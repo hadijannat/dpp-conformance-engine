@@ -17,8 +17,9 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from joserfc import jws
-from joserfc.errors import JoseError
+from joserfc.errors import BadSignatureError, ExceededSizeError, JoseError
 from joserfc.jwk import ECKey
+from joserfc.jws import JWSRegistry
 
 from dppce.evidence.canonical import canonical_bytes
 from dppce.infrastructure.interfaces import Signer
@@ -28,8 +29,30 @@ _PUBLIC_JWK_FIELDS: Final = frozenset({"kty", "crv", "x", "y"})
 _SUPPORTED_HEADERS: Final = frozenset({"alg", "kid", "typ", "x5c"})
 
 
+# Explicit size limits. The library default for a header is 512 bytes, which is smaller than
+# one certificate in ``x5c``. A token above a limit is "too large for this engine". It is never
+# reported as an invalid signature.
+MAX_HEADER_BYTES: Final = 16 * 1024
+MAX_PAYLOAD_BYTES: Final = 1024 * 1024
+MAX_SIGNATURE_BYTES: Final = 1024
+
+
+class _Registry(JWSRegistry):
+    max_header_length = MAX_HEADER_BYTES
+    max_payload_length = MAX_PAYLOAD_BYTES
+    max_signature_length = MAX_SIGNATURE_BYTES
+
+
 class SignatureError(ValueError):
-    """A token is malformed, uses a disallowed algorithm, or does not verify."""
+    """A token is malformed, uses a disallowed algorithm, is too large, or does not verify.
+
+    ``code`` says which: ``MALFORMED``, ``NOT_ALLOWED``, ``TOO_LARGE``, or ``BAD_SIGNATURE``.
+    Only ``BAD_SIGNATURE`` means that the cryptographic check ran and failed.
+    """
+
+    def __init__(self, message: str, code: str = "MALFORMED") -> None:
+        super().__init__(message)
+        self.code = code
 
 
 def _b64(data: bytes) -> str:
@@ -46,7 +69,7 @@ def _unb64(text: str) -> bytes:
 def sign_compact(payload: bytes, signer: Signer, *, typ: str) -> str:
     """Return a compact JWS over ``payload``. The header is canonical JSON."""
     if signer.algorithm not in ALLOWED_ALGORITHMS:
-        raise SignatureError(f"algorithm {signer.algorithm!r} is not in the allowlist")
+        raise SignatureError(f"algorithm {signer.algorithm!r} is not in the allowlist", "NOT_ALLOWED")
     header = canonical_bytes({"alg": signer.algorithm, "kid": signer.key_id, "typ": typ})
     signing_input = f"{_b64(header)}.{_b64(payload)}".encode("ascii")
     return f"{signing_input.decode('ascii')}.{_b64(signer.sign(signing_input))}"
@@ -72,21 +95,33 @@ def verify_compact(token: str, public_jwk: Mapping[str, str], *, typ: str) -> by
     Rejects a disallowed algorithm, a wrong ``typ``, an unknown header parameter, and a key
     that is not a public P-256 key.
     """
+    if len(token) > MAX_HEADER_BYTES + MAX_PAYLOAD_BYTES * 2 + MAX_SIGNATURE_BYTES:
+        raise SignatureError("the token is larger than this engine accepts", "TOO_LARGE")
     header = header_of(token)
     if header.get("alg") not in ALLOWED_ALGORITHMS:
-        raise SignatureError(f"algorithm {header.get('alg')!r} is not in the allowlist")
+        raise SignatureError(f"algorithm {header.get('alg')!r} is not in the allowlist", "NOT_ALLOWED")
     if header.get("typ") != typ:
-        raise SignatureError(f"type {header.get('typ')!r} is not {typ!r}")
+        raise SignatureError(f"type {header.get('typ')!r} is not {typ!r}", "NOT_ALLOWED")
     unknown = set(header) - _SUPPORTED_HEADERS
     if unknown:
-        raise SignatureError(f"unsupported header parameters: {sorted(unknown)}")
+        raise SignatureError(f"unsupported header parameters: {sorted(unknown)}", "NOT_ALLOWED")
     if set(public_jwk) - {"kid", "use", "alg"} != _PUBLIC_JWK_FIELDS or public_jwk.get("crv") != "P-256":
-        raise SignatureError("the verification key is not a public P-256 key")
+        raise SignatureError("the verification key is not a public P-256 key", "NOT_ALLOWED")
     try:
         key = ECKey.import_key({k: public_jwk[k] for k in _PUBLIC_JWK_FIELDS})
-        return bytes(jws.deserialize_compact(token, key, algorithms=list(ALLOWED_ALGORITHMS)).payload)
+        verified = jws.deserialize_compact(
+            token,
+            key,
+            algorithms=list(ALLOWED_ALGORITHMS),
+            registry=_Registry(algorithms=list(ALLOWED_ALGORITHMS)),
+        )
+        return bytes(verified.payload)
+    except ExceededSizeError as exc:
+        raise SignatureError("the token is larger than this engine accepts", "TOO_LARGE") from exc
+    except BadSignatureError as exc:
+        raise SignatureError("the signature does not verify", "BAD_SIGNATURE") from exc
     except (JoseError, ValueError) as exc:
-        raise SignatureError("the signature does not verify") from exc
+        raise SignatureError(f"the token cannot be processed: {type(exc).__name__}") from exc
 
 
 def public_jwk_of(key: ec.EllipticCurvePublicKey) -> dict[str, str]:

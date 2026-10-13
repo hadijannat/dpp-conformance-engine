@@ -1,0 +1,248 @@
+{
+  "target_group": "commission-2026-acts",
+  "retrieval_date": "2026-10-13",
+  "checked": [
+    {
+      "claim": "The implementing act required by Art. 77(9) of Regulation (EU) 2023/1542 (access rights of persons with a legitimate interest) has not been located as adopted, published or applicable as of 2026-10-13; adoption must not be inferred from the 18 August 2026 deadline.",
+      "source_id": "batteries-art-77-9-access-rights-implementing-act",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/eu-digital-product-passport-faq-batteries_en", "what_it_shows": "Commission FAQ for Batteries (1st Edition, manuscript completed September 2026), answers 1.4 and 6.3: the implementing act on access to restricted data is still being developed and is expected in draft form for public feedback on Have your say in October or November 2026; pending final adoption.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en", "what_it_shows": "Commission DPP timeline (indicative) lists 'Implementing Act for battery access rights' under Q4 2026, i.e. still future as of the page read today.", "official": true},
+        {"url": "https://publications.europa.eu/webapi/rdf/sparql", "what_it_shows": "Independent Cellar SPARQL query run 2026-10-13: all works dated on or after 2026-08-01 whose English title contains 'passport', '2023/1542', 'legitimate interest' or 'batteries' returned 8 rows (02023R1542-20260813, 52026PC0590, 52026SC0590/591/592, 52026DC0470, 32026D2048, 32026R2049); none is an Article 77(9) act.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Negative finding independently re-run through three routes (Commission FAQ and timeline, Cellar SPARQL, EUR-Lex-restricted search recorded under attempts). The 'Have your say' portal returned only a JavaScript shell to the fetch tool, so a draft posted there since September 2026 could not be excluded; a draft would in any case not be adoption. The comitology register was not independently checked by this reviewer (the first agent's search of it was negative); this does not affect the verdict because the Commission's own September 2026 FAQ places the act before the draft stage. Status remains not_located as of 2026-10-13."
+    },
+    {
+      "claim": "Art. 77(9) sets 18 August 2026 as the deadline for the Commission to adopt the access-rights implementing acts under the examination procedure of Art. 90(3).",
+      "source_id": "reg-2023-1542-batteries",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "what_it_shows": "English consolidated text 02023R1542-20260813 at the Publications Office: Art. 77(9) 'By 18 August 2026' the Commission shall adopt implementing acts on persons with a legitimate interest, examination procedure of Art. 90(3); Art. 90(3) refers to Art. 5 of Regulation (EU) No 182/2011.", "official": true},
+        {"url": "https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng", "what_it_shows": "Second route: EUR-Lex ELI consolidated version 13.08.2026 (version 003.001) shows the same Art. 77(9) deadline (18 August 2026) and Art. 90(3) procedure.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Both routes show no amendment marker on Art. 77(9)."
+    },
+    {
+      "claim": "From 18 February 2027 each LMT battery, each industrial battery with capacity greater than 2 kWh and each electric vehicle battery placed on the market or put into service must have a battery passport (Art. 77(1)).",
+      "source_id": "reg-2023-1542-batteries",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "what_it_shows": "Art. 77(1) of the consolidated text: 'From 18 February 2027 each LMT battery', each industrial battery with a capacity greater than 2 kWh and each electric vehicle battery placed on the market or put into service shall have an electronic record ('battery passport').", "official": true},
+        {"url": "https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng", "what_it_shows": "Second route (EUR-Lex ELI consolidated): same wording and date.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/news/digital-product-passport-registry-now-live-2026-07-20_en", "what_it_shows": "Commission news item names 18 February 2027 as the first implementation deadline for certain large batteries.", "official": true}
+      ],
+      "correction": "",
+      "notes": ""
+    },
+    {
+      "claim": "Commission Implementing Regulation (EU) 2026/1778 is the ESPR DPP registry act (not the Art. 77(9) act), published 17 July 2026, in force 6 August 2026, with no separate application date found.",
+      "source_id": "cir-2026-1778-dpp-registry",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata for CELEX 32026R1778: title 'laying down the implementation arrangements for the digital product passport registry set up under Regulation (EU) 2024/1781'; date of document 2026-07-16; publication 2026-07-17; entry into force 2026-08-06 annotated 'DATPUB +20 V ART 24'; legal basis 32024R1781 Art. 13(5) subparagraphs 2 and 3; author COM/GROW; no corrected_by, amended_by or consolidated_by relation; end of validity 9999-12-31.", "official": true},
+        {"url": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj/eng", "what_it_shows": "Second route: EUR-Lex ELI page (returned content with the /eng suffix): OJ L, 2026/1778, 17.7.2026; C/2026/4922; Art. 24 entry into force on the twentieth day following publication; no 'shall apply from' sentence; Done at Brussels 16 July 2026; status 'In force'.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1", "what_it_shows": "English OJ text at Cellar: recitals cite Art. 13(5) second subparagraph in conjunction with third subparagraph of Regulation (EU) 2024/1781; Art. 24 'Entry into force' only; no Annex; no 'shall apply from' sentence in Arts 6 to 24.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Subject and legal basis confirm it is the ESPR registry act, not an act under Art. 77(9) of Regulation (EU) 2023/1542. The only internal dates are deadlines inside Art. 7(1) (18 February 2027), Art. 13(1) (February 2029) and Art. 23 (end of 2032)."
+    },
+    {
+      "claim": "Batteries are in scope of 2026/1778 (Art. 1(1)(b)) and Art. 77(10) of the Batteries Regulation requires upload of the battery unique identifier to the ESPR Art. 13(1) registry.",
+      "source_id": "cir-2026-1778-dpp-registry",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1", "what_it_shows": "Art. 1(1)(b) of Implementing Regulation (EU) 2026/1778: 'batteries covered by Article 77 of Regulation (EU) 2023/1542'. Points (a) ESPR delegated-act products, (c) construction products, (d) toys, (e) detergents and surfactants, (f) any other product required by Union law.", "official": true},
+        {"url": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj/eng", "what_it_shows": "Second route: EUR-Lex ELI page shows the same Art. 1(1)(b) wording.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "what_it_shows": "Art. 77(10) of consolidated Regulation (EU) 2023/1542: the economic operator placing the battery on the market or putting it into service shall upload the unique identifier in the registry referred to in Art. 13(1) of Regulation (EU) 2024/1781; paragraph carries marker C2 (32024R1781R(01)).", "official": true},
+        {"url": "https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng", "what_it_shows": "Second route for Art. 77(10): same text and C2 marker.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Also confirmed at Cellar: Art. 8(7)(a) and (c) of 2026/1778 refer to 'the applicable delegated acts adopted pursuant to Article 77 of Regulation (EU) 2023/1542' (the wording the first agent asked to have re-read). The act does contain an 'Article 6a' headed 'Transfer of registered digital product passports' between Articles 6 and 7, as the first agent reported."
+    },
+    {
+      "claim": "Commission Implementing Decision (EU) 2026/1736 entered into force on 15 July 2026 and cites exactly six standards (EN 18216, 18219, 18220, 18221, 18222, 18223, all :2026) with presumption of conformity for Arts 10 and 11 of Regulation (EU) 2024/1781 only.",
+      "source_id": "cid-2026-1736-dpp-harmonised-standards",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj/eng", "what_it_shows": "EUR-Lex ELI page: Decision of 14 July 2026; OJ L, 2026/1736, 15.7.2026; Art. 2 entry into force on the day of publication; Annex with exactly 6 rows: EN 18216:2026, EN 18219:2026, EN 18220:2026, EN 18221:2026, EN 18222:2026, EN 18223:2026; recital 1 refers to Art. 41(2) of Regulation (EU) 2024/1781 and presumption of conformity with Articles 10 and 11; no 'Amended by' or 'Corrected by' entries shown.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata for CELEX 32026D1736: date of document 2026-07-14; publication and entry into force 2026-07-15 ('DATPUB V ART 2'); legal basis 32012R1025 Art. 10(6); cites 32024R1781; no corrected_by, amended_by or consolidated_by relation.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1", "what_it_shows": "English OJ text at Cellar: Annex counted as 6 rows; recitals 1 and 5 name Articles 10 and 11 of Regulation (EU) 2024/1781; no recital states a restriction on the presumption; standardisation request C(2024) 5423 as amended by C(2025) 8024.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en", "what_it_shows": "Commission harmonised-standards summary page for DPP lists only Implementing Decision (EU) 2026/1736 of 14 July 2026 (OJ L, 2026/1736, 15.7.2026) under Regulation (EU) 2024/1781; no later decision listed.", "official": true}
+      ],
+      "correction": "",
+      "notes": "OJ Annex titles differ slightly from the CEN catalogue titles: OJ row 4 reads 'Data storage, archiving, and persistence' (CEN: 'Data storage, archiving, and data persistence'); OJ row 5 reads 'for product passport lifecycle management' (CEN: 'for the product passport lifecycle management'). These are real textual differences between the two official sources, confirmed at EUR-Lex today, not fetch-tool artefacts."
+    },
+    {
+      "claim": "EN 18239:2026 and EN 18246:2026 are listed as published by CEN (2026-09-16) but no OJ citation was located as of 2026-10-13, so they must not be treated as conferring presumption of conformity.",
+      "source_id": "en-18239-2026",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25", "what_it_shows": "CEN/CLC/JTC 24 'Published Standards' list opened today: EN 18239:2026 (JT024007) and EN 18246:2026 (JT024008) dated 2026-09-16; the other six dated 2026-05-27. Bibliographic metadata only.", "official": true},
+        {"url": "https://knowledge.bsigroup.com/products/digital-product-passport-access-rights-management-information-system-security-and-business-confidentiality", "what_it_shows": "National standards body catalogue (BSI): BS EN 18239:2026 published 30 Sep 2026, status Current, committee IST/47/1, stated identical to EN 18239. Second route for CEN publication.", "official": true},
+        {"url": "https://www.dinmedia.de/en/standard/din-en-18239/405632313", "what_it_shows": "National standards body catalogue (DIN): DIN EN 18239:2026-11 adopting EN 18239:2026, available pre-publication, replaces draft DIN EN 18239:2025-09.", "official": true},
+        {"url": "https://www.dinmedia.de/en/standard/din-en-18246/405630823", "what_it_shows": "National standards body catalogue (DIN): DIN EN 18246:2026-11 adopting EN 18246:2026, available pre-publication, replaces draft DIN EN 18246:2025-09.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en", "what_it_shows": "Commission harmonised-standards summary page for DPP lists only Decision 2026/1736; EN 18239:2026 and EN 18246:2026 do not appear.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata for 2026/1736 shows no amended_by relation, so no amending decision adding further standards is recorded at the Publications Office as of today.", "official": true},
+        {"url": "https://publications.europa.eu/webapi/rdf/sparql", "what_it_shows": "Cellar SPARQL (works dated from 2026-08-01, English title containing 'passport' etc.) returned no second implementing decision on DPP harmonised standards.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Two facts kept separate: (1) published by CEN: yes, 2026-09-16 per CEN catalogue, corroborated by BSI and DIN national adoptions; (2) cited in the OJ: not located as of 2026-10-13 (Commission summary page, Cellar relations and SPARQL all negative). The Commission timeline's 'September 2026' decision on the remaining two standards has not been located."
+    },
+    {
+      "claim": "No harmonised standard for the battery passport is cited under Regulation (EU) 2023/1542: the only decision located under that Regulation (2026/2048) cites EN 18060:2025 and does not mention Art. 77.",
+      "source_id": "cid-2026-2048-batteries-harmonised-standard",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://eur-lex.europa.eu/eli/dec_impl/2026/2048/oj/eng", "what_it_shows": "EUR-Lex ELI page: Commission Implementing Decision (EU) 2026/2048 of 14 September 2026 on the harmonised standard for batteries drafted in support of Regulation (EU) 2023/1542; OJ L, 2026/2048, 16.9.2026; Annex with one row, EN 18060:2025; recital 1 cites Art. 15(3) and names Articles 9, 10, 12, 13, 14 and 78; Article 77 and 'battery passport' not mentioned.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/b76cb090-b166-11f1-b9e5-01aa75ed71a1.0006.03/DOC_1", "what_it_shows": "Second route: English OJ text at Cellar, same content; Annex title 'Road vehicles - Rechargeable batteries with internal energy storage - Performance and durability of alkali-Ion (Li-Ion, Na-Ion), Pb, NiMH and combined chemistries EV modules and batteries'.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/b76cb090-b166-11f1-b9e5-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata: date of document 2026-09-14, publication and entry into force 2026-09-16, legal basis 32012R1025 Art. 10(6), cites 32023R1542, no corrected_by/amended_by.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/2cfbce57-ce5f-11f0-8da2-01aa75ed71a1/rdf/object/full", "what_it_shows": "CELEX 32025D2440, which appeared in the first agent's title search, is a Commission Implementing Decision registering a European citizens' initiative ('EU Stars On My Passport') under Regulation (EU) 2019/788; unrelated to batteries. It does not undercut the 'only decision located' statement.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Recital 1 of 2026/2048 lists Art. 78 among the provisions the presumption can cover, but the decision does not mention Art. 77 or the battery passport, and the cited standard's title concerns EV battery performance and durability. 'Only decision located' is confirmed only for the search windows used (Cellar SPARQL from 2026-08-01 today; the first agent's from 2023-08-01)."
+    },
+    {
+      "claim": "The current version of the Batteries Regulation is the consolidated text of 2026-08-13 (M1 2024/1781, M2 2025/1561, M3 2026/1738, corrigenda C1-C4); Arts 77(1)-(9) and 78 carry no amendment marker, while Art. 77(10) and Annex XIII point 1(q) do.",
+      "source_id": "reg-2023-1542-batteries",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng", "what_it_shows": "EUR-Lex ELI consolidated version header '02023R1542 - EN - 13.08.2026 - 003.001'; amended by M1 Regulation (EU) 2024/1781 (OJ L 1781, 28.6.2024), M2 Regulation (EU) 2025/1561 (OJ L 1561, 30.7.2025), M3 Regulation (EU) 2026/1738 (OJ L 1738, 24.7.2026); corrected by C1 OJ L 90243 17.4.2024, C2 OJ L 90493 7.8.2024, C3 OJ L 90794 8.10.2025, C4 OJ L 90285 10.4.2026. Art. 77: only marker is C2 on paragraph 10; Art. 78: no marker; Art. 96: no marker.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "what_it_shows": "Second route: English consolidated text at Cellar with the same front-matter list; Art. 77 has 10 paragraphs, C2 marker before paragraph 10, B marker after; Art. 78 no marker; Annex XIII item 1(q) carries C4 (32023R1542R(13)); no M1/M2/M3 marker in Annex XIII; M3 marker seen only in Annex I.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata for 02023R1542-20260813: consolidates 32023R1542, 02023R1542-20250731, 32023R1542R(14) and 32026R1738; created 2026-09-09; is_logical_successor_of 02023R1542-20250731; NO successor or consolidated_by relation, so no later consolidated version recorded as of today.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/d0065c31-2ce3-11ee-95a2-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata for the base act 32023R1542 (first 100000 of 2.9 million characters): consolidated-version identifiers 2023R1542/20230728, 20250731 (with sub-versions) and 20260813_0030010; latest consolidation date 2026-08-13, version 003.001. No corrected_by target appeared in the portion read.", "official": true},
+        {"url": "https://publications.europa.eu/resource/celex/32023R1542R%2815%29", "what_it_shows": "HTTP 404 for both the literal-parenthesis and the URL-encoded form of CELEX 32023R1542R(15): no fifteenth corrigendum resolvable at Cellar as of 2026-10-13 (the encoded form is the one Cellar registers for existing corrigenda, so this 404 is meaningful).", "official": true}
+      ],
+      "correction": "",
+      "notes": "The corrigendum to Regulation (EU) 2026/1738 of 2026-10-08 (CELEX 32026R1738R(02), OJ L 2026/90844) was opened at Cellar: its correction annotation lists language 'NL' only, so it does not alter the English consolidated text. Cellar metadata for 32026R1738 shows an 'amends' relation to 32023R1542 without article annotation. The EUR-Lex-restricted search that surfaced 20260813 as the latest consolidated identifier is recorded under attempts."
+    },
+    {
+      "claim": "The current Commission battery passport data guidance is V2, last updated 15 August 2026, and is non-binding; version taken from Commission landing pages, the PDF itself was not opened.",
+      "source_id": "ec-guidance-battery-passport-data-points",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/resources-documentation_en", "what_it_shows": "Resources page lists 'Digital Batteries Passport - data point by category', General publications, 3 August 2026, V2, last update 15 August 2026, English, PDF 571.85 KB; advises checking for a more recent version.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/batteries_en", "what_it_shows": "Battery passport page: last update 15 August 2026, changes clarify the applicability date for points 19 and 20 to 23 and explain why points 16 and 25 are not to be filled.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/news/guidance-support-preparations-digital-batteries-passport-2026-08-21_en", "what_it_shows": "News item of 21 August 2026: 'Guidance Document: Digital Batteries Passport - data points by category'; 71 data points; states the guidance does not introduce additional legal requirements and should not be regarded as an authoritative interpretation of the legislation; no version number stated.", "official": true}
+      ],
+      "correction": "",
+      "notes": "The PDF was not opened by this reviewer either (binary download avoided). No page says 'non-binding' verbatim; the status rests on the disclaimer wording quoted above. The page title uses 'data point by category' and the news item 'data points by category'."
+    },
+    {
+      "claim": "The DPP registry is stated by the Commission to be operational since 20 July 2026, which precedes the 6 August 2026 entry into force of 2026/1778; the two dates were not reconciled.",
+      "source_id": "ec-dpp-batteries-webpage-and-timeline",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "https://single-market-economy.ec.europa.eu/news/digital-product-passport-registry-now-live-2026-07-20_en", "what_it_shows": "Commission news item dated 20 July 2026, 'The Digital Product Passport Registry is now live': launched 'Today' together with a testing environment; the milestone 'follows the adoption of the Implementing Regulation' (linked as OJ L_202601778); first implementation deadline 18 February 2027 for certain large batteries; no entry-into-force date given.", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en", "what_it_shows": "Timeline: 20 July 2026 'The Digital Product Passport Registry becomes operational'; July 2026 registry implementing act and decision on six standards.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata: entry into force of 2026/1778 is 2026-08-06 (publication 2026-07-17 + 20 days, Art. 24).", "official": true}
+      ],
+      "correction": "",
+      "notes": "Both dates independently confirmed. The Commission's own framing is that the 20 July launch (with a testing environment) followed adoption (16 July) and publication (17 July) of the act, not its entry into force; the act itself contains no application date distinct from entry into force. Nothing in the official sources contradicts the first agent's statement that the relationship was left unreconciled."
+    },
+    {
+      "claim": "Commission FAQ answer 7.3 says the due diligence report is required from August 2027, which was not reconciled with Art. 96(2)(c) as read (Chapter VIII from 18 August 2025) or with amending Regulation (EU) 2025/1561 (not read); this affects Annex XIII point 1(d).",
+      "source_id": "ec-faq-dpp-batteries",
+      "verdict": "refuted",
+      "evidence": [
+        {"url": "http://publications.europa.eu/resource/cellar/fe1163e4-6cdd-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1", "what_it_shows": "English OJ text of Regulation (EU) 2025/1561 of 18 July 2025 (OJ L, 2025/1561, 30.7.2025) amending Regulation (EU) 2023/1542 as regards battery due diligence: Art. 1 replaces '18 August 2025' with '18 August 2027' in Art. 48(1) and '18 February 2025' with '26 July 2026' in Art. 48(5); it does not touch Art. 77, Art. 96 or Annex XIII.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/fe1163e4-6cdd-11f0-bf4e-01aa75ed71a1/rdf/object/full", "what_it_shows": "Cellar metadata for CELEX 32025R1561: amends 32023R1542 Art. 48(1) and Art. 48(5), start of validity 2025-07-31.", "official": true},
+        {"url": "https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng", "what_it_shows": "EUR-Lex consolidated text 13.08.2026: Chapter VII 'Obligations of economic operators as regards battery due diligence policies'; Art. 48(1) carries marker M2 (32025R1561) and names 18 August 2027; Art. 48(5) carries M2 and names 26 July 2026; Art. 52(3) is the annual public report on the due diligence policy; Art. 96(2)(c) 'Chapter VIII shall apply from 18 August 2025' with no marker.", "official": true},
+        {"url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "what_it_shows": "Second route (Cellar consolidated text): Chapter VII heading, Art. 48(1) with M2 and 18 August 2027, Art. 48(5) with M2 and 26 July 2026; Chapter VIII is 'Management of waste batteries'; Annex XIII point 1(d) refers to the report on battery due diligence policy under Art. 52(3).", "official": true},
+        {"url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/eu-digital-product-passport-faq-batteries_en", "what_it_shows": "FAQ answer 7.3: due diligence report required from August 2027; carbon footprint, recycled content and due diligence information not required from February 2027.", "official": true}
+      ],
+      "correction": "The tension the claim posits does not exist. Art. 96(2)(c) concerns Chapter VIII ('Management of waste batteries'), not due diligence. Due diligence is Chapter VII, whose own application date sits in Art. 48(1); Regulation (EU) 2025/1561 (M2, in force 31 July 2025) replaced '18 August 2025' with '18 August 2027' there, and the consolidated text of 13.08.2026 shows the M2 marker on Art. 48(1). FAQ answer 7.3 ('August 2027') is therefore consistent with the law as amended. Consequence for Annex XIII point 1(d): Art. 48(1) as amended states that from 18 August 2027 operators shall fulfil the due diligence obligations in Art. 48(2) and (3) and Arts 49, 50 and 52; the Art. 52(3) report that point 1(d) refers to is thus not required before 18 August 2027, so point 1(d) cannot be mandatory for passports issued between 18 February 2027 and 18 August 2027. The first agent's Art. 96(2)(c)/Chapter VIII reference should be deleted and replaced by Art. 48(1) as amended by M2.",
+      "notes": "The factual part of the claim (FAQ 7.3 says August 2027) is confirmed; the stated non-reconciliation and the Chapter VIII/Art. 96(2)(c) attribution are what is refuted."
+    },
+    {
+      "claim": "Implementing Regulation (EU) 2026/1778 contains an 'Article 6a' and Art. 8(7)(a) and (c) refer to delegated acts adopted pursuant to Article 77 of Regulation (EU) 2023/1542 (both flagged by the first agent as needing re-reading).",
+      "source_id": "cir-2026-1778-dpp-registry",
+      "verdict": "confirmed",
+      "evidence": [
+        {"url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1", "what_it_shows": "Article sequence in the English OJ text: Art. 6 'Management of verified economic operator and verified value chain actor user profile', Art. 6a 'Transfer of registered digital product passports', Art. 7 'National authorities', Art. 8 'Registration of a digital product passport' ... Art. 24 'Entry into force'. Art. 8(7)(a) (semantic conformity) and (c) (granularity level) both refer to 'the applicable delegated acts adopted pursuant to Article 77 of Regulation (EU) 2023/1542' alongside ESPR Art. 4 delegated acts.", "official": true}
+      ],
+      "correction": "",
+      "notes": "Added by the reviewer as a high-risk identity point. 'Article 6a' in an original act is unusual but is what the OJ text shows at Cellar; the EUR-Lex ELI page was truncated before this point so a second route for the numbering was not obtained. The Art. 8(7) wording refers to delegated acts under Art. 77 of Regulation (EU) 2023/1542, not to the Art. 77(9) implementing acts; which paragraphs of Art. 77 confer delegated powers was not re-read today."
+    }
+  ],
+  "missed_items": [
+    "Regulation (EU) 2025/1561 (M2) was not read by the first agent. Its Art. 1 moves the due diligence application date in Art. 48(1) from 18 August 2025 to 18 August 2027 and the Art. 48(5) guidance date from 18 February 2025 to 26 July 2026. This reconciles FAQ 7.3 and matters for Annex XIII point 1(d) (Art. 52(3) report).",
+    "Chapter VIII of Regulation (EU) 2023/1542 is 'Management of waste batteries'; due diligence is Chapter VII. The first agent's open question linking FAQ 7.3 to Art. 96(2)(c) rests on a misattribution.",
+    "EUR-Lex is not fully blocked to the fetch tool: ELI URLs with an explicit '/eng' suffix (e.g. https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj/eng, https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng) returned full page content today, giving a second official route the first agent did not have.",
+    "The Commission's harmonised-standards summary page for DPP (single-market-economy.ec.europa.eu/.../harmonised-standards/digital-product-passport-dpp_en) lists only Decision 2026/1736; it is an official second route for the 'six cited, two not cited' finding and was not used by the first agent.",
+    "The OJ Annex of Decision 2026/1736 uses titles that differ from the CEN catalogue for EN 18221:2026 ('persistence' vs 'data persistence') and EN 18222:2026 (no 'the' before 'product passport lifecycle'); confirmed at EUR-Lex, so the first agent's 'not resolved' uncertainty can be closed: both spellings are official, from different sources.",
+    "National adoptions of the two uncited standards exist: BS EN 18239:2026 (published 30 Sep 2026, BSI), DIN EN 18239:2026-11 and DIN EN 18246:2026-11 (DIN, pre-publication). These corroborate CEN publication but are not OJ citations.",
+    "The corrigendum to Regulation (EU) 2026/1738 of 8 October 2026 (CELEX 32026R1738R(02), OJ L 2026/90844, Cellar 6bed6a7a-c2b0-11f1-bfcb-01aa75ed71a1) is recorded with language 'NL' only, so it does not affect the English consolidated Batteries Regulation; the literal-parenthesis CELEX URL returns 404 at Cellar while the URL-encoded form is the registered identifier.",
+    "CELEX 32025D2440 in the first agent's eight-row title search is a citizens'-initiative registration decision ('EU Stars On My Passport'), not a batteries act; it matched on the word 'passport'.",
+    "The CEN project page for EN 18223:2026 shows date of availability 2026-05-27, date of announcement 2026-08-31 and national date of publication/withdrawal 2026-11-30, which explains the November 2026 dates seen for national editions.",
+    "The 20 July 2026 Commission news item ('The Digital Product Passport Registry is now live') states that the launch followed adoption of the implementing regulation and that six of the eight DPP standards were then available from national standardisation organisations; it is the primary official source for the 20 July date and was not cited by the first agent."
+  ],
+  "attempts": [
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj", "outcome": "Empty page content returned (EUR-Lex blocks the fetch tool on the bare ELI URL)"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj", "outcome": "Empty page content returned"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/dec_impl/2026/2048/oj", "outcome": "Empty page content returned"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:32023R1542", "outcome": "Empty page content returned (consolidated-versions list not readable)"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R1778", "outcome": "Empty page content returned"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736", "outcome": "Empty page content returned"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/reg/2023/1542/2026-08-13/eng", "outcome": "SUCCESS: consolidated text 13.08.2026 returned (378017 characters); read at offsets 0, 100000 and 200000 (front matter, Art. 48, Arts 77/78/96)"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj/eng", "outcome": "SUCCESS: OJ text returned (105197 characters); first 100000 read"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj/eng", "outcome": "SUCCESS: full decision including Annex (6 rows) read"},
+    {"tool": "WebFetch", "target": "https://eur-lex.europa.eu/eli/dec_impl/2026/2048/oj/eng", "outcome": "SUCCESS: full decision including Annex (1 row) read"},
+    {"tool": "WebFetch", "target": "https://publications.europa.eu/resource/celex/32026R1778, 32026D1736, 32026D2048, 32025R1561, 02023R1542-20260813, 32025D2440", "outcome": "303 redirects to Cellar RDF objects; each followed and read"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1/rdf/object/full", "outcome": "Success: metadata for 32026R1778"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1/rdf/object/full", "outcome": "Success: metadata for 32026D1736; no amended_by/corrected_by"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/b76cb090-b166-11f1-b9e5-01aa75ed71a1/rdf/object/full", "outcome": "Success: metadata for 32026D2048"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/fe1163e4-6cdd-11f0-bf4e-01aa75ed71a1/rdf/object/full", "outcome": "Success: metadata for 32025R1561 (amends Art. 48(1) and 48(5))"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1/rdf/object/full", "outcome": "Success: metadata for 02023R1542-20260813; no successor consolidation"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/2cfbce57-ce5f-11f0-8da2-01aa75ed71a1/rdf/object/full", "outcome": "Success: 32025D2440 is an ECI registration decision, unrelated"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/394bc298-86fd-11f1-bf5e-01aa75ed71a1/rdf/object/full", "outcome": "Success (first 100000 chars): 32026R1738 amends 32023R1542 without article annotation; sameAs link to corrigendum 32026R1738R(02)"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/6bed6a7a-c2b0-11f1-bfcb-01aa75ed71a1/rdf/object/full", "outcome": "Success: corrigendum of 2026-10-08 to 2026/1738, OJ L 2026/90844, language annotation NL"},
+    {"tool": "WebFetch", "target": "https://publications.europa.eu/resource/celex/32026R1738R(02) and 32026R1738R(01)", "outcome": "HTTP 404 for both literal-parenthesis forms"},
+    {"tool": "WebFetch", "target": "https://publications.europa.eu/resource/celex/32023R1542R(15) and the URL-encoded form 32023R1542R%2815%29", "outcome": "HTTP 404 for both forms: no fifteenth corrigendum resolvable at Cellar"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/d0065c31-2ce3-11ee-95a2-01aa75ed71a1/rdf/object/full", "outcome": "Success (first 100000 of 2927772 characters): consolidated-version list for 32023R1542, latest 2023R1542/20260813_0030010; corrected_by targets not within the portion read"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1", "outcome": "Success: English OJ text of 2026/1778 read at offsets 0 and 100000 (Art. 1(1), article headings incl. 6a, Art. 8(7), Arts 23-24, signature)"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1", "outcome": "Success: English OJ text of 2026/1736 incl. Annex"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/b76cb090-b166-11f1-b9e5-01aa75ed71a1.0006.03/DOC_1", "outcome": "Success: English OJ text of 2026/2048 incl. Annex"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/fe1163e4-6cdd-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1", "outcome": "Success: English OJ text of 2025/1561 (Art. 1 and 2)"},
+    {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "outcome": "Success: English consolidated text read at offsets 0 (front matter), 200000 (Chapter VII, Art. 48, Art. 52(3)), 250000 (Art. 52+, Chapter VIII heading), 400000 (Arts 77, 78, 90, 96), 500000 (Annexes II-VIII only), 600000 (Annex XIII)"},
+    {"tool": "WebFetch", "target": "https://publications.europa.eu/webapi/rdf/sparql (works dated from 2026-08-01 with English title containing passport / 2023/1542 / legitimate interest / batteries)", "outcome": "8 rows; no Art. 77(9) act and no second DPP standards decision"},
+    {"tool": "WebSearch (extended, eur-lex/op/publications domains)", "target": "implementing decision harmonised standards DPP amending 2026/1736", "outcome": "Only 2026/1736 and 2026/1778 surfaced"},
+    {"tool": "WebSearch (extended, eur-lex/op/publications domains)", "target": "implementing regulation battery passport legitimate interest Art. 77(9)", "outcome": "No Art. 77(9) act surfaced"},
+    {"tool": "WebSearch (extended, ec.europa.eu/europa.eu)", "target": "have your say battery passport access rights draft", "outcome": "No initiative page found; FAQ reiterates draft expected Oct/Nov 2026"},
+    {"tool": "WebSearch (extended, all domains)", "target": "battery passport access rights draft have your say October 2026", "outcome": "Non-official pages only; none reports a posted draft"},
+    {"tool": "WebSearch (extended, all domains)", "target": "EN 18239:2026 / EN 18246:2026 implementing decision OJ October 2026", "outcome": "Non-official trackers state not cited as of late September 2026; no decision found"},
+    {"tool": "WebSearch (extended, eur-lex/ec/europa/cencenelec domains)", "target": "amending Implementing Decision (EU) 2026/1736", "outcome": "No amending act; surfaced the Commission DPP harmonised-standards summary page"},
+    {"tool": "WebSearch (extended, eur-lex)", "target": "02023R1542 consolidated text 2026", "outcome": "20260813 is the latest consolidated identifier surfaced"},
+    {"tool": "WebSearch (standard)", "target": "EN 18239:2026, EN 18246:2026, EN 18060:2025 catalogue entries", "outcome": "Surfaced BSI, DIN Media, Genorma and CEN pages; official ones opened"},
+    {"tool": "WebSearch (extended, cencenelec domains)", "target": "CEN/CLC/JTC 24 published standards", "outcome": "Surfaced the JTC 24 catalogue list and the EN 18223 project page"},
+    {"tool": "WebSearch (standard, ec.europa.eu domains)", "target": "DPP Registry launched 20 July 2026", "outcome": "Surfaced Commission news item of 2026-07-20"},
+    {"tool": "WebSearch (standard, ec.europa.eu domains)", "target": "harmonised standards batteries 2023/1542 summary list 2026/2048", "outcome": "No Commission summary page for batteries harmonised standards located"},
+    {"tool": "WebFetch", "target": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205:32:::::FSP_ORG_ID,FSP_LANG_ID:3342699,25", "outcome": "Success: JTC 24 published standards list, eight rows with dates (metadata only)"},
+    {"tool": "WebFetch", "target": "https://standards.cencenelec.eu/ords/f?cs=15B6936F27A680D435B8AC3C6A3EB6016&p=305:110:::::FSP_ORG_ID,FSP_PROJECT:3342699,80714", "outcome": "Success: EN 18223:2026 project page, DAV/DOA/DOP dates (metadata only)"},
+    {"tool": "WebFetch", "target": "https://knowledge.bsigroup.com/products/digital-product-passport-access-rights-management-information-system-security-and-business-confidentiality", "outcome": "Success: BS EN 18239:2026 metadata"},
+    {"tool": "WebFetch", "target": "https://www.dinmedia.de/en/standard/din-en-18239/405632313 and /din-en-18246/405630823", "outcome": "Success: DIN EN 18239:2026-11 and DIN EN 18246:2026-11 metadata"},
+    {"tool": "WebFetch", "target": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/", "outcome": "Success: lists eight EN titles; says six of eight cited in OJ without naming them"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en", "outcome": "Success: only Decision 2026/1736 listed"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/eu-digital-product-passport-faq-batteries_en", "outcome": "Success"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en", "outcome": "Success (timeline; 'Show 7 more items' not expandable by the fetch tool)"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/batteries_en", "outcome": "Success"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/resources-documentation_en", "outcome": "Success"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/dpp-registry_en", "outcome": "Success; page states no dates"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/news/digital-product-passport-registry-now-live-2026-07-20_en", "outcome": "Success"},
+    {"tool": "WebFetch", "target": "https://single-market-economy.ec.europa.eu/news/guidance-support-preparations-digital-batteries-passport-2026-08-21_en", "outcome": "Success"},
+    {"tool": "WebFetch", "target": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives_en?text=battery%20passport%20legitimate%20interest", "outcome": "JavaScript shell only; no initiatives rendered"},
+    {"tool": "Write", "target": "/Users/aeroshariati/DPP-CE/docs/research/raw/commission-2026-acts.refutation.json", "outcome": "Output file written; no other file touched"}
+  ],
+  "anomalies": [
+    "Reviewer method note: independent adversarial review; every verdict rests on pages opened on 2026-10-13; agreement with the first agent's file was not treated as evidence; EN standards were handled as bibliographic metadata only and no standard text was fetched.",
+    "No page opened today contained text addressed to an AI or automated agent.",
+    "EUR-Lex returned empty content for bare ELI, TXT/HTML and ALL URLs but returned full content for ELI URLs ending in '/eng'; the first agent's statement that all EUR-Lex URLs were blocked is therefore only partly reproducible.",
+    "All page text was read through a summarising fetch tool that limits verbatim quotation to short fragments; wording in this file is paraphrase except where quoted.",
+    "Cellar CELEX URLs with literal parentheses, e.g. .../celex/32026R1738R(02), return 404 even though the identifier exists in Cellar metadata (registered with URL-encoded parentheses); 404 on such a URL must not be read as non-existence.",
+    "The first agent's eight-row Cellar title search included CELEX 32025D2440, which is a citizens'-initiative decision matching the word 'passport'; title searches on 'passport' over-match.",
+    "The Commission harmonised-standards summary page for DPP lists the implementing decision but not the individual standard references, unlike the summary pages for other harmonisation legislation.",
+    "Implementing Regulation (EU) 2026/1778 contains an 'Article 6a' in its original OJ text (confirmed at Cellar; EUR-Lex ELI page truncated before that point)."
+  ]
+}

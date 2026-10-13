@@ -10,7 +10,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from dppce.infrastructure.interfaces import Acquirer, Record
 from dppce.models import (
@@ -50,7 +50,7 @@ class CheckContext:
         *,
         kind: Literal["exchange", "artifact", "declaration", "derived"],
         records: Sequence[Record] = (),
-        summary: Mapping[str, JsonValue] | None = None,
+        summary: Mapping[str, Any] | None = None,
         transformations: Sequence[str] = (),
     ) -> Observation:
         """Build an observation with a deterministic identifier.

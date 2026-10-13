@@ -7,13 +7,13 @@ default: check
 check: fmt-check lint types test
 
 fmt:
-    uv run ruff format src tests scripts
+    uv run ruff format src tests scripts validation
 
 fmt-check:
-    uv run ruff format --check src tests scripts
+    uv run ruff format --check src tests scripts validation
 
 lint:
-    uv run ruff check src tests scripts
+    uv run ruff check src tests scripts validation
 
 types:
     uv run mypy

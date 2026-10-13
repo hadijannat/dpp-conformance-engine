@@ -25,6 +25,7 @@ dependencies = [
   "pydantic>=2.9,<3",
   "pyyaml>=6.0.2,<7",
   "jsonschema>=4.23,<5",
+  "referencing>=0.35",
   "rfc8785>=0.1.4,<0.2",
   "cryptography>=44",
   "joserfc>=1.0,<2",
