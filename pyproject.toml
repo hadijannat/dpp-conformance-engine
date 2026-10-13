@@ -117,8 +117,9 @@ branch = true
 source = ["dppce"]
 
 [tool.coverage.report]
-# Core packages only. Adapters with optional dependencies are reported but are not in the gate.
-fail_under = 90
+# The 90 percent gate applies to the defined core packages. `just cov` enforces it with
+# `coverage report --include=<core> --fail-under=90`. The adapters, the command line, the
+# report renderer, and the reference server are reported separately and are not in the gate.
 show_missing = true
 skip_covered = true
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "@overload"]
