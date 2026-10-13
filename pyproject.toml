@@ -79,6 +79,12 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "PLR0915"]
 "validation/**" = ["S101"]
+# Only the orchestrator itself and the command line may import the orchestrator.
+"src/dppce/orchestrator/**" = ["TID251"]
+"src/dppce/cli.py" = ["TID251"]
+"tests/**/test_orchestrator*.py" = ["TID251"]
+"tests/**/test_cli*.py" = ["TID251"]
+"tests/**/test_e2e*.py" = ["TID251"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 # The verifier must run without the orchestrator. See ADR 0005.
