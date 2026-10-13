@@ -1,0 +1,376 @@
+# Audience: contributors and assessors.
+# Purpose: demonstrate engine behavior with synthetic rules. No rule here states a legal or standard requirement.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.pack/1
+pack_id: illustrative/core
+version: 0.1.0
+title: Illustrative core rules
+description: Synthetic rules for the local reference system.
+scope_statement: Synthetic demonstration rules only. This pack covers no law and no standard.
+requirements:
+- id: ILL-CARRIER-001
+  title: The carrier decodes
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The QR image decodes to one symbol with text.
+  applicability:
+    fact: ics.carriers
+    op: contains
+    value: qr
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-CARRIER-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-CARRIER-001
+- id: ILL-ID-001
+  title: The identifier has valid syntax
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The carrier identifier has the syntax of the declared scheme.
+  applicability: &id001
+    const: 'true'
+    reason: Applies to every system in the profile.
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-ID-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-ID-001
+- id: ILL-ID-002
+  title: The identifier resolves
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The carrier identifier resolves to a passport.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-ID-002-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-ID-002
+- id: ILL-ID-003
+  title: The identifier is consistent
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The carrier, the declaration, and the passport give the same identifier.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-ID-003-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-ID-003
+- id: ILL-API-001
+  title: The API follows its contract
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The passport response matches the pinned API contract.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-API-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-API-001
+- id: ILL-DATA-001
+  title: Item-level data match the schema
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The item-level passport matches the pinned item schema.
+  applicability: *id001
+  declared_support:
+    fact: ics.features.item_data
+    op: eq
+    value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-DATA-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-DATA-001
+- id: ILL-DATA-002
+  title: Model-level data match the schema
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The model-level data match the pinned model schema.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-DATA-002-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-DATA-002
+- id: ILL-DATA-003
+  title: Contexts are pinned
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: Each context reference of the passport is in the pinned allowlist.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-DATA-003-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-DATA-003
+- id: ILL-DATA-004
+  title: Data obey the rule pack
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The passport is complete, uses permitted units and ranges, and is fresh.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-DATA-004-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-DATA-004
+- id: ILL-ACCESS-001
+  title: The declared access policy is enforced
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The anonymous role does not receive a field that the declared policy withholds.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-ACCESS-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-ACCESS-001
+- id: ILL-INTEGRITY-001
+  title: The signed passport verifies
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The signature is valid, the issuer is trusted, and the certificate is valid.
+  applicability:
+    fact: ics.signature_format
+    op: eq
+    value: jws
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-INTEGRITY-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-INTEGRITY-001
+- id: ILL-REGISTRY-001
+  title: The registry record is consistent
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The mock registry record agrees with the passport.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-REGISTRY-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-REGISTRY-001
+- id: ILL-EV-ONLY-001
+  title: Rule for the EV category only
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: Demonstrates a justified not-applicable outcome for other categories.
+  applicability:
+    fact: ics.product_category
+    op: eq
+    value: ev
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-EV-ONLY-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-ID-001
+- id: ILL-CAPACITY-001
+  title: Rule above a capacity threshold
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: Demonstrates a threshold. The value 2000 Wh is synthetic and makes no legal statement.
+  applicability:
+    fact: ics.characteristics.capacity_wh
+    op: gt
+    value: 2000
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-CAPACITY-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-DATA-004
+- id: ILL-PERSIST-001
+  title: Versions obey the declared update rule
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: recommended
+  paraphrase: The version history obeys the update rule that the system declares.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-PERSIST-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-PERSIST-001
+- id: ILL-MANUAL-001
+  title: Manual review of the carrier marking
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: recommended
+  paraphrase: A person checks that the carrier is legible. The engine cannot do this.
+  applicability: *id001
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-MANUAL-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-MANUAL-001
+- id: ILL-NFC-001
+  title: The NFC carrier reads
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: optional
+  paraphrase: The NFC tag gives the identifier.
+  applicability:
+    fact: ics.carriers
+    op: contains
+    value: nfc
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-NFC-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-NFC-001
+- id: ILL-AAS-001
+  title: The Asset Administration Shell is valid
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: optional
+  paraphrase: The declared Asset Administration Shell file passes the wrapped validator.
+  applicability:
+    fact: ics.features.aas
+    op: eq
+    value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-AAS-001-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-001

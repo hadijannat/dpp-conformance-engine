@@ -1,0 +1,56 @@
+# Audience: contributors and assessors.
+# Purpose: demonstrate rule-pack checks. Every rule here is synthetic.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.rulepack/1
+rulepack_id: battery/illustrative-rules
+version: 0.1.0
+rules:
+- id: BAT-RULE-001
+  kind: required_fields
+  document: item
+  fields:
+  - id
+  - operator.identifier
+  - rated_capacity.value
+  - rated_capacity.unit
+  - remaining_capacity.value
+  - updated_at
+  - version
+  basis: &id001
+    class: illustrative
+- id: BAT-RULE-002
+  kind: unit
+  document: item
+  field: rated_capacity.unit
+  allowed:
+  - Wh
+  basis: *id001
+- id: BAT-RULE-003
+  kind: unit
+  document: item
+  field: remaining_capacity.unit
+  allowed:
+  - Wh
+  basis: *id001
+- id: BAT-RULE-004
+  kind: range
+  document: item
+  field: state_of_health_percent
+  min: 0
+  max: 100
+  basis: *id001
+- id: BAT-RULE-005
+  kind: relationship
+  document: item
+  left: remaining_capacity.value
+  op: le
+  right: rated_capacity.value
+  basis: *id001
+- id: BAT-RULE-006
+  kind: freshness
+  document: item
+  field: updated_at
+  max_age_days: 30
+  basis:
+    class: engineering
+    note: Demonstration value chosen by the project. It has no normative basis.

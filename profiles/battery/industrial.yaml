@@ -1,0 +1,40 @@
+# Audience: contributors and assessors.
+# Purpose: select the packs, tests, and resources for the industrial battery profile.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.profile/1
+id: battery/industrial
+title: Industrial battery passport
+description: Item-level passport data and shared model-level data are separate documents with separate
+  schemas.
+product_category: industrial
+item_schema: profiles/battery/schemas/item.schema.json
+model_schema: profiles/battery/schemas/model.schema.json
+rule_packs:
+- profiles/battery/rules/illustrative-rules.yaml
+api_contract: profiles/battery/contracts/reference-api.openapi.yaml
+access_policy: profiles/battery/access/reference-policy.yaml
+packs:
+- illustrative/core
+- eu-battery/draft
+- en-jtc24/placeholders
+testpacks:
+- battery/core
+- eu-battery/draft-tests
+facts:
+  capacity_wh:
+    type: integer
+    unit: Wh
+    description: Declared capacity of the battery in watt-hours.
+  placed_on_market_date:
+    type: date
+    description: Date on which the battery was first made available on the Union market.
+  put_into_service_date:
+    type: date
+    description: Date of first use in the Union, if the battery was not placed on the market before.
+  mass_g:
+    type: integer
+    unit: g
+    description: Mass of the battery in grams.
+  external_storage_only:
+    type: boolean
+    description: True if the battery has external storage only.

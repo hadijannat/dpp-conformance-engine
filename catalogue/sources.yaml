@@ -1,0 +1,16 @@
+# Audience: contributors and assessors.
+# Purpose: record each source with its verification level.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.sources/1
+legal_as_of: '2026-10-13'
+sources:
+- id: dppce-illustrative
+  title: dppce illustrative rules
+  identifier: dppce illustrative/core
+  issuing_body: dpp-conformance-engine project
+  source_type: project_resource
+  official_url: catalogue/packs/illustrative-core.yaml
+  retrieval_date: '2026-10-13'
+  legal_or_spec_status: Synthetic demonstration rules. Not a law, not a standard, not guidance.
+  permitted_use_basis: Project-authored content under the project license.
+  verification_level: substantive

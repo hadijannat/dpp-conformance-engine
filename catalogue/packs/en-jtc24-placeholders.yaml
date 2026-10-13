@@ -1,0 +1,9 @@
+# Audience: contributors and assessors.
+# Purpose: placeholder until the source audit is complete.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.pack/1
+pack_id: en-jtc24/placeholders
+version: 0.0.0
+title: CEN-CENELEC JTC 24 placeholders
+scope_statement: Empty. The source audit has not produced this pack yet.
+requirements: []

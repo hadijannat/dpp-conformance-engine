@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:dppce:profile:battery:model:v1",
+  "title": "Synthetic model-level battery data",
+  "$comment": "Project-authored illustrative schema. Not derived from a standard or a law.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "@context",
+    "id",
+    "type",
+    "granularity",
+    "category",
+    "chemistry",
+    "nominal_voltage",
+    "mass"
+  ],
+  "properties": {
+    "@context": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "id": {
+      "type": "string",
+      "format": "uri"
+    },
+    "type": {
+      "const": "BatteryModel"
+    },
+    "granularity": {
+      "const": "model"
+    },
+    "category": {
+      "enum": [
+        "ev",
+        "lmt",
+        "industrial"
+      ]
+    },
+    "chemistry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nominal_voltage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "V"
+          ]
+        }
+      }
+    },
+    "mass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kg"
+          ]
+        }
+      }
+    }
+  }
+}

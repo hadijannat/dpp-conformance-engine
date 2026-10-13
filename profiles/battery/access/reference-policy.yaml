@@ -1,0 +1,25 @@
+# Audience: contributors and assessors.
+# Purpose: state the access policy that the reference system declares.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.accesspolicy/1
+policy_id: battery/reference-policy
+version: 0.1.0
+basis:
+  class: illustrative
+restricted:
+- path: restricted.dismantling_notes
+  roles:
+  - legitimate_interest
+  - authority
+- path: restricted.supplier_reference
+  roles:
+  - authority
+canaries:
+- path: restricted.supplier_reference
+  value: CANARY-7f3a-supplier
+channels:
+  fetch: /dpp/{id}
+  export: /dpp/{id}/export
+  search: /search?q={serial}
+  error: /dpp/{id}/does-not-exist
+  html: /dpp/{id}.html

@@ -1,0 +1,267 @@
+# Audience: contributors and assessors.
+# Purpose: define the declarative test purposes for the battery profiles.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.testpack/1
+testpack_id: battery/core
+version: 0.1.0
+title: Battery core test purposes
+test_purposes:
+- id: TP-CARRIER-001
+  title: Decode the QR carrier
+  requirements:
+  - ILL-CARRIER-001
+  profiles:
+  - '*'
+  applicability: &id001
+    const: 'true'
+    reason: Applies to every system in the profile.
+  roles:
+  - anonymous
+  stimulus:
+    check: carrier.qr_decode
+    params:
+      artifact: qr_image
+  expected_evidence:
+  - The QR image as an artifact record.
+  permitted_modes: &id002
+  - illustrative
+  - exploratory
+  requires_scope: none
+- id: TP-ID-001
+  title: Parse the carrier identifier
+  requirements:
+  - ILL-ID-001
+  - ILL-EV-ONLY-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.parse
+  expected_evidence:
+  - The decoded identifier scheme and syntax result.
+  permitted_modes: *id002
+  requires_scope: none
+- id: TP-ID-002
+  title: Resolve the identifier
+  requirements:
+  - ILL-ID-002
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.resolve
+  expected_evidence:
+  - The resolver exchange with its redirect chain.
+  permitted_modes: *id002
+- id: TP-ID-003
+  title: Compare the identifier across carrier, declaration, and passport
+  requirements:
+  - ILL-ID-003
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.consistency
+  expected_evidence:
+  - The compared identifier sources.
+  permitted_modes: *id002
+- id: TP-API-001
+  title: Check the passport response against the API contract
+  requirements:
+  - ILL-API-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: api.contract
+    params:
+      path: /dpp/{id}
+      method: get
+  expected_evidence:
+  - Status, media type, and schema result.
+  permitted_modes: *id002
+- id: TP-DATA-001
+  title: Validate the item-level passport
+  requirements:
+  - ILL-DATA-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: data.jsonschema
+    params:
+      document: item
+  expected_evidence:
+  - JSON paths and keywords of each schema error.
+  permitted_modes: *id002
+- id: TP-DATA-002
+  title: Validate the model-level data
+  requirements:
+  - ILL-DATA-002
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: data.jsonschema
+    params:
+      document: model
+  expected_evidence:
+  - JSON paths and keywords of each schema error.
+  permitted_modes: *id002
+- id: TP-DATA-003
+  title: Check the context references
+  requirements:
+  - ILL-DATA-003
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: data.context
+    params:
+      document: item
+      allowed_contexts:
+      - https://dppce.example.test/contexts/battery/v1
+  expected_evidence:
+  - The context references that are not in the allowlist.
+  permitted_modes: *id002
+- id: TP-DATA-004
+  title: Apply the rule pack
+  requirements:
+  - ILL-DATA-004
+  - ILL-CAPACITY-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: data.rules
+    params:
+      document: item
+  expected_evidence:
+  - The identifiers of the failed rules.
+  permitted_modes: *id002
+- id: TP-ACCESS-001
+  title: Probe the channels as the anonymous role
+  requirements:
+  - ILL-ACCESS-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: access.restricted_fields
+    params:
+      role: anonymous
+  expected_evidence:
+  - Channel names and field paths. Never field values.
+  permitted_modes: *id002
+  requires_scope: access_probe
+  severity: critical
+- id: TP-INTEGRITY-001
+  title: Verify the signed passport
+  requirements:
+  - ILL-INTEGRITY-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: integrity.jws
+  expected_evidence:
+  - Separate findings for signature, issuer trust, certificate validity, revocation, and payload.
+  permitted_modes: *id002
+  severity: critical
+- id: TP-PERSIST-001
+  title: Check the version history
+  requirements:
+  - ILL-PERSIST-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: persistence.versions
+  expected_evidence:
+  - The version entries and the digest comparison.
+  permitted_modes: *id002
+  severity: minor
+- id: TP-REGISTRY-001
+  title: Compare the registry record with the passport
+  requirements:
+  - ILL-REGISTRY-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: registry.consistency
+  expected_evidence:
+  - The compared identifier and operator.
+  permitted_modes: *id002
+- id: TP-AAS-001
+  title: Validate the Asset Administration Shell file
+  requirements:
+  - ILL-AAS-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: aas.validate
+    params:
+      artifact: aas_file
+  expected_evidence:
+  - The validator result.
+  permitted_modes: *id002
+  requires_scope: none
+- id: TP-NFC-001
+  title: Read the NFC carrier
+  requirements:
+  - ILL-NFC-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: carrier.nfc_read
+  expected_evidence:
+  - 'Not available: the NFC adapter is an interface only.'
+  permitted_modes: *id002
+  requires_scope: none
+- id: TP-MANUAL-001
+  title: Manual review of the carrier marking
+  requirements:
+  - ILL-MANUAL-001
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A signed manual review record.
+  permitted_modes: *id002
+  requires_scope: none
+  manual: true

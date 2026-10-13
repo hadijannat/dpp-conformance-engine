@@ -1,0 +1,8 @@
+# Audience: contributors and assessors.
+# Purpose: placeholder until the source audit is complete.
+# This file is project-authored and synthetic. It makes no normative statement.
+schema_version: dppce.testpack/1
+testpack_id: eu-battery/draft-tests
+version: 0.0.0
+title: Test purposes for the EU battery draft pack
+test_purposes: []
