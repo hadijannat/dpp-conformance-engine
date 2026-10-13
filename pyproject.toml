@@ -50,6 +50,13 @@ dev = [
   "types-pyyaml>=6.0",
   "types-jsonschema>=4.23",
   "rust-just>=1.36",
+  "pip-licenses>=5.5.5",
+]
+docs = [
+    "mkdocs-material>=9.7.7",
+]
+release = [
+    "cyclonedx-bom>=7.5.0",
 ]
 
 [tool.hatch.build.targets.wheel]

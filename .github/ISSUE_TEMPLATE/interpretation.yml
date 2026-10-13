@@ -1,0 +1,32 @@
+name: Requirement interpretation
+description: Propose, question, or correct an interpretation of a source provision.
+labels: [catalogue]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not paste the text of an EN, ISO, IEC, or DIN document. Cite it by its public
+        bibliographic reference only. An issue cannot approve an interpretation.
+  - type: input
+    id: requirement
+    attributes:
+      label: Requirement identifier, if it exists
+  - type: input
+    id: provision
+    attributes:
+      label: Source provision and the exact version examined
+      description: For example "Regulation (EU) 2023/1542, Art. 77(3), consolidated version of 2026-08-13".
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed interpretation or correction, in your own words
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence at an official location
+    validations:
+      required: true

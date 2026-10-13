@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it with the metadata in this file."
+title: "dpp-conformance-engine: a conformance test engine for Digital Product Passports"
+type: software
+authors:
+  - family-names: Jannatabadi
+    given-names: Hadi
+version: 0.1.0rc1
+license: Apache-2.0
+abstract: >-
+  An open-source, vendor-neutral conformance test engine for Digital Product Passports, with
+  traceable requirements and verifiable evidence. It produces conformance test reports, not
+  certificates.
+keywords:
+  - digital product passport
+  - battery passport
+  - conformance testing
+  - verifiable evidence

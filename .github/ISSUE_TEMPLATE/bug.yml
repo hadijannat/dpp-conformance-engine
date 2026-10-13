@@ -1,0 +1,32 @@
+name: Bug report
+description: The engine does something that the architecture contract does not describe.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not report a vulnerability here. Follow SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use synthetic data. Do not paste data of a real product or a real credential.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result, with the section of the contract
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result, with the exit code
+    validations:
+      required: true

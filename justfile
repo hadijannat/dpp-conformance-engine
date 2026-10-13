@@ -46,6 +46,15 @@ validate: check cov
     uv run pytest -m validation
     uv run python -m validation.run
 
+# Write a CycloneDX SBOM of the locked environment to dist/sbom.cdx.json.
+sbom:
+    mkdir -p dist
+    uv run --group release cyclonedx-py environment .venv --output-format JSON --output-file dist/sbom.cdx.json
+
+# Regenerate the dependency license report from the installed environment.
+licenses:
+    uv run python scripts/gen_license_report.py
+
 # Build the documentation site and fail on a broken link or a warning.
 docs:
     uv run --group docs mkdocs build --strict

@@ -1,0 +1,11 @@
+# The handle comes from the local git configuration of the first development session.
+# It is not verified against the repository host. See the open question OQ-001.
+*                       @hadijannat
+
+# Normative content and the engine contract need the maintainer.
+/catalogue/             @hadijannat
+/docs/explanation/architecture.md  @hadijannat
+/validation/fault-catalogue.yaml   @hadijannat
+/src/dppce/verdicts/    @hadijannat
+/src/dppce/evidence/    @hadijannat
+/src/dppce/verifier/    @hadijannat
