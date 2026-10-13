@@ -33,6 +33,7 @@ nav:
   - Reference:
       - Command line: reference/cli.md
       - Capability manifest: reference/capabilities.md
+      - Verdict truth table: reference/verdict-truth-table.md
       - Schemas: reference/schemas.md
       - Reference system and data formats: reference/reference-system.md
       - Glossary: reference/glossary.md
