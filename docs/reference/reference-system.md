@@ -279,3 +279,105 @@ fixtures/reference/
 `scripts/gen_fixtures.py` writes the PKI, the QR images, the trust bundle, and the
 authorization. Keys are random, so the generated files are committed. The script is rerun only
 to rotate them. QR images are generated with zxing-cpp and Pillow (the `qr` extra).
+
+## 8. Check parameters and outcomes
+
+This section is the contract between the test pack and the adapters.
+
+IXIT conventions for the reference rig:
+
+- `endpoints.api` and `endpoints.registry`: base URLs in public form (`https://id.example.test`).
+- `endpoints.public_origin` and `endpoints.origin_override`: see section 2.
+- `samples.qr_image`: path of a QR image. `samples.identifier`: the public identifier as text.
+- `samples.passport_id`: the `{id}` path segment, for example `09506000134352-EV0001`.
+- `samples.aas_file`: path of an Asset Administration Shell JSON file (optional).
+
+A relative sample path is relative to the directory of the IXIT file. The command line
+resolves it before the run.
+
+Shared helpers in `dppce.adapters.common`:
+
+- `effective_url(ctx, url)`: applies the origin override.
+- `identifier_text(ctx)`: the carrier identifier. If `samples.qr_image` exists, decode it (this
+  needs the `qr` extra; without it the check is `unsupported`). Otherwise use
+  `samples.identifier`. If neither exists, the check is `blocked` with `CARRIER.SAMPLE.MISSING`.
+- `fetch_once(ctx, url, role)`: returns an earlier record of the same method, URL, and role if
+  it has no error; otherwise fetches. This keeps the request count low and the replay stable.
+- `unreachable(ctx, record)`: builds the outcome for a record with a transport error:
+  status `completed`, `passed: false`, `unreachable: true`. Reason code
+  `TRANSPORT.REDIRECT_OUT_OF_SCOPE` for that error, `TRANSPORT.DENIED` for `policy_denied`,
+  `authorization_denied`, and `budget_exhausted`, and `TRANSPORT.UNREACHABLE` for the others.
+
+A response that is not valid JSON where JSON is needed gives a `fail` with `<AREA>.RESPONSE.NOT_JSON`.
+A truncated body gives status `blocked` with `TRANSPORT.BODY_TRUNCATED`: a partial body proves nothing.
+
+| Check | Parameters | Pass | Fail and other outcomes |
+| --- | --- | --- | --- |
+| `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING` |
+| `identifier.parse` | `scheme` (default: `ics.identifier_scheme`) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail); `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN` |
+| `identifier.resolve` | none | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail) |
+| `identifier.consistency` | none | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport |
+| `api.contract` | `path` (for example `/dpp/{id}`), `method` (default `get`) | `API.CONTRACT.OK` | see section 5.3 |
+| `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values |
+| `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
+| `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
+| `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
+| `integrity.jws` | none | `INTEGRITY.OK` | first that applies: `INTEGRITY.SIGNATURE.INVALID`, `INTEGRITY.ISSUER.UNTRUSTED`, `INTEGRITY.CERT.EXPIRED`, `INTEGRITY.CERT.REVOKED`, `INTEGRITY.PAYLOAD.MISMATCH` (all fail); no trust bundle: `blocked`, `INTEGRITY.TRUST.MISSING`; mandatory status snapshot missing or stale: `blocked`, `INTEGRITY.STATUS.MISSING` |
+| `persistence.versions` | none | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail) |
+| `registry.consistency` | none | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
+| `aas.validate` | `artifact` (default `aas_file`) | `AAS.VALID` | `AAS.INVALID` (fail); sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
+
+Document URLs: item `{api}/dpp/{id}`, model `{api}/dpp/{id}/model`, signed
+`{api}/dpp/{id}/signed`, versions `{api}/dpp/{id}/versions`, registry `{registry}/registry/{id}`.
+The resolver URL is the carrier identifier itself.
+
+`integrity.jws` verifies in this order: (1) the JWS signature with the key of the leaf
+certificate, algorithm allowlist `ES256`; (2) the chain from the leaf to an anchor of the trust
+bundle; (3) the validity period of each certificate at the evaluation time; (4) the leaf serial
+against the revocation snapshot; (5) the payload against the canonical bytes of the anonymous
+item-level passport. Each step is a separate finding in the observation summary.
+
+`persistence.versions` checks: version numbers strictly ascend; `updated_at` never decreases;
+the last `content_digest` equals the digest of the current anonymous item-level passport.
+
+## 9. Illustrative catalogue content
+
+Requirement pack `illustrative/core` (file `catalogue/packs/illustrative-core.yaml`), all with
+`authority_class: illustrative`, `review_status: draft-needs-review`, and source
+`dppce-illustrative`. Test pack `battery/core` (file `testpacks/battery-core.yaml`), all with
+`permitted_modes: [illustrative, exploratory]` and `profiles: ["*"]`.
+
+| Requirement | Modality | Applicability | Test purposes |
+| --- | --- | --- | --- |
+| `ILL-CARRIER-001` | mandatory | `ics.carriers contains qr` | `TP-CARRIER-001` (`carrier.qr_decode`) |
+| `ILL-ID-001` | mandatory | always | `TP-ID-001` (`identifier.parse`) |
+| `ILL-ID-002` | mandatory | always | `TP-ID-002` (`identifier.resolve`) |
+| `ILL-ID-003` | mandatory | always | `TP-ID-003` (`identifier.consistency`) |
+| `ILL-API-001` | mandatory | always | `TP-API-001` (`api.contract`, path `/dpp/{id}`) |
+| `ILL-DATA-001` | mandatory | always; `declared_support`: `ics.features.item_data eq true` | `TP-DATA-001` (`data.jsonschema`, item) |
+| `ILL-DATA-002` | mandatory | always | `TP-DATA-002` (`data.jsonschema`, model) |
+| `ILL-DATA-003` | mandatory | always | `TP-DATA-003` (`data.context`, item) |
+| `ILL-DATA-004` | mandatory | always | `TP-DATA-004` (`data.rules`, item) |
+| `ILL-ACCESS-001` | mandatory | always | `TP-ACCESS-001` (`access.restricted_fields`; `requires_scope: access_probe`) |
+| `ILL-INTEGRITY-001` | mandatory | `ics.signature_format eq jws` | `TP-INTEGRITY-001` (`integrity.jws`) |
+| `ILL-REGISTRY-001` | mandatory | always | `TP-REGISTRY-001` (`registry.consistency`) |
+| `ILL-EV-ONLY-001` | mandatory | `ics.product_category eq ev` | `TP-ID-001` |
+| `ILL-CAPACITY-001` | mandatory | `ics.characteristics.capacity_wh gt profile.capacity_threshold_wh` is not expressible, so the profile sets the constant and the pack uses `{fact: ics.characteristics.capacity_wh, op: gt, value: 2000}` | `TP-DATA-004` |
+| `ILL-PERSIST-001` | recommended | always | `TP-PERSIST-001` (`persistence.versions`) |
+| `ILL-MANUAL-001` | recommended | always | `TP-MANUAL-001` (`manual: true`, check `manual.review`) |
+| `ILL-NFC-001` | optional | `ics.carriers contains nfc` | `TP-NFC-001` (check `carrier.nfc_read`, not registered) |
+| `ILL-AAS-001` | optional | `ics.features.aas eq true` | `TP-AAS-001` (`aas.validate`) |
+
+The threshold 2000 Wh in `ILL-CAPACITY-001` is a synthetic demonstration value in an
+illustrative rule. It makes no legal statement.
+
+Each profile selects the packs `illustrative/core`, `eu-battery/draft`, and
+`en-jtc24/placeholders`, and the test pack `battery/core`. Each profile declares the facts
+`capacity_wh` (integer, Wh), `placed_on_market_date` (date), `put_into_service_date` (date),
+`mass_g` (integer, g), and `external_storage_only` (boolean).
+
+The reference ICS files declare: `carriers: [qr]`, `identifier_scheme: gs1-digital-link`,
+`signature_format: jws`, `granularity: item`, `features: {item_data: true, aas: false}`,
+`characteristics.capacity_wh` from section 2, and `placed_on_market_date: "2027-03-01"`.
+With the unmodified reference system, every executed test purpose passes and the overall
+outcome in illustrative mode is `pass`.
