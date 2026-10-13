@@ -120,6 +120,7 @@
     "revoked_serials": {
       "default": [],
       "items": {
+        "pattern": "^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$",
         "type": "string"
       },
       "title": "Revoked Serials",

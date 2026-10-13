@@ -39,14 +39,42 @@ def _certificates(header: dict[str, object]) -> list[x509.Certificate] | None:
         return None
 
 
+def _may_issue(issuer: x509.Certificate, authorities_below: int) -> bool:
+    """True if ``issuer`` is a certificate authority that may sign the next certificate of the path.
+
+    A signature and a matching name are not enough. Without this test, the holder of any end
+    certificate from a trusted root could sign certificates of its own.
+    """
+    try:
+        constraints = issuer.extensions.get_extension_for_class(x509.BasicConstraints).value
+    except x509.ExtensionNotFound:
+        return False
+    if not constraints.ca:
+        return False
+    if constraints.path_length is not None and authorities_below > constraints.path_length:
+        return False
+    try:
+        usage = issuer.extensions.get_extension_for_class(x509.KeyUsage).value
+    except x509.ExtensionNotFound:
+        return True
+    return bool(usage.key_cert_sign)
+
+
 def trust_path(
     leaf: x509.Certificate, intermediates: list[x509.Certificate], trust: TrustBundle
 ) -> list[x509.Certificate] | None:
-    """Return the path from the leaf to an anchor of the trust bundle, or None if there is none."""
+    """Return the path from the leaf to an anchor of the trust bundle, or None if there is none.
+
+    Each issuer must have signed the certificate below it, must be a certificate authority,
+    must permit signing certificates, and must respect its path length constraint.
+    """
     anchors = [x509.load_pem_x509_certificate(a.certificate_pem.encode("ascii")) for a in trust.anchors]
     path, current = [leaf], leaf
-    for _ in range(_MAX_CHAIN):
+    for depth in range(_MAX_CHAIN):
+        # ``depth`` is the number of certificate authorities already below the next issuer.
         for candidate, is_anchor in [*((a, True) for a in anchors), *((i, False) for i in intermediates)]:
+            if not _may_issue(candidate, authorities_below=depth):
+                continue
             try:
                 current.verify_directly_issued_by(candidate)
             except (ValueError, TypeError, InvalidSignature):
@@ -59,6 +87,12 @@ def trust_path(
         else:
             return None
     return None
+
+
+def revoked(path: list[x509.Certificate], trust: TrustBundle) -> bool:
+    """True if any certificate of the path is in the revocation snapshot. Serials compare as integers."""
+    snapshot = {int(serial.replace(":", ""), 16) for serial in trust.revoked_serials}
+    return any(certificate.serial_number in snapshot for certificate in path)
 
 
 def _status_gap(trust: TrustBundle, now: datetime) -> str | None:
@@ -132,11 +166,10 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - the ordered
 
     if (gap := _status_gap(ctx.trust, now)) is not None:
         return blocked("INTEGRITY.STATUS.MISSING", gap)
-    if f"{certificates[0].serial_number:x}" in {s.lower() for s in ctx.trust.revoked_serials}:
+    if revoked(path, ctx.trust):
         findings["revocation"] = "revoked"
-        return result(
-            False, "INTEGRITY.CERT.REVOKED", "The signing certificate is in the revocation snapshot."
-        )
+        message = "A certificate of the chain is in the revocation snapshot."
+        return result(False, "INTEGRITY.CERT.REVOKED", message)
     findings["revocation"] = (
         "not revoked in the snapshot" if ctx.trust.status_as_of else "no snapshot; not required"
     )

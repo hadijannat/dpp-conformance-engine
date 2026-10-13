@@ -193,7 +193,7 @@ _TAMPER: dict[str, tuple[Callable[[dict[str, Any]], None], str]] = {
         lambda d: _decision(d)["manifest"]["sut"].update(identifier="urn:example:other"),
         "signature",
     ),
-    "E-07 drop_limitation": (lambda d: _decision(d)["manifest"].update(limitations=[]), "signature"),
+    "drop_limitation": (lambda d: _decision(d)["manifest"].update(limitations=[]), "signature"),
     "E-08 change_counts": (lambda d: _decision(d)["verdict_counts"].update({"pass": 3, "fail": 0}), "counts"),
     "E-09 substitute_commitment": (
         lambda d: _decision(d)["record_commitments"][0].update(commitment="0" * 64),

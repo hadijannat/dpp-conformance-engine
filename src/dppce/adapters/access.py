@@ -9,14 +9,15 @@ why the test purpose needs the scope ``access_probe`` from a signed authorizatio
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
-from pydantic import ValidationError
+from pydantic import ValidationError, model_validator
 
-from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, json_object, no_answer
+from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, no_answer
 from dppce.catalogue import CatalogueError, load_model
+from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
-from dppce.models import CheckOutcome, JsonValue, Model
+from dppce.models import CheckOutcome, Model
 from dppce.testdefs.registry import CheckContext, register
 
 # The first leaking channel in this order names the reason code.
@@ -42,6 +43,15 @@ class AccessPolicy(Model):
     canaries: tuple[Canary, ...] = ()
     channels: dict[str, str]
 
+    @model_validator(mode="after")
+    def _known_channels_only(self) -> Self:
+        unknown = sorted(set(self.channels) - set(_CHANNELS))
+        if unknown:
+            raise ValueError(
+                f"unknown channels {unknown}: a channel that is not probed must not look covered"
+            )
+        return self
+
 
 def _holds_path(node: Any, dotted: str) -> bool:
     """True if any object in the tree holds the dotted path. A channel can nest the passport."""
@@ -65,10 +75,15 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
     except (CatalogueError, ValidationError):
         return blocked("ACCESS.POLICY.MISSING", "The pinned access policy cannot be read or is not valid.")
     withheld = [r.path for r in policy.restricted if role not in r.roles]
+    if not withheld or not policy.channels:
+        # Nothing to look for, or nowhere to look. That is not evidence of enforcement.
+        message = f"The policy withholds no field from the role '{role}', or it names no channel."
+        return blocked("ACCESS.POLICY.NOTHING_TO_PROBE", message)
     canaries = [c for c in policy.canaries if c.path in withheld]
     serial = passport_id.partition("-")[2]
     records: list[Record] = []
     leaks: dict[str, list[str]] = {}
+    canary_only: list[str] = []  # not JSON: only a canary value can be found there
     for channel in _CHANNELS:
         template = policy.channels.get(channel)
         if template is None:
@@ -82,16 +97,27 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
                 "TRANSPORT.BODY_TRUNCATED", "A body is larger than the limit. A partial body proves nothing."
             )
         records.append(record)
-        document = json_object(record)
+        media_type = (record.header("content-type") or "").split(";")[0].strip().lower()
+        document: Any = None
+        if media_type == "application/json" or media_type.endswith("+json"):
+            try:
+                document = parse_strict(record.body)
+            except CanonicalizationError:
+                # The body claims to be JSON and cannot be read. Field paths cannot be checked.
+                message = f"The '{channel}' channel declares JSON, but the body cannot be parsed."
+                return blocked("ACCESS.RESPONSE.NOT_JSON", message)
+        else:
+            canary_only.append(channel)
         found = [path for path in withheld if document is not None and _holds_path(document, path)]
         # A canary in the raw bytes is a leak in any format: JSON, HTML, or an error text.
         found += [c.path for c in canaries if c.value.encode("utf-8") in record.body and c.path not in found]
         if found:
             leaks[channel] = sorted(found)
-    summary: dict[str, JsonValue] = {
+    summary: dict[str, Any] = {
         "policy": f"{policy.policy_id} {policy.version}",
         "role": role,
         "channels_probed": [c for c in _CHANNELS if c in policy.channels],
+        "channels_checked_for_canaries_only": canary_only,
         # Field paths only. A field value is never written to an observation.
         "leaks": {channel: list(paths) for channel, paths in leaks.items()},
     }

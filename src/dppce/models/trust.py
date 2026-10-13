@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -38,7 +38,8 @@ class TrustBundle(Model):
     keys: tuple[TrustedKey, ...] = ()
     anchors: tuple[TrustAnchor, ...] = ()
     # A static snapshot of revocation status. The engine never fetches status at verification time.
-    revoked_serials: tuple[str, ...] = ()
+    # Certificate serial numbers in hexadecimal. Colons are permitted. Compared as integers.
+    revoked_serials: tuple[Annotated[str, Field(pattern=r"^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$")], ...] = ()
     revoked_kids: tuple[str, ...] = ()
     status_as_of: str | None = Field(default=None, pattern=STAMP)
     status_max_age_days: int = Field(default=7, ge=0, le=3650)

@@ -193,7 +193,21 @@ def _certificate(  # noqa: PLR0917 - mirrors the fields of a certificate
         .serial_number(x509.random_serial_number())
         .not_valid_before(not_before)
         .not_valid_after(not_after)
-        .add_extension(x509.BasicConstraints(ca=ca, path_length=None), critical=True)
+        .add_extension(x509.BasicConstraints(ca=ca, path_length=0 if ca else None), critical=True)
+        .add_extension(
+            x509.KeyUsage(
+                digital_signature=not ca,
+                key_cert_sign=ca,
+                crl_sign=ca,
+                content_commitment=False,
+                key_encipherment=False,
+                data_encipherment=False,
+                key_agreement=False,
+                encipher_only=False,
+                decipher_only=False,
+            ),
+            critical=True,
+        )
         .sign(issuer_key, hashes.SHA256())
     )
 

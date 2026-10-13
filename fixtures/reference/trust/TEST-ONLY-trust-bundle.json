@@ -13,8 +13,8 @@
       "public_jwk": {
         "kty": "EC",
         "crv": "P-256",
-        "x": "SIZY5FdhzYIUH4ZwawfFxJJ2PJucOPgmrnXiYAx4WkI",
-        "y": "_7Wr_JOM4AjPE_jF-v3OBkv0q5vemHgqsflhBHVua3o"
+        "x": "4fUTXbsrp9_GCUNYWknAobK3JvFX2gNGiyAI_EKafwU",
+        "y": "gy1VVu_Ot--VJuWEe-IkTwZUdw-qKrsZqxPlgx8v5SI"
       },
       "not_before": "2026-01-01T00:00:00Z",
       "not_after": "2036-01-01T00:00:00Z"
@@ -28,8 +28,8 @@
       "public_jwk": {
         "kty": "EC",
         "crv": "P-256",
-        "x": "qRBcw7-xQC5-L9QAQO7IZUrrpVf3TBp_-y3Hm0FX_IU",
-        "y": "DxERPqiX3di7tNOMIqOn_D4JJaV3M-XmJKOKBYcdgzI"
+        "x": "E_XbtOK3-zzcliFXrgBBLq9VsmqOGdwz8mQLhEH-JJY",
+        "y": "6iMBvwL3SIKXVhmbiaDbiE-Z3HQRIHvE1wwDiXDkt-Y"
       },
       "not_before": "2026-01-01T00:00:00Z",
       "not_after": "2036-01-01T00:00:00Z"
@@ -38,7 +38,7 @@
   "anchors": [
     {
       "name": "TEST-ONLY dppce reference root",
-      "certificate_pem": "-----BEGIN CERTIFICATE-----\nMIIBZzCCAQ2gAwIBAgIUObkY5Hp58V79mgGP+2J1pCSLcyYwCgYIKoZIzj0EAwIw\nKTEnMCUGA1UEAwweVEVTVC1PTkxZIGRwcGNlIHJlZmVyZW5jZSByb290MB4XDTI2\nMDEwMTAwMDAwMFoXDTM2MDEwMTAwMDAwMFowKTEnMCUGA1UEAwweVEVTVC1PTkxZ\nIGRwcGNlIHJlZmVyZW5jZSByb290MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\nT/MgndUeNgPMps185HxDN0Ips1ZhxFVst09SodrLK4Ucopgyu7hV6SvNKqycEqr6\niurgSkxHqz0CJXAmUctr0aMTMBEwDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQD\nAgNIADBFAiAKAy1GUOw1bc4zKtAbklzfsSL/wbMNkV8pEHn55QiWUAIhANL2l3Sm\nTEGvRBRKEf1tDiJXS9XHTHKoh3+ZBJAyvXyO\n-----END CERTIFICATE-----\n"
+      "certificate_pem": "-----BEGIN CERTIFICATE-----\nMIIBezCCASCgAwIBAgIUMTV/di7Vow4KiHYVe+lLqI7Bw5owCgYIKoZIzj0EAwIw\nKTEnMCUGA1UEAwweVEVTVC1PTkxZIGRwcGNlIHJlZmVyZW5jZSByb290MB4XDTI2\nMDEwMTAwMDAwMFoXDTM2MDEwMTAwMDAwMFowKTEnMCUGA1UEAwweVEVTVC1PTkxZ\nIGRwcGNlIHJlZmVyZW5jZSByb290MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n9wmcrJf97X/j7ChFE96ZbvBvogdef2fSbid5307iZKTmSP+dMOELMUVbTGbJcPJO\nHb2bSG7D+MhM/+o/xDDtiqMmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8B\nAf8EBAMCAQYwCgYIKoZIzj0EAwIDSQAwRgIhAO3omn5BjdUwuBXdltnjAPl/Rk9E\ny9nhOdQpjfHYDKByAiEA6kSLn0qo/i2A81s06ZJysJPyYlI4IcB4l7Vx44RyS9g=\n-----END CERTIFICATE-----\n"
     }
   ],
   "revoked_serials": [],
