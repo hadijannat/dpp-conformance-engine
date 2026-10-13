@@ -79,6 +79,7 @@ from dppce.models.testing import (
     TestResult,
     VerdictRules,
 )
+from dppce.models.trust import TrustAnchor, TrustBundle, TrustedKey
 
 # Contracts that have a published JSON Schema, keyed by schema file stem.
 SCHEMA_MODELS: dict[str, type[Model]] = {
@@ -95,6 +96,7 @@ SCHEMA_MODELS: dict[str, type[Model]] = {
     "envelope": EvidenceEnvelope,
     "capabilities": CapabilityManifest,
     "verification": VerificationReport,
+    "trust": TrustBundle,
 }
 
 __all__ = [
@@ -169,7 +171,10 @@ __all__ = [
     "TestResult",
     "Testability",
     "Tri",
+    "TrustAnchor",
+    "TrustBundle",
     "TrustConfig",
+    "TrustedKey",
     "Unknown",
     "Verdict",
     "VerdictRules",

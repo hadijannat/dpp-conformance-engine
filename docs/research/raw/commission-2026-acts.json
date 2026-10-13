@@ -201,8 +201,7 @@
       "legal_or_spec_status": "non-binding FAQ; carries a disclaimer that it reflects the views only of its authors and that the Commission is not liable for reuse",
       "applicable_dates": [
         {"date": "2026-07-20", "what": "DPP Registry launch date as stated in the FAQ (answer 1.2)", "basis": "FAQ page"},
-        {"date": "2027-02-28", "what": "FAQ refers to 'February 2027' (month only; day is end-of-month placeholder) as the start of mandatory battery passport data; carbon footprint and recycled content not required from that date (answers 7.1, 7.2, 8.1)", "basis": "FAQ page"},
-        {"date": "2027-08-31", "what": "FAQ states the due diligence report is required from 'August 2027' (month only; day is end-of-month placeholder) (answer 7.3)", "basis": "FAQ page"}
+        {"date": "2027-02-18", "what": "Start of mandatory battery passport data; the FAQ gives the month only ('February 2027') and says carbon footprint and recycled content are not required from that date (answers 7.1, 7.2, 8.1)", "basis": "Regulation (EU) 2023/1542 Art. 77(1) for the day; FAQ gives month only"}
       ],
       "amendment_history": [],
       "oj_citation": {"status": "not_applicable", "reference": "", "url": ""},
@@ -216,7 +215,7 @@
       "uncertainties": [
         "No publication or last-updated date is shown beyond 'manuscript completed in September 2026'.",
         "The authorship disclaimer means the FAQ is not a formal Commission position.",
-        "Month-only dates in the FAQ (February 2027, August 2027) are recorded with end-of-month placeholders; the binding dates are those in Regulation (EU) 2023/1542 as amended."
+        "FAQ answer 7.3 says the due diligence report is required from 'August 2027' (month only, no day); this is deliberately not recorded as a typed date because it was not reconciled with Art. 96(2)(c) as read (Chapter VIII from 18 August 2025) or with amending Regulation (EU) 2025/1561, which was not read."
       ]
     },
     {
@@ -656,6 +655,7 @@
     "Does Implementing Regulation (EU) 2026/1778 set any application date different from its entry into force, and how does that relate to the registry being operational from 20 July 2026? The OJ PDF should be read in full.",
     "What exactly does Art. 8(7) of Implementing Regulation (EU) 2026/1778 require for batteries, given that it reportedly refers to delegated acts under Art. 77 of Regulation (EU) 2023/1542?",
     "Which provisions of Regulation (EU) 2023/1542 were changed by Regulation (EU) 2026/1738 and by corrigenda C3 and C4, beyond Annex I and Annex XIII point 1(q)?",
+    "Commission FAQ answer 7.3 (due diligence report required from August 2027) versus Art. 96(2)(c) of Regulation (EU) 2023/1542 as read in the consolidated text (Chapter VIII applies from 18 August 2025): reconcile against M2 Regulation (EU) 2025/1561, which was not read in this audit. This affects Annex XIII point 1(d).",
     "Is the Commission data-point guidance still at V2 (15 August 2026), and what do its own cover page and disclaimer say? The PDF was not opened.",
     "Do the six cited DPP standards give any presumption of conformity for battery passports under Regulation (EU) 2023/1542? Decision 2026/1736 grants it only for Arts 10 and 11 of Regulation (EU) 2024/1781; Decision 2026/2048 cites only EN 18060:2025 under the Batteries Regulation."
   ]
