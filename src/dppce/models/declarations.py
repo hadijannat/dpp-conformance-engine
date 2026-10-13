@@ -66,6 +66,7 @@ class NetworkPolicy(Model):
     max_redirects: int = Field(default=3, ge=0, le=5)
     max_requests: int = Field(default=200, ge=1, le=10000)
     min_interval_ms: int = Field(default=0, ge=0, le=60000)
+    retries: int = Field(default=0, ge=0, le=3, description="Extra attempts for an idempotent read.")
     contact: str = Field(default="", description="Contact shown in the User-Agent header.")
 
 
