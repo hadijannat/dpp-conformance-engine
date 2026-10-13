@@ -44,7 +44,9 @@ Rules:
 1. `catalogue`, `applicability`, `verdicts`, and `evidence` do no network I/O.
 2. `verifier` never imports `orchestrator`, `adapters`, `testdefs`, or the transport.
 3. A check reaches the outside world only through the `Acquirer` protocol.
-4. YAML is loaded with `yaml.safe_load` only. No YAML value is evaluated as code or as a template.
+4. YAML is parsed only by `dppce.catalogue.load_data`. It uses a subclass of PyYAML's
+   `SafeLoader` that also rejects a repeated key. A test proves that a `!!python/object` tag is
+   rejected. No YAML value is evaluated as code or as a template.
 5. No module fetches a schema, a JSON-LD context, or a `$ref` from the network. Every such
    resource is a pinned local file.
 
