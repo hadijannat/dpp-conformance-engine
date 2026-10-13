@@ -7,6 +7,7 @@ processing rules of any credential securing specification. See ADR 0006.
 from __future__ import annotations
 
 import hashlib
+import json
 from typing import Any
 
 import rfc8785
@@ -56,3 +57,41 @@ def canonical_bytes(value: Any) -> bytes:
 def digest(value: Any) -> str:
     """Return ``sha256:<hex>`` of the canonical bytes."""
     return "sha256:" + hashlib.sha256(canonical_bytes(value)).hexdigest()
+
+
+def _reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    keys = [key for key, _ in pairs]
+    if len(set(keys)) != len(keys):
+        repeated = sorted({k for k in keys if keys.count(k) > 1})
+        raise CanonicalizationError(f"duplicate object key: {', '.join(repeated)}")
+    return dict(pairs)
+
+
+def _reject_constant(name: str) -> Any:
+    raise CanonicalizationError(f"{name} is not JSON")
+
+
+def parse_strict(raw: bytes | str) -> Any:
+    """Parse JSON that two parsers cannot read differently.
+
+    Rejects a repeated object key (parsers disagree on which value wins) and the non-JSON
+    constants NaN and Infinity. Use this for every document whose content gets verified.
+    """
+    try:
+        return json.loads(raw, object_pairs_hook=_reject_duplicates, parse_constant=_reject_constant)
+    except (ValueError, RecursionError) as exc:
+        if isinstance(exc, CanonicalizationError):
+            raise
+        raise CanonicalizationError(f"not valid JSON: {exc}") from exc
+
+
+def is_exact(document: Any, model: Model) -> bool:
+    """True if ``document`` is exactly the canonical form of ``model``.
+
+    Validation fills defaults and can coerce types. Without this check the verified model
+    could differ from the document that a different consumer reads.
+    """
+    try:
+        return canonical_bytes(document) == canonical_bytes(model)
+    except CanonicalizationError:
+        return False

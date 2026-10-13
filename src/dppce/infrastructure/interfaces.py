@@ -43,6 +43,7 @@ TransportError = Literal[
     "body_too_large",
     "protocol",
     "recording_mismatch",
+    "artifact_unavailable",
 ]
 
 

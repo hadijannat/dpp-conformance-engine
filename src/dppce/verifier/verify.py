@@ -9,7 +9,6 @@ separately. The result says nothing new about the tested system.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from itertools import pairwise
@@ -17,7 +16,7 @@ from typing import Any, Literal
 
 from pydantic import ValidationError
 
-from dppce.evidence.canonical import CanonicalizationError
+from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, is_exact, parse_strict
 from dppce.evidence.envelope import (
     ATTESTATION_TYP,
     decision_digest,
@@ -133,9 +132,10 @@ def _signatures(
             key = keys.get(str(header_of(token).get("kid")))
             if key is None:
                 continue
-            attestation = Attestation.model_validate(
-                json.loads(verify_compact(token, key.public_jwk, typ=ATTESTATION_TYP))
-            )
+            payload = verify_compact(token, key.public_jwk, typ=ATTESTATION_TYP)
+            attestation = Attestation.model_validate(parse_strict(payload))
+            if canonical_bytes(attestation) != payload:
+                raise SignatureError("the signed payload is not a canonical attestation")
         except (SignatureError, ValueError) as exc:
             signature = ("fail", f"A signature does not verify: {exc}")
             continue
@@ -188,8 +188,28 @@ def _timestamp(envelope: EvidenceEnvelope, trust: TrustBundle) -> tuple[Outcome,
     return "not_checked", "Timestamp evidence is present, but this version cannot validate it."
 
 
+def verify_json(raw: bytes | str, trust: TrustBundle, at: datetime) -> VerificationReport:
+    """Verify an envelope given as JSON text. This is the entry point for a file.
+
+    The text is parsed strictly: a repeated object key makes the structure check fail.
+    """
+    try:
+        document = parse_strict(raw)
+    except CanonicalizationError as exc:
+        document = _Unparseable(str(exc))
+    return verify(document, trust, at)
+
+
+class _Unparseable:
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+
+
 def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationReport:
-    """Verify an envelope given as parsed JSON. ``at`` is the explicit evaluation time."""
+    """Verify an envelope given as parsed JSON. ``at`` is the explicit evaluation time.
+
+    Prefer ``verify_json`` for a file: only a strict parse can detect a repeated object key.
+    """
     at_text = at.astimezone(UTC).strftime(_STAMP)
 
     def report(dimensions: dict[str, tuple[Outcome, str]], digest: str) -> VerificationReport:
@@ -212,7 +232,15 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
     skipped: tuple[Outcome, str] = ("not_checked", "Not checked because the structure is not valid.")
     names = (*_ALWAYS_MANDATORY[1:], "status", "timestamp")
     try:
+        if isinstance(document, _Unparseable):
+            raise CanonicalizationError(document.reason)
         envelope = EvidenceEnvelope.model_validate(document)
+        # The verified model must be exactly the document. No default, no coerced value.
+        if not is_exact(document, envelope):
+            raise CanonicalizationError(
+                "the document is not in the exact canonical form of the schema "
+                "(a field is missing, a type differs, or a number is not an integer)"
+            )
         digest = decision_digest(envelope.decision)
     except (ValidationError, CanonicalizationError) as exc:
         first = str(exc).splitlines()[0]
