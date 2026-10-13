@@ -7,7 +7,6 @@ data in ``Record.error``. It is never raised, and it is never a verdict by itsel
 from __future__ import annotations
 
 import http.client
-import ipaddress
 import socket
 import ssl
 import time
@@ -20,12 +19,15 @@ from urllib.parse import urljoin, urlsplit
 from dppce.evidence.recording import new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Clock, Record, Request, TransportError
+from dppce.infrastructure.redaction import (
+    is_public_address,
+    redact_request_headers,
+    redact_response_headers,
+    redact_url,
+)
 from dppce.models import Authorization, NetworkPolicy, Scope
 
 SAFE_METHODS: Final = ("GET", "HEAD")
-REMOVED: Final = "<removed>"
-_SECRET_REQUEST_HEADERS: Final = frozenset({"authorization", "cookie", "proxy-authorization", "x-api-key"})
-_SECRET_RESPONSE_HEADERS: Final = frozenset({"set-cookie"})
 _REDIRECTS: Final = (301, 302, 303, 307, 308)
 _ACTIVE_SCOPES: Final = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ)
 _RETRYABLE: Final = ("connect", "timeout")
@@ -95,13 +97,6 @@ class _PinnedHTTPSConnection(http.client.HTTPSConnection):
         self.sock = self._tls.wrap_socket(raw, server_hostname=self.host)
 
 
-def _is_public(address: str) -> bool:
-    ip = ipaddress.ip_address(address)
-    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
-        ip = ip.ipv4_mapped
-    return ip.is_global
-
-
 class PolicyTransport:
     """Live ``Acquirer``: applies the policy, performs the request, and records the exchange."""
 
@@ -148,7 +143,7 @@ class PolicyTransport:
             raise _DeniedError("dns")
         private_ok = host in {h.lower() for h in policy.allow_private_hosts}
         try:
-            public = [_is_public(a) for a in addresses]
+            public = [is_public_address(a) for a in addresses]
         except ValueError as exc:
             raise _DeniedError("dns") from exc
         # Every answer must pass. One private answer among public ones is a rebinding attempt.
@@ -220,10 +215,9 @@ class PolicyTransport:
     def _headers(self, request: Request, target: _Target, first_origin: str) -> dict[str, str]:
         contact = f" (+{self._config.policy.contact})" if self._config.policy.contact else ""
         headers = {"User-Agent": f"dppce/{self._config.engine_version}{contact}", "Accept": "*/*"}
-        for name, value in request.headers.items():
-            # A secret header that the caller supplies stays with the first origin.
-            if name.lower() not in _SECRET_REQUEST_HEADERS or target.origin == first_origin:
-                headers[name] = value
+        # Caller headers are bound to the first origin. A redirect to a different origin gets none.
+        if target.origin == first_origin:
+            headers.update(request.headers)
         credential = self._config.credentials.get(request.role)
         if credential is not None and credential[0] == target.origin:
             headers["Authorization"] = f"Bearer {credential[1]}"
@@ -249,16 +243,11 @@ class PolicyTransport:
                 kind="http",
                 acquired_at=utc_stamp(self._clock.now()),
                 method=method,
-                url=request.url,
+                url=redact_url(request.url),
                 role=request.role,
-                request_headers=tuple(
-                    (k, REMOVED if k.lower() in _SECRET_REQUEST_HEADERS else v)
-                    for k, v in sorted(sent_headers.items())
-                ),
+                request_headers=redact_request_headers(sent_headers),
                 status=status,
-                headers=tuple(
-                    (k, REMOVED if k.lower() in _SECRET_RESPONSE_HEADERS else v) for k, v in headers
-                ),
+                headers=redact_response_headers(headers),
                 body=body,
                 truncated=truncated,
                 error=error,
@@ -297,7 +286,7 @@ class PolicyTransport:
             if len(redirects) >= self._config.policy.max_redirects:
                 return done("too_many_redirects", status, headers)
             next_url = urljoin(f"{target.origin}{target.path}", location)
-            redirects.append(next_url)
+            redirects.append(redact_url(next_url))
             try:
                 target = self._target(next_url, method, request.role)
             except _DeniedError as denied:

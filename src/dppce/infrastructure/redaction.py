@@ -1,0 +1,105 @@
+"""Keep secrets and private network details out of records.
+
+Records are retained, hashed into commitments, and can be opened to reviewers. A secret that
+reaches a record is disclosed. The rules here are default-deny: a value is recorded only when
+it is known to be safe.
+"""
+
+from __future__ import annotations
+
+import ipaddress
+import re
+from typing import Final
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+REMOVED: Final = "<removed>"
+
+# Request header values that are safe to keep. Every other value is removed from the record.
+SAFE_REQUEST_HEADERS: Final = frozenset(
+    {"accept", "accept-language", "content-type", "if-modified-since", "if-none-match", "user-agent"}
+)
+# Response header values that can hold a secret.
+SECRET_RESPONSE_HEADERS: Final = frozenset({"set-cookie", "set-cookie2", "authorization", "www-authenticate"})
+
+_SENSITIVE_PARAMETER: Final = re.compile(
+    r"token|secret|passw|pwd|sig|key|auth|credential|session|code|jwt|bearer", re.IGNORECASE
+)
+# IPv6 prefixes that carry an IPv4 address. The embedded address decides where a packet goes.
+_NAT64: Final = (ipaddress.ip_network("64:ff9b::/96"), ipaddress.ip_network("64:ff9b:1::/48"))
+
+
+def redact_url(url: str) -> str:
+    """Return ``url`` without userinfo and without the values of credential-like query parameters.
+
+    A URL with nothing to remove is returned unchanged, byte for byte.
+    """
+    try:
+        parts = urlsplit(url)
+        has_userinfo = parts.username is not None or parts.password is not None
+        pairs = parse_qsl(parts.query, keep_blank_values=True)
+    except ValueError:
+        return REMOVED
+    sensitive = any(_SENSITIVE_PARAMETER.search(name) for name, _ in pairs)
+    if not has_userinfo and not sensitive:
+        return url
+    netloc = parts.netloc.rpartition("@")[2] if has_userinfo else parts.netloc
+    query = (
+        urlencode([(n, REMOVED if _SENSITIVE_PARAMETER.search(n) else v) for n, v in pairs])
+        if sensitive
+        else parts.query
+    )
+    return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
+
+
+def redact_request_headers(headers: dict[str, str]) -> tuple[tuple[str, str], ...]:
+    return tuple((k, v if k.lower() in SAFE_REQUEST_HEADERS else REMOVED) for k, v in sorted(headers.items()))
+
+
+def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple[str, str], ...]:
+    out: list[tuple[str, str]] = []
+    for name, value in headers:
+        lowered = name.lower()
+        if lowered in SECRET_RESPONSE_HEADERS:
+            out.append((name, REMOVED))
+        elif lowered in ("location", "content-location", "link"):
+            out.append((name, redact_url(value) if lowered != "link" else value))
+        else:
+            out.append((name, value))
+    return tuple(out)
+
+
+def _embedded_ipv4(ip: ipaddress.IPv6Address) -> ipaddress.IPv4Address | None:
+    """Return the IPv4 address that a translation or tunnel prefix carries, if any."""
+    if ip.ipv4_mapped is not None:
+        return ip.ipv4_mapped
+    if ip.sixtofour is not None:
+        return ip.sixtofour
+    if ip.teredo is not None:
+        return ip.teredo[1]
+    if any(ip in network for network in _NAT64):
+        return ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF)
+    return None
+
+
+def _routable(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    # ``is_global`` alone is not enough: it is true for multicast addresses such as 224.0.0.1.
+    return ip.is_global and not (
+        ip.is_multicast or ip.is_reserved or ip.is_loopback or ip.is_link_local or ip.is_unspecified
+    )
+
+
+def is_public_address(address: str) -> bool:
+    """True only if the address, and any IPv4 address embedded in it, is a public unicast address.
+
+    A NAT64, 6to4, Teredo, or IPv4-mapped address can look global while it leads to a private
+    IPv4 address. Both layers must be public. In practice a NAT64, 6to4, or Teredo address is
+    always refused, because the prefix itself is not public unicast space. A system that is
+    reachable only through such a prefix needs an entry in ``allow_private_hosts``.
+    """
+    ip = ipaddress.ip_address(address)
+    if isinstance(ip, ipaddress.IPv6Address):
+        embedded = _embedded_ipv4(ip)
+        if embedded is not None:
+            # An IPv4-mapped address is the IPv4 address. The other prefixes must be public too.
+            return _routable(embedded) and (ip.ipv4_mapped is not None or _routable(ip))
+    return _routable(ip)

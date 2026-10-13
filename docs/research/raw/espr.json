@@ -48,7 +48,7 @@
       "uncertainties": [
         "EUR-Lex itself returned empty pages to WebFetch; the EUR-Lex 'Document information' tab and the EUR-Lex consolidated-versions list could not be displayed. Amendment history rests on Publications Office (Cellar) metadata, the consolidated-text front page and Commission pages.",
         "Only the first 100 000 characters of the 2.5 million character metadata record for 32024R1781 were read; an amending act listed further down would not have been seen. Absence of an amending act is therefore 'none located', supported by the consolidated version and two Commission pages.",
-        "The consolidated EN print 000.001 lists C1 and C2 only. C3 (German) and C4 (Czech) are language-specific; their content was not examined.",
+        "The consolidated EN print 000.001 lists C1 and C2 only. C3 (German) and C4 (Czech) are language-specific; their content was not examined. Cellar metadata for 32024R1781 pointed to a consolidation identifier ending '_0000030' while the EN PDF header reads '000.001', so a later print of the consolidated version may exist.",
         "The original OJ rendering (ELI .../oj) still shows the uncorrected number 2024/1726 in Articles 77 and 78; always read these two articles in the corrected or consolidated version.",
         "Art. 25(1) (start date of the destruction prohibition) and Art. 24 were not read directly; the 19 July 2026 date comes from a Commission page."
       ]
@@ -112,7 +112,7 @@
       ],
       "brief_claim_check": "matches: this is the implementing act required by Art. 13(5) ESPR; it is adopted and published, not a draft.",
       "uncertainties": [
-        "One extractor read reported an 'Article 6a' (Transfer of registered digital product passports) between Articles 6 and 7; unusual numbering for a new act and seen in one chunk only. Re-check on EUR-Lex before citing.",
+        "Two independent extractor reads (offsets 40 000 and 95 000) both listed an 'Article 6a' (Transfer of registered digital product passports) between Articles 6 and 7; unusual numbering for a newly adopted act, so confirm the numbering on EUR-Lex before citing.",
         "Article 8 paragraph 1 was at a chunk boundary and was summarised from one read only.",
         "Entry into force 2026-08-06 is computed, not quoted from a EUR-Lex 'date of effect' field (EUR-Lex inaccessible).",
         "No later amendment or corrigendum was searched for exhaustively: none located."
@@ -530,7 +530,7 @@
     {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/celex/02023R1542-20260813 and Cellar expressions .0005.02, .0006.02, .0007.02", "outcome": ".0006.02 is Greek, .0005.02 is German, .0007.02 is English (used). Front table and Articles 77-78 read."},
     {"tool": "WebFetch", "target": "http://publications.europa.eu/resource/celex/32026R1738 and Cellar .0006.03/DOC_1", "outcome": "Partial: first 100 000 of 1 060 233 characters (title and recitals) read; operative amendments to Regulation (EU) 2023/1542 not read."},
     {"tool": "WebFetch", "target": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14382-Digital-product-passport-rules-for-service-providers_en", "outcome": "Page rendered only its heading (JavaScript application); status of the initiative not readable."},
-    {"tool": "python3 -m json.tool", "target": "docs/research/raw/espr.json", "outcome": "See return value of the agent for the validation result."}
+    {"tool": "python3 -m json.tool", "target": "docs/research/raw/espr.json", "outcome": "VALID (exit status 0) on 2026-10-13."}
   ],
   "anomalies": [
     "OFFICIAL JOURNAL ERROR: the original OJ text of Regulation (EU) 2024/1781 (OJ L, 2024/1781, 28.6.2024) cites the Regulation itself as 'Regulation (EU) 2024/1726' in Articles 77 and 78, including the sentence that inserts Art. 77(10) into the Batteries Regulation. Corrected by corrigendum OJ L, 2024/90493 of 7.8.2024. Tools that scrape the uncorrected ELI /oj rendering will pick up the wrong number.",
@@ -540,7 +540,7 @@
     "The Commission DPP page lists the 'Delegated Act for DPP Service Providers' under both Q2 2027 and Q3 2027.",
     "Secondary sites state that Decision (EU) 2026/1736 entered into force the day after publication; the official text says the day of publication.",
     "The environment.ec.europa.eu ESPR page links a news item whose URL contains 'enters-application-2026-07-17' for the destruction ban, while the green-forum page gives 19 July 2026 as the application date.",
-    "One extractor read reported an 'Article 6a' in Implementing Regulation (EU) 2026/1778, which is unusual numbering for a newly adopted act.",
+    "Two extractor reads reported an 'Article 6a' in Implementing Regulation (EU) 2026/1778, which is unusual numbering for a newly adopted act; numbering to be confirmed on EUR-Lex.",
     "The Art. 77(9) Batteries Regulation implementing act (access rights) had a statutory deadline of 18 August 2026; the Commission DPP page lists it as planned for Q4 2026. Its adoption status is not inferred from the deadline.",
     "The Commission batteries FAQ is labelled 'Manuscript completed in September 2026' and mentions a draft act expected for feedback in October or November 2026."
   ],
@@ -549,7 +549,7 @@
     "NO EXPLICIT MAPPING LOCATED (scope): ESPR Art. 1(2) does not exclude batteries, and no provision located states which act prevails for batteries. Whether the Commission could set ESPR ecodesign or DPP requirements for batteries, or would use the Art. 9(4)(b) exemption, is not answered by the texts; do not assume either.",
     "Do the OJ citations of EN 18219:2026 (unique identifiers) and EN 18220:2026 (data carriers) on 2026-07-15 end the 'until' fallback to the ISO/IEC 15459 series in Arts 10(1)(c) and 12(1) ESPR, and if so from which date and for which identifiers (the Decision's recitals mention Arts 10 and 11, not Art. 12)? Needs legal review; the Batteries Regulation Art. 77(3) keeps its own ISO/IEC 15459 reference and is not affected by this ESPR clause.",
     "Has a second implementing decision citing the remaining two DPP standards (reported as EN 18239 and EN 18246) been published in the OJ? Not located as of 2026-10-13.",
-    "What exactly does Art. 8(1) of Implementing Regulation (EU) 2026/1778 say about the moment of registration (before or when placing on the market), and is there really an Article 6a? Re-read on EUR-Lex when accessible.",
+    "What exactly does Art. 8(1) of Implementing Regulation (EU) 2026/1778 say about the moment of registration (before or when placing on the market), and is the numbering 'Article 6a' (reported by two reads) correct? Re-read on EUR-Lex when accessible.",
     "Which data must be uploaded for a battery registration in practice (unique identifier only under Art. 77(10), or the wider data set of Art. 8(9) of Implementing Regulation (EU) 2026/1778)? The implementing act refers to delegated acts under Art. 77 of Regulation (EU) 2023/1542 for conformity criteria; those acts were not examined here.",
     "Final text of Omnibus IV (2025/0134(COD)): does the agreed text change ESPR Chapter III, Arts 77-78 or Annex XIII of the Batteries Regulation, or battery passport dates? The Commission proposal does not; the compromise text was not read and the act is not adopted.",
     "EUR-Lex 'Document information' for 32024R1781 (dates of effect, 'amended by', consolidated versions list) could not be displayed; a human should confirm on EUR-Lex that no amending act other than the four corrigenda is listed.",

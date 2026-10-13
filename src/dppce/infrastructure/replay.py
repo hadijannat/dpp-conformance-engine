@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from dppce.infrastructure.interfaces import Record, Request
+from dppce.infrastructure.redaction import redact_url
 
 
 class ReplayAcquirer:
@@ -53,7 +54,8 @@ class ReplayAcquirer:
         return mismatch
 
     def fetch(self, request: Request) -> Record:
-        return self._next("http", request.method.upper(), request.url, request.role)
+        # The recording holds the redacted URL, so compare in the same form.
+        return self._next("http", request.method.upper(), redact_url(request.url), request.role)
 
     def artifact(self, name: str) -> Record:
         return self._next("artifact", "READ", f"artifact:{name}", "local")

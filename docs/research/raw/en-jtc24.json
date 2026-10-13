@@ -1,0 +1,1029 @@
+{
+  "group": "en-jtc24",
+  "retrieval_date": "2026-10-13",
+  "sources": [
+    {
+      "id": "en-18216-2026",
+      "title": "Digital product passport - Data exchange protocols",
+      "identifier": "EN 18216:2026 (CEN/CLC/JTC 24; CEN work item JT024003; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80427&cs=1606A2E7E589E0185CCA83A6D82E1C78E",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-05-27",
+      "legal_or_spec_status": "published EN (CEN status 'Published'); reference cited in the OJ as a harmonised standard under Regulation (EU) 2024/1781",
+      "applicable_dates": [
+        {
+          "date": "2026-05-03",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18216:2026"
+        },
+        {
+          "date": "2026-05-27",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18216:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Reference published in the Official Journal; presumption of conformity with the requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 covered by the standard runs from this date",
+          "basis": "Implementing Decision (EU) 2026/1736, Art. 1, Art. 2, Annex row 1, recitals 1 and 6"
+        },
+        {
+          "date": "2026-08-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18216:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18216:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18216:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026, Annex row 1, OJ L, 2026/1736, 15.7.2026; harmonised standard under Regulation (EU) 2024/1781 (Arts 10 and 11, via Art. 41(2) as described in recital 1); title in the Annex: 'Digital product passport – Data exchange protocols'",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18216:2026, work item JT024003, title 'Digital product passport - Data exchange protocols', publication date 2026-05-27",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80427&cs=1606A2E7E589E0185CCA83A6D82E1C78E",
+          "what_it_shows": "CEN project page for EN 18216:2026: status Published; DOR 2026-05-03, DAV 2026-05-27, DOA 2026-08-31, DOP 2026-11-30, DOW 2026-11-30; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 35.240.63; no supersedes / superseded-by entries; OJ line 'OJ L, 2026/1736 (2026-07-15) for Directive 2024/1781'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18216; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "English OJ text of Implementing Decision (EU) 2026/1736 (Cellar manifestation): Annex row 1 lists EN 18216:2026 with title 'Digital product passport – Data exchange protocols'",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex page for CELEX 32026D1736: in force, OJ L, 2026/1736, 15.7.2026; Annex row 1 lists EN 18216:2026; no corrigendum, amendment or consolidated version shown",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18216 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18216:2026.",
+      "uncertainties": [
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "The Annex to Decision (EU) 2026/1736, as rendered to me, has three columns (No, reference, title) and no restriction or transition notes; which requirements of Arts 10 and 11 the standard actually covers is set out in the standard itself, which was not opened.",
+        "National editions (for example DIN EN, SS-EN, UNI CEI EN, BS EN) carry their own national publication dates up to the CEN DOP of 2026-11-30; those national dates were not audited."
+      ]
+    },
+    {
+      "id": "en-18219-2026",
+      "title": "Digital product passport - Unique identifiers",
+      "identifier": "EN 18219:2026 (CEN/CLC/JTC 24; CEN work item JT024001; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:79954&cs=14DC1F74D7E9F9DD3EA30959F19526334",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-05-27",
+      "legal_or_spec_status": "published EN (CEN status 'Published'); reference cited in the OJ as a harmonised standard under Regulation (EU) 2024/1781",
+      "applicable_dates": [
+        {
+          "date": "2026-05-03",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18219:2026"
+        },
+        {
+          "date": "2026-05-27",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18219:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Reference published in the Official Journal; presumption of conformity with the requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 covered by the standard runs from this date",
+          "basis": "Implementing Decision (EU) 2026/1736, Art. 1, Art. 2, Annex row 2, recitals 1 and 6"
+        },
+        {
+          "date": "2026-08-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18219:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18219:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18219:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026, Annex row 2, OJ L, 2026/1736, 15.7.2026; harmonised standard under Regulation (EU) 2024/1781 (Arts 10 and 11, via Art. 41(2) as described in recital 1); title in the Annex: 'Digital product passport – Unique identifiers'",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18219:2026, work item JT024001, title 'Digital product passport - Unique identifiers', publication date 2026-05-27",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:79954&cs=14DC1F74D7E9F9DD3EA30959F19526334",
+          "what_it_shows": "CEN project page for EN 18219:2026: status Published; DOR 2026-05-03, DAV 2026-05-27, DOA 2026-08-31, DOP 2026-11-30, DOW 2026-11-30; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 35.240.63; no supersedes / superseded-by entries; OJ line 'OJ L, 2026/1736 (2026-07-15) for Directive 2024/1781'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18219; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "English OJ text of Implementing Decision (EU) 2026/1736 (Cellar manifestation): Annex row 2 lists EN 18219:2026 with title 'Digital product passport – Unique identifiers'",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex page for CELEX 32026D1736: in force, OJ L, 2026/1736, 15.7.2026; Annex row 2 lists EN 18219:2026; no corrigendum, amendment or consolidated version shown",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18219 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18219:2026.",
+      "uncertainties": [
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "The Annex to Decision (EU) 2026/1736, as rendered to me, has three columns (No, reference, title) and no restriction or transition notes; which requirements of Arts 10 and 11 the standard actually covers is set out in the standard itself, which was not opened.",
+        "National editions (for example DIN EN, SS-EN, UNI CEI EN, BS EN) carry their own national publication dates up to the CEN DOP of 2026-11-30; those national dates were not audited."
+      ]
+    },
+    {
+      "id": "en-18220-2026",
+      "title": "Digital product passport - Data carriers",
+      "identifier": "EN 18220:2026 (CEN/CLC/JTC 24; CEN work item JT024002; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80081&cs=1EEB1FD069281C804EC0A5EEDB8295A77",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-05-27",
+      "legal_or_spec_status": "published EN (CEN status 'Published'); reference cited in the OJ as a harmonised standard under Regulation (EU) 2024/1781",
+      "applicable_dates": [
+        {
+          "date": "2026-05-03",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18220:2026"
+        },
+        {
+          "date": "2026-05-27",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18220:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Reference published in the Official Journal; presumption of conformity with the requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 covered by the standard runs from this date",
+          "basis": "Implementing Decision (EU) 2026/1736, Art. 1, Art. 2, Annex row 3, recitals 1 and 6"
+        },
+        {
+          "date": "2026-08-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18220:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18220:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18220:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026, Annex row 3, OJ L, 2026/1736, 15.7.2026; harmonised standard under Regulation (EU) 2024/1781 (Arts 10 and 11, via Art. 41(2) as described in recital 1); title in the Annex: 'Digital product passport – Data carriers'",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18220:2026, work item JT024002, title 'Digital product passport - Data carriers', publication date 2026-05-27",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80081&cs=1EEB1FD069281C804EC0A5EEDB8295A77",
+          "what_it_shows": "CEN project page for EN 18220:2026: status Published; DOR 2026-05-03, DAV 2026-05-27, DOA 2026-08-31, DOP 2026-11-30, DOW 2026-11-30; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 35.240.63; no supersedes / superseded-by entries; OJ line 'OJ L, 2026/1736 (2026-07-15) for Directive 2024/1781'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18220; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "English OJ text of Implementing Decision (EU) 2026/1736 (Cellar manifestation): Annex row 3 lists EN 18220:2026 with title 'Digital product passport – Data carriers'",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex page for CELEX 32026D1736: in force, OJ L, 2026/1736, 15.7.2026; Annex row 3 lists EN 18220:2026; no corrigendum, amendment or consolidated version shown",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18220 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18220:2026.",
+      "uncertainties": [
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "The Annex to Decision (EU) 2026/1736, as rendered to me, has three columns (No, reference, title) and no restriction or transition notes; which requirements of Arts 10 and 11 the standard actually covers is set out in the standard itself, which was not opened.",
+        "National editions (for example DIN EN, SS-EN, UNI CEI EN, BS EN) carry their own national publication dates up to the CEN DOP of 2026-11-30; those national dates were not audited."
+      ]
+    },
+    {
+      "id": "en-18221-2026",
+      "title": "Digital product passport - Data storage, archiving, and data persistence",
+      "identifier": "EN 18221:2026 (CEN/CLC/JTC 24; CEN work item JT024006; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80715&cs=150B8E8F03843B9CC9F4CAD8E01C34DE6",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-05-27",
+      "legal_or_spec_status": "published EN (CEN status 'Published'); reference cited in the OJ as a harmonised standard under Regulation (EU) 2024/1781",
+      "applicable_dates": [
+        {
+          "date": "2026-05-03",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18221:2026"
+        },
+        {
+          "date": "2026-05-27",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18221:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Reference published in the Official Journal; presumption of conformity with the requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 covered by the standard runs from this date",
+          "basis": "Implementing Decision (EU) 2026/1736, Art. 1, Art. 2, Annex row 4, recitals 1 and 6"
+        },
+        {
+          "date": "2026-08-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18221:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18221:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18221:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026, Annex row 4, OJ L, 2026/1736, 15.7.2026; harmonised standard under Regulation (EU) 2024/1781 (Arts 10 and 11, via Art. 41(2) as described in recital 1); title in the Annex: 'Digital product passport – Data storage, archiving, and persistence'",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18221:2026, work item JT024006, title 'Digital product passport - Data storage, archiving, and data persistence', publication date 2026-05-27",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80715&cs=150B8E8F03843B9CC9F4CAD8E01C34DE6",
+          "what_it_shows": "CEN project page for EN 18221:2026: status Published; DOR 2026-05-03, DAV 2026-05-27, DOA 2026-08-31, DOP 2026-11-30, DOW 2026-11-30; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 35.240.63; no supersedes / superseded-by entries; OJ line 'OJ L, 2026/1736 (2026-07-15) for Directive 2024/1781'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18221; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "English OJ text of Implementing Decision (EU) 2026/1736 (Cellar manifestation): Annex row 4 lists EN 18221:2026 with title 'Digital product passport – Data storage, archiving, and persistence'",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex page for CELEX 32026D1736: in force, OJ L, 2026/1736, 15.7.2026; Annex row 4 lists EN 18221:2026; no corrigendum, amendment or consolidated version shown",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18221 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18221:2026.",
+      "uncertainties": [
+        "Title differs between the two official sources: CEN catalogue (list page, project page and the 2026-07-15 CEN-CENELEC news item) has '... archiving, and data persistence'; the OJ Annex (Cellar text and EUR-Lex page) has '... archiving, and persistence'. Match on the reference EN 18221:2026, not on the title string.",
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "The Annex to Decision (EU) 2026/1736, as rendered to me, has three columns (No, reference, title) and no restriction or transition notes; which requirements of Arts 10 and 11 the standard actually covers is set out in the standard itself, which was not opened.",
+        "National editions (for example DIN EN, SS-EN, UNI CEI EN, BS EN) carry their own national publication dates up to the CEN DOP of 2026-11-30; those national dates were not audited.",
+        "The public CEN project page lists EN 18239:2026 and EN 18246:2026 among this standard's normative references (catalogue relation only; content not opened). Neither of those two references was found cited in the OJ as of 2026-10-13."
+      ]
+    },
+    {
+      "id": "en-18222-2026",
+      "title": "Digital Product Passport - Application Programming Interfaces (APIs) for the product passport lifecycle management and searchability",
+      "identifier": "EN 18222:2026 (CEN/CLC/JTC 24; CEN work item JT024004; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80713&cs=1B0801E994815A4E35E2BABB2A3460C05",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-05-27",
+      "legal_or_spec_status": "published EN (CEN status 'Published'); reference cited in the OJ as a harmonised standard under Regulation (EU) 2024/1781",
+      "applicable_dates": [
+        {
+          "date": "2026-05-03",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18222:2026"
+        },
+        {
+          "date": "2026-05-27",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18222:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Reference published in the Official Journal; presumption of conformity with the requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 covered by the standard runs from this date",
+          "basis": "Implementing Decision (EU) 2026/1736, Art. 1, Art. 2, Annex row 5, recitals 1 and 6"
+        },
+        {
+          "date": "2026-08-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18222:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18222:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18222:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026, Annex row 5, OJ L, 2026/1736, 15.7.2026; harmonised standard under Regulation (EU) 2024/1781 (Arts 10 and 11, via Art. 41(2) as described in recital 1); title in the Annex: 'Digital Product Passport – Application Programming Interfaces (APIs) for product passport lifecycle management and searchability'",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18222:2026, work item JT024004, title 'Digital Product Passport - Application Programming Interfaces (APIs) for the product passport lifecycle management and searchability', publication date 2026-05-27",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80713&cs=1B0801E994815A4E35E2BABB2A3460C05",
+          "what_it_shows": "CEN project page for EN 18222:2026: status Published; DOR 2026-05-03, DAV 2026-05-27, DOA 2026-08-31, DOP 2026-11-30, DOW 2026-11-30; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 13.020.20; no supersedes / superseded-by entries; OJ line 'OJ L, 2026/1736 (2026-07-15) for Directive 2024/1781'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18222; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "English OJ text of Implementing Decision (EU) 2026/1736 (Cellar manifestation): Annex row 5 lists EN 18222:2026 with title 'Digital Product Passport – Application Programming Interfaces (APIs) for product passport lifecycle management and searchability'",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex page for CELEX 32026D1736: in force, OJ L, 2026/1736, 15.7.2026; Annex row 5 lists EN 18222:2026; no corrigendum, amendment or consolidated version shown",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18222 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18222:2026.",
+      "uncertainties": [
+        "Title differs between the two official sources: CEN catalogue has '... (APIs) for the product passport lifecycle management ...'; the OJ Annex has '... (APIs) for product passport lifecycle management ...' (no 'the'). Match on the reference EN 18222:2026, not on the title string.",
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "The Annex to Decision (EU) 2026/1736, as rendered to me, has three columns (No, reference, title) and no restriction or transition notes; which requirements of Arts 10 and 11 the standard actually covers is set out in the standard itself, which was not opened.",
+        "National editions (for example DIN EN, SS-EN, UNI CEI EN, BS EN) carry their own national publication dates up to the CEN DOP of 2026-11-30; those national dates were not audited."
+      ]
+    },
+    {
+      "id": "en-18223-2026",
+      "title": "Digital Product Passport - System interoperability",
+      "identifier": "EN 18223:2026 (CEN/CLC/JTC 24; CEN work item JT024005; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80714&cs=1B90D92069253E3C80D47ECEFE6CC7FAD",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-05-27",
+      "legal_or_spec_status": "published EN (CEN status 'Published'); reference cited in the OJ as a harmonised standard under Regulation (EU) 2024/1781",
+      "applicable_dates": [
+        {
+          "date": "2026-05-03",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18223:2026"
+        },
+        {
+          "date": "2026-05-27",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18223:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Reference published in the Official Journal; presumption of conformity with the requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 covered by the standard runs from this date",
+          "basis": "Implementing Decision (EU) 2026/1736, Art. 1, Art. 2, Annex row 6, recitals 1 and 6"
+        },
+        {
+          "date": "2026-08-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18223:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18223:2026"
+        },
+        {
+          "date": "2026-11-30",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18223:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026, Annex row 6, OJ L, 2026/1736, 15.7.2026; harmonised standard under Regulation (EU) 2024/1781 (Arts 10 and 11, via Art. 41(2) as described in recital 1); title in the Annex: 'Digital Product Passport – System interoperability'",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18223:2026, work item JT024005, title 'Digital Product Passport - System interoperability', publication date 2026-05-27",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80714&cs=1B90D92069253E3C80D47ECEFE6CC7FAD",
+          "what_it_shows": "CEN project page for EN 18223:2026: status Published; DOR 2026-05-03, DAV 2026-05-27, DOA 2026-08-31, DOP 2026-11-30, DOW 2026-11-30; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 13.020.20; no supersedes / superseded-by entries; OJ line 'OJ L, 2026/1736 (2026-07-15) for Directive 2024/1781'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18223; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "English OJ text of Implementing Decision (EU) 2026/1736 (Cellar manifestation): Annex row 6 lists EN 18223:2026 with title 'Digital Product Passport – System interoperability'",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex page for CELEX 32026D1736: in force, OJ L, 2026/1736, 15.7.2026; Annex row 6 lists EN 18223:2026; no corrigendum, amendment or consolidated version shown",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18223 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18223:2026.",
+      "uncertainties": [
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "The Annex to Decision (EU) 2026/1736, as rendered to me, has three columns (No, reference, title) and no restriction or transition notes; which requirements of Arts 10 and 11 the standard actually covers is set out in the standard itself, which was not opened.",
+        "National editions (for example DIN EN, SS-EN, UNI CEI EN, BS EN) carry their own national publication dates up to the CEN DOP of 2026-11-30; those national dates were not audited."
+      ]
+    },
+    {
+      "id": "en-18239-2026",
+      "title": "Digital product passport - Access rights management, information system security, and business confidentiality",
+      "identifier": "EN 18239:2026 (CEN/CLC/JTC 24; CEN work item JT024007; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81494&cs=1C97AB3E731BCF82E3BD2A04D9D8DC8CD",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-09-16",
+      "legal_or_spec_status": "published EN (CEN status 'Published', DAV 2026-09-16); OJ citation not_located, CEN catalogue says 'Citation expected'",
+      "applicable_dates": [
+        {
+          "date": "2026-08-17",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18239:2026"
+        },
+        {
+          "date": "2026-09-16",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18239:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-12-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18239:2026"
+        },
+        {
+          "date": "2027-03-31",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18239:2026"
+        },
+        {
+          "date": "2027-03-31",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18239:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "Not in the Annex to Implementing Decision (EU) 2026/1736 (six rows, EN 18216 to EN 18223 only). No later Commission implementing decision citing this reference was located as of 2026-10-13. The CEN project page says 'Citation expected for Directive 2024/1781'.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18239:2026, work item JT024007, title 'Digital product passport - Access rights management, information system security, and business confidentiality', publication date 2026-09-16",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81494&cs=1C97AB3E731BCF82E3BD2A04D9D8DC8CD",
+          "what_it_shows": "CEN project page for EN 18239:2026: status Published; DOR 2026-08-17, DAV 2026-09-16, DOA 2026-12-31, DOP 2027-03-31, DOW 2027-03-31; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 13.020.20; no supersedes / superseded-by entries; OJ line reads 'Citation expected for Directive 2024/1781' (no OJ reference given)",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18239; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "https://www.uni.com/digital-product-passport-pubblicate-due-nuove-norme-da-cen-e-cenelec/",
+          "what_it_shows": "UNI (Italian national standards body) news item dated 2026-09-24: CEN and CENELEC published EN 18239:2026 and EN 18246:2026 on 2026-09-16, developed by CEN-CLC/JTC 24 under standardisation request M/604; speaks of OJ citation as a future event",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Annex of Implementing Decision (EU) 2026/1736 has six rows (EN 18216:2026 to EN 18223:2026); EN 18239:2026 is not among them and is not mentioned in the recitals",
+          "official": true
+        },
+        {
+          "url": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en",
+          "what_it_shows": "Commission (DG GROW) harmonised-standards page for the Digital Product Passport lists exactly one OJ publication: Implementing Decision (EU) 2026/1736 (OJ L, 2026/1736, 15.7.2026). No later decision listed when read on 2026-10-13",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/webapi/rdf/sparql",
+          "what_it_shows": "Public Cellar SPARQL queries run on 2026-10-13 (works dated from 2026-05-01 whose English title contains 'harmonised standards'; and whose title contains 'product passport' or '2024/1781') returned 32026D1736 as the only harmonised-standards decision for digital product passports; no later, amending or corrigendum act for it",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: EN 18239 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18239:2026.",
+      "uncertainties": [
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "Published does not mean cited: on the evidence located, this reference gives no presumption of conformity under Regulation (EU) 2024/1781 as of 2026-10-13. A citing decision could have been adopted and not yet indexed, or published under a title my searches did not match; absence here is 'not_located', not proof of non-citation.",
+        "Secondary sources lag the official catalogue: earlier trade notes describe FprEN 18239 / prEN 18246 as under formal vote until 16 July 2026, and one aggregator (genorma.com) still shows EN 18246:2026 as 'Draft' with the date 2026-09-16. The CEN catalogue status 'Published' is taken as authoritative."
+      ]
+    },
+    {
+      "id": "en-18246-2026",
+      "title": "Digital product passport - Data authentication, reliability and integrity",
+      "identifier": "EN 18246:2026 (CEN/CLC/JTC 24; CEN work item JT024008; standardisation request M/604 and M/604 Amd 1)",
+      "issuing_body": "CEN and CENELEC; responsible committee CEN/CLC/JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN per CEN-CENELEC news of 2026-07-15)",
+      "source_type": "european_standard",
+      "official_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81495&cs=1C627F97280D3E45FBBBED053BCCA88A9",
+      "edition_or_version": "2026 (first edition; CEN project page shows no superseded document)",
+      "publication_date": "2026-09-16",
+      "legal_or_spec_status": "published EN (CEN status 'Published', DAV 2026-09-16); OJ citation not_located, CEN catalogue says 'Citation expected'",
+      "applicable_dates": [
+        {
+          "date": "2026-08-17",
+          "what": "CEN DOR (date of ratification of the EN)",
+          "basis": "CEN project page for EN 18246:2026"
+        },
+        {
+          "date": "2026-09-16",
+          "what": "CEN DAV (date of availability: definitive text made available by CEN-CENELEC). This is the date the CEN/CLC/JTC 24 list page shows in its 'Publication date' column and is used here as publication_date",
+          "basis": "CEN project page for EN 18246:2026; CEN/CLC/JTC 24 published-standards list"
+        },
+        {
+          "date": "2026-12-31",
+          "what": "CEN DOA (latest date for announcing the EN at national level)",
+          "basis": "CEN project page for EN 18246:2026"
+        },
+        {
+          "date": "2027-03-31",
+          "what": "CEN DOP (latest date for national members to publish an identical national standard or endorse the EN). This is a national-implementation deadline, NOT the date the EN was published",
+          "basis": "CEN project page for EN 18246:2026"
+        },
+        {
+          "date": "2027-03-31",
+          "what": "CEN DOW (latest date for withdrawal of conflicting national standards)",
+          "basis": "CEN project page for EN 18246:2026"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "Not in the Annex to Implementing Decision (EU) 2026/1736 (six rows, EN 18216 to EN 18223 only). No later Commission implementing decision citing this reference was located as of 2026-10-13. The CEN project page says 'Citation expected for Directive 2024/1781'.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Copyright-protected CEN-CENELEC publication, distributed through national members (statement from prior knowledge; no CEN-CENELEC licence page was opened today). Only the public catalogue record was read; the standard itself was not obtained or opened.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, dates, status, committee, catalogue URL, OJ citation status. No reproduction, paraphrase or clause-level reference to the content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+          "what_it_shows": "CEN catalogue page headed 'Digital Product Passport - Framework and System (CEN/CLC/JTC 24 Published Standards)': row EN 18246:2026, work item JT024008, title 'Digital product passport - Data authentication, reliability and integrity', publication date 2026-09-16",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81495&cs=1C627F97280D3E45FBBBED053BCCA88A9",
+          "what_it_shows": "CEN project page for EN 18246:2026: status Published; DOR 2026-08-17, DAV 2026-09-16, DOA 2026-12-31, DOP 2027-03-31, DOW 2027-03-31; mandates 'M/604, M/604 Amd 1'; directive field '2024/1781'; ICS 35.240.63; no supersedes / superseded-by entries; OJ line reads 'Citation expected for Directive 2024/1781' (no OJ reference given)",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item posted 2026-07-15: JTC 24 'Digital Product Passport - Framework and System' (secretariat DIN) developed a first series of eight ENs under standardisation request M/604, including EN 18246; six of the eight cited in the OJEU (link to OJ L_202601736)",
+          "official": true
+        },
+        {
+          "url": "https://www.uni.com/digital-product-passport-pubblicate-due-nuove-norme-da-cen-e-cenelec/",
+          "what_it_shows": "UNI (Italian national standards body) news item dated 2026-09-24: CEN and CENELEC published EN 18239:2026 and EN 18246:2026 on 2026-09-16, developed by CEN-CLC/JTC 24 under standardisation request M/604; speaks of OJ citation as a future event",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Annex of Implementing Decision (EU) 2026/1736 has six rows (EN 18216:2026 to EN 18223:2026); EN 18246:2026 is not among them and is not mentioned in the recitals",
+          "official": true
+        },
+        {
+          "url": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en",
+          "what_it_shows": "Commission (DG GROW) harmonised-standards page for the Digital Product Passport lists exactly one OJ publication: Implementing Decision (EU) 2026/1736 (OJ L, 2026/1736, 15.7.2026). No later decision listed when read on 2026-10-13",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/webapi/rdf/sparql",
+          "what_it_shows": "Public Cellar SPARQL queries run on 2026-10-13 (works dated from 2026-05-01 whose English title contains 'harmonised standards'; and whose title contains 'product passport' or '2024/1781') returned 32026D1736 as the only harmonised-standards decision for digital product passports; no later, amending or corrigendum act for it",
+          "official": true
+        },
+        {
+          "url": "https://genorma.com/en/standards/en-18246-2026",
+          "what_it_shows": "Aggregator listing seen in search results only (not opened): EN 18246:2026 with date 2026-09-16 and status field 'Draft'; conflicts with the CEN catalogue",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches: EN 18246 is assigned to CEN/CLC/JTC 24 with a digital product passport subject, as the brief assumes; the brief gave no year and the catalogue edition is EN 18246:2026.",
+      "uncertainties": [
+        "The glosses of the CEN date abbreviations (DOR, DAV, DOA, DOP, DOW) follow the CEN-CENELEC Internal Regulations Part 2 as recalled from prior knowledge; the Internal Regulations were not opened today (unverified_recall for the glosses only; the dates themselves were read on the CEN project page today).",
+        "Published does not mean cited: on the evidence located, this reference gives no presumption of conformity under Regulation (EU) 2024/1781 as of 2026-10-13. A citing decision could have been adopted and not yet indexed, or published under a title my searches did not match; absence here is 'not_located', not proof of non-citation.",
+        "Secondary sources lag the official catalogue: earlier trade notes describe FprEN 18239 / prEN 18246 as under formal vote until 16 July 2026, and one aggregator (genorma.com) still shows EN 18246:2026 as 'Draft' with the date 2026-09-16. The CEN catalogue status 'Published' is taken as authoritative."
+      ]
+    },
+    {
+      "id": "cid-2026-1736-dpp-harmonised-standards",
+      "title": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026 on harmonised standards for digital product passports drafted in support of Regulation (EU) 2024/1781 of the European Parliament and of the Council (Text with EEA relevance)",
+      "identifier": "CELEX 32026D1736; ELI http://data.europa.eu/eli/dec_impl/2026/1736/oj; OJ L, 2026/1736, 15.7.2026",
+      "issuing_body": "European Commission",
+      "source_type": "eu_implementing_act",
+      "official_url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj",
+      "edition_or_version": "Original OJ version; no consolidated version, amendment or corrigendum shown on EUR-Lex or in Cellar metadata as of 2026-10-13",
+      "publication_date": "2026-07-15",
+      "legal_or_spec_status": "in force (EUR-Lex 'In force'; Cellar in-force = true)",
+      "applicable_dates": [
+        {
+          "date": "2026-07-14",
+          "what": "Adoption (done at Brussels)",
+          "basis": "Title and closing formula; Cellar work_date_document"
+        },
+        {
+          "date": "2026-07-15",
+          "what": "Publication in OJ L and entry into force on the same day; presumption of conformity from the six listed references runs from this date",
+          "basis": "Art. 2; recital 6; OJ header; Cellar date_publication and date_entry-into-force"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "This decision is itself the OJ instrument that cites six of the eight JTC 24 standards (OJ L, 2026/1736, 15.7.2026)",
+        "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj"
+      },
+      "license_or_reuse_terms": "EU legal act published on EUR-Lex; reusable under the Commission's document reuse policy with source acknowledgement (stated from prior knowledge; the EUR-Lex legal notice was not opened today)",
+      "permitted_use_basis": "Reuse under the EUR-Lex reuse policy: may be cited by article and annex, summarised, and the Annex references recorded as data",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Full English OJ text read: title; citations (TFEU; Regulation (EU) No 1025/2012 Art. 10(6)); recitals 1 to 6 (Art. 41(2) of Regulation (EU) 2024/1781; standardisation request C(2024) 5423 as amended by C(2025) 8024 addressed to CEN, Cenelec and ETSI; six standards named); Arts 1 and 2; Annex with six rows",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+          "what_it_shows": "EUR-Lex record: date of document 14 July 2026, OJ L, 2026/1736, 15.7.2026, ELI, status 'In force', no corrigenda / amendments / consolidated versions shown; same six Annex rows",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1/rdf/object/full",
+          "what_it_shows": "Cellar RDF for CELEX 32026D1736 (reached by 303 redirect from publications.europa.eu/resource/celex/32026D1736): type DEC_IMPL, document date 2026-07-14, publication and entry into force 2026-07-15, OJ L_202601736, legal basis 32012R1025 Art. 10(6), cites 32024R1781, in-force true, no corrected-by / amended-by / repealed-by relation",
+          "official": true
+        },
+        {
+          "url": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en",
+          "what_it_shows": "Commission harmonised-standards page for the Digital Product Passport lists this decision as the only OJ publication of references under Regulation (EU) 2024/1781",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/webapi/rdf/sparql",
+          "what_it_shows": "Cellar SPARQL on 2026-10-13: no triple other than owl:sameAs points at celex/32026D1736; title searches from 2026-05-01 return no later DPP harmonised-standards decision",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked which Commission Implementing Decision cites the standards; this decision cites six of the eight (EN 18216, 18219, 18220, 18221, 18222, 18223) and does not cite EN 18239 or EN 18246.",
+      "uncertainties": [
+        "The ELI URL and the EUR-Lex TXT/HTML URL returned empty content to WebFetch; the text was read from the Cellar manifestation and from the EUR-Lex TXT page instead. Both readings went through WebFetch's summarising model, so the exact Annex title strings (notably rows 4 and 5) should be re-checked by eye before being hard-coded.",
+        "Recital 3 attributes the drafting to 'CEN, Cenelec and ETSI', while the CEN catalogue shows the standards under the joint CEN-CENELEC committee JTC 24 only; ETSI's role was not investigated."
+      ]
+    },
+    {
+      "id": "sreq-m-604-dpp",
+      "title": "Commission standardisation request to CEN, Cenelec and ETSI for harmonised standards on digital product passports: M/604 and M/604 Amd 1 (Commission Implementing Decision C(2024) 5423, amended by C(2025) 8024). Descriptive label; the request's official title was not read",
+      "identifier": "M/604; M/604 Amd 1; C(2024) 5423; C(2025) 8024",
+      "issuing_body": "European Commission",
+      "source_type": "eu_implementing_act",
+      "official_url": "https://ec.europa.eu/growth/tools-databases/enorm/mandate/604_en",
+      "edition_or_version": "As amended by M/604 Amd 1 / C(2025) 8024",
+      "publication_date": null,
+      "legal_or_spec_status": "adopted standardisation request, amended once (existence, amendment and addressees confirmed indirectly via recital 2 of Implementing Decision (EU) 2026/1736 and the CEN catalogue mandate field); the request's own text and record were not retrievable today",
+      "applicable_dates": [],
+      "amendment_history": [
+        {
+          "identifier": "C(2025) 8024 (shown as 'M/604 Amd 1' in the CEN catalogue; equivalence inferred)",
+          "date": "",
+          "summary": "Amends Implementing Decision C(2024) 5423 (fact of amendment from recital 2 of Decision (EU) 2026/1736). Adoption date and content not verified at an official location today",
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Standardisation requests are notified to the ESOs, not cited as standards",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Commission document; reuse terms not checked because the document was not opened",
+      "permitted_use_basis": "Reference by identifier only until the text is retrieved from the Commission's standardisation-request database",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Recital 2 of Implementing Decision (EU) 2026/1736: by Implementing Decision C(2024) 5423, as amended by C(2025) 8024, the Commission requested CEN, Cenelec and ETSI to draft harmonised standards in support of Arts 10 and 11 of Regulation (EU) 2024/1781",
+          "official": true
+        },
+        {
+          "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80427&cs=1606A2E7E589E0185CCA83A6D82E1C78E",
+          "what_it_shows": "CEN project pages for all eight standards show the mandate field 'M/604, M/604 Amd 1'",
+          "official": true
+        },
+        {
+          "url": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+          "what_it_shows": "CEN-CENELEC news item of 2026-07-15 names 'Standardisation Request M/604' as the basis of the JTC 24 series",
+          "official": true
+        },
+        {
+          "url": "https://www.uni.com/digital-product-passport-pubblicate-due-nuove-norme-da-cen-e-cenelec/",
+          "what_it_shows": "UNI news item of 2026-09-24 names standardisation request M/604 for EN 18239:2026 and EN 18246:2026",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable: the brief does not name the request; that M/604 is C(2024) 5423 and that M/604 Amd 1 is C(2025) 8024 is inferred from the two identifiers appearing for the same standards in two official sources, not read on a single official page.",
+      "uncertainties": [
+        "Verification is weaker than 'metadata_only' normally implies: identity and amended status are confirmed at official locations, but NO dates are confirmed, so publication_date is null. Search-result snippets (not opened, not official evidence) gave 31 July 2024 for C(2024) 5423 and 28 November 2025 for C(2025) 8024; treat both as unverified.",
+        "The Commission eNorm page for mandate 604 and the Register of Commission Documents entry for C(2024)5423 both returned only a JavaScript shell to WebFetch.",
+        "The list of deliverables and deadlines in the request (and whether further deliverables beyond the eight ENs are requested) was not read."
+      ]
+    }
+  ],
+  "provisions": [
+    {
+      "source_id": "cid-2026-1736-dpp-harmonised-standards",
+      "citation": "Art. 1 and Annex",
+      "version_examined": "OJ L, 2026/1736, 15.7.2026 (original version; no consolidated version or corrigendum located as of 2026-10-13)",
+      "summary": "Publishes in the Official Journal the references of six harmonised standards for digital product passports drafted in support of Regulation (EU) 2024/1781: EN 18216:2026, EN 18219:2026, EN 18220:2026, EN 18221:2026, EN 18222:2026 and EN 18223:2026. As rendered, the Annex has three columns (number, reference, title) and no restriction notes.",
+      "applies_to": "Digital product passports under Regulation (EU) 2024/1781 and the economic operators relying on harmonised standards for the requirements of its Arts 10 and 11",
+      "applicable_from": "2026-07-15",
+      "conditions": "Per recitals 1 and 6, the presumption of conformity (Art. 41(2) of Regulation (EU) 2024/1781) is limited to the requirements of Arts 10 and 11 that the standards or their parts cover, and runs from the date of publication of the reference. EN 18239 and EN 18246 are not listed.",
+      "modality": "shall",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "cid-2026-1736-dpp-harmonised-standards",
+      "citation": "Art. 2",
+      "version_examined": "OJ L, 2026/1736, 15.7.2026",
+      "summary": "The decision enters into force on the day of its publication in the Official Journal.",
+      "applies_to": "The decision as a whole",
+      "applicable_from": "2026-07-15",
+      "conditions": "None stated",
+      "modality": "shall",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "verification_level": "substantive"
+    }
+  ],
+  "attempts": [
+    {
+      "tool": "WebSearch (standard)",
+      "target": "CEN/CLC/JTC 24 Digital Product Passport EN 18216 ... EN 18223 published",
+      "outcome": "Discovery only: lead to Implementing Decision (EU) 2026/1736; secondary sources disagree on publication dates"
+    },
+    {
+      "tool": "WebSearch (standard)",
+      "target": "EN 18239 EN 18246 Digital product passport CEN CENELEC JTC 24",
+      "outcome": "Discovery only: secondary sources conflict (formal vote until 16 July 2026; 'Draft' on an aggregator; 16 September 2026 date)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.cencenelec.eu/dyn/www/f?p=205:105:0:::::",
+      "outcome": "HTTP 500"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj",
+      "outcome": "Returned empty content (no text extracted)"
+    },
+    {
+      "tool": "Bash grep (read-only)",
+      "target": "docs/research/raw/commission-2026-acts.json (sibling research file)",
+      "outcome": "Used only as a lead for two URLs (CEN JTC 24 list page; Cellar DOC_1); every fact recorded here was re-read at the official location today"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+      "outcome": "Success: eight published standards listed under CEN/CLC/JTC 24 with work items and dates"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "outcome": "Success: full English text of Decision (EU) 2026/1736 including Annex"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "Eight CEN project pages (standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:<id> for 80427, 79954, 80081, 80715, 80713, 80714, 81494, 81495)",
+      "outcome": "Success for all eight: status, DOR/DAV/DOA/DOP/DOW, mandate, directive, OJ citation line, ICS. Scope/abstract text deliberately not requested"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.cencenelec.eu/dyn/www/f?p=205:7:0::::FSP_ORG_ID:3342699 (committee page; two URL variants) and f?p=205:22 (work programme)",
+      "outcome": "HTTP 500 on all three; committee page and work programme not read"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026D1736",
+      "outcome": "Returned empty content"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://publications.europa.eu/resource/celex/32026D1736",
+      "outcome": "303 redirect to the Cellar RDF; RDF fetched successfully"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32026D1736",
+      "outcome": "Success: EUR-Lex record and Annex; 'In force'; no corrigenda or amendments shown"
+    },
+    {
+      "tool": "WebFetch (Cellar SPARQL, GET)",
+      "target": "Works dated from 2026-05-01 with English title containing 'harmonised standards'",
+      "outcome": "29 rows listed by the tool (it announced 30); the only DPP item is 32026D1736"
+    },
+    {
+      "tool": "Bash curl (Cellar SPARQL)",
+      "target": "https://publications.europa.eu/webapi/rdf/sparql",
+      "outcome": "Permission denied by the harness; query re-run through WebFetch"
+    },
+    {
+      "tool": "WebFetch (Cellar SPARQL, GET)",
+      "target": "Works dated from 2026-05-01 with title containing 'product passport' or '2024/1781'",
+      "outcome": "6 rows: 32026D1736, 32026R1778, and four September 2026 preparatory documents on public procurement; no second harmonised-standards decision"
+    },
+    {
+      "tool": "WebFetch (Cellar SPARQL, GET)",
+      "target": "Any triple whose object is celex/32026D1736",
+      "outcome": "One row (owl:sameAs only): no amending or correcting act linked"
+    },
+    {
+      "tool": "WebFetch (Cellar SPARQL, GET)",
+      "target": "Works with cdm:work_cites_work 32024R1781 dated from 2026-07-01",
+      "outcome": "Zero rows; INCONCLUSIVE, because the query did not return 32026D1736 itself although its RDF shows that relation. Not used as evidence"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://ec.europa.eu/growth/tools-databases/enorm/mandate/604_en",
+      "outcome": "JavaScript shell only ('eNorm Platform'); no mandate data retrieved"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://ec.europa.eu/transparency/documents-register/detail?ref=C(2024)5423&lang=en",
+      "outcome": "JavaScript shell only; no document data retrieved"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.cencenelec.eu/areas-of-work/cen-cenelec-topics/digital-product-passport/",
+      "outcome": "404 page (guessed URL)"
+    },
+    {
+      "tool": "WebSearch (extended, europa.eu domains)",
+      "target": "\"EN 18239\" OR \"EN 18246\" harmonised standard Official Journal implementing decision",
+      "outcome": "No OJ act naming EN 18239 or EN 18246 found; lead to the Commission DPP harmonised-standards page"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://single-market-economy.ec.europa.eu/news/digital-product-passport-registry-now-live-2026-07-20_en",
+      "outcome": "Success: Commission news of 2026-07-20 speaks of eight harmonised standards, six available; no numbers"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards_en",
+      "outcome": "Success: link to the DPP harmonised-standards page"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://single-market-economy.ec.europa.eu/single-market/goods/european-standards/harmonised-standards/digital-product-passport-dpp_en",
+      "outcome": "Success: one OJ publication listed (Decision (EU) 2026/1736)"
+    },
+    {
+      "tool": "WebSearch (extended, cencenelec.eu domains)",
+      "target": "JTC 24 EN 18239 EN 18246 September 2026",
+      "outcome": "Leads to the CEN-CENELEC news item of 2026-07-15 and the 2026-06-25 webinar page"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.cencenelec.eu/news-events/news/2026/en-in-the-spotlight/2026-07-15-dpp/",
+      "outcome": "Success: eight-standard series, DIN secretariat, M/604, six of eight cited"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.cencenelec.eu/news-events/events/2026/2026-06-25-webinar-eu-digital-product-passport/",
+      "outcome": "Success: webinar on 'the first six standards published'; nothing on EN 18239 / EN 18246"
+    },
+    {
+      "tool": "WebSearch (standard, europa.eu and cencenelec.eu domains)",
+      "target": "\"M/604\" \"C(2024) 5423\"",
+      "outcome": "No single official page stating the equivalence was opened; snippet dates (31 July 2024; 28 November 2025) left unverified"
+    },
+    {
+      "tool": "WebSearch (standard, national standards body domains)",
+      "target": "\"EN 18239:2026\" OR \"EN 18246:2026\"",
+      "outcome": "Leads: UNI news item; SIS, BSI and DIN Media listings (not opened, apart from UNI)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.uni.com/digital-product-passport-pubblicate-due-nuove-norme-da-cen-e-cenelec/",
+      "outcome": "Success: UNI news of 2026-09-24 confirms publication of EN 18239:2026 and EN 18246:2026 on 2026-09-16"
+    },
+    {
+      "tool": "none",
+      "target": "National catalogue records (DIN Media, SIS, BSI, NSAI and others) for the eight national editions",
+      "outcome": "Not attempted beyond search snippets; national publication dates not audited"
+    }
+  ],
+  "anomalies": [
+    "No text addressed to an AI or agent was encountered on any page opened.",
+    "CEN catalogue pages label Regulation (EU) 2024/1781 as 'Directive 2024/1781' (catalogue field naming, not a different act).",
+    "Date-label trap: the CEN/CLC/JTC 24 list page calls the DAV 'Publication date' (2026-05-27 / 2026-09-16), while each project page has a separate DOP (2026-11-30 / 2027-03-31), which is the national-implementation deadline.",
+    "Title mismatch between CEN catalogue and OJ Annex for EN 18221:2026 ('... and data persistence' vs '... and persistence') and for EN 18222:2026 ('... for the product passport lifecycle ...' vs '... for product passport lifecycle ...').",
+    "Capitalisation is inconsistent within the series in both official sources: 'Digital product passport' for EN 18216, 18219, 18220, 18221, 18239, 18246 and 'Digital Product Passport' for EN 18222 and 18223.",
+    "ICS classification is split: 35.240.63 for EN 18216, 18219, 18220, 18221, 18246 and 13.020.20 for EN 18222, 18223, 18239.",
+    "Decision (EU) 2026/1736 recital 3 says the standards were drafted by 'CEN, Cenelec and ETSI'; the CEN catalogue attributes them to CEN/CLC/JTC 24.",
+    "Secondary sources lag the official catalogue for EN 18239 / EN 18246 (formal-vote and 'Draft' statuses still shown); a Commission news item of 2026-07-20 speaks of 'harmonised parts' of the standards while the Annex lists whole references without restrictions.",
+    "Cellar RDF for 32026D1736 exposes the generic 'date' property with three values (2026-07-14, 2026-07-15, 9999-12-31); the typed date properties are unambiguous.",
+    "WebFetch returns model-summarised page content, not raw HTML; one SPARQL result was announced as 30 rows but 29 were listed. Exact strings should be re-checked by a human before being hard-coded.",
+    "The UNI news item's hyperlink for UNI CEI EN 18223:2026 reportedly points to the UNI CEI EN 18219:2026 URL."
+  ],
+  "open_questions": [
+    "Has a Commission implementing decision citing EN 18239:2026 and EN 18246:2026 been adopted or published after 2026-10-13, or under a title not matched by today's searches? Re-check the Commission DPP harmonised-standards page and EUR-Lex before each release.",
+    "EN 18221:2026 (cited) is shown on its public CEN project page with EN 18239:2026 and EN 18246:2026 among its normative references, and EN 18246:2026 with EN 18239:2026; how should the engine treat a cited harmonised standard that depends on two references not located in the OJ?",
+    "Which requirements of Arts 10 and 11 of Regulation (EU) 2024/1781 does each cited standard cover (the standards' own EU-relationship annex)? Not readable without the purchased standards; must not be guessed.",
+    "Confirm at the Commission's standardisation-request database that M/604 = C(2024) 5423 and M/604 Amd 1 = C(2025) 8024, with adoption dates and the deliverable list and deadlines.",
+    "Does the CEN/CLC/JTC 24 work programme hold further work items (amendments, corrigenda, technical reports, further ENs)? The work-programme and committee pages returned HTTP 500 today.",
+    "The CEN-CENELEC news item names ISO/IEC JTC 5 'Digital Product Passport' as the international mirror; will later EN ISO/IEC editions supersede any of the eight ENs?",
+    "Which exact title string should the engine display for EN 18221:2026 and EN 18222:2026: the CEN catalogue title or the OJ Annex title?"
+  ]
+}
