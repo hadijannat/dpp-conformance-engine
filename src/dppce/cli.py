@@ -157,10 +157,11 @@ def _build_inputs(
 def _inputs_from_args(args: argparse.Namespace) -> tuple[RunInputs, str | None, TrustBundle | None]:
     ixit = load_ixit(args.ixit)
     base = args.ixit.resolve().parent
-    trust_path = args.trust or (base / ixit.trust.bundle if ixit.trust.bundle else None)
-    trust = _trust(trust_path)
+    # Trust comes from the operator only. A trust bundle that the IXIT names is never loaded:
+    # the supplier of the system under test could otherwise name its own key as trusted.
+    trust = _trust(args.trust)
     token_path = getattr(args, "authorization", None) or (
-        base / ixit.authorization_ref if ixit.authorization_ref else None
+        _confined(base, ixit.authorization_ref, "authorization_ref") if ixit.authorization_ref else None
     )
     token = token_path.read_text(encoding="ascii").strip() if token_path else None
     issuer = IssuerStatement(
@@ -183,6 +184,24 @@ def _inputs_from_args(args: argparse.Namespace) -> tuple[RunInputs, str | None, 
         issuer=issuer,
     )
     return inputs, token, trust
+
+
+def _confined(base: Path, value: str, what: str) -> Path | None:
+    """Resolve an IXIT-relative path. It must stay inside the directory of the IXIT file.
+
+    The IXIT can come from the supplier of the system under test. It must not make the engine
+    read a file elsewhere on the host. Returns None if the value does not name an existing file.
+    """
+    root = base.resolve()
+    try:
+        path = (root / value).resolve()
+    except (OSError, ValueError):
+        return None
+    if not path.is_file():
+        return None
+    if not path.is_relative_to(root):
+        raise UsageError(f"{what} points outside the directory of the IXIT file")
+    return path
 
 
 def _origin(url: str) -> str:
@@ -209,12 +228,28 @@ def cmd_run(args: argparse.Namespace) -> int:
     if out.exists() and any(out.iterdir()):
         raise UsageError(f"{out} is not empty; a run never overwrites an earlier run")
     ixit, base = inputs.ixit, args.ixit.resolve().parent
-    endpoints = ixit.endpoints
-    target = endpoints.get("origin_override") or endpoints.get("api", "")
-    credentials = {
-        identity.role: (_origin(target), resolve_secret(identity.secret_ref))
-        for identity in ixit.identities
-        if identity.secret_ref is not None
+    unconfirmed = sorted(set(ixit.network.allow_private_hosts) - set(args.allow_private_host))
+    if unconfirmed:
+        raise UsageError(
+            "the IXIT asks for non-public hosts; confirm each one with --allow-private-host: "
+            + ", ".join(unconfirmed)
+        )
+    # A role credential goes only to an origin that a validated authorization names.
+    target = _origin(ixit.endpoints.get("origin_override") or ixit.endpoints.get("api", ""))
+    permitted = inputs.authorization is not None and target in inputs.authorization.endpoints
+    credentials = (
+        {
+            identity.role: (target, resolve_secret(identity.secret_ref, secrets_dir=args.secrets))
+            for identity in ixit.identities
+            if identity.secret_ref is not None
+        }
+        if permitted
+        else {}
+    )
+    samples = {
+        name: path
+        for name, value in ixit.samples.items()
+        if (path := _confined(base, value, f"sample '{name}'")) is not None
     }
     keys = FileDataKeyProvider(args.keys)
     keys.create()
@@ -225,9 +260,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             credentials=credentials,
             authorization=inputs.authorization,
             remote_read_authorized=args.allow_remote_read,
-            samples={
-                name: (base / value) for name, value in ixit.samples.items() if (base / value).is_file()
-            },
+            samples=samples,
         ),
         SystemClock(),
     )
@@ -446,7 +479,7 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         sub.add_argument("--ixit", type=Path, required=True, help="extra information for testing")
         sub.add_argument("--mode", choices=[m.value for m in ExecutionMode], default="illustrative")
         sub.add_argument("--pack", action="append", default=[], help="select one more pack by identifier")
-        sub.add_argument("--trust", type=Path, help="trust bundle (JSON)")
+        sub.add_argument("--trust", type=Path, help="trust bundle (JSON); only the operator supplies it")
         sub.add_argument("--authorization", type=Path, help="signed test authorization (compact JWS)")
         sub.add_argument("--at", help="evaluation time, for example 2026-10-13T12:00:00Z; default: now")
         sub.add_argument("--issuer-name", default="unspecified")
@@ -459,6 +492,13 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     run_options(run)
     run.add_argument("--out", type=Path, required=True, help="new directory for the run")
     run.add_argument("--keys", type=Path, required=True, help="directory with the data keys; keep it apart")
+    run.add_argument("--secrets", type=Path, help="directory that holds the file secrets of the roles")
+    run.add_argument(
+        "--allow-private-host",
+        action="append",
+        default=[],
+        help="confirm one loopback or private host that the IXIT asks for; repeat for each host",
+    )
     run.add_argument(
         "--allow-remote-read",
         action="store_true",

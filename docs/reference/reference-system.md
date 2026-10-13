@@ -268,6 +268,7 @@ fixtures/reference/
   items/{ev,lmt,industrial}.json     anonymous item-level passports
   models/{ev,lmt,industrial}.json    model-level data
   roles.json                         role -> TEST-ONLY token
+  secrets/TEST-ONLY-<role>.token     the same tokens, one file for each role, for `--secrets`
   pki/TEST-ONLY-*.pem                fixture PKI (section 4.5)
   qr/{ev,lmt,industrial,invalid}.png QR images
   ics/{ev,lmt,industrial}.yaml       declarations for each profile
@@ -292,8 +293,11 @@ IXIT conventions for the reference rig:
 - `samples.passport_id`: the `{id}` path segment, for example `09506000134352-EV0001`.
 - `samples.aas_file`: path of an Asset Administration Shell JSON file (optional).
 
-A relative sample path is relative to the directory of the IXIT file. The command line
-resolves it before the run.
+A sample path is relative to the directory of the IXIT file and must stay inside it.
+The IXIT is untrusted input: see the architecture contract, section 9.1. The operator supplies
+the trust bundle (`--trust`), the secrets directory (`--secrets`), and the confirmation of each
+non-public host (`--allow-private-host 127.0.0.1`). An identity uses
+`secret_ref: "file:TEST-ONLY-authority.token"`.
 
 Shared helpers in `dppce.adapters.common`:
 

@@ -57,14 +57,35 @@ class FileDataKeyProvider:
         return key
 
 
-def resolve_secret(reference: str, environ: Mapping[str, str] | None = None) -> str:
-    """Resolve ``env:NAME`` or ``file:PATH``. The IXIT holds the reference, never the secret."""
+SECRET_ENV_PREFIX = "DPPCE_SECRET_"  # noqa: S105 - the name prefix of a variable, not a secret
+
+
+def resolve_secret(
+    reference: str, *, secrets_dir: Path | None = None, environ: Mapping[str, str] | None = None
+) -> str:
+    """Resolve ``env:NAME`` or ``file:NAME``. The IXIT holds the reference, never the secret.
+
+    The IXIT can come from the supplier of the system under test, so a reference cannot name an
+    arbitrary secret. An environment name must start with ``DPPCE_SECRET_``. A file must lie
+    inside the secrets directory that the operator supplies.
+    """
     kind, _, target = reference.partition(":")
-    try:
-        if kind == "env":
+    if kind == "env":
+        if not target.startswith(SECRET_ENV_PREFIX):
+            raise KeyError_(f"an environment secret must have a name that starts with {SECRET_ENV_PREFIX}")
+        try:
             return (os.environ if environ is None else environ)[target]
-        if kind == "file":
-            return Path(target).read_text(encoding="utf-8").strip()
-    except (KeyError, OSError) as exc:
-        raise KeyError_(f"secret reference '{kind}:...' cannot be resolved") from exc
+        except KeyError as exc:
+            raise KeyError_(f"the environment secret '{target}' is not set") from exc
+    if kind == "file":
+        if secrets_dir is None:
+            raise KeyError_("a file secret needs a secrets directory from the operator")
+        root = secrets_dir.resolve()
+        path = (root / target).resolve()
+        if not path.is_relative_to(root):
+            raise KeyError_("a file secret must lie inside the secrets directory")
+        try:
+            return path.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            raise KeyError_("a file secret cannot be read") from exc
     raise KeyError_("a secret reference starts with 'env:' or 'file:'")

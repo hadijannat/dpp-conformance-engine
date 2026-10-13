@@ -266,6 +266,20 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 A transport failure is data: `Record.error`. The check reports `unreachable`.
 By default that is `inconclusive`, because a connectivity failure does not prove a breach.
 
+### 9.1 The IXIT is untrusted input
+
+The supplier of the system under test can write the ICS and the IXIT. The engine therefore
+does not let those files decide what the test host trusts or discloses:
+
+- The trust bundle comes only from the operator (`--trust`). A bundle that the IXIT names is
+  never loaded. Otherwise a supplier could name its own key as a trusted authorization issuer.
+- Each non-public host in `IXIT.network.allow_private_hosts` must be confirmed by the operator
+  with `--allow-private-host`. A public host needs an authorization or `--allow-remote-read`.
+- A secret reference is `env:DPPCE_SECRET_<NAME>` or `file:<name>` inside the directory that
+  the operator gives with `--secrets`. No other environment variable or file can be named.
+- A role credential is sent only to an origin that a validated authorization names.
+- A path in the IXIT is resolved and must stay inside the directory of the IXIT file.
+
 ## 10. Recording
 
 A recording is a directory.
