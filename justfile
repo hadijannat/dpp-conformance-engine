@@ -46,6 +46,10 @@ validate: check cov
     uv run pytest -m validation
     uv run python -m validation.run
 
+# Mutation testing of the verdict and evidence code. Slow. Results: `uv run mutmut results`.
+mutation:
+    uv run mutmut run
+
 # Write a CycloneDX SBOM of the locked environment to dist/sbom.cdx.json.
 sbom:
     mkdir -p dist
