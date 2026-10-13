@@ -28,6 +28,10 @@ test:
 # Line and branch coverage. The 90 percent gate applies to the core packages only.
 cov:
     uv run pytest -m "not validation" --cov --cov-report=xml --cov-report=
+    just cov-report
+
+# Report coverage from the last run. Fails if the core packages are below 90 percent.
+cov-report:
     @echo "--- all modules (information only) ---"
     uv run coverage report --fail-under=0
     @echo "--- core packages (gate: 90 percent) ---"

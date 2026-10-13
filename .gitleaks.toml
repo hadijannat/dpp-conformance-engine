@@ -1,0 +1,13 @@
+# Secret scanning. The fixtures hold test keys and test tokens on purpose.
+# Every such file has a name that starts with TEST-ONLY- and protects nothing.
+title = "dpp-conformance-engine"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic test keys, certificates, and tokens of the reference system"
+paths = [
+  '''^fixtures/reference/.*TEST-ONLY-.*''',
+  '''^fixtures/reference/roles\.json$''',
+]

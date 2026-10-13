@@ -13,3 +13,4 @@ An item here is not an implemented feature.
 | BL-002 | Run the Vale style checks locally. | `vale docs README.md` runs with the `styles/STE` rules and the result is recorded. | M1 | blocked by OQ-005 |
 | BL-003 | Build and run the container image and the Docker Compose integrations. | The image builds as a non-root user. The Compose reference system starts and the offline test suite passes against it. | M5 | blocked by OQ-004 |
 | BL-004 | Validate RFC 3161 timestamp evidence in the verifier. | A trusted timestamp token over the decision digest is checked against a configured timestamp authority certificate. The `timestamp` dimension can give `pass`. Tests use a local mock authority. | post-0.1.0 | open |
+| BL-005 | Pin the container base images by digest. | The `Dockerfile` names each base image with a `@sha256:` digest, and Dependabot updates the digests. | M6 | blocked by OQ-004 |

@@ -1,0 +1,36 @@
+# Run `uv run pre-commit install` one time. The hooks use the locked tools of this repository.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy --strict
+        entry: uv run mypy
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: schemas
+        name: JSON Schemas are in step with the models
+        entry: uv run python scripts/gen_schemas.py --check
+        language: system
+        pass_filenames: false
+        files: ^src/dppce/(models|schemas)/
+      - id: catalogue-lint
+        name: catalogue lint
+        entry: uv run dppce catalogue lint
+        language: system
+        pass_filenames: false
+        files: ^(catalogue|profiles|testpacks)/
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # v8.30.1
+    hooks:
+      - id: gitleaks

@@ -1,0 +1,14 @@
+.git
+.venv
+.remember
+.claude
+runs
+site
+docs
+tests
+validation
+fixtures
+**/__pycache__
+.*_cache
+.coverage
+coverage.xml

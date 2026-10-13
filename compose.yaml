@@ -1,0 +1,43 @@
+# The local reference DPP system for demonstrations. All data are synthetic.
+# Status: written, not run. Docker was not available in the development session (OQ-004, BL-003).
+#
+# The reference system binds to the loopback interface inside its container, so the engine
+# runs in the same network namespace. Nothing is published to the host, and nothing here
+# reaches another machine.
+services:
+  reference:
+    build: .
+    entrypoint: ["python", "-m", "dppce.infrastructure.reference_server"]
+    command: ["--fixtures", "/fixtures", "--port", "8765"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./fixtures/reference:/fixtures:ro
+
+  engine:
+    build: .
+    network_mode: "service:reference"
+    depends_on: [reference]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./fixtures/reference:/fixtures:ro
+      - runs:/work
+    command:
+      - run
+      - --profile=battery/ev
+      - --ics=/fixtures/ev.ics.yaml
+      - --ixit=/fixtures/ev.ixit.yaml
+      - --trust=/fixtures/trust/TEST-ONLY-trust-bundle.json
+      - --secrets=/fixtures/secrets
+      - --allow-private-host=127.0.0.1
+      - --role-secret=legitimate_interest=file:TEST-ONLY-legitimate_interest.token
+      - --role-secret=authority=file:TEST-ONLY-authority.token
+      - --at=2026-10-13T12:00:00Z
+      - --keys=/work/keys
+      - --out=/work/run
+
+volumes:
+  runs:

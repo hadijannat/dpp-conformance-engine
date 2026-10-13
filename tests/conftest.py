@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ipaddress
+import socket
 from collections.abc import Callable, Iterator
 
 import pytest
@@ -47,3 +49,35 @@ def loopback() -> Iterator[Callable[[Handler], LoopbackServer]]:
     yield start
     for server in servers:
         server.close()
+
+
+_real_connect = socket.socket.connect
+
+
+def _is_loopback(address: object) -> bool:
+    if not isinstance(address, tuple) or not address:
+        return True  # a Unix domain socket path: local by definition
+    try:
+        return ipaddress.ip_address(str(address[0]).split("%")[0]).is_loopback
+    except ValueError:
+        return str(address[0]) == "localhost"
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _no_external_network() -> Iterator[None]:
+    """Fail any test that opens a connection to a host other than loopback.
+
+    The suite must never contact a real DPP system, registry, or third-party service. CI also
+    removes network access at the operating-system level; this guard works on every machine.
+    """
+
+    def guarded(self: socket.socket, address: object) -> None:
+        if not _is_loopback(address):
+            raise AssertionError(f"a test tried to connect to {address!r}; tests use loopback only")
+        _real_connect(self, address)  # type: ignore[arg-type]
+
+    socket.socket.connect = guarded  # type: ignore[method-assign, assignment]
+    try:
+        yield
+    finally:
+        socket.socket.connect = _real_connect  # type: ignore[method-assign]
