@@ -93,22 +93,32 @@ The review is an agent review. It is not a human approval and not an audit. All 
   recorded under the role, and can pass.
 - More findings, including F-17: read the report file. The task result was truncated in the session.
 
-Independent core tests (`tests/core/`, uncommitted): 3 failing tests in the verdict code when last run.
+Independent core tests (`tests/core/`, committed): 782 passed, 10 failed. The 10 failures are
+kept on purpose. Each one documents a defect in the code or a gap in the contract. Do not skip them.
 
 - `aggregate()` drops a path with no step, or with unknown applicability, from `retained` when a
-  different path passes. The contract, section 7.3, says that hidden problems stay in `retained`.
-- `claim_level(reviewed, illustrative, approved)`: the contract table and the code disagree.
+  different path passes (2 tests). Contract section 7.3 says that hidden problems stay in `retained`.
+- `claim_level(reviewed, illustrative, approved)`: the contract table and the code disagree (1 test).
   Decide and state it in section 4: an illustrative requirement never gives a reviewed claim.
+- A placeholder requirement can pass if a mapped test passes (1 test). Contract section 4 says
+  that its verdict is `inconclusive`.
+- The lint does not report an ordering comparison whose operand type does not fit the declared
+  fact type, for example an integer fact compared with a date (3 tests).
+- The ICS migration accepts an infinite capacity (3 tests).
+
+Fast gate at this commit: format, lint, and types pass. Tests: **1069 passed, 10 failed**.
+`uv run just check` exits 1 because of those 10 tests.
 
 ### Not done
 
 - [ ] Fix the defects above. Add a regression test for each. Run `uv run just check`.
-- [ ] Check and commit the catalogue task output: `catalogue/sources.yaml`, the two packs,
-      `testpacks/eu-battery-draft.yaml`, `docs/research/source-audit.md`, the scope page, the
-      import how-to, the review template, `tests/test_catalogue_content.py`.
-      Gate: `uv run dppce catalogue lint` gives 0 errors. It gave 44 errors while the task ran.
+- [x] Catalogue task output committed: 128 source records, 36 draft interpretations of
+      Regulation (EU) 2023/1542 (none approved), 8 EN placeholders, 41 test purposes for the draft
+      pack (5 automated, 36 manual). `uv run dppce catalogue lint`: 0 errors. 21 content tests pass.
+      No draft entry can get `pass` or `fail` in this version: each path has a manual step, and
+      the engine has no input for a manual result (OQ-015).
 - [ ] Independent review of the draft legal interpretations and of the verdict and planner code.
-- [ ] Coverage of the core packages: 80 percent when last measured without `tests/core`. Gate: 90.
+- [ ] Coverage of the core packages: not measured again with `tests/core`. Run `uv run just cov`. Gate: 90.
 - [ ] Mutation testing (`uv run just mutation`): not run.
 - [ ] Method-validation record from a clean commit (`uv run python -m validation.run`): none stored.
 - [ ] `uv run just docs`: not run. `docs/readiness.md`: not written. The README links to it.

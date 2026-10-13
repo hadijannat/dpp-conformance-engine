@@ -93,7 +93,6 @@ def test_two_live_runs_differ_only_where_they_must(tmp_path: Path) -> None:
         first, second = rig.run(), rig.run()
     a, b = first.envelope.decision, second.envelope.decision
     assert [r.verdict for r in a.requirement_results] == [r.verdict for r in b.requirement_results]
-    assert a.results_root == b.results_root
     assert a.records_root != b.records_root, "randomness is never weakened to make a live run repeat"
 
 

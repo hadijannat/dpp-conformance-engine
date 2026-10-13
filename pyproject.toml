@@ -77,6 +77,7 @@ include = ["src", "catalogue", "profiles", "testpacks", "tests", "README.md", "N
 line-length = 110
 target-version = "py312"
 src = ["src", "tests"]
+extend-exclude = ["validation/records"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "C4", "SIM", "RUF", "PL", "PT", "N", "TID"]
