@@ -57,7 +57,7 @@ def path_verdict(applicability: Tri, steps: Sequence[Verdict]) -> Verdict:
     return _PASS
 
 
-def requirement_verdict(  # noqa: PLR0911 - a precedence ladder: one return per rung of section 7.3
+def requirement_verdict(
     applicability: Tri,
     conflict: bool,
     paths: Sequence[Verdict],

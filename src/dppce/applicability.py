@@ -107,7 +107,7 @@ def _ordered(left: Any, right: Any, path: str) -> tuple[Any, Any]:
     raise ApplicabilityError(f"{path}: ordering needs two integers or two ISO dates, got {left!r}, {right!r}")
 
 
-def _result(node: Compare, actual: Any) -> bool:  # noqa: PLR0911 - one return per operator reads best
+def _result(node: Compare, actual: Any) -> bool:
     op, expected, path = node.op, node.value, node.fact
     if op in (Op.IN, Op.NOT_IN):
         if not isinstance(expected, tuple):

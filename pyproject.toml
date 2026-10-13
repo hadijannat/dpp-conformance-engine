@@ -73,6 +73,7 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "C4", "SIM", "RUF", "PL", "PT", "N
 ignore = [
   "PLR2004", # magic values are clear in test assertions and protocol constants
   "PLR0913", # orchestration entry points take explicit keyword arguments
+  "PLR0911", # precedence ladders use one return per rung, which mirrors the published tables
 ]
 
 [tool.ruff.lint.per-file-ignores]
