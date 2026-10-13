@@ -297,7 +297,8 @@ A sample path is relative to the directory of the IXIT file and must stay inside
 The IXIT is untrusted input: see the architecture contract, section 9.1. The operator supplies
 the trust bundle (`--trust`), the secrets directory (`--secrets`), and the confirmation of each
 non-public host (`--allow-private-host 127.0.0.1`). An identity uses
-`secret_ref: "file:TEST-ONLY-authority.token"`.
+`secret_ref: "file:TEST-ONLY-authority.token"`, and the operator confirms it with
+`--role-secret authority=file:TEST-ONLY-authority.token`.
 
 Shared helpers in `dppce.adapters.common`:
 

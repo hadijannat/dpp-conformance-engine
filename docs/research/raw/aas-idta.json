@@ -1,0 +1,1591 @@
+{
+  "group": "aas-idta",
+  "retrieval_date": "2026-10-13",
+  "sources": [
+    {
+      "id": "iec-63278-1-2023",
+      "title": "Asset Administration Shell for industrial applications - Part 1: Asset Administration Shell structure",
+      "identifier": "IEC 63278-1:2023 ED1",
+      "issuing_body": "IEC TC 65 (Industrial-process measurement, control and automation)",
+      "source_type": "international_standard",
+      "official_url": "https://webstore.iec.ch/en/publication/65628",
+      "edition_or_version": "Edition 1.0",
+      "publication_date": "2023-12-14",
+      "legal_or_spec_status": "published International Standard (IEC webstore); stability date 2028 shown on webstore; no amendment or corrigendum listed on the webstore page",
+      "applicable_dates": [
+        {
+          "date": "2023-12-14",
+          "what": "Publication date of Edition 1.0",
+          "basis": "https://webstore.iec.ch/en/publication/65628"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "(c) IEC. Copyright-protected international standard; no open licence.",
+      "permitted_use_basis": "Metadata reference only (number, title, edition, date, status, committee, catalogue URL). No clause text fetched, quoted, paraphrased or summarised; no clause numbers stated.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://webstore.iec.ch/en/publication/65628",
+          "what_it_shows": "IEC webstore page: IEC 63278-1:2023, Edition 1.0, published 2023-12-14, TC 65, stability date 2028, ICS 71.100.20, 149 pages; no related parts or amendments shown in the fetched capture.",
+          "official": true
+        },
+        {
+          "url": "https://isme.me/en/project/show/iec:proj:103536",
+          "what_it_shows": "National-body mirror of the IEC project database: project 103536 at stage 60.60 (standard published), publication 2023-12-14.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches - the brief names IEC 63278 as a multi-part series; Part 1 is confirmed as a published Edition 1.0 dated 2023-12-14, and the other parts are not yet published (see their entries).",
+      "uncertainties": [
+        "The IEC project page for this project (iec.ch/dyn/www/f?p=103:38:...:103536) returned HTTP 403, so the project-database status was confirmed only through a national-body mirror.",
+        "The webstore 'Lifecycle' and 'Referenced by' tabs were empty in the fetched capture, so absence of amendments is based on the page showing none, not on a lifecycle listing."
+      ]
+    },
+    {
+      "id": "en-iec-63278-1-2024",
+      "title": "Asset Administration Shell for industrial applications - Part 1: Asset Administration Shell structure (European adoption)",
+      "identifier": "EN IEC 63278-1:2024 (German national version: DIN EN IEC 63278-1:2024-09; VDE 0810-781:2024-09)",
+      "issuing_body": "CENELEC (adopting IEC 63278-1:2023); national catalogue: DIN Media",
+      "source_type": "european_standard",
+      "official_url": "https://www.dinmedia.de/en/standard/din-en-iec-63278-1/380477303",
+      "edition_or_version": "EN IEC 63278-1:2024 (based on IEC 63278-1:2023 Edition 1.0)",
+      "publication_date": null,
+      "legal_or_spec_status": "published EN (EN IEC 63278-1:2024 exists; DIN Media lists DIN EN IEC 63278-1:2024-09 as current). CENELEC date of availability not_located.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Copyright-protected European standard (CENELEC/IEC); national versions are sold by national bodies; no open licence.",
+      "permitted_use_basis": "Metadata reference only (number, title, edition, date, status, committee, catalogue URL). No clause text fetched, quoted, paraphrased or summarised; no clause numbers stated.",
+      "verification_level": "secondary_only",
+      "evidence": [
+        {
+          "url": "https://www.dinmedia.de/en/standard/din-en-iec-63278-1/380477303",
+          "what_it_shows": "DIN Media catalogue (DIN is a CENELEC member; this is a national catalogue, not CENELEC): DIN EN IEC 63278-1:2024-09, German version of EN IEC 63278-1:2024, status current, issue month 2024-09. No EN ratification or availability date shown.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "not_verifiable - the brief does not mention the EN adoption; this entry records that an EN adoption of Part 1 exists per a national catalogue.",
+      "uncertainties": [
+        "CENELEC date of availability (dav), date of ratification and withdrawal date were not located: the CEN-CENELEC standards search returned HTTP 500 for a guessed URL and the iTeh mirror returned only a site header.",
+        "2024-09 is the DIN national issue month, not the EN publication date, so publication_date is left null.",
+        "Publication and OJ citation are separate facts: published = yes per national catalogue; OJ citation = not_located."
+      ]
+    },
+    {
+      "id": "iec-63278-2",
+      "title": "Asset Administration Shell for Industrial Applications - Part 2: Information meta model",
+      "identifier": "IEC 63278-2 ED1",
+      "issuing_body": "IEC TC 65",
+      "source_type": "international_standard",
+      "official_url": "",
+      "edition_or_version": "ED1 (Edition 1.0 planned; no published edition located; no IEC webstore or IEC project page reached for this part)",
+      "publication_date": null,
+      "legal_or_spec_status": "in development: IEC stage 40.60 (close of voting) effective 2026-08-07 per national-body/aggregator mirrors of the IEC project database; no published edition located as of 2026-10-13",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "(c) IEC. Copyright-protected international standard; no open licence.",
+      "permitted_use_basis": "Metadata reference only (number, title, edition, date, status, committee, catalogue URL). No clause text fetched, quoted, paraphrased or summarised; no clause numbers stated.",
+      "verification_level": "secondary_only",
+      "evidence": [
+        {
+          "url": "https://isrsm.gov.mk/en/project/show/iec:proj:109017",
+          "what_it_shows": "North Macedonia standards body mirror of IEC project 109017: IEC 63278-2 ED1, title 'Information meta model', stage 40.60 close of voting, effective 2026-08-07, TC 65. Not the IEC page.",
+          "official": false
+        },
+        {
+          "url": "https://genorma.com/en/standards/iec-63278-2-ed1",
+          "what_it_shows": "Aggregator listing: same title, stage 40.60 close of voting 2026-08-07, TC 65.",
+          "official": false
+        },
+        {
+          "url": "https://din.de/en/wdc-proj:din21:367312197",
+          "what_it_shows": "DIN project page: DIN IEC 63278-2, project 02231543, start 2023-04-12, committee DKE/K 931; abstract names it the basis for Part 5 (interface functions). No status shown.",
+          "official": false
+        },
+        {
+          "url": "https://knowledge.bsigroup.com/products/bs-en-iec-63278-2-asset-administration-shell-for-industrial-applications-part-2-information-meta-model",
+          "what_it_shows": "BSI catalogue entry for reference 23/30459609 DC (suffix DC = draft for comment), dated 14 Mar 2023, labelled 'Current' by BSI. A draft, not a final standard.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches - the brief names IEC 63278 as a series; Part 2 (title 'Information meta model') is not published as an IEC edition as of 2026-10-13 on the evidence located.",
+      "uncertainties": [
+        "IEC project page returned HTTP 403 (7 attempts across URL variants); stage data comes from non-IEC mirrors, so the status is not verified at an official location.",
+        "A WebSearch summary (page not opened) said a ballot opened 2026-05-15 and the document was 65/1193/CDV; another summary called it a DIS ballot. The mirrors I opened show only 'close of voting 2026-08-07'. Ballot opening date and document type are unresolved.",
+        "A WebSearch summary claimed BS EN IEC 63278-2 was 'Current, published 23 May 2025'. The BSI page I opened is the 2023 DC draft (23/30459609 DC). The 2025 date is unresolved and is probably a second draft for comment; it must not be read as a publication date. An EN adoption cannot normally precede the IEC voting close of 2026-08-07.",
+        "Outcome of the vote after 2026-08-07 (approval, FDIS, publication) was not located."
+      ]
+    },
+    {
+      "id": "iec-63278-3",
+      "title": "Asset Administration Shell for Industrial Applications - Part 3: Security provisions for Asset Administration Shells",
+      "identifier": "IEC 63278-3 ED1 (planned DIN EN IEC 63278-3)",
+      "issuing_body": "IEC TC 65",
+      "source_type": "international_standard",
+      "official_url": "",
+      "edition_or_version": "ED1 (Edition 1.0 planned; no published edition located; no IEC webstore or IEC project page reached for this part)",
+      "publication_date": null,
+      "legal_or_spec_status": "in development: IEC stage 30.60 (close of voting/comment period) dated 2026-04-10 per aggregator mirror; no published edition located as of 2026-10-13",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "(c) IEC. Copyright-protected international standard; no open licence.",
+      "permitted_use_basis": "Metadata reference only (number, title, edition, date, status, committee, catalogue URL). No clause text fetched, quoted, paraphrased or summarised; no clause numbers stated.",
+      "verification_level": "secondary_only",
+      "evidence": [
+        {
+          "url": "https://genorma.com/en/standards/iec-63278-3-ed1",
+          "what_it_shows": "Aggregator listing: IEC 63278-3 ED1, title as above, stage 30.60 close of voting/comment 2026-04-10, TC 65.",
+          "official": false
+        },
+        {
+          "url": "https://www.din.de/en/wdc-proj:din21:391813262",
+          "what_it_shows": "DIN project page: planned number DIN EN IEC 63278-3, project 02233064, start 2025-04-23, DKE/K 931; no status shown.",
+          "official": false
+        },
+        {
+          "url": "https://knowledge.bsigroup.com/products/bs-en-iec-63278-3-asset-administration-shell-for-industrial-applications-part-3-security-provisions-for-asset-administration-shells",
+          "what_it_shows": "BSI entry 26/30556013 DC dated 2026-02-13; DC = draft for comment although BSI labels it 'Current'. A draft, not a final standard.",
+          "official": false
+        },
+        {
+          "url": "https://standict.eu/standards-repository/asset-administration-shell-industrial-applications-part-3-security-provisions",
+          "what_it_shows": "StandICT.eu repository entry for EN IEC 63278-3 ED1; gives no publication date.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches - Part 3 exists as a project titled 'Security provisions for Asset Administration Shells' and is not published as of 2026-10-13 on the evidence located.",
+      "uncertainties": [
+        "IEC project page unreachable (HTTP 403); stage data comes from an aggregator and national bodies only.",
+        "BSI labels the 2026 draft-for-comment record 'Current'; that label does not mean a published standard.",
+        "Stages after 30.60 (CDV, FDIS, publication) were not located."
+      ]
+    },
+    {
+      "id": "iec-63278-4",
+      "title": "not_located (title not confirmed)",
+      "identifier": "IEC 63278-4",
+      "issuing_body": "IEC TC 65",
+      "source_type": "international_standard",
+      "official_url": "",
+      "edition_or_version": "not_located",
+      "publication_date": null,
+      "legal_or_spec_status": "not_located as of 2026-10-13: no page opened that states a title, stage or date for IEC 63278-4",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "(c) IEC. Copyright-protected international standard; no open licence.",
+      "permitted_use_basis": "Do not cite as an existing standard. Metadata reference only if later confirmed.",
+      "verification_level": "not_located",
+      "evidence": [
+        {
+          "url": "https://genorma.com/en/standards/pren-iec-63278-4",
+          "what_it_shows": "Search result title 'prEN IEC 63278-4'; the page returned HTTP 404 when fetched, so nothing was read.",
+          "official": false
+        },
+        {
+          "url": "https://genorma.com/en/standards/iec-63278-4-ed1",
+          "what_it_shows": "Guessed URL; HTTP 404.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "not_verifiable - the brief asks for each part; no opened page documents a Part 4.",
+      "uncertainties": [
+        "Search-engine summaries (not page reads) made unverified claims about Part 4: a title about use cases and modelling examples, a CENELEC project approval dated 2023-10-09, and an FDIS stage in mid-2026. None was reproduced on any page I opened; they are discarded and not recorded as findings.",
+        "IDTA's own Part 4 is Security (IDTA-01004); that numbering is IDTA's and must not be read as IEC 63278-4."
+      ]
+    },
+    {
+      "id": "iec-63278-5",
+      "title": "Asset Administration Shell for industrial applications - Part 5: Interfaces",
+      "identifier": "IEC 63278-5 ED1; European project prEN IEC 63278-5",
+      "issuing_body": "IEC TC 65; CENELEC CLC/TC 65X for the European project prEN IEC 63278-5",
+      "source_type": "international_standard",
+      "official_url": "",
+      "edition_or_version": "ED1 (Edition 1.0 planned; no published edition located; no IEC webstore or IEC project page reached for this part)",
+      "publication_date": null,
+      "legal_or_spec_status": "in development: IEC stage 30.20 (CD study/ballot initiated) dated 2026-08-21, next stage PCC due 2026-10-16, per aggregator mirror; European project prEN IEC 63278-5 at stage 10.99 (new project approved) per aggregator; no published edition located as of 2026-10-13",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "(c) IEC. Copyright-protected international standard; no open licence.",
+      "permitted_use_basis": "Metadata reference only (number, title, edition, date, status, committee, catalogue URL). No clause text fetched, quoted, paraphrased or summarised; no clause numbers stated.",
+      "verification_level": "secondary_only",
+      "evidence": [
+        {
+          "url": "https://genorma.com/en/standards/iec-63278-5-ed1",
+          "what_it_shows": "Aggregator listing: IEC 63278-5 ED1 'Interfaces', stage 30.20 CD study/ballot initiated 2026-08-21, next stage PCC due 2026-10-16, TC 65.",
+          "official": false
+        },
+        {
+          "url": "https://genorma.com/en/standards/pren-iec-63278-5",
+          "what_it_shows": "Aggregator listing: prEN IEC 63278-5, CLC/TC 65X, stage 10.99 new project approved, approval 2024-09-23, in development.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches - Part 5 ('Interfaces') exists as a project and is not published as of 2026-10-13 on the evidence located.",
+      "uncertainties": [
+        "IEC project page unreachable (HTTP 403); stage data comes from an aggregator only.",
+        "The title 'Interfaces' is from the aggregator; no IEC or CENELEC page was read."
+      ]
+    },
+    {
+      "id": "iec-63278-6",
+      "title": "not_located (title not confirmed)",
+      "identifier": "IEC 63278-6",
+      "issuing_body": "IEC TC 65",
+      "source_type": "international_standard",
+      "official_url": "",
+      "edition_or_version": "not_located",
+      "publication_date": null,
+      "legal_or_spec_status": "not_located as of 2026-10-13: no page opened mentions a Part 6; its existence is neither asserted nor denied",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No Official Journal citation located for this IEC/EN part. A WebSearch restricted to eur-lex.europa.eu, op.europa.eu and single-market-economy.ec.europa.eu found no reference to 63278; EUR-Lex lists were not opened, so this is not an exhaustive OJ search.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "(c) IEC. Copyright-protected international standard; no open licence.",
+      "permitted_use_basis": "Do not cite as an existing standard.",
+      "verification_level": "not_located",
+      "evidence": [],
+      "brief_claim_check": "not_verifiable - no source located for a Part 6.",
+      "uncertainties": [
+        "Two WebSearch queries returned no document mentioning 63278-6."
+      ]
+    },
+    {
+      "id": "idta-01001-metamodel",
+      "title": "Specification of the Asset Administration Shell Part 1: Metamodel",
+      "identifier": "IDTA-01001-3-2-0 (repository https://github.com/admin-shell-io/aas-specs-metamodel)",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-1-metamodel-idta-number-01001",
+      "edition_or_version": "3.2 (release IDTA-01001-3-2-0, tag v3.2.0)",
+      "publication_date": "2026-07-21",
+      "legal_or_spec_status": "published; current release in the maintainer repository (GitHub release not marked pre-release)",
+      "applicable_dates": [
+        {
+          "date": "2026-07-21",
+          "what": "Date of the GitHub release of the current version (IDTA website states no date)",
+          "basis": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "v3.1.2 / IDTA-01001-3-1-2",
+          "date": "2025-11-10",
+          "summary": "GitHub release (repository README text says October 2025)",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases"
+        },
+        {
+          "identifier": "v3.1.1 / IDTA-01001-3-1-1",
+          "date": "2025-08-01",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases"
+        },
+        {
+          "identifier": "v3.1.0 / IDTA-01001-3-1-0",
+          "date": "2025-05-27",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases"
+        },
+        {
+          "identifier": "IDTA-01001-3-0-1_schemasV3.0.9",
+          "date": "2024-11-15",
+          "summary": "Schema release of the 3.0.x line",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases"
+        },
+        {
+          "identifier": "IDTA-01001-3-0-1_schemasV3.0.8",
+          "date": "2024-07-05",
+          "summary": "Schema release of the 3.0.x line",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+          "what_it_shows": "IDTA AAS specifications page, 'Release 26-01': lists Parts 1, 2, 3a, 3b, 4, 5 with IDTA numbers 01001, 01002, 01003-a, 01003-b, 01004, 01005; version numbers appear only in cover-image filenames; no dates and no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-1-metamodel-idta-number-01001",
+          "what_it_shows": "IDTA content-hub page for this part (version taken from PDF filename and HTML path; no date, no licence text, only a copyright line).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases",
+          "what_it_shows": "GitHub release list with full ISO publication timestamps; none marked pre-release or draft.",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/aas-specs-metamodel",
+          "what_it_shows": "Repository README: latest release 3.2 (v3.2.0); licence CC BY 4.0 (badge and LICENSE.txt); documentation folder documentation/IDTA-01001; schemas for JSON, RDF, XML.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names AAS specifications published by IDTA with versions, dates and licence; this entry records the version, release date and licence found.",
+      "uncertainties": [
+        "publication_date is the GitHub release timestamp; the IDTA website states no publication date.",
+        "The hub heading 'Release 26-01' is undefined on the page and does not match the 2026-07 upload paths and 2026-07-21 release timestamps; its meaning is unresolved.",
+        "Only identity, version, release date and licence were confirmed (hub landing page, repository README, release API). The specification HTML/PDF itself was not opened, hence metadata_only.",
+        "WebFetch output is produced by a summarising model; version numbers were cross-checked between the hub page, PDF filename and the GitHub release list.",
+        "IDTA numbering differs from IEC 63278 numbering (IDTA Part 2 = API, Part 4 = Security, Part 5 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). The content relationship between IDTA and IEC parts was not examined.",
+        "README says 3.1.2 was October 2025 but the release API says 2025-11-10.",
+        "Repository last pushed 2026-09-09, after the v3.2.0 tag; unreleased changes may exist on the main branch."
+      ]
+    },
+    {
+      "id": "idta-01002-api",
+      "title": "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces",
+      "identifier": "IDTA-01002-3-2-0 (repository https://github.com/admin-shell-io/aas-specs-api)",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-2-application-programming-interfaces-idta-number-01002",
+      "edition_or_version": "3.2 (release IDTA-01002-3-2-0, tag v3.2.0)",
+      "publication_date": "2026-07-21",
+      "legal_or_spec_status": "published; current release in the maintainer repository (GitHub release not marked pre-release)",
+      "applicable_dates": [
+        {
+          "date": "2026-07-21",
+          "what": "Date of the GitHub release of the current version (IDTA website states no date)",
+          "basis": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "v3.1.3 / IDTA-01002-3-1-3",
+          "date": "2026-07-06",
+          "summary": "GitHub release (earlier-numbered line released shortly before 3.2.0)",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases"
+        },
+        {
+          "identifier": "v3.1.2 / IDTA-01002-3-1-2",
+          "date": "2026-04-23",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases"
+        },
+        {
+          "identifier": "v3.1.1 / IDTA-01002-3-1-1",
+          "date": "2025-08-01",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases"
+        },
+        {
+          "identifier": "v3.1.0 / IDTA-01002-3-1-0",
+          "date": "2025-05-27",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases"
+        },
+        {
+          "identifier": "v3.0.4",
+          "date": "2025-04-29",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+          "what_it_shows": "IDTA AAS specifications page, 'Release 26-01': lists Parts 1, 2, 3a, 3b, 4, 5 with IDTA numbers 01001, 01002, 01003-a, 01003-b, 01004, 01005; version numbers appear only in cover-image filenames; no dates and no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-2-application-programming-interfaces-idta-number-01002",
+          "what_it_shows": "IDTA content-hub page for this part (version taken from PDF filename and HTML path; no date, no licence text, only a copyright line).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases",
+          "what_it_shows": "GitHub release list with full ISO publication timestamps; none marked pre-release or draft.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names AAS specifications published by IDTA with versions, dates and licence; this entry records the version, release date and licence found.",
+      "uncertainties": [
+        "publication_date is the GitHub release timestamp; the IDTA website states no publication date.",
+        "The hub heading 'Release 26-01' is undefined on the page and does not match the 2026-07 upload paths and 2026-07-21 release timestamps; its meaning is unresolved.",
+        "Only identity, version, release date and licence were confirmed (hub landing page, repository README, release API). The specification HTML/PDF itself was not opened, hence metadata_only.",
+        "WebFetch output is produced by a summarising model; version numbers were cross-checked between the hub page, PDF filename and the GitHub release list.",
+        "IDTA numbering differs from IEC 63278 numbering (IDTA Part 2 = API, Part 4 = Security, Part 5 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). The content relationship between IDTA and IEC parts was not examined.",
+        "Repository last pushed 2026-10-13 (the retrieval date), after the v3.2.0 tag; unreleased changes likely exist on main.",
+        "The content-hub page text (as summarised) lists referenced parts at v3.1 (Part 1, 3a, 5) although Part 1 and Part 5 current releases are 3.2; whether the 3.2 API specification references 3.1 or 3.2 of the other parts was not resolved.",
+        "v3.1.3 (2026-07-06) was released only about two weeks before v3.2.0, so patch releases of the 3.1 line may continue in parallel."
+      ]
+    },
+    {
+      "id": "idta-01003a-iec61360",
+      "title": "Specification of the Asset Administration Shell Part 3a: Data Specification IEC 61360",
+      "identifier": "IDTA-01003-a-3-1-1 (repository https://github.com/admin-shell-io/aas-specs-iec61360)",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-3a-data-specification-iec-61360-idta-number-01003-a",
+      "edition_or_version": "3.1.1 (release IDTA-01003-a-3-1-1, tag v3.1.1)",
+      "publication_date": "2025-08-01",
+      "legal_or_spec_status": "published; current release in the maintainer repository (GitHub release not marked pre-release)",
+      "applicable_dates": [
+        {
+          "date": "2025-08-01",
+          "what": "Date of the GitHub release of the current version (IDTA website states no date)",
+          "basis": "https://api.github.com/repos/admin-shell-io/aas-specs-iec61360/releases"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "v3.1.0 / IDTA-01003-a-3-1-0",
+          "date": "2025-05-27",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-iec61360/releases"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+          "what_it_shows": "IDTA AAS specifications page, 'Release 26-01': lists Parts 1, 2, 3a, 3b, 4, 5 with IDTA numbers 01001, 01002, 01003-a, 01003-b, 01004, 01005; version numbers appear only in cover-image filenames; no dates and no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-3a-data-specification-iec-61360-idta-number-01003-a",
+          "what_it_shows": "IDTA content-hub page for this part (version taken from PDF filename and HTML path; no date, no licence text, only a copyright line).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-iec61360/releases",
+          "what_it_shows": "GitHub release list with full ISO publication timestamps; none marked pre-release or draft.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names AAS specifications published by IDTA with versions, dates and licence; this entry records the version, release date and licence found.",
+      "uncertainties": [
+        "publication_date is the GitHub release timestamp; the IDTA website states no publication date.",
+        "The hub heading 'Release 26-01' is undefined on the page and does not match the 2026-07 upload paths and 2026-07-21 release timestamps; its meaning is unresolved.",
+        "Only identity, version, release date and licence were confirmed (hub landing page, repository README, release API). The specification HTML/PDF itself was not opened, hence metadata_only.",
+        "WebFetch output is produced by a summarising model; version numbers were cross-checked between the hub page, PDF filename and the GitHub release list.",
+        "IDTA numbering differs from IEC 63278 numbering (IDTA Part 2 = API, Part 4 = Security, Part 5 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). The content relationship between IDTA and IEC parts was not examined.",
+        "Repository last pushed 2026-09-02, after the v3.1.1 tag (2025-08-01); unreleased changes may exist on main.",
+        "Content-hub version for Part 3a (3-1-1) was inferred from a cover-image filename, corroborated by the GitHub tag."
+      ]
+    },
+    {
+      "id": "idta-01003b-units",
+      "title": "Specification of the Asset Administration Shell Part 3b: Data Specification Units of Measurement",
+      "identifier": "IDTA-01003-b-3-0-0 (repository https://github.com/admin-shell-io/aas-specs-measurement-units)",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-3b-data-specification-units-of-measurement-idta-number-01003-b",
+      "edition_or_version": "3.0 (release IDTA-01003-b-3-0-0, tag v3.0.0)",
+      "publication_date": "2026-07-21",
+      "legal_or_spec_status": "published; current release in the maintainer repository (GitHub release not marked pre-release)",
+      "applicable_dates": [
+        {
+          "date": "2026-07-21",
+          "what": "Date of the GitHub release of the current version (IDTA website states no date)",
+          "basis": "https://api.github.com/repos/admin-shell-io/aas-specs-measurement-units/releases"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+          "what_it_shows": "IDTA AAS specifications page, 'Release 26-01': lists Parts 1, 2, 3a, 3b, 4, 5 with IDTA numbers 01001, 01002, 01003-a, 01003-b, 01004, 01005; version numbers appear only in cover-image filenames; no dates and no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-3b-data-specification-units-of-measurement-idta-number-01003-b",
+          "what_it_shows": "IDTA content-hub page for this part (version taken from PDF filename and HTML path; no date, no licence text, only a copyright line).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-measurement-units/releases",
+          "what_it_shows": "GitHub release list with full ISO publication timestamps; none marked pre-release or draft.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names AAS specifications published by IDTA with versions, dates and licence; this entry records the version, release date and licence found.",
+      "uncertainties": [
+        "publication_date is the GitHub release timestamp; the IDTA website states no publication date.",
+        "The hub heading 'Release 26-01' is undefined on the page and does not match the 2026-07 upload paths and 2026-07-21 release timestamps; its meaning is unresolved.",
+        "Only identity, version, release date and licence were confirmed (hub landing page, repository README, release API). The specification HTML/PDF itself was not opened, hence metadata_only.",
+        "WebFetch output is produced by a summarising model; version numbers were cross-checked between the hub page, PDF filename and the GitHub release list.",
+        "IDTA numbering differs from IEC 63278 numbering (IDTA Part 2 = API, Part 4 = Security, Part 5 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). The content relationship between IDTA and IEC parts was not examined.",
+        "The repository has only one GitHub release (v3.0.0, 2026-07-21); the specification line may predate this release, as the repository appears to have been created or migrated later. Earlier history was not examined."
+      ]
+    },
+    {
+      "id": "idta-01004-security",
+      "title": "Specification of the Asset Administration Shell Part 4: Security",
+      "identifier": "IDTA-01004-3-1-0 (repository https://github.com/admin-shell-io/aas-specs-security)",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-4-security-idta-number-01004",
+      "edition_or_version": "3.1 (release IDTA-01004-3-1-0, tag v3.1.0)",
+      "publication_date": "2026-07-21",
+      "legal_or_spec_status": "published; current release in the maintainer repository (GitHub release not marked pre-release)",
+      "applicable_dates": [
+        {
+          "date": "2026-07-21",
+          "what": "Date of the GitHub release of the current version (IDTA website states no date)",
+          "basis": "https://api.github.com/repos/admin-shell-io/aas-specs-security/releases"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "v3.0.2 / IDTA-01004-3-0-2",
+          "date": "2026-04-14",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-security/releases"
+        },
+        {
+          "identifier": "v3.0.1 / IDTA-01004-3-0-1",
+          "date": "2025-08-01",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-security/releases"
+        },
+        {
+          "identifier": "v3.0.0 / IDTA-01004-3-0-0",
+          "date": "2025-05-27",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-security/releases"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+          "what_it_shows": "IDTA AAS specifications page, 'Release 26-01': lists Parts 1, 2, 3a, 3b, 4, 5 with IDTA numbers 01001, 01002, 01003-a, 01003-b, 01004, 01005; version numbers appear only in cover-image filenames; no dates and no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-4-security-idta-number-01004",
+          "what_it_shows": "IDTA content-hub page for this part (version taken from PDF filename and HTML path; no date, no licence text, only a copyright line).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-security/releases",
+          "what_it_shows": "GitHub release list with full ISO publication timestamps; none marked pre-release or draft.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names AAS specifications published by IDTA with versions, dates and licence; this entry records the version, release date and licence found.",
+      "uncertainties": [
+        "publication_date is the GitHub release timestamp; the IDTA website states no publication date.",
+        "The hub heading 'Release 26-01' is undefined on the page and does not match the 2026-07 upload paths and 2026-07-21 release timestamps; its meaning is unresolved.",
+        "Only identity, version, release date and licence were confirmed (hub landing page, repository README, release API). The specification HTML/PDF itself was not opened, hence metadata_only.",
+        "WebFetch output is produced by a summarising model; version numbers were cross-checked between the hub page, PDF filename and the GitHub release list.",
+        "IDTA numbering differs from IEC 63278 numbering (IDTA Part 2 = API, Part 4 = Security, Part 5 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). The content relationship between IDTA and IEC parts was not examined.",
+        "Repository last pushed 2026-10-13 (the retrieval date), after the v3.1.0 tag; unreleased changes likely exist on main.",
+        "This is IDTA's security part; it is not IEC 63278-3, and no equivalence was examined."
+      ]
+    },
+    {
+      "id": "idta-01005-aasx",
+      "title": "Specification of the Asset Administration Shell Part 5: Package File Format (AASX)",
+      "identifier": "IDTA-01005-3-2-0 (repository https://github.com/admin-shell-io/aas-specs-aasx)",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-5-package-file-format-aasx-idta-number-01005",
+      "edition_or_version": "3.2 (release IDTA-01005-3-2-0, tag v3.2.0)",
+      "publication_date": "2026-07-21",
+      "legal_or_spec_status": "published; current release in the maintainer repository (GitHub release not marked pre-release)",
+      "applicable_dates": [
+        {
+          "date": "2026-07-21",
+          "what": "Date of the GitHub release of the current version (IDTA website states no date)",
+          "basis": "https://api.github.com/repos/admin-shell-io/aas-specs-aasx/releases"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "v3.1.0 / IDTA-01005-3-1-0",
+          "date": "2025-05-27",
+          "summary": "GitHub release",
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-aasx/releases"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+          "what_it_shows": "IDTA AAS specifications page, 'Release 26-01': lists Parts 1, 2, 3a, 3b, 4, 5 with IDTA numbers 01001, 01002, 01003-a, 01003-b, 01004, 01005; version numbers appear only in cover-image filenames; no dates and no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-5-package-file-format-aasx-idta-number-01005",
+          "what_it_shows": "IDTA content-hub page for this part (version taken from PDF filename and HTML path; no date, no licence text, only a copyright line).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/aas-specs-aasx/releases",
+          "what_it_shows": "GitHub release list with full ISO publication timestamps; none marked pre-release or draft.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names AAS specifications published by IDTA with versions, dates and licence; this entry records the version, release date and licence found.",
+      "uncertainties": [
+        "publication_date is the GitHub release timestamp; the IDTA website states no publication date.",
+        "The hub heading 'Release 26-01' is undefined on the page and does not match the 2026-07 upload paths and 2026-07-21 release timestamps; its meaning is unresolved.",
+        "Only identity, version, release date and licence were confirmed (hub landing page, repository README, release API). The specification HTML/PDF itself was not opened, hence metadata_only.",
+        "WebFetch output is produced by a summarising model; version numbers were cross-checked between the hub page, PDF filename and the GitHub release list.",
+        "IDTA numbering differs from IEC 63278 numbering (IDTA Part 2 = API, Part 4 = Security, Part 5 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). The content relationship between IDTA and IEC parts was not examined.",
+        "The repository description labels the specification 'IDTA-010005' (an apparent typo for IDTA-01005); the hub page and release names use 01005.",
+        "This is IDTA's AASX part; it is not IEC 63278-5 (Interfaces)."
+      ]
+    },
+    {
+      "id": "idta-02099-1-dpp-metadata",
+      "title": "Digital Product Passport - Part 1: Metadata",
+      "identifier": "IDTA 02099-1 (content hub lists it as '02099'); repo path published/Digital Product Passport/Digital Product Passport Part-1",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/index.html",
+      "edition_or_version": "Content hub: 1.0, Published. Docs site: current 1.0.1 (bugfix). Repository main also holds folder 1/0/2 (README: bug-fix 1.0.2).",
+      "publication_date": null,
+      "legal_or_spec_status": "IDTA Submodel Template, Published (content hub). Version 1.0 first released May 2026 per docs-site version table; bugfix 1.0.1 July 2026; 1.0.2 folder present on main since September 2026 commits, not yet shown on the docs site or hub.",
+      "applicable_dates": [],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (first version)",
+          "date": "2026-05",
+          "summary": "First version per docs-site version table (month only).",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/index.html"
+        },
+        {
+          "identifier": "1.0.1 (bugfix)",
+          "date": "2026-07",
+          "summary": "Bugfix version per docs-site version table; repository commits 2026-07-08 'Bug fix dpp metadata' and 2026-07-09 move of older 1.0.0 documentation to folder 0.",
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates/commits?path=published/Digital%20Product%20Passport"
+        },
+        {
+          "identifier": "IDTA number added to title",
+          "date": "2026-09-09",
+          "summary": "Repository commit 'DPP Metadata: add IDTA number in title'.",
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates/commits?path=published/Digital%20Product%20Passport"
+        },
+        {
+          "identifier": "1.0.2 (bug-fix folder on main)",
+          "date": "2026-09-22",
+          "summary": "Commit 'bug fixes for 22 reported issues: new patch folders'. Folder README lists corrections to the machine-readable files only (issues #187, #207, #208, #210); PDF unchanged. Not shown on hub or docs site. Date is that of repository commit 5bf65db ('new patch folders'); further commits through 2026-09-25 edited these folders; the folder-level date was not verified.",
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/2/README.md"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: entry 'Digital Product Passport - Part 1: Metadata', number 02099, version 1.0, status Published; describes data points for a DPP conformant to EN 18223:2026; first part of a planned series, later parts undetermined. Page read in full across two fetches; no other 02099 entries.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/index.html",
+          "what_it_shows": "IDTA docs site: IDTA 02099-1 Part 1 Metadata, version table 1.0 (May 2026, first version) and 1.0.1 (July 2026, bugfix); imprint of IDTA, no licence text.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/2/README.md",
+          "what_it_shows": "Repository README: IDTA number 02099-1, bug-fix version 1.0.2, issues listed, no dates, no licence.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/README.md",
+          "what_it_shows": "Repository README for version 1.0: names EN 18223:2026 as primary reference and lists related CEN/CENELEC JTC 24 modules (as IDTA's own list).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates/contents/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/2",
+          "what_it_shows": "GitHub contents listing: files named 'IDTA 02099-1_Template Digital Product Passport - Part 1' (.aasx, .json, .pdf) in folder 1/0/2.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - 'IDTA 02099-1' is located: it is 'Digital Product Passport - Part 1: Metadata', a Published IDTA Submodel Template. The brief asked only for identification, and no title was guessed.",
+      "uncertainties": [
+        "publication_date is null: only month-level dates (May 2026 for 1.0, July 2026 for 1.0.1) are given by the docs-site version table; the hub gives no date.",
+        "The EN 18223:2026 conformance statement is IDTA's own claim. EN 18223 itself was not verified here (another research group's scope).",
+        "Which of 1.0, 1.0.1 or 1.0.2 IDTA regards as the current registered version is unresolved: the hub says 1.0, the docs site says 1.0.1, the repository holds 1.0.2.",
+        "The hub's GitHub link uses the path published/DigitalProductPassport/DigitalProductPassportPart-1/1/0 (no spaces), but the real repository path contains spaces; the link as published may not resolve.",
+        "The repository README auto-table lists the template as version 1.0 (1/0/0) and does not show the 1.0.2 folder.",
+        "Licence of the website PDF is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-1-dbp-digital-nameplate",
+      "title": "Digital Battery Passport, Part 1: Digital Nameplate",
+      "identifier": "IDTA 02035-1; repo path published/Digital Battery Passport/1_Digital Nameplate",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-1/1.0/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0. See amendment_history for later patch folders.",
+      "publication_date": null,
+      "legal_or_spec_status": "Published (content hub, version 1.0). Docs site lists only 1.0 (February 2026). Repository main also holds folder 1/1 whose README calls it 'bug-fix version 1.1'.",
+      "applicable_dates": [],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (first version)",
+          "date": "2026-02",
+          "summary": "February 2026 per docs-site version table (no day); first version by the Model Expert Group of IDTA, Catena-X and the BatteryPass Consortium.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-1/1.0/index.html"
+        },
+        {
+          "identifier": "1.1 (bug-fix, repository folder 1/1)",
+          "date": "2026-09-22",
+          "summary": "Repository README: corrections to JSON/AASX only (issues #187, #207, #208, #210), PDF unchanged. Not on hub or docs site. Date is that of repository commit 5bf65db ('new patch folders'); further commits through 2026-09-25 edited these folders; the folder-level date was not verified.",
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Battery%20Passport/1_Digital%20Nameplate/1/1/README.md"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 1: Digital Nameplate', IDTA 02035-1, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-1/1.0/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/1_Digital%20Nameplate",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 1: Digital Nameplate).",
+      "uncertainties": [
+        "Docs-site version table gives only 'February 2026' for 1.0; publication_date left null.",
+        "Folder name 1/1 denotes version 1.1 in the repository's major/minor/patch layout, whereas parts 4-7 use 1/0/1 and 1/0/2 for bug fixes; the README nonetheless calls 1.1 a 'bug-fix' version. This inconsistency is unresolved.",
+        "The repository README auto-table lists this part as 1.0 (1/0/0) and does not show folder 1/1.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-2-dbp-handover-documentation",
+      "title": "Digital Battery Passport, Part 2: Handover Documentation",
+      "identifier": "IDTA 02035-2; repo path published/Digital Battery Passport/2_Handover Documentation",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-2/1.0/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0. See amendment_history for later patch folders.",
+      "publication_date": "2026-02-18",
+      "legal_or_spec_status": "Published (content hub, version 1.0, release 18.02.2026 per docs-site version table). Repository main also holds folder 1/1 ('bug-fix version 1.1').",
+      "applicable_dates": [
+        {
+          "date": "2026-02-18",
+          "what": "Version 1.0 release date as written in the docs-site version table",
+          "basis": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-2/1.0/index.html"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (official release)",
+          "date": "2026-02-18",
+          "summary": "Release of the official Submodel Template published by IDTA (docs-site version table, written 18.02.2026).",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-2/1.0/index.html"
+        },
+        {
+          "identifier": "1.1 (bug-fix, repository folder 1/1)",
+          "date": "2026-09-22",
+          "summary": "Repository README: corrections to JSON/AASX only (issues #187, #207, #208, #210), PDF unchanged. Not on hub or docs site. Date is that of repository commit 5bf65db ('new patch folders'); further commits through 2026-09-25 edited these folders; the folder-level date was not verified.",
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Battery%20Passport/2_Handover%20Documentation/1/1/README.md"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 2: Handover Documentation', IDTA 02035-2, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-2/1.0/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/2_Handover%20Documentation",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 2: Handover Documentation).",
+      "uncertainties": [
+        "Folder 1/1 vs 'bug-fix' naming anomaly as for Part 1 (1/1 = version 1.1 in the repository layout).",
+        "The repository README auto-table lists this part as 1.0 and does not show folder 1/1.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-3-dbp-product-carbon-footprint",
+      "title": "Digital Battery Passport, Part 3: Product Carbon Footprint",
+      "identifier": "IDTA 02035-3; repo path published/Digital Battery Passport/3_Product Carbon Footprint",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-3/1.0/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0. See amendment_history for later patch folders.",
+      "publication_date": "2026-02-18",
+      "legal_or_spec_status": "Published (content hub, version 1.0, release 18.02.2026 per docs-site version table). Repository main also holds folder 1/1 ('bug-fix version 1.1').",
+      "applicable_dates": [
+        {
+          "date": "2026-02-18",
+          "what": "Version 1.0 release date as written in the docs-site version table",
+          "basis": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-3/1.0/index.html"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (official release)",
+          "date": "2026-02-18",
+          "summary": "Official IDTA release (docs-site version table, written 18.02.2026).",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-3/1.0/index.html"
+        },
+        {
+          "identifier": "1.1 (bug-fix, repository folder 1/1)",
+          "date": "2026-09-22",
+          "summary": "Repository README: corrections to JSON/AASX only (issues #187, #207, #208, #210), PDF unchanged. Not on hub or docs site. Date is that of repository commit 5bf65db ('new patch folders'); further commits through 2026-09-25 edited these folders; the folder-level date was not verified.",
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Battery%20Passport/3_Product%20Carbon%20Footprint/1/1/README.md"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 3: Product Carbon Footprint', IDTA 02035-3, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-3/1.0/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/3_Product%20Carbon%20Footprint",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 3: Product Carbon Footprint).",
+      "uncertainties": [
+        "Folder 1/1 vs 'bug-fix' naming anomaly as for Part 1.",
+        "The repository README auto-table lists this part as 1.0 and does not show folder 1/1.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-4-dbp-technical-data",
+      "title": "Digital Battery Passport, Part 4: Technical Data",
+      "identifier": "IDTA 02035-4; repo path published/Digital Battery Passport/4_Technical Data",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-4/1.0.1/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0.1. See amendment_history for later patch folders.",
+      "publication_date": null,
+      "legal_or_spec_status": "Published (content hub, version 1.0). Docs site current 1.0.1 (May 2026 bugfix). Repository main holds 1/0 (1.0), 1/0/1 and 1/0/2.",
+      "applicable_dates": [],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (first version)",
+          "date": "2025-12",
+          "summary": "The part's own docs-site version table dates 1.0 to December 2025, whereas the sibling parts say February 2026.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-4/1.0.1/index.html"
+        },
+        {
+          "identifier": "1.0.1 (bugfix)",
+          "date": "2026-05",
+          "summary": "Bugfix version per docs-site version table (month only). The repository README auto-table also lists 1.0.1.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-4/1.0.1/index.html"
+        },
+        {
+          "identifier": "1.0.2 (bug-fix folder on main)",
+          "date": "2026-09-22",
+          "summary": "Repository README: fixes issue #263, a spelling correction in the PDF (a field name); the 1.0.1 artifacts are described as unchanged. Not on docs site. Date is that of repository commit 5bf65db ('new patch folders'); further commits through 2026-09-25 edited these folders; the folder-level date was not verified.",
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/Digital%20Battery%20Passport/4_Technical%20Data/1/0/2/README.md"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 4: Technical Data', IDTA 02035-4, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-4/1.0.1/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/4_Technical%20Data",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 4: Technical Data).",
+      "uncertainties": [
+        "Date discrepancy kept as found: this part's version table says 1.0 was December 2025 while Parts 1-3 and 5-7 say February 2026 and the hub PDF path for this part is 2026/02.",
+        "publication_date is null because the only date is month-level and conflicts with siblings.",
+        "Part 4 'Technical Data' is described as an instance of the generic Technical Data template with battery extensions only in a search summary; not verified.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-5-dbp-product-condition",
+      "title": "Digital Battery Passport, Part 5: Product Condition",
+      "identifier": "IDTA 02035-5; repo path published/Digital Battery Passport/5_Product Condition",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-5/1.0.2/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0.2. See amendment_history for later patch folders.",
+      "publication_date": "2026-02-18",
+      "legal_or_spec_status": "Published (content hub, version 1.0, release 18.02.2026 per docs-site version table). Docs site current 1.0.2 (August 2026 bugfix).",
+      "applicable_dates": [
+        {
+          "date": "2026-02-18",
+          "what": "Version 1.0 release date as written in the docs-site version table",
+          "basis": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-5/1.0.2/index.html"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (initial official release)",
+          "date": "2026-02-18",
+          "summary": "Initial official release by IDTA (docs-site version table, written 18.02.2026).",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-5/1.0.2/index.html"
+        },
+        {
+          "identifier": "1.0.1 (bugfix)",
+          "date": "2026-04",
+          "summary": "Bugfix release per docs-site version table (month only); repository README auto-table lists 1.0.1.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-5/1.0.2/index.html"
+        },
+        {
+          "identifier": "1.0.2 (bugfix)",
+          "date": "2026-08",
+          "summary": "Bugfix release per docs-site version table (month only). Repository folder 1/0/2 exists.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-5/1.0.2/index.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 5: Product Condition', IDTA 02035-5, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-5/1.0.2/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/5_Product%20Condition",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 5: Product Condition).",
+      "uncertainties": [
+        "Repository commit 2026-09-24 'drop duplicate Product Condition 1.0.3, untrack __pycache__' shows a 1.0.3 folder existed transiently and was removed; no 1.0.3 is published.",
+        "The docs site dates 1.0.2 to August 2026 while repository patch-folder commits are dated 2026-09-22 to 2026-09-25; the relationship between the two is unresolved.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-6-dbp-material-composition",
+      "title": "Digital Battery Passport, Part 6: Material Composition",
+      "identifier": "IDTA 02035-6; repo path published/Digital Battery Passport/6_Material Composition",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-6/1.0.2/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0.2. See amendment_history for later patch folders.",
+      "publication_date": null,
+      "legal_or_spec_status": "Published (content hub, version 1.0). Docs site current 1.0.2 (September 2026 bugfix).",
+      "applicable_dates": [],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (first official release)",
+          "date": "2026-02",
+          "summary": "February 2026 per docs-site version table (no day).",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-6/1.0.2/index.html"
+        },
+        {
+          "identifier": "1.0.1 (bugfix)",
+          "date": "2026-04",
+          "summary": "Bugfix release per docs-site version table; changelog in its Annex B (month only). Repository README auto-table lists 1.0.1.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-6/1.0.2/index.html"
+        },
+        {
+          "identifier": "1.0.2 (bugfix)",
+          "date": "2026-09",
+          "summary": "Bugfix release per docs-site version table; repository commits 2026-09-09 'Batterypass MaterialComposition v1.0.2: aasx' and documentation for 1.0.2.",
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates/commits?path=published/Digital%20Battery%20Passport"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 6: Material Composition', IDTA 02035-6, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-6/1.0.2/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/6_Material%20Composition",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 6: Material Composition).",
+      "uncertainties": [
+        "Docs-site version table gives only 'February 2026' for 1.0; publication_date left null.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-02035-7-dbp-circularity",
+      "title": "Digital Battery Passport, Part 7: Circularity",
+      "identifier": "IDTA 02035-7; repo path published/Digital Battery Passport/7_Circularity",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium (joint Model Expert Group per docs-site version table)",
+      "source_type": "industry_specification",
+      "official_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-7/1.0.1/index.html",
+      "edition_or_version": "Content hub registered version: 1.0. Latest on docs site: 1.0.1. See amendment_history for later patch folders.",
+      "publication_date": "2026-02-18",
+      "legal_or_spec_status": "Published (content hub, version 1.0, release 18.02.2026 per docs-site version table). Docs site current 1.0.1 (24.03.2026). Repository main also holds folder 1/0/2.",
+      "applicable_dates": [
+        {
+          "date": "2026-02-18",
+          "what": "Version 1.0 release date as written in the docs-site version table",
+          "basis": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-7/1.0.1/index.html"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.0 (initial official release)",
+          "date": "2026-02-18",
+          "summary": "Initial official release of the Submodel Template (docs-site version table, written 18.02.2026).",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-7/1.0.1/index.html"
+        },
+        {
+          "identifier": "1.0.1 (bugfix)",
+          "date": "2026-03-24",
+          "summary": "Per docs-site version table: documentation generation fixed, list-element types corrected in some collections, a ConceptDescription ID corrected for one attribute, a guideline added to the bibliography, minor editorial changes.",
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-7/1.0.1/index.html"
+        },
+        {
+          "identifier": "1.0.2 (bug-fix folder on main)",
+          "date": "2026-09-22",
+          "summary": "Folder 1/0/2 holds AASX, JSON and PDF; no README content was read for it. Not on docs site or hub. Date is that of repository commit 5bf65db ('new patch folders'); further commits through 2026-09-25 edited these folders; the folder-level date was not verified.",
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates/contents/published/Digital%20Battery%20Passport/7_Circularity/1/0/2"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 is the licence recorded by the GitHub API (spdx_id) and repository LICENSE file for the admin-shell-io repository that hosts this document. The IDTA website pages and the document version tables read today show only an IDTA e.V. copyright/imprint line and no licence text, so the licence of the website PDF copies is unstated.",
+      "permitted_use_basis": "Reference and implement under CC-BY-4.0 with attribution, relying on the repository licence; licence of website PDF copies is unstated, so prefer the repository copy as the redistributable source.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+          "what_it_shows": "IDTA content hub: 'Digital Battery Passport - Part 7: Circularity', IDTA 02035-7, version 1.0, status Published; the seven parts 02035-1..7 are the Digital Battery Passport series. Whole page read across two fetches.",
+          "official": true
+        },
+        {
+          "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-7/1.0.1/index.html",
+          "what_it_shows": "IDTA docs site page with version table; imprint of IDTA, no licence text. Navigation on the site shows per-part versions (P1-3: 1.0; P4: 1.0.1; P5: 1.0.2 and 1.0.1; P6: 1.0.2 and 1.0.1; P7: 1.0.1).",
+          "official": true
+        },
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/7_Circularity",
+          "what_it_shows": "Repository folder for this part in admin-shell-io/submodel-templates (CC-BY-4.0 repository); contents listing read via the GitHub API.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/README.md",
+          "what_it_shows": "Repository README auto-table lists Parts 1-3 as 1.0 (1/0/0) and Parts 4-7 as 1.0.1 (1/0/1), all 'Published'; table has no date column and lags the newer patch folders.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief believes the 02035 series concerns the digital battery passport; IDTA 02035-1 to 02035-7 are titled 'Digital Battery Passport' (Part 7: Circularity).",
+      "uncertainties": [
+        "Repository folder 1/0/2 exists but its README was not read; its status as a released version is unconfirmed.",
+        "Current-version conflict between sources: content hub says 1.0 for all parts; docs site P1-3 1.0, P4 1.0.1, P5 1.0.2, P6 1.0.2, P7 1.0.1; repo README table P1-3 1.0, P4-7 1.0.1; repo folders on main hold 1/1 for P1-3 and 1/0/2 for P4-7. Commits dated 2026-09-22 to 2026-09-25 (e.g. 5bf65db 'bug fixes for 22 reported issues: new patch folders') added patch folders that the hub and README table do not yet reflect.",
+        "No source states which version a conformance engine should treat as current; the hub's registered version is recorded in edition_or_version.",
+        "Parts conform to DIN DKE SPEC 99100 and related EU regulations per the docs-site preamble (Part 1 page); that conformance statement is IDTA's own and was not verified.",
+        "Licence of website PDF copies is unstated; CC-BY-4.0 is the repository licence."
+      ]
+    },
+    {
+      "id": "idta-submodel-templates-repo",
+      "title": "IDTA Submodel Templates for AAS (repository admin-shell-io/submodel-templates)",
+      "identifier": "https://github.com/admin-shell-io/submodel-templates",
+      "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), GitHub organisation admin-shell-io",
+      "source_type": "software_repository",
+      "official_url": "https://github.com/admin-shell-io/submodel-templates",
+      "edition_or_version": "branch main; last pushed 2026-10-05 per GitHub API",
+      "publication_date": null,
+      "legal_or_spec_status": "active repository; the 'published' folder holds templates officially released and registered by IDTA; 'deprecated' holds templates no longer maintained; in-development templates are not held here (listed at an external IDTA link)",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 (GitHub API spdx_id and LICENSE.txt). The related Antora documentation repositories (idta-submodel-templates, aas-specifications, aas-guides-antora) are Apache-2.0.",
+      "permitted_use_basis": "Content reuse under CC-BY-4.0 with attribution. Tooling or documentation-site repositories under Apache-2.0 may be used as dependencies. Do not call or probe any DPP system.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://github.com/admin-shell-io/submodel-templates",
+          "what_it_shows": "Repository README: published/deprecated folder meaning, major/minor/patch folder layout, CC-BY-4.0.",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates",
+          "what_it_shows": "API record: licence CC-BY-4.0, default branch main, pushed 2026-10-05, not archived, no topics.",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/repos/admin-shell-io/submodel-templates/contents/published",
+          "what_it_shows": "55 template directories in published/ including 'Digital Battery Passport' (7 numbered parts plus a guideline folder) and 'Digital Product Passport' (Part-1). No directory starts with 02035 or 02099 (folders are named by title, files carry the IDTA numbers).",
+          "official": true
+        },
+        {
+          "url": "https://api.github.com/orgs/admin-shell-io/repos?per_page=100&sort=full_name",
+          "what_it_shows": "Organisation repository list (read across three fetches): no repository named 'aas-specs'; spec repositories are aas-specs-metamodel/-api/-security/-aasx/-iec61360/-measurement-units; 'specifications' is an old repository last pushed 2022-12-07 with no licence.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches - the brief names github.com/admin-shell-io as an official location; the repository holds the 02035 and 02099 templates.",
+      "uncertainties": [
+        "Repository state is moving: 8 commits between 2026-09-22 and 2026-09-25 touched the Digital Battery Passport folders (including one that rebuilds bug-fix AASX files from JSON). Re-read before relying on any patch folder.",
+        "A recursive git-tree read was truncated by GitHub (truncated: true) and was not used.",
+        "Per-file licence statements inside template PDFs were not read."
+      ]
+    },
+    {
+      "id": "idta-iec63278-companion-repo",
+      "title": "Additional materials to the IEC 63278 series (repository admin-shell-io/IEC63278)",
+      "identifier": "https://github.com/admin-shell-io/IEC63278",
+      "issuing_body": "IDTA, GitHub organisation admin-shell-io",
+      "source_type": "software_repository",
+      "official_url": "https://github.com/admin-shell-io/IEC63278",
+      "edition_or_version": "no release; last pushed 2026-08-06 per GitHub API",
+      "publication_date": null,
+      "legal_or_spec_status": "active repository; README says the files are provided as-is, IEC's official information overrules them, and the repository contains no copies of IEC documents",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Industry specification / repository; not a European standard and not subject to OJ citation.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "CC-BY-4.0 (README licence link, LICENSE file, GitHub API).",
+      "permitted_use_basis": "Reference only; companion files for IEC 63278-3 (folder IEC63278-3/ed1/grammar) and IEC 63278-5 (folder IEC63278-5/ed1). Content was not inspected beyond folder names.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://github.com/admin-shell-io/IEC63278",
+          "what_it_shows": "README and folder names: per-part folders IEC63278-3/ed1/grammar and IEC63278-5/ed1; CC-BY-4.0; 6 commits.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable - the brief does not mention this repository; it was found in the organisation listing.",
+      "uncertainties": [
+        "README text says 'IEC 63283' while the repository and folders use 63278; the README does not explain this (likely a typo, unconfirmed).",
+        "The repository contains no part status or date information, so it cannot confirm which IEC parts are published."
+      ]
+    }
+  ],
+  "provisions": [],
+  "attempts": [
+    {
+      "tool": "ToolSearch",
+      "target": "select:WebSearch,WebFetch",
+      "outcome": "Both tools loaded."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "IEC 63278-1 edition/date (allowed domains webstore.iec.ch, iec.ch, iso.org)",
+      "outcome": "Found webstore.iec.ch/en/publication/65628."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://webstore.iec.ch/en/publication/65628",
+      "outcome": "OK: IEC 63278-1:2023 ED1, published 2023-12-14, TC 65, stability date 2028, no amendments shown."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://webstore.iec.ch/en/publication/65628#additionalinfo",
+      "outcome": "OK but no other IEC 63278 parts or lifecycle entries in the capture."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://webstore.iec.ch/en/searchresults?q=63278",
+      "outcome": "HTTP 404."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "IEC 63278-2/-3/-4/-5/-6 status, several queries incl. extended mode and domain-restricted to webstore.iec.ch/iec.ch",
+      "outcome": "No IEC webstore page found for Parts 2-6; results were national-body/aggregator pages. Some result summaries contained claims not reproduced by pages I opened (see anomalies)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.iec.ch/dyn/www/f?p=103:38:25763300038578::::FSP_ORG_ID,FSP_APEX_PAGE,FSP_PROJECT_ID:1250,23,103536",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://iec.ch/ords/f?p=103:38:10453698257418::::FSP_ORG_ID,FSP_APEX_PAGE,FSP_PROJECT_ID:1250,23,103536",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://iec.ch/dyn/www/f?p=103:38:510776132032550::::FSP_ORG_ID,FSP_APEX_PAGE,FSP_PROJECT_ID:1250,23,109075",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.iec.ch/ords/f?p=103:26:519052604650947::::FSP_ORG_ID,FSP_LANG_ID:1250,34",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://iec.ch/ords/f?p=103:27:1269495818334::::FSP_ORG_ID,FSP_LANG_ID:1345,25",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "Bash",
+      "target": "plain curl of the IEC project page",
+      "outcome": "Denied by the permission system; not retried."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.cencenelec.eu/dyn/www/f?p=CENELEC:110:0::::FSP_PROJECT,FSP_ORG_ID:80089,1258510&cs=1 (guessed project id)",
+      "outcome": "HTTP 500; no CENELEC record read."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "EN IEC 63278-1:2024 CENELEC date of availability (allowed domains standards.cencenelec.eu, cenelec.eu, cencenelec.eu)",
+      "outcome": "No date found; only CENELEC work-programme/business-plan documents."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.iteh.ai/catalog/standards/clc/3bee3f87-b0d9-4a59-8f28-04bbd8b38e4e/en-iec-63278-1-2024",
+      "outcome": "Returned only a site header; no metadata."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://webstore.ansi.org/standards/ds/dseniec632782024",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.dinmedia.de/en/standard/din-en-iec-63278-1/380477303",
+      "outcome": "OK: DIN EN IEC 63278-1:2024-09, current."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://isrsm.gov.mk/en/project/show/iec:proj:109017 ; https://genorma.com/en/standards/iec-63278-2-ed1",
+      "outcome": "OK: IEC 63278-2 ED1 stage 40.60, close of voting 2026-08-07."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://genorma.com/en/standards/iec-63278-3-ed1",
+      "outcome": "OK: Part 3 stage 30.60, 2026-04-10."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://genorma.com/en/standards/iec-63278-5-ed1 ; https://genorma.com/en/standards/pren-iec-63278-5",
+      "outcome": "OK: Part 5 'Interfaces', IEC stage 30.20 (2026-08-21); prEN stage 10.99 (2024-09-23)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://genorma.com/en/standards/pnw-65-1032-ed1 ; iec-63278-4-ed1 ; pren-iec-63278-4",
+      "outcome": "HTTP 404 each."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://isme.me/en/project/show/iec:proj:103536",
+      "outcome": "OK: Part 1 stage 60.60, published 2023-12-14."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "BSI knowledge pages for BS EN IEC 63278-2 and -3",
+      "outcome": "OK: both are DC (draft for comment) records dated 2023-03-14 and 2026-02-13, labelled 'Current' by BSI."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://din.de/en/wdc-proj:din21:367312197 ; https://www.din.de/en/wdc-proj:din21:391813262 ; https://standict.eu/standards-repository/asset-administration-shell-industrial-applications-part-3-security-provisions",
+      "outcome": "OK: DIN project starts 2023-04-12 (Part 2) and 2025-04-23 (Part 3); no status shown."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "63278 harmonised standard Official Journal (allowed domains eur-lex.europa.eu, op.europa.eu, single-market-economy.ec.europa.eu)",
+      "outcome": "No reference to 63278 or Asset Administration Shell found. EUR-Lex lists not opened."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications (+ Part 1, 2, 5 detail pages)",
+      "outcome": "OK: Release 26-01, Parts 1/2/5 at 3.2; no dates, no licence text."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/admin-shell-io ; /aas-specs-metamodel ; /IEC63278 ; /id ; /submodel-templates",
+      "outcome": "OK."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://api.github.com/repos/admin-shell-io/{aas-specs-metamodel,aas-specs-api,aas-specs-security,aas-specs-aasx,aas-specs-iec61360,aas-specs-measurement-units}/releases",
+      "outcome": "OK: release tags with ISO timestamps."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://api.github.com/orgs/admin-shell-io/repos?per_page=100 (three fetches, offsets 0/100000/200000)",
+      "outcome": "OK: 37 repositories; licences per repository."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://api.github.com/repos/admin-shell-io/submodel-templates/{,contents/published,contents/published/Digital Battery Passport/**,contents/published/Digital Product Passport/**,commits?path=...}",
+      "outcome": "OK: part folders, patch folders and commit history 2026-07-08 to 2026-09-25."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://api.github.com/repos/admin-shell-io/submodel-templates/git/trees/main?recursive=1",
+      "outcome": "Truncated by GitHub (truncated: true); not used."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://raw.githubusercontent.com/admin-shell-io/submodel-templates/main/published/... README.md files and top-level README.md",
+      "outcome": "OK for Digital Battery Passport parts 1-7 and Digital Product Passport READMEs read."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://industrialdigitaltwin.org/en/content-hub/submodels (two fetches covering the whole page)",
+      "outcome": "OK: 02035-1..7 and 02099 Published, version 1.0; other statuses on page: In Development, In Review, Proposal submitted; no further 02035/02099 entries."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/ and IDTA-02035-{1..7}/<version>/index.html",
+      "outcome": "OK: version tables read for 02099-1 and 02035-1..7."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://admin-shell-io.github.io/aas-specifications/ and http://industrialdigitaltwin.io/aas-specifications/",
+      "outcome": "301 redirect to industrialdigitaltwin.io, then a 'relocated' notice; nothing read from the destination."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://industrialdigitaltwin.org/wp-content/uploads/2026/05/260527_IDTA_2Pager_DPP_final.pdf",
+      "outcome": "WebFetch auto-saved the PDF to its tool-results folder (a one-page IDTA German-language leaflet; text unreadable). I did not open or use it; no standard was downloaded."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "IDTA 02035 / IDTA 02099-1 published status; EN 18223 status",
+      "outcome": "Discovery only. EN 18223 results were secondary and belong to another group's scope."
+    }
+  ],
+  "anomalies": [
+    "A WebSearch summary said BS EN IEC 63278-2 was 'Current, published 23 May 2025'. The BSI page I opened shows only the 2023 draft-for-comment record (23/30459609 DC, 14 Mar 2023). The 2025 claim is unresolved and was not recorded as a fact.",
+    "BSI labels draft-for-comment records for IEC 63278-2 (2023) and IEC 63278-3 (2026) as 'Current'. A DC suffix marks a draft; these are not published standards.",
+    "WebSearch summaries gave conflicting descriptions of the IEC 63278-2 ballot (CDV 65/1193 circulated 2026-05-15 vs a DIS ballot). Only 'close of voting 2026-08-07, stage 40.60' was seen on opened mirror pages.",
+    "A WebSearch summary claimed IEC 63278-4 was at FDIS in mid-2026 and had a title about use cases; no opened page supports either claim. Discarded.",
+    "IDTA part numbering differs from IEC 63278 numbering (IDTA 01002 = API, 01004 = Security, 01005 = AASX; IEC 63278-2 = information meta model, -3 = security, -5 = interfaces). Do not map IDTA parts to IEC parts by number.",
+    "The IDTA AAS specifications page is headed 'Release 26-01' but its PDFs sit in 2026/07 upload paths and GitHub releases are dated 2026-07-21; the label is not explained.",
+    "The aas-specs-metamodel README dates release 3.1.2 'October 2025'; the release API gives 2025-11-10.",
+    "The IDTA content hub link for the 02099 template points to a repository path without spaces (published/DigitalProductPassport/DigitalProductPassportPart-1/1/0); the actual path is 'published/Digital Product Passport/Digital Product Passport Part-1'.",
+    "The admin-shell-io/IEC63278 README says 'IEC 63283' in its description while the repository and folders use 63278.",
+    "Part 4 'Technical Data' of IDTA 02035: its own version table dates 1.0 to December 2025; every sibling part says February 2026.",
+    "Repository folders for Parts 1-3 use 1/1 for 'bug-fix version 1.1', but Parts 4-7 and the 02099-1 template use a third level (1/0/1, 1/0/2) for bug fixes; the layout is internally inconsistent. A transient 'Product Condition 1.0.3' folder was removed on 2026-09-24.",
+    "The submodel-templates README auto-table lags the folders (lists 1.0 for Parts 1-3 and 1.0.1 for Parts 4-7), and the content hub lists 1.0 for all seven parts; docs site versions differ again.",
+    "WebFetch returns text summarised by a small model, not raw pages. Version numbers and dates were cross-checked across at least two IDTA/GitHub locations where possible, but a transcription error cannot be excluded.",
+    "WebFetch auto-saved one IDTA PDF leaflet (see attempts). Not a standard; not opened.",
+    "No text addressed to an AI agent was found on any page read."
+  ],
+  "open_questions": [
+    "EN 18223:2026 (CEN/CLC JTC 24, 'Digital Product Passport - System interoperability'): IDTA 02099-1 cites it. A search summary reported publication 2026-05-27 and a Commission Implementing Decision (EU) 2026/1736 of 2026-07-15 citing it, but only from blogs/secondary sources and not verified here. Orchestrator should assign this to the CEN/EUR-Lex group; the IDTA claim of conformance is unverified.",
+    "Official IEC project status for IEC 63278-2, -3 and -5 (IEC pages returned 403): is Part 2 approved after the 2026-08-07 vote close, and has any part been published after 2026-10-13?",
+    "Do IEC 63278-4 and IEC 63278-6 exist as projects, and under what titles?",
+    "CENELEC date of availability/ratification for EN IEC 63278-1:2024, and whether any EN IEC 63278 part appears in an Official Journal list or standardisation request.",
+    "Which patch version of each IDTA 02035 part (1.0, 1.0.1, 1.0.2, or 1.1 for Parts 1-3) does IDTA regard as current and registered? The hub says 1.0, the docs site and repository say later.",
+    "Exact publication dates (day) for IDTA 02035-1, -4 and -6 version 1.0 and for 02099-1 versions 1.0 and 1.0.1.",
+    "Licence of the IDTA website PDF copies of the AAS specifications and the 02035/02099 templates (the website shows only a copyright line; repositories are CC-BY-4.0).",
+    "Whether IDTA's own specifications (IDTA-01001 to 01005) are the technical basis of IEC 63278-2/-3/-5; not examined."
+  ]
+}

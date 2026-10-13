@@ -204,6 +204,32 @@ def _confined(base: Path, value: str, what: str) -> Path | None:
     return path
 
 
+def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str, tuple[str, str]]:
+    """Resolve the role secrets that the operator confirmed for this run.
+
+    The IXIT declares a reference. The operator must repeat exactly that reference with
+    ``--role-secret ROLE=REFERENCE``. An IXIT alone can therefore never select a secret, for
+    example one that belongs to a different system that the same laboratory tests.
+    """
+    confirmed: dict[str, str] = {}
+    for item in args.role_secret:
+        role, separator, reference = item.partition("=")
+        if not separator or not role or not reference:
+            raise UsageError(f"'{item}' is not ROLE=REFERENCE")
+        confirmed[role] = reference
+    credentials: dict[str, tuple[str, str]] = {}
+    for identity in ixit.identities:
+        if identity.secret_ref is None:
+            continue
+        if confirmed.get(identity.role) != identity.secret_ref:
+            raise UsageError(
+                f"the IXIT names a secret for role '{identity.role}'; confirm it with "
+                f"--role-secret {identity.role}=<the same reference>"
+            )
+        credentials[identity.role] = (origin, resolve_secret(identity.secret_ref, secrets_dir=args.secrets))
+    return credentials
+
+
 def _origin(url: str) -> str:
     parts = urlsplit(url)
     return f"{parts.scheme}://{parts.netloc}"
@@ -237,15 +263,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     # A role credential goes only to an origin that a validated authorization names.
     target = _origin(ixit.endpoints.get("origin_override") or ixit.endpoints.get("api", ""))
     permitted = inputs.authorization is not None and target in inputs.authorization.endpoints
-    credentials = (
-        {
-            identity.role: (target, resolve_secret(identity.secret_ref, secrets_dir=args.secrets))
-            for identity in ixit.identities
-            if identity.secret_ref is not None
-        }
-        if permitted
-        else {}
-    )
+    credentials = _credentials(args, ixit, target) if permitted else {}
     samples = {
         name: path
         for name, value in ixit.samples.items()
@@ -493,6 +511,13 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     run.add_argument("--out", type=Path, required=True, help="new directory for the run")
     run.add_argument("--keys", type=Path, required=True, help="directory with the data keys; keep it apart")
     run.add_argument("--secrets", type=Path, help="directory that holds the file secrets of the roles")
+    run.add_argument(
+        "--role-secret",
+        action="append",
+        default=[],
+        metavar="ROLE=REFERENCE",
+        help="confirm the secret reference that the IXIT declares for one role; repeat for each role",
+    )
     run.add_argument(
         "--allow-private-host",
         action="append",

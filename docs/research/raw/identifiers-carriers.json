@@ -1,0 +1,1628 @@
+{
+  "group": "identifiers-carriers",
+  "retrieval_date": "2026-10-13",
+  "sources": [
+    {
+      "id": "gs1-digital-link-uri-syntax-1-7-0",
+      "title": "GS1 Digital Link Standard: URI Syntax",
+      "identifier": "GS1 Digital Link Standard: URI Syntax, Release 1.7.0 (https://ref.gs1.org/standards/digital-link/uri-syntax/1.7.0/)",
+      "issuing_body": "GS1 AISBL (GS1 Global Standards Management Process)",
+      "source_type": "industry_specification",
+      "official_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+      "edition_or_version": "Release 1.7.0 is the latest at retrieval; ref.gs1.org states the term 'GS1 Digital Link' is now synonymous with this URI Syntax standard. Archive lists: 1.2.0 Jan 2021; 1.2.1 Feb 2022; 1.3.0 Nov 2022; 1.4.0 15 Jun 2023; 1.4.1 1 Aug 2023; 1.5.0 3 Jun 2024; 1.6.0 6 Mar 2025; 1.7.0 7 Aug 2026.",
+      "publication_date": "2026-08-07",
+      "legal_or_spec_status": "GS1 standard, status line 'Release 1.7.0, Ratified Aug 2026' (month only; no day given). Project resource, not law. Voluntary industry specification.",
+      "applicable_dates": [
+        {
+          "date": "2026-08-07",
+          "what": "Publication date of 1.7.0 as listed in the GS1 archive page (ratification itself is stated only as 'Aug 2026')",
+          "basis": "https://ref.gs1.org/standards/digital-link/uri-syntax/archive"
+        },
+        {
+          "date": "2026-08-06",
+          "what": "Date embedded in the 1.7.0 PDF file name (document date indicator, not stated as a date on the page)",
+          "basis": "PDF link GS1-Digital-Link-Standard-URI-Syntax-i1-7-r-2026-08-06.pdf on the 1.7.0 page"
+        },
+        {
+          "date": "2025-03-06",
+          "what": "Publication of previous release 1.6.0",
+          "basis": "archive page"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.7.0",
+          "date": "2026-08-07",
+          "summary": "Latest release. Log of changes (page text) says 'Jul 2026', work requests WR 26-180 and WR 26-260, reference change log 8.6. Changes not examined.",
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/1.7.0/"
+        },
+        {
+          "identifier": "1.6.0",
+          "date": "2025-03-06",
+          "summary": "Log of changes says 'Feb 2025', WR 24-146 and WR 25-011, reference change log 8.5.",
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/archive"
+        },
+        {
+          "identifier": "1.5.0",
+          "date": "2024-06-03",
+          "summary": "Earlier release per archive; changes not read.",
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/archive"
+        },
+        {
+          "identifier": "1.4.1",
+          "date": "2023-08-01",
+          "summary": "Earlier release per archive (a GS1 search excerpt labels 1.4.1 'Ratified Jul 2023'); changes not read.",
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/archive"
+        },
+        {
+          "identifier": "1.4.0",
+          "date": "2023-06-15",
+          "summary": "Earlier release per archive (labelled 'Ratified Jun 2023' in a GS1 search excerpt); changes not read.",
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/archive"
+        },
+        {
+          "identifier": "1.0 (as 'GS1 Web URI Structure Standard')",
+          "date": "2018-08",
+          "summary": "Original release, ratified Aug 2018 (GS1 search excerpt and ref.gs1.org text); original title differs.",
+          "url": "https://ref.gs1.org/standards/digital-link/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No OJ citation of GS1 Digital Link located. It is not named in Reg (EU) 2023/1542 Art. 77(3) or Reg (EU) 2024/1781 Annex III as read today (those name ISO/IEC 15459). Decision (EU) 2026/1736 was not opened by this group; sibling research lists six EN standards in its Annex.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Page footer: copyright 2026 GS1 AISBL; links to the GS1 standards disclaimer. Disclaimer (read): GS1 aims to make IP needed to implement its standards available royalty-free or, where necessary, on RAND terms via the GS1 IP Policy; implementers are bound by the policy's benefits and obligations; third-party patents may fall outside it and implementers are advised to check; the PDF on ref.gs1.org is the official version; provided 'as is'. The page also notes QR Code is a registered trademark of Denso Wave. No statement was found granting a right to copy or redistribute the standard document itself.",
+      "permitted_use_basis": "Implement the URI syntax in the engine as an Implementer under the GS1 IP Policy (royalty-free licence of necessary Covered IP, reciprocity applies; see source gs1-ip-policy-and-disclaimer). Cite title, version, date and URL. Do not republish the PDF or large extracts; short attributed quotation only. Do not treat as law.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+          "what_it_shows": "Landing page: title, 'This version' 1.7.0, Ratified status, copyright line, PDF link.",
+          "official": true
+        },
+        {
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/1.7.0/",
+          "what_it_shows": "Status line 'Release 1.7.0, Ratified Aug 2026'; latest/this/archive links; log of changes rows for 1.6.0 and 1.7.0.",
+          "official": true
+        },
+        {
+          "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/archive",
+          "what_it_shows": "Archive table of releases with publication dates; 1.7.0 flagged as latest.",
+          "official": true
+        },
+        {
+          "url": "https://ref.gs1.org/standards/digital-link/",
+          "what_it_shows": "Parent page: says the term GS1 Digital Link is synonymous with the URI Syntax standard; points to the separate GS1-Conformant Resolver Standard.",
+          "official": true
+        },
+        {
+          "url": "https://ref.gs1.org/gs1/standards-disclaimer/",
+          "what_it_shows": "GS1 standards disclaimer (IP and official-version statements).",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for the URI Syntax standard and any resolution standard; the URI Syntax standard (1.7.0) and a separate resolution standard (GS1-Conformant Resolver Standard 1.2.1) were both located. The brief gave no version to compare.",
+      "uncertainties": [
+        "Ratification is given only as 'Aug 2026'. Three other dates appear: archive 'published 7 August 2026', PDF file name 2026-08-06, log-of-changes 'Jul 2026'. Not reconciled.",
+        "www.gs1.org/standards/gs1-digital-link returned HTTP 403 (also gs1.org without www). A search-engine excerpt of that page showed 1.5.0 (Jun 2024) as current; ref.gs1.org (the disclaimer's stated authority) shows 1.7.0. The stale gs1.org page could not be inspected.",
+        "Only page metadata, the log of changes and the license/disclaimer text were read; the standard's clauses were not read, so no claim is made on what changed in 1.6.0 or 1.7.0.",
+        "Whether 1.7.0 will be adopted by EN 18219/EN 18220 or any DPP act was not examined."
+      ]
+    },
+    {
+      "id": "gs1-conformant-resolver-1-2-1",
+      "title": "GS1-Conformant Resolver Standard",
+      "identifier": "GS1-Conformant Resolver Standard, Release 1.2.1 (https://ref.gs1.org/standards/resolver/1.2.1/)",
+      "issuing_body": "GS1 AISBL (GS1 Global Standards Management Process)",
+      "source_type": "industry_specification",
+      "official_url": "https://ref.gs1.org/standards/resolver/",
+      "edition_or_version": "Release 1.2.1 is the latest at retrieval. Archive: 1.0.0 published 12 Feb 2024; 1.1.0 4 Feb 2025; 1.2.0 16 Jan 2026; 1.2.1 19 Aug 2026.",
+      "publication_date": "2026-08-19",
+      "legal_or_spec_status": "GS1 standard, page header 'Ratfied Aug 2026' (sic; month only). Project resource, not law. Voluntary industry specification; it is the resolution standard that sits beside the URI Syntax standard.",
+      "applicable_dates": [
+        {
+          "date": "2026-08-19",
+          "what": "Publication date of 1.2.1 as listed in the GS1 resolver archive page",
+          "basis": "https://ref.gs1.org/standards/resolver/archive"
+        },
+        {
+          "date": "2026-08-07",
+          "what": "Date embedded in the 1.2.1 PDF file name (document date indicator)",
+          "basis": "PDF link GS1_Conformant_Resolver_standard_i1.2.1-r-2026-08-07 on the resolver page"
+        },
+        {
+          "date": "2026-01-16",
+          "what": "Publication of previous release 1.2.0",
+          "basis": "archive page"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.2.1",
+          "date": "2026-08-19",
+          "summary": "Latest; changes not examined.",
+          "url": "https://ref.gs1.org/standards/resolver/1.2.1/"
+        },
+        {
+          "identifier": "1.2.0",
+          "date": "2026-01-16",
+          "summary": "Previous release per archive.",
+          "url": "https://ref.gs1.org/standards/resolver/archive"
+        },
+        {
+          "identifier": "1.1.0",
+          "date": "2025-02-04",
+          "summary": "Previous release per archive.",
+          "url": "https://ref.gs1.org/standards/resolver/archive"
+        },
+        {
+          "identifier": "1.0.0",
+          "date": "2024-02-12",
+          "summary": "First stand-alone release per archive.",
+          "url": "https://ref.gs1.org/standards/resolver/archive"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No OJ citation or EU-act reference to the GS1-Conformant Resolver Standard located.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Copyright 2026 GS1 AISBL with link to the GS1 standards disclaimer; same terms as the URI Syntax standard (see gs1-ip-policy-and-disclaimer). No separate licence text on the page.",
+      "permitted_use_basis": "As for the URI Syntax standard: implement under the GS1 IP Policy; cite title, version, date, URL; no republication of the document. Do not call or probe any GS1 resolver service for this audit; documentation reading only.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://ref.gs1.org/standards/resolver/",
+          "what_it_shows": "Title, release 1.2.1, ratified Aug 2026 header, copyright line, PDF link (first 100 000 of 107 148 characters read).",
+          "official": true
+        },
+        {
+          "url": "https://ref.gs1.org/standards/resolver/archive",
+          "what_it_shows": "Archive: four releases with publication dates; 1.2.1 latest.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for 'any resolution standard'; one was located as a separate GS1 standard with its own version line.",
+      "uncertainties": [
+        "Page says ratified 'Aug 2026' and the archive says published 19 August 2026, while the PDF file name carries 2026-08-07. Not reconciled.",
+        "The last 7 148 characters of the resolver page were not read.",
+        "Clause content not read. Whether earlier GS1 Digital Link versions (before the split) contained resolution rules was not examined."
+      ]
+    },
+    {
+      "id": "gs1-ip-policy-and-disclaimer",
+      "title": "GS1 Intellectual Property Policy and GS1 standards disclaimer",
+      "identifier": "GS1 Intellectual Property Policy, adopted 24 March 2025 (https://ref.gs1.org/gs1/ip-policy/); GS1 standards disclaimer (https://ref.gs1.org/gs1/standards-disclaimer/)",
+      "issuing_body": "GS1 AISBL",
+      "source_type": "other",
+      "official_url": "https://ref.gs1.org/gs1/ip-policy/",
+      "edition_or_version": "IP Policy, adopted 24 March 2025 (11 pages; pages 1-4 read)",
+      "publication_date": "2025-03-24",
+      "legal_or_spec_status": "GS1 policy governing IP in GS1 standards (adopted 2025-03-24). It is a private licensing policy, not law.",
+      "applicable_dates": [
+        {
+          "date": "2025-03-24",
+          "what": "Adoption date of the current GS1 IP Policy",
+          "basis": "Page 1 of the policy PDF at ref.gs1.org/gs1/ip-policy/"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Private policy document; not an EU act or European standard.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Pages 1-4 (own words): the stated purpose is to make the IP needed to implement GS1 Standards available royalty-free to the greatest extent possible. Work-group participants and affiliates grant Implementers and GS1 Beneficiaries a non-exclusive, worldwide, royalty-free, perpetual licence over their Covered IP (including copyright and patents) to make, use, sell, distribute and otherwise exploit works implementing a Standard, plus a covenant not to sue for those Permitted Uses. Implementers include end users and solution providers. The licence is reciprocal and does not extend beyond what the Standard requires. Covered Parties may not charge others for using the licence or for access to GS1 Standards, which GS1 states are provided freely, although implementers may charge for certification, testing and implementation services. A RAND route exists for participants who file an IP declaration (section 5.G, defined on page 2; its text was not read). Pages 5-11 (disclosure, survival, no-transfer and other sections) were not read. The policy as read does not itself license copying or redistributing the standards documents.",
+      "permitted_use_basis": "Basis for implementing GS1 Digital Link and the GS1-Conformant Resolver standard in this project: the engine is an Implementer; reciprocity applies; no fee may be charged for the licence itself. Not legal advice; the disclaimer recommends patent counsel for third-party IP.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://ref.gs1.org/gs1/ip-policy/",
+          "what_it_shows": "PDF, pages 1-4 of 11 read via the Read tool: adoption date 24 March 2025, definitions, royalty-free licence and covenant (4.A), reciprocity (4.B), no-charge rule (4.C).",
+          "official": true
+        },
+        {
+          "url": "https://ref.gs1.org/gs1/standards-disclaimer/",
+          "what_it_shows": "Disclaimer: royalty-free or RAND aim, implementers bound by IP Policy, third-party IP caveat, PDF on ref.gs1.org is the official version, no warranty.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for license or IP terms for GS1 Digital Link; terms are the GS1 IP Policy plus disclaimer rather than a per-document licence.",
+      "uncertainties": [
+        "Sections 5 to 9 of the policy (participant disclosure, RAND licensing, survival, no transfer) were not read.",
+        "Which policy version binds work done under earlier releases of the standards was not examined.",
+        "www.gs1.org/standards/ip returned HTTP 403, so GS1's own explainer page was not read."
+      ]
+    },
+    {
+      "id": "iec-61406-1-2022",
+      "title": "IEC 61406-1:2022 Identification Link - Part 1: General requirements",
+      "identifier": "IEC 61406-1:2022 Edition 1.0; European adoption EN IEC 61406-1:2022; German adoption DIN EN IEC 61406-1:2023-12 (VDE 0810-406-1)",
+      "issuing_body": "IEC TC 65/SC 65E (Devices and integration in enterprise systems); CENELEC CLC/TC 65X for the EN adoption",
+      "source_type": "international_standard",
+      "official_url": "https://webstore.iec.ch/en/publication/67673",
+      "edition_or_version": "Edition 1.0 (the only edition located). EN adoption EN IEC 61406-1:2022. A revision draft prEN IEC 61406-1:2025 is indicated by non-official sources only.",
+      "publication_date": "2022-09-15",
+      "legal_or_spec_status": "Published International Standard, Edition 1.0, stability date 2026 (IEC webstore). Published as EN IEC 61406-1:2022. A revision may be at enquiry stage (unconfirmed, non-official evidence). Voluntary standard; not law.",
+      "applicable_dates": [
+        {
+          "date": "2022-09-15",
+          "what": "IEC publication date, Edition 1.0",
+          "basis": "IEC webstore page 67673"
+        },
+        {
+          "date": "2022-10-20",
+          "what": "CENELEC date of ratification (DOR) for EN IEC 61406-1:2022",
+          "basis": "secondary_only: search-engine excerpt of the standards.cencenelec.eu project page; the page itself returned HTTP 500 to WebFetch twice"
+        },
+        {
+          "date": "2022-12-16",
+          "what": "CENELEC date of availability (DAV)",
+          "basis": "secondary_only: same search excerpt as above"
+        },
+        {
+          "date": "2023-01-20",
+          "what": "CENELEC date of announcement (DOA)",
+          "basis": "secondary_only: same search excerpt as above"
+        },
+        {
+          "date": "2023-07-20",
+          "what": "CENELEC date of publication (DOP)",
+          "basis": "secondary_only: same search excerpt as above"
+        },
+        {
+          "date": "2025-12-05",
+          "what": "BSI released a draft for comment numbered 25/30511089 DC for BS EN IEC 61406-1 (British draft; indicates an EN revision draft exists)",
+          "basis": "secondary_only: BSI knowledge page seen in search results, not opened"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "prEN IEC 61406-1:2025 (draft)",
+          "date": "",
+          "summary": "Listed in the standard history of the Estonian EVS page and on an iteh.ai catalogue page; BSI draft 25/30511089 DC dated 2025-12-05. Stage, committee decision and any IEC Edition 2 are NOT confirmed. Do not read this as an Edition 2 existing.",
+          "url": "https://www.evs.ee/en/evs-en-iec-61406-1-2022"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No OJ citation of EN IEC 61406-1 located. Not named in Reg (EU) 2023/1542 Art. 77(3) or Reg (EU) 2024/1781 Annex III as read today. Sibling research files list six EN standards (EN 18216, 18219, 18220, 18221, 18222, 18223) in the Annex of Implementing Decision (EU) 2026/1736 and none of them is EN IEC 61406; the decision itself was not opened by this group.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Copyright IEC (and CENELEC/national bodies for adoptions); sold through the IEC webstore and national stores. No open licence. Not fetched or quoted beyond catalogue metadata.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, date, status, committee, catalogue URL. No clause text, no clause numbers. The engine may list IEC 61406 as a candidate identifier/carrier reference without relying on its content.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://webstore.iec.ch/en/publication/67673",
+          "what_it_shows": "IEC webstore: IEC 61406-1:2022, Identification Link - Part 1: General requirements, Edition 1.0, 2022-09-15, stability date 2026, TC 65/SC 65E, ICS 35.240.15; no replacement note shown.",
+          "official": true
+        },
+        {
+          "url": "https://www.dinmedia.de/en/standard/din-en-iec-61406-1/372053652",
+          "what_it_shows": "DIN Media: DIN EN IEC 61406-1:2023-12 is the German version of EN IEC 61406-1:2022, listed current. National body page (not CENELEC).",
+          "official": false
+        },
+        {
+          "url": "https://www.evs.ee/en/evs-en-iec-61406-1-2022",
+          "what_it_shows": "Estonian national page listing EN IEC 61406-1:2022 valid from 30.12.2022 and a prEN IEC 61406-1:2025 entry in its history (row-to-column mapping ambiguous). Non-official for CENELEC.",
+          "official": false
+        },
+        {
+          "url": "https://standards.cencenelec.eu/dyn/www/f?cs=1C23F99B04536D72FFB28124FC26B2F2A&p=305%3A110%3A0%3A%3A%3A%3AFSP_ORG_ID%2CFSP_PROJECT%2CFSP_LANG_ID%3A1257871%2C75312%2C25",
+          "what_it_shows": "CENELEC project page for EN IEC 61406-1:2022 as surfaced by WebSearch: dates as quoted in the search excerpt; the page itself could not be fetched (HTTP 500).",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: Part 1 exists as Edition 1.0 dated 2022-09-15 with the stated title. The brief gave no edition; no Edition 2 of either part was located (a lookup that found nothing, not proof that none exists).",
+      "uncertainties": [
+        "IEC stability date 2026 means the content is expected to stay unchanged until 2026; a maintenance decision or revision may be pending as of 2026-10-13. IEC and CENELEC project pages could not be queried (forms must not be submitted; CENELEC project page returned HTTP 500).",
+        "CENELEC dates are secondary_only for the reason stated; the date of withdrawal (DOW) was not located and must not be computed.",
+        "Search-engine summaries gave conflicting stability dates (2026 vs 2024) for this part; the IEC page fetched today shows 2026.",
+        "A BSI listing 'PD IEC/TS 61406' (see source iec-ts-61406-predecessor-unverified) suggests an earlier technical specification."
+      ]
+    },
+    {
+      "id": "iec-61406-2-2024",
+      "title": "IEC 61406-2:2024 Identification link - Part 2: Types/models, lots/batches, items and characteristics",
+      "identifier": "IEC 61406-2:2024 Edition 1.0; European adoption EN IEC 61406-2:2024; German adoption DIN EN IEC 61406-2:2024",
+      "issuing_body": "IEC TC 65/SC 65E (Devices and integration in enterprise systems); CENELEC CLC/TC 65X for the EN adoption",
+      "source_type": "international_standard",
+      "official_url": "https://webstore.iec.ch/en/publication/77973",
+      "edition_or_version": "Edition 1.0 (only edition located); 69 pages; English/French; ISBN 9782832288863.",
+      "publication_date": "2024-05-08",
+      "legal_or_spec_status": "Published International Standard, Edition 1.0, stability date 2027 (IEC webstore). Published as EN IEC 61406-2:2024 (CENELEC approval 2024-06-12 per a national-catalogue search excerpt, secondary). Voluntary standard; not law.",
+      "applicable_dates": [
+        {
+          "date": "2024-05-08",
+          "what": "IEC publication date, Edition 1.0",
+          "basis": "IEC webstore page 77973 (the Canadian SCC catalogue shows 2024-05-07 and Genorma shows 2024-05-31; those are non-official)"
+        },
+        {
+          "date": "2024-06-12",
+          "what": "CENELEC approval of the EN adoption",
+          "basis": "secondary_only: text quoted in a search excerpt of a national catalogue; CENELEC page not opened"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "No OJ citation of EN IEC 61406-2 located; not named in the two EU regulations read today; not among the six ENs in the Annex of Decision (EU) 2026/1736 according to sibling research (decision not opened by this group).",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Copyright IEC; sold through the IEC webstore. No open licence. Catalogue metadata only was read.",
+      "permitted_use_basis": "Metadata reference only: number, title, edition, date, status, committee, catalogue URL. No clause text or clause numbers.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://webstore.iec.ch/en/publication/77973",
+          "what_it_shows": "IEC webstore: IEC 61406-2:2024 title, Edition 1.0, 2024-05-08, stability date 2027, TC 65/SC 65E, 69 pages, ICS 35.040.50 and 35.240.15.",
+          "official": true
+        },
+        {
+          "url": "https://ccn-scc.ca/standardsdb/standards/2054140",
+          "what_it_shows": "Canadian SCC catalogue giving 2024-05-07 (one-day difference). Non-official.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for 'each part'; Part 2 is located with the stated title and edition.",
+      "uncertainties": [
+        "IEC's own date (2024-05-08) and national catalogue dates differ by up to 23 days; IEC date used.",
+        "CENELEC project page for the EN adoption was not opened; dates are from a search excerpt."
+      ]
+    },
+    {
+      "id": "iec-ts-61406-predecessor-unverified",
+      "title": "IEC TS 61406 Identification Link (predecessor technical specification, indicated by a BSI listing only)",
+      "identifier": "PD IEC/TS 61406 (BSI), stated 'Identical to: IEC 61406 ED1'",
+      "issuing_body": "IEC (indicated); BSI committee GEL/65/5 (adoption)",
+      "source_type": "international_standard",
+      "official_url": "https://knowledge.bsigroup.com/products/pd-iec-ts-61406-identification-link",
+      "edition_or_version": "Not confirmed at IEC. BSI shows one publication, published 18 February 2022, status 'Current'.",
+      "publication_date": "2022-02-18",
+      "legal_or_spec_status": "secondary_only: a national BSI listing of a technical specification; the IEC webstore search did not return a technical-specification entry for IEC 61406, so its existence, number and edition at IEC are not confirmed.",
+      "applicable_dates": [
+        {
+          "date": "2022-02-18",
+          "what": "BSI publication date of PD IEC/TS 61406",
+          "basis": "knowledge.bsigroup.com page (national body, not IEC)"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "None located.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "BSI/IEC copyright; not examined.",
+      "permitted_use_basis": "Do not rely on. Record only as an unresolved lead; do not cite as an IEC publication until confirmed at webstore.iec.ch.",
+      "verification_level": "secondary_only",
+      "evidence": [
+        {
+          "url": "https://knowledge.bsigroup.com/products/pd-iec-ts-61406-identification-link",
+          "what_it_shows": "BSI listing: PD IEC/TS 61406, published 18 Feb 2022, current, identical to 'IEC 61406 ED1', committee GEL/65/5.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "not_verifiable: the brief did not name a technical specification; this is an unresolved lead found while checking editions.",
+      "uncertainties": [
+        "Could be a pre-publication adoption of what became IEC 61406-1:2022; not resolved.",
+        "Number and edition at IEC unknown."
+      ]
+    },
+    {
+      "id": "iec-61406-part-3-not-located",
+      "title": "IEC 61406 Part 3 (or any further part beyond Parts 1 and 2)",
+      "identifier": "not_located",
+      "issuing_body": "IEC TC 65/SC 65E (expected, if it existed)",
+      "source_type": "international_standard",
+      "official_url": "https://webstore.iec.ch/en/publication/67673",
+      "edition_or_version": "not_located",
+      "publication_date": null,
+      "legal_or_spec_status": "not_located as of 2026-10-13: a WebSearch for 'IEC 61406-3' returned only Parts 1 and 2 and the BSI technical-specification listing. This is a failed lookup, not a statement that no such part exists or is planned.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_located",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "n/a",
+      "permitted_use_basis": "Do not cite a Part 3.",
+      "verification_level": "not_located",
+      "evidence": [
+        {
+          "url": "https://webstore.iec.ch/en/publication/77973",
+          "what_it_shows": "IEC webstore entry for Part 2; no related-parts list was visible in the fetched metadata.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable: the brief says 'each part' without naming parts; Parts 1 and 2 were located and no other part.",
+      "uncertainties": [
+        "The IEC project database (a form) was not queried; a Part 3 under development would not appear in a webstore search."
+      ]
+    },
+    {
+      "id": "iso-iec-15459-1-2014",
+      "title": "ISO/IEC 15459-1:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 1: Individual transport units",
+      "identifier": "ISO/IEC 15459-1:2014, Edition 3",
+      "issuing_body": "ISO and IEC, joint technical committee ISO/IEC JTC 1/SC 31 (Automatic identification and data capture techniques); ICS 35.040.50",
+      "source_type": "international_standard",
+      "official_url": "https://www.iso.org/standard/54779.html",
+      "edition_or_version": "Edition 3 (stage 60.60 dated 2014-11-12; corrected version 2016-09; 8 pages). Replaces ISO/IEC 15459-1:2006 (withdrawn). Latest stage 90.93 'International Standard confirmed' dated 2025-10-31.",
+      "publication_date": "2014-11-12",
+      "legal_or_spec_status": "Published International Standard. ISO page states it was last reviewed and confirmed in 2025 and remains current. No amendment, revision or new edition shown on the ISO page. Voluntary standard; binding only through the legislation that names it (see oj_citation).",
+      "applicable_dates": [
+        {
+          "date": "2014-11-12",
+          "what": "Publication date of this edition",
+          "basis": "IEC webstore bibliographic page (webstore.iec.ch)"
+        },
+        {
+          "date": "2025-10-31",
+          "what": "ISO life-cycle stage 90.93 (International Standard confirmed)",
+          "basis": "committee.iso.org/standard/54779.html"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Corrected version (en)",
+          "date": "2016-09",
+          "summary": "ISO page lists a corrected version dated 2016-09; content of the correction not examined.",
+          "url": "https://committee.iso.org/standard/54779.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "Copyright ISO/IEC; sold through ISO and IEC webstores. No open licence. This group read only catalogue metadata and did not fetch, quote or summarise clause text (protected-standard rule).",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition, date, status, committee and catalogue URL. The engine may record these editions as the ones named by Reg (EU) 2023/1542 Art. 77(3) and Reg (EU) 2024/1781 Annex III. Do not copy, embed or paraphrase clause text; implement requirements only from a lawfully purchased copy.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://committee.iso.org/standard/54779.html",
+          "what_it_shows": "ISO catalogue record on ISO's committee site: edition, publication stage/date, corrected version, 'last reviewed and confirmed in 2025', committee, pages. (www.iso.org returned HTTP 403 to WebFetch; same record.)",
+          "official": true
+        },
+        {
+          "url": "https://webstore.iec.ch/en/publication/10334",
+          "what_it_shows": "IEC webstore record: edition and publication date.",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2023/1542 text (read at character offset 400000): Art. 77(3) second subparagraph lists ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent.",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2024/1781 (02024R1781-20240628) PDF p. 80: Annex III second paragraph names the same six dated editions.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for each part's current edition, date, title and status; this part is located and its edition equals the edition named in the two EU regulations. Named by dated edition in Art. 77(3) second subparagraph of Regulation (EU) 2023/1542 (consolidated text read today) and in the second paragraph of Annex III to Regulation (EU) 2024/1781 (consolidated text 02024R1781-20240628, PDF p. 80, read today).",
+      "uncertainties": [
+        "ISO life-cycle section also shows undated stage codes 90.20/90.60/90.99; the 90.99 (withdrawal proposed) entry is probably a legend, but this was not confirmed. Verify at ISO before relying on it.",
+        "Title string taken verbatim from the IEC webstore record; ISO page paraphrases it as 'individual transport units'.",
+        "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
+        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+      ]
+    },
+    {
+      "id": "iso-iec-15459-2-2015",
+      "title": "ISO/IEC 15459-2:2015 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 2: Registration procedures",
+      "identifier": "ISO/IEC 15459-2:2015, Edition 3",
+      "issuing_body": "ISO and IEC, joint technical committee ISO/IEC JTC 1/SC 31 (Automatic identification and data capture techniques); ICS 35.040.50",
+      "source_type": "international_standard",
+      "official_url": "https://www.iso.org/standard/54780.html",
+      "edition_or_version": "Edition 3 (published March 2015; 4 pages). Replaces ISO/IEC 15459-2:2006 (withdrawn 2015-03-05 per IEC webstore).",
+      "publication_date": "2015-03-05",
+      "legal_or_spec_status": "Published International Standard. ISO page states it was last reviewed and confirmed in 2025 and remains current. No amendment, revision or new edition shown on the ISO page. Voluntary standard; binding only through the legislation that names it (see oj_citation).",
+      "applicable_dates": [
+        {
+          "date": "2015-03-05",
+          "what": "Publication date of this edition",
+          "basis": "IEC webstore bibliographic page (webstore.iec.ch)"
+        },
+        {
+          "date": "2015-03-05",
+          "what": "Withdrawal date of the 2006 edition, i.e. the day this edition took over",
+          "basis": "IEC webstore page 10335 (ISO/IEC 15459-2:2006)"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "No corrected version shown",
+          "date": "",
+          "summary": "ISO page fetched for this part shows no corrected version.",
+          "url": "https://committee.iso.org/standard/54780.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "Copyright ISO/IEC; sold through ISO and IEC webstores. No open licence. This group read only catalogue metadata and did not fetch, quote or summarise clause text (protected-standard rule).",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition, date, status, committee and catalogue URL. The engine may record these editions as the ones named by Reg (EU) 2023/1542 Art. 77(3) and Reg (EU) 2024/1781 Annex III. Do not copy, embed or paraphrase clause text; implement requirements only from a lawfully purchased copy.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://committee.iso.org/standard/54780.html",
+          "what_it_shows": "ISO catalogue record on ISO's committee site: edition, publication stage/date, corrected version, 'last reviewed and confirmed in 2025', committee, pages. (www.iso.org returned HTTP 403 to WebFetch; same record.)",
+          "official": true
+        },
+        {
+          "url": "https://webstore.iec.ch/en/publication/21921",
+          "what_it_shows": "IEC webstore record: edition and publication date.",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2023/1542 text (read at character offset 400000): Art. 77(3) second subparagraph lists ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent.",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2024/1781 (02024R1781-20240628) PDF p. 80: Annex III second paragraph names the same six dated editions.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for each part's current edition, date, title and status; this part is located and its edition equals the edition named in the two EU regulations. Named by dated edition in Art. 77(3) second subparagraph of Regulation (EU) 2023/1542 (consolidated text read today) and in the second paragraph of Annex III to Regulation (EU) 2024/1781 (consolidated text 02024R1781-20240628, PDF p. 80, read today).",
+      "uncertainties": [
+        "ISO page for this part showed no corrected version; the 2016 corrections exist for Parts 1, 3, 4, 5 and 6.",
+        "Any register of issuing-agency codes linked to this part was not looked up.",
+        "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
+        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+      ]
+    },
+    {
+      "id": "iso-iec-15459-3-2014",
+      "title": "ISO/IEC 15459-3:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 3: Common rules",
+      "identifier": "ISO/IEC 15459-3:2014, Edition 2",
+      "issuing_body": "ISO and IEC, joint technical committee ISO/IEC JTC 1/SC 31 (Automatic identification and data capture techniques); ICS 35.040.50",
+      "source_type": "international_standard",
+      "official_url": "https://www.iso.org/standard/54781.html",
+      "edition_or_version": "Edition 2 (published November 2014; corrected version 2016-12; 12 pages). Replaces ISO/IEC 15459-3:2006 (withdrawn 2014-11-12 per IEC webstore).",
+      "publication_date": "2014-11-12",
+      "legal_or_spec_status": "Published International Standard. ISO page states it was last reviewed and confirmed in 2025 and remains current. No amendment, revision or new edition shown on the ISO page. Voluntary standard; binding only through the legislation that names it (see oj_citation).",
+      "applicable_dates": [
+        {
+          "date": "2014-11-12",
+          "what": "Publication date of this edition",
+          "basis": "IEC webstore bibliographic page (webstore.iec.ch)"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Corrected version (en)",
+          "date": "2016-12",
+          "summary": "ISO page lists a corrected version dated 2016-12; content of the correction not examined.",
+          "url": "https://committee.iso.org/standard/54781.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "Copyright ISO/IEC; sold through ISO and IEC webstores. No open licence. This group read only catalogue metadata and did not fetch, quote or summarise clause text (protected-standard rule).",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition, date, status, committee and catalogue URL. The engine may record these editions as the ones named by Reg (EU) 2023/1542 Art. 77(3) and Reg (EU) 2024/1781 Annex III. Do not copy, embed or paraphrase clause text; implement requirements only from a lawfully purchased copy.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://committee.iso.org/standard/54781.html",
+          "what_it_shows": "ISO catalogue record on ISO's committee site: edition, publication stage/date, corrected version, 'last reviewed and confirmed in 2025', committee, pages. (www.iso.org returned HTTP 403 to WebFetch; same record.)",
+          "official": true
+        },
+        {
+          "url": "https://webstore.iec.ch/en/publication/10337",
+          "what_it_shows": "IEC webstore record: edition and publication date.",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2023/1542 text (read at character offset 400000): Art. 77(3) second subparagraph lists ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent.",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2024/1781 (02024R1781-20240628) PDF p. 80: Annex III second paragraph names the same six dated editions.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for each part's current edition, date, title and status; this part is located and its edition equals the edition named in the two EU regulations. Named by dated edition in Art. 77(3) second subparagraph of Regulation (EU) 2023/1542 (consolidated text read today) and in the second paragraph of Annex III to Regulation (EU) 2024/1781 (consolidated text 02024R1781-20240628, PDF p. 80, read today).",
+      "uncertainties": [
+        "Corrected version date (2016-12) differs by three months from the other parts' corrections (2016-09).",
+        "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
+        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+      ]
+    },
+    {
+      "id": "iso-iec-15459-4-2014",
+      "title": "ISO/IEC 15459-4:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 4: Individual products and product packages",
+      "identifier": "ISO/IEC 15459-4:2014, Edition 3",
+      "issuing_body": "ISO and IEC, joint technical committee ISO/IEC JTC 1/SC 31 (Automatic identification and data capture techniques); ICS 35.040.50",
+      "source_type": "international_standard",
+      "official_url": "https://www.iso.org/standard/54782.html",
+      "edition_or_version": "Edition 3 (published November 2014; corrected version 2016-09; 9 pages). Replaces ISO/IEC 15459-4:2008 (withdrawn); the 2008 title was 'Individual items', so title and scope wording differ between editions.",
+      "publication_date": "2014-11-12",
+      "legal_or_spec_status": "Published International Standard. ISO page states it was last reviewed and confirmed in 2025 and remains current. No amendment, revision or new edition shown on the ISO page. Voluntary standard; binding only through the legislation that names it (see oj_citation).",
+      "applicable_dates": [
+        {
+          "date": "2014-11-12",
+          "what": "Publication date of this edition",
+          "basis": "IEC webstore bibliographic page (webstore.iec.ch)"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Corrected version (en)",
+          "date": "2016-09",
+          "summary": "ISO page lists a corrected version dated 2016-09; content of the correction not examined.",
+          "url": "https://committee.iso.org/standard/54782.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "Copyright ISO/IEC; sold through ISO and IEC webstores. No open licence. This group read only catalogue metadata and did not fetch, quote or summarise clause text (protected-standard rule).",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition, date, status, committee and catalogue URL. The engine may record these editions as the ones named by Reg (EU) 2023/1542 Art. 77(3) and Reg (EU) 2024/1781 Annex III. Do not copy, embed or paraphrase clause text; implement requirements only from a lawfully purchased copy.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://committee.iso.org/standard/54782.html",
+          "what_it_shows": "ISO catalogue record on ISO's committee site: edition, publication stage/date, corrected version, 'last reviewed and confirmed in 2025', committee, pages. (www.iso.org returned HTTP 403 to WebFetch; same record.)",
+          "official": true
+        },
+        {
+          "url": "https://webstore.iec.ch/en/publication/10339",
+          "what_it_shows": "IEC webstore record: edition and publication date.",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2023/1542 text (read at character offset 400000): Art. 77(3) second subparagraph lists ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent.",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2024/1781 (02024R1781-20240628) PDF p. 80: Annex III second paragraph names the same six dated editions.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for each part's current edition, date, title and status; this part is located and its edition equals the edition named in the two EU regulations. Named by dated edition in Art. 77(3) second subparagraph of Regulation (EU) 2023/1542 (consolidated text read today) and in the second paragraph of Annex III to Regulation (EU) 2024/1781 (consolidated text 02024R1781-20240628, PDF p. 80, read today).",
+      "uncertainties": [
+        "Do not confuse with the 2008 edition, whose title differs.",
+        "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
+        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+      ]
+    },
+    {
+      "id": "iso-iec-15459-5-2014",
+      "title": "ISO/IEC 15459-5:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 5: Individual returnable transport items (RTIs)",
+      "identifier": "ISO/IEC 15459-5:2014, Edition 2",
+      "issuing_body": "ISO and IEC, joint technical committee ISO/IEC JTC 1/SC 31 (Automatic identification and data capture techniques); ICS 35.040.50",
+      "source_type": "international_standard",
+      "official_url": "https://www.iso.org/standard/54785.html",
+      "edition_or_version": "Edition 2 (published November 2014; corrected version 2016-09; 9 pages). Replaces ISO/IEC 15459-5:2007 (withdrawn).",
+      "publication_date": "2014-11-12",
+      "legal_or_spec_status": "Published International Standard. ISO page states it was last reviewed and confirmed in 2025 and remains current. No amendment, revision or new edition shown on the ISO page. Voluntary standard; binding only through the legislation that names it (see oj_citation).",
+      "applicable_dates": [
+        {
+          "date": "2014-11-12",
+          "what": "Publication date of this edition",
+          "basis": "IEC webstore bibliographic page (webstore.iec.ch)"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Corrected version (en)",
+          "date": "2016-09",
+          "summary": "ISO page lists a corrected version dated 2016-09; content of the correction not examined.",
+          "url": "https://committee.iso.org/standard/54785.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "Copyright ISO/IEC; sold through ISO and IEC webstores. No open licence. This group read only catalogue metadata and did not fetch, quote or summarise clause text (protected-standard rule).",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition, date, status, committee and catalogue URL. The engine may record these editions as the ones named by Reg (EU) 2023/1542 Art. 77(3) and Reg (EU) 2024/1781 Annex III. Do not copy, embed or paraphrase clause text; implement requirements only from a lawfully purchased copy.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://committee.iso.org/standard/54785.html",
+          "what_it_shows": "ISO catalogue record on ISO's committee site: edition, publication stage/date, corrected version, 'last reviewed and confirmed in 2025', committee, pages. (www.iso.org returned HTTP 403 to WebFetch; same record.)",
+          "official": true
+        },
+        {
+          "url": "https://webstore.iec.ch/en/publication/10341",
+          "what_it_shows": "IEC webstore record: edition and publication date.",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2023/1542 text (read at character offset 400000): Art. 77(3) second subparagraph lists ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent.",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2024/1781 (02024R1781-20240628) PDF p. 80: Annex III second paragraph names the same six dated editions.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for each part's current edition, date, title and status; this part is located and its edition equals the edition named in the two EU regulations. Named by dated edition in Art. 77(3) second subparagraph of Regulation (EU) 2023/1542 (consolidated text read today) and in the second paragraph of Annex III to Regulation (EU) 2024/1781 (consolidated text 02024R1781-20240628, PDF p. 80, read today).",
+      "uncertainties": [
+        "Part 5 is named by both EU regulations even though returnable transport items are an unusual fit for batteries; applicability is a matter for the legal text, not examined here.",
+        "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
+        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+      ]
+    },
+    {
+      "id": "iso-iec-15459-6-2014",
+      "title": "ISO/IEC 15459-6:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 6: Groupings",
+      "identifier": "ISO/IEC 15459-6:2014, Edition 2",
+      "issuing_body": "ISO and IEC, joint technical committee ISO/IEC JTC 1/SC 31 (Automatic identification and data capture techniques); ICS 35.040.50",
+      "source_type": "international_standard",
+      "official_url": "https://www.iso.org/standard/54786.html",
+      "edition_or_version": "Edition 2 (published November 2014; corrected version 2016-09; 10 pages). Replaces ISO/IEC 15459-6:2007 (withdrawn 2014-11-12 per IEC webstore), whose title was 'Unique identifier for product groupings'.",
+      "publication_date": "2014-11-12",
+      "legal_or_spec_status": "Published International Standard. ISO page states it was last reviewed and confirmed in 2025 and remains current. No amendment, revision or new edition shown on the ISO page. Voluntary standard; binding only through the legislation that names it (see oj_citation).",
+      "applicable_dates": [
+        {
+          "date": "2014-11-12",
+          "what": "Publication date of this edition",
+          "basis": "IEC webstore bibliographic page (webstore.iec.ch)"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Corrected version (en)",
+          "date": "2016-09",
+          "summary": "ISO page lists a corrected version dated 2016-09; content of the correction not examined.",
+          "url": "https://committee.iso.org/standard/54786.html"
+        }
+      ],
+      "oj_citation": {
+        "status": "cited",
+        "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "Copyright ISO/IEC; sold through ISO and IEC webstores. No open licence. This group read only catalogue metadata and did not fetch, quote or summarise clause text (protected-standard rule).",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition, date, status, committee and catalogue URL. The engine may record these editions as the ones named by Reg (EU) 2023/1542 Art. 77(3) and Reg (EU) 2024/1781 Annex III. Do not copy, embed or paraphrase clause text; implement requirements only from a lawfully purchased copy.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://committee.iso.org/standard/54786.html",
+          "what_it_shows": "ISO catalogue record on ISO's committee site: edition, publication stage/date, corrected version, 'last reviewed and confirmed in 2025', committee, pages. (www.iso.org returned HTTP 403 to WebFetch; same record.)",
+          "official": true
+        },
+        {
+          "url": "https://webstore.iec.ch/en/publication/10343",
+          "what_it_shows": "IEC webstore record: edition and publication date.",
+          "official": true
+        },
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2023/1542 text (read at character offset 400000): Art. 77(3) second subparagraph lists ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent.",
+          "official": true
+        },
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Consolidated Reg (EU) 2024/1781 (02024R1781-20240628) PDF p. 80: Annex III second paragraph names the same six dated editions.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for each part's current edition, date, title and status; this part is located and its edition equals the edition named in the two EU regulations. Named by dated edition in Art. 77(3) second subparagraph of Regulation (EU) 2023/1542 (consolidated text read today) and in the second paragraph of Annex III to Regulation (EU) 2024/1781 (consolidated text 02024R1781-20240628, PDF p. 80, read today).",
+      "uncertainties": [
+        "ESPR Annex III point (c) names ISO/IEC 15459-6 without a year ('or equivalent') while the second paragraph of the same Annex names the 2014 edition; see provisions.",
+        "A search excerpt showed a 2020 review date on one ISO page for this part; the ISO page fetched today says reviewed and confirmed in 2025.",
+        "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
+        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+      ]
+    },
+    {
+      "id": "din-dke-spec-99100-2025-02",
+      "title": "DIN DKE SPEC 99100:2025-02 Requirements for data attributes of the battery passport; Text in English",
+      "identifier": "DIN DKE SPEC 99100:2025-02 (German title: Anforderungen an Datenattribute des Batteriepasses; Text Englisch); DOI 10.31030/3582101",
+      "issuing_body": "DIN Deutsches Institut fuer Normung e.V. and DKE (German Commission for Electrical, Electronic and Information Technologies of DIN and VDE); distributed by DIN Media GmbH. Developed in a PAS procedure initiated with the Battery Pass consortium.",
+      "source_type": "industry_specification",
+      "official_url": "https://www.dinmedia.de/en/technical-rule/din-dke-spec-99100/385692321",
+      "edition_or_version": "2025-02 edition; 106 pages; original language English; ICS 13.020.20 and 29.220.20; procedure: PAS (Publicly Available Specification)",
+      "publication_date": null,
+      "legal_or_spec_status": "Technical rule, DIN Media status 'AKTUELL/CURRENT' (edition date 2025-02, month only). DIN SPEC (PAS) is a national/consortium specification, not a European Standard and not law.",
+      "applicable_dates": [
+        {
+          "date": "2025-01-15",
+          "what": "VDE press release (Berlin) announcing publication of DIN DKE SPEC 99100 by DIN and DKE",
+          "basis": "https://www.vde.com/en/press/press-releases/din-dke-spec-99100-battery-pass"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "A DIN SPEC (PAS) is not a European Standard or an EU act; no OJ citation looked for or expected.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Free English PDF from DIN Media (price listed as free). Direct DIN Media statements (read): all valid DIN SPEC (PAS) are free PDF downloads; one-time registration in the DIN Media webshop is needed; documents, including free ones, are copyright-protected and may be used at one workstation only, with a single-user licence to store the file on one PC; a network licence exists for some publications; the free offer covers DIN SPEC (PAS) only. Page footer: copyright 2025 DIN e.V. Search-engine excerpts of DIN Media pages (not read directly) add: the DIN SPEC Hub page limits the free product to customers who are not consumers within section 13 BGB, and the DIN Media general terms grant simple, non-sublicensable, non-transferable rights for own purposes and forbid automated retrieval by crawlers. The DIN Media catalogue page for this document states no document-specific licence.",
+      "permitted_use_basis": "Metadata reference only: cite number, title, edition date, DOI and URL. Free download does not license redistribution, mirroring, embedding or crawling. The project must not copy the PDF into the repository, and no clause or attribute text was read or used here.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.dinmedia.de/de/technische-regel/din-dke-spec-99100/385692321",
+          "what_it_shows": "DIN Media: German and English titles, edition date 2025-02, status AKTUELL, 106 pages, PAS, ICS, DOI https://dx.doi.org/10.31030/3582101, free English PDF.",
+          "official": true
+        },
+        {
+          "url": "https://www.din.de/en/wdc-beuth:din21:385692321",
+          "what_it_shows": "din.de catalogue: edition 2025-02, status CURRENT, PAS, free download link, footer copyright 2025 DIN e.V.",
+          "official": true
+        },
+        {
+          "url": "https://www.vde.com/en/press/press-releases/din-dke-spec-99100-battery-pass",
+          "what_it_shows": "VDE press release dated 2025-01-15: DIN and DKE published it; free download from DIN Media; builds on the Battery Pass Content Guidance.",
+          "official": true
+        },
+        {
+          "url": "https://www.dinmedia.de/de/normen-produkte/din-spec-pas",
+          "what_it_shows": "DIN Media DIN SPEC (PAS) page: free PDFs, registration, copyright, single-workstation use.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for full title, edition date, status, publisher, free availability and terms of use; all located. Free availability is qualified: registration and a single-workstation licence apply.",
+      "uncertainties": [
+        "Edition date on DIN catalogues is 2025-02 while the press release is dated 2025-01-15 and Battery Pass pages say 'published January 2025'. Not reconciled; edition date used.",
+        "The din.de catalogue page names DIN e.V. only as copyright holder; neither catalogue page names a publisher field. Publisher naming relies on the VDE press release.",
+        "thebatterypass.eu hosts a copy of the SPEC PDF (DIN_DKE_SPEC_99100.PDF). Whether that hosting is licensed by DIN was not determined; this project should not rely on or link to that copy as a substitute for the DIN Media source.",
+        "The SPEC text was NOT read (protected document). Its relationship to Annex XIII of Reg (EU) 2023/1542 is taken from publisher descriptions only.",
+        "DIN Media general terms and the DIN SPEC Hub consumer restriction were seen only in a search-engine excerpt, not opened."
+      ]
+    },
+    {
+      "id": "bp-content-guidance",
+      "title": "Battery Passport Content Guidance (Battery Pass consortium)",
+      "identifier": "Battery Pass 'Battery Passport Content Guidance' (PDF 2023_Battery_Passport_Content_Guidance.pdf on thebatterypass.eu)",
+      "issuing_body": "Battery Pass consortium (project concluded April 2025), published via acatech; co-funded by the German Federal Ministry for Economic Affairs and Climate Action",
+      "source_type": "project_resource",
+      "official_url": "https://thebatterypass.eu/battery-pass/materials/",
+      "edition_or_version": "First edition 'Version 1.0' released April 2023 (executive-summary file name and press coverage); updated edition December 2023 (acatech: 8 December 2023; one other source: 7 December). A version number for the December 2023 update was not found.",
+      "publication_date": "2023-12-08",
+      "legal_or_spec_status": "Project resource, not law. Non-binding consortium guidance interpreting the Battery Regulation content requirements; per search-excerpt of the Systemiq page, its data-attribute sections are superseded for data attributes by DIN DKE SPEC 99100 (not verified on the document).",
+      "applicable_dates": [
+        {
+          "date": "2023-04-17",
+          "what": "First Content Guidance (Version 1.0) released",
+          "basis": "search excerpts of BASF and acatech news items; acatech page https://en.acatech.de/publication/battery-passport-content-guidance/ gives the December date only"
+        },
+        {
+          "date": "2023-12-08",
+          "what": "Updated Content Guidance published",
+          "basis": "https://en.acatech.de/publication/battery-passport-content-guidance/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Updated edition",
+          "date": "2023-12-08",
+          "summary": "Update of the April 2023 guidance; contents not read.",
+          "url": "https://en.acatech.de/publication/battery-passport-content-guidance/"
+        },
+        {
+          "identifier": "Version 1.0",
+          "date": "2023-04-17",
+          "summary": "First release.",
+          "url": "https://en.acatech.de/wp-content/uploads/sites/6/2023/04/1.1.-202304_Battery-Passport-Content-Guidance-Version-1.0_Executive-Summary.pdf"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Consortium project resource; not an EU act or European standard.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "No licence stated on the resource pages or the acatech page. thebatterypass.eu imprint (read): publisher acatech - Deutsche Akademie der Technikwissenschaften e.V.; content is under German copyright law; duplication, processing and dissemination beyond what copyright law permits need written permission; downloads and copies are allowed only for private, non-commercial use; no open licence named. Page footers show copyright acatech. The resources pages state no per-document licence.",
+      "permitted_use_basis": "Cite and link only (title, date, URL). Do not copy, embed or redistribute the PDF or its tables without written permission from acatech; do not treat as legal authority. Reading the PDF was not done (binary download not permitted for this audit).",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://thebatterypass.eu/battery-pass/materials/",
+          "what_it_shows": "Materials page: Main Content Guidance and Executive Summary 'last updated December 2023', PDF URLs; project 'has officially concluded'; no licence stated.",
+          "official": true
+        },
+        {
+          "url": "https://en.acatech.de/publication/battery-passport-content-guidance/",
+          "what_it_shows": "acatech page: Content Guidance dated 8 December 2023 by the Battery Pass Consortium; copyright line only.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/imprint/",
+          "what_it_shows": "Imprint: copyright and private non-commercial download wording.",
+          "official": true
+        },
+        {
+          "url": "https://www.vde.com/en/press/press-releases/din-dke-spec-99100-battery-pass",
+          "what_it_shows": "Press release: DIN DKE SPEC 99100 builds on the Content Guidance last updated December 2023; consortium of eleven organisations led by Systemiq.",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "matches: the content guidance exists as a Battery Pass project resource with a December 2023 latest update; no version number for that update was found.",
+      "uncertainties": [
+        "PDF not opened (binary); version label inside the document, document-level licence or legal disclaimer therefore unknown.",
+        "April 2023 date comes from news excerpts, not a page fetched in full today.",
+        "Whether the guidance remains maintained: the project concluded in April 2025 and the site says results remain available."
+      ]
+    },
+    {
+      "id": "bp-data-attribute-longlist",
+      "title": "Battery Passport Data Attribute Longlist (Battery Pass v1.2; BatteryPass-Ready v1.3 and v2.0)",
+      "identifier": "BatteryPass-Ready 'Data Attribute Longlist' v2.0 (2026_BatteryPass-Ready_DataAttributeLongList_v2.0.xlsx)",
+      "issuing_body": "BatteryPass-Ready consortium (successor project, maintained via acatech, funded by the German Federal Ministry for Economic Affairs and Energy, grant 16BZF363C); earlier versions by the Battery Pass consortium",
+      "source_type": "project_resource",
+      "official_url": "https://thebatterypass.eu/battery-pass-ready/resources/",
+      "edition_or_version": "Current: v2.0 (27 Aug 2026). Previous: v1.3 (25 Mar 2026, BatteryPass-Ready); v1.2 (January 2025, Battery Pass, aligned to DIN DKE SPEC 99100); original 2023 'Battery Passport Data Attributes' workbook. The v2.0 news item says it builds on the fundamentals of DIN DKE SPEC 99100 and adds a 'technical references' tab.",
+      "publication_date": "2026-08-27",
+      "legal_or_spec_status": "Project resource, not law. Non-binding project resource; v2.0 reflects draft implementing acts and final JTC 24 standards (June 2026) and says it will be updated again after developments.",
+      "applicable_dates": [
+        {
+          "date": "2026-08-27",
+          "what": "Longlist v2.0 and Data Model v2.0 announced as published",
+          "basis": "https://thebatterypass.eu/news/now-published-data-attribute-longlist-v2-0-and-data-model-v2-0/"
+        },
+        {
+          "date": "2026-03-25",
+          "what": "Longlist v1.3 published (BatteryPass-Ready)",
+          "basis": "same news item (supersedes v1.3 published 25 March 2026)"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "v2.0",
+          "date": "2026-08-27",
+          "summary": "Adds a technical-references tab mapping data model specifications to the longlist; change log against March 2026 said to be integrated; considers final JTC 24 standards, the registry implementing act, EU Guidance Document v2.0 and feedback.",
+          "url": "https://thebatterypass.eu/news/now-published-data-attribute-longlist-v2-0-and-data-model-v2-0/"
+        },
+        {
+          "identifier": "v1.3",
+          "date": "2026-03-25",
+          "summary": "BatteryPass-Ready release; contents not read.",
+          "url": "https://thebatterypass.eu/wp-content/uploads/2026_BatteryPass-Ready_DataAttributeLongList_v1.3.xlsx"
+        },
+        {
+          "identifier": "v1.2",
+          "date": "2025-01",
+          "summary": "Battery Pass update aligning to DIN DKE SPEC 99100; the Battery Pass materials page still hosts this version and notes v1.3 exists.",
+          "url": "https://thebatterypass.eu/battery-pass/materials/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Project resource; not an EU act or European standard.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "No licence stated on the resources page or the v2.0 news item. thebatterypass.eu imprint (read): publisher acatech - Deutsche Akademie der Technikwissenschaften e.V.; content is under German copyright law; duplication, processing and dissemination beyond what copyright law permits need written permission; downloads and copies are allowed only for private, non-commercial use; no open licence named. Page footers show copyright acatech. The resources pages state no per-document licence.",
+      "permitted_use_basis": "Cite and link only (title, version, date, URL). Do not copy the workbook into the repository or redistribute it without written permission. For schema reuse use the data-model repositories (CC BY 4.0, see their entries), not this workbook. Not legal authority.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://thebatterypass.eu/battery-pass-ready/resources/",
+          "what_it_shows": "Resources page: longlist v2.0 (August 2026) and v1.3 (March 2026) workbook URLs; no licence statement; content guidance and technical guidance not listed as BatteryPass-Ready outputs.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/news/now-published-data-attribute-longlist-v2-0-and-data-model-v2-0/",
+          "what_it_shows": "News item dated 27 August 2026: v2.0 contents, supersedes v1.3 (25 March 2026), builds on DIN DKE SPEC 99100, no licence, no formal legal statement.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/battery-pass/materials/",
+          "what_it_shows": "Battery Pass materials page: hosts v1.2 and says v1.3 was published in March 2026 under BatteryPass-Ready.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/imprint/",
+          "what_it_shows": "Imprint terms.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "differs: the brief names the longlist as a Battery Pass consortium resource; the original project concluded in April 2025 and the current versions (v1.3, v2.0) come from the successor BatteryPass-Ready project, which lists no licence for them.",
+      "uncertainties": [
+        "Workbooks (xlsx) were not downloaded; attribute counts, columns and any in-file licence or disclaimer text were not examined.",
+        "The June 2026 news item with slug 'longlist-v1-3-2' is actually about 'User Stories from a Technical Perspective' v1.0 (30 June 2026); the site landing page labels it v1.3.2 while the resources page says v1.0. No longlist v1.3.2 was found.",
+        "v1.3 date: 'March 2026' on the resources page, 25 March 2026 in the v2.0 news item."
+      ]
+    },
+    {
+      "id": "bp-technical-guidance",
+      "title": "Battery Passport Technical Guidance (Battery Pass consortium)",
+      "identifier": "Battery Pass 'Battery Passport Technical Guidance' (2024_BatteryPassport_Technical_Guidance.pdf)",
+      "issuing_body": "Battery Pass consortium (project concluded April 2025), published via acatech",
+      "source_type": "project_resource",
+      "official_url": "https://en.acatech.de/publication/battery-passport-technical-guidance/",
+      "edition_or_version": "First edition, published 26 March 2024 (acatech). The acatech page states no version number; an executive summary file name carries 18 March 2024; search excerpts label the guidance 'version 1.0' (not confirmed on the page).",
+      "publication_date": "2024-03-26",
+      "legal_or_spec_status": "Project resource, not law. Non-binding recommendations for technical implementation of the battery passport; not republished or updated by BatteryPass-Ready (it is not listed among that project's resources).",
+      "applicable_dates": [
+        {
+          "date": "2024-03-26",
+          "what": "Publication date of the Technical Guidance",
+          "basis": "https://en.acatech.de/publication/battery-passport-technical-guidance/"
+        },
+        {
+          "date": "2024-03-18",
+          "what": "Date embedded in the executive-summary file name (indicator only)",
+          "basis": "https://thebatterypass.eu/battery-pass/materials/ link text/URL"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Consortium project resource; not an EU act or European standard.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "No licence stated on acatech or Battery Pass pages (footer copyright acatech). thebatterypass.eu imprint (read): publisher acatech - Deutsche Akademie der Technikwissenschaften e.V.; content is under German copyright law; duplication, processing and dissemination beyond what copyright law permits need written permission; downloads and copies are allowed only for private, non-commercial use; no open licence named. Page footers show copyright acatech. The resources pages state no per-document licence.",
+      "permitted_use_basis": "Cite and link only. Do not copy, embed or redistribute without written permission. Not legal authority; reflects a 2024 view that predates the 2026 registry and standards acts.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://en.acatech.de/publication/battery-passport-technical-guidance/",
+          "what_it_shows": "acatech page: Battery Pass consortium, joint publication, 26 March 2024; PDF links; no licence.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/battery-pass/materials/",
+          "what_it_shows": "Materials page: Technical Guidance 2024 PDF and executive summary URLs.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/battery-pass-ready/resources/",
+          "what_it_shows": "BatteryPass-Ready resources page: Technical Guidance not listed as a BatteryPass-Ready output (mentioned only as a core resource of the completed project).",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the technical guidance exists as a Battery Pass project resource dated 2024-03-26; no version number is stated on the official pages.",
+      "uncertainties": [
+        "PDF not opened; version label, internal licence or disclaimer unknown.",
+        "Its recommended 'standard stack' may be outdated relative to the 2026 EN 18219/18220 and registry acts; not examined."
+      ]
+    },
+    {
+      "id": "bp-data-model-github-v1-2-0",
+      "title": "Battery Pass Data Model repository (GitHub, Battery Pass project, v1.2.0)",
+      "identifier": "https://github.com/batterypass/BatteryPassDataModel",
+      "issuing_body": "Battery Pass project (concluded April 2025; GitHub organisation 'batterypass')",
+      "source_type": "software_repository",
+      "official_url": "https://github.com/batterypass/BatteryPassDataModel",
+      "edition_or_version": "README title 'Battery Pass Data Model v1.2.0'. RELEASE_NOTES: 1.0.0 (2024-05-28), 1.2.0 (2025-01-14, data model updated to match DIN DKE Spec 99100:2025-02), 1.2.0 (2025-10-23, licence changed to CC-BY-4.0; same version number listed twice). No GitHub releases or tags.",
+      "publication_date": "2025-01-14",
+      "legal_or_spec_status": "Project resource, not law. README says the project concluded successfully in April 2025, the repository is no longer actively maintained and is for reference only, and the model is still in draft mode. Most recent commit (2026-09-14) only adds a pointer to the new BatteryPass-Ready data model.",
+      "applicable_dates": [
+        {
+          "date": "2024-05-28",
+          "what": "Version 1.0.0 initial release",
+          "basis": "RELEASE_NOTES.md"
+        },
+        {
+          "date": "2025-01-14",
+          "what": "Version 1.2.0: data points aligned to DIN DKE SPEC 99100:2025-02",
+          "basis": "RELEASE_NOTES.md; oldest visible commit is also 2025-01-14"
+        },
+        {
+          "date": "2025-10-23",
+          "what": "Licence changed to CC-BY-4.0",
+          "basis": "RELEASE_NOTES.md"
+        },
+        {
+          "date": "2026-09-14",
+          "what": "Latest commit: reference notification to the new BatteryPass-Ready data model",
+          "basis": "https://github.com/batterypass/BatteryPassDataModel/commits/main"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "1.2.0 (licence change)",
+          "date": "2025-10-23",
+          "summary": "Licence changed to CC-BY-4.0.",
+          "url": "https://raw.githubusercontent.com/batterypass/BatteryPassDataModel/main/RELEASE_NOTES.md"
+        },
+        {
+          "identifier": "1.2.0",
+          "date": "2025-01-14",
+          "summary": "Aligned with DIN DKE Spec 99100:2025-02.",
+          "url": "https://raw.githubusercontent.com/batterypass/BatteryPassDataModel/main/RELEASE_NOTES.md"
+        },
+        {
+          "identifier": "1.0.0",
+          "date": "2024-05-28",
+          "summary": "Initial battery passport data model.",
+          "url": "https://raw.githubusercontent.com/batterypass/BatteryPassDataModel/main/RELEASE_NOTES.md"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Project repository; not an EU act or European standard.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "README License section: made available under Creative Commons Attribution 4.0 International (CC-BY-4.0), linking to the Creative Commons legal code. No LICENSE file exists in the repository (a request for /blob/main/LICENSE returned HTTP 404) and the GitHub About sidebar shows no licence.",
+      "permitted_use_basis": "May reuse, adapt and redistribute the model files with attribution under CC BY 4.0 (summary from general knowledge; the Creative Commons legal code was not opened). Keep attribution and licence link. Use only as a non-binding reference: it is a draft, unmaintained, tied to the 2025 DIN SPEC edition, and not law.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/batterypass/BatteryPassDataModel/main/README.md",
+          "what_it_shows": "README: v1.2.0, CC-BY-4.0 statement, project concluded April 2025, not maintained, draft, successor links, DIN DKE SPEC 99100:2025-02 reference.",
+          "official": true
+        },
+        {
+          "url": "https://raw.githubusercontent.com/batterypass/BatteryPassDataModel/main/RELEASE_NOTES.md",
+          "what_it_shows": "Release notes with dates for 1.0.0 and the two 1.2.0 rows.",
+          "official": true
+        },
+        {
+          "url": "https://github.com/batterypass/BatteryPassDataModel/commits/main",
+          "what_it_shows": "Commit history: latest 2026-09-14; 75 commits; oldest visible 2025-01-14.",
+          "official": true
+        },
+        {
+          "url": "https://github.com/batterypass/BatteryPassDataModel/releases",
+          "what_it_shows": "No releases published.",
+          "official": true
+        },
+        {
+          "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main",
+          "what_it_shows": "Top-level files: BatteryPass/, docs/, README.md, RELEASE_NOTES.md, logos; no LICENSE file; no licence badge.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the data model repository exists at the expected GitHub location, but it is the archived-in-practice 2025 model; the current model is in the successor BatteryPass-Ready repository (see bp-ready-data-model-v2).",
+      "uncertainties": [
+        "RELEASE_NOTES lists v1.2.0 twice (2025-01-14 and 2025-10-23). Not reconciled; the second is a licence change, not a new version.",
+        "The licence is stated in the README and release notes but not machine-readable (no LICENSE file, no repository licence metadata).",
+        "Third-party logos in the repository (BMWK, Battery Pass) are not covered by the CC BY statement as far as this audit can tell.",
+        "README says 'draft' and also 'fully aligned' with the EU Battery Regulation; the alignment claim was not tested."
+      ]
+    },
+    {
+      "id": "bp-ready-data-model-v2",
+      "title": "BatteryPass-Ready Data Model (successor repository, v2.0)",
+      "identifier": "https://git.gefeg.com/bp/BatteryPassDataModel (folder BatteryPass-Ready/; release folder v2.0.1)",
+      "issuing_body": "BatteryPass-Ready consortium (hosted on a GEFEG mbH GitLab; resources maintained by acatech)",
+      "source_type": "software_repository",
+      "official_url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/tree/main/BatteryPass-Ready?ref_type=heads",
+      "edition_or_version": "Version 2.0 per README (work in progress); current release folder v2.0.1; repository created 2025-10-27; 201 commits, 2 branches, 0 tags (project overview page).",
+      "publication_date": "2026-08-27",
+      "legal_or_spec_status": "Project resource, not law. README calls the model a work in progress that references legislative and standardisation processes still in development; conditional data elements are marked optional in schemas pending a later update.",
+      "applicable_dates": [
+        {
+          "date": "2026-08-27",
+          "what": "Data Model v2.0 announced with Longlist v2.0",
+          "basis": "https://thebatterypass.eu/news/now-published-data-attribute-longlist-v2-0-and-data-model-v2-0/"
+        },
+        {
+          "date": "2025-10-27",
+          "what": "Repository created",
+          "basis": "project overview page on git.gefeg.com"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "Project repository; not an EU act or European standard.",
+        "url": ""
+      },
+      "license_or_reuse_terms": "README (raw): materials licensed under CC BY 4.0; copyright held by the BatteryPass-Ready Consortium; acatech maintains them on its behalf. The news item announcing v2.0 states no licence; the repository's licence metadata was not shown on the project page.",
+      "permitted_use_basis": "May reuse, adapt and redistribute under CC BY 4.0 with attribution (summary from general knowledge; legal code not opened), subject to the README's warning that all resources may change. Not legal authority. Reading was limited to public documentation pages; no test environment (batterypass-ready.gefeg.com) was contacted.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads",
+          "what_it_shows": "README: version 2.0 work in progress, release folder v2.0.1, CC BY 4.0, copyright BatteryPass-Ready Consortium, relation to JTC 24 work; does not mention DIN DKE SPEC 99100.",
+          "official": true
+        },
+        {
+          "url": "https://git.gefeg.com/bp/BatteryPassDataModel",
+          "what_it_shows": "Project overview: 201 commits, 2 branches, 0 tags, created 2025-10-27 (description shown only as 'Testimport').",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/battery-pass-ready/resources/",
+          "what_it_shows": "Resources page linking the repository; version and date for the data model not stated there.",
+          "official": true
+        },
+        {
+          "url": "https://thebatterypass.eu/news/now-published-data-attribute-longlist-v2-0-and-data-model-v2-0/",
+          "what_it_shows": "News item dated 2026-08-27 announcing Data Model v2.0 as the basis for the test-environment schema.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "differs: the brief names 'the data model repository' as a Battery Pass resource; there are two (the 2025 GitHub model and the 2026 BatteryPass-Ready model) and the GitHub one points to the newer one.",
+      "uncertainties": [
+        "The README and project page were obtained through WebFetch summaries; the file list and licence file of the repository were not visible, so the licence rests on the README text only.",
+        "Release date of v2.0.1 is not shown; 2026-08-27 is the date of the v2.0 announcement.",
+        "The relationship of v2.0 to DIN DKE SPEC 99100 is stated only on the longlist news item ('builds on'), not in the data-model README."
+      ]
+    },
+    {
+      "id": "reg-eu-2023-1542-art-77-xref",
+      "title": "Regulation (EU) 2023/1542 concerning batteries and waste batteries (cross-reference source: Art. 77(1) and 77(3) only)",
+      "identifier": "CELEX 32023R1542; consolidated text 02023R1542-20260813 (English); ELI http://data.europa.eu/eli/reg/2023/1542/oj",
+      "issuing_body": "European Parliament and Council of the European Union",
+      "source_type": "eu_regulation",
+      "official_url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj",
+      "edition_or_version": "Consolidated English text read through the Publications Office Cellar manifestation d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1 (amendment markers B, C2, C1 and M3 visible in the examined window). Version label 02023R1542-20260813 is taken from the sibling batteries-regulation research and from a EUR-Lex search result; the page header was not visible in the window read.",
+      "publication_date": "2023-07-28",
+      "legal_or_spec_status": "In force per the existence of a 2026 consolidated version; full legal status, amendment history and applicability were NOT audited by this group (see batteries-regulation.json). Only Art. 77(1) and Art. 77(3) were examined.",
+      "applicable_dates": [
+        {
+          "date": "2027-02-18",
+          "what": "Battery passport obligation applies to LMT batteries, industrial batteries above 2 kWh and EV batteries",
+          "basis": "Art. 77(1), read in the Cellar consolidated text"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "This is the OJ act itself (OJ L 191 per the EUR-Lex file label L_2023191EN; publication date 2023-07-28 inferred from the EUR-Lex consolidated-version label 02023R1542-20230728). Not separately opened.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
+      },
+      "license_or_reuse_terms": "EU legislation: reuse under the EUR-Lex / Publications Office legal-notice reuse policy (the notice itself was not opened today).",
+      "permitted_use_basis": "May cite article, paragraph and subparagraph and summarise in own words; may quote a few words. Reuse under the EUR-Lex reuse policy.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+          "what_it_shows": "Read at offsets 300000 (ends mid Art. 76), 400000 (Art. 77) and 500000 (annexes only; no Art. 77): Art. 77(1) and Art. 77(3) three subparagraphs.",
+          "official": true
+        },
+        {
+          "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj",
+          "what_it_shows": "Canonical ELI link; WebFetch returned empty content for it and for five other EUR-Lex variants (see attempts).",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable: not named in the brief; included only because Art. 77(3) makes the ISO/IEC 15459 dated editions legally relevant to the identifier and carrier items in the brief.",
+      "uncertainties": [
+        "EUR-Lex blocked WebFetch; text was read from the Publications Office Cellar copy, whose identifier was taken from a sibling research file and not re-derived through the redirect today.",
+        "No delegated act replacing the Art. 77(3) standards was seen in the consolidated text read; the consolidated-versions list on EUR-Lex was not readable.",
+        "Art. 77(2), 77(9), 77(10), Art. 13(6) and Annex XIII were not examined by this group."
+      ]
+    },
+    {
+      "id": "reg-eu-2024-1781-annex-iii-xref",
+      "title": "Regulation (EU) 2024/1781 ecodesign for sustainable products (cross-reference source: Annex III only)",
+      "identifier": "CELEX 32024R1781; consolidated text 02024R1781-20240628 (EN, 000.001); ELI http://data.europa.eu/eli/reg/2024/1781/oj",
+      "issuing_body": "European Parliament and Council of the European Union",
+      "source_type": "eu_regulation",
+      "official_url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj",
+      "edition_or_version": "Consolidated text 02024R1781-20240628 (EN 000.001), PDF page 80 read via the Cellar PDF 78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1 (page header 02024R1781 - EN - 28.06.2024 - 000.001 - 80)",
+      "publication_date": "2024-06-28",
+      "legal_or_spec_status": "Status, entry into force and amendment history were NOT audited by this group (see espr.json). Annex III (digital product passport, 'referred to in Articles 9 to 12') was read in full on PDF page 80, with its last paragraph on page 81.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "This is the OJ act itself; 2024-06-28 is the date shown in the consolidated-text header and was not separately matched to the OJ L publication page.",
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj"
+      },
+      "license_or_reuse_terms": "EU legislation: reuse under the EUR-Lex / Publications Office legal-notice reuse policy (notice not opened today).",
+      "permitted_use_basis": "May cite and summarise in own words; short quotations only. Reuse under the EUR-Lex reuse policy.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+          "what_it_shows": "Cellar PDF of the consolidated text; the fetch tool saved it locally and pages 79-81 were read with the Read tool, then the file was deleted.",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable: not named in the brief; included because Annex III names ISO/IEC 15459-1 to -6 for the DPP data carrier and identifiers.",
+      "uncertainties": [
+        "Arts 10 and 12, which interact with Annex III (equivalents, harmonised standards), were not read by this group.",
+        "The Annex III second paragraph as read contains no 'or equivalent' wording, unlike Art. 77(3) of Regulation 2023/1542 and Annex III point (c); whether Art. 10 supplies one was not examined."
+      ]
+    }
+  ],
+  "provisions": [
+    {
+      "source_id": "reg-eu-2023-1542-art-77-xref",
+      "citation": "Art. 77(1)",
+      "version_examined": "Consolidated English text of Reg (EU) 2023/1542 (Cellar d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1; version label 02023R1542-20260813 per sibling research); window at characters 400000-500000",
+      "summary": "A battery passport, described as an electronic record, is required for three battery categories: light means of transport (LMT) batteries, industrial batteries with a capacity above 2 kWh, and electric vehicle batteries, from 18 February 2027 for batteries placed on the market or put into service.",
+      "applies_to": "LMT batteries; industrial batteries above 2 kWh; electric vehicle batteries; economic operators placing them on the market or putting them into service",
+      "applicable_from": "2027-02-18",
+      "conditions": "Capacity threshold applies to industrial batteries only (the window read shows 'above 2 kWh'). Other provisions of Art. 77 and Annex XIII not examined by this group.",
+      "modality": "shall",
+      "evidence_url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "reg-eu-2023-1542-art-77-xref",
+      "citation": "Art. 77(3), first subparagraph",
+      "version_examined": "Consolidated English text of Reg (EU) 2023/1542 (Cellar d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1; version label 02023R1542-20260813 per sibling research); window at characters 400000-500000",
+      "summary": "The passport must be reachable through the QR code of Art. 13(6), which links to a unique identifier that the economic operator placing the battery on the market assigns to it.",
+      "applies_to": "Economic operator placing the battery on the market; battery passport access route",
+      "applicable_from": "No date in the subparagraph; read with Art. 77(1), 2027-02-18",
+      "conditions": "No dated standard editions in this subparagraph.",
+      "modality": "shall",
+      "evidence_url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "reg-eu-2023-1542-art-77-xref",
+      "citation": "Art. 77(3), second subparagraph",
+      "version_examined": "Consolidated English text of Reg (EU) 2023/1542 (Cellar d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1; version label 02023R1542-20260813 per sibling research); window at characters 400000-500000",
+      "summary": "The QR code and the unique identifier must comply with ISO/IEC 15459-1:2014, 15459-2:2015, 15459-3:2014, 15459-4:2014, 15459-5:2014 and 15459-6:2014, or their equivalent (edition numbers and years as written in the Regulation).",
+      "applies_to": "QR code and unique identifier of battery passports",
+      "applicable_from": "No date in the subparagraph; read with Art. 77(1), 2027-02-18",
+      "conditions": "Dated editions are named; the words 'or their equivalent' leave room for other European or international standards. The ISO pages show corrected versions (2016) for parts 1, 3, 4, 5 and 6; the Regulation does not mention them.",
+      "modality": "shall",
+      "evidence_url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "reg-eu-2023-1542-art-77-xref",
+      "citation": "Art. 77(3), third subparagraph",
+      "version_examined": "Consolidated English text of Reg (EU) 2023/1542 (Cellar d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1; version label 02023R1542-20260813 per sibling research); window at characters 400000-500000",
+      "summary": "The Commission may adopt delegated acts under Art. 89 amending the second subparagraph in light of technical and scientific progress, by replacing the listed standards or adding other European or international standards.",
+      "applies_to": "Commission",
+      "applicable_from": "No deadline stated in the part read",
+      "conditions": "No such delegated act was seen in the consolidated text read; the EUR-Lex consolidated-versions list could not be read, so absence of an adopted act is not established.",
+      "modality": "empowerment",
+      "evidence_url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "reg-eu-2024-1781-annex-iii-xref",
+      "citation": "Annex III, introductory paragraph and point (b)",
+      "version_examined": "Consolidated text 02024R1781-20240628 (EN 000.001), PDF page 80",
+      "summary": "Delegated acts under Art. 4 specify, from a list of twelve elements (a) to (l), which data are or can be included in the digital product passport; point (b) is the unique product identifier at the level set in the applicable delegated act.",
+      "applies_to": "Commission delegated acts per product group; DPP data content",
+      "applicable_from": "Condition: each delegated act adopted under Art. 4",
+      "conditions": "Annex III is a menu from which each delegated act selects; it does not itself set a mandatory data set. Batteries are governed by Regulation (EU) 2023/1542.",
+      "modality": "shall",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "reg-eu-2024-1781-annex-iii-xref",
+      "citation": "Annex III, point (c)",
+      "version_examined": "Consolidated text 02024R1781-20240628 (EN 000.001), PDF page 80",
+      "summary": "One selectable DPP data element is the Global Trade Identification Number as provided for in ISO/IEC 15459-6 or equivalent, for products or their parts. The standard is named without a year here, while the second paragraph of the Annex names the 2014 edition.",
+      "applies_to": "Products or their parts; DPP data content where a delegated act selects this element",
+      "applicable_from": "Condition: each delegated act adopted under Art. 4",
+      "conditions": "'Or equivalent' appears in this point. Year is absent in point (c) but present in the second paragraph.",
+      "modality": "shall",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+      "verification_level": "substantive"
+    },
+    {
+      "source_id": "reg-eu-2024-1781-annex-iii-xref",
+      "citation": "Annex III, second paragraph",
+      "version_examined": "Consolidated text 02024R1781-20240628 (EN 000.001), PDF page 80",
+      "summary": "The data carrier, the unique product identifier (point (b)), the unique operator identifiers (points (g), (h), (k)) and the unique facility identifiers (point (i)) must, where relevant for the products concerned, comply with ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 (numbers and years as written).",
+      "applies_to": "Data carriers and identifiers of ESPR digital product passports",
+      "applicable_from": "Condition: a DPP required by an Art. 4 delegated act",
+      "conditions": "'Where relevant for the products concerned'. No 'or equivalent' wording in this paragraph as read; interaction with Arts 10 and 12 (equivalents, harmonised standards) not examined. The same six dated editions as Art. 77(3) of Regulation 2023/1542.",
+      "modality": "shall",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+      "verification_level": "substantive"
+    }
+  ],
+  "attempts": [
+    {
+      "tool": "WebSearch",
+      "target": "GS1 Digital Link URI Syntax current version ratified (standard)",
+      "outcome": "Surfaced ref.gs1.org pages; search summary claimed gs1.org lists 1.5.0 and ref.gs1.org lists 1.6.0 - both superseded by what the ref.gs1.org pages showed on fetch (1.7.0)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.gs1.org/standards/gs1-digital-link and https://gs1.org/standards/gs1-digital-link",
+      "outcome": "HTTP 403 both times; page not inspected."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.gs1.org/standards/ip",
+      "outcome": "HTTP 403."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://ref.gs1.org/standards/digital-link/ , /uri-syntax/ , /uri-syntax/1.7.0/ , /uri-syntax/archive",
+      "outcome": "Success. 1.7.0 'Ratified Aug 2026'; archive dates; log of changes read at offset 100000 (page 120 374 characters)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://ref.gs1.org/standards/resolver/ and /resolver/archive",
+      "outcome": "Success. Resolver 1.2.1; archive dates. Last 7 148 characters of the resolver page not read."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://ref.gs1.org/gs1/standards-disclaimer/",
+      "outcome": "Success (disclaimer read)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://ref.gs1.org/gs1/ip-policy/ and /ip-policy",
+      "outcome": "Returned a PDF that the fetch tool saved automatically into its tool-results cache (not a deliberate download). Pages 1-4 of 11 read with the Read tool; file then deleted."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "GS1 Intellectual Property Policy royalty-free (allowed_domains gs1.org, ref.gs1.org)",
+      "outcome": "Discovery only; confirmed existence of ref.gs1.org/gs1/ip-policy/ and a 24 March 2025 adoption date, later confirmed on the PDF itself."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "IEC 61406 identification link edition 2 publication date",
+      "outcome": "Only IEC 61406-2:2024 Edition 1.0 appeared; no Edition 2 of either part located. Search summary wrongly described IEC 61406 as an optical-disc standard in a later query (see anomalies)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://webstore.iec.ch/en/publication/77973 (IEC 61406-2:2024) and /67673 (IEC 61406-1:2022)",
+      "outcome": "Success; metadata read. Publication id 5469 tried by mistake was IEC 61445:2012 (irrelevant)."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "IEC 61406-1 edition 2022 webstore; prEN IEC 61406-1:2025; E DIN EN IEC 61406-1; IEC 61406-3; IEC TS 61406:2021",
+      "outcome": "Discovery: EN adoption, prEN IEC 61406-1:2025 entry (EVS, iteh), BSI draft 25/30511089 DC (2025-12-05), BSI PD IEC/TS 61406; no Part 3."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.cencenelec.eu/dyn/www/f?p=CEN:105::RESET::::",
+      "outcome": "Public search form fetched for description only; NOT submitted (forms must not be submitted)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "CENELEC project page for EN IEC 61406-1 (a hand-built p=305:110 URL with FSP_PROJECT 75312, and the exact cs= URL surfaced by WebSearch)",
+      "outcome": "HTTP 500 both times. CENELEC dates therefore come from a search excerpt only (secondary_only)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://standards.cencenelec.eu/ords/f?...FSP_ORG_ID:1257871 (CLC/TC 65X body page)",
+      "outcome": "Loaded but lists no 61406 entries; Published Standards tab not reachable by WebFetch."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.evs.ee/en/evs-en-iec-61406-1-2022 ; https://www.dinmedia.de/en/standard/din-en-iec-61406-1/372053652 ; iteh.ai catalog pages ; https://knowledge.bsigroup.com/products/pd-iec-ts-61406-identification-link ; https://standardsdevelopment.bsigroup.com/projects/2025-00752",
+      "outcome": "EVS, DIN Media and BSI listing read (non-official); iteh pages returned only the site banner; BSI project page failed with too many redirects."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://committee.iso.org/standard/54779.html, 54780, 54781, 54782, 54785, 54786 (ISO/IEC 15459-1 to -6)",
+      "outcome": "Success for all six: edition, dates, corrected versions, 'reviewed and confirmed in 2025'."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.iso.org/standard/54779.html and https://www.iso.org/es/contents/data/standard/05/47/54786.html",
+      "outcome": "HTTP 403; the committee.iso.org copies of the same records were used instead."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://webstore.iec.ch/en/publication/10334 (part 1), 21921 (part 2:2015), 10337 (part 3), 10339 (part 4), 10341 (part 5), 10343 (part 6); 10335, 10336, 10342 (older 2006/2007 editions)",
+      "outcome": "Success; used for exact publication dates (2014-11-12 for parts 1, 3, 4, 5, 6; 2015-03-05 for part 2) and to see predecessor withdrawals."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "ISO/IEC 15459 parts 1-6 editions; ISO/IEC 15459-5; ISO/IEC 15459 revision DIS stage 2026 (standard and extended)",
+      "outcome": "Discovery; no revision at DIS stage located; SC 31 business plan mention of systematic review only."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "DIN DKE SPEC 99100 digital product passport / 99100:2025-02 free download / dke.de Batteriepass / DIN Media terms of use",
+      "outcome": "Discovery of dinmedia.de, din.de, VDE press release; terms-of-use excerpts of DIN Media pages and general terms (not opened)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.din.de/en/wdc-beuth:din21:402154227",
+      "outcome": "Page is about DIN EN 18220, not SPEC 99100."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.din.de/en/wdc-beuth:din21:385692321 ; https://www.dinmedia.de/de/technische-regel/din-dke-spec-99100/385692321 ; https://www.vde.com/en/press/press-releases/din-dke-spec-99100-battery-pass ; https://www.dinmedia.de/de/normen-produkte/din-spec-pas ; https://www.din.de/en/din-and-our-partners/press/press-releases/free-download-of-all-din-spec-pas-documents-at-www-dinmedia-de-262538",
+      "outcome": "Success; catalogue metadata, free-download and licence statements read."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.din.de/en/wdc-beuth:din21:385692321/toc-3582101/download (intended as the terms/download-gate page)",
+      "outcome": "INADVERTENT: this URL is the PDF of DIN DKE SPEC 99100 itself. The fetch tool auto-saved the file into its tool-results cache; the extracted answer contained only PDF metadata (signature, producer) and no clause text. The file was not opened by this agent and was deleted immediately. No attribute or clause content was used anywhere in this file."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://thebatterypass.eu ; /battery-pass-ready/resources/ ; /battery-pass/materials/ ; /battery-pass/content-guidance-facts/ ; /imprint/ ; /news/now-published-data-attribute-longlist-v2-0-and-data-model-v2-0/ ; /news/now-published-data-attribute-longlist-v1-3-2/",
+      "outcome": "Success; resource lists, dates, imprint terms. PDF and xlsx resource files were deliberately not fetched (no binaries)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://en.acatech.de/publication/battery-passport-content-guidance/ ; .../battery-passport-technical-guidance/",
+      "outcome": "Success; dates and links. Systemiq page https://systemiq.earth/resource-category/battery-passport-content-guidance-2 returned HTTP 403."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "Battery Pass consortium content guidance / technical guidance / Content Guidance v1.2 December 2023",
+      "outcome": "Discovery; dates 17 April 2023, 7/8 December 2023, 26 March 2024."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/batterypass ; https://github.com/batterypass/BatteryPassDataModel (main, /releases, /commits/main, /tree/main) ; raw README.md and RELEASE_NOTES.md",
+      "outcome": "Success. /blob/main/LICENSE returned HTTP 404 (no LICENSE file)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads ; https://git.gefeg.com/bp/BatteryPassDataModel ; https://git.gefeg.com/bp/BatteryPassDataModel/-/tree/main/BatteryPass-Ready?ref_type=heads",
+      "outcome": "README raw page succeeded; the other two pages gave only headers or minimal project metadata."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "eur-lex IEC 61406 / ISO/IEC 15459 digital product passport; Battery Regulation Annex XIII Art. 77 QR code ISO/IEC 15459 (extended, EU domains only)",
+      "outcome": "Discovery of Art. 77(3) wording; a search-tool summary also claimed IEC 61406 is an optical-disc standard (wrong; see anomalies)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "EUR-Lex: legal-content/EN/TXT/?uri=CELEX:02023R1542-20260813 ; eli/reg/2023/1542/oj ; legal-content/EN/TXT/HTML/?uri=CELEX:32023R1542 ; eli/reg/2023/1542/oj/eng ; eli/reg/2023/1542/2026-08-13/eng ; legal-content/EN/TXT/PDF/?uri=CELEX:02023R1542-20240718",
+      "outcome": "All six returned empty content (EUR-Lex blocks WebFetch)."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://publications.europa.eu/resource/celex/32023R1542",
+      "outcome": "HTTP 303 to cellar d0065c31-2ce3-11ee-95a2-01aa75ed71a1 (RDF metadata); not followed further."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "Regulation 2023/1542 Article 77 QR code ISO/IEC 15459 (allowed_domains eur-lex.europa.eu, op.europa.eu)",
+      "outcome": "Returned EUR-Lex URLs and an excerpt of Art. 77(3); excerpt used for discovery only."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "Cellar d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1 (identifier taken from the sibling batteries-regulation.json)",
+      "outcome": "Success. Read at offsets 300000 (ends in Art. 76(4)), 400000 (Art. 77(1) and 77(3)) and 500000 (annexes, no Art. 77). Total length 727 481 characters; the rest not read."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "Cellar 78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1 at offsets 600000 and 700000 (consolidated Reg 2024/1781, identifier from sibling espr.json)",
+      "outcome": "Returned a PDF structure dump which the tool saved to its cache; PDF pages 79-81 read with the Read tool (Annex III on p. 80); file then deleted."
+    },
+    {
+      "tool": "Bash (grep/python, read-only)",
+      "target": "Sibling files docs/research/raw/espr.json, batteries-regulation.json, commission-2026-acts.json, en-jtc24.json",
+      "outcome": "Read only to (1) obtain Cellar identifiers, (2) check whether Decision (EU) 2026/1736 lists IEC 61406 (it does not, per those files), (3) avoid contradicting them. Their contents are not treated as verified evidence in this file."
+    },
+    {
+      "tool": "Bash",
+      "target": "rm of three auto-saved PDFs in the tool-results cache (GS1 IP policy, DIN SPEC 99100, ESPR consolidated PDF)",
+      "outcome": "Done. No file in the repository other than this output file was created or changed."
+    }
+  ],
+  "anomalies": [
+    "No text addressed to an AI or agent was found on any page fetched (GS1, IEC, ISO, DIN, DKE, VDE, acatech, Battery Pass, GitHub, GEFEG, Publications Office).",
+    "GS1 date discrepancies, not reconciled: URI Syntax 1.7.0 is 'Ratified Aug 2026' (page), 'published 7 August 2026' (archive), 2026-08-06 (PDF file name) and 'Jul 2026' (log of changes). Resolver 1.2.1 is 'Ratfied Aug 2026' (typo on page), 'published 19 August 2026' (archive) and 2026-08-07 (PDF file name).",
+    "A search-engine excerpt of gs1.org/standards/gs1-digital-link (HTTP 403 on fetch) listed URI Syntax 1.5.0 (Jun 2024) as current; ref.gs1.org shows 1.7.0. A conformance engine must not take the version from the gs1.org marketing page.",
+    "IEC 61406-2:2024: IEC webstore date 2024-05-08 versus 2024-05-07 (Canadian SCC) and 2024-05-31 (Genorma); IEC date used.",
+    "IEC 61406-1 stability date: search-engine summaries showed both 2026 and 2024; the IEC webstore page fetched today shows 2026.",
+    "EN IEC 61406-1 CENELEC implementation dates (DOR 2022-10-20, DAV 2022-12-16, DOA 2023-01-20, DOP 2023-07-20) were seen only in a search excerpt of the CENELEC project page, which returned HTTP 500 twice.",
+    "prEN IEC 61406-1:2025 appears in the EVS standard history and on iteh.ai, and BSI lists draft 25/30511089 DC (2025-12-05); no official CENELEC or IEC page confirms stage. A search tool also reported the draft in contradictory terms (BSI page labelled both 'Current' and 'Draft for Comment').",
+    "BSI lists 'PD IEC/TS 61406' (2022-02-18) as identical to 'IEC 61406 ED1'; no IEC technical specification entry was found at webstore.iec.ch.",
+    "A WebSearch summary described IEC 61406 as the standard for marking optical discs. This is contradicted by the IEC webstore record (Identification Link). Search-tool summaries were treated as discovery only throughout.",
+    "ISO/IEC 15459 corrected versions exist for parts 1, 3, 4, 5 and 6 (2016-09, or 2016-12 for part 3); Reg 2023/1542 Art. 77(3) and Reg 2024/1781 Annex III name the 2014/2015 editions without mentioning corrections.",
+    "ESPR Annex III point (c) names ISO/IEC 15459-6 with no year and 'or equivalent'; Annex III's second paragraph names the 2014 edition; Art. 77(3) names six dated editions 'or their equivalent'.",
+    "ISO/IEC 15459-1 ISO life-cycle section shows undated stage code 90.99 alongside the dated 90.93 entry (2025-10-31); likely a legend, unconfirmed.",
+    "DIN DKE SPEC 99100: edition date 2025-02 (DIN Media, din.de) versus press release dated 2025-01-15 and 'published January 2025' on Battery Pass pages. din.de page does not show the DOI that DIN Media shows (10.31030/3582101).",
+    "thebatterypass.eu hosts a copy of DIN_DKE_SPEC_99100.PDF; DIN Media terms describe the document as copyright-protected with single-workstation use. Authorisation for that hosting is unknown; the copy was not fetched.",
+    "Battery Pass GitHub RELEASE_NOTES.md lists version 1.2.0 twice (2025-01-14 and 2025-10-23); README says the repository is unmaintained yet the latest commit is 2026-09-14 (a pointer to the successor); the README calls the model both 'draft' and 'fully aligned' with the EU Battery Regulation; no LICENSE file and no repository licence metadata, although the README states CC-BY-4.0.",
+    "BatteryPass-Ready news item with slug 'now-published-data-attribute-longlist-v1-3-2' is about 'User Stories from a Technical Perspective' v1.0 (30 June 2026); the landing page labels it v1.3.2, the resources page v1.0. No longlist v1.3.2 exists on any page read.",
+    "Battery Pass Content Guidance December 2023 update is dated 8 December 2023 on acatech and 7 December 2023 in a press-release excerpt.",
+    "Inadvertent binary retrievals, disclosed for audit: (1) the GS1 IP Policy PDF (an open policy document, read pages 1-4), (2) the DIN DKE SPEC 99100 PDF when a '/download' URL was fetched as a presumed terms page (a protected document; auto-saved by the tool; not opened; deleted; no content used), (3) the consolidated ESPR PDF (EU legislation; Annex III read). All three were deleted from the tool-results cache. Rule 9 (no binaries) and rule 6 (do not download standards) were therefore technically breached by tool behaviour on item (2); no protected text was read.",
+    "Rule-6 compliance: for IEC, ISO and DIN items only catalogue metadata was read; no clause numbers or clause text are stated anywhere in this file."
+  ],
+  "open_questions": [
+    "Is a revision of IEC 61406-1 (prEN IEC 61406-1:2025, BSI draft 25/30511089 DC) real, at what stage, and does an IEC Edition 2 or amendment exist? Needs the IEC project database and the CENELEC enquiry list, both form-driven and not queried here.",
+    "Does any DPP-relevant act or standard make IEC 61406-1/-2 or GS1 Digital Link normatively relevant? EN 18219 (unique identifiers) and EN 18220 (data carriers) are cited via Decision (EU) 2026/1736 according to sibling files and are outside this brief; their normative references are protected content and were not examined.",
+    "GS1: what exact day was URI Syntax 1.7.0 ratified, and does GS1 grant any right to copy or redistribute the standard text beyond the IP Policy implementer licence? Sections 5 to 9 of the IP Policy and the gs1.org IP explainer page were not read.",
+    "What does the DIN Media web shop require for the free DIN DKE SPEC 99100 download (consumer exclusion, single-workstation licence) and may an open-source project redistribute or link to the PDF? The DIN Media general terms were seen only in a search excerpt.",
+    "Battery Pass documents (content guidance, technical guidance, longlist workbooks): do the PDFs and workbooks carry an in-file licence or disclaimer that differs from the site imprint? They were not opened. A written permission request to acatech would be needed for anything beyond citing.",
+    "What version label does the December 2023 Content Guidance carry, and has any Battery Pass or BatteryPass-Ready document been formally withdrawn or superseded in writing?",
+    "Is a delegated act under Art. 77(3) third subparagraph of Reg (EU) 2023/1542 adopted or planned? The EUR-Lex consolidated-versions list was unreadable.",
+    "Is any revision of ISO/IEC 15459 parts under way at ISO/IEC JTC 1/SC 31 (SC 31 business plan mentions systematic review only)? ISO work-programme pages were not opened.",
+    "How does the BatteryPass-Ready data model v2.0 (work in progress, release folder v2.0.1) map to Annex XIII of Reg (EU) 2023/1542 and to the Commission battery passport guidance? Not examined; schemas were not read."
+  ]
+}

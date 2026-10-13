@@ -277,6 +277,9 @@ does not let those files decide what the test host trusts or discloses:
   with `--allow-private-host`. A public host needs an authorization or `--allow-remote-read`.
 - A secret reference is `env:DPPCE_SECRET_<NAME>` or `file:<name>` inside the directory that
   the operator gives with `--secrets`. No other environment variable or file can be named.
+- The IXIT declares a secret reference for a role. The operator must repeat exactly that
+  reference with `--role-secret ROLE=REFERENCE`. An IXIT alone can never select a secret, for
+  example one that belongs to a different system that the same laboratory tests.
 - A role credential is sent only to an origin that a validated authorization names.
 - A path in the IXIT is resolved and must stay inside the directory of the IXIT file.
 

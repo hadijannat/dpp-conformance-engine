@@ -1,0 +1,1112 @@
+{
+  "group": "w3c-untp",
+  "retrieval_date": "2026-10-13",
+  "sources": [
+    {
+      "id": "w3c-vcdm-2-0",
+      "title": "Verifiable Credentials Data Model v2.0",
+      "identifier": "W3C REC-vc-data-model-2.0-20250515 (shortname vc-data-model-2.0)",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/vc-data-model-2.0/",
+      "edition_or_version": "2.0 (Recommendation snapshot of 15 May 2025)",
+      "publication_date": "2025-05-15",
+      "legal_or_spec_status": "W3C Recommendation",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "Date shown in the document header of the Recommendation; this-version URL https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/",
+          "basis": "https://www.w3.org/TR/vc-data-model-2.0/ header; https://www.w3.org/standards/history/vc-data-model-2.0/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation published before the Recommendation",
+          "url": "https://www.w3.org/standards/history/vc-data-model-2.0/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "Latest entry in the W3C history list (172 versions listed in total); no later republication seen",
+          "url": "https://www.w3.org/standards/history/vc-data-model-2.0/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/vc-data-model-2.0/",
+          "what_it_shows": "Header: W3C Recommendation, 15 May 2025, this-version and latest-version URLs, errata exist, licence link (first 100000 of 552656 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/vc-data-model-2.0/",
+          "what_it_shows": "Most recent entries: Recommendation 15 May 2025, Proposed Recommendation 20 March 2025; 172 versions listed",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked for status, Recommendation date and URL; W3C Recommendation, 2025-05-15, https://www.w3.org/TR/vc-data-model-2.0/.",
+      "uncertainties": [
+        "Errata exist (https://w3c.github.io/vc-data-model/errata.html) and were not read, so normative corrections after 2025-05-15 are not characterised.",
+        "Only the header and status part of the page was read (not the normative body)."
+      ]
+    },
+    {
+      "id": "w3c-vc-jose-cose",
+      "title": "Securing Verifiable Credentials using JOSE and COSE",
+      "identifier": "W3C REC-vc-jose-cose-20261013 (shortname vc-jose-cose); earlier Recommendation REC-vc-jose-cose-20250515",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/vc-jose-cose/",
+      "edition_or_version": "Recommendation; latest published version dated 13 October 2026 (previous Recommendation 15 May 2025)",
+      "publication_date": "2026-10-13",
+      "legal_or_spec_status": "W3C Recommendation (two Recommendation-status versions exist: 2025-05-15 and 2026-10-13; the shortlink and the W3C API resolve to the 2026-10-13 one today)",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "First Recommendation publication",
+          "basis": "https://api.w3.org/specifications/vc-jose-cose/versions/20250515 (status Recommendation, date 2025-05-15) and https://www.w3.org/TR/2025/REC-vc-jose-cose-20250515/"
+        },
+        {
+          "date": "2026-10-13",
+          "what": "Later Recommendation publication; header of https://www.w3.org/TR/vc-jose-cose/ shows 'W3C Recommendation 13 October 2026', process-rules 18 August 2025 Process Document",
+          "basis": "https://api.w3.org/specifications/vc-jose-cose/versions/20261013; https://www.w3.org/standards/history/vc-jose-cose/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "First Public Working Draft (then titled 'Securing Verifiable Credentials using JSON Web Tokens')",
+          "date": "2023-04-27",
+          "summary": "First entry in the 85-version history",
+          "url": "https://www.w3.org/standards/history/vc-jose-cose/"
+        },
+        {
+          "identifier": "Candidate Recommendation Snapshot",
+          "date": "2024-04-25",
+          "summary": "First CR; the spec's Revision History appendix compares against this CR",
+          "url": "https://www.w3.org/standards/history/vc-jose-cose/"
+        },
+        {
+          "identifier": "Candidate Recommendation Snapshot",
+          "date": "2024-12-19",
+          "summary": "Second CR snapshot",
+          "url": "https://www.w3.org/standards/history/vc-jose-cose/"
+        },
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation",
+          "url": "https://www.w3.org/standards/history/vc-jose-cose/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "First Recommendation",
+          "url": "https://api.w3.org/specifications/vc-jose-cose/versions/20250515"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2026-10-13",
+          "summary": "Republished Recommendation, now the latest version; nature of the change relative to the 2025-05-15 Recommendation was NOT located",
+          "url": "https://api.w3.org/specifications/vc-jose-cose/versions/20261013"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/vc-jose-cose/",
+          "what_it_shows": "Header 'W3C Recommendation 13 October 2026'; this-version https://www.w3.org/TR/2026/REC-vc-jose-cose-20261013/; errata exist; status section and Patent Policy statement (first 100000 of 209276 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://api.w3.org/specifications/vc-jose-cose/versions/20261013",
+          "what_it_shows": "status Recommendation, date 2026-10-13, process-rules 20250818, rec-track true",
+          "official": true
+        },
+        {
+          "url": "https://api.w3.org/specifications/vc-jose-cose/versions/20250515",
+          "what_it_shows": "status Recommendation, date 2025-05-15, has a successor-version link",
+          "official": true
+        },
+        {
+          "url": "https://api.w3.org/specifications/vc-jose-cose",
+          "what_it_shows": "latest version link points to versions/20261013",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/vc-jose-cose/",
+          "what_it_shows": "85 versions; top entries Recommendation 13 October 2026, Recommendation 15 May 2025, Proposed Recommendation 20 March 2025",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/TR/2026/REC-vc-jose-cose-20261013/",
+          "what_it_shows": "Dated URL resolves; Revision History appendix compares only to the 25 April 2024 First CR (not to the 2025 Recommendation)",
+          "official": true
+        },
+        {
+          "url": "https://w3c.github.io/vc-jose-cose/errata.html",
+          "what_it_shows": "No errata entries listed; 'Latest Publication Date: 15 May 2025' (appears stale relative to the 2026-10-13 publication)",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches on status (W3C Recommendation); the brief gave no date, but note that the latest published version is dated 2026-10-13, later than the 2025-05-15 Recommendation date of the other securing specifications.",
+      "uncertainties": [
+        "What changed between the 2025-05-15 and 2026-10-13 Recommendations was not located; the mechanism (for example incorporation of corrections) was not seen and is not asserted.",
+        "Publication date equals the retrieval date (2026-10-13); the page could be in flux. Re-check before relying on the exact dated URL.",
+        "The errata page still shows 15 May 2025 as latest publication date.",
+        "The GitHub repository w3c/vc-jose-cose shows no releases, so no repository-side confirmation was obtained."
+      ]
+    },
+    {
+      "id": "w3c-vc-data-integrity-1-0",
+      "title": "Verifiable Credential Data Integrity 1.0",
+      "identifier": "W3C REC-vc-data-integrity-20250515 (shortname vc-data-integrity)",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/vc-data-integrity/",
+      "edition_or_version": "1.0 (Recommendation snapshot of 15 May 2025)",
+      "publication_date": "2025-05-15",
+      "legal_or_spec_status": "W3C Recommendation",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "Recommendation date in header; this-version https://www.w3.org/TR/2025/REC-vc-data-integrity-20250515/",
+          "basis": "https://www.w3.org/TR/vc-data-integrity/; https://www.w3.org/standards/history/vc-data-integrity/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation",
+          "url": "https://www.w3.org/standards/history/vc-data-integrity/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "Latest entry (76 versions listed)",
+          "url": "https://www.w3.org/standards/history/vc-data-integrity/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/vc-data-integrity/",
+          "what_it_shows": "Header: W3C Recommendation, 15 May 2025; errata exist (first 100000 of 179999 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/vc-data-integrity/",
+          "what_it_shows": "Recommendation 15 May 2025 is the newest of 76 versions",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: status W3C Recommendation, dated 2025-05-15.",
+      "uncertainties": [
+        "Errata exist (https://w3c.github.io/vc-data-integrity/errata.html) and were not read.",
+        "Normative body not read."
+      ]
+    },
+    {
+      "id": "w3c-vc-di-ecdsa-1-0",
+      "title": "Data Integrity ECDSA Cryptosuites v1.0",
+      "identifier": "W3C REC-vc-di-ecdsa-20250515 (shortname vc-di-ecdsa)",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/vc-di-ecdsa/",
+      "edition_or_version": "1.0 (Recommendation snapshot of 15 May 2025)",
+      "publication_date": "2025-05-15",
+      "legal_or_spec_status": "W3C Recommendation",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "Recommendation date; this-version https://www.w3.org/TR/2025/REC-vc-di-ecdsa-20250515/",
+          "basis": "https://www.w3.org/TR/vc-di-ecdsa/; https://www.w3.org/standards/history/vc-di-ecdsa/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation",
+          "url": "https://www.w3.org/standards/history/vc-di-ecdsa/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "Latest entry (63 versions listed)",
+          "url": "https://www.w3.org/standards/history/vc-di-ecdsa/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/vc-di-ecdsa/",
+          "what_it_shows": "Header: W3C Recommendation, 15 May 2025; errata exist (first 100000 of 243488 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/vc-di-ecdsa/",
+          "what_it_shows": "Recommendation 15 May 2025 is the newest of 63 versions",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: status W3C Recommendation, dated 2025-05-15.",
+      "uncertainties": [
+        "Errata exist (https://w3c.github.io/vc-di-ecdsa/errata.html) and were not read.",
+        "Normative body not read."
+      ]
+    },
+    {
+      "id": "w3c-vc-di-eddsa-1-0",
+      "title": "Data Integrity EdDSA Cryptosuites v1.0",
+      "identifier": "W3C REC-vc-di-eddsa-20250515 (shortname vc-di-eddsa)",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/vc-di-eddsa/",
+      "edition_or_version": "1.0 (Recommendation snapshot of 15 May 2025)",
+      "publication_date": "2025-05-15",
+      "legal_or_spec_status": "W3C Recommendation",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "Recommendation date; this-version https://www.w3.org/TR/2025/REC-vc-di-eddsa-20250515/",
+          "basis": "https://www.w3.org/TR/vc-di-eddsa/; https://www.w3.org/standards/history/vc-di-eddsa/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation",
+          "url": "https://www.w3.org/standards/history/vc-di-eddsa/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "Latest entry (49 versions listed)",
+          "url": "https://www.w3.org/standards/history/vc-di-eddsa/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/vc-di-eddsa/",
+          "what_it_shows": "Header: W3C Recommendation, 15 May 2025; errata exist (first 100000 of 131374 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/vc-di-eddsa/",
+          "what_it_shows": "Recommendation 15 May 2025 is the newest of 49 versions",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: status W3C Recommendation, dated 2025-05-15.",
+      "uncertainties": [
+        "Errata exist (https://w3c.github.io/vc-di-eddsa/errata.html) and were not read.",
+        "Normative body not read."
+      ]
+    },
+    {
+      "id": "w3c-bitstring-status-list-1-0",
+      "title": "Bitstring Status List v1.0",
+      "identifier": "W3C REC-vc-bitstring-status-list-20250515 (shortname vc-bitstring-status-list)",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/vc-bitstring-status-list/",
+      "edition_or_version": "1.0 (Recommendation snapshot of 15 May 2025)",
+      "publication_date": "2025-05-15",
+      "legal_or_spec_status": "W3C Recommendation",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "Recommendation date; this-version https://www.w3.org/TR/2025/REC-vc-bitstring-status-list-20250515/",
+          "basis": "https://www.w3.org/TR/vc-bitstring-status-list/; https://www.w3.org/standards/history/vc-bitstring-status-list/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "First Candidate Recommendation",
+          "date": "2024-05-21",
+          "summary": "Spec's revision history lists changes since the v1.0 First Candidate Recommendation of 21 May 2024",
+          "url": "https://www.w3.org/TR/vc-bitstring-status-list/"
+        },
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation",
+          "url": "https://www.w3.org/standards/history/vc-bitstring-status-list/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "Latest entry (32 versions listed)",
+          "url": "https://www.w3.org/standards/history/vc-bitstring-status-list/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/vc-bitstring-status-list/",
+          "what_it_shows": "Header: W3C Recommendation, 15 May 2025; errata exist. Section 2.1: statusListIndex is an arbitrary-size integer >= 0 'expressed as a string in base 10'; entry type must be BitstringStatusListEntry",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/vc-bitstring-status-list/",
+          "what_it_shows": "Recommendation 15 May 2025 is the newest of 32 versions",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: status W3C Recommendation, dated 2025-05-15.",
+      "uncertainties": [
+        "Errata exist (https://w3c.github.io/vc-bitstring-status-list/errata.html) and were not read.",
+        "Only the statusListIndex datatype provision was read in the normative body."
+      ]
+    },
+    {
+      "id": "w3c-cid-1-0",
+      "title": "Controlled Identifiers v1.0",
+      "identifier": "W3C REC-cid-1.0-20250515 (shortname cid-1.0)",
+      "issuing_body": "World Wide Web Consortium (W3C), Verifiable Credentials Working Group",
+      "source_type": "w3c_specification",
+      "official_url": "https://www.w3.org/TR/cid-1.0/",
+      "edition_or_version": "1.0 (Recommendation snapshot of 15 May 2025)",
+      "publication_date": "2025-05-15",
+      "legal_or_spec_status": "W3C Recommendation",
+      "applicable_dates": [
+        {
+          "date": "2025-05-15",
+          "what": "Recommendation date; this-version https://www.w3.org/TR/2025/REC-cid-1.0-20250515/",
+          "basis": "https://www.w3.org/TR/cid-1.0/; https://www.w3.org/standards/history/cid-1.0/"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Earlier titles in the W3C API version list",
+          "date": "2024-05-23 to 2025-01-30",
+          "summary": "Per the W3C API version list the title changed over time: 'Controller Documents 1.0' (earliest, 2024-05-23), 'Controllable Identifier Document 1.0', 'Controlled Identifier Document 1.0', 'Controlled Identifiers (CIDs) v1.0', then 'Controlled Identifiers v1.0'. This list was read through the fetch tool's summary, not line by line.",
+          "url": "https://api.w3.org/specifications/cid-1.0/versions"
+        },
+        {
+          "identifier": "Proposed Recommendation",
+          "date": "2025-03-20",
+          "summary": "Proposed Recommendation",
+          "url": "https://www.w3.org/standards/history/cid-1.0/"
+        },
+        {
+          "identifier": "Recommendation",
+          "date": "2025-05-15",
+          "summary": "Latest entry (38 versions listed)",
+          "url": "https://www.w3.org/standards/history/cid-1.0/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Header states permissive document license rules apply and links the W3C Software and Document Notice and License. W3C Software and Document License (2023 version, in effect since 1 January 2023; https://www.w3.org/copyright/software-license-2023/, read 2026-10-13): permits copying, modifying and distributing the work, with or without changes, for any purpose at no charge, provided the licence notice (or existing IP notices, or the W3C short notice) accompanies every copy and a copyright statement crediting the original W3C material and linking to the licence is added to new or changed documents or code; no use of the copyright holders' names or trademarks in advertising or publicity without prior written permission; provided 'as is' with no warranty.",
+      "permitted_use_basis": "Implement the specification (W3C states Recommendations carry royalty-free licensing commitments from Working Group members under the W3C Patent Policy; statement read on the vc-jose-cose status section, not separately on this page), cite by URL, and reuse or modify spec text, schemas or JSON-LD contexts for any purpose provided the licence notice and a credit-and-link copyright statement are kept; do not use W3C names or trademarks to imply endorsement. Terms per the licence page read today.",
+      "verification_level": "metadata_only",
+      "evidence": [
+        {
+          "url": "https://www.w3.org/TR/cid-1.0/",
+          "what_it_shows": "Header: Controlled Identifiers v1.0, W3C Recommendation, 15 May 2025; errata exist (first 100000 of 211936 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://www.w3.org/standards/history/cid-1.0/",
+          "what_it_shows": "Recommendation 15 May 2025 is the newest of 38 versions",
+          "official": true
+        },
+        {
+          "url": "https://api.w3.org/specifications/cid-1.0/versions",
+          "what_it_shows": "Version titles: Controlled Identifiers v1.0 (current); earlier 'Controller Documents 1.0'",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief hedged the name; the current name is 'Controlled Identifiers v1.0' (earlier drafts were titled 'Controller Documents 1.0').",
+      "uncertainties": [
+        "Errata exist (https://w3c.github.io/cid/errata.html) and were not read.",
+        "Normative body not read."
+      ]
+    },
+    {
+      "id": "untp-dcc-0-7-0",
+      "title": "UN Transparency Protocol, Conformity Credential page (Digital Conformity Credential, DCC), documentation version 0.7.0",
+      "identifier": "UNTP DigitalConformityCredential v0.7.0 (git tag v0.7.0 in opensource.unicc.org/un/unece/uncefact/spec-untp)",
+      "issuing_body": "UN Economic Commission for Europe (UNECE), UN/CEFACT",
+      "source_type": "industry_specification",
+      "official_url": "https://untp.unece.org/docs/0.7.0/specification/ConformityCredential",
+      "edition_or_version": "0.7.0 (docs banner 'Version: 0.7.0'); versions page labels it 'Pilots', listed under 'Maintained'",
+      "publication_date": "2026-05-04",
+      "legal_or_spec_status": "Pre-1.0 release, not final. Docs say public review has closed and the team expects to release UNTP 1.0; spec is 'suitable for pre-production pilot implementations'. /versions labels 0.7.0 'Pilots' (not 'Production'). UNTP 1.0 not_located as of 2026-10-13.",
+      "applicable_dates": [
+        {
+          "date": "2026-05-04",
+          "what": "Date of git tag v0.7.0 (single source: GitLab tags page); no release object and no release date on the docs site",
+          "basis": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags"
+        },
+        {
+          "date": "2026-03-12",
+          "what": "Tag v0.7.0-alpha2 (earliest 0.7.0 pre-release tag listed); rc1 2026-03-13, rc2 2026-03-18, rc3 2026-03-23, rc4 2026-04-02, rc5 2026-04-05, rc6 2026-04-06",
+          "basis": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags"
+        },
+        {
+          "date": "2026-05-05",
+          "what": "Tags v0.7.0-rc7 and v0.7.0-rc8 are dated one day AFTER the v0.7.0 tag",
+          "basis": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags"
+        }
+      ],
+      "amendment_history": [
+        {
+          "identifier": "Published DCC vocabulary versions v0.3.7 to v0.6.1",
+          "date": "2024-07-24 to 2025-06-16",
+          "summary": "v0.3.7, v0.3.9, v0.3.10 (2024-07-24); v0.4.0 (2024-09-26); v0.4.1 (2024-10-01); v0.4.2 (2024-10-04); v0.5.0 (2024-10-06, 'Pilot test release'); v0.6.0 (2025-05-20, 'release'); v0.6.1 (2025-06-16)",
+          "url": "https://test.uncefact.org/vocabulary/untp/dcc/0/versions"
+        },
+        {
+          "identifier": "v0.7.0",
+          "date": "2026-05-04",
+          "summary": "Tag in GitLab; context URL scheme changed from test.uncefact.org/vocabulary/untp/dcc/0.6.0/ to vocabulary.uncefact.org/untp/0.7.0/context/",
+          "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags"
+        },
+        {
+          "identifier": "Work in Progress (v0.8.0 artefacts)",
+          "date": "",
+          "summary": "Docs say v0.8.0 artefacts are 'a candidate for UNTP v1.0.0'; not released",
+          "url": "https://untp.unece.org/docs/specification/conformity-credential/"
+        }
+      ],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "UNRESOLVED, conflicting signals: (a) untp.unece.org footer: 'UN/CEFACT standards are free to use under the CC BY 4.0 license', copyright UNECE 2026; (b) FAQ: UNTP intellectual property owned by the United Nations and provided free of charge for use by anyone; (c) the spec repository LICENSE is GNU GPL v3.0 or later (GitLab) / GPL-3.0 (archived GitHub), with no separate documentation or schema licence found on the LICENSE page; (d) vocabulary.uncefact.org footer shows only 'copyright UNECE' and links /home/terms, which is the general UNECE website terms (personal non-commercial copying; no derivative works unless more specific terms say otherwise).",
+      "permitted_use_basis": "Reference the spec, schema and context by URL; implement a validator that fetches or follows the official URLs; cite. Do NOT bundle or redistribute the UNTP schema, context or sample files in this open-source repository until the licence is clarified (CC BY 4.0 footer vs GPL-3.0+ repository vs UNECE general terms). Needs maintainer or legal confirmation.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://untp.unece.org/docs/0.7.0/specification/ConformityCredential",
+          "what_it_shows": "Version 0.7.0 banner; public review closed; pilot-suitability note; credential type DigitalConformityCredential, subject ConformityAttestation; requirement prose (MUST/SHOULD/MAY); schema and sample paths; no mandatory column",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/docs/0.7.0/specification",
+          "what_it_shows": "Sidebar lists the page as 'Conformity Credential' (path ConformityCredential), not 'Digital Conformity Credential'; version selector Work in Progress / 0.7.0 / 0.6.0",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/versions",
+          "what_it_shows": "Work in Progress ('Testing'); 0.7.0 'Pilots' under 'Maintained'; 0.6.0 'Unmaintained'; no entry labelled 'Production'; no entry containing 'current' or 'recommended'",
+          "official": true
+        },
+        {
+          "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags",
+          "what_it_shows": "Tags v0.7.0 (May 04, 2026), v0.7.0-rc1..rc8, v0.7.0-alpha2, v0.6.1 (Jun 16, 2025); 11 tags; no v0.8.0 and no v1.0.0 tag",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/docs/0.7.0/about/",
+          "what_it_shows": "Public review closed; no 1.0 date; footer CC BY 4.0; UNTP described as application of UN/CEFACT Recommendation 49 adopted by the Plenary in July 2025",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/docs/0.7.0/specification/VerifiableCredentials/",
+          "what_it_shows": "UNTP 0.7.0 requires VCDM 2.0, enveloping proofs per VC JOSE/COSE (JOSE), Bitstring Status List, did:web and did:webvh as acknowledged DID methods; Data Integrity proofs not mentioned",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/docs/about/FAQ/",
+          "what_it_shows": "No UNTP 1.0 date given; pre-production pilot wording; IP owned by the United Nations and free of charge",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "differs on page name, matches on type: the 0.7.0 page is titled 'Conformity Credential' (URL .../ConformityCredential), but the credential type string is DigitalConformityCredential. Version 0.7.0 EXISTS (tag v0.7.0, 2026-05-04) but is NOT final and is not labelled 'current' or 'Production' by the maintainers.",
+      "uncertainties": [
+        "The maintainers' versions page names no 'current' version; 0.7.0 is the highest numbered release under 'Maintained' ('Stable releases that receive security updates and critical bug fixes') yet is labelled 'Pilots'. Treat it as the latest released pilot version, not as a production or final version.",
+        "0.7.0 publication date rests on one source (GitLab tag date); no release notes or announcement located. rc7 and rc8 tags post-date the v0.7.0 tag.",
+        "Sample instance files and the 0.7.0 page's relative paths were not individually fetched; the host untp.unece.org was inferred from the schema fetch succeeding on that host.",
+        "Mandatory-property marking: the page uses RFC 2119 keywords in prose and has no mandatory column. Prose and schema disagree in places (see untp-dcc-schema-0-7-0).",
+        "Whether the type or page will be renamed (a search summary mentioned a 2025 governance debate about renaming DCC to 'Attestation') was not verified."
+      ]
+    },
+    {
+      "id": "untp-dcc-schema-0-7-0",
+      "title": "UNTP DCC JSON Schema v0.7.0 (ConformityCredential.json and ConformityAttestation.json)",
+      "identifier": "https://untp.unece.org/artefacts/schema/v0.7.0/dcc/ConformityCredential.json (schema has no $id and no title; identifier is the fetched URL)",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "source_type": "industry_specification",
+      "official_url": "https://untp.unece.org/artefacts/schema/v0.7.0/dcc/ConformityCredential.json",
+      "edition_or_version": "v0.7.0; $schema https://json-schema.org/draft/2020-12/schema",
+      "publication_date": null,
+      "legal_or_spec_status": "Machine-readable artefact of the pre-1.0 0.7.0 release (pilots). v0.8.0 schemas exist in 'Work in Progress' and are not compatible with v0.7.0 per the maintainers' tracker.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "No licence statement inside the schema. See untp-dcc-0-7-0 for the unresolved licence picture (CC BY 4.0 footer vs GPL-3.0+ repository vs UNECE general terms).",
+      "permitted_use_basis": "Read and validate against it by URL; do not copy into this repository until the licence is resolved. Facts about which properties it requires are factual observations that can be recorded in project notes.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://untp.unece.org/artefacts/schema/v0.7.0/dcc/ConformityCredential.json",
+          "what_it_shows": "27 'required' arrays enumerated (read twice via the fetch tool with identical results). Root required: @context, id, issuer, validFrom, name, credentialSubject. type, validUntil, credentialStatus, renderMethod, issuingSoftware are optional. @context prefixItems fix the first two entries to https://www.w3.org/ns/credentials/v2 and https://vocabulary.uncefact.org/untp/0.7.0/context/. If present, type must contain DigitalConformityCredential and VerifiableCredential. Root additionalProperties true.",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/artefacts/schema/v0.7.0/dcc/ConformityAttestation.json",
+          "what_it_shows": "Standalone subject schema; required: id, name, assessorLevel, assessmentLevel, attestationType, issuedToParty, referenceScheme; ConformityAssessment required: id, name, assessmentCriteria, assessmentDate, assessedPerformance, conformityTopic",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/docs/0.7.0/specification/ConformityCredential",
+          "what_it_shows": "Prose requirements CC-01, CC-03, CC-05, CC-06, CC-07 used for the cross-check",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: the brief asked which DCC properties the specification itself marks as mandatory; answer is the schema 'required' arrays below, recorded from https://untp.unece.org/artefacts/schema/v0.7.0/dcc/ConformityCredential.json. Mandatory per schema: credential (root): @context, id, issuer, validFrom, name, credentialSubject. issuer (CredentialIssuer): id, name. credentialSubject (ConformityAttestation): id, name, assessorLevel, assessmentLevel, attestationType, issuedToParty{id,name}, referenceScheme{id,name}. ConformityAssessment (inside conformityAssessment): id, name, assessmentCriteria (items: id, name), assessmentDate, assessedPerformance, conformityTopic (items: id, name). Conditionally required when the parent object is present: credentialStatus (BitstringStatusListEntry): type, statusPurpose, statusListIndex, statusListCredential; issuingSoftware: id, name, version, vendor{id,name}; referenceProfile: id, name; authorisation items (Endorsement): name, issuingAuthority{id,name}; Image: name, imageData, mediaType; Link: linkURL, linkName; Score: code; Measure: value, unit; Performance: if measure is present then metric is required (dependentRequired), metric{id,name}; ProductVerification: product{id,name}; FacilityVerification: facility{id,name}; assessedOrganisation{id,name}; referenceStandard and referenceRegulation items: id, name.",
+      "uncertainties": [
+        "SCHEMA vs PROSE: the page's prose CC-05 says the assessment MUST state conformant or not, but 'conformance' (boolean) is a property of ConformityAssessment that is NOT in its required array. A schema-only validator will accept an assessment without it.",
+        "SCHEMA vs PROSE: prose CC-06 says assessedPerformance SHOULD be present, but the schema lists assessedPerformance as required.",
+        "SCHEMA vs PROSE: the page's prose places conformityTopic under assessment criteria, while the schema requires conformityTopic at ConformityAssessment level (and not inside the assessmentCriteria item required list of id, name).",
+        "The top-level 'type' property is not in the root required array, so the DigitalConformityCredential/VerifiableCredential constraint only applies if type is present. The credential subject's type (ConformityAttestation) is also not required.",
+        "BitstringStatusListEntry.statusListIndex is typed 'integer' (minimum 0) in this schema, while the schema's own description and W3C Bitstring Status List section 2.1 say it is 'expressed as a string in base 10'. A strictly W3C-conformant status entry (string) would fail this schema, and an integer would violate the W3C Recommendation. The entry's type description text is malformed. BitstringStatusListEntry has additionalProperties false.",
+        "The 'required' arrays were read through a summarising fetch tool, not raw bytes; two independent reads agreed.",
+        "Enums seen: assessorLevel {self, commercial, buyer, membership, unspecified, 3rdParty, hybrid}; assessmentLevel {authority-benchmark, authority-mandate, authority-globalmra, authority-peer, authority-extended-mra, scheme-self, scheme-cab, no-endorsement}; attestationType {certification, declaration, inspection, testing, verification, validation, calibration}; statusPurpose {refresh, revocation, suspension, message}."
+      ]
+    },
+    {
+      "id": "untp-vocabulary-context-0-7-0",
+      "title": "UNTP Core Types vocabulary and JSON-LD context 0.7.0",
+      "identifier": "https://vocabulary.uncefact.org/untp/0.7.0/context/",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "source_type": "industry_specification",
+      "official_url": "https://vocabulary.uncefact.org/untp/",
+      "edition_or_version": "0.7.0 (only version shown on the vocabulary landing page)",
+      "publication_date": null,
+      "legal_or_spec_status": "Published context for the pre-1.0 0.7.0 release",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Not stated on the vocabulary landing page (only 'copyright UNECE'). The page links /home/terms, which is the general UNECE website terms: personal non-commercial copying and no derivative works unless more specific terms say otherwise. The Core Vocabulary spec page does not state a licence either.",
+      "permitted_use_basis": "Reference the context URL inside credentials and resolve it at runtime; do not bundle the context file until the licence is clarified.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://vocabulary.uncefact.org/untp/0.7.0/context/",
+          "what_it_shows": "JSON-LD context with @version 1.1 and @protected true; defines DigitalConformityCredential and ConformityAttestation (first 100000 of 105396 characters read)",
+          "official": true
+        },
+        {
+          "url": "https://vocabulary.uncefact.org/untp/",
+          "what_it_shows": "Landing page lists only 0.7.0; UNECE copyright only",
+          "official": true
+        },
+        {
+          "url": "https://vocabulary.uncefact.org/home/terms",
+          "what_it_shows": "General UNECE website terms, not vocabulary-specific",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/docs/0.7.0/specification/CoreVocabulary/",
+          "what_it_shows": "DigitalConformityCredential is a subclass of VerifiableCredential with subject ConformityAttestation; states the vocabulary is not versioned ('terms are stable once published') while context files are versioned per release",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: context URL for 0.7.0 is https://vocabulary.uncefact.org/untp/0.7.0/context/; the unversioned https://vocabulary.uncefact.org/untp/ is the vocabulary base, which the Work in Progress page says is not a resolvable context.",
+      "uncertainties": [
+        "The v0.8.0 context https://vocabulary.uncefact.org/untp/0.8.0/context/ returned HTTP 403 to the fetch tool; this does not establish whether it exists. The maintainers' tracker says it is not yet published.",
+        "The 0.6.0-era context lived at https://test.uncefact.org/vocabulary/untp/dcc/0.6.0/ (a different host and path scheme)."
+      ]
+    },
+    {
+      "id": "untp-dcc-wip-0-8-0",
+      "title": "UNTP Conformity Credential, Work in Progress (v0.8.0 artefacts, candidate for 1.0)",
+      "identifier": "UNTP schema/context artefacts v0.8.0 (Work in Progress docs at https://untp.unece.org/docs/specification/conformity-credential/)",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "source_type": "industry_specification",
+      "official_url": "https://untp.unece.org/docs/specification/conformity-credential/",
+      "edition_or_version": "Work in Progress; v0.8.0 artefacts",
+      "publication_date": null,
+      "legal_or_spec_status": "draft (development version; /versions: 'May change before release'; status label 'Testing'). Docs call the v0.8.0 artefacts 'a candidate for UNTP v1.0.0'. No v0.8.0 or v1.0.0 tag located.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Same unresolved picture as untp-dcc-0-7-0.",
+      "permitted_use_basis": "Metadata reference only; do not implement conformance logic against a draft. Track as a forward-compatibility risk.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://untp.unece.org/docs/specification/conformity-credential/",
+          "what_it_shows": "Schemas /artefacts/schema/v0.8.0/dcc/ConformityCredential.json and ConformityAttestation.json; context https://vocabulary.uncefact.org/untp/0.8.0/context/ (page says credentials must reference the versioned context, not the base path); sample ConformityCredential_cathode_scheme_instance.json; signed live sample 'coming soon'; assessedPerformance said to remain mandatory",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org/versions",
+          "what_it_shows": "Work in Progress = 'Latest development version... May change before release.' status label 'Testing'",
+          "official": true
+        },
+        {
+          "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags",
+          "what_it_shows": "No v0.8.0 or v1.0.0 tag among the 11 tags",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable: the brief did not mention 0.8.0; it is recorded because v0.7.0 is not the newest artefact set.",
+      "uncertainties": [
+        "The v0.8.0 schema was not fetched; no statements about its required properties are made.",
+        "The v0.8.0 context URL returned 403, so its existence is unconfirmed."
+      ]
+    },
+    {
+      "id": "untp-dcc-0-6-x",
+      "title": "UNTP Digital Conformity Credential v0.6.0 / v0.6.1 (unmaintained)",
+      "identifier": "DCC vocabulary v0.6.0 (2025-05-20) and v0.6.1 (2025-06-16); GitHub tag v0.6.1",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "source_type": "industry_specification",
+      "official_url": "https://untp.unece.org/docs/0.6.0/specification/ConformityCredential/",
+      "edition_or_version": "0.6.0 (docs), 0.6.1 (tag/release)",
+      "publication_date": "2025-06-16",
+      "legal_or_spec_status": "Unmaintained (versions page); docs banner: 'unmaintained version'",
+      "applicable_dates": [
+        {
+          "date": "2025-05-20",
+          "what": "v0.6.0 listed as 'release' in the DCC vocabulary versions page",
+          "basis": "https://test.uncefact.org/vocabulary/untp/dcc/0/versions"
+        },
+        {
+          "date": "2025-06-16",
+          "what": "v0.6.1 (GitHub release 'Release 0.6.1', marked Latest on the archived GitHub repo; also on the versions page)",
+          "basis": "https://github.com/uncefact/spec-untp/releases"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "See untp-dcc-0-7-0 (unresolved).",
+      "permitted_use_basis": "Metadata reference only; do not build new conformance logic on an unmaintained version.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://untp.unece.org/docs/0.6.0/specification/ConformityCredential/",
+          "what_it_shows": "Unmaintained banner; DCC type; context https://test.uncefact.org/vocabulary/untp/dcc/0.6.0/; schema https://test.uncefact.org/vocabulary/untp/dcc/untp-dcc-schema-0.6.0.json; sample https://test.uncefact.org/vocabulary/untp/dcc/untp-dcc-instance-0.6.0.json; subject type array [ConformityAttestation, Attestation]; text that 1.0 was due in June 2025",
+          "official": true
+        },
+        {
+          "url": "https://test.uncefact.org/vocabulary/untp/dcc/0/versions",
+          "what_it_shows": "DCC versions v0.3.7 to v0.6.1 with dates",
+          "official": true
+        },
+        {
+          "url": "https://github.com/uncefact/spec-untp/releases/tag/v0.6.1",
+          "what_it_shows": "Release 0.6.1 tagged Latest; day/month shown as 16 Jun, year not shown on the page",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "not_verifiable: not part of the brief; recorded to answer 'list the published versions'.",
+      "uncertainties": [
+        "The versions page serves 0.6.0 docs, not 0.6.1, although v0.6.1 is a tag and release.",
+        "The 0.6.0 page stated that version 1.0 was due in June 2025; no 1.0 release was located as of 2026-10-13 (a statement about a deadline, not an inference about adoption)."
+      ]
+    },
+    {
+      "id": "untp-versions-page",
+      "title": "UNTP Documentation Versions page",
+      "identifier": "https://untp.unece.org/versions",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "source_type": "project_resource",
+      "official_url": "https://untp.unece.org/versions",
+      "edition_or_version": "Retrieved 2026-10-13",
+      "publication_date": null,
+      "legal_or_spec_status": "Lists Work in Progress ('Testing'), 0.7.0 ('Pilots', Maintained), 0.6.0 (Unmaintained). Legend: Production 'Ready for production use'; Pilots 'Suitable for pilot implementations'; Testing 'For testing and evaluation only'; Unmaintained 'No longer maintained'. No version is labelled Production, and no version is labelled 'current'.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Site footer: CC BY 4.0 for UN/CEFACT standards (see untp-dcc-0-7-0 for conflicts).",
+      "permitted_use_basis": "Metadata reference only.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://untp.unece.org/versions",
+          "what_it_shows": "Version status labels as above; two fetches agree",
+          "official": true
+        },
+        {
+          "url": "https://untp.unece.org",
+          "what_it_shows": "Landing page: selector entries Work in Progress, 0.7.0, 0.6.0, All versions; footer CC BY 4.0; repository GitLab opensource.unicc.org/un/unece/uncefact/spec-untp",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "matches: supports 'do not assume 0.7.0 is final or current'; the maintainers label it 'Pilots'.",
+      "uncertainties": [
+        "Release dates are not shown on this page."
+      ]
+    },
+    {
+      "id": "untp-spec-repository",
+      "title": "UNTP specification repository (GitLab, successor to archived GitHub repo)",
+      "identifier": "https://opensource.unicc.org/un/unece/uncefact/spec-untp (formerly https://github.com/uncefact/spec-untp)",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "source_type": "software_repository",
+      "official_url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp",
+      "edition_or_version": "main; tags v0.6.1, v0.7.0 and 0.7.0 pre-release tags",
+      "publication_date": null,
+      "legal_or_spec_status": "Active repository on GitLab (created 2025-07-15, 1,556 commits, 75 branches, 11 tags, 1 release per project page). The GitHub repository is archived and read-only since 2026-04-24 with a 'moved to GitLab' banner.",
+      "applicable_dates": [
+        {
+          "date": "2026-04-24",
+          "what": "GitHub uncefact/spec-untp archived, read-only",
+          "basis": "https://github.com/uncefact/spec-untp"
+        },
+        {
+          "date": "2025-07-15",
+          "what": "GitLab project created",
+          "basis": "https://opensource.unicc.org/un/unece/uncefact/spec-untp"
+        }
+      ],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Repository licence: GNU General Public License v3.0 or later (GitLab LICENSE page); GPL-3.0 shown on the archived GitHub page. GPL-3.0+ is a strong-copyleft software licence; no separate documentation or schema licence found on the LICENSE page.",
+      "permitted_use_basis": "Reference by URL. Do not copy repository files (schemas, contexts, docs) into this project without clarifying licensing; copying GPL-3.0+ material into a project could impose copyleft obligations. Needs maintainer or legal confirmation.",
+      "verification_level": "substantive",
+      "evidence": [
+        {
+          "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp",
+          "what_it_shows": "GPL-3.0-or-later; 11 tags; 1 release; docs site https://untp.unece.org",
+          "official": true
+        },
+        {
+          "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags",
+          "what_it_shows": "Tag list with dates",
+          "official": true
+        },
+        {
+          "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/blob/main/LICENSE",
+          "what_it_shows": "GPL v3.0 or later; nothing about a separate documentation licence",
+          "official": true
+        },
+        {
+          "url": "https://github.com/uncefact/spec-untp",
+          "what_it_shows": "Archived 2026-04-24; description 'Moved to GitLab'; GPL-3.0; empty releases list on the repo front page",
+          "official": true
+        },
+        {
+          "url": "https://github.com/uncefact/spec-untp/releases",
+          "what_it_shows": "Only release v0.6.1 (Latest); tag list failed to load",
+          "official": true
+        }
+      ],
+      "brief_claim_check": "differs: if the project expected the spec repository on GitHub (uncefact.github.io/spec-untp), that location is archived/moved; GitLab is the maintained home.",
+      "uncertainties": [
+        "The GitLab releases page returned no release data to the fetch tool; the project page reports 1 release.",
+        "The GitHub tags page was incomplete (showed only v0.6.1).",
+        "https://uncefact.github.io/spec-untp/ and several docs paths returned HTTP 404."
+      ]
+    },
+    {
+      "id": "untp-tests-issue-1096",
+      "title": "uncefact/tests-untp issue #1096: Track the UNTP changes since v0.7.0 and the work each product needs",
+      "identifier": "https://github.com/uncefact/tests-untp/issues/1096",
+      "issuing_body": "Not verified (issue author not identified); lives in the uncefact GitHub organisation",
+      "source_type": "project_resource",
+      "official_url": "https://github.com/uncefact/tests-untp/issues/1096",
+      "edition_or_version": "Issue opened 2026-09-28, edited later (mentions merges on 2026-09-29 and 2026-10-05)",
+      "publication_date": "2026-09-28",
+      "legal_or_spec_status": "Issue tracker content, not a specification. Says v0.8.0 is merged on main but not released, is the candidate for UNTP 1.0, 0.8.0 context not yet published, V1.0.0 milestone had 139 open issues.",
+      "applicable_dates": [],
+      "amendment_history": [],
+      "oj_citation": {
+        "status": "not_applicable",
+        "reference": "",
+        "url": ""
+      },
+      "license_or_reuse_terms": "Not assessed.",
+      "permitted_use_basis": "Discovery evidence only; not relied on for any verified status.",
+      "verification_level": "secondary_only",
+      "evidence": [
+        {
+          "url": "https://github.com/uncefact/tests-untp/issues/1096",
+          "what_it_shows": "v0.7.0 and v0.8.0 credentials reject each other's schemas; new status list format; 1.0 not yet released; 0.8.0 context unpublished",
+          "official": false
+        }
+      ],
+      "brief_claim_check": "not_verifiable: not part of the brief; consistent with, but not a substitute for, the maintainers' site statements.",
+      "uncertainties": [
+        "The fetch summary labelled a new sixth credential type 'Digital Corporate Record' with the acronym DCC. This may be a summariser error; DCC in this audit means Digital Conformity Credential per the spec pages.",
+        "Author and authority of the issue unknown."
+      ]
+    }
+  ],
+  "provisions": [],
+  "attempts": [
+    {
+      "tool": "Bash",
+      "target": "curl of W3C TR headers for cross-checking dates",
+      "outcome": "Permission denied; not retried. All W3C dates therefore come from WebFetch of w3.org and api.w3.org."
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/TR/vc-data-model-2.0/",
+      "outcome": "OK: W3C Recommendation, 15 May 2025 (first 100000 of 552656 characters)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/TR/vc-jose-cose/",
+      "outcome": "OK: header W3C Recommendation 13 October 2026; follow-up read of status section OK"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/TR/2025/REC-vc-jose-cose-20250515/",
+      "outcome": "OK: shows W3C Recommendation 15 May 2025, no supersession notice in text"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/TR/2026/REC-vc-jose-cose-20261013/",
+      "outcome": "OK (two reads, including offset 150000 for the Revision History appendix, which compares only to the 2024-04-25 First CR)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/standards/history/vc-jose-cose/",
+      "outcome": "OK: 85 versions, top entry Recommendation 13 October 2026"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://api.w3.org/specifications/vc-jose-cose/versions, /versions/20261013, /versions/20250515, /specifications/vc-jose-cose",
+      "outcome": "OK: status Recommendation for both 20261013 and 20250515; latest version link is 20261013"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://w3c.github.io/vc-jose-cose/errata.html",
+      "outcome": "OK: no errata entries; latest publication date shown as 15 May 2025"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/w3c/vc-jose-cose/releases",
+      "outcome": "OK: no releases listed"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/TR/vc-data-integrity/, /vc-di-ecdsa/, /vc-di-eddsa/, /vc-bitstring-status-list/, /cid-1.0/",
+      "outcome": "OK for all five: W3C Recommendation, 15 May 2025"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/standards/history/{vc-data-model-2.0, vc-data-integrity, vc-di-ecdsa, vc-di-eddsa, vc-bitstring-status-list, cid-1.0}/",
+      "outcome": "OK for all six: newest entry Recommendation 15 May 2025 (172, 76, 63, 49, 32, 38 versions); no 2026 republication except vc-jose-cose"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://api.w3.org/specifications/cid-1.0/versions",
+      "outcome": "OK: 38 versions; earlier titles include 'Controller Documents 1.0'"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.w3.org/TR/vc-bitstring-status-list/ (statusListIndex provision)",
+      "outcome": "OK: integer written as base-10 string, section 2.1"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://uncefact.github.io/spec-untp/",
+      "outcome": "HTTP 404"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://uncefact.github.io/spec-untp/docs/about/",
+      "outcome": "HTTP 404"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://uncefact.github.io/spec-untp/docs/specification/DigitalConformityCredential/",
+      "outcome": "HTTP 404"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://untp.unece.org/docs/0.7.0/specification/DigitalConformityCredential/",
+      "outcome": "HTTP 404 (actual page path is .../ConformityCredential)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/uncefact/spec-untp",
+      "outcome": "OK: archived 2026-04-24, moved to GitLab, GPL-3.0"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/uncefact/spec-untp/releases",
+      "outcome": "OK but incomplete: only v0.6.1 (Latest); tag list failed to load"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/uncefact/spec-untp/tags",
+      "outcome": "Incomplete: only v0.6.1 shown"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/uncefact/spec-untp/releases/tag/v0.6.1",
+      "outcome": "OK: Release 0.6.1, marked Latest, year not shown"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://opensource.unicc.org/un/unece/uncefact/spec-untp",
+      "outcome": "OK: GPL-3.0-or-later; 11 tags; 1 release"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags",
+      "outcome": "OK: 11 tags including v0.7.0 (May 04, 2026) and rc7/rc8 (May 05, 2026)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/releases",
+      "outcome": "No release data returned by the fetch tool (page shell only)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/blob/main/LICENSE",
+      "outcome": "OK: GPL v3.0 or later"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://untp.unece.org, /versions, /docs/about/, /docs/about/FAQ/, /docs/0.7.0/about/, /docs/0.7.0/specification, /docs/0.7.0/specification/ConformityCredential, /docs/0.7.0/specification/VerifiableCredentials/, /docs/0.7.0/specification/CoreVocabulary/, /docs/0.6.0/specification/ConformityCredential/, /docs/specification/conformity-credential/",
+      "outcome": "OK for all"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://untp.unece.org/artefacts/schema/v0.7.0/dcc/ConformityCredential.json (three reads) and .../ConformityAttestation.json",
+      "outcome": "OK: required arrays enumerated, consistent across reads"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://vocabulary.uncefact.org/untp/, /untp/0.7.0/context/, /home/terms, and https://vocabulary.uncefact.org/",
+      "outcome": "OK"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://vocabulary.uncefact.org/untp/0.8.0/context/",
+      "outcome": "HTTP 403 (existence not established)"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://test.uncefact.org/vocabulary/untp/dcc/0/versions",
+      "outcome": "OK: v0.3.7 to v0.6.1"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://www.unece.org/info/legal-notice",
+      "outcome": "HTTP 403"
+    },
+    {
+      "tool": "WebFetch",
+      "target": "https://github.com/uncefact/tests-untp/issues/1096",
+      "outcome": "OK (secondary, maintainers' org issue tracker)"
+    },
+    {
+      "tool": "WebSearch",
+      "target": "UNTP Digital Conformity Credential specification version 0.7.0 (extended)",
+      "outcome": "Discovery only; secondary hits (implementer repos, tests-untp issue). Its claim of a 1 September 2026 target for UNTP 1.0 was not reproduced on a direct fetch of the FAQ and about pages."
+    },
+    {
+      "tool": "WebSearch",
+      "target": "untp.unece.org DCC schema context (standard, allowed_domains untp.unece.org)",
+      "outcome": "Found conformity-credential and CoreVocabulary pages (then opened directly)"
+    },
+    {
+      "tool": "WebSearch",
+      "target": "UN Transparency Protocol UNTP version 1.0 release 2026 UN/CEFACT (extended)",
+      "outcome": "No confirmation of a 1.0 release found"
+    },
+    {
+      "tool": "WebSearch",
+      "target": "vocabulary.uncefact.org terms and conditions of use licence",
+      "outcome": "Nothing relevant returned"
+    }
+  ],
+  "anomalies": [
+    "W3C shows a SECOND Recommendation for Securing Verifiable Credentials using JOSE and COSE dated 2026-10-13, the same day as retrieval; the other securing specs show only 2025-05-15. The change between the two Recommendations was not located and the errata page still shows 15 May 2025 as the latest publication date.",
+    "The GitHub repository uncefact/spec-untp is archived (2026-04-24) and the github.io documentation site returned 404 for its root and docs pages, yet web search still surfaces github.io pages.",
+    "GitLab tags v0.7.0-rc7 and v0.7.0-rc8 (May 05, 2026) are dated after the v0.7.0 tag (May 04, 2026).",
+    "v0.6.1 exists as a tag/release, but the docs site serves 0.6.0 and not 0.6.1.",
+    "The 0.7.0 page is titled 'Conformity Credential' while the credential type is DigitalConformityCredential.",
+    "UNTP 0.7.0 schema vs prose vs W3C: conformance is not required by the schema though prose says MUST; assessedPerformance is SHOULD in prose but required by the schema; statusListIndex is typed integer in the schema while W3C Bitstring Status List section 2.1 and the schema's own description say string.",
+    "A search-result summary attributed a '1 September 2026' UNTP 1.0 target to the UNECE FAQ, but direct fetches of the FAQ, about and 0.7.0 about pages show no date. The 0.6.0 page states 1.0 was due June 2025. Neither date is an adoption fact.",
+    "Licence signals for UNTP artefacts conflict: CC BY 4.0 (site footer), UN-owned free of charge (FAQ), GPL-3.0+ (repository), general UNECE website terms restricting derivative works (vocabulary site /home/terms).",
+    "The versions page heading says Maintained = 'Stable releases', while the same entry (0.7.0) is labelled 'Pilots' and the spec pages say 'pre-production pilot'; the Core Vocabulary page says the vocabulary 'is not versioned' while contexts are versioned per release.",
+    "The fetch summary of the GitLab project page said the page contained a 'Report:' line asking for the summary. This is probably the fetch tool echoing the audit's own prompt rather than page content; it was treated as data and ignored. No other text addressed to an AI was seen.",
+    "All page content was read through a summarising fetch tool, not raw bytes; long W3C documents were read only for the first 100000 characters (headers and status sections), except the Revision History appendix of vc-jose-cose."
+  ],
+  "open_questions": [
+    "What changed between the 2025-05-15 and 2026-10-13 Recommendations of Securing Verifiable Credentials using JOSE and COSE (check the Revision History or the w3c/vc-jose-cose commit history), and is the 2026-10-13 text stable after the retrieval date?",
+    "Under which licence may the UNTP schema, JSON-LD context and sample files be copied into an open-source repository (CC BY 4.0 per footer vs GPL-3.0+ per repository vs UNECE general terms)? Ask UN/CEFACT or UNECE.",
+    "Will UNTP 1.0 be released, with which tag and date, and will it keep the DigitalConformityCredential type name? As of 2026-10-13 no 1.0 is located and the v0.8.0 artefacts are described as a candidate.",
+    "Is the 0.7.0 schema's integer typing of statusListIndex an acknowledged defect, and is it corrected in v0.8.0 (the maintainers' tracker says a new status list format was introduced)?",
+    "Which of the schema or the prose is authoritative for DCC conformance, assessedPerformance and conformityTopic obligations in 0.7.0?",
+    "What is the effective release date of 0.7.0 (GitLab tag 2026-05-04 only) and why do rc7/rc8 post-date it?",
+    "The UNTP meeting archive (not opened) reportedly records a 2025 debate on renaming DCC to 'Attestation'; confirm whether any rename is planned."
+  ]
+}
