@@ -1,0 +1,27 @@
+{
+  "@context": [
+    "https://dppce.example.test/contexts/battery/v1"
+  ],
+  "category": "ev",
+  "granularity": "item",
+  "id": "https://id.example.test/01/09506000134352/21/EV0001",
+  "manufactured": "2027-03-01",
+  "model": "https://id.example.test/01/09506000134352",
+  "operator": {
+    "identifier": "urn:example:operator:0001",
+    "name": "Example Battery Works (synthetic)"
+  },
+  "rated_capacity": {
+    "unit": "Wh",
+    "value": 75000
+  },
+  "remaining_capacity": {
+    "unit": "Wh",
+    "value": 74000
+  },
+  "state_of_health_percent": 99,
+  "status": "original",
+  "type": "BatteryPassport",
+  "updated_at": "2026-10-10T08:00:00Z",
+  "version": 3
+}

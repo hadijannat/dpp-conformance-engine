@@ -1,0 +1,18 @@
+{
+  "@context": [
+    "https://dppce.example.test/contexts/battery/v1"
+  ],
+  "category": "ev",
+  "chemistry": "synthetic-chemistry-a",
+  "granularity": "model",
+  "id": "https://id.example.test/01/09506000134352",
+  "mass": {
+    "unit": "kg",
+    "value": 450
+  },
+  "nominal_voltage": {
+    "unit": "V",
+    "value": 400
+  },
+  "type": "BatteryModel"
+}

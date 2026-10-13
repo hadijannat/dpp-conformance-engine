@@ -1,0 +1,48 @@
+{
+  "schema_version": "dppce.trust/1",
+  "policy_version": "TEST-ONLY-reference-1",
+  "require_status": false,
+  "require_timestamp": false,
+  "keys": [
+    {
+      "kid": "TEST-ONLY-report-key-1",
+      "issuer": "urn:example:test-lab",
+      "purposes": [
+        "report"
+      ],
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "SIZY5FdhzYIUH4ZwawfFxJJ2PJucOPgmrnXiYAx4WkI",
+        "y": "_7Wr_JOM4AjPE_jF-v3OBkv0q5vemHgqsflhBHVua3o"
+      },
+      "not_before": "2026-01-01T00:00:00Z",
+      "not_after": "2036-01-01T00:00:00Z"
+    },
+    {
+      "kid": "TEST-ONLY-owner-key-1",
+      "issuer": "urn:example:operator:0001",
+      "purposes": [
+        "authorization"
+      ],
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "qRBcw7-xQC5-L9QAQO7IZUrrpVf3TBp_-y3Hm0FX_IU",
+        "y": "DxERPqiX3di7tNOMIqOn_D4JJaV3M-XmJKOKBYcdgzI"
+      },
+      "not_before": "2026-01-01T00:00:00Z",
+      "not_after": "2036-01-01T00:00:00Z"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "TEST-ONLY dppce reference root",
+      "certificate_pem": "-----BEGIN CERTIFICATE-----\nMIIBZzCCAQ2gAwIBAgIUObkY5Hp58V79mgGP+2J1pCSLcyYwCgYIKoZIzj0EAwIw\nKTEnMCUGA1UEAwweVEVTVC1PTkxZIGRwcGNlIHJlZmVyZW5jZSByb290MB4XDTI2\nMDEwMTAwMDAwMFoXDTM2MDEwMTAwMDAwMFowKTEnMCUGA1UEAwweVEVTVC1PTkxZ\nIGRwcGNlIHJlZmVyZW5jZSByb290MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\nT/MgndUeNgPMps185HxDN0Ips1ZhxFVst09SodrLK4Ucopgyu7hV6SvNKqycEqr6\niurgSkxHqz0CJXAmUctr0aMTMBEwDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQD\nAgNIADBFAiAKAy1GUOw1bc4zKtAbklzfsSL/wbMNkV8pEHn55QiWUAIhANL2l3Sm\nTEGvRBRKEf1tDiJXS9XHTHKoh3+ZBJAyvXyO\n-----END CERTIFICATE-----\n"
+    }
+  ],
+  "revoked_serials": [],
+  "revoked_kids": [],
+  "status_as_of": null,
+  "status_max_age_days": 7
+}

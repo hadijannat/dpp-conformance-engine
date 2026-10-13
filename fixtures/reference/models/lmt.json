@@ -1,0 +1,18 @@
+{
+  "@context": [
+    "https://dppce.example.test/contexts/battery/v1"
+  ],
+  "category": "lmt",
+  "chemistry": "synthetic-chemistry-a",
+  "granularity": "model",
+  "id": "https://id.example.test/01/09506000134352",
+  "mass": {
+    "unit": "kg",
+    "value": 3
+  },
+  "nominal_voltage": {
+    "unit": "V",
+    "value": 36
+  },
+  "type": "BatteryModel"
+}

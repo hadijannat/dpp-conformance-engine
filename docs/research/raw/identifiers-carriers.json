@@ -474,7 +474,7 @@
         }
       ],
       "oj_citation": {
-        "status": "cited",
+        "status": "not_applicable",
         "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
         "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
       },
@@ -508,7 +508,7 @@
         "ISO life-cycle section also shows undated stage codes 90.20/90.60/90.99; the 90.99 (withdrawal proposed) entry is probably a legend, but this was not confirmed. Verify at ISO before relying on it.",
         "Title string taken verbatim from the IEC webstore record; ISO page paraphrases it as 'individual transport units'.",
         "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
-        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+        "oj_citation is not_applicable on purpose: the edition is named inside the enacting text, which is a different fact from a harmonised-standard reference being cited in the OJ. Do not infer presumption of conformity."
       ]
     },
     {
@@ -542,7 +542,7 @@
         }
       ],
       "oj_citation": {
-        "status": "cited",
+        "status": "not_applicable",
         "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
         "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
       },
@@ -576,7 +576,7 @@
         "ISO page for this part showed no corrected version; the 2016 corrections exist for Parts 1, 3, 4, 5 and 6.",
         "Any register of issuing-agency codes linked to this part was not looked up.",
         "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
-        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+        "oj_citation is not_applicable on purpose: the edition is named inside the enacting text, which is a different fact from a harmonised-standard reference being cited in the OJ. Do not infer presumption of conformity."
       ]
     },
     {
@@ -605,7 +605,7 @@
         }
       ],
       "oj_citation": {
-        "status": "cited",
+        "status": "not_applicable",
         "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
         "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
       },
@@ -638,7 +638,7 @@
       "uncertainties": [
         "Corrected version date (2016-12) differs by three months from the other parts' corrections (2016-09).",
         "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
-        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+        "oj_citation is not_applicable on purpose: the edition is named inside the enacting text, which is a different fact from a harmonised-standard reference being cited in the OJ. Do not infer presumption of conformity."
       ]
     },
     {
@@ -667,7 +667,7 @@
         }
       ],
       "oj_citation": {
-        "status": "cited",
+        "status": "not_applicable",
         "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
         "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
       },
@@ -700,7 +700,7 @@
       "uncertainties": [
         "Do not confuse with the 2008 edition, whose title differs.",
         "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
-        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+        "oj_citation is not_applicable on purpose: the edition is named inside the enacting text, which is a different fact from a harmonised-standard reference being cited in the OJ. Do not infer presumption of conformity."
       ]
     },
     {
@@ -729,7 +729,7 @@
         }
       ],
       "oj_citation": {
-        "status": "cited",
+        "status": "not_applicable",
         "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
         "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
       },
@@ -762,7 +762,7 @@
       "uncertainties": [
         "Part 5 is named by both EU regulations even though returnable transport items are an unusual fit for batteries; applicability is a matter for the legal text, not examined here.",
         "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
-        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+        "oj_citation is not_applicable on purpose: the edition is named inside the enacting text, which is a different fact from a harmonised-standard reference being cited in the OJ. Do not infer presumption of conformity."
       ]
     },
     {
@@ -791,7 +791,7 @@
         }
       ],
       "oj_citation": {
-        "status": "cited",
+        "status": "not_applicable",
         "reference": "Named in the enacting terms of Regulation (EU) 2023/1542 Art. 77(3) (OJ L) and Regulation (EU) 2024/1781 Annex III second paragraph (OJ L). This is a reference inside the legislation itself, NOT a harmonised-standard reference publication under Regulation (EU) No 1025/2012 and gives no presumption-of-conformity status. Decision (EU) 2026/1736 (which lists six EN standards per sibling research files) was not opened by this group.",
         "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj"
       },
@@ -825,7 +825,7 @@
         "ESPR Annex III point (c) names ISO/IEC 15459-6 without a year ('or equivalent') while the second paragraph of the same Annex names the 2014 edition; see provisions.",
         "A search excerpt showed a 2020 review date on one ISO page for this part; the ISO page fetched today says reviewed and confirmed in 2025.",
         "ISO page 'confirmed 2025' is a systematic-review outcome, not a statement that no revision is planned; no revision work item was located (WebSearch only; ISO work-programme pages not opened).",
-        "Do not read oj_citation 'cited' as harmonised-standard status: it only records that the legislation names this edition."
+        "oj_citation is not_applicable on purpose: the edition is named inside the enacting text, which is a different fact from a harmonised-standard reference being cited in the OJ. Do not infer presumption of conformity."
       ]
     },
     {
