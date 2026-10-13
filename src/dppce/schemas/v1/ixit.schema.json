@@ -1,0 +1,236 @@
+{
+  "$defs": {
+    "NetworkPolicy": {
+      "additionalProperties": false,
+      "description": "Destinations the transport may reach. Loopback and private ranges need an explicit entry.",
+      "properties": {
+        "allow_private_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allow Private Hosts",
+          "type": "array"
+        },
+        "allowed_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Hosts",
+          "type": "array"
+        },
+        "contact": {
+          "default": "",
+          "description": "Contact shown in the User-Agent header.",
+          "title": "Contact",
+          "type": "string"
+        },
+        "max_body_bytes": {
+          "default": 1048576,
+          "maximum": 16777216,
+          "minimum": 1024,
+          "title": "Max Body Bytes",
+          "type": "integer"
+        },
+        "max_redirects": {
+          "default": 3,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Max Redirects",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 200,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "min_interval_ms": {
+          "default": 0,
+          "maximum": 60000,
+          "minimum": 0,
+          "title": "Min Interval Ms",
+          "type": "integer"
+        },
+        "retries": {
+          "default": 0,
+          "description": "Extra attempts for an idempotent read.",
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "default": 5000,
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "title": "NetworkPolicy",
+      "type": "object"
+    },
+    "ObservationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "retention_days": {
+          "default": 30,
+          "maximum": 3650,
+          "minimum": 0,
+          "title": "Retention Days",
+          "type": "integer"
+        },
+        "store_bodies": {
+          "default": true,
+          "title": "Store Bodies",
+          "type": "boolean"
+        }
+      },
+      "title": "ObservationPolicy",
+      "type": "object"
+    },
+    "RoleIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "secret_ref": {
+          "anyOf": [
+            {
+              "pattern": "^(env|file):.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Secret Ref"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "RoleIdentity",
+      "type": "object"
+    },
+    "TrustConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "bundle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bundle"
+        },
+        "policy_version": {
+          "default": "unset",
+          "title": "Policy Version",
+          "type": "string"
+        }
+      },
+      "title": "TrustConfig",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:ixit",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Implementation eXtra Information for Testing.",
+  "properties": {
+    "authorization_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Authorization Ref"
+    },
+    "endpoints": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Endpoints",
+      "type": "object"
+    },
+    "identities": {
+      "default": [
+        {
+          "description": "",
+          "role": "anonymous",
+          "secret_ref": null
+        }
+      ],
+      "items": {
+        "$ref": "#/$defs/RoleIdentity"
+      },
+      "title": "Identities",
+      "type": "array"
+    },
+    "network": {
+      "$ref": "#/$defs/NetworkPolicy",
+      "default": {
+        "allow_private_hosts": [],
+        "allowed_hosts": [],
+        "contact": "",
+        "max_body_bytes": 1048576,
+        "max_redirects": 3,
+        "max_requests": 200,
+        "min_interval_ms": 0,
+        "retries": 0,
+        "timeout_ms": 5000
+      }
+    },
+    "observation": {
+      "$ref": "#/$defs/ObservationPolicy",
+      "default": {
+        "retention_days": 30,
+        "store_bodies": true
+      }
+    },
+    "samples": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Samples",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "dppce.ixit/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "trust": {
+      "$ref": "#/$defs/TrustConfig",
+      "default": {
+        "bundle": null,
+        "policy_version": "unset"
+      }
+    }
+  },
+  "required": [
+    "schema_version"
+  ],
+  "title": "IXIT",
+  "type": "object"
+}

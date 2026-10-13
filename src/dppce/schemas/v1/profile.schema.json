@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "FactSpec": {
+      "additionalProperties": false,
+      "description": "A fact that a profile reads from the ICS ``characteristics`` map.",
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "integer",
+            "string",
+            "boolean",
+            "date"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "unit": {
+          "default": "",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "description"
+      ],
+      "title": "FactSpec",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:profile",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "access_policy": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Access Policy"
+    },
+    "api_contract": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Api Contract"
+    },
+    "constants": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "title": "Constants",
+      "type": "object"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "facts": {
+      "additionalProperties": {
+        "$ref": "#/$defs/FactSpec"
+      },
+      "title": "Facts",
+      "type": "object"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "item_schema": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Item Schema"
+    },
+    "model_schema": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Schema"
+    },
+    "packs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Packs",
+      "type": "array"
+    },
+    "product_category": {
+      "title": "Product Category",
+      "type": "string"
+    },
+    "rule_packs": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Rule Packs",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "dppce.profile/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "testpacks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Testpacks",
+      "type": "array"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "product_category",
+    "packs",
+    "testpacks"
+  ],
+  "title": "Profile",
+  "type": "object"
+}

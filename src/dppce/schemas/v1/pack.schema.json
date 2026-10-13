@@ -1,0 +1,527 @@
+{
+  "$defs": {
+    "All": {
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "items": {
+            "$ref": "#/$defs/Expr"
+          },
+          "minItems": 1,
+          "title": "All",
+          "type": "array"
+        }
+      },
+      "required": [
+        "all"
+      ],
+      "title": "All",
+      "type": "object"
+    },
+    "AnyOf": {
+      "additionalProperties": false,
+      "properties": {
+        "any": {
+          "items": {
+            "$ref": "#/$defs/Expr"
+          },
+          "minItems": 1,
+          "title": "Any",
+          "type": "array"
+        }
+      },
+      "required": [
+        "any"
+      ],
+      "title": "AnyOf",
+      "type": "object"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "description": "A human decision. The engine never writes one of these. See ADR 0007.",
+      "properties": {
+        "artifact": {
+          "description": "Path or URL of the signed-off review record.",
+          "minLength": 1,
+          "title": "Artifact",
+          "type": "string"
+        },
+        "date": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "source_version": {
+          "minLength": 1,
+          "title": "Source Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reviewer",
+        "date",
+        "rationale",
+        "source_version",
+        "artifact"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "AssessmentPath": {
+      "additionalProperties": false,
+      "description": "One permitted way to assess a requirement. Every step in a path is required.\n\nA requirement with more than one path offers alternatives: one passing path is enough.",
+      "properties": {
+        "applicability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expr"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "tests": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Tests",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "AssessmentPath",
+      "type": "object"
+    },
+    "AuthorityClass": {
+      "description": "Kept separate on purpose: a guidance item is never reported as a legal obligation.",
+      "enum": [
+        "legal_obligation",
+        "standard_method",
+        "implementation_contract",
+        "guidance",
+        "illustrative"
+      ],
+      "title": "AuthorityClass",
+      "type": "string"
+    },
+    "Compare": {
+      "additionalProperties": false,
+      "description": "Compare one declared fact, addressed by a dotted path such as ``ics.product_category``.\n\nOrdering operators accept two integers or two ISO 8601 dates (``YYYY-MM-DD``).",
+      "properties": {
+        "fact": {
+          "pattern": "^[a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)+$",
+          "title": "Fact",
+          "type": "string"
+        },
+        "op": {
+          "$ref": "#/$defs/Op"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Operand"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/Operand"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "fact",
+        "op",
+        "value"
+      ],
+      "title": "Compare",
+      "type": "object"
+    },
+    "Const": {
+      "additionalProperties": false,
+      "description": "A literal outcome. ``{const: unknown}`` marks an applicability that nobody has resolved.",
+      "properties": {
+        "const": {
+          "$ref": "#/$defs/Tri"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "const"
+      ],
+      "title": "Const",
+      "type": "object"
+    },
+    "Expr": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Const"
+        },
+        {
+          "$ref": "#/$defs/Compare"
+        },
+        {
+          "$ref": "#/$defs/All"
+        },
+        {
+          "$ref": "#/$defs/AnyOf"
+        },
+        {
+          "$ref": "#/$defs/Not"
+        }
+      ]
+    },
+    "Interpretation": {
+      "additionalProperties": false,
+      "properties": {
+        "author_kind": {
+          "enum": [
+            "agent",
+            "human"
+          ],
+          "title": "Author Kind",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "source_version": {
+          "default": "",
+          "title": "Source Version",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ReviewStatus"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "unresolved": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "status",
+        "author_kind"
+      ],
+      "title": "Interpretation",
+      "type": "object"
+    },
+    "Modality": {
+      "enum": [
+        "mandatory",
+        "recommended",
+        "optional"
+      ],
+      "title": "Modality",
+      "type": "string"
+    },
+    "Not": {
+      "additionalProperties": false,
+      "properties": {
+        "not": {
+          "$ref": "#/$defs/Expr"
+        }
+      },
+      "required": [
+        "not"
+      ],
+      "title": "Not",
+      "type": "object"
+    },
+    "Op": {
+      "enum": [
+        "eq",
+        "ne",
+        "in",
+        "not_in",
+        "gt",
+        "ge",
+        "lt",
+        "le",
+        "contains"
+      ],
+      "title": "Op",
+      "type": "string"
+    },
+    "Operand": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "Requirement": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Expr"
+        },
+        "approval": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Approval"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "assessment_paths": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssessmentPath"
+          },
+          "title": "Assessment Paths",
+          "type": "array"
+        },
+        "authority_class": {
+          "$ref": "#/$defs/AuthorityClass"
+        },
+        "declared_support": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expr"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "interpretations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Interpretation"
+          },
+          "title": "Interpretations",
+          "type": "array"
+        },
+        "modality": {
+          "$ref": "#/$defs/Modality"
+        },
+        "paraphrase": {
+          "default": "",
+          "title": "Paraphrase",
+          "type": "string"
+        },
+        "review_status": {
+          "$ref": "#/$defs/ReviewStatus"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Superseded By"
+        },
+        "supersedes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Supersedes",
+          "type": "array"
+        },
+        "testability": {
+          "$ref": "#/$defs/Testability"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "source",
+        "authority_class",
+        "modality",
+        "applicability",
+        "testability",
+        "review_status"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
+    "ReviewStatus": {
+      "enum": [
+        "placeholder",
+        "draft-needs-review",
+        "approved",
+        "superseded",
+        "withdrawn"
+      ],
+      "title": "ReviewStatus",
+      "type": "string"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "description": "Pointer from a requirement to a provision. ``citation`` is empty for placeholders.",
+      "properties": {
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        },
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "version": {
+          "default": "",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "Testability": {
+      "enum": [
+        "automated",
+        "manual",
+        "mixed",
+        "not_testable"
+      ],
+      "title": "Testability",
+      "type": "string"
+    },
+    "Tri": {
+      "description": "Three-valued outcome. Missing information is UNKNOWN, never FALSE.",
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "Tri",
+      "type": "string"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:pack",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "legal_as_of": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Legal As Of"
+    },
+    "pack_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+      "title": "Pack Id",
+      "type": "string"
+    },
+    "requirements": {
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      },
+      "title": "Requirements",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "dppce.pack/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope_statement": {
+      "title": "Scope Statement",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "pack_id",
+    "version",
+    "title",
+    "scope_statement",
+    "requirements"
+  ],
+  "title": "RequirementPack",
+  "type": "object"
+}

@@ -1,0 +1,44 @@
+{
+  "$id": "urn:dppce:schema:v1:attestation",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Payload of the signature. It binds the digest of the whole decision body.",
+  "properties": {
+    "decision_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Decision Digest",
+      "type": "string"
+    },
+    "issuer": {
+      "title": "Issuer",
+      "type": "string"
+    },
+    "records_root": {
+      "title": "Records Root",
+      "type": "string"
+    },
+    "results_root": {
+      "title": "Results Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.attestation/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "signed_at": {
+      "title": "Signed At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "decision_digest",
+    "results_root",
+    "records_root",
+    "issuer",
+    "signed_at"
+  ],
+  "title": "Attestation",
+  "type": "object"
+}

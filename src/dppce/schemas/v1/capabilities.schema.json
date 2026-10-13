@@ -1,0 +1,92 @@
+{
+  "$defs": {
+    "Capability": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_criteria": {
+          "default": "",
+          "title": "Acceptance Criteria",
+          "type": "string"
+        },
+        "adapter": {
+          "title": "Adapter",
+          "type": "string"
+        },
+        "available": {
+          "default": true,
+          "title": "Available",
+          "type": "boolean"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "optional_dependency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Optional Dependency"
+        },
+        "state": {
+          "$ref": "#/$defs/CapabilityState"
+        }
+      },
+      "required": [
+        "id",
+        "adapter",
+        "state",
+        "description"
+      ],
+      "title": "Capability",
+      "type": "object"
+    },
+    "CapabilityState": {
+      "enum": [
+        "supported",
+        "experimental",
+        "interface_only",
+        "unsupported"
+      ],
+      "title": "CapabilityState",
+      "type": "string"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:capabilities",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "capabilities": {
+      "items": {
+        "$ref": "#/$defs/Capability"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "engine_version": {
+      "title": "Engine Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.capabilities/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "engine_version",
+    "capabilities"
+  ],
+  "title": "CapabilityManifest",
+  "type": "object"
+}

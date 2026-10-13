@@ -1,0 +1,926 @@
+{
+  "$defs": {
+    "AcquisitionWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First"
+        },
+        "last": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last"
+        }
+      },
+      "title": "AcquisitionWindow",
+      "type": "object"
+    },
+    "AuthorityClass": {
+      "description": "Kept separate on purpose: a guidance item is never reported as a legal obligation.",
+      "enum": [
+        "legal_obligation",
+        "standard_method",
+        "implementation_contract",
+        "guidance",
+        "illustrative"
+      ],
+      "title": "AuthorityClass",
+      "type": "string"
+    },
+    "ClaimLevel": {
+      "description": "What a result may be cited as. Set by execution mode and review status.",
+      "enum": [
+        "none",
+        "illustrative",
+        "diagnostic",
+        "reviewed"
+      ],
+      "title": "ClaimLevel",
+      "type": "string"
+    },
+    "Conflict": {
+      "additionalProperties": false,
+      "description": "A declared capability that contradicts an applicable requirement.",
+      "properties": {
+        "declared": {
+          "title": "Declared",
+          "type": "string"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "requirement_id": {
+          "title": "Requirement Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "declared",
+        "explanation"
+      ],
+      "title": "Conflict",
+      "type": "object"
+    },
+    "CoverageSummary": {
+      "additionalProperties": false,
+      "description": "Coverage of the selected catalogue. It is not coverage of a law or of a whole standard.",
+      "properties": {
+        "by_applicability": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Applicability",
+          "type": "object"
+        },
+        "by_authority_class": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Authority Class",
+          "type": "object"
+        },
+        "by_review_status": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Review Status",
+          "type": "object"
+        },
+        "by_testability": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Testability",
+          "type": "object"
+        },
+        "by_verdict": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Verdict",
+          "type": "object"
+        },
+        "excluded": {
+          "title": "Excluded",
+          "type": "integer"
+        },
+        "execution": {
+          "$ref": "#/$defs/Ratio"
+        },
+        "implementation": {
+          "$ref": "#/$defs/Ratio"
+        },
+        "manual_missing": {
+          "title": "Manual Missing",
+          "type": "integer"
+        },
+        "passing": {
+          "$ref": "#/$defs/Ratio"
+        },
+        "placeholders": {
+          "title": "Placeholders",
+          "type": "integer"
+        },
+        "scope_statement": {
+          "title": "Scope Statement",
+          "type": "string"
+        },
+        "total_requirements": {
+          "title": "Total Requirements",
+          "type": "integer"
+        },
+        "unknown_applicability": {
+          "title": "Unknown Applicability",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope_statement",
+        "total_requirements",
+        "by_authority_class",
+        "by_review_status",
+        "by_applicability",
+        "by_testability",
+        "by_verdict",
+        "implementation",
+        "execution",
+        "passing",
+        "placeholders",
+        "unknown_applicability",
+        "excluded",
+        "manual_missing"
+      ],
+      "title": "CoverageSummary",
+      "type": "object"
+    },
+    "Exclusion": {
+      "additionalProperties": false,
+      "description": "Something in the selected catalogue that was left out, and why. Always reported.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "requirement",
+            "test_purpose"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "reason_code",
+        "reason"
+      ],
+      "title": "Exclusion",
+      "type": "object"
+    },
+    "ExecutionMode": {
+      "enum": [
+        "illustrative",
+        "exploratory",
+        "reviewed"
+      ],
+      "title": "ExecutionMode",
+      "type": "string"
+    },
+    "ExecutionStatus": {
+      "description": "What happened to one test step. Only COMPLETED can carry pass or fail.",
+      "enum": [
+        "completed",
+        "not_run",
+        "skipped",
+        "blocked",
+        "unsupported",
+        "manual_unavailable",
+        "error"
+      ],
+      "title": "ExecutionStatus",
+      "type": "string"
+    },
+    "IssuerStatement": {
+      "additionalProperties": false,
+      "description": "Who issues the report. The default states that the issuer is not accredited.",
+      "properties": {
+        "accreditation_reference": {
+          "default": "",
+          "title": "Accreditation Reference",
+          "type": "string"
+        },
+        "accreditation_status": {
+          "default": "not accredited",
+          "title": "Accreditation Status",
+          "type": "string"
+        },
+        "identifier": {
+          "default": "unspecified",
+          "title": "Identifier",
+          "type": "string"
+        },
+        "name": {
+          "default": "unspecified",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "IssuerStatement",
+      "type": "object"
+    },
+    "JsonScalar": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "JsonValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JsonScalar"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "Modality": {
+      "enum": [
+        "mandatory",
+        "recommended",
+        "optional"
+      ],
+      "title": "Modality",
+      "type": "string"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "description": "A minimized record of what a check saw.\n\n``summary`` holds only what the verdict needs, for example field names and status codes.\nIt must not hold restricted payload values. Raw bytes stay in the encrypted recording.",
+      "properties": {
+        "acquired_at": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Acquired At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "exchange",
+            "artifact",
+            "declaration",
+            "derived"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "record_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Record Ids",
+          "type": "array"
+        },
+        "summary": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Summary",
+          "type": "object"
+        },
+        "test_purpose_id": {
+          "title": "Test Purpose Id",
+          "type": "string"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "array"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "test_purpose_id",
+        "kind",
+        "acquired_at"
+      ],
+      "title": "Observation",
+      "type": "object"
+    },
+    "PathResult": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Tri"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verdict"
+        }
+      },
+      "required": [
+        "path_id",
+        "applicability",
+        "verdict",
+        "steps"
+      ],
+      "title": "PathResult",
+      "type": "object"
+    },
+    "Ratio": {
+      "additionalProperties": false,
+      "description": "A count with its denominator. A percentage is never stored or shown without both.",
+      "properties": {
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "of": {
+          "title": "Of",
+          "type": "string"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator",
+        "of"
+      ],
+      "title": "Ratio",
+      "type": "object"
+    },
+    "RecordCommitment": {
+      "additionalProperties": false,
+      "description": "Salted commitment to one raw record. The salt stays in the encrypted recording.",
+      "properties": {
+        "commitment": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Commitment",
+          "type": "string"
+        },
+        "record_id": {
+          "title": "Record Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_id",
+        "commitment"
+      ],
+      "title": "RecordCommitment",
+      "type": "object"
+    },
+    "RequirementResult": {
+      "additionalProperties": false,
+      "description": "Applicability, execution, modality, and review status stay separate fields.",
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Tri"
+        },
+        "applicability_reason": {
+          "title": "Applicability Reason",
+          "type": "string"
+        },
+        "authority_class": {
+          "$ref": "#/$defs/AuthorityClass"
+        },
+        "claim_level": {
+          "$ref": "#/$defs/ClaimLevel"
+        },
+        "modality": {
+          "$ref": "#/$defs/Modality"
+        },
+        "pack_id": {
+          "title": "Pack Id",
+          "type": "string"
+        },
+        "paths": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PathResult"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "requirement_id": {
+          "title": "Requirement Id",
+          "type": "string"
+        },
+        "retained": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Retained",
+          "type": "array"
+        },
+        "review_status": {
+          "$ref": "#/$defs/ReviewStatus"
+        },
+        "testability": {
+          "$ref": "#/$defs/Testability"
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verdict"
+        },
+        "verdict_reason": {
+          "title": "Verdict Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "pack_id",
+        "authority_class",
+        "modality",
+        "review_status",
+        "testability",
+        "applicability",
+        "applicability_reason",
+        "verdict",
+        "verdict_reason",
+        "claim_level"
+      ],
+      "title": "RequirementResult",
+      "type": "object"
+    },
+    "ReviewStatus": {
+      "enum": [
+        "placeholder",
+        "draft-needs-review",
+        "approved",
+        "superseded",
+        "withdrawn"
+      ],
+      "title": "ReviewStatus",
+      "type": "string"
+    },
+    "RunManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "acquisition": {
+          "$ref": "#/$defs/AcquisitionWindow",
+          "default": {
+            "first": null,
+            "last": null
+          }
+        },
+        "authorization_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authorization Ref"
+        },
+        "catalogue_hash": {
+          "title": "Catalogue Hash",
+          "type": "string"
+        },
+        "dependency_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Dependency Versions",
+          "type": "object"
+        },
+        "engine_version": {
+          "title": "Engine Version",
+          "type": "string"
+        },
+        "evaluation_time": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Evaluation Time",
+          "type": "string"
+        },
+        "ics_hash": {
+          "title": "Ics Hash",
+          "type": "string"
+        },
+        "image_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Digest"
+        },
+        "issuer": {
+          "$ref": "#/$defs/IssuerStatement",
+          "default": {
+            "accreditation_reference": "",
+            "accreditation_status": "not accredited",
+            "identifier": "unspecified",
+            "name": "unspecified"
+          }
+        },
+        "ixit_sanitized_hash": {
+          "title": "Ixit Sanitized Hash",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "mode": {
+          "$ref": "#/$defs/ExecutionMode"
+        },
+        "pack_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Pack Hashes",
+          "type": "object"
+        },
+        "profile_hash": {
+          "title": "Profile Hash",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "seeds": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Seeds",
+          "type": "object"
+        },
+        "sources_hash": {
+          "title": "Sources Hash",
+          "type": "string"
+        },
+        "sut": {
+          "$ref": "#/$defs/SutIdentity"
+        },
+        "testpack_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Testpack Hashes",
+          "type": "object"
+        },
+        "trust_policy_version": {
+          "title": "Trust Policy Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "engine_version",
+        "dependency_versions",
+        "mode",
+        "profile_id",
+        "profile_hash",
+        "catalogue_hash",
+        "pack_hashes",
+        "testpack_hashes",
+        "sources_hash",
+        "ics_hash",
+        "ixit_sanitized_hash",
+        "sut",
+        "evaluation_time",
+        "trust_policy_version",
+        "limitations"
+      ],
+      "title": "RunManifest",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "critical",
+        "major",
+        "minor",
+        "info"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SutIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "description": "Stable URI or URN of the system under test.",
+          "title": "Identifier",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Operator"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Version"
+        }
+      },
+      "required": [
+        "name",
+        "identifier"
+      ],
+      "title": "SutIdentity",
+      "type": "object"
+    },
+    "TestResult": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Tri"
+        },
+        "applicability_reason": {
+          "title": "Applicability Reason",
+          "type": "string"
+        },
+        "check": {
+          "title": "Check",
+          "type": "string"
+        },
+        "execution_status": {
+          "$ref": "#/$defs/ExecutionStatus"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "observations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Observation"
+          },
+          "title": "Observations",
+          "type": "array"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "requirement_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requirement Ids",
+          "type": "array"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "test_purpose_id": {
+          "title": "Test Purpose Id",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verdict"
+        }
+      },
+      "required": [
+        "test_purpose_id",
+        "requirement_ids",
+        "check",
+        "applicability",
+        "applicability_reason",
+        "execution_status",
+        "verdict",
+        "severity",
+        "reason_code",
+        "message"
+      ],
+      "title": "TestResult",
+      "type": "object"
+    },
+    "Testability": {
+      "enum": [
+        "automated",
+        "manual",
+        "mixed",
+        "not_testable"
+      ],
+      "title": "Testability",
+      "type": "string"
+    },
+    "Tri": {
+      "description": "Three-valued outcome. Missing information is UNKNOWN, never FALSE.",
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "Tri",
+      "type": "string"
+    },
+    "Verdict": {
+      "enum": [
+        "pass",
+        "fail",
+        "inconclusive",
+        "not_applicable",
+        "error"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:decision",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The canonical statement of one run. Its RFC 8785 form is what gets hashed and signed.\n\nLists are sorted by identifier. The verifier rejects a body whose lists are out of order\nor hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.",
+  "properties": {
+    "conflicts": {
+      "items": {
+        "$ref": "#/$defs/Conflict"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "coverage": {
+      "$ref": "#/$defs/CoverageSummary"
+    },
+    "exclusions": {
+      "items": {
+        "$ref": "#/$defs/Exclusion"
+      },
+      "title": "Exclusions",
+      "type": "array"
+    },
+    "manifest": {
+      "$ref": "#/$defs/RunManifest"
+    },
+    "overall": {
+      "$ref": "#/$defs/Verdict"
+    },
+    "overall_reason": {
+      "title": "Overall Reason",
+      "type": "string"
+    },
+    "record_commitments": {
+      "items": {
+        "$ref": "#/$defs/RecordCommitment"
+      },
+      "title": "Record Commitments",
+      "type": "array"
+    },
+    "records_root": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Records Root",
+      "type": "string"
+    },
+    "requirement_results": {
+      "items": {
+        "$ref": "#/$defs/RequirementResult"
+      },
+      "title": "Requirement Results",
+      "type": "array"
+    },
+    "results_count": {
+      "minimum": 0,
+      "title": "Results Count",
+      "type": "integer"
+    },
+    "results_root": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Results Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.decision/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "test_results": {
+      "items": {
+        "$ref": "#/$defs/TestResult"
+      },
+      "title": "Test Results",
+      "type": "array"
+    },
+    "verdict_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Verdict Counts",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "manifest",
+    "overall",
+    "overall_reason",
+    "requirement_results",
+    "test_results",
+    "exclusions",
+    "conflicts",
+    "coverage",
+    "verdict_counts",
+    "results_root",
+    "results_count",
+    "record_commitments",
+    "records_root"
+  ],
+  "title": "DecisionBody",
+  "type": "object"
+}

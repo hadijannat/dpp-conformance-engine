@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "Scope": {
+      "description": "Permission needed by a test step. Anything above READ needs a signed authorization.",
+      "enum": [
+        "none",
+        "read",
+        "write",
+        "tamper",
+        "fuzz",
+        "access_probe"
+      ],
+      "title": "Scope",
+      "type": "string"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:authorization",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Payload of a signed test authorization from the system owner or an authorized delegate.",
+  "properties": {
+    "authorization_id": {
+      "title": "Authorization Id",
+      "type": "string"
+    },
+    "endpoints": {
+      "description": "Permitted URL origins.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Endpoints",
+      "type": "array"
+    },
+    "issuer": {
+      "title": "Issuer",
+      "type": "string"
+    },
+    "max_requests": {
+      "minimum": 1,
+      "title": "Max Requests",
+      "type": "integer"
+    },
+    "methods": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Methods",
+      "type": "array"
+    },
+    "not_after": {
+      "title": "Not After",
+      "type": "string"
+    },
+    "not_before": {
+      "title": "Not Before",
+      "type": "string"
+    },
+    "roles": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Roles",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "dppce.authorization/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scopes": {
+      "items": {
+        "$ref": "#/$defs/Scope"
+      },
+      "minItems": 1,
+      "title": "Scopes",
+      "type": "array"
+    },
+    "subject": {
+      "title": "Subject",
+      "type": "string"
+    },
+    "sut_identifier": {
+      "title": "Sut Identifier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "authorization_id",
+    "issuer",
+    "subject",
+    "sut_identifier",
+    "endpoints",
+    "methods",
+    "roles",
+    "scopes",
+    "not_before",
+    "not_after",
+    "max_requests"
+  ],
+  "title": "Authorization",
+  "type": "object"
+}

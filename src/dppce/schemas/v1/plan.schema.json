@@ -1,0 +1,275 @@
+{
+  "$defs": {
+    "Conflict": {
+      "additionalProperties": false,
+      "description": "A declared capability that contradicts an applicable requirement.",
+      "properties": {
+        "declared": {
+          "title": "Declared",
+          "type": "string"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "requirement_id": {
+          "title": "Requirement Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "declared",
+        "explanation"
+      ],
+      "title": "Conflict",
+      "type": "object"
+    },
+    "Exclusion": {
+      "additionalProperties": false,
+      "description": "Something in the selected catalogue that was left out, and why. Always reported.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "requirement",
+            "test_purpose"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "reason_code",
+        "reason"
+      ],
+      "title": "Exclusion",
+      "type": "object"
+    },
+    "ExecutionMode": {
+      "enum": [
+        "illustrative",
+        "exploratory",
+        "reviewed"
+      ],
+      "title": "ExecutionMode",
+      "type": "string"
+    },
+    "ExecutionStatus": {
+      "description": "What happened to one test step. Only COMPLETED can carry pass or fail.",
+      "enum": [
+        "completed",
+        "not_run",
+        "skipped",
+        "blocked",
+        "unsupported",
+        "manual_unavailable",
+        "error"
+      ],
+      "title": "ExecutionStatus",
+      "type": "string"
+    },
+    "PlannedPath": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Tri"
+        },
+        "applicability_reason": {
+          "title": "Applicability Reason",
+          "type": "string"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "tests": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tests",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path_id",
+        "applicability",
+        "applicability_reason",
+        "tests"
+      ],
+      "title": "PlannedPath",
+      "type": "object"
+    },
+    "PlannedRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Tri"
+        },
+        "applicability_reason": {
+          "title": "Applicability Reason",
+          "type": "string"
+        },
+        "declared_support": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Tri"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pack_id": {
+          "title": "Pack Id",
+          "type": "string"
+        },
+        "paths": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PlannedPath"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "requirement_id": {
+          "title": "Requirement Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "pack_id",
+        "applicability",
+        "applicability_reason"
+      ],
+      "title": "PlannedRequirement",
+      "type": "object"
+    },
+    "PlannedStep": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Tri"
+        },
+        "applicability_reason": {
+          "title": "Applicability Reason",
+          "type": "string"
+        },
+        "check": {
+          "title": "Check",
+          "type": "string"
+        },
+        "planned_reason": {
+          "default": "",
+          "title": "Planned Reason",
+          "type": "string"
+        },
+        "planned_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "test_purpose_id": {
+          "title": "Test Purpose Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "test_purpose_id",
+        "check",
+        "applicability",
+        "applicability_reason"
+      ],
+      "title": "PlannedStep",
+      "type": "object"
+    },
+    "Tri": {
+      "description": "Three-valued outcome. Missing information is UNKNOWN, never FALSE.",
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "Tri",
+      "type": "string"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:plan",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Deterministic output of ``dppce plan``. Entries are sorted by identifier.",
+  "properties": {
+    "conflicts": {
+      "items": {
+        "$ref": "#/$defs/Conflict"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "exclusions": {
+      "items": {
+        "$ref": "#/$defs/Exclusion"
+      },
+      "title": "Exclusions",
+      "type": "array"
+    },
+    "mode": {
+      "$ref": "#/$defs/ExecutionMode"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "requirements": {
+      "items": {
+        "$ref": "#/$defs/PlannedRequirement"
+      },
+      "title": "Requirements",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "dppce.plan/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/PlannedStep"
+      },
+      "title": "Steps",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "mode",
+    "profile_id",
+    "requirements",
+    "steps",
+    "exclusions",
+    "conflicts"
+  ],
+  "title": "Plan",
+  "type": "object"
+}

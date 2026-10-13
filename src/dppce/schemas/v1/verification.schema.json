@@ -1,0 +1,78 @@
+{
+  "$defs": {
+    "VerificationDimension": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "pass",
+            "fail",
+            "missing",
+            "not_checked"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "outcome",
+        "detail"
+      ],
+      "title": "VerificationDimension",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:verification",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Result of standalone verification. It says nothing new about the tested system.",
+  "properties": {
+    "complete": {
+      "title": "Complete",
+      "type": "boolean"
+    },
+    "decision_digest": {
+      "title": "Decision Digest",
+      "type": "string"
+    },
+    "dimensions": {
+      "items": {
+        "$ref": "#/$defs/VerificationDimension"
+      },
+      "title": "Dimensions",
+      "type": "array"
+    },
+    "evaluation_time": {
+      "title": "Evaluation Time",
+      "type": "string"
+    },
+    "note": {
+      "default": "Verification of the report is separate from the verdict about the tested system.",
+      "title": "Note",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.verification/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "evaluation_time",
+    "decision_digest",
+    "dimensions",
+    "complete"
+  ],
+  "title": "VerificationReport",
+  "type": "object"
+}

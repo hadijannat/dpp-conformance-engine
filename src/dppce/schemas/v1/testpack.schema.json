@@ -1,0 +1,418 @@
+{
+  "$defs": {
+    "All": {
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "items": {
+            "$ref": "#/$defs/Expr"
+          },
+          "minItems": 1,
+          "title": "All",
+          "type": "array"
+        }
+      },
+      "required": [
+        "all"
+      ],
+      "title": "All",
+      "type": "object"
+    },
+    "AnyOf": {
+      "additionalProperties": false,
+      "properties": {
+        "any": {
+          "items": {
+            "$ref": "#/$defs/Expr"
+          },
+          "minItems": 1,
+          "title": "Any",
+          "type": "array"
+        }
+      },
+      "required": [
+        "any"
+      ],
+      "title": "AnyOf",
+      "type": "object"
+    },
+    "Compare": {
+      "additionalProperties": false,
+      "description": "Compare one declared fact, addressed by a dotted path such as ``ics.product_category``.\n\nOrdering operators accept two integers or two ISO 8601 dates (``YYYY-MM-DD``).",
+      "properties": {
+        "fact": {
+          "pattern": "^[a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)+$",
+          "title": "Fact",
+          "type": "string"
+        },
+        "op": {
+          "$ref": "#/$defs/Op"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Operand"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/Operand"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "fact",
+        "op",
+        "value"
+      ],
+      "title": "Compare",
+      "type": "object"
+    },
+    "Const": {
+      "additionalProperties": false,
+      "description": "A literal outcome. ``{const: unknown}`` marks an applicability that nobody has resolved.",
+      "properties": {
+        "const": {
+          "$ref": "#/$defs/Tri"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "const"
+      ],
+      "title": "Const",
+      "type": "object"
+    },
+    "ExecutionMode": {
+      "enum": [
+        "illustrative",
+        "exploratory",
+        "reviewed"
+      ],
+      "title": "ExecutionMode",
+      "type": "string"
+    },
+    "Expr": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Const"
+        },
+        {
+          "$ref": "#/$defs/Compare"
+        },
+        {
+          "$ref": "#/$defs/All"
+        },
+        {
+          "$ref": "#/$defs/AnyOf"
+        },
+        {
+          "$ref": "#/$defs/Not"
+        }
+      ]
+    },
+    "JsonScalar": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "JsonValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JsonScalar"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "Not": {
+      "additionalProperties": false,
+      "properties": {
+        "not": {
+          "$ref": "#/$defs/Expr"
+        }
+      },
+      "required": [
+        "not"
+      ],
+      "title": "Not",
+      "type": "object"
+    },
+    "Op": {
+      "enum": [
+        "eq",
+        "ne",
+        "in",
+        "not_in",
+        "gt",
+        "ge",
+        "lt",
+        "le",
+        "contains"
+      ],
+      "title": "Op",
+      "type": "string"
+    },
+    "Operand": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "Scope": {
+      "description": "Permission needed by a test step. Anything above READ needs a signed authorization.",
+      "enum": [
+        "none",
+        "read",
+        "write",
+        "tamper",
+        "fuzz",
+        "access_probe"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "critical",
+        "major",
+        "minor",
+        "info"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Stimulus": {
+      "additionalProperties": false,
+      "description": "Names one check from the allowlisted registry. Parameters are data, never code.",
+      "properties": {
+        "check": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+          "title": "Check",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "check"
+      ],
+      "title": "Stimulus",
+      "type": "object"
+    },
+    "TestPurpose": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Expr"
+        },
+        "expected_evidence": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Evidence",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "manual": {
+          "default": false,
+          "title": "Manual",
+          "type": "boolean"
+        },
+        "permitted_modes": {
+          "items": {
+            "$ref": "#/$defs/ExecutionMode"
+          },
+          "minItems": 1,
+          "title": "Permitted Modes",
+          "type": "array"
+        },
+        "profiles": {
+          "description": "Profile ids, or '*' for all.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Profiles",
+          "type": "array"
+        },
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "requirements": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requirements",
+          "type": "array"
+        },
+        "requires_scope": {
+          "$ref": "#/$defs/Scope",
+          "default": "read"
+        },
+        "roles": {
+          "default": [
+            "anonymous"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "major"
+        },
+        "stimulus": {
+          "$ref": "#/$defs/Stimulus"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "verdict_rules": {
+          "$ref": "#/$defs/VerdictRules",
+          "default": {
+            "on_check_failed": "fail",
+            "on_unreachable": "inconclusive"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "requirements",
+        "profiles",
+        "applicability",
+        "stimulus",
+        "permitted_modes"
+      ],
+      "title": "TestPurpose",
+      "type": "object"
+    },
+    "Tri": {
+      "description": "Three-valued outcome. Missing information is UNKNOWN, never FALSE.",
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "Tri",
+      "type": "string"
+    },
+    "VerdictRules": {
+      "additionalProperties": false,
+      "description": "How a completed check maps to a verdict.\n\nAn unreachable system is inconclusive by default. Only an approved test method may set\n``on_unreachable`` to ``fail``, because a connectivity failure does not prove a breach.",
+      "properties": {
+        "on_check_failed": {
+          "default": "fail",
+          "enum": [
+            "fail",
+            "inconclusive"
+          ],
+          "title": "On Check Failed",
+          "type": "string"
+        },
+        "on_unreachable": {
+          "default": "inconclusive",
+          "enum": [
+            "inconclusive",
+            "fail"
+          ],
+          "title": "On Unreachable",
+          "type": "string"
+        }
+      },
+      "title": "VerdictRules",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:testpack",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "dppce.testpack/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "test_purposes": {
+      "items": {
+        "$ref": "#/$defs/TestPurpose"
+      },
+      "title": "Test Purposes",
+      "type": "array"
+    },
+    "testpack_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+      "title": "Testpack Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "testpack_id",
+    "version",
+    "title",
+    "test_purposes"
+  ],
+  "title": "TestPack",
+  "type": "object"
+}

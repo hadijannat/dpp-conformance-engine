@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "TrustAnchor": {
+      "additionalProperties": false,
+      "description": "An X.509 certificate that ends a passport signature chain.",
+      "properties": {
+        "certificate_pem": {
+          "title": "Certificate Pem",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "certificate_pem"
+      ],
+      "title": "TrustAnchor",
+      "type": "object"
+    },
+    "TrustedKey": {
+      "additionalProperties": false,
+      "description": "A public key that the verifier accepts for the listed purposes, inside its validity window.",
+      "properties": {
+        "issuer": {
+          "title": "Issuer",
+          "type": "string"
+        },
+        "kid": {
+          "title": "Kid",
+          "type": "string"
+        },
+        "not_after": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Not After",
+          "type": "string"
+        },
+        "not_before": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Not Before",
+          "type": "string"
+        },
+        "public_jwk": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Public Jwk",
+          "type": "object"
+        },
+        "purposes": {
+          "items": {
+            "enum": [
+              "report",
+              "authorization",
+              "passport"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Purposes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kid",
+        "issuer",
+        "purposes",
+        "public_jwk",
+        "not_before",
+        "not_after"
+      ],
+      "title": "TrustedKey",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:trust",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "anchors": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TrustAnchor"
+      },
+      "title": "Anchors",
+      "type": "array"
+    },
+    "keys": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TrustedKey"
+      },
+      "title": "Keys",
+      "type": "array"
+    },
+    "policy_version": {
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "require_status": {
+      "default": false,
+      "title": "Require Status",
+      "type": "boolean"
+    },
+    "require_timestamp": {
+      "default": false,
+      "title": "Require Timestamp",
+      "type": "boolean"
+    },
+    "revoked_kids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Revoked Kids",
+      "type": "array"
+    },
+    "revoked_serials": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Revoked Serials",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "dppce.trust/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status_as_of": {
+      "anyOf": [
+        {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Status As Of"
+    },
+    "status_max_age_days": {
+      "default": 7,
+      "maximum": 3650,
+      "minimum": 0,
+      "title": "Status Max Age Days",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_version"
+  ],
+  "title": "TrustBundle",
+  "type": "object"
+}

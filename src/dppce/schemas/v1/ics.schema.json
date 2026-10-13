@@ -1,0 +1,270 @@
+{
+  "$defs": {
+    "AccessDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "description": "Identifier of the declared access policy.",
+          "title": "Policy"
+        },
+        "tiers": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Tiers"
+        }
+      },
+      "title": "AccessDeclaration",
+      "type": "object"
+    },
+    "ApiDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "description": "Identifier of the pinned API contract.",
+          "title": "Contract"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Version"
+        }
+      },
+      "title": "ApiDeclaration",
+      "type": "object"
+    },
+    "SutIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "description": "Stable URI or URN of the system under test.",
+          "title": "Identifier",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Operator"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Version"
+        }
+      },
+      "required": [
+        "name",
+        "identifier"
+      ],
+      "title": "SutIdentity",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:ics",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Implementation Conformance Statement.\n\nThe core is product-agnostic. Product facts such as a capacity or a market date go in\n``characteristics``. The profile says which facts it reads. Any value may be ``\"unknown\"``.\nAn ICS declaration cannot waive a mandatory requirement.",
+  "properties": {
+    "access": {
+      "$ref": "#/$defs/AccessDeclaration",
+      "default": {
+        "policy": "unknown",
+        "tiers": "unknown"
+      }
+    },
+    "api": {
+      "$ref": "#/$defs/ApiDeclaration",
+      "default": {
+        "contract": "unknown",
+        "version": "unknown"
+      }
+    },
+    "carriers": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "const": "unknown",
+          "type": "string"
+        }
+      ],
+      "default": "unknown",
+      "title": "Carriers"
+    },
+    "characteristics": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "title": "Characteristics",
+      "type": "object"
+    },
+    "features": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "const": "unknown",
+            "type": "string"
+          }
+        ]
+      },
+      "title": "Features",
+      "type": "object"
+    },
+    "granularity": {
+      "anyOf": [
+        {
+          "enum": [
+            "item",
+            "model",
+            "batch"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "type": "string"
+        }
+      ],
+      "default": "unknown",
+      "title": "Granularity"
+    },
+    "identifier_scheme": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "type": "string"
+        }
+      ],
+      "default": "unknown",
+      "title": "Identifier Scheme"
+    },
+    "product_category": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "type": "string"
+        }
+      ],
+      "default": "unknown",
+      "title": "Product Category"
+    },
+    "profile": {
+      "title": "Profile",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.ics/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "signature_format": {
+      "anyOf": [
+        {
+          "enum": [
+            "jws",
+            "cose",
+            "none"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "type": "string"
+        }
+      ],
+      "default": "unknown",
+      "title": "Signature Format"
+    },
+    "sut": {
+      "$ref": "#/$defs/SutIdentity"
+    }
+  },
+  "required": [
+    "schema_version",
+    "sut",
+    "profile"
+  ],
+  "title": "ICS",
+  "type": "object"
+}

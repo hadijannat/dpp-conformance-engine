@@ -1,0 +1,270 @@
+{
+  "$defs": {
+    "Amendment": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "title": "Date",
+          "type": "string"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier"
+      ],
+      "title": "Amendment",
+      "type": "object"
+    },
+    "DatedFact": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "default": "",
+          "title": "Basis",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "what": {
+          "title": "What",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "what"
+      ],
+      "title": "DatedFact",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "official": {
+          "title": "Official",
+          "type": "boolean"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "what_it_shows": {
+          "title": "What It Shows",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "what_it_shows",
+        "official"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "OjCitation": {
+      "additionalProperties": false,
+      "description": "Publication of a standard and its citation in the Official Journal are separate facts.",
+      "properties": {
+        "reference": {
+          "default": "",
+          "title": "Reference",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "cited",
+            "not_cited",
+            "not_located",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "OjCitation",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:source",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One entry of ``catalogue/sources.yaml``.",
+  "properties": {
+    "amendment_history": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Amendment"
+      },
+      "title": "Amendment History",
+      "type": "array"
+    },
+    "applicable_dates": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DatedFact"
+      },
+      "title": "Applicable Dates",
+      "type": "array"
+    },
+    "edition_or_version": {
+      "default": "",
+      "title": "Edition Or Version",
+      "type": "string"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "hash_note": {
+      "default": "not hashed",
+      "title": "Hash Note",
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "identifier": {
+      "title": "Identifier",
+      "type": "string"
+    },
+    "independent_check": {
+      "default": "not_checked",
+      "enum": [
+        "confirmed",
+        "refuted",
+        "not_confirmed",
+        "not_checked"
+      ],
+      "title": "Independent Check",
+      "type": "string"
+    },
+    "issuing_body": {
+      "title": "Issuing Body",
+      "type": "string"
+    },
+    "legal_or_spec_status": {
+      "title": "Legal Or Spec Status",
+      "type": "string"
+    },
+    "license_or_reuse_terms": {
+      "default": "",
+      "title": "License Or Reuse Terms",
+      "type": "string"
+    },
+    "official_url": {
+      "title": "Official Url",
+      "type": "string"
+    },
+    "oj_citation": {
+      "$ref": "#/$defs/OjCitation",
+      "default": {
+        "reference": "",
+        "status": "not_applicable",
+        "url": ""
+      }
+    },
+    "permitted_use_basis": {
+      "title": "Permitted Use Basis",
+      "type": "string"
+    },
+    "publication_date": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Date"
+    },
+    "retrieval_date": {
+      "title": "Retrieval Date",
+      "type": "string"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "source_type": {
+      "title": "Source Type",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "uncertainties": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "verification_level": {
+      "enum": [
+        "substantive",
+        "metadata_only",
+        "secondary_only",
+        "not_located",
+        "unverified_recall"
+      ],
+      "title": "Verification Level",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "identifier",
+    "issuing_body",
+    "source_type",
+    "official_url",
+    "retrieval_date",
+    "legal_or_spec_status",
+    "permitted_use_basis",
+    "verification_level"
+  ],
+  "title": "SourceRecord",
+  "type": "object"
+}
