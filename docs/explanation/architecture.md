@@ -33,7 +33,7 @@ deterministic code and versioned data.
 | `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws` |
 | `dppce.verdicts` | Aggregation truth table and coverage. Pure functions. | `models` |
 | `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing. | `models`, `infrastructure.interfaces` |
-| `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence` |
+| `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence`, `verdicts` |
 | `dppce.infrastructure` | Transport, recorder, replay, clock, key providers, reference server. | `models`, `evidence` |
 | `dppce.orchestrator` | Plan, run, replay. | all of the above except `verifier` |
 | `dppce.report` | JSON and HTML rendering. | `models` |
