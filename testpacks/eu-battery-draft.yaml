@@ -1,8 +1,893 @@
-# Audience: contributors and assessors.
-# Purpose: placeholder until the source audit is complete.
-# This file is project-authored and synthetic. It makes no normative statement.
+# Audience: reviewers, contributors, and assessors.
+# Purpose: define the test purposes for the draft pack eu-battery/draft. Exploratory mode only.
+# An automated step gives partial evidence. If its check fails, the step is inconclusive, because
+# the checks compare with declarations and synthetic resources, not with the Regulation.
+# A manual step has no result in the engine. No path can pass without its manual step.
 schema_version: dppce.testpack/1
 testpack_id: eu-battery/draft-tests
-version: 0.0.0
+version: 0.1.0
 title: Test purposes for the EU battery draft pack
-test_purposes: []
+test_purposes:
+- id: TP-EU-QR-DECODE
+  title: Decode the supplied image of the QR code
+  purpose: 'Shows that the supplied image holds one QR symbol with text. It does not show that the code is on
+    the battery, or its contrast, size, or permanence. Partial evidence only. A failed check gives ''inconclusive''
+    with its reason code: a person must decide whether the observation contradicts the provision.'
+  requirements:
+  - EUBAT-13-6
+  - EUBAT-13-6A
+  - EUBAT-13-6B
+  - EUBAT-77-3
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: carrier.qr_decode
+    params:
+      artifact: qr_image
+  expected_evidence:
+  - The QR image as an artifact record.
+  - The decode result or the reason code.
+  verdict_rules:
+    on_check_failed: inconclusive
+    on_unreachable: inconclusive
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+- id: TP-EU-ID-RESOLVE
+  title: Resolve the identifier from the QR code as the anonymous role
+  purpose: 'Shows that the identifier in the carrier leads to a resource without a credential. It does not show
+    that the resource is the battery passport of that battery. The check expects a JSON object, which the Regulation
+    does not require at this link. Partial evidence only. A failed check gives ''inconclusive'' with its reason
+    code: a person must decide whether the observation contradicts the provision.'
+  requirements:
+  - EUBAT-13-6A
+  - EUBAT-77-3
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.resolve
+  expected_evidence:
+  - The resolver exchange with its redirect chain.
+  - The final status code and media type.
+  verdict_rules:
+    on_check_failed: inconclusive
+    on_unreachable: inconclusive
+  permitted_modes:
+  - exploratory
+  requires_scope: read
+- id: TP-EU-API-CONTRACT
+  title: Compare the passport response with the API contract that the owner of the system pins
+  purpose: 'Shows that the response is machine-readable and has the declared structure. The contract and its path
+    come from the profile, not from the Regulation. Partial evidence only. A failed check gives ''inconclusive''
+    with its reason code: a person must decide whether the observation contradicts the provision.'
+  requirements:
+  - EUBAT-77-5
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: api.contract
+    params:
+      path: /dpp/{id}
+      method: get
+  expected_evidence:
+  - Status, media type, and schema result.
+  verdict_rules:
+    on_check_failed: inconclusive
+    on_unreachable: inconclusive
+  permitted_modes:
+  - exploratory
+  requires_scope: read
+- id: TP-EU-ACCESS-ANON
+  title: Probe the channels as the anonymous role against the declared access policy
+  purpose: 'Shows whether the anonymous role gets a field that the declared access policy withholds. The policy
+    is a declaration of the owner of the system. The engine cannot confirm that it matches the access groups of
+    Article 77(2). Partial evidence only. A failed check gives ''inconclusive'' with its reason code: a person
+    must decide whether the observation contradicts the provision.'
+  requirements:
+  - EUBAT-77-2-ACCESS
+  - EUBAT-78-F
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: access.restricted_fields
+    params:
+      role: anonymous
+  expected_evidence:
+  - Channel names and field paths. Never field values.
+  verdict_rules:
+    on_check_failed: inconclusive
+    on_unreachable: inconclusive
+  permitted_modes:
+  - exploratory
+  requires_scope: access_probe
+- id: TP-EU-INTEGRITY-JWS
+  title: Verify the signed passport where the system declares a JWS signature
+  purpose: 'Shows signature validity, issuer trust, and certificate validity for the declared mechanism. The Regulation
+    names no mechanism. A valid signature does not prove that the signed values are true. Partial evidence only.
+    A failed check gives ''inconclusive'' with its reason code: a person must decide whether the observation contradicts
+    the provision.'
+  requirements:
+  - EUBAT-78-G
+  profiles:
+  - '*'
+  applicability:
+    fact: ics.signature_format
+    op: eq
+    value: jws
+  roles:
+  - anonymous
+  stimulus:
+    check: integrity.jws
+  expected_evidence:
+  - Separate findings for signature, issuer trust, certificate validity, revocation, and payload.
+  verdict_rules:
+    on_check_failed: inconclusive
+    on_unreachable: inconclusive
+  permitted_modes:
+  - exploratory
+  requires_scope: read
+- id: TP-EU-13-6-MANUAL
+  title: 'Manual review: the QR code on the battery'
+  requirements:
+  - EUBAT-13-6
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A photograph or inspection record of the QR code on the battery or, where Article 13(7) permits, on the packaging
+    and documents.
+  - The reader that was used and the result.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-13-6A-MANUAL
+  title: 'Manual review: the QR code leads to the passport of this battery'
+  requirements:
+  - EUBAT-13-6A
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A record that the resource behind the QR code is the battery passport of the battery that bears the code.
+  - The evidence used to judge that the information is complete, up to date, and accurate.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-13-6B-MANUAL
+  title: 'Manual review: the information behind the QR code for a battery without a passport'
+  requirements:
+  - EUBAT-13-6B
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A list of the items of Article 13(6), point (b) that apply on the date of the review, with the reason for
+    each item that does not apply yet.
+  - A record of each applicable item that the QR code gives access to.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-13-7-QR-MANUAL
+  title: 'Manual review: how the QR code is applied'
+  requirements:
+  - EUBAT-13-7-QR
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - An inspection record of the marking method and place.
+  - 'Where the code is not on the battery: the stated reason and the evidence for the packaging and the documents.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-13-7-LABELS-MANUAL
+  title: 'Manual review: how the labels are applied'
+  requirements:
+  - EUBAT-13-7-LABELS
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A list of the label duties that apply on the date of the review and the legal basis for each date.
+  - An inspection record of each applicable label.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-1-MANUAL
+  title: 'Manual review: one passport record exists for each battery'
+  requirements:
+  - EUBAT-77-1
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The category, the declared capacity, and the market or service date of the battery, with the evidence for
+    each.
+  - A record that an electronic record exists for the individual battery, not only for its model.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-2-CONTENT-MANUAL
+  title: 'Manual review: the two levels of information are present'
+  requirements:
+  - EUBAT-77-2-CONTENT
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A record that the passport separates model information from individual battery information.
+  - The list of Annex XIII items that were judged not applicable to the category, with the reason.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-2-ACCESS-MANUAL
+  title: 'Manual review: the access groups match Article 77(2)'
+  requirements:
+  - EUBAT-77-2-ACCESS
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A comparison of the declared access policy with the three groups and the Annex XIII points.
+  - A record of what each tested role received. Field names only, never restricted values.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-3-MANUAL
+  title: 'Manual review: the identifier behind the QR code'
+  requirements:
+  - EUBAT-77-3
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A record that the QR code on the battery links to the identifier of that battery and that the identifier leads
+    to its passport.
+  - The economic operator that attributed the identifier and the rule that keeps identifiers unique.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-3-STD-MANUAL
+  title: 'Manual review: compliance with the named editions or an equivalent'
+  requirements:
+  - EUBAT-77-3-STD
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - An assessment by a competent person who holds lawful copies of the named editions.
+  - 'Where an equivalent is claimed: the claim and its justification.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-4-MANUAL
+  title: 'Manual review: accuracy, completeness, and currency of the passport'
+  requirements:
+  - EUBAT-77-4
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The evidence used to compare passport values with the battery and its documents.
+  - 'Where a different economic operator acts: the written authorization.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-5-MANUAL
+  title: 'Manual review: open standards, interoperability, transfer, and search'
+  requirements:
+  - EUBAT-77-5
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The standards and formats that the passport system uses, with their openness status.
+  - A record of how the information can be transferred and searched.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-6-MANUAL
+  title: 'Manual review: the access rules of the passport system'
+  requirements:
+  - EUBAT-77-6
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The documented access rules of the system and the Article 78 point that each rule serves.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-7A-MANUAL
+  title: 'Manual review: the new passport and its link'
+  requirements:
+  - EUBAT-77-7A
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The status history of the battery and the economic operator that is now responsible.
+  - A record that the new passport links to each original passport.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-7B-MANUAL
+  title: 'Manual review: the responsible party for a waste battery'
+  requirements:
+  - EUBAT-77-7B
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The evidence that the battery is waste and the party that is now responsible.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-8-MANUAL
+  title: 'Manual review: the passport of a recycled battery'
+  requirements:
+  - EUBAT-77-8
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The evidence that the battery was recycled and the state of its passport record.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-77-10-MANUAL
+  title: 'Manual review: the proof of registration'
+  requirements:
+  - EUBAT-77-10
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The proof of registration that the registry issues and that the economic operator supplies.
+  - A comparison of the identifier in that proof with the identifier of the battery.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-A-MANUAL
+  title: 'Manual review: interoperability with other digital product passports'
+  requirements:
+  - EUBAT-78-A
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The interoperability claim of the owner of the system and the evidence for it.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-B-MANUAL
+  title: 'Manual review: access without charge'
+  requirements:
+  - EUBAT-78-B
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A record of each access route and of any charge or condition for each group.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-C-MANUAL
+  title: 'Manual review: who stores the passport data'
+  requirements:
+  - EUBAT-78-C
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The storage arrangement and, where a different economic operator stores the data, its authorization.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-D-MANUAL
+  title: 'Manual review: limits on the use of data by an authorized economic operator'
+  requirements:
+  - EUBAT-78-D
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The contract terms or audit records that limit the use of the data.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-E-MANUAL
+  title: 'Manual review: continuity of the passport'
+  requirements:
+  - EUBAT-78-E
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The documented arrangement that keeps the passport available.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-F-MANUAL
+  title: 'Manual review: restriction of the rights to read and to change'
+  requirements:
+  - EUBAT-78-F
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The documented rights for each role to read, introduce, modify, and update.
+  - The evidence that the system enforces those rights.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-G-MANUAL
+  title: 'Manual review: authentication, reliability, and integrity'
+  requirements:
+  - EUBAT-78-G
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The mechanisms that the system uses and the evidence that they work.
+  - 'Where no automated result exists: the reason.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-78-H-MANUAL
+  title: 'Manual review: security, privacy, and fraud prevention'
+  requirements:
+  - EUBAT-78-H
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The security and privacy assessment of the passport system that the owner supplies.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-1-MANUAL
+  title: 'Manual review: the public model information'
+  requirements:
+  - EUBAT-AXIII-1
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A list of the items with the value or document found for each.
+  - The items judged not applicable to the category, with the reason.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-1C-MANUAL
+  title: 'Manual review: carbon footprint information'
+  requirements:
+  - EUBAT-AXIII-1C
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The legal state of the Article 7 acts on the date of the review.
+  - 'Where the item is due: the information found.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-1D-MANUAL
+  title: 'Manual review: responsible sourcing information'
+  requirements:
+  - EUBAT-AXIII-1D
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - Whether the economic operator is inside Chapter VII on the date of the review, with the evidence.
+  - 'Where the item is due: the information found and the report that it comes from.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-1E-MANUAL
+  title: 'Manual review: recycled content information'
+  requirements:
+  - EUBAT-AXIII-1E
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The legal state of the Article 8(1) act on the date of the review.
+  - 'Where the item is due: the information found.'
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-1K-MANUAL
+  title: 'Manual review: capacity threshold for exhaustion'
+  requirements:
+  - EUBAT-AXIII-1K
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The value found and the document that it comes from.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-2-MANUAL
+  title: 'Manual review: the restricted model information'
+  requirements:
+  - EUBAT-AXIII-2
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A list of the four items with a statement that each is present. Field names only.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-3-MANUAL
+  title: 'Manual review: the results of test reports'
+  requirements:
+  - EUBAT-AXIII-3
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A list of the requirements that need a test report on the date of the review.
+  - A statement that a result is present for each. Field names only.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-4A-MANUAL
+  title: 'Manual review: performance and durability values'
+  requirements:
+  - EUBAT-AXIII-4A
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A statement that the values are present for the two points in time. Field names only.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-4B-MANUAL
+  title: 'Manual review: state of health information'
+  requirements:
+  - EUBAT-AXIII-4B
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A statement that the parameters for the category are present. Field names only.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-4C-MANUAL
+  title: 'Manual review: the status of the battery'
+  requirements:
+  - EUBAT-AXIII-4C
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - The status value found and a comparison with the five values of the item.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true
+- id: TP-EU-AXIII-4D-MANUAL
+  title: 'Manual review: information from use'
+  requirements:
+  - EUBAT-AXIII-4D
+  profiles:
+  - '*'
+  applicability:
+    const: 'true'
+    reason: Applies to every system that the parent requirement selects.
+  roles:
+  - anonymous
+  stimulus:
+    check: manual.review
+  expected_evidence:
+  - A statement that each kind of use information is present. Field names only.
+  - A signed manual review record that names the reviewer, the date, and the evidence examined.
+  permitted_modes:
+  - exploratory
+  requires_scope: none
+  manual: true

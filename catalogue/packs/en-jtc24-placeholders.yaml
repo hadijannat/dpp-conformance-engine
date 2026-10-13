@@ -1,9 +1,128 @@
 # Audience: contributors and assessors.
-# Purpose: placeholder until the source audit is complete.
-# This file is project-authored and synthetic. It makes no normative statement.
+# Purpose: keep one placeholder for each CEN/CLC/JTC 24 standard. Bibliographic data only.
+# No entry states, quotes, paraphrases, or summarizes the content of a standard.
 schema_version: dppce.pack/1
 pack_id: en-jtc24/placeholders
-version: 0.0.0
-title: CEN-CENELEC JTC 24 placeholders
-scope_statement: Empty. The source audit has not produced this pack yet.
-requirements: []
+version: 0.1.0
+title: 'CEN-CENELEC JTC 24 standards: placeholders'
+description: 'One placeholder for each of the eight European standards of CEN/CLC/JTC 24 on the digital product
+  passport. Each entry holds bibliographic data only: the number, the year, and the public title from the CEN
+  catalogue. The use of a harmonised standard is voluntary. This pack does not describe the content of any standard.'
+legal_as_of: '2026-10-13'
+scope_statement: These entries are placeholders. No clause of any standard is mapped, and no entry has a paraphrase,
+  an interpretation, or a test. This pack is not coverage of any standard. A human who holds a lawful copy must
+  write and approve an interpretation before an entry can be assessed.
+requirements:
+- id: EN18216-PH-001
+  title: Digital product passport - Data exchange protocols
+  source:
+    source_id: en-18216-2026
+    citation: ''
+    version: EN 18216:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18219-PH-001
+  title: Digital product passport - Unique identifiers
+  source:
+    source_id: en-18219-2026
+    citation: ''
+    version: EN 18219:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18220-PH-001
+  title: Digital product passport - Data carriers
+  source:
+    source_id: en-18220-2026
+    citation: ''
+    version: EN 18220:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18221-PH-001
+  title: Digital product passport - Data storage, archiving, and data persistence
+  source:
+    source_id: en-18221-2026
+    citation: ''
+    version: EN 18221:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18222-PH-001
+  title: Digital Product Passport - Application Programming Interfaces (APIs) for the product passport lifecycle
+    management and searchability
+  source:
+    source_id: en-18222-2026
+    citation: ''
+    version: EN 18222:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18223-PH-001
+  title: Digital Product Passport - System interoperability
+  source:
+    source_id: en-18223-2026
+    citation: ''
+    version: EN 18223:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18239-PH-001
+  title: Digital product passport - Access rights management, information system security, and business confidentiality
+  source:
+    source_id: en-18239-2026
+    citation: ''
+    version: EN 18239:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder
+- id: EN18246-PH-001
+  title: Digital product passport - Data authentication, reliability and integrity
+  source:
+    source_id: en-18246-2026
+    citation: ''
+    version: EN 18246:2026
+  authority_class: standard_method
+  modality: optional
+  paraphrase: ''
+  applicability:
+    const: unknown
+    reason: No approved interpretation exists.
+  testability: not_testable
+  review_status: placeholder

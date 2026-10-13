@@ -1,9 +1,2035 @@
-# Audience: contributors and assessors.
-# Purpose: placeholder until the source audit is complete.
-# This file is project-authored and synthetic. It makes no normative statement.
+# Audience: reviewers, contributors, and assessors.
+# Purpose: hold agent-authored DRAFT interpretations of Regulation (EU) 2023/1542 for review.
+# No entry is approved. This file is not legal advice and makes no statement of legal compliance.
+# Review each entry with catalogue/templates/interpretation-review.md.
 schema_version: dppce.pack/1
 pack_id: eu-battery/draft
-version: 0.0.0
-title: EU battery passport draft interpretations
-scope_statement: Empty. The source audit has not produced this pack yet.
-requirements: []
+version: 0.1.0
+title: 'EU battery passport: agent-authored draft interpretations'
+description: 'Draft interpretations of Regulation (EU) 2023/1542 for the battery passport and its data carrier.
+  An agent wrote them from the source audit. No entry is approved and no human reviewed them. The audit read the
+  consolidated text, which is a documentation tool and has no legal effect: the Official Journal text with its
+  corrigenda is the authentic text. A result from this pack is diagnostic. It is not a statement of legal compliance.'
+legal_as_of: '2026-10-13'
+scope_statement: Covers Article 13(6), first sentence and points (a) and (b), with Annex VI, Part C, and Article
+  13(7); Article 77(1) to (8) and (10); Article 78, points (a) to (h); and Annex XIII, points 1 to 4, of Regulation
+  (EU) 2023/1542, in the consolidated version of 2026-08-13. It does not cover Article 13(6), point (c), Article
+  77(9) (addressed to the Commission), the rest of the Regulation, any act that was not adopted on 2026-10-13,
+  or the content of any standard. A count of these entries is not coverage of the Regulation.
+requirements:
+- id: EUBAT-13-6
+  title: The battery bears a QR code
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 13(6), first sentence; Annex VI, Part C
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: From 18 February 2027, a battery is marked with a QR code. The code has a high color contrast with
+    its background and a size that a commonly available QR reader reads easily.
+  applicability:
+    any:
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
+    - fact: ics.characteristics.put_into_service_date
+      op: ge
+      value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-13-6-I1
+    text: 'Agent-authored draft reading of Art. 13(6), first sentence; Annex VI, Part C. Not approved. Support:
+      docs/research/raw/batteries-regulation.json. The duty covers every battery category, so the expression holds
+      the date only. The independent check in docs/research/raw/batteries-regulation.refutation.json confirmed
+      the date. Decoding a supplied image is partial evidence: it does not show the marking on the battery.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
+      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Annex VI, Part C names no symbology standard and no numeric limit for contrast or size.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-QR-DECODE
+    - TP-EU-13-6-MANUAL
+- id: EUBAT-13-6A
+  title: The QR code gives access to the battery passport
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 13(6), point (a)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: For an LMT battery, an industrial battery with a capacity greater than 2 kWh, and an electric vehicle
+    battery, the QR code gives access to the battery passport of Article 77. The information is complete, up to
+    date, and accurate.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-13-6A-I1
+    text: 'Agent-authored draft reading of Art. 13(6), point (a). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The category list and the limit are those of Article 77(1). The capacity limit is in the industrial branch
+      only and the comparison is strictly greater than 2000 Wh. The two automated steps show that a supplied code
+      decodes and that its link resolves.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
+      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Article 13(6) ends with the duty that the information is complete, up to date, and accurate. The audit did
+      not record how that sentence relates to each point of the paragraph.
+    - The Regulation does not define 'capacity' for the 2 kWh limit. The fact capacity_wh is a declared energy
+      value. Commission FAQ material (non-binding) says that independent units are assessed one by one and integrated
+      systems by their combined capacity.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-QR-DECODE
+    - TP-EU-ID-RESOLVE
+    - TP-EU-13-6A-MANUAL
+- id: EUBAT-13-6B
+  title: The QR code gives access to the information for a battery without a passport
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 13(6), point (b)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: For a battery that needs no battery passport, the QR code gives access to the applicable label information
+    of Article 13(1) to (5), the EU declaration of conformity, the due diligence report of Article 52(3), and
+    the waste prevention and management information of Article 74(1), points (a) to (f). The information is complete,
+    up to date, and accurate.
+  applicability:
+    all:
+    - not:
+        any:
+        - fact: ics.product_category
+          op: in
+          value:
+          - lmt
+          - ev
+        - all:
+          - fact: ics.product_category
+            op: eq
+            value: industrial
+          - fact: ics.characteristics.capacity_wh
+            op: gt
+            value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-13-6B-I1
+    text: 'Agent-authored draft reading of Art. 13(6), point (b). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The expression is the negation of the passport categories together with the date. For the shipped profiles
+      it can be true only for an industrial battery of 2000 Wh or less. Point (c) (SLI batteries) is not in this
+      pack: no profile exists for that category.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
+      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Each content item has its own start. The Article 52(3) report follows the due diligence date of 2027-08-18
+      and the Article 47 exemption. The labels of Article 13(1) to (3) have no fixed start date. The audit did
+      not read Article 74(1).
+    - The independent check did not re-read point (b) word by word.
+    - Article 13(6) ends with the duty that the information is complete, up to date, and accurate. The audit did
+      not record how that sentence relates to each point of the paragraph.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-QR-DECODE
+    - TP-EU-13-6B-MANUAL
+- id: EUBAT-13-7-QR
+  title: The QR code is printed or engraved on the battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 13(7) (QR code)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The QR code is printed or engraved on the battery so that it is visible, legible, and indelible.
+    Where the nature and size of the battery make that impossible or unwarranted, the code is on the packaging
+    and on the documents that accompany the battery.
+  applicability:
+    any:
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
+    - fact: ics.characteristics.put_into_service_date
+      op: ge
+      value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-13-7-QR-I1
+    text: 'Agent-authored draft reading of Art. 13(7) (QR code). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      This entry covers the QR code only. It starts with the QR code duty of Article 13(6). The labels are in
+      EUBAT-13-7-LABELS because their start dates differ. No engine check can observe a physical marking.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
+      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - The Regulation gives no test method for 'indelibly' and no criterion for 'not possible or not warranted'.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-13-7-QR-MANUAL
+- id: EUBAT-13-7-LABELS
+  title: The labels are printed or engraved on the battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 13(7) (labels)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The labels of Article 13 are printed or engraved on the battery so that they are visible, legible,
+    and indelible, or are on the packaging and the accompanying documents where that is impossible or unwarranted.
+  applicability:
+    const: unknown
+    reason: The label duties start on different dates. Article 13(1) to (3) start on the later of 2026-08-18 and
+      18 months after the entry into force of the Article 13(10) implementing act. That act was not located as
+      adopted as of 2026-10-13. Article 13(4) applies from 2025-08-18. Article 13(5) states no date.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-13-7-LABELS-I1
+    text: 'Agent-authored draft reading of Art. 13(7) (labels). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The entry is here so that the label part of Article 13(7) is visible. Labels are not the data carrier of
+      the passport. The independent check in docs/research/raw/batteries-regulation.refutation.json confirmed
+      that the start of Article 13(1) to (3) is not fixed.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - A draft of the Article 13(10) act was notified to the WTO (G/TBT/N/EU/1181). A draft is not law. The latest
+      official event that the audit found is dated 2026-07-06.
+    - The effective start of the Article 13(5) marking is a matter of interpretation.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-13-7-LABELS-MANUAL
+- id: EUBAT-77-1
+  title: Each battery in scope has a battery passport
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(1)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: From 18 February 2027, each LMT battery, each industrial battery with a capacity greater than 2
+    kWh, and each electric vehicle battery that is placed on the market or put into service has an electronic
+    record, the battery passport.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-1-I1
+    text: 'Agent-authored draft reading of Art. 77(1). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The audit obtained short exact quotations for this paragraph, and both independent checks (docs/research/raw/batteries-regulation.refutation.json,
+      docs/research/raw/commission-2026-acts.refutation.json) confirmed it. The capacity limit belongs to the
+      industrial category only and is strictly greater than 2000 Wh. The word ''each'' means one record for each
+      battery. No automated step is listed: a link that resolves shows access under Article 77(3), not that one
+      record exists for each battery.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation does not define 'capacity' for the 2 kWh limit. The fact capacity_wh is a declared energy
+      value. Commission FAQ material (non-binding) says that independent units are assessed one by one and integrated
+      systems by their combined capacity.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - The Regulation does not say expressly whether a battery that was placed on the market before 2027-02-18
+      needs a passport after a later change of status. Commission FAQ material (non-binding) says that a new passport
+      is needed if such a battery is remanufactured after that date.
+    - Article 77(1) says 'industrial battery', and Articles 7(1), 8(1), and 10(1) say 'rechargeable industrial
+      batteries'. A non-rechargeable industrial battery above 2 kWh is inside Article 77(1).
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-1-MANUAL
+- id: EUBAT-77-2-CONTENT
+  title: The passport holds model information and individual battery information
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(2) (content of the passport)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The battery passport holds information on the battery model and information on the individual battery,
+    including information from its use, as Annex XIII sets out. An item is included to the extent that it applies
+    to the category or sub-category of the battery.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-2-CONTENT-I1
+    text: 'Agent-authored draft reading of Art. 77(2) (content of the passport). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The single items are in the EUBAT-AXIII entries. Their start dates differ: see EUBAT-AXIII-1C, EUBAT-AXIII-1D,
+      and EUBAT-AXIII-1E. The engine has no normative data model for the passport, so no schema check is listed.
+      The schemas of the profile are synthetic.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation has no table of items for each category or sub-category. Commission guidance version 2.0
+      gives one. That guidance is not binding.
+    - No delegated act that amends Annex XIII was located. The Commission can adopt one under Article 77(2).
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-2-CONTENT-MANUAL
+- id: EUBAT-77-2-ACCESS
+  title: The information is accessible in three groups
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(2), points (a) to (c)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The general public gets the information of Annex XIII point 1. Notified bodies, market surveillance
+    authorities, and the Commission get points 2 and 3. Persons with a legitimate interest get points 2 and 4,
+    for the purposes that the paragraph names.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-2-ACCESS-I1
+    text: 'Agent-authored draft reading of Art. 77(2), points (a) to (c). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The boundary between public and restricted information follows from Article 77(2) and Annex XIII without
+      a further act. The automated step observes the anonymous role only. It uses the access policy that the owner
+      of the system declares.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - Article 77(2), point (b) gives notified bodies, market surveillance authorities, and the Commission the
+      points 2 and 3 only. The heading of point 4 names only persons with a legitimate interest. Authority access
+      to point 4 is not resolved.
+    - The engine cannot confirm that the declared access policy matches the groups of Article 77(2). The manual
+      step must compare them.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-ACCESS-ANON
+    - TP-EU-77-2-ACCESS-MANUAL
+- id: EUBAT-77-3
+  title: The passport is accessible through the QR code and a unique identifier
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(3), first subparagraph
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The battery passport is accessible through the QR code of Article 13(6). The code links to a unique
+    identifier that the economic operator who places the battery on the market attributes to the battery.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-3-I1
+    text: 'Agent-authored draft reading of Art. 77(3), first subparagraph. Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The audit obtained short exact quotations for this paragraph. The automated steps show that a supplied code
+      decodes and that its link resolves without a credential. They do not show who attributed the identifier
+      or that it is unique.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The paragraph names only the economic operator that places the battery on the market. It does not say who
+      has the duty when a battery is put into service without being placed on the market.
+    - One sample cannot show that an identifier is unique.
+    - The Regulation does not define 'capacity' for the 2 kWh limit. The fact capacity_wh is a declared energy
+      value. Commission FAQ material (non-binding) says that independent units are assessed one by one and integrated
+      systems by their combined capacity.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-QR-DECODE
+    - TP-EU-ID-RESOLVE
+    - TP-EU-77-3-MANUAL
+- id: EUBAT-77-3-STD
+  title: The QR code and the unique identifier comply with the named ISO/IEC editions or an equivalent
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(3), second subparagraph
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The QR code and the unique identifier comply with ISO/IEC 15459-1:2014, 15459-2:2015, 15459-3:2014,
+    15459-4:2014, 15459-5:2014, and 15459-6:2014, or with their equivalent.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-3-STD-I1
+    text: 'Agent-authored draft reading of Art. 77(3), second subparagraph. Not approved. Support: docs/research/raw/batteries-regulation.json.
+      This entry states the legal reference only (docs/research/raw/batteries-regulation.json; confirmed in docs/research/raw/batteries-regulation.refutation.json).
+      It does not state, quote, or summarize the content of an ISO/IEC document. The check identifier.parse is
+      not listed: the audit did not establish that an identifier scheme that the engine parses complies with the
+      named editions or is equivalent to them.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation does not define 'their equivalent'.
+    - Catalogues of national standards bodies show corrected versions dated 2016 for parts 1, 3, 4, 5, and 6.
+      Article 77(3) cites the 2014 and 2015 editions and does not mention the corrected versions.
+    - No delegated act under Article 77(3), third subparagraph, that replaces or adds a standard was located.
+    - The relation between these editions and EN 18219:2026 and EN 18220:2026, whose references are cited under
+      Regulation (EU) 2024/1781, is not established. This draft does not treat those standards as the equivalent.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-3-STD-MANUAL
+- id: EUBAT-77-4
+  title: The passport information is accurate, complete, and up to date
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(4)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The economic operator who places the battery on the market makes sure that the information in the
+    battery passport is accurate, complete, and up to date. That economic operator can authorize a different economic
+    operator in writing to act on its behalf.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-4-I1
+    text: 'Agent-authored draft reading of Art. 77(4). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The audit obtained short exact quotations for this paragraph (docs/research/raw/batteries-regulation.json).
+      No engine check is listed. The rule pack of the profile is synthetic, and a passport system cannot show
+      that a declared value is true.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The paragraph names only the economic operator that places the battery on the market. It does not say who
+      has the duty when a battery is put into service without being placed on the market.
+    - The Regulation gives no criterion or interval for 'up to date'.
+    - Recital 125 (not operative) says that the responsibility stays with the economic operator that places the
+      battery on the market when an authorized party updates the passport.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-4-MANUAL
+- id: EUBAT-77-5
+  title: The passport information uses open standards and is machine-readable
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(5)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: All information in the battery passport is based on open standards, has an interoperable format,
+    can be transferred through an open interoperable data exchange network without vendor lock-in, and is machine-readable,
+    structured, and searchable.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-5-I1
+    text: 'Agent-authored draft reading of Art. 77(5). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The automated step shows that a response is machine-readable and has the structure that the owner of the
+      system declares. That is partial evidence for two of the listed properties.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - 'The audit recorded paragraphs 5 and 6 of Article 77 together. The split used here (paragraph 5: format;
+      paragraph 6: access) must be confirmed against the Official Journal.'
+    - The Regulation names no standard, format, or network, and gives no criterion for 'open standards', 'interoperable',
+      'searchable', or 'vendor lock-in'.
+    - Implementing Decision (EU) 2026/1736 cites six standards under Regulation (EU) 2024/1781. The presumption
+      of conformity is for Articles 10 and 11 of that Regulation only. This draft does not transfer it to Article
+      77(5).
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-API-CONTRACT
+    - TP-EU-77-5-MANUAL
+- id: EUBAT-77-6
+  title: Access to the information follows the essential requirements
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(6)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: Access to the information in the battery passport is regulated in line with the essential requirements
+    of Article 78.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-6-I1
+    text: 'Agent-authored draft reading of Art. 77(6). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The paragraph points to Article 78. The access points of that Article are in EUBAT-78-B and EUBAT-78-F,
+      and the public boundary is in EUBAT-77-2-ACCESS.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - 'The audit recorded paragraphs 5 and 6 of Article 77 together. The split used here (paragraph 5: format;
+      paragraph 6: access) must be confirmed against the Official Journal.'
+    - Article 78, points (b) and (f) refer to the Article 77(9) implementing act. No adopted act was located as
+      of 2026-10-13.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-6-MANUAL
+- id: EUBAT-77-7A
+  title: A battery in a second life has a new passport that links to the original
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(7) (re-use, repurposing, remanufacturing)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: For a battery that was prepared for re-use, prepared for repurposing, repurposed, or remanufactured,
+    the responsibility of Article 77(4) passes to the economic operator that placed that battery on the market
+    or put it into service. That battery has a new battery passport that is linked to the passport or passports
+    of the original battery or batteries.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The profile declares no fact for a change of battery status. The engine cannot tell whether the
+        battery was prepared for re-use, prepared for repurposing, repurposed, or remanufactured.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-7A-I1
+    text: 'Agent-authored draft reading of Art. 77(7) (re-use, repurposing, remanufacturing). Not approved. Support:
+      docs/research/raw/batteries-regulation.json. The audit obtained short exact quotations for this paragraph
+      (docs/research/raw/batteries-regulation.json). The text expressly covers several original batteries. The
+      expression is false outside the passport scope and unknown inside it.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation does not specify the form of the link between the new and the original passports.
+    - Article 45 says that a battery can fall under a different category after a change of status. The expression
+      reads the declared category only.
+    - The Regulation does not say expressly whether a battery that was placed on the market before 2027-02-18
+      needs a passport after a later change of status. Commission FAQ material (non-binding) says that a new passport
+      is needed if such a battery is remanufactured after that date.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-7A-MANUAL
+- id: EUBAT-77-7B
+  title: The responsibility passes when the battery becomes waste
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(7) (waste)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: When the status of a battery changes to waste, the responsibility of Article 77(4) passes to the
+    producer, or to the producer responsibility organization where one is appointed under Article 57(1), or to
+    the waste management operator selected under Article 57(8).
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The profile declares no fact that says whether the status of the battery changed to waste.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-7B-I1
+    text: 'Agent-authored draft reading of Art. 77(7) (waste). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The audit obtained short exact quotations for this paragraph (docs/research/raw/batteries-regulation.json).
+      A transfer of responsibility is an organizational fact. A passport system can show it only if it records
+      the responsible party.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation does not say how the transfer is recorded in the passport.
+    - The audit did not read Article 57.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-7B-MANUAL
+- id: EUBAT-77-8
+  title: The passport ceases to exist after recycling
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(8)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: A battery passport ceases to exist after the battery has been recycled.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The profile declares no fact that says whether the battery was recycled.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-8-I1
+    text: 'Agent-authored draft reading of Art. 77(8). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The audit obtained a short exact quotation for this paragraph (docs/research/raw/batteries-regulation.json).'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation names no obligated party and no time limit, and does not say what 'ceases to exist' means
+      for the record (deletion, deactivation, or archiving).
+    - The relation to the identifier that Article 77(10) puts in the registry is not stated.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-8-MANUAL
+- id: EUBAT-77-10
+  title: The unique identifier is uploaded to the registry
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 77(10)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The economic operator who places the battery on the market or puts it into service uploads the unique
+    identifier to the registry of Article 13(1) of Regulation (EU) 2024/1781.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-77-10-I1
+    text: 'Agent-authored draft reading of Art. 77(10). Not approved. Support: docs/research/raw/batteries-regulation.json,
+      docs/research/raw/espr.json, and docs/research/raw/commission-2026-acts.json. This is an explicit cross-reference
+      to the registry of Regulation (EU) 2024/1781. Article 78 of that Regulation inserted the paragraph, and
+      the corrigendum OJ L, 2024/90493 corrected the regulation number in it. Implementing Regulation (EU) 2026/1778
+      sets the registration arrangements and names the batteries of Article 77 in its scope. The check registry.consistency
+      reads a mock registry of the reference system. It is no evidence of a registration in the Commission registry
+      and is not listed. No part of the engine contacts the Commission registry.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 77(10) states no date. This draft applies it together with Article 77(1).
+    - Whether the upload must be complete before the battery is placed on the market is not resolved.
+    - Which data a battery registration needs in addition to the unique identifier is not resolved. Article 8(7)
+      of Implementing Regulation (EU) 2026/1778 refers to delegated acts under Article 77 of Regulation (EU) 2023/1542.
+      The audit did not examine such acts.
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-77-10-MANUAL
+- id: EUBAT-78-A
+  title: The passport is interoperable with other digital product passports
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (a)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The battery passport is fully interoperable with the other digital product passports that Union
+    ecodesign law requires, for the technical, semantic, and organizational aspects of end-to-end communication
+    and data transfer.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-A-I1
+    text: 'Agent-authored draft reading of Art. 78, point (a). Not approved. Support: docs/research/raw/batteries-regulation.json
+      and docs/research/raw/espr.json. This point is an explicit cross-reference from the Batteries Regulation
+      to Union ecodesign law (docs/research/raw/espr.json). It sets a property of the battery passport. It does
+      not make Articles 9 to 15 or Annex III of Regulation (EU) 2024/1781 apply to battery passports, and this
+      draft transfers none of them.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The text has no criterion for 'fully interoperable'.
+    - No delegated act under Article 4 of Regulation (EU) 2024/1781 was located as adopted. No other required
+      digital product passport exists yet to test against.
+    - The point does not name Regulation (EU) 2024/1781. Its wording is older than that Regulation.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-78-A-MANUAL
+- id: EUBAT-78-B
+  title: Access is free of charge according to the access rights
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (b)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: Consumers, economic operators, and other relevant actors have free access to the battery passport
+    according to their access rights under Annex XIII and under the Article 77(9) implementing act.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The access rights depend on the Article 77(9) implementing act. No adopted act was located as of
+        2026-10-13.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-B-I1
+    text: 'Agent-authored draft reading of Art. 78, point (b). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The public group of Article 77(2), point (a) is assessed under EUBAT-77-2-ACCESS. This entry stays unknown
+      inside the passport scope until the act exists.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-78-B-MANUAL
+- id: EUBAT-78-C
+  title: The responsible economic operator stores the data
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (c)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The economic operator that is responsible under Article 77(4) and (7), or an economic operator that
+    is authorized to act on its behalf, stores the data of the battery passport.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-C-I1
+    text: 'Agent-authored draft reading of Art. 78, point (c). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      No engine check can observe where data are stored or who operates the storage.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The text names no place, architecture, or retention period.
+    - Recital 126 (not operative) speaks of a decentralised data system.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-78-C-MANUAL
+- id: EUBAT-78-D
+  title: An authorized economic operator does not use the data beyond the service
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (d)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: An economic operator that is authorized to act on behalf of the responsible economic operator does
+    not sell, re-use, or process the passport data, in whole or in part, beyond what the storage or processing
+    service needs.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-D-I1
+    text: 'Agent-authored draft reading of Art. 78, point (d). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      This is a duty of conduct. A test of the passport system cannot show it. The manual step needs contract
+      or audit evidence.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The text gives no criterion for what a service 'needs'.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-78-D-MANUAL
+- id: EUBAT-78-E
+  title: The passport stays available after the responsible economic operator ceases
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (e)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The battery passport stays available after the responsible economic operator ceases to exist or
+    ceases its activity in the Union.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-E-I1
+    text: 'Agent-authored draft reading of Art. 78, point (e). Not approved. Support: docs/research/raw/batteries-regulation.json
+      and docs/research/raw/espr.json. No engine check can observe a future event. The manual step reviews the
+      arrangement that the economic operator documents.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation names no mechanism.
+    - Article 10(4) of Regulation (EU) 2024/1781 requires a back-up copy with a service provider for the passports
+      of that Regulation. The audit found no provision that applies it to battery passports. This draft does not
+      transfer it.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-78-E-MANUAL
+- id: EUBAT-78-F
+  title: The rights to access and change information are restricted
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (f)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The rights to access, introduce, modify, or update information in the battery passport are restricted
+    according to the access rights under Annex XIII and under the Article 77(9) implementing act.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The access rights depend on the Article 77(9) implementing act. No adopted act was located as of
+        2026-10-13.
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-F-I1
+    text: 'Agent-authored draft reading of Art. 78, point (f). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The automated step observes read access of the anonymous role against the declared policy. It does not observe
+      the rights to introduce, modify, or update. The engine sends no write request.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - Article 77(2), point (b) gives notified bodies, market surveillance authorities, and the Commission the
+      points 2 and 3 only. The heading of point 4 names only persons with a legitimate interest. Authority access
+      to point 4 is not resolved.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-ACCESS-ANON
+    - TP-EU-78-F-MANUAL
+- id: EUBAT-78-G
+  title: Data authentication, reliability, and integrity are ensured
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (g)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The authentication, reliability, and integrity of the passport data are ensured.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: mixed
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-G-I1
+    text: 'Agent-authored draft reading of Art. 78, point (g). Not approved. Support: docs/research/raw/batteries-regulation.json
+      and docs/research/raw/commission-2026-acts.json. The automated step runs only where the system declares
+      a JWS signature. It shows the state of that one mechanism.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation names no mechanism, signature format, or trust model.
+    - EN 18246:2026 is published by CEN and CENELEC. Its reference was not located as cited in the Official Journal
+      as of 2026-10-13. This draft makes no statement on its content and assumes no presumption of conformity.
+    - Implementing Decision (EU) 2026/2048 recalls that a standard cited under Regulation (EU) 2023/1542 can give
+      a presumption for Article 78. The one standard that it cites is EN 18060:2025. The decision does not mention
+      Article 77 or the battery passport.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
+    tests:
+    - TP-EU-INTEGRITY-JWS
+    - TP-EU-78-G-MANUAL
+- id: EUBAT-78-H
+  title: Security and privacy are high and fraud is avoided
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Art. 78, point (h)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: A high level of security and privacy is ensured and fraud is avoided.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-78-H-I1
+    text: 'Agent-authored draft reading of Art. 78, point (h). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      No engine check is listed. A check of the declared access policy is in EUBAT-77-2-ACCESS.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The text has no criterion for a 'high level'.
+    - EN 18239:2026 is published by CEN and CENELEC. Its reference was not located as cited in the Official Journal
+      as of 2026-10-13. This draft makes no statement on its content and assumes no presumption of conformity.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-78-H-MANUAL
+- id: EUBAT-AXIII-1
+  title: Public model information that is due with the passport
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 1(a), (b), (f) to (j), and (l) to (s)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The public part of the passport holds the model information of these items, for example the information
+    of Annex VI Part A, the material composition, the rated capacity, the voltages, the expected lifetime, the
+    marking information, the EU declaration of conformity, and the information on the prevention and management
+    of waste batteries.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-1-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 1(a), (b), (f) to (j), and (l) to (s). Not approved.
+      Support: docs/research/raw/batteries-regulation.json. The audit found no later start date behind these items.
+      Items (c), (d), (e), and (k) are separate entries because their dates or categories differ.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Item (q) refers to Article 13(4) and (5) after the corrigendum OJ L, 2026/90285 of 2026-04-10. Older copies
+      of the text refer to Article 13(3) and (4).
+    - Item (a) uses the data of Annex VI Part A. The label duty for the same data (Article 13(1)) has its own
+      start date, which is not fixed. As passport content the data are due with the passport.
+    - Article 77(2) limits each item to what applies to the category or sub-category. The Regulation has no table
+      for that. Commission guidance version 2.0 has one and is not binding.
+    - The audit did not read Article 74(1), points (a) to (f), which item (s) names.
+    - The Commission guidance lists a data point for an 'Annex XIII 1(t)'. The consolidated text of 2026-08-13
+      has no item (t).
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-1-MANUAL
+- id: EUBAT-AXIII-1C
+  title: Carbon footprint information
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 1(c)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The public part of the passport holds the carbon footprint information of Article 7(1) and (2).
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The start follows Article 7(1) and (2). For each category it is the later of a fixed date and 12
+        or 18 months after the entry into force of a delegated or implementing act. No such act was located as
+        adopted as of 2026-10-13. No start date is fixed.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-1C-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 1(c). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The independent check in docs/research/raw/batteries-regulation.refutation.json confirmed that no adopted
+      Article 7 act was located.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 7 covers rechargeable industrial batteries above 2 kWh. The profile declares no fact for 'rechargeable'.
+    - Article 7(5) excludes certain batteries in a second life.
+    - Commission guidance version 2.0 (not binding) says that this item is not filled or displayed as of February
+      2027.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-1C-MANUAL
+- id: EUBAT-AXIII-1D
+  title: Responsible sourcing information
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 1(d)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The public part of the passport holds the information on responsible sourcing that the report on
+    the battery due diligence policy of Article 52(3) gives.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - const: unknown
+      reason: The item follows the due diligence obligations, which apply from 2027-08-18 (Article 48(1) as amended
+        by Regulation (EU) 2025/1561). The expression language has no fact for the evaluation time, and the profile
+        has no fact for the exemption of Article 47 (net turnover below EUR 40 million, with a group rule).
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-1D-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 1(d). Not approved. Support: docs/research/raw/batteries-regulation.json
+      and docs/research/raw/commission-2026-acts.refutation.json. Correction applied: the first research pass
+      linked this item to Article 96(2), point (c). The independent check in docs/research/raw/commission-2026-acts.refutation.json
+      refuted that link. That point concerns Chapter VIII on waste batteries. The date comes from Article 48(1).'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The Regulation does not say whether the item must be added to the passport of a battery that was placed
+      on the market from 2027-02-18 to 2027-08-17.
+    - Article 47 also excludes certain batteries in a second life. The independent check did not re-read that
+      part.
+    - A pending proposal (procedure 2025/0130(COD)) could change the Article 47 limit. It is not law.
+    - Commission guidance version 2.0 (not binding) says that this item is not filled as of February 2027 and
+      is required from August 2027.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-1D-MANUAL
+- id: EUBAT-AXIII-1E
+  title: Recycled content information
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 1(e)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The public part of the passport holds the recycled content information from the documentation of
+    Article 8(1).
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - not:
+        all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.external_storage_only
+          op: eq
+          value: true
+    - const: unknown
+      reason: 'The start follows Article 8(1): the later of 2028-08-18 and 24 months after the entry into force
+        of a delegated act, and 2033-08-18 for LMT batteries. The delegated act was not located as adopted as
+        of 2026-10-13. No start date is fixed.'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-1E-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 1(e). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      Article 8(1) leaves out an industrial battery that has external storage only. The expression is false for
+      that case. The independent check in docs/research/raw/batteries-regulation.refutation.json confirmed that
+      no adopted Article 8(1) act was located.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Article 8(1) applies only where cobalt, lead, lithium, or nickel is in the active materials. The profile
+      declares no fact for that.
+    - Article 8(4) excludes certain batteries in a second life.
+    - A draft of the delegated act is reported by secondary sources only.
+    - Commission guidance version 2.0 (not binding) says that this item is not filled as of February 2027.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-1E-MANUAL
+- id: EUBAT-AXIII-1K
+  title: Capacity threshold for exhaustion of an electric vehicle battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 1(k)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: For an electric vehicle battery, the public part of the passport holds the capacity threshold for
+    exhaustion.
+  applicability:
+    all:
+    - fact: ics.product_category
+      op: eq
+      value: ev
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-1K-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 1(k). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The item says that it is for electric vehicle batteries only, so the expression reads that category and
+      the date.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The audit recorded no definition or test for this value.
+    - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
+      the profile declares no fact for them.'
+    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
+      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
+      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-1K-MANUAL
+- id: EUBAT-AXIII-2
+  title: Restricted model information
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 2(a) to (d)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The passport holds the detailed composition, the part numbers and the sources of spare parts, the
+    dismantling information, and the safety measures for the battery model. This information is not public.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-2-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 2(a) to (d). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The content is due with the passport. Who gets access is in EUBAT-77-2-ACCESS.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - The heading of point 2 names persons with a legitimate interest and the Commission. Article 77(2), point
+      (b) adds notified bodies and market surveillance authorities.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-2-MANUAL
+- id: EUBAT-AXIII-3
+  title: Results of test reports
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 3
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: The passport holds the results of the test reports that prove compliance with the Regulation and
+    with the acts adopted under it. Only notified bodies, market surveillance authorities, and the Commission
+    get this information.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-3-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 3. Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The content is due with the passport.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The set of reports grows when delegated and implementing acts are adopted. The audit made no list of the
+      reports that are due on 2027-02-18.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-3-MANUAL
+- id: EUBAT-AXIII-4A
+  title: Performance and durability values of the individual battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 4(a)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: For the individual battery, the passport holds the values of the performance and durability parameters
+    of Article 10(1), when the battery is placed on the market and when its status changes. This information is
+    not public.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - const: unknown
+        reason: Article 10(1) covers rechargeable industrial batteries above 2 kWh. The profile declares no fact
+          for 'rechargeable'.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-4A-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 4(a). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      Article 10(1) has applied since 2024-08-18, so the audit found no later date for this item. The independent
+      check in docs/research/raw/batteries-regulation.refutation.json noted the narrower scope for industrial
+      batteries.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - Article 77(2), point (b) gives notified bodies, market surveillance authorities, and the Commission the
+      points 2 and 3 only. The heading of point 4 names only persons with a legitimate interest. Authority access
+      to point 4 is not resolved.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-4A-MANUAL
+- id: EUBAT-AXIII-4B
+  title: State of health of the individual battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 4(b)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: For the individual battery, the passport holds the state of health information of Article 14. This
+    information is not public.
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - const: unknown
+        reason: Article 14 covers stationary battery energy storage systems, LMT batteries, and electric vehicle
+          batteries. The profile declares no fact that says whether an industrial battery is a stationary battery
+          energy storage system.
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-4B-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 4(b). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      Article 14(1) has applied since 2024-08-18, so the audit found no later date for this item.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The parameters differ by category under Annex VII.
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - Article 77(2), point (b) gives notified bodies, market surveillance authorities, and the Commission the
+      points 2 and 3 only. The heading of point 4 names only persons with a legitimate interest. Authority access
+      to point 4 is not resolved.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-4B-MANUAL
+- id: EUBAT-AXIII-4C
+  title: Status of the individual battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 4(c)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: 'For the individual battery, the passport holds the status of the battery: original, repurposed,
+    re-used, remanufactured, or waste. This information is not public.'
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-4C-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 4(c). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The engine has no normative data model for this item. The field of the reference system with a similar name
+      is synthetic.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - Article 77(2), point (b) gives notified bodies, market surveillance authorities, and the Commission the
+      points 2 and 3 only. The heading of point 4 names only persons with a legitimate interest. Authority access
+      to point 4 is not resolved.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-4C-MANUAL
+- id: EUBAT-AXIII-4D
+  title: Information from the use of the individual battery
+  source:
+    source_id: reg-eu-2023-1542
+    citation: Annex XIII, point 4(d)
+    version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+  authority_class: legal_obligation
+  modality: mandatory
+  paraphrase: 'For the individual battery, the passport holds information and data from its use: the number of
+    charge and discharge cycles, negative events such as accidents, and periodically recorded information on the
+    operating environmental conditions, including temperature, and on the state of charge. This information is
+    not public.'
+  applicability:
+    all:
+    - any:
+      - fact: ics.product_category
+        op: in
+        value:
+        - lmt
+        - ev
+      - all:
+        - fact: ics.product_category
+          op: eq
+          value: industrial
+        - fact: ics.characteristics.capacity_wh
+          op: gt
+          value: 2000
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+  testability: manual
+  review_status: draft-needs-review
+  interpretations:
+  - id: EUBAT-AXIII-4D-I1
+    text: 'Agent-authored draft reading of Annex XIII, point 4(d). Not approved. Support: docs/research/raw/batteries-regulation.json.
+      The content is due with the passport.'
+    status: draft-needs-review
+    author_kind: agent
+    source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
+    unresolved:
+    - The text gives no interval for 'periodically'.
+    - Who is a person with a legitimate interest, and what such a person may download, share, publish, and re-use,
+      depends on the Article 77(9) implementing act. No adopted act was located as of 2026-10-13. The deadline
+      of 2026-08-18 is addressed to the Commission and does not show adoption.
+    - Article 77(2), point (b) gives notified bodies, market surveillance authorities, and the Commission the
+      points 2 and 3 only. The heading of point 4 names only persons with a legitimate interest. Authority access
+      to point 4 is not resolved.
+    - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
+      character with the Official Journal.
+  assessment_paths:
+  - id: default
+    description: One manual step. The engine has no check for this provision.
+    tests:
+    - TP-EU-AXIII-4D-MANUAL
