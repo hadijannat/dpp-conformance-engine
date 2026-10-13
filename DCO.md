@@ -35,4 +35,4 @@ With that line you certify the statements of the certificate for that commit.
 A development agent created the first commits of this repository in one session.
 Those commits have no sign-off line, because an agent must not sign for a person.
 The copyright holder decides how to certify them before the first public release.
-See the open question OQ-007 in `docs/open-questions.md`.
+See the open question OQ-018 in `docs/open-questions.md`.

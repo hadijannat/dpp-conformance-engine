@@ -11,5 +11,5 @@ The code of conduct applies in all project spaces, and when a person represents 
 ## Reporting
 
 Report unacceptable behavior to the maintainer named in [GOVERNANCE.md](GOVERNANCE.md).
-A dedicated reporting address does not exist yet. See the open question OQ-008.
+A dedicated reporting address does not exist yet. See the open question OQ-019.
 The maintainer reviews each report and keeps the reporter's identity confidential.

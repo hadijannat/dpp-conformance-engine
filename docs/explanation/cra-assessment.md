@@ -27,8 +27,8 @@ The answer depends on facts that this repository does not decide.
 
 | Question | Why it matters | State |
 | --- | --- | --- |
-| Is the engine made available on the market in the course of a commercial activity? | Article 3(22) defines making available by commercial activity. | Open: OQ-009. The engine is free and open-source software and is not published. |
-| Does a person place it on the market under a name or a trademark? | Article 3(13) defines the manufacturer. | Open: OQ-009. |
+| Is the engine made available on the market in the course of a commercial activity? | Article 3(22) defines making available by commercial activity. | Open: OQ-020. The engine is free and open-source software and is not published. |
+| Does a person place it on the market under a name or a trademark? | Article 3(13) defines the manufacturer. | Open: OQ-020. |
 | Does a legal person support its development for commercial use on a sustained basis? | Article 3(14) defines the open-source software steward, and Article 24 gives stewards lighter duties. | Open: no such legal person exists today. |
 | Does an organization integrate the engine in a product? | Article 13(5) asks a manufacturer for due diligence on third-party components. | That duty is on the integrator. The artifacts below support it. |
 
@@ -36,7 +36,7 @@ The answer depends on facts that this repository does not decide.
 
 | Topic | Artifact | State |
 | --- | --- | --- |
-| Vulnerability handling policy | `SECURITY.md` | Written. No dedicated contact exists (OQ-008). |
+| Vulnerability handling policy | `SECURITY.md` | Written. No dedicated contact exists (OQ-019). |
 | Secure development | Strict typing, lint, tests, an automated review of each commit, the [threat model](threat-model.md) | In use during development. No independent audit. |
 | Component inventory | `uv.lock` with hashes; `uv run just sbom` writes a CycloneDX SBOM | The tool ran locally: CycloneDX 1.6. No SBOM is published. |
 | Dependency licenses | `docs/reference/dependency-licenses.md` | Generated from the environment. |

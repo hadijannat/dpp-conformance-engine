@@ -74,6 +74,59 @@ Security findings from the automated commit review, all fixed in the cycle they 
 | `uv run python scripts/gen_schemas.py --check` | 0 | 14 schemas; checked |
 | `uv run just check` | 0 | ruff format, ruff check, mypy --strict (46 files), pytest: 162 passed |
 
+## State at the stop of 2026-10-14 (usage limit reached)
+
+The last commit is green for the committed files. The working tree holds uncommitted work of
+two delegated tasks that may be incomplete. Do not commit it before the checks below pass.
+
+### Open defects: fix these first
+
+Independent security review (Fable), report: `validation/records/review-evidence-security-2026-10-13.md`.
+The review is an agent review. It is not a human approval and not an audit. All findings are **open**.
+
+- F-01 high: `integrity.jws` reports engine limits (algorithm not in the allowlist, unknown header
+  parameter, non-P-256 leaf, HTTP 4xx or 5xx on `/signed`, a body that is not a JWS) as
+  `INTEGRITY.SIGNATURE.INVALID`, which is a fail of the tested system. Only `BAD_SIGNATURE` may fail.
+- F-02 high: `integrity.jws` applies the engine's integer-only canonical form to the third-party
+  payload. A float, a different key order, or white space gives `INTEGRITY.PAYLOAD.MISMATCH`.
+- F-03 high: an access probe for a role with no attached credential is sent as anonymous, is
+  recorded under the role, and can pass.
+- More findings, including F-17: read the report file. The task result was truncated in the session.
+
+Independent core tests (`tests/core/`, uncommitted): 3 failing tests in the verdict code when last run.
+
+- `aggregate()` drops a path with no step, or with unknown applicability, from `retained` when a
+  different path passes. The contract, section 7.3, says that hidden problems stay in `retained`.
+- `claim_level(reviewed, illustrative, approved)`: the contract table and the code disagree.
+  Decide and state it in section 4: an illustrative requirement never gives a reviewed claim.
+
+### Not done
+
+- [ ] Fix the defects above. Add a regression test for each. Run `uv run just check`.
+- [ ] Check and commit the catalogue task output: `catalogue/sources.yaml`, the two packs,
+      `testpacks/eu-battery-draft.yaml`, `docs/research/source-audit.md`, the scope page, the
+      import how-to, the review template, `tests/test_catalogue_content.py`.
+      Gate: `uv run dppce catalogue lint` gives 0 errors. It gave 44 errors while the task ran.
+- [ ] Independent review of the draft legal interpretations and of the verdict and planner code.
+- [ ] Coverage of the core packages: 80 percent when last measured without `tests/core`. Gate: 90.
+- [ ] Mutation testing (`uv run just mutation`): not run.
+- [ ] Method-validation record from a clean commit (`uv run python -m validation.run`): none stored.
+- [ ] `uv run just docs`: not run. `docs/readiness.md`: not written. The README links to it.
+- [ ] Never executed: CI, release, and scorecard workflows; container build; Vale; manual
+      accessibility review.
+
+### Resume commands
+
+```bash
+git status --short
+uv run just check
+uv run dppce catalogue lint
+uv run pytest tests/core
+```
+
+The delegated tasks ran as workflow `wf_0c3db9e9-d6b`. If their files are incomplete, run the
+workflow again from its script with `resumeFromRunId`.
+
 ## Resume instructions
 
 1. Read `state/progress.json`. Do not exceed `session.max_cycles`.

@@ -4,10 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 8,
+    "cycle": 9,
     "max_cycles": 20,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
-    "note": "The session was interrupted one time by an expired credential and was resumed. The cycle count continues."
+    "note": "The session was interrupted one time by an expired credential and was resumed. The cycle count continues.",
+    "stopped": "2026-10-14: usage limit reached. See TASKS.md, section 'State at the stop'."
   },
   "limits": {
     "max_parallel_tasks": 3,
@@ -173,9 +174,16 @@
       "kind": "implement-and-check",
       "milestone": "M0-M2, M6",
       "summary": "Delegated: source catalogue with draft and placeholder packs; independent tests of the core semantics; the third refutation check. Coordinator: coverage gate on the core packages, edge-case tests, network guard, CI and release configuration, community files, decision records, documentation. In progress."
+    },
+    {
+      "cycle": 9,
+      "kind": "review",
+      "milestone": "M4",
+      "summary": "Independent security review by Fable completed. It reports open findings, three of them high. No finding is fixed. Source research complete: 45 high-risk claims checked, 44 confirmed, 1 refuted and corrected."
     }
   ],
   "blockers": [
+    "Open high-severity findings of the independent security review, and 3 failing independent tests of the verdict code. Milestone M4 is not complete.",
     "Docker was not probed (the command was declined): the container image and the Compose file are not built or run. OQ-004.",
     "Homebrew cannot install vale and a native just: the Xcode license is not accepted. Vale checks are not run. OQ-005.",
     "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
