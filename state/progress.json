@@ -1,0 +1,36 @@
+{
+  "project": "dpp-conformance-engine",
+  "package": "dppce",
+  "legal_as_of": "2026-10-13",
+  "session": {
+    "started_utc": "2026-10-13T20:02:58Z",
+    "cycle": 0,
+    "max_cycles": 20,
+    "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted."
+  },
+  "limits": {
+    "max_parallel_tasks": 3,
+    "max_research_passes_per_milestone": 2,
+    "max_repair_attempts_per_root_cause": 3,
+    "max_milestone_review_rounds": 2
+  },
+  "milestones": {
+    "M0": {"status": "in_progress", "research_passes": 0, "review_rounds": 0},
+    "M1": {"status": "not_started", "research_passes": 0, "review_rounds": 0},
+    "M2": {"status": "not_started", "research_passes": 0, "review_rounds": 0},
+    "M3": {"status": "not_started", "research_passes": 0, "review_rounds": 0},
+    "M4": {"status": "not_started", "research_passes": 0, "review_rounds": 0},
+    "M5": {"status": "not_started", "research_passes": 0, "review_rounds": 0},
+    "M6": {"status": "not_started", "research_passes": 0, "review_rounds": 0}
+  },
+  "repair_attempts": {},
+  "cycle_log": [
+    {
+      "cycle": 0,
+      "kind": "discovery",
+      "summary": "Workspace inventory and toolchain probe. Not counted against the cycle budget."
+    }
+  ],
+  "blockers": [],
+  "resume": "See TASKS.md, section 'Resume instructions'."
+}

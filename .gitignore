@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Tool caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+mutants/
+
+# Generated documentation site
+site/
+
+# Run outputs. Recordings can hold observation payloads; do not commit them.
+runs/
+*.key.local
+
+# Session tooling (not project content)
+.remember/
+.claude/
