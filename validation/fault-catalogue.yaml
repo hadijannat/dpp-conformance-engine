@@ -1,0 +1,211 @@
+# Fault catalogue for method validation.
+#
+# Audience: assessors and contributors.
+# Purpose: state, before the checks exist, which seeded fault each check must detect and how.
+#
+# Expected outcomes were written on 2026-10-13, before the checks were implemented.
+# A fault counts as detected only if the named test purpose gives the expected verdict
+# with the expected reason code. A crash of the runner is not a detection.
+#
+# All faults are synthetic and are seeded into the local reference system or into copies of
+# its outputs. The reference system is an example. It is not a normative authority.
+schema_version: dppce.faultcatalogue/1
+version: 0.1.0
+profiles: [battery/ev, battery/lmt, battery/industrial]
+
+controls:
+  - id: C-BASELINE
+    description: The unmodified reference system for each battery profile.
+    expected: Every executed test purpose of the illustrative pack gives `pass`.
+  - id: C-EVIDENCE
+    description: An unmodified signed envelope, verified with the test trust bundle.
+    expected: Every mandatory verification dimension gives `pass`.
+
+# Faults in the system under test. `fault` is the flag that the reference system accepts.
+sut_faults:
+  - id: F-01
+    class: contract_violation
+    fault: api_wrong_content_type
+    description: The passport endpoint answers with media type text/plain.
+    test_purpose: TP-API-001
+    expected: {verdict: fail, reason_code: API.CONTRACT.CONTENT_TYPE}
+  - id: F-02
+    class: contract_violation
+    fault: api_schema_violation
+    description: The passport response omits a property that the pinned contract requires.
+    test_purpose: TP-API-001
+    expected: {verdict: fail, reason_code: API.CONTRACT.SCHEMA}
+  - id: F-03
+    class: restricted_field_leakage
+    fault: leak_fetch
+    description: The anonymous fetch response holds a synthetic canary in a restricted field.
+    test_purpose: TP-ACCESS-001
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.FETCH}
+  - id: F-04
+    class: restricted_field_leakage
+    fault: leak_export
+    description: The anonymous export channel holds the canary.
+    test_purpose: TP-ACCESS-001
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.EXPORT}
+  - id: F-05
+    class: restricted_field_leakage
+    fault: leak_error
+    description: An error response to the anonymous role echoes the canary.
+    test_purpose: TP-ACCESS-001
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.ERROR}
+  - id: F-06
+    class: restricted_field_leakage
+    fault: leak_html
+    description: The HTML view for the anonymous role holds the canary.
+    test_purpose: TP-ACCESS-001
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.HTML}
+  - id: F-07
+    class: invalid_signature
+    fault: sig_invalid
+    description: The signed passport payload was changed after it was signed.
+    test_purpose: TP-INTEGRITY-001
+    expected: {verdict: fail, reason_code: INTEGRITY.SIGNATURE.INVALID}
+  - id: F-08
+    class: untrusted_issuer
+    fault: sig_untrusted_issuer
+    description: The signature verifies, but the signing key is not in the trust bundle.
+    test_purpose: TP-INTEGRITY-001
+    expected: {verdict: fail, reason_code: INTEGRITY.ISSUER.UNTRUSTED}
+  - id: F-09
+    class: certificate_expiry
+    fault: cert_expired
+    description: The signer certificate expired before the evaluation time.
+    test_purpose: TP-INTEGRITY-001
+    expected: {verdict: fail, reason_code: INTEGRITY.CERT.EXPIRED}
+  - id: F-10
+    class: identity_mismatch
+    fault: id_mismatch
+    description: The passport states a different identifier than the carrier.
+    test_purpose: TP-ID-003
+    expected: {verdict: fail, reason_code: IDENTIFIER.MISMATCH}
+  - id: F-11
+    class: unresolved_identifier
+    fault: resolver_404
+    description: The resolver answers 404 for the carrier identifier.
+    test_purpose: TP-ID-002
+    expected: {verdict: fail, reason_code: IDENTIFIER.UNRESOLVED}
+  - id: F-12
+    class: schema_fault
+    fault: data_wrong_type
+    description: An item-level field has the wrong JSON type.
+    test_purpose: TP-DATA-001
+    expected: {verdict: fail, reason_code: DATA.SCHEMA.INVALID}
+  - id: F-13
+    class: schema_fault
+    fault: data_missing_required
+    description: A field that the rule pack requires for this category and tier is absent.
+    test_purpose: TP-DATA-004
+    expected: {verdict: fail, reason_code: DATA.COMPLETENESS.MISSING}
+  - id: F-14
+    class: stale_value
+    fault: data_stale
+    description: The last-update time is older than the freshness rule permits.
+    test_purpose: TP-DATA-004
+    expected: {verdict: fail, reason_code: DATA.FRESHNESS.STALE}
+  - id: F-15
+    class: unit_fault
+    fault: data_wrong_unit
+    description: A quantity uses a unit that the rule pack does not permit.
+    test_purpose: TP-DATA-004
+    expected: {verdict: fail, reason_code: DATA.UNIT.INVALID}
+  - id: F-16
+    class: relationship_fault
+    fault: data_relationship
+    description: The remaining capacity is larger than the rated capacity.
+    test_purpose: TP-DATA-004
+    expected: {verdict: fail, reason_code: DATA.RELATIONSHIP.VIOLATED}
+  - id: F-17
+    class: invalid_context
+    fault: context_invalid
+    description: The document names a JSON-LD context that is not in the pinned allowlist.
+    test_purpose: TP-DATA-003
+    expected: {verdict: fail, reason_code: DATA.CONTEXT.NOT_ALLOWED}
+  - id: F-18
+    class: registry_inconsistency
+    fault: registry_inconsistent
+    description: The mock registry record names a different operator than the passport.
+    test_purpose: TP-REGISTRY-001
+    expected: {verdict: fail, reason_code: REGISTRY.INCONSISTENT}
+  - id: F-19
+    class: undeclared_change
+    fault: version_undeclared_change
+    description: Content changed between two observations without a new version number.
+    test_purpose: TP-PERSIST-001
+    expected: {verdict: fail, reason_code: PERSISTENCE.UNDECLARED_CHANGE}
+  - id: F-20
+    class: carrier_fault
+    fault: qr_payload_invalid
+    description: The QR image decodes to text that is not an HTTPS or HTTP URL.
+    test_purpose: TP-ID-001
+    expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
+
+# Cases that must NOT be reported as a failure of the system under test.
+boundary_cases:
+  - id: B-01
+    fault: redirect_out_of_scope
+    description: The resolver redirects to a host outside the authorized scope.
+    test_purpose: TP-ID-002
+    expected: {verdict: inconclusive, reason_code: TRANSPORT.REDIRECT_OUT_OF_SCOPE}
+    rationale: The engine refuses to follow the redirect. It has no answer to judge.
+  - id: B-02
+    fault: unreachable
+    description: Nothing listens on the declared endpoint.
+    test_purpose: TP-ID-002
+    expected: {verdict: inconclusive, reason_code: TRANSPORT.UNREACHABLE}
+    rationale: A connectivity failure does not prove that an obligation was breached.
+  - id: B-03
+    fault: none
+    description: The last-update time is exactly at the freshness limit.
+    test_purpose: TP-DATA-004
+    expected: {verdict: pass, reason_code: DATA.RULES.OK}
+    rationale: The limit is inclusive.
+  - id: B-04
+    fault: none
+    description: The ICS gives a capacity equal to the profile threshold; the rule needs "greater than".
+    requirement: ILL-CAPACITY-001
+    expected: {verdict: not_applicable}
+    rationale: Non-applicability is positively established by a known value.
+  - id: B-05
+    fault: none
+    description: The ICS gives the capacity as "unknown".
+    requirement: ILL-CAPACITY-001
+    expected: {verdict: inconclusive}
+    rationale: Missing information is never treated as not applicable.
+  - id: B-06
+    fault: none
+    description: A requirement that applies to the EV category only, run with the LMT profile.
+    requirement: ILL-EV-ONLY-001
+    expected: {verdict: not_applicable}
+    rationale: Justified not-applicable case.
+  - id: B-07
+    fault: none
+    description: A requirement whose only assessment is a manual review.
+    requirement: ILL-MANUAL-001
+    expected: {verdict: inconclusive}
+    rationale: An unavailable manual review is inconclusive.
+  - id: B-08
+    fault: none
+    description: The ICS declares that a mandatory applicable feature is not implemented.
+    requirement: ILL-DATA-001
+    expected: {verdict: fail}
+    rationale: An ICS declaration cannot waive a mandatory requirement.
+
+# Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
+evidence_faults:
+  - {id: E-01, tamper: flip_verdict, description: One requirement verdict is changed., dimension: signature}
+  - {id: E-02, tamper: omit_result, description: One test result is removed., dimension: results_root}
+  - {id: E-03, tamper: duplicate_result, description: One test result appears two times., dimension: ordering}
+  - {id: E-04, tamper: reorder_results, description: Two requirement results are exchanged., dimension: ordering}
+  - {id: E-05, tamper: substitute_result, description: A result is replaced by one from a different run., dimension: results_root}
+  - {id: E-06, tamper: change_scope, description: The SUT identifier in the manifest is changed., dimension: signature}
+  - {id: E-07, tamper: drop_exclusion, description: One exclusion is removed., dimension: signature}
+  - {id: E-08, tamper: change_counts, description: The verdict counts are changed., dimension: counts}
+  - {id: E-09, tamper: substitute_commitment, description: One record commitment is replaced., dimension: records_root}
+  - {id: E-10, tamper: untrusted_key, description: The envelope is signed with a key that is not in the trust bundle., dimension: issuer_trust}
+  - {id: E-11, tamper: alg_none, description: The signature header names the algorithm "none"., dimension: signature}
+  - {id: E-12, tamper: expired_key, description: The trusted key is past its validity at the evaluation time., dimension: issuer_trust}

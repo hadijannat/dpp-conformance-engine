@@ -1,0 +1,13 @@
+dpp-conformance-engine
+Copyright 2026 Hadi Jannatabadi
+
+This product is licensed under the Apache License, Version 2.0.
+The documentation in the docs/ directory is licensed under the
+Creative Commons Attribution 4.0 International license (CC-BY-4.0),
+unless a file states a different license.
+
+This product does not contain the text of any EN, ISO, IEC, or DIN
+standard. It refers to such documents by public bibliographic metadata only.
+
+Third-party software is used as separately installed dependencies.
+Each dependency keeps its own license. See docs/reference/dependency-licenses.md.

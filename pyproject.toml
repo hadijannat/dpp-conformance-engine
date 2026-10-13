@@ -1,0 +1,115 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dpp-conformance-engine"
+version = "0.1.0rc1"
+description = "Vendor-neutral conformance test engine for Digital Product Passports, with traceable requirements and verifiable evidence."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSES/Apache-2.0.txt", "NOTICE"]
+authors = [{ name = "Hadi Jannatabadi" }]
+keywords = ["digital product passport", "conformance testing", "battery passport", "evidence"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Testing",
+  "Typing :: Typed",
+]
+dependencies = [
+  "pydantic>=2.9,<3",
+  "pyyaml>=6.0.2,<7",
+  "jsonschema>=4.23,<5",
+  "rfc8785>=0.1.4,<0.2",
+  "cryptography>=44",
+  "joserfc>=1.0,<2",
+]
+
+[project.optional-dependencies]
+# Optional integrations. The core must install and run offline without them.
+qr = ["zxing-cpp>=2.2", "pillow>=10"]
+aas = ["aas-test-engines>=0.9"]
+
+[project.scripts]
+dppce = "dppce.cli:main"
+
+[dependency-groups]
+dev = [
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "hypothesis>=6.120",
+  "pre-commit>=4.0",
+  "types-pyyaml>=6.0",
+  "types-jsonschema>=4.23",
+  "rust-just>=1.36",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dppce"]
+
+# Ship the default catalogue, profiles, and test packs inside the wheel.
+[tool.hatch.build.targets.wheel.force-include]
+"catalogue" = "dppce/_bundled/catalogue"
+"profiles" = "dppce/_bundled/profiles"
+"testpacks" = "dppce/_bundled/testpacks"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "catalogue", "profiles", "testpacks", "tests", "README.md", "NOTICE", "LICENSES", "CHANGELOG.md"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "C4", "SIM", "RUF", "PL", "PT", "N", "TID"]
+ignore = [
+  "PLR2004", # magic values are clear in test assertions and protocol constants
+  "PLR0913", # orchestration entry points take explicit keyword arguments
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "PLR0915"]
+"validation/**" = ["S101"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# The verifier must run without the orchestrator. See ADR 0005.
+"dppce.orchestrator".msg = "Import the orchestrator only from dppce.cli."
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["src/dppce"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["zxingcpp", "aas_test_engines.*", "rfc8785"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --strict-config"
+markers = [
+  "validation: full method-validation checks (slow); run with `just validate`",
+  "qr: needs the optional `qr` extra",
+  "aas: needs the optional `aas` extra",
+]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["dppce"]
+
+[tool.coverage.report]
+# Core packages only. Adapters with optional dependencies are reported but are not in the gate.
+fail_under = 90
+show_missing = true
+skip_covered = true
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "@overload"]
