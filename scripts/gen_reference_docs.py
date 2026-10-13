@@ -148,7 +148,8 @@ def _step_rows() -> list[str]:
                     verdict = step_verdict(status, False, unreachable, rules)
                     answer = "yes" if unreachable else "no"
                     rows.append(
-                        f"| completed | no | {answer} | {on_failed} | {on_unreachable} | **{verdict.value}** |"
+                        f"| completed | no | {answer} | {on_failed} | {on_unreachable} "
+                        f"| **{verdict.value}** |"
                     )
     return rows
 
