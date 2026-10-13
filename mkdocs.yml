@@ -1,0 +1,53 @@
+# Documentation site. Build with `uv run just docs`.
+site_name: dpp-conformance-engine
+site_description: Conformance test engine for Digital Product Passports. Its reports are not certificates.
+docs_dir: docs
+strict: true
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - search.highlight
+    - content.code.copy
+plugins:
+  - search
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+exclude_docs: |
+  research/raw/
+nav:
+  - Home: index.md
+  - Tutorials:
+      - Your first run: tutorials/first-run.md
+  - How-to guides:
+      - Write an ICS and an IXIT: how-to/write-an-ics-and-an-ixit.md
+      - Verify a report: how-to/verify-a-report.md
+      - Test a real system with authorization: how-to/test-a-real-system.md
+      - Import an approved pack: how-to/import-an-approved-pack.md
+      - Run the method validation: how-to/run-the-method-validation.md
+  - Reference:
+      - Command line: reference/cli.md
+      - Capability manifest: reference/capabilities.md
+      - Schemas: reference/schemas.md
+      - Reference system and data formats: reference/reference-system.md
+      - Glossary: reference/glossary.md
+      - Writing style: reference/writing-style.md
+      - Accessibility: reference/accessibility.md
+      - Dependency licenses: reference/dependency-licenses.md
+  - Explanation:
+      - Architecture and engineering contract: explanation/architecture.md
+      - Scope and legal mapping: explanation/scope-and-legal-mapping.md
+      - Threat model: explanation/threat-model.md
+      - Cyber Resilience Act notes: explanation/cra-assessment.md
+      - Decision records: adr/README.md
+  - Project:
+      - Readiness and limitations: readiness.md
+      - Source audit: research/source-audit.md
+      - Tool and model routing: research/tool-model-routing.md
+      - Open questions: open-questions.md
+      - Backlog: backlog.md
