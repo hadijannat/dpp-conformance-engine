@@ -54,6 +54,7 @@ dev = [
   "mutmut>=3.8.0",
 ]
 docs = [
+    "mike>=2.2.0",
     "mkdocs-material>=9.7.7",
 ]
 release = [

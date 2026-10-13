@@ -67,6 +67,11 @@ reference:
 docs: reference
     uv run --group docs mkdocs build --strict
 
+# Publish one version of the documentation site with mike. Needs a human decision: it pushes
+# to the `gh-pages` branch of the remote. It has never run.
+docs-publish version:
+    uv run --group docs mike deploy --push --update-aliases {{version}} latest
+
 # Style checks. Needs the `vale` binary, which this project does not install.
 style:
     vale docs README.md
