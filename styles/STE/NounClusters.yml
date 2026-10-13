@@ -1,0 +1,7 @@
+# Four or more words in a row with no article, preposition, or common verb between them often
+# form a noun cluster. A weak heuristic with many false findings. Review each finding.
+extends: existence
+message: "'%s' looks like a long noun cluster. Break it up with a preposition or a hyphen."
+level: suggestion
+raw:
+  - '\b(?:[A-Za-z][a-z]+(?:tion|ment|ity|ance|ence|ness|ure|ing|or|er|al|ic)s?\s+){3,}[A-Za-z][a-z]+\b'

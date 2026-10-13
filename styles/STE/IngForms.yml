@@ -1,0 +1,44 @@
+# Words that end in -ing. Many are verb forms that Simplified Technical English restricts.
+# Many others are valid nouns (for example "testing" in a compound term). Review each finding.
+extends: existence
+message: "'%s' ends in -ing. Use a different verb form unless it is an approved noun."
+ignorecase: true
+level: suggestion
+tokens:
+  - '\b\w{3,}ing\b'
+exceptions:
+  - thing
+  - nothing
+  - anything
+  - everything
+  - something
+  - string
+  - during
+  - warning
+  - setting
+  - meaning
+  - heading
+  - spelling
+  - reading
+  - recording
+  - signing
+  - testing
+  - training
+  - mapping
+  - encoding
+  - rebinding
+  - fuzzing
+  - tampering
+  - planning
+  - sourcing
+  - labeling
+  - marking
+  - packaging
+  - recycling
+  - repurposing
+  - remanufacturing
+  - dismantling
+  - lighting
+  - starting
+  - charging
+  - discharging

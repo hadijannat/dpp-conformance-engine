@@ -1,0 +1,8 @@
+# Descriptive text: at most 25 words in a sentence. A heuristic: Vale counts tokens, not words
+# as a human editor does. Review each finding.
+extends: occurrence
+message: "This sentence has more than 25 words. Split it."
+scope: sentence
+level: warning
+max: 25
+token: '\b[\w''-]+\b'

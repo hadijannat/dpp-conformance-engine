@@ -1,0 +1,25 @@
+# Prefer the simple word. This list is project-authored. It is not a copy of any dictionary.
+extends: substitution
+message: "Use '%s' in place of '%s'."
+ignorecase: true
+level: warning
+swap:
+  utilize: use
+  utilise: use
+  utilization: use
+  in order to: to
+  prior to: before
+  subsequent to: after
+  terminate: stop
+  commence: start
+  facilitate: help
+  leverage: use
+  approximately: about
+  in the event that: if
+  due to the fact that: because
+  a number of: some
+  is able to: can
+  compliance report: conformance test report
+  conformance certificate: conformance test report
+  whitelist: allowlist
+  blacklist: denylist

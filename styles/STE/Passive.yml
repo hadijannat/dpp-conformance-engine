@@ -1,0 +1,8 @@
+# Likely passive constructions: a form of "be" followed by a past participle. A heuristic.
+# A passive is acceptable when the agent is unknown or does not matter. Review each finding.
+extends: existence
+message: "'%s' looks passive. Use the active voice if the agent is known."
+ignorecase: true
+level: suggestion
+raw:
+  - '\b(am|are|is|was|were|be|been|being)\b\s+(\w+ed|built|done|given|held|kept|known|made|read|run|seen|sent|set|shown|taken|written)\b'

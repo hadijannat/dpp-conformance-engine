@@ -55,8 +55,12 @@ sbom:
 licenses:
     uv run python scripts/gen_license_report.py
 
+# Regenerate the reference pages for the command line, the capabilities, and the schemas.
+reference:
+    uv run python scripts/gen_reference_docs.py
+
 # Build the documentation site and fail on a broken link or a warning.
-docs:
+docs: reference
     uv run --group docs mkdocs build --strict
 
 # Style checks. Needs the `vale` binary, which this project does not install.
