@@ -100,7 +100,7 @@ values and their names start with `TEST-ONLY-`.
 Numbers are integers. A role that the access policy permits also gets the object `restricted`:
 
 ```json
-{"restricted": {"dismantling_notes": "Synthetic note.", "supplier_reference": "CANARY-7f3a-supplier"}}
+{"restricted": {"dismantling_notes": "CANARY-2b9c-dismantling", "supplier_reference": "CANARY-7f3a-supplier"}}
 ```
 
 ### 4.2 Model-level data (`/dpp/{id}/model`)
@@ -196,7 +196,8 @@ basis: {class: illustrative}
 restricted:                         # dotted paths in the item-level passport
   - {path: restricted.dismantling_notes, roles: [legitimate_interest, authority]}
   - {path: restricted.supplier_reference, roles: [authority]}
-canaries:                           # synthetic values; sandboxes only
+canaries:                           # synthetic values; sandboxes only; one for each withheld field
+  - {path: restricted.dismantling_notes, value: CANARY-2b9c-dismantling}
   - {path: restricted.supplier_reference, value: CANARY-7f3a-supplier}
 channels:
   fetch: /dpp/{id}
@@ -209,8 +210,11 @@ channels:
 The policy states what the system owner declares. The check observes whether the system
 enforces that declaration. It does not decide who has a legal entitlement.
 
-For the role under test, the check reads each channel. A restricted path that the role may not
-see, or a canary value in the body bytes, is a leak. Reason codes: `ACCESS.LEAK.FETCH`,
+For the role under test, the check reads each channel. It always tries to parse the body as
+JSON, whatever media type the system declares. A restricted path that the role may not see,
+or a canary value in the body bytes, is a leak. On a channel that is not JSON, only a canary
+can be found: if a withheld field has no canary, the check is `blocked` with
+`ACCESS.POLICY.NOT_FULLY_CHECKABLE`. It never passes on a partial look. Reason codes: `ACCESS.LEAK.FETCH`,
 `ACCESS.LEAK.EXPORT`, `ACCESS.LEAK.SEARCH`, `ACCESS.LEAK.ERROR`, `ACCESS.LEAK.HTML`; the first
 leaking channel in that order names the code. A pass gives `ACCESS.POLICY.ENFORCED`.
 The observation summary holds channel names and field paths. It never holds a field value.

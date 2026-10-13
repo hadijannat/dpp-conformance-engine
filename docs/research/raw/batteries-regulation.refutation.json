@@ -1,7 +1,6 @@
 {
   "target_group": "batteries-regulation",
   "retrieval_date": "2026-10-13",
-  "reviewer_note": "Independent adversarial review. Every verdict below rests on pages opened today at official locations (Publications Office cellar copies of OJ texts, Commission pages, OEIL, CEN-CENELEC and national standards body catalogues). EUR-Lex itself returned empty content to WebFetch for every URL pattern tried; the cellar serves the same OJ and consolidated documents. WebFetch extracts through a small model with a 125-character quote cap, so long provisions were confirmed as sequences of short exact quotes, and every load-bearing wording (Art. 77(1), 77(3), 77(9), 13(1), 13(4), 13(5), 13(6)) was obtained from two separate documents or two separate fetches.",
   "checked": [
     {
       "claim": "Battery passport applies from 18 February 2027 to each LMT battery, each industrial battery with a capacity greater than 2 kWh and each EV battery placed on the market or put into service (per individual battery; threshold is strictly greater than and applies to industrial batteries only).",
@@ -117,8 +116,8 @@
         {"url": "https://single-market-economy.ec.europa.eu/document/download/cd1e5e6c-4a4a-4b99-995a-49eb6916187e_en?filename=Digital%20Batteries%20Passport%20-%20data%20point%20by%20category.pdf", "what_it_shows": "Guidance v2.0 data point 44, source 'BR Annex XIII 1 (t)' (instructions for use): 'Not to be filled/displayed as of February 2027 - application provisions on hold pending Omnibus adoption'.", "official": true},
         {"url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1", "what_it_shows": "Consolidated text 13.08.2026, Annex XIII point 1: list ends at item (s); no item (t).", "official": true}
       ],
-      "correction": "Status of 2025/0395(COD) has moved since the researcher's snapshot ('Tabled', legislative train page of 20/09/2026): OEIL now records a committee vote on 05/10/2026, report A10-0266/2026 tabled 09/10/2026 and an indicative plenary of 19/10/2026 - still not adopted, no final act.",
-      "notes": "The OEIL page for 2025/0395(COD) displayed no list of amended acts, so whether it formally amends Regulation (EU) 2023/1542 was not confirmed from that page. If the 19 October 2026 plenary vote proceeds, this file could become law within weeks; re-check before release."
+      "correction": "",
+      "notes": "Claim holds. Status update only (not a refutation): 2025/0395(COD) has moved since the researcher's snapshot ('Tabled', legislative train page of 20/09/2026) - OEIL now records a committee vote on 05/10/2026, report A10-0266/2026 tabled 09/10/2026 and an indicative plenary of 19/10/2026; still not adopted, no final act. The OEIL page for 2025/0395(COD) displayed no list of amended acts, so whether it formally amends Regulation (EU) 2023/1542 was not confirmed from that page. If the 19 October 2026 plenary vote proceeds, this file could become law within weeks; re-check before release."
     },
     {
       "claim": "Art. 77(3) requires the QR code and unique identifier to comply with the dated editions ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014 and -6:2014 or their equivalent; current ISO status of those editions was not confirmed (iso.org returned 403).",

@@ -277,6 +277,31 @@ def test_a_body_that_claims_json_and_cannot_be_read_is_not_clean(tmp_path: Path)
         assert (outcome.status, outcome.reason_code) == (ExecutionStatus.BLOCKED, "ACCESS.RESPONSE.NOT_JSON")
 
 
+def test_the_declared_media_type_cannot_switch_off_the_path_check(tmp_path: Path) -> None:
+    """A JSON body with a non-JSON label, holding a withheld field whose value is not a canary."""
+    body = b'{"restricted": {"secret": "a value that no canary names"}}'
+    for label in ("text/plain", "application/octet-stream", ""):
+        outcome = restricted_fields(_context(tmp_path, _POLICY, _Canned(body, label)))
+        assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH"), label
+
+
+def test_a_channel_that_is_not_json_passes_only_if_every_withheld_field_has_a_canary(tmp_path: Path) -> None:
+    html = _Canned(b"<p>nothing to see</p>", "text/html")
+    covered = restricted_fields(_context(tmp_path, _POLICY, html))
+    assert (covered.passed, covered.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+    two = _POLICY | {
+        "restricted": [
+            {"path": "restricted.secret", "roles": ["authority"]},
+            {"path": "restricted.unmarked", "roles": ["authority"]},
+        ]
+    }
+    partial = restricted_fields(_context(tmp_path, two, _Canned(b"<p>nothing to see</p>", "text/html")))
+    assert (partial.status, partial.passed) == (ExecutionStatus.BLOCKED, None)
+    assert partial.reason_code == "ACCESS.POLICY.NOT_FULLY_CHECKABLE"
+    seen = restricted_fields(_context(tmp_path, two, _Canned(b'{"restricted": {"unmarked": 1}}')))
+    assert (seen.passed, seen.reason_code) == (False, "ACCESS.LEAK.FETCH"), "JSON channels check every path"
+
+
 def test_a_policy_with_an_unknown_channel_is_rejected() -> None:
     with pytest.raises(ValidationError, match="unknown channels"):
         AccessPolicy.model_validate(_POLICY | {"channels": {"fetch": "/x", "websocket": "/y"}})

@@ -27,6 +27,7 @@ from dppce.evidence.jws import LocalSigner
 
 PUBLIC_ORIGIN: Final = "https://id.example.test"
 CANARY: Final = "CANARY-7f3a-supplier"
+NOTES_CANARY: Final = "CANARY-2b9c-dismantling"
 FAULTS: Final = frozenset(
     {
         "api_wrong_content_type", "api_schema_violation", "leak_fetch", "leak_export", "leak_search",
@@ -40,7 +41,7 @@ _RESTRICTED: Final = {
     "dismantling_notes": ("legitimate_interest", "authority"),
     "supplier_reference": ("authority",),
 }
-_RESTRICTED_VALUES: Final = {"dismantling_notes": "Synthetic note.", "supplier_reference": CANARY}
+_RESTRICTED_VALUES: Final = {"dismantling_notes": NOTES_CANARY, "supplier_reference": CANARY}
 _ITEM_PATH: Final = re.compile(
     r"^/dpp/(?P<id>\d{14}-[A-Za-z0-9]+)(?P<rest>/model|/signed|/versions|/export|\.html)?$"
 )

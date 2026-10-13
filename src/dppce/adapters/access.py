@@ -99,14 +99,15 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         records.append(record)
         media_type = (record.header("content-type") or "").split(";")[0].strip().lower()
         document: Any = None
-        if media_type == "application/json" or media_type.endswith("+json"):
-            try:
-                document = parse_strict(record.body)
-            except CanonicalizationError:
+        # Always try to read the body as JSON. The system under test chooses the declared media
+        # type, so that label must not decide whether the field paths are checked.
+        try:
+            document = parse_strict(record.body)
+        except CanonicalizationError:
+            if media_type == "application/json" or media_type.endswith("+json"):
                 # The body claims to be JSON and cannot be read. Field paths cannot be checked.
                 message = f"The '{channel}' channel declares JSON, but the body cannot be parsed."
                 return blocked("ACCESS.RESPONSE.NOT_JSON", message)
-        else:
             canary_only.append(channel)
         found = [path for path in withheld if document is not None and _holds_path(document, path)]
         # A canary in the raw bytes is a leak in any format: JSON, HTML, or an error text.
@@ -128,6 +129,15 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         channels = ", ".join(c for c in _CHANNELS if c in leaks)
         message = f"The role '{role}' receives withheld fields on: {channels}. {limit}"
         return completed(False, f"ACCESS.LEAK.{first.upper()}", message, [observation])
+    unmarked = sorted(set(withheld) - {c.path for c in canaries})
+    if canary_only and unmarked:
+        # On a channel that is not JSON, only a canary value can be found. A withheld field with
+        # no canary could be there and stay unseen. That is not evidence of enforcement.
+        message = (
+            f"The channels {', '.join(canary_only)} are not JSON, and these withheld fields have no "
+            f"canary to look for: {', '.join(unmarked)}."
+        )
+        return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", message)
     return completed(
         True,
         "ACCESS.POLICY.ENFORCED",
