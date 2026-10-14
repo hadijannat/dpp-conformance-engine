@@ -15,7 +15,7 @@ The precedence tables in the architecture contract, section 7, are normative for
 ## Consequences
 
 - A check that raises is an error, never a fail.
-- An unreachable system is inconclusive unless an approved test method says otherwise.
+- An unreachable system is inconclusive unless an approved test method says otherwise. The engine reads `on_unreachable: fail` as `inconclusive` outside reviewed mode, and the lint refuses it for a requirement that is not approved.
 - A run with a recommended requirement that fails can still have the overall outcome pass. The report shows both.
 
 ## Alternatives considered

@@ -21,6 +21,7 @@ from pydantic import ValidationError
 
 from dppce import __version__
 from dppce.adapters.capabilities import manifest as capability_manifest
+from dppce.applicability import ApplicabilityError
 from dppce.catalogue import (
     CatalogueError,
     check_ics,
@@ -71,6 +72,8 @@ _VERDICT_EXIT: Final = {
     Verdict.NOT_APPLICABLE: EXIT_INCONCLUSIVE,
 }
 _INPUT_ERRORS: Final = (
+    # A comparison of two different types is a defect of the catalogue or of the ICS (section 5).
+    ApplicabilityError,
     CatalogueError,
     PlanError,
     KeyError_,
@@ -316,6 +319,9 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 
 def cmd_replay(args: argparse.Namespace) -> int:
+    if args.times < 1:
+        # Zero replays would report "match" for an evaluation that never took place.
+        raise UsageError("--times must be 1 or more")
     run: Path = args.run
     stored = parse_strict((run / "inputs.json").read_bytes())
     original = EvidenceEnvelope.model_validate(parse_strict((run / "envelope.json").read_bytes()))

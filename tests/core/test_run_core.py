@@ -187,11 +187,31 @@ def test_a_check_that_does_not_pass_follows_the_verdict_rules_of_its_test_purpos
     assert run_one(lenient, tmp_path).verdict is Verdict.INCONCLUSIVE
 
 
-def test_an_unreachable_system_is_inconclusive_unless_the_test_purpose_says_fail(tmp_path: Path) -> None:
+def test_an_unreachable_system_is_inconclusive_unless_an_approved_test_method_says_fail(
+    tmp_path: Path,
+) -> None:
+    """ADR 0010 and review finding V-02: the rule of a test purpose is not enough.
+
+    The first form of this test took ``fail`` from a draft requirement in exploratory mode.
+    The contract gives ``fail`` only to an approved test method, so that case is now asserted
+    as ``inconclusive`` and the ``fail`` case uses an approved requirement in reviewed mode.
+    """
     default = run_one(step("T-1", "unreachable"), tmp_path)
     assert (default.execution_status, default.verdict) == (COMPLETED, Verdict.INCONCLUSIVE)
     strict = step("T-1", "unreachable", verdict_rules={"on_unreachable": "fail"})
-    assert run_one(strict, tmp_path).verdict is Verdict.FAIL
+    draft = run_one(strict, tmp_path)
+    assert (draft.execution_status, draft.verdict) == (COMPLETED, Verdict.INCONCLUSIVE)
+    approved = one_path(
+        "R-1",
+        "T-1",
+        authority_class="guidance",
+        source=b.CITED,
+        review_status="approved",
+        approval=b.TEST_ONLY_APPROVAL,
+    )
+    inputs = inputs_for([approved], [strict], tmp_path, mode=ExecutionMode.REVIEWED)
+    reviewed = execute(make_plan(inputs), inputs, FakeAcquirer())["T-1"]
+    assert (reviewed.execution_status, reviewed.verdict) == (COMPLETED, Verdict.FAIL)
 
 
 # --- A check that raises -------------------------------------------------------------------

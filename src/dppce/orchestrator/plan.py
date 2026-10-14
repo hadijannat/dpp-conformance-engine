@@ -132,16 +132,22 @@ def build_plan(  # noqa: PLR0912 - one linear pass over the catalogue; splitting
         )
 
     purposes: dict[str, TestPurpose] = {}
+    defined: set[str] = set()
     for testpack in _select(testpacks, profile.testpacks, "test pack", profile):
         for purpose in testpack.test_purposes:
+            # Checked before the filters. Otherwise a copy that this mode excludes could still
+            # supply the parameters and the verdict rules of the step that runs.
+            if purpose.id in defined:
+                raise PlanError(
+                    f"test purpose {purpose.id} is defined more than once in the selected test packs"
+                )
+            defined.add(purpose.id)
             if "*" not in purpose.profiles and profile.id not in purpose.profiles:
                 exclude("test_purpose", purpose.id, "PROFILE.NOT_SELECTED", f"Not defined for {profile.id}.")
             elif mode not in purpose.permitted_modes:
                 exclude(
                     "test_purpose", purpose.id, "MODE.NOT_PERMITTED", f"Not permitted in {mode.value} mode."
                 )
-            elif purpose.id in purposes:
-                raise PlanError(f"test purpose {purpose.id} is defined in more than one test pack")
             else:
                 purposes[purpose.id] = purpose
 

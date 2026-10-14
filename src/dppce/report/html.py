@@ -83,7 +83,7 @@ def _summary(envelope: EvidenceEnvelope) -> str:
         f"<strong>{_e(manifest.profile_id)}</strong> in <strong>{_e(manifest.mode.value)}</strong> mode.</p>"
         f"<p>Overall outcome for the selected catalogue: {_verdict(decision.overall.value)}. "
         f"{_e(decision.overall_reason)}</p>"
-        f"<p>Of {assessed} assessed requirements: {n('pass')} passed, {n('fail')} failed, "
+        f"<p>Of {assessed} requirement results: {n('pass')} passed, {n('fail')} failed, "
         f"{n('inconclusive')} are inconclusive, {n('not_applicable')} do not apply, and "
         f"{n('error')} had an execution error. "
         f"{decision.coverage.excluded} more requirements were excluded and are listed below.</p>"

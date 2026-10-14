@@ -104,7 +104,10 @@ The lint rejects an interpretation with `author_kind: agent` and `status: approv
 | `CAT005` | The trace is one-way. | Make the test purpose list the requirement. |
 | `CAT008` | An agent-authored interpretation is marked approved. | Only a human-authored interpretation can be approved. |
 | `CAT009` | A legal obligation rests on a source that is not an EU act. | Change the authority class or the source. |
-| `CAT010` | `supersedes` names a requirement that does not exist. | Correct the identifier. |
+| `CAT010` | `supersedes` names a requirement that does not exist, or one that is still `approved`. An entry with `superseded_by` does not have the status `superseded`. | Correct the identifier, or set the old entry to `superseded`. |
+| `CAT016` | Two test packs define the same test purpose identifier. | Give your test purpose a new identifier. |
+| `CAT017` | A test purpose sets `on_unreachable: fail`, and a requirement that it names is not approved. | Remove the rule, or use it only for approved requirements. |
+| `CAT018` | Warning: a manual step has an applicability that reads a fact. | Use a constant, or accept that the step can leave its path. |
 
 You can see the trace from the provision to the check with this command.
 
@@ -161,7 +164,8 @@ An approved requirement can get a `pass` only from a path whose steps are all au
 
 `supersedes` is a link for the trace. It says that an approved entry replaces a draft.
 
-- The lint checks that each named requirement exists (`CAT010`).
+- The lint checks that each named requirement exists, and that it is not still `approved` (`CAT010`).
+- An entry with `superseded_by` must have the status `superseded`. The planner then excludes it.
 - `supersedes` does not remove the draft from a run. The planner does not read the field.
 - In reviewed mode the draft is an exclusion in any case, because it is not approved.
 - In exploratory mode a run assesses the draft and the approved entry. The report shows the two results.

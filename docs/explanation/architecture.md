@@ -74,7 +74,7 @@ root in a source checkout. The CLI option `--data-root` overrides it.
 | Mode | Requirements that may be assessed | Claim level of a result |
 | --- | --- | --- |
 | `illustrative` | `authority_class: illustrative` only | `illustrative` |
-| `exploratory` | review status `draft-needs-review` or `approved`, and illustrative ones | `diagnostic`, or `illustrative` |
+| `exploratory` | review status `draft-needs-review` or `approved`, illustrative ones, and placeholders | `diagnostic`, or `illustrative`; `none` for a placeholder |
 | `reviewed` | review status `approved` only, and never `authority_class: illustrative` | `reviewed` |
 
 An illustrative requirement is a synthetic rule. It never gives the claim level `reviewed` or
@@ -88,6 +88,8 @@ The loader rejects a placeholder that names a test. It stays in the coverage cou
 verdict is `inconclusive`.
 
 A test purpose runs only in a mode that its `permitted_modes` lists.
+A test purpose identifier is unique in the selected test packs. The planner refuses a second
+definition, also if the mode or the profile excludes one of the two.
 
 Only a human can set `approved`. The loader rejects an `approved` requirement that has no
 `approval` record with reviewer, date, rationale, source version, and artifact.
@@ -128,7 +130,7 @@ For each test purpose that a selected requirement names, in a permitted mode and
 
 | Condition, tested in this order | Planned status |
 | --- | --- |
-| Step applicability is `false` | none; the step is left out of its path with a reason |
+| Step applicability is `false` | none; the step is left out of its path with a reason, and the requirement result names it in `retained` |
 | Parent requirement applicability is not `true` | `skipped` |
 | Step applicability is `unknown` | `skipped` |
 | `manual: true` | `manual_unavailable` |
@@ -153,6 +155,12 @@ An unavailable adapter never produces `pass`.
 | `not_run`, `skipped`, `blocked`, `unsupported`, `manual_unavailable` | any | `inconclusive` |
 
 A check that raises an exception gives status `error`. It never gives `fail`.
+A check cannot report `passed` and `unreachable` together. The result models refuse a step
+verdict that this table does not give for the execution status.
+
+`on_unreachable: fail` is for an approved test method only: a connectivity failure does not
+prove a breach. Outside `reviewed` mode the engine reads the rule as `inconclusive`. The lint
+refuses the rule on a test purpose that names a requirement that is not approved (`CAT017`).
 
 ### 7.2 Path verdict
 
@@ -184,8 +192,13 @@ Precedence, first match wins:
    - otherwise: `inconclusive`.
 6. In `reviewed` mode a `pass` needs review status `approved`. If not, the verdict is
    `inconclusive`. The planner already excludes such a requirement; this is a second barrier.
+   The barrier reads the review status only. The planner applies the rule for illustrative
+   requirements, and the claim level of such a result is `none` in any case (section 4).
 
-Each other problem that the precedence hides is kept in `retained`.
+Each other problem that the precedence hides is kept in `retained`. That includes a step that
+the planner left out of a path (`STEP.NOT_APPLICABLE`), because the steps that stay can pass alone.
+A result for a step that the plan does not run is not evidence: it counts as `inconclusive`
+with `RESULT.NOT_PLANNED`.
 For example a requirement that fails can also retain an error and a skipped step.
 
 A valid failing observation is one from a completed step, on an applicable step of an
@@ -200,7 +213,8 @@ The overall outcome uses the mandatory requirements only. Precedence:
 2. Any `fail`: `fail`. 3. Any `error`: `error`. 4. Any `inconclusive`: `inconclusive`. 5. `pass`.
 
 The overall outcome is the outcome for the selected catalogue scope. It is not a statement of
-legal compliance. Results for `recommended` and `optional` requirements are reported separately.
+legal compliance. Results for `recommended` and `optional` requirements do not change the overall
+outcome. Each result shows its modality. The counts in a report summary cover all modalities.
 
 ### 7.5 Coverage
 
@@ -399,7 +413,7 @@ itself. It does not show that the issuer observed what the report says.
 | --- | --- |
 | 0 | The command completed. For `run` and `replay`: the overall outcome is `pass`. |
 | 1 | The system under test failed: the overall outcome is `fail`. |
-| 2 | Usage or input error: bad arguments, invalid file, lint findings. |
+| 2 | Usage or input error: bad arguments, invalid file, lint findings, or an applicability rule that compares two different types. |
 | 3 | Execution error: the overall outcome is `error`, or the engine failed. |
 | 4 | Evidence verification failed or is incomplete. Replay digest mismatch. |
 | 5 | The run completed and the overall outcome is `inconclusive`. |

@@ -52,6 +52,24 @@ This is a release candidate. It has not been tagged or published.
     period (`--retention-days`), and gives the time for a verification section (`--at`).
   - The verifier also checks that the verdicts in a signed report follow from its test results.
 
+- Fixed after the review of the fix itself: the signed payload and the published passport are
+  compared with exact numbers and with booleans apart from numbers; a `Link` header with
+  anything but targets and relation names is removed as a whole.
+
+### Fixed
+
+- After the independent review of verdicts and planning of 2026-10-14
+  (`validation/records/review-verdicts-and-planning-2026-10-14.md`, findings V-01 to V-09):
+  - A test purpose identifier in two selected test packs is a plan error and a lint error.
+  - `on_unreachable: fail` counts only in reviewed mode. The lint refuses it for a requirement
+    that is not approved.
+  - A step that its applicability left out of a path is named in `retained`.
+  - `replay --times` needs 1 or more.
+  - A step result must obey the step verdict table. A result for a step that the plan does not
+    run is not evidence.
+  - The lint refuses a stale approved requirement next to its successor.
+  - An applicability defect at run time is exit code 2.
+
 ### Changed
 
 - `--allow-remote-read` is replaced by `--allow-remote-host HOST`.

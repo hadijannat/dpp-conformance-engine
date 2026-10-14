@@ -78,7 +78,8 @@ def steps(**statuses: str) -> dict[str, TestResult]:
             applicability="true",
             applicability_reason="synthetic",
             execution_status=ExecutionStatus(status),
-            verdict="pass" if status == COMPLETED else "inconclusive",
+            # Section 7.1: the status "error" gives the verdict "error". The model enforces it.
+            verdict={COMPLETED: "pass", "error": "error"}.get(status, "inconclusive"),
             severity="major",
             reason_code="SYNTHETIC.RESULT",
             message="synthetic",

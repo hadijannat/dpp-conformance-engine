@@ -254,7 +254,8 @@ requirements:
     source_id: dppce-illustrative
   authority_class: illustrative
   modality: mandatory
-  paraphrase: Demonstrates a justified not-applicable outcome for other categories.
+  paraphrase: Demonstrates a justified not-applicable outcome for other categories. The entry has no check of its
+    own. Its pass rests on the identifier check of ILL-ID-001.
   applicability:
     fact: ics.product_category
     op: eq
@@ -276,7 +277,8 @@ requirements:
     source_id: dppce-illustrative
   authority_class: illustrative
   modality: mandatory
-  paraphrase: Demonstrates a threshold. The value 2000 Wh is synthetic and makes no legal statement.
+  paraphrase: Demonstrates a threshold. The value 2000 Wh is synthetic and makes no legal statement. The entry has
+    no check of its own. Its pass rests on the rule check of ILL-DATA-004.
   applicability:
     fact: ics.characteristics.capacity_wh
     op: gt

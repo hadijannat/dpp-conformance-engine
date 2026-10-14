@@ -24,8 +24,9 @@ from dppce.models import (
     Requirement,
     ReviewStatus,
     TestPack,
+    TestPurpose,
 )
-from dppce.models.expr import All, AnyOf, Not
+from dppce.models.expr import All, AnyOf, Const, Not
 
 _PROTECTED = ("european_standard", "international_standard", "national_standard")
 _UNVERIFIED = ("secondary_only", "not_located", "unverified_recall")
@@ -149,7 +150,14 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
     """Return every finding, sorted. An empty list means the catalogue is clean."""
     out: list[Finding] = []
     sources = {s.id: s for s in catalogue.sources}
-    purposes = {t.id: t for pack in testpacks.values() for t in pack.test_purposes}
+    purposes: dict[str, TestPurpose] = {}
+    for testpack_id, testpack in sorted(testpacks.items()):
+        for candidate in testpack.test_purposes:
+            if candidate.id in purposes:
+                # The planner refuses a profile that selects both copies. Say so before a run.
+                message = "Defined in more than one test pack. An identifier names one test purpose."
+                out.append(Finding("CAT016", "error", f"{testpack_id}/{candidate.id}", message))
+            purposes.setdefault(candidate.id, candidate)
     owners: dict[str, str] = {}
     requirements: dict[str, Requirement] = {}
     for pack_id, pack in sorted(catalogue.packs.items()):
@@ -202,6 +210,17 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
                 out.append(
                     Finding("CAT010", "error", where, f"Supersession names unknown requirement '{other}'.")
                 )
+        # A stale entry that stays "approved" would be assessed next to its successor, and in
+        # reviewed mode it could be the only one. A draft can stay: an imported approved entry
+        # supersedes a shipped draft, and no mode gives that draft a reviewed claim.
+        if requirement.superseded_by and requirement.review_status is not ReviewStatus.SUPERSEDED:
+            message = "The entry names a successor, so its status must be 'superseded'."
+            out.append(Finding("CAT010", "error", where, message))
+        for other in requirement.supersedes:
+            old = requirements.get(other)
+            if old is not None and old.review_status is ReviewStatus.APPROVED:
+                message = f"The entry supersedes '{other}', which is still 'approved'."
+                out.append(Finding("CAT010", "error", where, message))
         for expr in _expressions(requirement):
             out.extend(_fact_findings(expr, where, selecting))
         mapped = [t for path in requirement.assessment_paths for t in path.tests]
@@ -238,6 +257,25 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
             )
             out.append(Finding("CAT006", "warning", test_id, message))
         out.extend(_fact_findings(purpose.applicability, test_id, list(profiles.values())))
+        if purpose.verdict_rules.on_unreachable == "fail":
+            named = [requirements[r] for r in purpose.requirements if r in requirements]
+            if not named or any(
+                r.review_status is not ReviewStatus.APPROVED
+                or r.authority_class is AuthorityClass.ILLUSTRATIVE
+                for r in named
+            ):
+                message = (
+                    "Only an approved test method may call an unreachable system a failure. "
+                    "A requirement of this test purpose is not approved."
+                )
+                out.append(Finding("CAT017", "error", test_id, message))
+        if purpose.manual and not isinstance(purpose.applicability, Const):
+            # The ICS decides such an expression, and the supplier of the system writes the ICS.
+            message = (
+                "A manual step with an applicability that reads a fact can leave its path. "
+                "The steps that remain can then pass alone."
+            )
+            out.append(Finding("CAT018", "warning", test_id, message))
 
     for profile_id, profile in sorted(profiles.items()):
         for name in profile.packs:

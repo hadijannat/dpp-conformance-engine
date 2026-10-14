@@ -38,7 +38,8 @@ def step_verdict(
     if status is not ExecutionStatus.COMPLETED or passed is None:
         return _INCONCLUSIVE
     if passed:
-        return _PASS
+        # "Passed" and "unreachable" contradict each other. A contradiction is not a pass.
+        return _INCONCLUSIVE if unreachable else _PASS
     rule = rules.on_unreachable if unreachable else rules.on_check_failed
     return _FAIL if rule == "fail" else _INCONCLUSIVE
 
@@ -125,21 +126,32 @@ def aggregate(
 ) -> tuple[RequirementResult, ...]:
     """Build one result per planned requirement, sorted by requirement identifier."""
     conflicts = {c.requirement_id for c in plan.conflicts}
+    not_run = {s.test_purpose_id for s in plan.steps if s.planned_status is not None}
     out: list[RequirementResult] = []
     for planned in sorted(plan.requirements, key=lambda p: p.requirement_id):
         requirement = requirements[planned.requirement_id]
         path_results: list[PathResult] = []
         retained: list[str] = []
+        defined = {p.id: p.tests for p in requirement.assessment_paths}
         for path in planned.paths:
             verdicts: list[Verdict] = []
             for test_id in path.tests:
                 result = test_results.get(test_id)
                 # A planned step with no result is missing evidence. It is never a pass.
                 verdict = result.verdict if result is not None else _INCONCLUSIVE
+                code = result.reason_code if result is not None else "RESULT.MISSING"
+                if test_id in not_run and verdict in (_PASS, _FAIL):
+                    # The plan says that this step does not run. A result that says otherwise
+                    # did not come from this plan and is not evidence.
+                    verdict, code = _INCONCLUSIVE, "RESULT.NOT_PLANNED"
                 verdicts.append(verdict)
                 if verdict is not _PASS:
-                    code = result.reason_code if result is not None else "RESULT.MISSING"
                     retained.append(f"{path.path_id}/{test_id}: {verdict.value} ({code})")
+            # A step that the planner left out is no longer in the path, and the steps that
+            # remain can pass. Keep it visible next to the verdict (section 7.3).
+            for test_id in defined.get(path.path_id, ()):
+                if test_id not in path.tests:
+                    retained.append(f"{path.path_id}/{test_id}: left out (STEP.NOT_APPLICABLE)")
             outcome = path_verdict(path.applicability, verdicts)
             # A gap of the path itself has no step entry above. Keep it, so that a pass of a
             # different path cannot hide it (section 7.3).

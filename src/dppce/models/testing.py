@@ -186,6 +186,8 @@ class CheckOutcome(Model):
     def _passed_only_when_completed(self) -> Self:
         if (self.status is ExecutionStatus.COMPLETED) != (self.passed is not None):
             raise ValueError("'passed' is set if and only if the check completed")
+        if self.unreachable and self.passed is not False:
+            raise ValueError("'unreachable' is set only on a completed check that did not pass")
         return self
 
 
@@ -203,3 +205,13 @@ class TestResult(Model):
     reason_code: str
     message: str
     observations: tuple[Observation, ...] = ()
+
+    @model_validator(mode="after")
+    def _verdict_fits_the_status(self) -> Self:
+        """Section 7.1. A result that a different tool assembles must obey the same table."""
+        completed = self.execution_status is ExecutionStatus.COMPLETED
+        if self.verdict in (Verdict.PASS, Verdict.FAIL) and not completed:
+            raise ValueError("a step has 'pass' or 'fail' only if its check completed")
+        if (self.verdict is Verdict.ERROR) != (self.execution_status is ExecutionStatus.ERROR):
+            raise ValueError("a step has 'error' if and only if its execution status is 'error'")
+        return self

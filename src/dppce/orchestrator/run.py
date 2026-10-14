@@ -62,7 +62,7 @@ _LIMITATIONS: Final = (
 )
 _MODE_LIMITATIONS: Final = {
     ExecutionMode.ILLUSTRATIVE: "Illustrative mode: the rules are synthetic. No normative claim is made.",
-    ExecutionMode.EXPLORATORY: "Exploratory mode: the interpretations are drafts that no human has approved. "
+    ExecutionMode.EXPLORATORY: "Exploratory mode: the run can use interpretations that no human approved. "
     "The results are diagnostic. They are not requirement-conformance claims.",
     ExecutionMode.REVIEWED: "Reviewed mode: claims cover only requirements with a documented human approval, "
     "inside the stated scope of each approved pack. Human review is not accreditation.",
@@ -170,6 +170,10 @@ def execute(plan: Plan, inputs: RunInputs, acquirer: Acquirer) -> dict[str, Test
                     message="The replayed request differs from the recorded one. The inputs changed.",
                 )
         rules = purpose.verdict_rules if purpose else VerdictRules()
+        if plan.mode is not ExecutionMode.REVIEWED and rules.on_unreachable == "fail":
+            # A connectivity failure does not prove a breach. Only an approved test method may
+            # say that it does (section 9), and only reviewed mode runs approved content alone.
+            rules = rules.model_copy(update={"on_unreachable": "inconclusive"})
         results[step.test_purpose_id] = TestResult(
             test_purpose_id=step.test_purpose_id,
             requirement_ids=purpose.requirements if purpose else (),
