@@ -75,11 +75,17 @@ root in a source checkout. The CLI option `--data-root` overrides it.
 | --- | --- | --- |
 | `illustrative` | `authority_class: illustrative` only | `illustrative` |
 | `exploratory` | review status `draft-needs-review` or `approved`, and illustrative ones | `diagnostic`, or `illustrative` |
-| `reviewed` | review status `approved` only | `reviewed` |
+| `reviewed` | review status `approved` only, and never `authority_class: illustrative` | `reviewed` |
+
+An illustrative requirement is a synthetic rule. It never gives the claim level `reviewed` or
+`diagnostic`, also if a person marked it approved. Reviewed mode excludes it: with the reason
+code `MODE.NOT_APPROVED` as for each requirement that is not approved, and with
+`MODE.ILLUSTRATIVE_NOT_REVIEWABLE` if it is marked approved. Its claim level in that mode is `none`.
 
 A requirement that the mode does not permit is listed as an exclusion with a reason code.
 It is never silently dropped. A `placeholder` requirement has no paraphrase and no tests.
-It stays in the coverage counts and its verdict is `inconclusive`.
+The loader rejects a placeholder that names a test. It stays in the coverage counts and its
+verdict is `inconclusive`.
 
 A test purpose runs only in a mode that its `permitted_modes` lists.
 
@@ -111,7 +117,7 @@ capability manifest, and the validated authorization. Its output is sorted by id
 For each requirement in the selected packs:
 
 1. If the mode does not permit it, record an exclusion. Reason codes: `MODE.NOT_ILLUSTRATIVE`,
-   `MODE.NOT_APPROVED`, `STATUS.SUPERSEDED`, `STATUS.WITHDRAWN`.
+   `MODE.ILLUSTRATIVE_NOT_REVIEWABLE`, `MODE.NOT_APPROVED`, `STATUS.SUPERSEDED`, `STATUS.WITHDRAWN`.
 2. Evaluate `applicability`.
 3. Evaluate `declared_support` when present. If the requirement is applicable and mandatory and
    `declared_support` is `false`, record a conflict. The requirement stays applicable.

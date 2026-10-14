@@ -145,6 +145,10 @@ class Requirement(Model):
                 "a placeholder has an empty paraphrase",
             ),
             (
+                status is ReviewStatus.PLACEHOLDER and any(p.tests for p in self.assessment_paths),
+                "a placeholder has no test: nobody has interpreted its source",
+            ),
+            (
                 status is ReviewStatus.SUPERSEDED and not self.superseded_by,
                 "status 'superseded' needs 'superseded_by'",
             ),

@@ -7,6 +7,7 @@ and every requirement traces to a source and to its tests in both directions.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -77,6 +78,38 @@ def _expressions(requirement: Requirement) -> list[Expr]:
     return out
 
 
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _fits(operand: object, fact_type: str) -> bool:
+    """True if a literal operand can be compared with a fact of the declared type."""
+    if fact_type == "integer":
+        return type(operand) is int  # bool is a subclass of int, and true never equals 1
+    if fact_type == "boolean":
+        return type(operand) is bool
+    if fact_type == "date":
+        return isinstance(operand, str) and bool(_ISO_DATE.match(operand))
+    return isinstance(operand, str)
+
+
+def _operand_problem(comparison: Compare, name: str, fact_type: str) -> str | None:
+    """Return why the operand of a comparison does not fit the fact, or None if it fits.
+
+    The evaluator raises on such a pair. The lint finds it before a run does.
+    """
+    if comparison.op is Op.CONTAINS:
+        return f"The fact '{name}' is a scalar. The operator 'contains' needs a list-valued fact."
+    operands = comparison.value if isinstance(comparison.value, tuple) else (comparison.value,)
+    if comparison.op in (Op.IN, Op.NOT_IN) and not isinstance(comparison.value, tuple):
+        return f"The operator '{comparison.op.value}' needs a list operand."
+    if comparison.op not in (Op.IN, Op.NOT_IN) and isinstance(comparison.value, tuple):
+        return f"The operator '{comparison.op.value}' needs a single operand."
+    bad = [repr(o) for o in operands if not _fits(o, fact_type)]
+    if bad:
+        return f"The operand {', '.join(bad)} does not fit the fact '{name}' of type {fact_type}."
+    return None
+
+
 def _fact_findings(expr: Expr, where: str, profiles: list[Profile]) -> list[Finding]:
     """CAT013: a fact that no selecting profile can supply, or an ordering on a wrong type."""
     found: list[Finding] = []
@@ -96,6 +129,8 @@ def _fact_findings(expr: Expr, where: str, profiles: list[Profile]) -> list[Find
                 elif comparison.op in _ORDERING and spec.type not in ("integer", "date"):
                     message = f"The fact '{name}' has type {spec.type}. Ordering needs an integer or a date."
                     found.append(Finding("CAT013", "error", where, message))
+                elif (problem := _operand_problem(comparison, name, spec.type)) is not None:
+                    found.append(Finding("CAT013", "error", where, problem))
             elif (
                 head == "profile" and name not in ("id", "product_category") and name not in profile.constants
             ):

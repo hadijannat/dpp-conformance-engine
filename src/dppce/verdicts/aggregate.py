@@ -140,11 +140,18 @@ def aggregate(
                 if verdict is not _PASS:
                     code = result.reason_code if result is not None else "RESULT.MISSING"
                     retained.append(f"{path.path_id}/{test_id}: {verdict.value} ({code})")
+            outcome = path_verdict(path.applicability, verdicts)
+            # A gap of the path itself has no step entry above. Keep it, so that a pass of a
+            # different path cannot hide it (section 7.3).
+            if path.applicability is Tri.UNKNOWN:
+                retained.append(f"{path.path_id}: {outcome.value} (PATH.APPLICABILITY_UNKNOWN)")
+            elif path.applicability is Tri.TRUE and not path.tests:
+                retained.append(f"{path.path_id}: {outcome.value} (PATH.NO_STEP)")
             path_results.append(
                 PathResult(
                     path_id=path.path_id,
                     applicability=path.applicability,
-                    verdict=path_verdict(path.applicability, verdicts),
+                    verdict=outcome,
                     steps=path.tests,
                 )
             )

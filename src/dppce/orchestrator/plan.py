@@ -63,6 +63,12 @@ def mode_exclusion(mode: ExecutionMode, requirement: Requirement) -> tuple[str, 
             "MODE.NOT_APPROVED",
             f"Reviewed mode needs an approved interpretation; status is '{status.value}'.",
         )
+    if mode is ExecutionMode.REVIEWED and illustrative:
+        # The one case that is left: a synthetic rule that a person marked approved.
+        return (
+            "MODE.ILLUSTRATIVE_NOT_REVIEWABLE",
+            "Reviewed mode assesses normative requirements only. An illustrative rule makes no claim.",
+        )
     return None
 
 

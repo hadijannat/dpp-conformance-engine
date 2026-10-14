@@ -34,6 +34,8 @@ def _ics_0_to_1(document: Document) -> Document:
             watt_hours = Decimal(str(out.pop("capacity_kwh"))) * 1000
         except InvalidOperation as exc:
             raise MigrationError("capacity_kwh is not a number") from exc
+        if not watt_hours.is_finite():
+            raise MigrationError("capacity_kwh is not a finite number")
         if watt_hours != watt_hours.to_integral_value():
             raise MigrationError("capacity_kwh is not a whole number of watt-hours")
         characteristics["capacity_wh"] = int(watt_hours)

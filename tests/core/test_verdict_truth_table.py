@@ -386,7 +386,9 @@ def claim_oracle(
     if mode is ExecutionMode.ILLUSTRATIVE:
         return {ClaimLevel.ILLUSTRATIVE} if illustrative else None
     if mode is ExecutionMode.REVIEWED:
-        return {ClaimLevel.REVIEWED} if review_status is ReviewStatus.APPROVED else None
+        # Section 4: reviewed mode never assesses an illustrative rule, also if it is marked approved.
+        approved = review_status is ReviewStatus.APPROVED
+        return {ClaimLevel.REVIEWED} if approved and not illustrative else None
     if illustrative and review_status in INTERPRETED:
         # "diagnostic, or illustrative": both columns of the row match such a requirement.
         return {ClaimLevel.ILLUSTRATIVE, ClaimLevel.DIAGNOSTIC}
