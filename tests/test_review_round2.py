@@ -27,7 +27,7 @@ from dppce.evidence.recording import RecordingError, purge_expired, read_recordi
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.infrastructure.redaction import redact_url
 from dppce.infrastructure.transport import PolicyTransport, TransportConfig
-from dppce.models import Authorization, ClaimLevel, EvidenceEnvelope, NetworkPolicy, TrustBundle
+from dppce.models import IXIT, Authorization, ClaimLevel, EvidenceEnvelope, NetworkPolicy, TrustBundle
 from dppce.verifier import verify, verify_json
 from tests.support import AT, ISSUER, make_envelope, make_record, reply
 from tests.test_review_findings import LOCAL, NOW, _Keys, _recording, transport
@@ -629,3 +629,56 @@ def test_adapters15_a_withheld_field_with_the_value_null_is_withheld(tmp_path: P
 
 
 __all__ += ["pki"]
+
+
+def test_evidence5_a_recording_that_cannot_be_deleted_does_not_stop_the_next_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Found by mutation testing: one failed deletion must not end the purge."""
+    runs = tmp_path / "runs"
+    _recording(runs / "a", date(2026, 1, 1))
+    _recording(runs / "b", date(2026, 1, 1))
+    original = recording_module._is_only_a_recording
+
+    def a_file_arrives_in_a(directory: Path, index: Any) -> bool:
+        answer = original(directory, index)
+        if directory.name == "a":
+            (directory / "arrived-after-the-check.txt").write_text("keep me")
+        return answer
+
+    monkeypatch.setattr(recording_module, "_is_only_a_recording", a_file_arrives_in_a)
+    result = purge_expired(runs, date(2026, 10, 13), _Keys(), delete=True)
+    assert result.expired == (runs / "b",)
+    assert not (runs / "b").exists()
+    assert (runs / "a" / "arrived-after-the-check.txt").is_file()
+
+
+def test_verdicts4_a_step_missing_from_a_hand_built_plan_has_a_neutral_label(tmp_path: Path) -> None:
+    """Found by mutation testing: the fallback label of a left-out step had no test."""
+    from dppce.models import ExecutionMode as Mode  # noqa: PLC0415 - local to this one test
+    from dppce.orchestrator.run import RunInputs, make_plan  # noqa: PLC0415, TID251 - the run core is the unit
+    from dppce.verdicts import aggregate  # noqa: PLC0415
+    from tests.core import builders as b  # noqa: PLC0415
+
+    requirement = b.requirement("R-1", assessment_paths=[b.path("p1", "T-AUTO", "T-X")])
+    purposes = b.purposes_pack(b.purpose("T-AUTO", stimulus={"check": "tests_core.passes"}), b.purpose("T-X"))
+    inputs = RunInputs(
+        mode=Mode.EXPLORATORY,
+        profile=b.profile(),
+        catalogue=b.catalogue(b.pack(requirement)),
+        testpacks={"tp/a": purposes},
+        ics=b.ics(),
+        ixit=IXIT(schema_version="dppce.ixit/1"),
+        data_root=tmp_path,
+        evaluation_time=AT,
+    )
+    plan = make_plan(inputs)
+    path = plan.requirements[0].paths[0].model_copy(update={"tests": ("T-AUTO",)})
+    forged = plan.model_copy(
+        update={
+            "requirements": (plan.requirements[0].model_copy(update={"paths": (path,)}),),
+            "exclusions": (),
+        }
+    )
+    (result,) = aggregate(forged, {"R-1": requirement}, {})
+    assert "p1/T-X: left out (PLAN.STEP_MISSING)" in result.retained
