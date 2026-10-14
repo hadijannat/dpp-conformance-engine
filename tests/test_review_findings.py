@@ -672,6 +672,9 @@ def test_f12_a_response_header_value_is_kept_only_if_its_name_is_known_to_be_saf
         "S3CRET",
         '<http://h/a,b>; rel="next"; S3CRET',
         "<http://h/a>; rel=next; type=S3CRET",
+        '<http://h/a>; rel="next S3CRET"',
+        "<http://h/a>; rel=S3CRET",
+        '<http://h/a>; rel="next"; rel="prev"',
     ],
 )
 def test_f12_a_link_header_with_anything_but_targets_and_relation_names_is_removed(value: str) -> None:

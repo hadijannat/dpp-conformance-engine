@@ -28,8 +28,17 @@ SAFE_RESPONSE_HEADERS: Final = frozenset(
 )  # fmt: skip
 # These hold URLs. They are kept, with each URL redacted.
 _URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location"})
-# One link: a target and relation names only. A different parameter can hold any text.
-_LINK: Final = re.compile(r'\s*<([^<>\s]*)>((?:\s*;\s*rel="?[A-Za-z][A-Za-z0-9 ._-]*"?)*)\s*')
+# One link: a target and at most one "rel" parameter. Any other parameter can hold any text.
+_LINK: Final = re.compile(r'\s*<([^<>\s]*)>(?:\s*;\s*rel="?([A-Za-z][A-Za-z0-9 .-]*)"?)?\s*')
+# Registered relation names that an API uses for paging and description. A word outside this
+# list can be a secret, so a value with one is removed.
+_RELATIONS: Final = frozenset(
+    {
+        "alternate", "canonical", "collection", "describedby", "first", "help", "item", "last",
+        "license", "next", "prev", "previous", "profile", "related", "self", "service-desc",
+        "service-doc", "service-meta", "type", "up",
+    }
+)  # fmt: skip
 
 _SENSITIVE_PARAMETER: Final = re.compile(
     r"token|secret|passw|pwd|sig|key|auth|credential|session|code|jwt|bearer", re.IGNORECASE
@@ -72,7 +81,11 @@ def redact_link(value: str) -> str:
         match = _LINK.fullmatch(part)
         if match is None:
             return REMOVED
-        links.append(f"<{redact_url(match.group(1))}>{match.group(2)}")
+        relations = (match.group(2) or "").lower().split()
+        if not set(relations) <= _RELATIONS:
+            return REMOVED
+        rel = f'; rel="{" ".join(relations)}"' if relations else ""
+        links.append(f"<{redact_url(match.group(1))}>{rel}")
     return ", ".join(links)
 
 
