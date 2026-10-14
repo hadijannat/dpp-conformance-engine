@@ -35,6 +35,28 @@ This is a release candidate. It has not been tagged or published.
   trust, secrets, paths, and private hosts selected by an untrusted IXIT; a library size limit
   reported as an invalid signature; certificate paths accepted without certificate authority
   constraints; revocation compared as text; and two fail-open paths in the access check.
+- Fixed after the independent security review of 2026-10-13
+  (`validation/records/review-evidence-security-2026-10-13.md`, findings F-01 to F-17):
+  - A limit of the engine on a signed passport is `inconclusive`, never an invalid signature.
+  - A signed payload is compared with the published passport as a JSON value.
+  - A request for a role is sent only with the credential of that role. It stops at a
+    cross-origin redirect.
+  - The access check decodes a body before it looks for a canary. It does not assess an
+    encoded or undecodable body.
+  - One request has a total time limit. A redirect to a path outside ASCII raises nothing.
+  - A sample file is read from the confirmed path without following a link.
+  - `dppce purge` lists first, deletes only with `--yes`, and deletes only an authentic
+    recording. The index of a recording is authenticated.
+  - Response header values are recorded only for a fixed list of safe names.
+  - The operator confirms each public host (`--allow-remote-host HOST`), sets the retention
+    period (`--retention-days`), and gives the time for a verification section (`--at`).
+  - The verifier also checks that the verdicts in a signed report follow from its test results.
+
+### Changed
+
+- `--allow-remote-read` is replaced by `--allow-remote-host HOST`.
+- `purge_expired` needs the data keys and returns what it kept and why.
+- A role request no longer follows a cross-origin redirect (architecture, section 9).
 
 [Unreleased]: https://example.invalid/compare/v0.1.0rc1...HEAD
 [0.1.0rc1]: https://example.invalid/releases/tag/v0.1.0rc1

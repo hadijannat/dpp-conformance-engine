@@ -9,11 +9,13 @@ why the test purpose needs the scope ``access_probe`` from a signed authorizatio
 
 from __future__ import annotations
 
+import html
 from typing import Any, Literal, Self
+from urllib.parse import unquote
 
 from pydantic import ValidationError, model_validator
 
-from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, no_answer
+from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, unusable
 from dppce.catalogue import CatalogueError, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
@@ -62,6 +64,80 @@ def _holds_path(node: Any, dotted: str) -> bool:
     return False
 
 
+def _strings(node: Any) -> list[str]:
+    """Every string in a parsed JSON value: keys and values."""
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, dict):
+        return [text for key, value in node.items() for text in (key, *_strings(value))]
+    if isinstance(node, list):
+        return [text for value in node for text in _strings(value)]
+    return []
+
+
+def _decoded(record: Record, media_charset: str | None) -> str | None:
+    """Decode a body that is not JSON to text, or return None if it cannot be decoded.
+
+    A byte order mark decides first, then the declared character set, then UTF-8.
+    """
+    body = record.body
+    for mark, name in ((b"\xef\xbb\xbf", "utf-8-sig"), (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16")):
+        if body.startswith(mark):
+            media_charset = name
+            break
+    try:
+        return body.decode(media_charset or "utf-8")
+    except (UnicodeDecodeError, LookupError):
+        return None
+
+
+def _forms(text: str) -> list[str]:
+    """The forms in which a value can sit in a text: plain, HTML entities resolved, percent-decoded."""
+    unescaped = html.unescape(text)
+    return [text, unescaped, unquote(text), unquote(unescaped)]
+
+
+def _look(
+    record: Record, channel: str, withheld: list[str], canaries: list[Canary]
+) -> tuple[list[str], bool] | CheckOutcome:
+    """Look for withheld fields in one channel body.
+
+    Returns the leaked field paths and whether the body was JSON, or an outcome if the body
+    cannot be searched at all.
+    """
+    declared = (record.header("content-type") or "").lower()
+    media_type = declared.split(";")[0].strip()
+    charset = next((p.split("=", 1)[1].strip(' "') for p in declared.split(";")[1:] if "charset=" in p), None)
+    document: Any = None
+    # Always try to read the body as JSON. The system under test chooses the declared media
+    # type, so that label must not decide whether the field paths are checked.
+    try:
+        document = parse_strict(record.body)
+    except CanonicalizationError:
+        if media_type == "application/json" or media_type.endswith("+json"):
+            # The body claims to be JSON and cannot be read. Field paths cannot be checked.
+            message = f"The '{channel}' channel declares JSON, but the body cannot be parsed."
+            return blocked("ACCESS.RESPONSE.NOT_JSON", message)
+    if document is not None:
+        haystack = [form for text in _strings(document) for form in _forms(text)]
+    else:
+        text = _decoded(record, charset)
+        if text is None:
+            # Bytes that cannot be decoded cannot be searched. That is not a clean channel.
+            message = f"The body of the '{channel}' channel cannot be decoded as text."
+            return blocked("ACCESS.RESPONSE.NOT_DECODABLE", message)
+        haystack = _forms(text)
+    found = [path for path in withheld if document is not None and _holds_path(document, path)]
+    # A canary is a leak in any format. Look in the raw bytes and in each decoded form.
+    found += [
+        c.path
+        for c in canaries
+        if c.path not in found
+        and (c.value.encode("utf-8") in record.body or any(c.value in form for form in haystack))
+    ]
+    return found, document is not None
+
+
 @register("access.restricted_fields", capability="access.policy")
 def restricted_fields(ctx: CheckContext) -> CheckOutcome:
     role = str(ctx.params.get("role", "anonymous"))
@@ -90,28 +166,15 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
             continue
         url = origin.rstrip("/") + template.replace("{id}", passport_id).replace("{serial}", serial)
         record = fetch_once(ctx, url, role)
-        if record.error is not None:
-            return no_answer(ctx, record)
-        if record.truncated:
-            return blocked(
-                "TRANSPORT.BODY_TRUNCATED", "A body is larger than the limit. A partial body proves nothing."
-            )
+        if (problem := unusable(ctx, record)) is not None:
+            return problem
         records.append(record)
-        media_type = (record.header("content-type") or "").split(";")[0].strip().lower()
-        document: Any = None
-        # Always try to read the body as JSON. The system under test chooses the declared media
-        # type, so that label must not decide whether the field paths are checked.
-        try:
-            document = parse_strict(record.body)
-        except CanonicalizationError:
-            if media_type == "application/json" or media_type.endswith("+json"):
-                # The body claims to be JSON and cannot be read. Field paths cannot be checked.
-                message = f"The '{channel}' channel declares JSON, but the body cannot be parsed."
-                return blocked("ACCESS.RESPONSE.NOT_JSON", message)
+        looked = _look(record, channel, withheld, canaries)
+        if isinstance(looked, CheckOutcome):
+            return looked
+        found, is_json = looked
+        if not is_json:
             canary_only.append(channel)
-        found = [path for path in withheld if document is not None and _holds_path(document, path)]
-        # A canary in the raw bytes is a leak in any format: JSON, HTML, or an error text.
-        found += [c.path for c in canaries if c.value.encode("utf-8") in record.body and c.path not in found]
         if found:
             leaks[channel] = sorted(found)
     summary: dict[str, Any] = {
@@ -123,7 +186,11 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         "leaks": {channel: list(paths) for channel, paths in leaks.items()},
     }
     observation = ctx.observation(0, kind="exchange", records=records, summary=summary)
-    limit = "This shows enforcement of the declared policy. It does not decide a legal entitlement."
+    limit = (
+        "This shows enforcement of the declared policy. It does not decide a legal entitlement. "
+        "On a channel that is not JSON the check finds a canary only in plain, entity, or percent "
+        "form. It cannot find a value that a system hides on purpose."
+    )
     if leaks:
         first = next(c for c in _CHANNELS if c in leaks)
         channels = ", ".join(c for c in _CHANNELS if c in leaks)

@@ -18,8 +18,17 @@ REMOVED: Final = "<removed>"
 SAFE_REQUEST_HEADERS: Final = frozenset(
     {"accept", "accept-language", "content-type", "if-modified-since", "if-none-match", "user-agent"}
 )
-# Response header values that can hold a secret.
-SECRET_RESPONSE_HEADERS: Final = frozenset({"set-cookie", "set-cookie2", "authorization", "www-authenticate"})
+# Response header values that are safe to keep. Every other value is removed from the record.
+SAFE_RESPONSE_HEADERS: Final = frozenset(
+    {
+        "accept-ranges", "allow", "cache-control", "content-encoding", "content-language",
+        "content-length", "content-type", "date", "etag", "expires", "last-modified",
+        "retry-after", "vary",
+    }
+)  # fmt: skip
+# These hold URLs. They are kept, with each URL redacted.
+_URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location"})
+_LINK_TARGET: Final = re.compile(r"<([^<>]*)>")
 
 _SENSITIVE_PARAMETER: Final = re.compile(
     r"token|secret|passw|pwd|sig|key|auth|credential|session|code|jwt|bearer", re.IGNORECASE
@@ -56,15 +65,18 @@ def redact_request_headers(headers: dict[str, str]) -> tuple[tuple[str, str], ..
 
 
 def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple[str, str], ...]:
+    """Keep the names. Keep a value only if its name is known to be safe."""
     out: list[tuple[str, str]] = []
     for name, value in headers:
         lowered = name.lower()
-        if lowered in SECRET_RESPONSE_HEADERS:
-            out.append((name, REMOVED))
-        elif lowered in ("location", "content-location", "link"):
-            out.append((name, redact_url(value) if lowered != "link" else value))
-        else:
+        if lowered in SAFE_RESPONSE_HEADERS:
             out.append((name, value))
+        elif lowered in _URL_RESPONSE_HEADERS:
+            out.append((name, redact_url(value)))
+        elif lowered == "link":
+            out.append((name, _LINK_TARGET.sub(lambda m: f"<{redact_url(m.group(1))}>", value)))
+        else:
+            out.append((name, REMOVED))
     return tuple(out)
 
 

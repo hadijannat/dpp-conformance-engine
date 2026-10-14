@@ -62,6 +62,9 @@ class NetworkPolicy(Model):
     allowed_hosts: tuple[str, ...] = ()
     allow_private_hosts: tuple[str, ...] = ()
     timeout_ms: int = Field(default=5000, ge=100, le=60000)
+    total_timeout_ms: int = Field(
+        default=30000, ge=100, le=600000, description="Limit for one complete request, not for one read."
+    )
     max_body_bytes: int = Field(default=1_048_576, ge=1024, le=16_777_216)
     max_redirects: int = Field(default=3, ge=0, le=5)
     max_requests: int = Field(default=200, ge=1, le=10000)

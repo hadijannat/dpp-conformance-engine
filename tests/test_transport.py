@@ -233,12 +233,21 @@ def test_secrets_reach_only_their_origin_and_never_the_record(loopback: Start) -
         headers={"X-Tenant": "LEAK-3", "Accept": "application/json"},
     )
     record = engine.fetch(request)
-    assert record.status == 200
+    # Architecture section 9: a role request stops at a cross-origin hop. If it continued with
+    # no credential, the record would show the anonymous view under the name of the role.
+    assert record.error == "redirect_out_of_scope"
     assert first.seen[0]["Authorization"] == "Bearer TEST-ONLY-LEAK-1"
     assert first.seen[0]["X-Tenant"] == "LEAK-3"
-    assert "Authorization" not in other.seen[0], "the credential stays with its origin"
-    assert "X-Tenant" not in other.seen[0], "caller headers stay with the first origin"
+    assert other.seen == [], "the credential stays with its origin: the other origin gets no request"
     assert "LEAK" not in repr(record), "no secret reaches the record"
+
+    anonymous = engine.fetch(
+        Request("GET", f"{first.origin}/hop?api_key=LEAK-2", headers={"X-Tenant": "LEAK-3"})
+    )
+    assert anonymous.status == 200
+    assert "Authorization" not in other.seen[0], "an anonymous request carries no credential"
+    assert "X-Tenant" not in other.seen[0], "caller headers stay with the first origin"
+    assert "LEAK" not in repr(anonymous), "no secret reaches the record"
 
 
 def test_response_secrets_are_removed_from_the_record(loopback: Start) -> None:

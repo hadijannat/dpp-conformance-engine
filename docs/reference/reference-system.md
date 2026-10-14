@@ -212,9 +212,20 @@ enforces that declaration. It does not decide who has a legal entitlement.
 
 For the role under test, the check reads each channel. It always tries to parse the body as
 JSON, whatever media type the system declares. A restricted path that the role may not see,
-or a canary value in the body bytes, is a leak. On a channel that is not JSON, only a canary
+or a canary value in the body, is a leak. On a channel that is not JSON, only a canary
 can be found: if a withheld field has no canary, the check is `blocked` with
-`ACCESS.POLICY.NOT_FULLY_CHECKABLE`. It never passes on a partial look. Reason codes: `ACCESS.LEAK.FETCH`,
+`ACCESS.POLICY.NOT_FULLY_CHECKABLE`. It never passes on a partial look.
+
+The check looks for a canary in the decoded text, in each string value of a JSON body, and in
+the forms that an HTML character reference or a percent-encoding gives. It decodes the body
+with the declared character set, or with the byte order mark. A body that it cannot decode
+gives `blocked` with `ACCESS.RESPONSE.NOT_DECODABLE`. A body with a `Content-Encoding` other
+than `identity` gives `blocked` with `TRANSPORT.BODY_ENCODED`. The check does not find a value
+that a system hides on purpose, for example with encryption or a private encoding.
+
+A role other than `anonymous` needs a credential for the origin of the API. Without one, the
+transport sends no request and the check reports `TRANSPORT.DENIED` with `unreachable: true`.
+It never reports the anonymous view under the name of a role. Reason codes: `ACCESS.LEAK.FETCH`,
 `ACCESS.LEAK.EXPORT`, `ACCESS.LEAK.SEARCH`, `ACCESS.LEAK.ERROR`, `ACCESS.LEAK.HTML`; the first
 leaking channel in that order names the code. A pass gives `ACCESS.POLICY.ENFORCED`.
 The observation summary holds channel names and field paths. It never holds a field value.
@@ -319,6 +330,7 @@ Shared helpers in `dppce.adapters.common`:
 
 A response that is not valid JSON where JSON is needed gives a `fail` with `<AREA>.RESPONSE.NOT_JSON`.
 A truncated body gives status `blocked` with `TRANSPORT.BODY_TRUNCATED`: a partial body proves nothing.
+A body with a content encoding gives status `blocked` with `TRANSPORT.BODY_ENCODED`: no check decompresses a body.
 
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
@@ -331,10 +343,39 @@ A truncated body gives status `blocked` with `TRANSPORT.BODY_TRUNCATED`: a parti
 | `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
-| `integrity.jws` | none | `INTEGRITY.OK` | first that applies: `INTEGRITY.SIGNATURE.INVALID`, `INTEGRITY.ISSUER.UNTRUSTED`, `INTEGRITY.CERT.EXPIRED`, `INTEGRITY.CERT.REVOKED`, `INTEGRITY.PAYLOAD.MISMATCH` (all fail); no trust bundle: `blocked`, `INTEGRITY.TRUST.MISSING`; mandatory status snapshot missing or stale: `blocked`, `INTEGRITY.STATUS.MISSING` |
+| `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
 | `persistence.versions` | none | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail) |
 | `registry.consistency` | none | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`) | `AAS.VALID` | `AAS.INVALID` (fail); sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
+
+### 8.1 Outcomes of `integrity.jws`
+
+The check takes the first row that applies. A limit of this engine is `blocked`, which gives
+`inconclusive`. Only a finding about the tested system is a `fail`.
+
+| Order | Condition | Status | Reason code |
+| --- | --- | --- | --- |
+| 1 | No trust bundle is configured | `blocked` | `INTEGRITY.TRUST.MISSING` |
+| 2 | The IXIT gives no API endpoint or no passport identifier | `blocked` | `INTEGRITY.NO_TARGET` |
+| 3 | The system answers with status 500 or higher | fail, `unreachable: true` | `INTEGRITY.TOKEN.NO_ANSWER` |
+| 4 | The system answers with another status that is not 200 | fail | `INTEGRITY.TOKEN.NOT_AVAILABLE` |
+| 5 | The body is not a compact JWS, or a part of it cannot be decoded | fail | `INTEGRITY.TOKEN.MALFORMED` |
+| 6 | The token has no `x5c` header | `blocked` | `INTEGRITY.KEY.UNSUPPORTED` |
+| 7 | The token is larger than the limits of the engine | `blocked` | `INTEGRITY.TOKEN.TOO_LARGE` |
+| 8 | The algorithm, the type, a header, or the key is outside the supported profile | `blocked` | `INTEGRITY.TOKEN.NOT_PROCESSABLE` |
+| 9 | The signature does not verify with the key of the certificate | fail | `INTEGRITY.SIGNATURE.INVALID` |
+| 10 | No path leads to a trusted anchor | fail | `INTEGRITY.ISSUER.UNTRUSTED` |
+| 11 | The path has a constraint that the engine does not evaluate | `blocked` | `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` |
+| 12 | The certificate does not permit a digital signature | fail | `INTEGRITY.CERT.KEY_USAGE` |
+| 13 | A certificate is outside its validity period | fail | `INTEGRITY.CERT.EXPIRED` |
+| 14 | A mandatory status snapshot is missing or stale | `blocked` | `INTEGRITY.STATUS.MISSING` |
+| 15 | A certificate is revoked | fail | `INTEGRITY.CERT.REVOKED` |
+| 16 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
+| 17 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
+
+The supported profile is ES256 on curve P-256, with the key in the first `x5c` certificate.
+The payload is compared as a JSON value. Key order, white space, and number format do not matter.
+The canonical form of the engine applies to its own decision body only, not to a passport.
 
 Document URLs: item `{api}/dpp/{id}`, model `{api}/dpp/{id}/model`, signed
 `{api}/dpp/{id}/signed`, versions `{api}/dpp/{id}/versions`, registry `{registry}/registry/{id}`.

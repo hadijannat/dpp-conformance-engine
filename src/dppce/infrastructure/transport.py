@@ -6,15 +6,18 @@ data in ``Record.error``. It is never raised, and it is never a verdict by itsel
 
 from __future__ import annotations
 
+import contextlib
 import http.client
+import os
 import socket
 import ssl
+import threading
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final, Protocol
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 
 from dppce.evidence.recording import new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
@@ -28,6 +31,7 @@ from dppce.infrastructure.redaction import (
 from dppce.models import Authorization, NetworkPolicy, Scope
 
 SAFE_METHODS: Final = ("GET", "HEAD")
+ANONYMOUS: Final = "anonymous"
 _REDIRECTS: Final = (301, 302, 303, 307, 308)
 _ACTIVE_SCOPES: Final = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ)
 _RETRYABLE: Final = ("connect", "timeout")
@@ -45,6 +49,23 @@ class SystemResolver:
         return sorted({str(info[4][0]) for info in infos})
 
 
+_URL_SAFE: Final = "/%:@!$&'()*+,;=-._~"
+
+
+def origin_of(url: str) -> str:
+    """Return the origin of a URL in one normal form: lower case, no default port, IPv6 in brackets.
+
+    Every comparison of origins uses this function. Two spellings of one origin must never
+    decide whether a credential is sent.
+    """
+    parts = urlsplit(url)
+    host = (parts.hostname or "").lower()
+    default = 443 if parts.scheme == "https" else 80
+    port = parts.port or default
+    shown = f"[{host}]" if ":" in host else host
+    return f"{parts.scheme}://{shown}" + ("" if port == default else f":{port}")
+
+
 @dataclass(frozen=True)
 class TransportConfig:
     policy: NetworkPolicy
@@ -52,8 +73,8 @@ class TransportConfig:
     # role -> (origin, bearer token). A token is sent only to its own origin.
     credentials: Mapping[str, tuple[str, str]] = field(default_factory=dict)
     authorization: Authorization | None = None
-    # The operator states that the system owner permits bounded read-only access.
-    remote_read_authorized: bool = False
+    # Public hosts for which the operator states that the owner permits bounded read-only access.
+    remote_read_hosts: frozenset[str] = frozenset()
     samples: Mapping[str, Path] = field(default_factory=dict)
     max_artifact_bytes: int = 8 * 1024 * 1024
 
@@ -114,6 +135,7 @@ class PolicyTransport:
         self._sleep = sleep
         self._monotonic = monotonic
         self._records: list[Record] = []
+        self._samples = {name: path.resolve() for name, path in config.samples.items()}
         self._sent = 0
         self._last_sent: float | None = None
 
@@ -149,21 +171,22 @@ class PolicyTransport:
         # Every answer must pass. One private answer among public ones is a rebinding attempt.
         if not all(public) and not private_ok:
             raise _DeniedError("policy_denied")
-        if any(public) and auth is None and not self._config.remote_read_authorized:
+        if any(public) and auth is None and host not in self._config.remote_read_hosts:
             raise _DeniedError("authorization_denied")
-        default_port = port == (443 if parts.scheme == "https" else 80)
-        origin = f"{parts.scheme}://{host}" + ("" if default_port else f":{port}")
+        origin = origin_of(url)
         if auth is not None:
             now = self._clock.now()
             permitted = (
-                origin in auth.endpoints
+                origin in {origin_of(endpoint) for endpoint in auth.endpoints}
                 and method in auth.methods
                 and role in auth.roles
                 and parse_stamp(auth.not_before) <= now <= parse_stamp(auth.not_after)
             )
             if not permitted:
                 raise _DeniedError("authorization_denied")
-        path = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+        path = quote(parts.path or "/", safe=_URL_SAFE)
+        if parts.query:
+            path += "?" + quote(parts.query, safe=_URL_SAFE + "?")
         return _Target(parts.scheme, host, port, origin, path, addresses[0])
 
     def _budget_left(self) -> bool:
@@ -190,36 +213,69 @@ class PolicyTransport:
             if target.scheme == "https"
             else _PinnedHTTPConnection(target.host, target.port, target.address, timeout)
         )
+        # The socket timeout bounds one read. A system that sends one byte at a time would keep a
+        # request alive without end. This timer bounds the whole request.
+        expired = threading.Event()
+
+        def expire(sock: socket.socket) -> None:
+            expired.set()
+            with contextlib.suppress(OSError):
+                sock.shutdown(socket.SHUT_RDWR)
+
+        timer: threading.Timer | None = None
         try:
+            connection.connect()
+            # Keep the socket itself. http.client forgets it when a response says that the
+            # connection closes, and the body is still being read at that time.
+            timer = threading.Timer(policy.total_timeout_ms / 1000, expire, (connection.sock,))
+            timer.daemon = True
+            timer.start()
             connection.request(method, target.path, body=body, headers=dict(headers))
             response = connection.getresponse()
             data = response.read(policy.max_body_bytes + 1)
             response_headers = tuple((k, v) for k, v in response.getheaders())
-            return (
-                response.status,
-                response_headers,
-                data[: policy.max_body_bytes],
-                len(data) > policy.max_body_bytes,
-            )
+            if expired.is_set():
+                # The timer ended the read. What arrived is a partial answer and proves nothing.
+                return "timeout"
+            limit = policy.max_body_bytes
+            return response.status, response_headers, data[:limit], len(data) > limit
         except TimeoutError:
             return "timeout"
         except ssl.SSLError:
-            return "tls"
+            return "timeout" if expired.is_set() else "tls"
         except http.client.HTTPException:
-            return "protocol"
+            return "timeout" if expired.is_set() else "protocol"
         except OSError:
-            return "connect"
+            return "timeout" if expired.is_set() else "connect"
+        except (UnicodeError, ValueError):
+            # A transport failure is data. It is never raised to the check.
+            return "protocol"
         finally:
+            if timer is not None:
+                timer.cancel()
             connection.close()
+
+    def _credential_fits(self, role: str, target: _Target) -> bool:
+        """True for the anonymous role, or if the credential of ``role`` belongs to this origin."""
+        if role == ANONYMOUS:
+            return True
+        credential = self._config.credentials.get(role)
+        return credential is not None and origin_of(credential[0]) == target.origin
 
     def _headers(self, request: Request, target: _Target, first_origin: str) -> dict[str, str]:
         contact = f" (+{self._config.policy.contact})" if self._config.policy.contact else ""
-        headers = {"User-Agent": f"dppce/{self._config.engine_version}{contact}", "Accept": "*/*"}
+        # No check decompresses a body, so the transport asks for none. A system can still send
+        # an encoded body: the checks then report it as not assessable, never as clean.
+        headers = {
+            "User-Agent": f"dppce/{self._config.engine_version}{contact}",
+            "Accept": "*/*",
+            "Accept-Encoding": "identity",
+        }
         # Caller headers are bound to the first origin. A redirect to a different origin gets none.
         if target.origin == first_origin:
             headers.update(request.headers)
         credential = self._config.credentials.get(request.role)
-        if credential is not None and credential[0] == target.origin:
+        if credential is not None and origin_of(credential[0]) == target.origin:
             headers["Authorization"] = f"Bearer {credential[1]}"
         return headers
 
@@ -266,6 +322,9 @@ class PolicyTransport:
         except _DeniedError as denied:
             return done(denied.error)
         first_origin = target.origin
+        if not self._credential_fits(request.role, target):
+            # The answer would be the anonymous view, recorded under the name of the role.
+            return done("authorization_denied")
 
         while True:
             sent_headers = self._headers(request, target, first_origin)
@@ -293,19 +352,30 @@ class PolicyTransport:
                 # The engine refuses the hop. It has no answer from the system to judge.
                 out_of_scope = denied.error in ("policy_denied", "authorization_denied")
                 return done("redirect_out_of_scope" if out_of_scope else denied.error, status, headers)
+            if not self._credential_fits(request.role, target):
+                # The credential of the role does not follow to a different origin.
+                return done("redirect_out_of_scope", status, headers)
 
     def artifact(self, name: str) -> Record:
-        path = self._config.samples.get(name)
+        path = self._samples.get(name)
         body = b""
         error: TransportError | None = None
         if path is None:
             error = "artifact_unavailable"
         else:
             try:
-                if path.stat().st_size > self._config.max_artifact_bytes:
-                    error = "body_too_large"
-                else:
-                    body = path.read_bytes()
+                # The path was resolved when the transport was built. If a component is a link
+                # now, the file is not the one that was confirmed. The final component is opened
+                # without following a link. A change of a parent directory between these two
+                # steps stays possible for a process that can write to the sample directory.
+                if path.resolve(strict=True) != path:
+                    raise OSError("the sample path changed after it was confirmed")
+                handle = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+                with os.fdopen(handle, "rb") as source:
+                    if os.fstat(source.fileno()).st_size > self._config.max_artifact_bytes:
+                        error = "body_too_large"
+                    else:
+                        body = source.read(self._config.max_artifact_bytes)
             except OSError:
                 error = "artifact_unavailable"
         record = Record(

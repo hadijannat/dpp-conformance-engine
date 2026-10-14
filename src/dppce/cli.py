@@ -16,7 +16,6 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
-from urllib.parse import urlsplit
 
 from pydantic import ValidationError
 
@@ -41,7 +40,7 @@ from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, u
 from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_secret
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.resources import data_root
-from dppce.infrastructure.transport import PolicyTransport, TransportConfig
+from dppce.infrastructure.transport import PolicyTransport, TransportConfig, origin_of
 from dppce.models import (
     ICS,
     IXIT,
@@ -230,11 +229,6 @@ def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str,
     return credentials
 
 
-def _origin(url: str) -> str:
-    parts = urlsplit(url)
-    return f"{parts.scheme}://{parts.netloc}"
-
-
 def cmd_plan(args: argparse.Namespace) -> int:
     inputs, _, _ = _inputs_from_args(args)
     plan = make_plan(inputs)
@@ -261,7 +255,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             + ", ".join(unconfirmed)
         )
     # A role credential goes only to an origin that a validated authorization names.
-    target = _origin(ixit.endpoints.get("origin_override") or ixit.endpoints.get("api", ""))
+    target = origin_of(ixit.endpoints.get("origin_override") or ixit.endpoints.get("api", ""))
     permitted = inputs.authorization is not None and target in inputs.authorization.endpoints
     credentials = _credentials(args, ixit, target) if permitted else {}
     samples = {
@@ -277,7 +271,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             engine_version=__version__,
             credentials=credentials,
             authorization=inputs.authorization,
-            remote_read_authorized=args.allow_remote_read,
+            remote_read_hosts=frozenset(h.lower() for h in args.allow_remote_host),
             samples=samples,
         ),
         SystemClock(),
@@ -290,7 +284,10 @@ def cmd_run(args: argparse.Namespace) -> int:
         transport.records(),
         keys,
         created=inputs.evaluation_time.date(),
-        retention_days=ixit.observation.retention_days,
+        # The IXIT asks for a retention period. The operator decides it.
+        retention_days=ixit.observation.retention_days
+        if args.retention_days is None
+        else args.retention_days,
     )
     stored = {
         "schema_version": "dppce.runinputs/1",
@@ -366,6 +363,9 @@ def cmd_report(args: argparse.Namespace) -> int:
         text = envelope.model_dump_json(by_alias=True, indent=2) + "\n"
     else:
         trust = _trust(args.trust)
+        if trust is not None and args.at is None:
+            # Verification needs an explicit evaluation time. "Now" is never assumed.
+            raise UsageError("a report with a verification section needs an explicit time: --at")
         verification = verify_json(raw, trust, _time(args.at)) if trust else None
         text = render(envelope, verification)
     if args.out:
@@ -463,11 +463,19 @@ def cmd_capabilities(args: argparse.Namespace) -> int:
 
 
 def cmd_purge(args: argparse.Namespace) -> int:
-    today = _time(args.at).date()
-    removed = [
-        str(p) for run in sorted(args.runs.iterdir()) if run.is_dir() for p in purge_expired(run, today)
-    ]
-    _emit(args, {"removed": removed}, "\n".join(removed) or "nothing to purge")
+    """List the expired recordings. Delete them only with ``--yes``."""
+    today, keys = _time(args.at).date(), FileDataKeyProvider(args.keys)
+    expired: list[str] = []
+    kept: list[dict[str, str]] = []
+    for run in sorted(p for p in args.runs.iterdir() if p.is_dir() and not p.is_symlink()):
+        result = purge_expired(run, today, keys, delete=args.yes)
+        expired += [str(p) for p in result.expired]
+        kept += [{"path": str(p), "reason": reason} for p, reason in result.kept]
+    verb = "deleted" if args.yes else "would delete (run again with --yes)"
+    lines = [f"{verb}: {p}" for p in expired] + [f"left alone: {k['path']}: {k['reason']}" for k in kept]
+    _emit(
+        args, {"deleted": args.yes, "expired": expired, "kept": kept}, "\n".join(lines) or "nothing to purge"
+    )
     return EXIT_OK
 
 
@@ -525,9 +533,16 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         help="confirm one loopback or private host that the IXIT asks for; repeat for each host",
     )
     run.add_argument(
-        "--allow-remote-read",
-        action="store_true",
-        help="state that the system owner permits bounded read-only access to a public host",
+        "--allow-remote-host",
+        action="append",
+        default=[],
+        metavar="HOST",
+        help="state that the owner of one public host permits bounded read-only access; repeat for each host",
+    )
+    run.add_argument(
+        "--retention-days",
+        type=int,
+        help="days to keep the recording; the operator decides; default: the value that the IXIT asks for",
     )
 
     replay = add("replay", cmd_replay, "Evaluate a recording again and compare the decision digest.")
@@ -574,6 +589,8 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
 
     purge = add("purge", cmd_purge, "Delete recordings whose retention period has ended.")
     purge.add_argument("--runs", type=Path, required=True, help="directory that holds run directories")
+    purge.add_argument("--keys", type=Path, required=True, help="directory with the data keys")
+    purge.add_argument("--yes", action="store_true", help="delete; without it the command only lists")
     purge.add_argument("--at", help="reference time; default: now")
     return parser
 

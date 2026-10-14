@@ -11,7 +11,7 @@ Read-only access also needs the permission of the owner.
 
 | Activity | What you need |
 | --- | --- |
-| Bounded read-only requests to a public host | The owner's prior permission, and the option `--allow-remote-read` |
+| Bounded read-only requests to a public host | The owner's prior permission, and `--allow-remote-host HOST` for each host |
 | Requests to a loopback or private host | An entry in the IXIT, and `--allow-private-host HOST` for each host |
 | Requests as a role with a credential | A signed authorization that names the origin, and `--role-secret ROLE=REFERENCE` |
 | Access probes, writes, tampering, fuzzing | A signed authorization that grants that scope |
@@ -32,7 +32,8 @@ refuses them without a matching authorization.
 6. Run `dppce plan` first. Check which steps the plan executes and which it blocks.
 7. Run `dppce run` with `--trust`, `--authorization`, and the confirmations.
 8. Keep the data key directory apart from the run directory.
-9. Delete recordings after the retention period with `dppce purge`.
+9. List the recordings past the retention period with `dppce purge --runs DIR --keys DIR`.
+10. Check the list. Then delete those recordings with the same command and `--yes`.
 
 ## What the engine enforces
 

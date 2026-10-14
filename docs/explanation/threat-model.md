@@ -52,11 +52,12 @@ standalone verifier and the recipient's own trust bundle.
 | A host name resolves to a public address for the check and a private one for the connection (DNS rebinding) | The transport resolves one time and connects to the checked address. A mixed answer is refused. | `tests/test_transport.py` |
 | A private IPv4 address hides in an IPv6 translation prefix | An address is public only if any embedded IPv4 address is public too. Multicast and reserved ranges are excluded. | `tests/test_transport.py` |
 | A redirect leads out of scope, or carries credentials to a different origin | The transport follows redirects itself and checks each hop. Credentials and caller headers stay with their origin. | `tests/test_transport.py` |
-| A secret reaches a retained record | Request header values are recorded only for an allowlist of names. URL userinfo and credential-like query values are removed. | `tests/test_transport.py` |
-| A large or endless response exhausts memory | Body size, redirect count, request count, and time are limited. A truncated body is flagged and proves nothing. | `tests/test_transport.py` |
+| The anonymous view is recorded under the name of a role | A role request is sent only with the credential of that role. It stops at a cross-origin redirect. | `tests/test_review_findings.py` (F-03) |
+| A secret reaches a retained record | Request and response header values are recorded only for an allowlist of names. URL userinfo and credential-like query values are removed, also in `Location` and `Link`. | `tests/test_transport.py`, `tests/test_review_findings.py` (F-12) |
+| A large or endless response exhausts memory or time | Body size, redirect count, request count, the time of one read, and the time of one request are limited. A truncated body is flagged and proves nothing. | `tests/test_transport.py`, `tests/test_review_findings.py` (F-05) |
 | The supplier's IXIT names its own trust bundle and authorizes itself | The trust bundle comes only from the operator. | `docs/adr/0011` and `src/dppce/cli.py` |
 | The supplier's IXIT names a secret of a different system | The operator must repeat each secret reference. References are limited to one prefix and one directory. | `tests/test_transport.py` |
-| The supplier's IXIT names a local file to read | A path must stay inside the directory of the IXIT file. A symbolic link that leaves it is refused. | `tests/test_transport.py` |
+| The supplier's IXIT names a local file to read | A path must stay inside the directory of the IXIT file. A symbolic link that leaves it is refused, also if it appears after the check. | `tests/test_transport.py`, `tests/test_review_findings.py` (F-08) |
 | A YAML file runs code | A safe loader only. A Python object tag is rejected. An applicability rule is a data tree, not an expression. | `docs/adr/0004` |
 | A schema or a context reference fetches a remote document | Validators are built with an empty registry. A non-local reference is refused. No context is fetched. | `src/dppce/adapters/common.py` |
 | Untrusted text runs in the HTML report | Every value is escaped. The report has no script. | `src/dppce/report/html.py` |
@@ -68,9 +69,12 @@ standalone verifier and the recipient's own trust bundle.
 | The holder of any certificate from a trusted root issues passport certificates | Each issuer must be a certificate authority that can sign certificates, inside its path length. | `tests/test_adapters_security.py` |
 | A revoked certificate passes because of text formatting | Serial numbers compare as integers, for every certificate of the path. | `tests/test_adapters_security.py` |
 | A tested system hides a leak behind a wrong media type | The access check always tries to parse a body as JSON. A partial look never passes. | `tests/test_adapters_security.py` |
+| A tested system hides a leak behind a compression or a character encoding | The check decodes the body and looks at common encoded forms. It does not assess a body that it cannot decode. | `tests/test_review_findings.py` (F-04) |
 | An observation value can be guessed from its hash | Commitments are salted with 32 random bytes that stay in the encrypted record. | `tests/test_evidence.py` |
 | A recording is read without the key, or one record is swapped | AES-256-GCM with the record identifier as associated data. Each record is compared with its commitment. | `tests/test_evidence.py` |
-| A limit or a defect of the engine reads as a failure of the tested system | A check that raises is an error. A size limit is "too large". An unreachable system is inconclusive. | `tests/test_e2e_reference.py` |
+| A changed index makes a purge delete a current recording, or a directory that is not a recording | The index is authenticated with the data key. A purge lists first and deletes only an authentic recording with no other file. | `tests/test_review_findings.py` (F-09) |
+| An issuer signs a report whose verdict does not follow from its results | The verifier derives each verdict again from the test results in the report. | `tests/test_review_findings.py` |
+| A limit or a defect of the engine reads as a failure of the tested system | A check that raises is an error. A token outside the supported profile is not assessed. An unreachable system is inconclusive. | `tests/test_e2e_reference.py`, `tests/test_review_findings.py` (F-01, F-02, F-07) |
 | An unavailable adapter reads as a pass | The planner marks the step `unsupported`. Only a completed check can pass. | `tests/test_e2e_reference.py` |
 | A test contacts a real system by accident | A test-suite guard refuses any connection that is not loopback. The CI job has no other network. | `tests/test_no_network.py` |
 | An agent or a tool marks an interpretation approved | The loader needs a human approval record. The lint refuses an approved agent interpretation. No command writes an approval. | `docs/adr/0007` |
@@ -90,6 +94,10 @@ Each one was found by an automated review of a commit, or by a test, before any 
 8. The access check passed when it had nothing to probe.
 9. The access check skipped the field paths when a body had a non-JSON label.
 
+An independent review of 2026-10-13 found 17 more defects. The report is
+`validation/records/review-evidence-security-2026-10-13.md`. Each one has a regression test in
+`tests/test_review_findings.py`. The review was done by a development agent, not by a human auditor.
+
 ## 6. Open risks
 
 | Risk | State |
@@ -99,6 +107,8 @@ Each one was found by an automated review of a commit, or by a test, before any 
 | No trusted timestamp on a report | Open. RFC 3161 validation is not implemented (BL-004). |
 | Revocation uses a static snapshot | By design: verification does no network I/O. A stale snapshot blocks a complete result when the policy needs status. |
 | A hostile owner controls the tested system and its declared policy | The access check shows enforcement of the declared policy only. It cannot show that the policy is right. |
+| A hostile owner hides a restricted value on purpose | Open by design. The access check finds a canary in common encodings only. It cannot find an encrypted or privately encoded value. |
+| A signed passport outside the supported profile | The engine supports ES256 with an `x5c` certificate path only. Each other token gives `inconclusive`. Name constraints and policy constraints are not evaluated; a path that has them gives `inconclusive`. |
 | The reference system and the checks come from the same project | Method validation shows that known faults are found. It does not show that all faults are found. |
 | A denial of service against the engine by a slow tested system | Timeouts and budgets limit it. A parallel run scheduler does not exist. |
 | The file-backed Merkle log | A development component. No protection against equivocation. |

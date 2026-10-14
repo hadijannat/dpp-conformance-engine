@@ -60,6 +60,9 @@ def make_requirement_result(index: int, verdict: str, **changes: Any) -> Require
         "verdict": verdict,
         "verdict_reason": "test",
         "claim_level": "illustrative",
+        "paths": [
+            {"path_id": "default", "applicability": "true", "verdict": verdict, "steps": [f"TP-{index:03d}"]}
+        ],
     }
     return RequirementResult.model_validate(fields | changes)
 

@@ -67,7 +67,8 @@ usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PAC
                  [--accreditation-status ACCREDITATION_STATUS]
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
                  [--secrets SECRETS] [--role-secret ROLE=REFERENCE]
-                 [--allow-private-host ALLOW_PRIVATE_HOST] [--allow-remote-read]
+                 [--allow-private-host ALLOW_PRIVATE_HOST] [--allow-remote-host HOST]
+                 [--retention-days RETENTION_DAYS]
 
 Execute the plan, record the observations, and write the report.
 
@@ -100,8 +101,12 @@ options:
   --allow-private-host ALLOW_PRIVATE_HOST
                         confirm one loopback or private host that the IXIT asks for; repeat for
                         each host
-  --allow-remote-read   state that the system owner permits bounded read-only access to a public
-                        host
+  --allow-remote-host HOST
+                        state that the owner of one public host permits bounded read-only access;
+                        repeat for each host
+  --retention-days RETENTION_DAYS
+                        days to keep the recording; the operator decides; default: the value that
+                        the IXIT asks for
 ```
 
 ### `dppce replay`
@@ -231,7 +236,7 @@ options:
 ### `dppce purge`
 
 ```text
-usage: dppce purge [-h] [--json] --runs RUNS [--at AT]
+usage: dppce purge [-h] [--json] --runs RUNS --keys KEYS [--yes] [--at AT]
 
 Delete recordings whose retention period has ended.
 
@@ -239,6 +244,8 @@ options:
   -h, --help   show this help message and exit
   --json       write one JSON document to standard output
   --runs RUNS  directory that holds run directories
+  --keys KEYS  directory with the data keys
+  --yes        delete; without it the command only lists
   --at AT      reference time; default: now
 ```
 

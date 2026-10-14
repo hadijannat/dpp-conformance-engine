@@ -68,6 +68,14 @@
           "minimum": 100,
           "title": "Timeout Ms",
           "type": "integer"
+        },
+        "total_timeout_ms": {
+          "default": 30000,
+          "description": "Limit for one complete request, not for one read.",
+          "maximum": 600000,
+          "minimum": 100,
+          "title": "Total Timeout Ms",
+          "type": "integer"
         }
       },
       "title": "NetworkPolicy",
@@ -198,7 +206,8 @@
         "max_requests": 200,
         "min_interval_ms": 0,
         "retries": 0,
-        "timeout_ms": 5000
+        "timeout_ms": 5000,
+        "total_timeout_ms": 30000
       }
     },
     "observation": {

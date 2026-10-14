@@ -30,6 +30,7 @@ from dppce.models import (
     Attestation,
     DecisionBody,
     EvidenceEnvelope,
+    ExecutionStatus,
     Modality,
     Tri,
     TrustBundle,
@@ -38,7 +39,7 @@ from dppce.models import (
     VerificationDimension,
     VerificationReport,
 )
-from dppce.verdicts import overall_verdict
+from dppce.verdicts import overall_verdict, path_verdict, requirement_verdict
 
 Outcome = Literal["pass", "fail", "missing", "not_checked"]
 _STAMP = "%Y-%m-%dT%H:%M:%SZ"
@@ -75,6 +76,49 @@ def _ordering(decision: DecisionBody) -> tuple[Outcome, str]:
     return "pass", "Every list is strictly ascending by identifier."
 
 
+def _verdicts_follow(decision: DecisionBody) -> bool:
+    """True if each path and requirement verdict follows from the test results in the report.
+
+    The signature shows that the issuer made the report. It does not show that the report agrees
+    with itself. This derives each verdict again with the published rules.
+    """
+    tests = {t.test_purpose_id: t.verdict for t in decision.test_results}
+    conflicts = {c.requirement_id for c in decision.conflicts}
+    for result in decision.requirement_results:
+        for path in result.paths:
+            # A step with no result in the report is missing evidence, as in the aggregation.
+            steps = [tests.get(step, Verdict.INCONCLUSIVE) for step in path.steps]
+            if path_verdict(path.applicability, steps) is not path.verdict:
+                return False
+        derived = requirement_verdict(
+            result.applicability,
+            result.requirement_id in conflicts,
+            [p.verdict for p in result.paths],
+            decision.manifest.mode,
+            result.review_status,
+        )[0]
+        if derived is not result.verdict:
+            return False
+    return True
+
+
+def _execution_coverage(decision: DecisionBody) -> tuple[int, int]:
+    """Recompute the execution ratio: applicable requirements with one completed path."""
+    status = {t.test_purpose_id: t.execution_status for t in decision.test_results}
+    applicable = [r for r in decision.requirement_results if r.applicability is Tri.TRUE]
+    done = sum(
+        1
+        for r in applicable
+        if any(
+            p.applicability is Tri.TRUE
+            and p.steps
+            and all(status.get(step) is ExecutionStatus.COMPLETED for step in p.steps)
+            for p in r.paths
+        )
+    )
+    return done, len(applicable)
+
+
 def _counts(decision: DecisionBody) -> tuple[Outcome, str]:
     results, coverage = decision.requirement_results, decision.coverage
     excluded = sum(1 for e in decision.exclusions if e.kind == "requirement")
@@ -94,11 +138,21 @@ def _counts(decision: DecisionBody) -> tuple[Outcome, str]:
             for r in (coverage.implementation, coverage.execution, coverage.passing)
         ),
         "overall outcome": decision.overall is overall_verdict(results)[0],
+        "verdicts follow from the test results": _verdicts_follow(decision),
+        "pass and fail only for a completed step": all(
+            t.execution_status is ExecutionStatus.COMPLETED
+            for t in decision.test_results
+            if t.verdict in (Verdict.PASS, Verdict.FAIL)
+        ),
+        "execution ratio": (coverage.execution.numerator, coverage.execution.denominator)
+        == _execution_coverage(decision),
     }
     bad = [name for name, ok in checks.items() if not ok]
     if bad:
         return "fail", f"Stated values differ from the recomputed ones: {', '.join(bad)}."
-    return "pass", "Counts, coverage totals, and the overall outcome equal the recomputed values."
+    # The implementation ratio needs the catalogue and the installed capabilities, which a report
+    # does not hold. It is checked for its bounds only.
+    return "pass", "Counts, verdicts, coverage totals, and the overall outcome equal the recomputed values."
 
 
 def _key_state(key: TrustedKey, trust: TrustBundle, at: datetime) -> str | None:

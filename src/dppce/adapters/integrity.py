@@ -18,9 +18,10 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ec
 
 from dppce.adapters.common import api_url, blocked, completed, fetch_once, json_object, unusable
-from dppce.evidence.canonical import CanonicalizationError, canonical_bytes
+from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, public_jwk_of, verify_compact
 from dppce.infrastructure.clock import parse_stamp
+from dppce.infrastructure.interfaces import Record
 from dppce.models import CheckOutcome, JsonValue, TrustBundle
 from dppce.testdefs.registry import CheckContext, register
 
@@ -107,8 +108,44 @@ def _status_gap(trust: TrustBundle, now: datetime) -> str | None:
     return None
 
 
+# What a SignatureError code means for the tested system. Only a token that is not a JWS, or a
+# signature that does not verify, is a defect of the system. Every other code is a limit of this
+# engine: it supports one profile (ES256, a P-256 leaf in ``x5c``, four header parameters).
+_ENGINE_LIMITS = ("ALGORITHM", "TYPE", "HEADER", "KEY", "TOO_LARGE", "NOT_PROCESSABLE")
+_SERVER_ERROR = 500
+
+
+def _path_gap(path: list[x509.Certificate]) -> str | None:
+    """Return a constraint of the path that this engine cannot evaluate, or None.
+
+    The engine implements a subset of RFC 5280 path validation: signature, issuer name,
+    certificate authority, path length, certificate signing usage, validity, and revocation by
+    snapshot. It does not evaluate name constraints or policy constraints. A path that carries
+    one is not passed: the result is inconclusive.
+    """
+    for certificate in path:
+        for extension in (x509.NameConstraints, x509.PolicyConstraints):
+            try:
+                certificate.extensions.get_extension_for_class(extension)
+            except x509.ExtensionNotFound:
+                continue
+            return (
+                f"A certificate of the chain has {extension.__name__}, which this engine does not evaluate."
+            )
+    return None
+
+
+def _may_sign_documents(leaf: x509.Certificate) -> bool:
+    """False if the leaf states its key usage and that usage does not include a digital signature."""
+    try:
+        usage = leaf.extensions.get_extension_for_class(x509.KeyUsage).value
+    except x509.ExtensionNotFound:
+        return True
+    return bool(usage.digital_signature or usage.content_commitment)
+
+
 @register("integrity.jws", capability="integrity.jws")
-def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - the ordered findings of the contract
+def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - the ordered findings of the contract
     if ctx.trust is None:
         return blocked(
             "INTEGRITY.TRUST.MISSING", "No trust bundle is configured. Nothing is trusted by default."
@@ -119,33 +156,54 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - the ordered
     record = fetch_once(ctx, signed_url)
     if (problem := unusable(ctx, record)) is not None:
         return problem
-    findings: dict[str, JsonValue] = {}
+    findings: dict[str, JsonValue] = {"status": record.status}
+    more: list[Record] = []
 
-    def result(passed: bool, code: str, message: str, *more: object) -> CheckOutcome:
-        records = [record, *(r for r in more if r is not None)]
-        observation = ctx.observation(0, kind="exchange", records=records, summary={"findings": findings})  # type: ignore[arg-type]
-        return completed(passed, code, f"{message} {_LIMIT}", [observation])
+    def result(passed: bool, code: str, message: str, *, no_answer: bool = False) -> CheckOutcome:
+        summary = {"findings": findings}
+        observation = ctx.observation(0, kind="exchange", records=[record, *more], summary=summary)
+        return completed(passed, code, f"{message} {_LIMIT}", [observation], no_answer=no_answer)
+
+    if record.status is None or record.status >= _SERVER_ERROR:
+        # A server error is no answer about the signature. It is not a failed signature.
+        message = f"The endpoint of the signed passport answers {record.status}."
+        return result(False, "INTEGRITY.TOKEN.NO_ANSWER", message, no_answer=True)
+    if record.status != 200:
+        message = f"The system declares a signed passport, and its endpoint answers {record.status}."
+        return result(False, "INTEGRITY.TOKEN.NOT_AVAILABLE", message)
 
     token = record.body.decode("ascii", errors="replace").strip()
     try:
-        certificates = _certificates(header_of(token)) if record.status == 200 else None
-        leaf_key = certificates[0].public_key() if certificates else None
+        header = header_of(token)
+    except SignatureError:
+        findings["structure"] = "not a compact JWS"
+        return result(False, "INTEGRITY.TOKEN.MALFORMED", "The body is not a compact JWS.")
+    if "x5c" not in header:
+        return blocked(
+            "INTEGRITY.KEY.UNSUPPORTED", "The token has no x5c header. This engine finds the key there only."
+        )
+    certificates = _certificates(header)
+    if certificates is None:
+        findings["structure"] = "x5c is not a list of certificates"
+        return result(False, "INTEGRITY.TOKEN.MALFORMED", "The x5c header does not hold certificates.")
+    leaf_key = certificates[0].public_key()
+    try:
         if not isinstance(leaf_key, ec.EllipticCurvePublicKey):
-            raise SignatureError("the token carries no usable P-256 certificate")
+            raise SignatureError("the certificate key is not an elliptic-curve key", "KEY")
         payload = verify_compact(token, public_jwk_of(leaf_key), typ=PASSPORT_TYP)
     except SignatureError as exc:
-        if exc.code == "TOO_LARGE":
+        if exc.code in _ENGINE_LIMITS:
             # A limit of this engine. It says nothing about the system under test.
-            return blocked(
-                "INTEGRITY.TOKEN.TOO_LARGE", "The signed passport is larger than this engine accepts."
+            code = (
+                "INTEGRITY.TOKEN.TOO_LARGE" if exc.code == "TOO_LARGE" else "INTEGRITY.TOKEN.NOT_PROCESSABLE"
             )
+            return blocked(code, f"This engine cannot process the signed passport: {exc}.")
+        if exc.code == "MALFORMED":
+            findings["structure"] = "a part cannot be decoded"
+            return result(False, "INTEGRITY.TOKEN.MALFORMED", "A part of the token cannot be decoded.")
         findings["signature"] = "invalid"
-        return result(
-            False,
-            "INTEGRITY.SIGNATURE.INVALID",
-            "The signature does not verify with the key of its certificate.",
-        )
-    assert certificates is not None  # noqa: S101 - set when the signature verified
+        message = "The signature does not verify with the key of its certificate."
+        return result(False, "INTEGRITY.SIGNATURE.INVALID", message)
     findings["signature"] = "valid"
 
     path = trust_path(certificates[0], certificates[1:], ctx.trust)
@@ -155,7 +213,13 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - the ordered
             "The signature is valid, but its certificate does not chain to an anchor of the trust bundle."
         )
         return result(False, "INTEGRITY.ISSUER.UNTRUSTED", message)
+    if (gap := _path_gap(path)) is not None:
+        return blocked("INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT", gap)
     findings["issuer_trust"] = "chains to a trust anchor"
+    if not _may_sign_documents(certificates[0]):
+        findings["key_usage"] = "the certificate does not permit a digital signature"
+        message = "The key usage of the signing certificate does not permit a digital signature."
+        return result(False, "INTEGRITY.CERT.KEY_USAGE", message)
 
     now = ctx.evaluation_time
     if not all(c.not_valid_before_utc <= now <= c.not_valid_after_utc for c in path):
@@ -177,20 +241,26 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - the ordered
     item = fetch_once(ctx, item_url)
     if (problem := unusable(ctx, item)) is not None:
         return problem
-    document = json_object(item)
+    more.append(item)
+    document = json_object(item) if item.status == 200 else None
+    if document is None:
+        message = (
+            "The published passport is not a JSON object, so the signed payload has nothing to compare with."
+        )
+        return blocked("INTEGRITY.PAYLOAD.NOT_COMPARABLE", message)
+    # Compare the two documents as JSON values. The canonical form with integers only is a rule
+    # for the bodies of this engine (ADR 0006). It is not a rule for a passport of a third party:
+    # a different key order, white space, or a decimal number is not a mismatch.
     try:
-        same = document is not None and canonical_bytes(document) == payload
+        signed_document = parse_strict(payload)
     except CanonicalizationError:
-        same = False
-    if not same:
+        signed_document = None
+    if signed_document != document:
         findings["payload"] = "differs from the published passport"
         return result(
-            False, "INTEGRITY.PAYLOAD.MISMATCH", "The signed payload is not the published passport.", item
+            False, "INTEGRITY.PAYLOAD.MISMATCH", "The signed payload is not the published passport."
         )
     findings["payload"] = "equals the published passport"
     return result(
-        True,
-        "INTEGRITY.OK",
-        "The signature, the issuer, the certificates, and the payload are in order.",
-        item,
+        True, "INTEGRITY.OK", "The signature, the issuer, the certificates, and the payload are in order."
     )

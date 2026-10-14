@@ -83,10 +83,11 @@ def test_each_reason_a_token_is_refused_has_its_own_code(signer: LocalSigner) ->
     jwk = signer.public_jwk()
     assert verify_compact(_token(good, signer), jwk, typ=TYP) == b"payload"
     refused = {
-        "an algorithm outside the allowlist": (_token(good | {"alg": "ES384"}, signer), jwk, "NOT_ALLOWED"),
-        "a different type": (_token(good | {"typ": "other+jws"}, signer), jwk, "NOT_ALLOWED"),
-        "an unknown header parameter": (_token(good | {"crit": ["x"]}, signer), jwk, "NOT_ALLOWED"),
-        "a key on a different curve": (_token(good, signer), jwk | {"crv": "P-384"}, "NOT_ALLOWED"),
+        "an algorithm outside the allowlist": (_token(good | {"alg": "ES384"}, signer), jwk, "ALGORITHM"),
+        "a different type": (_token(good | {"typ": "other+jws"}, signer), jwk, "TYPE"),
+        "an unknown header parameter": (_token(good | {"crit": ["x"]}, signer), jwk, "HEADER"),
+        "a key on a different curve": (_token(good, signer), jwk | {"crv": "P-384"}, "KEY"),
+        "a key of a different type": (_token(good, signer), jwk | {"kty": "oct"}, "KEY"),
         "a different key": (
             _token(good, signer),
             LocalSigner.generate("other").public_jwk(),
@@ -147,7 +148,7 @@ def test_a_signer_with_a_disallowed_algorithm_cannot_sign() -> None:
 
     with pytest.raises(SignatureError) as caught:
         sign_compact(b"x", Other(), typ=TYP)
-    assert caught.value.code == "NOT_ALLOWED"
+    assert caught.value.code == "ALGORITHM"
 
 
 # -- authorization ----------------------------------------------------------------------------
@@ -222,10 +223,13 @@ def test_purge_deletes_only_recordings_past_their_retention_date(tmp_path: Path)
     (runs / "not-a-recording" / "keep.txt").write_text("keep")
     (runs / "damaged").mkdir()
     (runs / "damaged" / "recording.json").write_text("{not json")
-    assert purge_expired(runs, date(2026, 1, 31)) == [], "the last day of the period is kept"
-    assert purge_expired(runs, date(2026, 10, 13)) == [runs / "old"]
+    keys, today = _Keys(), date(2026, 10, 13)
+    assert purge_expired(runs, date(2026, 1, 31), keys, delete=True).expired == (), "the last day is kept"
+    assert purge_expired(runs, today, keys).expired == (runs / "old",)
+    assert (runs / "old").is_dir(), "a purge without the delete option removes nothing"
+    assert purge_expired(runs, today, keys, delete=True).expired == (runs / "old",)
     assert sorted(p.name for p in runs.iterdir()) == ["damaged", "new", "not-a-recording"]
-    assert purge_expired(tmp_path / "absent", date(2026, 10, 13)) == []
+    assert purge_expired(tmp_path / "absent", today, keys, delete=True).expired == ()
 
 
 # -- standalone verifier command ----------------------------------------------------------------

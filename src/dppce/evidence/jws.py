@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from joserfc import jws
-from joserfc.errors import BadSignatureError, ExceededSizeError, JoseError
+from joserfc.errors import BadSignatureError, DecodeError, ExceededSizeError, JoseError
 from joserfc.jwk import ECKey
 from joserfc.jws import JWSRegistry
 
@@ -46,8 +46,14 @@ class _Registry(JWSRegistry):
 class SignatureError(ValueError):
     """A token is malformed, uses a disallowed algorithm, is too large, or does not verify.
 
-    ``code`` says which: ``MALFORMED``, ``NOT_ALLOWED``, ``TOO_LARGE``, or ``BAD_SIGNATURE``.
-    Only ``BAD_SIGNATURE`` means that the cryptographic check ran and failed.
+    ``code`` says which:
+
+    - ``MALFORMED``: the text is not a compact JWS.
+    - ``ALGORITHM``, ``TYPE``, ``HEADER``, ``KEY``: the token is outside the one profile that
+      this engine supports. That is a limit of the engine, not a defect of the token.
+    - ``TOO_LARGE``: above a size limit of this engine.
+    - ``NOT_PROCESSABLE``: the JOSE library refused the token for a different reason.
+    - ``BAD_SIGNATURE``: the cryptographic check ran and failed. Only this code means that.
     """
 
     def __init__(self, message: str, code: str = "MALFORMED") -> None:
@@ -69,7 +75,7 @@ def _unb64(text: str) -> bytes:
 def sign_compact(payload: bytes, signer: Signer, *, typ: str) -> str:
     """Return a compact JWS over ``payload``. The header is canonical JSON."""
     if signer.algorithm not in ALLOWED_ALGORITHMS:
-        raise SignatureError(f"algorithm {signer.algorithm!r} is not in the allowlist", "NOT_ALLOWED")
+        raise SignatureError(f"algorithm {signer.algorithm!r} is not in the allowlist", "ALGORITHM")
     header = canonical_bytes({"alg": signer.algorithm, "kid": signer.key_id, "typ": typ})
     signing_input = f"{_b64(header)}.{_b64(payload)}".encode("ascii")
     return f"{signing_input.decode('ascii')}.{_b64(signer.sign(signing_input))}"
@@ -99,14 +105,15 @@ def verify_compact(token: str, public_jwk: Mapping[str, str], *, typ: str) -> by
         raise SignatureError("the token is larger than this engine accepts", "TOO_LARGE")
     header = header_of(token)
     if header.get("alg") not in ALLOWED_ALGORITHMS:
-        raise SignatureError(f"algorithm {header.get('alg')!r} is not in the allowlist", "NOT_ALLOWED")
+        raise SignatureError(f"algorithm {header.get('alg')!r} is not in the allowlist", "ALGORITHM")
     if header.get("typ") != typ:
-        raise SignatureError(f"type {header.get('typ')!r} is not {typ!r}", "NOT_ALLOWED")
+        raise SignatureError(f"type {header.get('typ')!r} is not {typ!r}", "TYPE")
     unknown = set(header) - _SUPPORTED_HEADERS
     if unknown:
-        raise SignatureError(f"unsupported header parameters: {sorted(unknown)}", "NOT_ALLOWED")
-    if set(public_jwk) - {"kid", "use", "alg"} != _PUBLIC_JWK_FIELDS or public_jwk.get("crv") != "P-256":
-        raise SignatureError("the verification key is not a public P-256 key", "NOT_ALLOWED")
+        raise SignatureError(f"unsupported header parameters: {sorted(unknown)}", "HEADER")
+    is_public_ec = set(public_jwk) - {"kid", "use", "alg"} == _PUBLIC_JWK_FIELDS
+    if not is_public_ec or public_jwk.get("kty") != "EC" or public_jwk.get("crv") != "P-256":
+        raise SignatureError("the verification key is not a public P-256 key", "KEY")
     try:
         key = ECKey.import_key({k: public_jwk[k] for k in _PUBLIC_JWK_FIELDS})
         verified = jws.deserialize_compact(
@@ -120,11 +127,18 @@ def verify_compact(token: str, public_jwk: Mapping[str, str], *, typ: str) -> by
         raise SignatureError("the token is larger than this engine accepts", "TOO_LARGE") from exc
     except BadSignatureError as exc:
         raise SignatureError("the signature does not verify", "BAD_SIGNATURE") from exc
+    except DecodeError as exc:
+        raise SignatureError("a token part cannot be decoded", "MALFORMED") from exc
     except (JoseError, ValueError) as exc:
-        raise SignatureError(f"the token cannot be processed: {type(exc).__name__}") from exc
+        raise SignatureError(
+            f"the token cannot be processed: {type(exc).__name__}", "NOT_PROCESSABLE"
+        ) from exc
 
 
 def public_jwk_of(key: ec.EllipticCurvePublicKey) -> dict[str, str]:
+    """Return the public JWK of a P-256 key. A key on a different curve is outside the profile."""
+    if not isinstance(key.curve, ec.SECP256R1):
+        raise SignatureError(f"the key is on curve {key.curve.name}, not on P-256", "KEY")
     numbers = key.public_numbers()
     return {
         "kty": "EC",
@@ -144,7 +158,7 @@ class LocalSigner:
 
     def __init__(self, key_id: str, private_key: ec.EllipticCurvePrivateKey) -> None:
         if not isinstance(private_key.curve, ec.SECP256R1):
-            raise SignatureError("ES256 needs a P-256 key")
+            raise SignatureError("ES256 needs a P-256 key", "KEY")
         self.key_id = key_id
         self._key = private_key
 

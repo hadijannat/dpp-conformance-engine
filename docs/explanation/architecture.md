@@ -261,8 +261,15 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
   connects to the checked address. This prevents DNS rebinding.
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
   An out-of-scope hop ends the request with `redirect_out_of_scope`.
-- Credentials are sent only to the origin they are configured for. They are dropped on a
-  cross-origin redirect.
+- Credentials are sent only to the origin they are configured for.
+- A request for a role other than `anonymous` always carries the credential of that role.
+  If no credential fits the target origin, the request is not sent: `authorization_denied`.
+  Such a request does not follow a redirect to a different origin: `redirect_out_of_scope`.
+  Otherwise the record would show the anonymous view under the name of the role.
+- A request for the `anonymous` role can follow a cross-origin redirect inside the policy.
+  Headers that the caller added stay with the first origin.
+- One request has a total time limit (`total_timeout_ms`), apart from the limit for one read.
+- The transport asks for an unencoded body. A check does not assess an encoded body.
 - Methods other than `GET` and `HEAD` need a valid authorization with the matching scope.
 - Limits: timeout, maximum body size (the body is truncated and flagged), maximum redirects,
   maximum request count, and minimum interval. Each limit that triggers is recorded.
@@ -280,7 +287,7 @@ does not let those files decide what the test host trusts or discloses:
 - The trust bundle comes only from the operator (`--trust`). A bundle that the IXIT names is
   never loaded. Otherwise a supplier could name its own key as a trusted authorization issuer.
 - Each non-public host in `IXIT.network.allow_private_hosts` must be confirmed by the operator
-  with `--allow-private-host`. A public host needs an authorization or `--allow-remote-read`.
+  with `--allow-private-host`. A public host needs an authorization, or `--allow-remote-host HOST` for that host.
 - A secret reference is `env:DPPCE_SECRET_<NAME>` or `file:<name>` inside the directory that
   the operator gives with `--secrets`. No other environment variable or file can be named.
 - The IXIT declares a secret reference for a role. The operator must repeat exactly that
@@ -295,6 +302,7 @@ A recording is a directory.
 
 ```text
 recording.json     index: schema version, key id, delete-after date, record ids, commitments
+recording.sealed   the same index, encrypted and authenticated with the data key
 records/<id>.enc   one encrypted record each
 ```
 
@@ -302,12 +310,19 @@ records/<id>.enc   one encrypted record each
   with AES-256-GCM. The nonce is 96 random bits. The associated data is the record id and the
   schema version.
 - The data key comes from a `DataKeyProvider`. The key is never stored in the recording directory.
-- The index holds no URL, no header, and no payload.
+- The index holds no URL, no header, and no payload. It is clear text, so that a tool can list
+  a recording with no key. It is not trusted alone: a reader with the key compares it with
+  `recording.sealed` and refuses a recording whose index was changed.
 - Commitment: `HMAC-SHA256(key = salt, message = "dppce.record.v1" || 0x00 || plaintext)`.
   The salt is 32 random bytes drawn at acquisition and stored inside the encrypted record.
   A bare hash of a predictable value is never published.
-- `delete_after` is the acquisition date plus `IXIT.observation.retention_days`.
-  `dppce purge` deletes recordings past that date.
+- `delete_after` is the acquisition date plus the retention period. The IXIT asks for a
+  period (`observation.retention_days`). The operator can set it with `--retention-days`.
+- `dppce purge` lists the recordings past that date. It deletes them only with `--yes`.
+  It deletes a directory only if the index authenticates with the data key of the operator
+  and the directory holds the files of that recording and nothing else.
+- A response header is recorded only if its name is in a fixed list of safe names. Each other
+  value is replaced with `<removed>`. A URL in a recorded header is redacted.
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in
 method, URL, or role gives `recording_mismatch`, which is an execution error.
@@ -365,7 +380,7 @@ It reports each dimension separately:
 | `ordering` | yes | Result and record keys are strictly ascending. |
 | `results_root` | yes | The recomputed root and count equal the stated ones. |
 | `records_root` | yes | The recomputed root equals the stated one. |
-| `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. |
+| `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict and each requirement verdict follows from the test results in the report (section 7). Only a completed step has `pass` or `fail`. |
 | `signature` | yes | At least one signature verifies with an allowlisted algorithm and binds the recomputed digest. |
 | `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. |
 | `status` | per trust policy | Fresh status or revocation evidence is present and good. |
@@ -374,6 +389,9 @@ It reports each dimension separately:
 `complete` is true only if every mandatory dimension passes. If the trust policy makes
 `status` or `timestamp` mandatory and the evidence is missing or stale, `complete` is false.
 Verification never changes or restates the verdict about the tested system.
+It shows that the report is intact, that a trusted issuer signed it, and that it agrees with
+itself. It does not show that the issuer observed what the report says.
+`dppce report --trust` needs `--at` too: a verification section always states its time.
 
 ## 12. Exit codes
 
