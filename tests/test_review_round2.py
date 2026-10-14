@@ -682,3 +682,13 @@ def test_verdicts4_a_step_missing_from_a_hand_built_plan_has_a_neutral_label(tmp
     )
     (result,) = aggregate(forged, {"R-1": requirement}, {})
     assert "p1/T-X: left out (PLAN.STEP_MISSING)" in result.retained
+
+
+def test_evidence5_a_dry_run_does_not_list_a_recording_with_an_extra_record_file(tmp_path: Path) -> None:
+    """Found by mutation testing: the content check decides the dry-run list on its own."""
+    runs = tmp_path / "runs"
+    _recording(runs / "r", date(2026, 1, 1))
+    (runs / "r" / "records" / "r0009.enc").write_bytes(b"not part of the index")
+    result = purge_expired(runs, date(2026, 10, 13), _Keys())
+    assert result.expired == ()
+    assert [reason for _, reason in result.kept] == ["holds files that are not part of the recording"]
