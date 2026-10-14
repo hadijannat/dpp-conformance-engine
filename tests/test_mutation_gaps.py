@@ -17,12 +17,20 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from cryptography.hazmat.primitives.asymmetric import ec
 
 import tests.core.test_run_core as core  # registers the synthetic tests_core.* checks
 from dppce.evidence import merkle
 from dppce.evidence.canonical import MAX_SAFE_INTEGER, CanonicalizationError, canonical_bytes
 from dppce.evidence.envelope import build_decision, records_root, results_root
-from dppce.evidence.jws import LocalSigner, SignatureError, sign_compact, verify_compact
+from dppce.evidence.jws import (  # the two helpers are a unit under test
+    LocalSigner,
+    SignatureError,
+    _b64,
+    _unb64,
+    sign_compact,
+    verify_compact,
+)
 from dppce.evidence.recording import (
     commit,
     purge_expired,
@@ -407,3 +415,24 @@ def test_purge_keeps_a_recording_with_an_extra_record_file_or_a_directory_in_pla
     result = purge_expired(runs, today, _StrictKeys(), delete=True)
     assert result.expired == ()
     assert {path.name for path, _ in result.kept} == {"extra-file", "dir-as-record"}
+
+
+def test_base64url_round_trips_every_short_value_also_one_that_ends_with_x() -> None:
+    endings = set()
+    for value in range(256):
+        for size in (1, 2, 3):
+            data = bytes([value]) * size
+            encoded = _b64(data)
+            endings.add(encoded[-1])
+            assert "=" not in encoded
+            assert _unb64(encoded) == data
+    assert "X" in endings, "the loop covers a text that ends with X"
+
+
+def test_a_local_signer_refuses_a_key_on_a_different_curve_and_keeps_its_key_id(tmp_path: Path) -> None:
+    with pytest.raises(SignatureError) as caught:
+        LocalSigner("TEST-ONLY-k", ec.generate_private_key(ec.SECP384R1()))
+    assert caught.value.code == "KEY"
+    pem = tmp_path / "TEST-ONLY-key.pem"
+    pem.write_bytes(LocalSigner.generate("TEST-ONLY-a").to_pem())
+    assert LocalSigner.from_pem(pem, "TEST-ONLY-b").key_id == "TEST-ONLY-b"
