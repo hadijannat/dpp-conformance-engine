@@ -98,6 +98,9 @@ This is a release candidate. It has not been tagged or published.
 - `--allow-remote-read` is replaced by `--allow-remote-host ORIGIN`.
 - `--allow-private-host` and `--allow-remote-host` take an origin, such as
   `http://127.0.0.1:8765`, not a bare host.
+- A recording needs its sealed index (`recording.sealed`). A recording written before that file
+  existed is not replayed and not purged by `dppce purge`. No such recording was published.
+  Delete it by hand after its retention period.
 - `purge_expired` needs the data keys and returns what it kept and why.
 - A role request no longer follows a cross-origin redirect (architecture, section 9).
 
