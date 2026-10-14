@@ -267,7 +267,7 @@ test_purposes:
   stimulus:
     check: manual.review
   expected_evidence:
-  - The category, the declared capacity, and the market or service date of the battery, with the evidence for
+  - The category, the declared capacity, and the placing-on-the-market date of the battery, with the evidence for
     each.
   - A record that an electronic record exists for the individual battery, not only for its model.
   - A signed manual review record that names the reviewer, the date, and the evidence examined.

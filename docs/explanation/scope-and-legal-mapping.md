@@ -159,12 +159,17 @@ No entry states, quotes, or summarizes the content of a standard.
 
 The passport duty covers each LMT battery, each industrial battery with a capacity greater than 2 kWh, and each electric vehicle battery.
 The capacity limit is for industrial batteries only. The comparison is "greater than", not "at least".
-The trigger is the placing on the market or the putting into service.
+The trigger in the Regulation is the placing on the market or the putting into service.
 
 Putting into service is the first use of a battery that was not placed on the market before (Article 3(1), point (18)).
-A placing-on-the-market date before 2027-02-18 therefore gives `false`. A later put-into-service date does not change that.
-An unknown placing-on-the-market date with a put-into-service date on or after 2027-02-18 gives `unknown`.
-The expression language has no value that means "never placed on the market". A human must accept or reject this trade-off.
+A later put-into-service date therefore cannot bring a battery that was placed on the market earlier into scope.
+The expressions read the placing-on-the-market date only. A date on or after 2027-02-18 gives `true`, an earlier date gives `false`.
+A battery that is put into service without ever being placed on the market can declare that date only as `unknown`.
+It then always gives `unknown`. The expression language has no value that means "never placed on the market".
+A human must accept or reject this trade-off (OQ-021).
+
+The three entries on a change of status (EUBAT-77-7A, EUBAT-77-7B, EUBAT-77-8) do not use the placing date to exclude a battery.
+A battery placed on the market earlier can change status later. Whether it then needs a passport is open (OQ-010).
 
 The draft pack never invents a date. Where a date is not fixed, the applicability is `unknown` and the entry gives the reason.
 A missing fact gives `unknown`. It never gives `false` and never gives `not_applicable`.

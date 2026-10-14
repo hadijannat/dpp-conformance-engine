@@ -245,9 +245,8 @@ _DATE_CASES = {
         Tri.UNKNOWN,
     ),  # no value says 'never placed on the market'
 }
-_EARLIER_PLACING = Not(
-    operand=Compare(fact="ics.characteristics.placed_on_market_date", op=Op.LT, value="2027-02-18")
-)
+_PLACED_FROM_START = Compare(fact="ics.characteristics.placed_on_market_date", op=Op.GE, value="2027-02-18")
+_STATUS_ENTRIES = {"EUBAT-77-7A", "EUBAT-77-7B", "EUBAT-77-8"}
 
 
 @pytest.mark.parametrize("case", _DATE_CASES)
@@ -259,19 +258,34 @@ def test_a_placing_before_the_start_date_puts_a_battery_outside_article_77_1(
     assert evaluate(requirement.applicability, facts).value is expected
 
 
-def test_each_entry_with_a_date_clause_excludes_an_earlier_placing(catalogue: Catalogue) -> None:
+def test_each_entry_with_a_date_clause_reads_the_placing_date_as_documented(catalogue: Catalogue) -> None:
+    """Review round 2 changed the form, not the results, of 32 entries (legal-2), and gave the three
+    status entries back their 'unknown' for an earlier placing (legal-1).
+
+    The first form of this test counted 35 entries with the clause not(placed lt 2027-02-18). That
+    clause made the put-into-service date inert, so 32 entries now state the single comparison that
+    they evaluate. The three entries on a change of status no longer exclude an earlier placing.
+    """
     requirements = {r.id: r for r in catalogue.packs[EU_PACK].requirements}
     assert len(requirements) == 36
     assert all(r.review_status is ReviewStatus.DRAFT for r in requirements.values())
-    carriers = {
+    single = {
         ident
         for ident, r in requirements.items()
-        if isinstance(r.applicability, All) and _EARLIER_PLACING in r.applicability.all
+        if isinstance(r.applicability, All) and _PLACED_FROM_START in r.applicability.all
     }
-    assert len(carriers) == 35
-    assert set(requirements) - carriers == {"EUBAT-13-7-LABELS"}, "that entry reads no date"
+    assert len(single) == 32
+    assert set(requirements) - single == {"EUBAT-13-7-LABELS", *_STATUS_ENTRIES}
     # A date-only entry, and an entry where a sibling 'const: unknown' hid the wrong 'true'.
     for ident in ("EUBAT-13-6", "EUBAT-78-B"):
         for case in "bx":
             facts, _ = _DATE_CASES[case]
             assert evaluate(requirements[ident].applicability, facts).value is Tri.FALSE, (ident, case)
+    # An earlier placing does not settle a later change of status (OQ-010): the result stays unknown.
+    for ident in _STATUS_ENTRIES:
+        expression = requirements[ident].applicability
+        assert isinstance(expression, All)
+        assert all(not isinstance(e, Not) for e in expression.all), ident
+        for case in "bx":
+            facts, _ = _DATE_CASES[case]
+            assert evaluate(expression, facts).value is Tri.UNKNOWN, (ident, case)

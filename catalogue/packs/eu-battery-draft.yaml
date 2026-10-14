@@ -12,17 +12,19 @@ description: 'Draft interpretations of Regulation (EU) 2023/1542 for the battery
   corrigenda is the authentic text. A result from this pack is diagnostic. It is not a statement of legal compliance.'
 legal_as_of: '2026-10-13'
 scope_statement: Covers Article 13(6), first sentence, points (a) and (b), and the closing sentence after point
-  (c), with Annex VI, Part C, and Article 13(7); Article 77(1) to (8) and (10); Article 78, points (a) to (h);
+  (c), with Annex VI, Part C, and Article 13(7) for the QR code and the labels of Article 13(1) to (3), not
+  for the markings of Article 13(4) and (5); Article 77(1) to (8) and (10); Article 78, points (a) to (h);
   and Annex XIII, points 1 to 4, of Regulation (EU) 2023/1542, in the consolidated version of 2026-08-13. It does
   not cover Article 13(6), point (c), Article 77(9) (addressed to the Commission), the rest of the Regulation,
   any act that was not adopted on 2026-10-13, or the content of any standard. A count of these entries is not
-  coverage of the Regulation. Two unresolved points apply to each entry that reads the dates of placing on the
-  market and putting into service. First, the exclusions of Article 1(5) and (6) (military, space, and nuclear
+  coverage of the Regulation. Three unresolved points apply to the entries that read the placing date. First, the exclusions of Article 1(5) and (6) (military, space, and nuclear
   safety equipment) are not in the expression, because the profile declares no fact for them. Second, the expression
-  excludes a battery with a placing-on-the-market date before 2027-02-18, and a declaration with an unknown
-  placing-on-the-market date and a put-into-service date on or after 2027-02-18 gives 'unknown'. The expression
+  reads the placing-on-the-market date only. A battery that is put into service without ever being placed on
+  the market (own use) can declare that date only as 'unknown', so it always gives 'unknown'. The expression
   language has no value that means 'never placed on the market'. A boolean profile fact could close that gap.
-  That change is not applied. A human must accept or reject this trade-off.
+  That change is not applied. A human must accept or reject this trade-off. Third, the entries on a change of
+  status (EUBAT-77-7A, EUBAT-77-7B, EUBAT-77-8) do not use the placing date to exclude a battery. A battery
+  placed on the market earlier can change status later, and whether it then needs a passport is open (OQ-010).
 requirements:
 - id: EUBAT-13-6
   title: The battery bears a QR code
@@ -36,17 +38,9 @@ requirements:
     its background and a size that a commonly available QR reader reads easily.
   applicability:
     all:
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -62,17 +56,19 @@ requirements:
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
     unresolved:
-    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
-      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the event that Article 77(1)
+      names, and the expression reads the placing date only (see the point on own use). A reviewer must confirm
+      that reading.
     - Annex VI, Part C names no symbology standard and no numeric limit for contrast or size.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -105,17 +101,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -131,8 +119,9 @@ requirements:
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
     unresolved:
-    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
-      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the event that Article 77(1)
+      names, and the expression reads the placing date only (see the point on own use). A reviewer must confirm
+      that reading.
     - Article 13(6) ends with the duty that the information is complete, up to date, and accurate. The audit did
       not record how that sentence relates to each point of the paragraph. The agent review of 2026-10-14
       (validation/records/review-eu-battery-draft-2026-10-14.md) read the sentence after point (c). A human
@@ -142,12 +131,13 @@ requirements:
       systems by their combined capacity.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -183,17 +173,9 @@ requirements:
           - fact: ics.characteristics.capacity_wh
             op: gt
             value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -209,8 +191,9 @@ requirements:
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
     unresolved:
-    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
-      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the event that Article 77(1)
+      names, and the expression reads the placing date only (see the point on own use). A reviewer must confirm
+      that reading.
     - Each content item has its own start. The Article 52(3) report follows the due diligence date of 2027-08-18
       and the Article 47 exemption. The labels of Article 13(1) to (3) have no fixed start date. The audit did
       not read Article 74(1).
@@ -221,12 +204,13 @@ requirements:
       closes this point.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -246,17 +230,9 @@ requirements:
     and on the documents that accompany the battery.
   applicability:
     all:
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -271,39 +247,40 @@ requirements:
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
     unresolved:
-    - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
-      or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
+    - Article 13(6) states the date and no trigger event. This draft applies the date to the event that Article 77(1)
+      names, and the expression reads the placing date only (see the point on own use). A reviewer must confirm
+      that reading.
     - The Regulation gives no test method for 'indelibly' and no criterion for 'not possible or not warranted'.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
     tests:
     - TP-EU-13-7-QR-MANUAL
 - id: EUBAT-13-7-LABELS
-  title: The labels are printed or engraved on the battery
+  title: The labels of Article 13(1) to (3) are printed or engraved on the battery
   source:
     source_id: reg-eu-2023-1542
-    citation: Art. 13(7) (labels)
+    citation: Art. 13(7) (labels of Art. 13(1) to (3))
     version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
   authority_class: legal_obligation
   modality: mandatory
-  paraphrase: The labels of Article 13 are printed or engraved on the battery so that they are visible, legible,
+  paraphrase: The labels of Article 13(1) to (3) are printed or engraved on the battery so that they are visible, legible,
     and indelible, or are on the packaging and the accompanying documents where that is impossible or unwarranted.
   applicability:
     const: unknown
     reason: The label duties start on different dates. Article 13(1) to (3) start on the later of 2026-08-18 and
       18 months after the entry into force of the Article 13(10) implementing act. That act was not located as
-      adopted as of 2026-10-13. Article 13(4) applies from 2025-08-18. Article 13(5) states no date. This 'unknown'
-      covers the labels of Article 13(1) to (3) only. The marking of Article 13(4) is outside the scope of this
-      pack.
+      adopted as of 2026-10-13. This 'unknown' covers the labels of Article 13(1) to (3)
+      only. The markings of Article 13(4) and (5) are outside the scope of this pack.
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -318,7 +295,8 @@ requirements:
     unresolved:
     - A draft of the Article 13(10) act was notified to the WTO (G/TBT/N/EU/1181). A draft is not law. The latest
       official event that the audit found is dated 2026-07-06.
-    - The effective start of the Article 13(5) marking is a matter of interpretation.
+    - The markings of Article 13(4) (from 2025-08-18) and Article 13(5) (no date stated) are not assessed by this
+      pack. A reviewer decides whether they need entries of their own.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -350,17 +328,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -380,12 +350,13 @@ requirements:
       systems by their combined capacity.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
     - The Regulation does not say expressly whether a battery that was placed on the market before 2027-02-18
       needs a passport after a later change of status. Commission FAQ material (non-binding) says that a new passport
       is needed if such a battery is remanufactured after that date.
@@ -422,17 +393,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -481,17 +444,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -549,17 +504,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -580,12 +527,13 @@ requirements:
       systems by their combined capacity.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -618,17 +566,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -679,17 +619,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -738,17 +670,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -798,17 +722,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -863,10 +779,6 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
     - const: unknown
       reason: The profile declares no fact for a change of battery status. The engine cannot tell whether the
         battery was prepared for re-use, prepared for repurposing, repurposed, or remanufactured.
@@ -888,6 +800,9 @@ requirements:
     - The Regulation does not say expressly whether a battery that was placed on the market before 2027-02-18
       needs a passport after a later change of status. Commission FAQ material (non-binding) says that a new passport
       is needed if such a battery is remanufactured after that date.
+    - This entry does not use the placing-on-the-market date to exclude a battery. A battery placed on the market
+      before 2027-02-18 can change status later, and whether it then needs a passport is open (OQ-010). The result
+      stays 'unknown' until a profile fact states the change of status.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -926,10 +841,6 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
     - const: unknown
       reason: The profile declares no fact that says whether the status of the battery changed to waste.
   testability: manual
@@ -947,6 +858,9 @@ requirements:
     unresolved:
     - The Regulation does not say how the transfer is recorded in the passport.
     - The audit did not read Article 57.
+    - This entry does not use the placing-on-the-market date to exclude a battery. A battery placed on the market
+      before 2027-02-18 can change status later, and whether it then needs a passport is open (OQ-010). The result
+      stays 'unknown' until a profile fact states the change of status.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -983,10 +897,6 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
     - const: unknown
       reason: The profile declares no fact that says whether the battery was recycled.
   testability: manual
@@ -1002,6 +912,9 @@ requirements:
     - The Regulation names no obligated party and no time limit, and does not say what 'ceases to exist' means
       for the record (deletion, deactivation, or archiving).
     - The relation to the identifier that Article 77(10) puts in the registry is not stated.
+    - This entry does not use the placing-on-the-market date to exclude a battery. A battery placed on the market
+      before 2027-02-18 can change status later, and whether it then needs a passport is open (OQ-010). The result
+      stays 'unknown' until a profile fact states the change of status.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -1032,17 +945,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1063,12 +968,13 @@ requirements:
     - Which data a battery registration needs in addition to the unique identifier is not resolved. Article 8(7)
       of Implementing Regulation (EU) 2026/1778 refers to delegated acts under Article 77 of Regulation (EU) 2023/1542.
       The audit did not examine such acts.
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -1100,17 +1006,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1160,17 +1058,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - const: unknown
       reason: The access rights depend on the Article 77(9) implementing act. No adopted act was located as of
         2026-10-13.
@@ -1220,17 +1110,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1276,17 +1158,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1331,17 +1205,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1389,17 +1255,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - const: unknown
       reason: The access rights depend on the Article 77(9) implementing act. No adopted act was located as of
         2026-10-13.
@@ -1452,17 +1310,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -1512,17 +1362,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1570,17 +1412,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1632,17 +1466,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - const: unknown
       reason: The start follows Article 7(1) and (2). For each category it is the later of a fixed date and 12
         or 18 months after the entry into force of a delegated or implementing act. No such act was located as
@@ -1692,17 +1518,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - const: unknown
       reason: The item follows the due diligence obligations, which apply from 2027-08-18 (Article 48(1) as amended
         by Regulation (EU) 2025/1561). The expression language has no fact for the evaluation time, and the profile
@@ -1756,17 +1574,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - not:
         all:
         - fact: ics.product_category
@@ -1817,17 +1627,9 @@ requirements:
     - fact: ics.product_category
       op: eq
       value: ev
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1842,12 +1644,13 @@ requirements:
     - The audit recorded no definition or test for this value.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
-      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
-      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
-      not placed on the market before. The expression language has no value that means 'never placed on the market'.
-      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
-      trade-off.
+    - The expression reads the placing-on-the-market date only. A battery placed on the market on or after
+      2027-02-18 is in scope. Article 3(1), point (18) limits putting into service to a battery that was not placed
+      on the market before, so a later put-into-service date cannot bring an earlier battery into scope. A battery
+      that is put into service without ever being placed on the market (own use) can declare its placing date only
+      as 'unknown', so it always gives 'unknown', whatever its put-into-service date. The expression language has
+      no value that means 'never placed on the market'. A boolean profile fact could close that gap. That change
+      is not applied. A human must accept or reject this trade-off.
     - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
       character with the Official Journal.
   assessment_paths:
@@ -1880,17 +1683,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1939,17 +1734,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1995,17 +1782,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - any:
       - fact: ics.product_category
         op: in
@@ -2063,17 +1842,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
     - any:
       - fact: ics.product_category
         op: in
@@ -2131,17 +1902,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -2193,17 +1956,9 @@ requirements:
         - fact: ics.characteristics.capacity_wh
           op: gt
           value: 2000
-    - any:
-      - fact: ics.characteristics.placed_on_market_date
-        op: ge
-        value: '2027-02-18'
-      - fact: ics.characteristics.put_into_service_date
-        op: ge
-        value: '2027-02-18'
-    - not:
-        fact: ics.characteristics.placed_on_market_date
-        op: lt
-        value: '2027-02-18'
+    - fact: ics.characteristics.placed_on_market_date
+      op: ge
+      value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
