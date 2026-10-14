@@ -354,3 +354,268 @@ def test_evidence7_a_number_that_overflows_to_infinity_is_refused() -> None:
 
 
 __all__ = ["LOCAL", "NOW", "NetworkPolicy", "PolicyTransport", "TransportConfig"]
+
+
+# -- adapters: integrity --------------------------------------------------------------------------
+
+from cryptography import x509  # noqa: E402 - the adapter tests below need the X.509 builders
+from cryptography.hazmat.primitives import hashes, serialization  # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec  # noqa: E402
+from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID  # noqa: E402
+
+from dppce.adapters.access import restricted_fields  # noqa: E402
+from dppce.adapters.common import unusable  # noqa: E402
+from dppce.adapters.integrity import _same_json, jws_check  # noqa: E402
+from dppce.models import ExecutionStatus  # noqa: E402
+from tests.test_adapters_security import _POLICY, _Canned, _context, bundle  # noqa: E402
+from tests.test_review_findings import Passport, _certificate, _x5c, integrity_context, pki, token  # noqa: E402
+
+ITEM = b'{"a":1}'
+
+
+def _check(
+    header_extra: dict[str, Any], key: ec.EllipticCurvePrivateKey, trust: TrustBundle, x5c: list[str]
+) -> Any:
+    header = {"alg": "ES256", "typ": "dpp+jws", "x5c": x5c} | header_extra
+    return jws_check(integrity_context(Passport(token(header, ITEM, key), ITEM), trust))
+
+
+def _leaf(
+    pki: dict[str, Any], *extensions: x509.ExtensionType
+) -> tuple[ec.EllipticCurvePrivateKey, x509.Certificate]:
+    key = ec.generate_private_key(ec.SECP256R1())
+    return key, _certificate("leaf", key.public_key(), pki["root"], *extensions)
+
+
+@pytest.mark.parametrize(
+    ("extension", "status", "code"),
+    [
+        (
+            x509.UnrecognizedExtension(x509.ObjectIdentifier("1.2.3.4.5"), b"\x05\x00"),
+            ExecutionStatus.BLOCKED,
+            "INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT",
+        ),
+        (
+            x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]),
+            ExecutionStatus.COMPLETED,
+            "INTEGRITY.CERT.KEY_USAGE",
+        ),
+        (
+            x509.ExtendedKeyUsage([x509.ObjectIdentifier("1.2.3.4.6")]),
+            ExecutionStatus.BLOCKED,
+            "INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT",
+        ),
+        (
+            x509.ExtendedKeyUsage([x509.ObjectIdentifier("1.3.6.1.5.5.7.3.36")]),
+            ExecutionStatus.COMPLETED,
+            "INTEGRITY.OK",
+        ),
+        (
+            x509.UnrecognizedExtension(x509.KeyUsage.oid, b"\x01\x02\x03"),
+            ExecutionStatus.BLOCKED,
+            "INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT",
+        ),
+    ],
+    ids=["unknown critical", "TLS only", "unknown purpose", "document signing", "unreadable key usage"],
+)
+def test_adapters1_3_a_leaf_extension_is_judged_or_not_assessed_and_never_raises(
+    extension: x509.ExtensionType, status: ExecutionStatus, code: str, pki: dict[str, Any]
+) -> None:
+    key, leaf = _leaf(pki, extension)
+    outcome = _check({}, key, pki["trust"], _x5c(leaf))
+    assert (outcome.status, outcome.reason_code) == (status, code)
+
+
+def test_adapters3_an_unreadable_intermediate_is_never_an_issuer_and_raises_nothing(
+    pki: dict[str, Any],
+) -> None:
+    key = ec.generate_private_key(ec.SECP256R1())
+    stranger = _certificate("self", key.public_key(), (key, _self_signed(key, "self")))
+    broken = _certificate(
+        "broken",
+        key.public_key(),
+        pki["root"],
+        x509.UnrecognizedExtension(x509.BasicConstraints.oid, b"\xff"),
+    )
+    outcome = _check({}, key, pki["trust"], _x5c(stranger, broken))
+    assert (outcome.passed, outcome.reason_code) == (False, "INTEGRITY.ISSUER.UNTRUSTED")
+
+
+def _self_signed(
+    key: ec.EllipticCurvePrivateKey, name: str, *, until: Any = None, start: Any = None
+) -> x509.Certificate:
+    subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, name)])
+    return (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(subject)
+        .public_key(key.public_key())
+        .serial_number(0x1111)
+        .not_valid_before(start or NOW.replace(year=2025))
+        .not_valid_after(until or NOW.replace(year=2036))
+        .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+        .sign(key, hashes.SHA256())
+    )
+
+
+def test_adapters4_a_leaf_key_of_an_unknown_algorithm_is_not_processable(pki: dict[str, Any]) -> None:
+    key, leaf = _leaf(pki)
+    der = leaf.public_bytes(serialization.Encoding.DER)
+    ec_public_key = bytes.fromhex("06072a8648ce3d0201")
+    assert ec_public_key in der
+    unknown = der.replace(ec_public_key, bytes.fromhex("06072a8648ce3d0209"), 1)
+    x5c = [base64.b64encode(unknown).decode()]
+    outcome = _check({}, key, pki["trust"], x5c)
+    assert (outcome.status, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        "INTEGRITY.TOKEN.NOT_PROCESSABLE",
+    )
+
+
+def test_adapters6_deep_documents_are_compared_without_recursion() -> None:
+    def deep(leaf: Any) -> Any:
+        node = leaf
+        for _ in range(5000):
+            node = {"k": [node]}
+        return node
+
+    assert _same_json(deep(1), deep(1))
+    assert not _same_json(deep(1), deep(2))
+    assert not _same_json({"a": 1}, {"a": 1, "b": None})
+
+
+def test_adapters8_a_chain_longer_than_the_engine_follows_is_too_large_not_malformed(
+    pki: dict[str, Any],
+) -> None:
+    key, leaf = _leaf(pki)
+    outcome = _check({}, key, pki["trust"], _x5c(leaf) * 6)
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.BLOCKED, "INTEGRITY.TOKEN.TOO_LARGE")
+
+
+def test_adapters9_an_expired_or_revoked_anchor_is_a_problem_of_the_bundle_not_of_the_system() -> None:
+    root_key = ec.generate_private_key(ec.SECP256R1())
+    expired_root = _self_signed(
+        root_key, "old root", start=NOW.replace(year=2020), until=NOW.replace(year=2026, month=1, day=1)
+    )
+    key = ec.generate_private_key(ec.SECP256R1())
+    leaf = _certificate("leaf", key.public_key(), (root_key, expired_root))
+    outcome = _check({}, key, bundle(expired_root), _x5c(leaf))
+    assert (outcome.status, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        "INTEGRITY.TRUST.ANCHOR_INVALID",
+    )
+    valid_root = _self_signed(root_key, "old root")
+    leaf = _certificate("leaf", key.public_key(), (root_key, valid_root))
+    revoked_anchor = _check({}, key, bundle(valid_root, revoked_serials=("1111",)), _x5c(leaf))
+    assert (revoked_anchor.status, revoked_anchor.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        "INTEGRITY.TRUST.ANCHOR_INVALID",
+    )
+
+
+def test_adapters11_a_cross_signed_authority_listed_twice_still_finds_the_trusted_path() -> None:
+    old_key, new_key, middle_key, key = (ec.generate_private_key(ec.SECP256R1()) for _ in range(4))
+    old_root, new_root = _self_signed(old_key, "old root"), _self_signed(new_key, "new root")
+    authority = x509.BasicConstraints(ca=True, path_length=0)
+    by_old = _certificate("middle", middle_key.public_key(), (old_key, old_root), authority)
+    by_new = _certificate("middle", middle_key.public_key(), (new_key, new_root), authority)
+    leaf = _certificate("leaf", key.public_key(), (middle_key, by_new))
+    for chain in ((leaf, by_old, by_new), (leaf, by_new, by_old)):
+        outcome = _check({}, key, bundle(new_root), _x5c(*chain))
+        assert outcome.reason_code == "INTEGRITY.OK", chain
+
+
+def test_adapters12_a_hostile_header_value_is_not_copied_into_the_report(pki: dict[str, Any]) -> None:
+    key, leaf = _leaf(pki)
+    for extra in ({"alg": "A" * 200_000}, {"typ": "x\nFORGED LINE: passed=True"}):
+        outcome = _check(extra, key, pki["trust"], _x5c(leaf))
+        assert outcome.status is ExecutionStatus.BLOCKED
+        assert len(outcome.message) < 300
+        assert "FORGED" not in outcome.message
+        assert "AAAA" not in outcome.message
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        (("Content-Encoding", "identity"), ("Content-Encoding", "gzip")),
+        (("Content-Encoding", "identity, br"),),
+        (("Transfer-Encoding", "gzip, chunked"),),
+    ],
+)
+def test_adapters13_every_coding_line_is_read(headers: tuple[tuple[str, str], ...], tmp_path: Path) -> None:
+    record = Record(**{**make_record(1).__dict__, "headers": headers})
+    outcome = unusable(_context(tmp_path, _POLICY, _Canned(b"{}")), record)
+    assert outcome is not None
+    assert outcome.reason_code == "TRANSPORT.BODY_ENCODED"
+    plain = Record(**{**make_record(1).__dict__, "headers": (("Transfer-Encoding", "chunked"),)})
+    assert unusable(_context(tmp_path, _POLICY, _Canned(b"{}")), plain) is None
+
+
+# -- adapters: access -----------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("body", "media_type"),
+    [
+        (b"\xff\xfe\x00\x00" + "<p>CANARY-test</p>".encode("utf-32-le"), "text/html; charset=utf-32"),
+        ("<p>CANARY-test</p>".encode("utf-16-be"), "text/html; charset=utf-16"),
+        ("<p>CANARY-test</p>".encode("utf-16-le"), "text/html"),
+        (b'<script>var d = {"n": "CANARY\\u002Dtest"}</script>', "text/html"),
+        (b'{"blob": "{\\"restricted\\": {\\"secret\\": \\"CANARY\\\\u002Dtest\\"}}"}', "application/json"),
+    ],
+    ids=[
+        "utf-32 with mark",
+        "utf-16 big-endian without mark",
+        "utf-16 under a utf-8 label",
+        "json escape in html",
+        "escape in nested json",
+    ],
+)
+def test_adapters2_16_a_canary_is_found_in_wide_encodings_and_json_escapes(
+    body: bytes, media_type: str, tmp_path: Path
+) -> None:
+    outcome = restricted_fields(_context(tmp_path, _POLICY, _Canned(body, media_type)))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH")
+
+
+def test_adapters5_a_deeply_nested_body_is_searched_without_recursion(tmp_path: Path) -> None:
+    depth = 500
+    body = b'{"k":' * depth + b'{"restricted":{"secret":"CANARY-test"}}' + b"}" * depth
+    outcome = restricted_fields(_context(tmp_path, _POLICY, _Canned(body)))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH")
+
+
+class _Redirected(_Canned):
+    def __init__(
+        self, body: bytes, redirects: tuple[str, ...] = (), headers: tuple[tuple[str, str], ...] = ()
+    ) -> None:
+        super().__init__(body, "text/html")
+        self._redirects, self._extra = redirects, headers
+
+    def fetch(self, request: Request) -> Record:
+        record = super().fetch(request)
+        return Record(
+            **{**record.__dict__, "redirects": self._redirects, "headers": (*record.headers, *self._extra)}
+        )
+
+
+def test_adapters14_a_canary_in_a_redirect_or_a_link_is_a_leak(tmp_path: Path) -> None:
+    for acquirer in (
+        _Redirected(b"<p>clean</p>", redirects=("http://sut.example/dpp/CANARY-test",)),
+        _Redirected(b"<p>clean</p>", headers=(("Link", '</dpp/CANARY-test>; rel="next"'),)),
+    ):
+        outcome = restricted_fields(_context(tmp_path, _POLICY, acquirer))
+        assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH")
+
+
+def test_adapters15_a_withheld_field_with_the_value_null_is_withheld(tmp_path: Path) -> None:
+    outcome = restricted_fields(
+        _context(tmp_path, _POLICY, _Canned(b'{"id":"x","restricted":{"secret":null}}'))
+    )
+    assert (outcome.passed, outcome.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+    leaked = restricted_fields(_context(tmp_path, _POLICY, _Canned(b'{"id":"x","restricted":{"secret":""}}')))
+    assert (leaked.passed, leaked.reason_code) == (False, "ACCESS.LEAK.FETCH"), "an empty string is a value"
+
+
+__all__ += ["pki"]

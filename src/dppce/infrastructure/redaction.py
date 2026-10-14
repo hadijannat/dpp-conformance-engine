@@ -23,7 +23,7 @@ SAFE_RESPONSE_HEADERS: Final = frozenset(
     {
         "accept-ranges", "allow", "cache-control", "content-encoding", "content-language",
         "content-length", "content-type", "date", "etag", "expires", "last-modified",
-        "retry-after", "vary",
+        "retry-after", "transfer-encoding", "vary",
     }
 )  # fmt: skip
 # These hold URLs. They are kept, with each URL redacted.

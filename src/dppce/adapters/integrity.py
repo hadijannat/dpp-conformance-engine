@@ -13,11 +13,12 @@ import base64
 import binascii
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Any
+from typing import Any, Final
 
 from cryptography import x509
-from cryptography.exceptions import InvalidSignature
+from cryptography.exceptions import InvalidSignature, UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.x509.oid import ExtendedKeyUsageOID
 
 from dppce.adapters.common import api_url, blocked, completed, fetch_once, json_object, unusable
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
@@ -32,13 +33,63 @@ _MAX_CHAIN = 5
 _LIMIT = "A valid signature does not prove that the signed attributes are true."
 
 
+# Extensions that this engine evaluates. Any other extension marked critical is a constraint
+# that a conforming validator must understand (RFC 5280, section 4.2), so the path is not passed.
+_EVALUATED: Final = frozenset(
+    {
+        x509.BasicConstraints.oid, x509.KeyUsage.oid, x509.ExtendedKeyUsage.oid,
+        x509.SubjectKeyIdentifier.oid, x509.AuthorityKeyIdentifier.oid,
+    }
+)  # fmt: skip
+_NOT_EVALUATED: Final = (x509.NameConstraints, x509.PolicyConstraints, x509.InhibitAnyPolicy)
+# Extended key usages that permit signing a document, and usages that name a different purpose.
+_SIGNING_PURPOSES: Final = frozenset(
+    {
+        ExtendedKeyUsageOID.ANY_EXTENDED_KEY_USAGE,
+        x509.ObjectIdentifier("1.3.6.1.5.5.7.3.36"),  # id-kp-documentSigning, RFC 9336
+    }
+)
+_OTHER_PURPOSES: Final = frozenset(
+    {
+        ExtendedKeyUsageOID.SERVER_AUTH, ExtendedKeyUsageOID.CLIENT_AUTH,
+        ExtendedKeyUsageOID.CODE_SIGNING, ExtendedKeyUsageOID.EMAIL_PROTECTION,
+        ExtendedKeyUsageOID.TIME_STAMPING, ExtendedKeyUsageOID.OCSP_SIGNING,
+    }
+)  # fmt: skip
+
+
+class _TooLongError(Exception):
+    """The chain in ``x5c`` is longer than this engine follows."""
+
+
 def _certificates(header: dict[str, object]) -> list[x509.Certificate] | None:
+    """The certificates of ``x5c``, or None if it does not hold certificates. Raises ``_TooLongError``."""
     chain = header.get("x5c")
-    if not isinstance(chain, list) or not chain or len(chain) > _MAX_CHAIN:
+    if not isinstance(chain, list) or not chain:
         return None
+    if len(chain) > _MAX_CHAIN:
+        raise _TooLongError
     try:
         return [x509.load_der_x509_certificate(base64.b64decode(str(item), validate=True)) for item in chain]
     except (binascii.Error, ValueError):
+        return None
+
+
+def _extensions(certificate: x509.Certificate) -> x509.Extensions | None:
+    """The extensions, or None if they cannot be parsed (malformed or repeated)."""
+    try:
+        return certificate.extensions
+    except ValueError:
+        return None
+
+
+def _value[E: x509.ExtensionType](certificate: x509.Certificate, kind: type[E]) -> E | None:
+    extensions = _extensions(certificate)
+    if extensions is None:
+        return None
+    try:
+        return extensions.get_extension_for_class(kind).value
+    except x509.ExtensionNotFound:
         return None
 
 
@@ -48,19 +99,14 @@ def _may_issue(issuer: x509.Certificate, authorities_below: int) -> bool:
     A signature and a matching name are not enough. Without this test, the holder of any end
     certificate from a trusted root could sign certificates of its own.
     """
-    try:
-        constraints = issuer.extensions.get_extension_for_class(x509.BasicConstraints).value
-    except x509.ExtensionNotFound:
-        return False
-    if not constraints.ca:
+    constraints = _value(issuer, x509.BasicConstraints)
+    if constraints is None or not constraints.ca:
+        # No basic constraints, or extensions that cannot be read: not a certificate authority.
         return False
     if constraints.path_length is not None and authorities_below > constraints.path_length:
         return False
-    try:
-        usage = issuer.extensions.get_extension_for_class(x509.KeyUsage).value
-    except x509.ExtensionNotFound:
-        return True
-    return bool(usage.key_cert_sign)
+    usage = _value(issuer, x509.KeyUsage)
+    return usage is None or bool(usage.key_cert_sign)
 
 
 def trust_path(
@@ -72,24 +118,27 @@ def trust_path(
     must permit signing certificates, and must respect its path length constraint.
     """
     anchors = [x509.load_pem_x509_certificate(a.certificate_pem.encode("ascii")) for a in trust.anchors]
-    path, current = [leaf], leaf
-    for depth in range(_MAX_CHAIN):
-        # ``depth`` is the number of certificate authorities already below the next issuer.
-        for candidate, is_anchor in [*((a, True) for a in anchors), *((i, False) for i in intermediates)]:
-            if not _may_issue(candidate, authorities_below=depth):
+    candidates = [*((a, True) for a in anchors), *((i, False) for i in intermediates)]
+
+    def extend(path: list[x509.Certificate]) -> list[x509.Certificate] | None:
+        # Depth first, with backtracking: a cross-signed authority can appear twice in ``x5c``,
+        # once under an anchor and once under a root that the bundle does not hold.
+        depth = len(path) - 1  # the number of certificate authorities already below the next issuer
+        if depth >= _MAX_CHAIN:
+            return None
+        for candidate, is_anchor in candidates:
+            if candidate in path or not _may_issue(candidate, authorities_below=depth):
                 continue
             try:
-                current.verify_directly_issued_by(candidate)
-            except (ValueError, TypeError, InvalidSignature):
+                path[-1].verify_directly_issued_by(candidate)
+            except (ValueError, TypeError, InvalidSignature, UnsupportedAlgorithm):
                 continue
-            path.append(candidate)
-            if is_anchor:
-                return path
-            current = candidate
-            break
-        else:
-            return None
-    return None
+            found = [*path, candidate] if is_anchor else extend([*path, candidate])
+            if found is not None:
+                return found
+        return None
+
+    return extend([leaf])
 
 
 def revoked(path: list[x509.Certificate], trust: TrustBundle) -> bool:
@@ -126,24 +175,36 @@ def _path_gap(path: list[x509.Certificate]) -> str | None:
     one is not passed: the result is inconclusive.
     """
     for certificate in path:
-        for extension in (x509.NameConstraints, x509.PolicyConstraints):
-            try:
-                certificate.extensions.get_extension_for_class(extension)
-            except x509.ExtensionNotFound:
-                continue
-            return (
-                f"A certificate of the chain has {extension.__name__}, which this engine does not evaluate."
-            )
+        extensions = _extensions(certificate)
+        if extensions is None:
+            return "A certificate of the chain has extensions that this engine cannot read."
+        for extension in extensions:
+            if isinstance(extension.value, _NOT_EVALUATED):
+                return (
+                    f"A certificate of the chain has {type(extension.value).__name__}, "
+                    "which this engine does not evaluate."
+                )
+            if extension.critical and extension.oid not in _EVALUATED:
+                return (
+                    "A certificate of the chain has a critical extension that this engine does not evaluate."
+                )
     return None
 
 
-def _may_sign_documents(leaf: x509.Certificate) -> bool:
-    """False if the leaf states its key usage and that usage does not include a digital signature."""
-    try:
-        usage = leaf.extensions.get_extension_for_class(x509.KeyUsage).value
-    except x509.ExtensionNotFound:
-        return True
-    return bool(usage.digital_signature or usage.content_commitment)
+def _purpose(leaf: x509.Certificate) -> tuple[bool | None, str]:
+    """May the leaf sign a document? True, False (it states a different purpose), or None (unknown)."""
+    usage = _value(leaf, x509.KeyUsage)
+    if usage is not None and not (usage.digital_signature or usage.content_commitment):
+        return False, "The key usage of the signing certificate does not permit a digital signature."
+    purposes = _value(leaf, x509.ExtendedKeyUsage)
+    if purposes is None or set(purposes) & _SIGNING_PURPOSES:
+        return True, ""
+    if set(purposes) <= _OTHER_PURPOSES:
+        return False, "The extended key usage of the signing certificate names other purposes only."
+    return (
+        None,
+        "The extended key usage of the signing certificate names a purpose that this engine does not know.",
+    )
 
 
 def _same_json(a: Any, b: Any) -> bool:
@@ -152,15 +213,27 @@ def _same_json(a: Any, b: Any) -> bool:
     Python calls ``True`` and ``1`` equal. JSON does not: a passport that signs ``true`` and
     publishes ``1`` shows two different documents. The numbers 1 and 1.0 are one JSON number.
     """
-    if isinstance(a, bool) or isinstance(b, bool):
-        return a is b
-    if isinstance(a, dict) and isinstance(b, dict):
-        return a.keys() == b.keys() and all(_same_json(value, b[key]) for key, value in a.items())
-    if isinstance(a, list) and isinstance(b, list):
-        return len(a) == len(b) and all(map(_same_json, a, b))
-    if isinstance(a, int | Decimal) and isinstance(b, int | Decimal):
-        return a == b
-    return type(a) is type(b) and bool(a == b)
+    # A work list, not recursion: a deeply nested passport must not stop the check.
+    pending = [(a, b)]
+    while pending:
+        x, y = pending.pop()
+        if isinstance(x, bool) or isinstance(y, bool):
+            same = x is y
+        elif isinstance(x, dict) and isinstance(y, dict):
+            same = x.keys() == y.keys()
+            if same:
+                pending.extend((value, y[key]) for key, value in x.items())
+        elif isinstance(x, list) and isinstance(y, list):
+            same = len(x) == len(y)
+            if same:
+                pending.extend(zip(x, y, strict=True))
+        elif isinstance(x, int | Decimal) and isinstance(y, int | Decimal):
+            same = x == y
+        else:
+            same = type(x) is type(y) and bool(x == y)
+        if not same:
+            return False
+    return True
 
 
 @register("integrity.jws", capability="integrity.jws")
@@ -201,12 +274,22 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
         return blocked(
             "INTEGRITY.KEY.UNSUPPORTED", "The token has no x5c header. This engine finds the key there only."
         )
-    certificates = _certificates(header)
+    try:
+        certificates = _certificates(header)
+    except _TooLongError:
+        return blocked(
+            "INTEGRITY.TOKEN.TOO_LARGE", f"The x5c chain is longer than {_MAX_CHAIN} certificates."
+        )
     if certificates is None:
         findings["structure"] = "x5c is not a list of certificates"
         return result(False, "INTEGRITY.TOKEN.MALFORMED", "The x5c header does not hold certificates.")
-    leaf_key = certificates[0].public_key()
     try:
+        try:
+            leaf_key = certificates[0].public_key()
+        except (UnsupportedAlgorithm, ValueError) as exc:
+            raise SignatureError(
+                "the certificate key is of a type that this engine does not support", "KEY"
+            ) from exc
         if not isinstance(leaf_key, ec.EllipticCurvePublicKey):
             raise SignatureError("the certificate key is not an elliptic-curve key", "KEY")
         payload = verify_compact(token, public_jwk_of(leaf_key), typ=PASSPORT_TYP)
@@ -216,7 +299,8 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
             code = (
                 "INTEGRITY.TOKEN.TOO_LARGE" if exc.code == "TOO_LARGE" else "INTEGRITY.TOKEN.NOT_PROCESSABLE"
             )
-            return blocked(code, f"This engine cannot process the signed passport: {exc}.")
+            # The code only: the text of the error can quote values that the tested system chose.
+            return blocked(code, f"This engine cannot process the signed passport ({exc.code}).")
         if exc.code == "MALFORMED":
             findings["structure"] = "a part cannot be decoded"
             return result(False, "INTEGRITY.TOKEN.MALFORMED", "A part of the token cannot be decoded.")
@@ -235,13 +319,20 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     if (gap := _path_gap(path)) is not None:
         return blocked("INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT", gap)
     findings["issuer_trust"] = "chains to a trust anchor"
-    if not _may_sign_documents(certificates[0]):
-        findings["key_usage"] = "the certificate does not permit a digital signature"
-        message = "The key usage of the signing certificate does not permit a digital signature."
+    may_sign, message = _purpose(certificates[0])
+    if may_sign is None:
+        return blocked("INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT", message)
+    if not may_sign:
+        findings["key_usage"] = "the certificate does not permit signing a document"
         return result(False, "INTEGRITY.CERT.KEY_USAGE", message)
 
     now = ctx.evaluation_time
-    if not all(c.not_valid_before_utc <= now <= c.not_valid_after_utc for c in path):
+    # The anchor is configuration of the operator. A problem with it is not a fault of the system.
+    anchor, below = path[-1], path[:-1]
+    if not anchor.not_valid_before_utc <= now <= anchor.not_valid_after_utc or revoked([anchor], ctx.trust):
+        message = "The trust anchor of this chain is expired or revoked in the operator's trust bundle."
+        return blocked("INTEGRITY.TRUST.ANCHOR_INVALID", message)
+    if not all(c.not_valid_before_utc <= now <= c.not_valid_after_utc for c in below):
         findings["certificate_validity"] = "outside the validity period"
         message = "A certificate of the chain is outside its validity period at the evaluation time."
         return result(False, "INTEGRITY.CERT.EXPIRED", message)
@@ -249,7 +340,7 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
 
     if (gap := _status_gap(ctx.trust, now)) is not None:
         return blocked("INTEGRITY.STATUS.MISSING", gap)
-    if revoked(path, ctx.trust):
+    if revoked(below, ctx.trust):
         findings["revocation"] = "revoked"
         message = "A certificate of the chain is in the revocation snapshot."
         return result(False, "INTEGRITY.CERT.REVOKED", message)

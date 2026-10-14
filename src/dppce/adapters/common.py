@@ -98,11 +98,19 @@ def unusable(ctx: CheckContext, record: Record) -> CheckOutcome | None:
         return blocked(
             "TRANSPORT.BODY_TRUNCATED", "The body is larger than the limit. A partial body proves nothing."
         )
-    encoding = (record.header("content-encoding") or "identity").strip().lower()
-    if encoding not in ("", "identity"):
+    # Every header line counts: a second Content-Encoding line adds a coding. A transfer coding
+    # other than chunked (which the HTTP library removes) also leaves the body encoded.
+    codings = [
+        token.strip().lower()
+        for name, value in record.headers
+        if name.lower() in ("content-encoding", "transfer-encoding")
+        for token in value.split(",")
+    ]
+    encoded = sorted({c for c in codings if c not in ("", "identity", "chunked")})
+    if encoded:
         # The transport asks for no encoding and no check decompresses. An encoded body is
         # neither clean nor wrong: it is not assessed.
-        message = f"The body has the content encoding '{encoding}'. This engine does not decode it."
+        message = f"The body has the coding {', '.join(encoded)}. This engine does not decode it."
         return blocked("TRANSPORT.BODY_ENCODED", message)
     return None
 

@@ -10,6 +10,7 @@ why the test purpose needs the scope ``access_probe`` from a signed authorizatio
 from __future__ import annotations
 
 import html
+import re
 from typing import Any, Literal, Self
 from urllib.parse import unquote
 
@@ -56,45 +57,96 @@ class AccessPolicy(Model):
 
 
 def _holds_path(node: Any, dotted: str) -> bool:
-    """True if any object in the tree holds the dotted path. A channel can nest the passport."""
-    if isinstance(node, dict):
-        return dig(node, dotted) is not MISSING or any(_holds_path(v, dotted) for v in node.values())
-    if isinstance(node, list):
-        return any(_holds_path(v, dotted) for v in node)
+    """True if any object in the tree holds the dotted path with a value. A channel can nest
+    the passport. A ``null`` value withholds the field. The walk is iterative: a deeply nested
+    body must not stop the check."""
+    pending = [node]
+    while pending:
+        current = pending.pop()
+        if isinstance(current, dict):
+            value = dig(current, dotted)
+            if value is not MISSING and value is not None:
+                return True
+            pending.extend(current.values())
+        elif isinstance(current, list):
+            pending.extend(current)
     return False
 
 
 def _strings(node: Any) -> list[str]:
     """Every string in a parsed JSON value: keys and values."""
-    if isinstance(node, str):
-        return [node]
-    if isinstance(node, dict):
-        return [text for key, value in node.items() for text in (key, *_strings(value))]
-    if isinstance(node, list):
-        return [text for value in node for text in _strings(value)]
-    return []
+    found: list[str] = []
+    pending = [node]
+    while pending:
+        current = pending.pop()
+        if isinstance(current, str):
+            found.append(current)
+        elif isinstance(current, dict):
+            found.extend(current)
+            pending.extend(current.values())
+        elif isinstance(current, list):
+            pending.extend(current)
+    return found
 
 
-def _decoded(record: Record, media_charset: str | None) -> str | None:
+# Byte order marks. UTF-32 first: its little-endian mark begins with the UTF-16 one.
+_MARKS = (
+    (b"\xff\xfe\x00\x00", "utf-32"), (b"\x00\x00\xfe\xff", "utf-32"), (b"\xef\xbb\xbf", "utf-8-sig"),
+    (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16"),
+)  # fmt: skip
+_WIDE = ("utf-16-le", "utf-16-be", "utf-32-le", "utf-32-be")
+
+
+def _decoded(record: Record, media_charset: str | None) -> list[str] | None:
     """Decode a body that is not JSON to text, or return None if it cannot be decoded.
 
-    A byte order mark decides first, then the declared character set, then UTF-8.
+    A byte order mark decides first, then the declared character set, then UTF-8. A wide
+    encoding without a mark is decoded in both byte orders. Text with NUL characters is also
+    read as a wide encoding: a label can hide UTF-16 that UTF-8 accepts byte for byte.
     """
     body = record.body
-    for mark, name in ((b"\xef\xbb\xbf", "utf-8-sig"), (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16")):
-        if body.startswith(mark):
-            media_charset = name
-            break
-    try:
-        return body.decode(media_charset or "utf-8")
-    except (UnicodeDecodeError, LookupError):
+    marked = next((name for mark, name in _MARKS if body.startswith(mark)), None)
+    name = (marked or media_charset or "utf-8").lower().replace("_", "-")
+    declared = [f"{name}-le", f"{name}-be"] if marked is None and name in ("utf-16", "utf-32") else [name]
+    texts = _decode_each(body, declared)
+    if not texts:
+        # The declared reading must work. Other readings only add places to look.
         return None
+    if b"\x00" in body:
+        texts += _decode_each(body, [wide for wide in _WIDE if wide not in declared])
+    return texts
+
+
+def _decode_each(body: bytes, names: list[str]) -> list[str]:
+    texts = []
+    for name in names:
+        try:
+            texts.append(body.decode(name))
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return texts
+
+
+_JSON_ESCAPE = re.compile(r"\\u([0-9a-fA-F]{4})|\\([\\/\"])")
+
+
+def _json_unescaped(text: str) -> str:
+    """Resolve JSON string escapes, for a value inside a script or a nested JSON string."""
+    return _JSON_ESCAPE.sub(lambda m: chr(int(m.group(1), 16)) if m.group(1) else m.group(2), text)
 
 
 def _forms(text: str) -> list[str]:
-    """The forms in which a value can sit in a text: plain, HTML entities resolved, percent-decoded."""
+    """The forms in which a value can sit in a text: plain, HTML entities resolved,
+    percent-decoded, and JSON escapes resolved, alone and combined."""
     unescaped = html.unescape(text)
-    return [text, unescaped, unquote(text), unquote(unescaped)]
+    decoded = unquote(text)
+    return [
+        text, unescaped, decoded, unquote(unescaped), html.unescape(decoded),
+        _json_unescaped(text), _json_unescaped(unescaped),
+    ]  # fmt: skip
+
+
+_URL_HEADERS = ("location", "content-location", "link")
 
 
 def _look(
@@ -119,14 +171,17 @@ def _look(
             message = f"The '{channel}' channel declares JSON, but the body cannot be parsed."
             return blocked("ACCESS.RESPONSE.NOT_JSON", message)
     if document is not None:
-        haystack = [form for text in _strings(document) for form in _forms(text)]
+        texts = _strings(document)
     else:
-        text = _decoded(record, charset)
-        if text is None:
+        decoded = _decoded(record, charset)
+        if decoded is None:
             # Bytes that cannot be decoded cannot be searched. That is not a clean channel.
             message = f"The body of the '{channel}' channel cannot be decoded as text."
             return blocked("ACCESS.RESPONSE.NOT_DECODABLE", message)
-        haystack = _forms(text)
+        texts = decoded
+    # A value can also leave through a redirect target or a link of the answer.
+    texts += [*record.redirects, *(v for k, v in record.headers if k.lower() in _URL_HEADERS)]
+    haystack = [form for text in texts for form in _forms(text)]
     found = [path for path in withheld if document is not None and _holds_path(document, path)]
     # A canary is a leak in any format. Look in the raw bytes and in each decoded form.
     found += [
