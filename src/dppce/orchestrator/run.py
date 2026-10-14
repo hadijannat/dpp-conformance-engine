@@ -27,6 +27,7 @@ from dppce.models import (
     ICS,
     IXIT,
     AcquisitionWindow,
+    AuthorityClass,
     Authorization,
     CapabilityState,
     CheckOutcome,
@@ -37,6 +38,7 @@ from dppce.models import (
     Plan,
     Profile,
     Requirement,
+    ReviewStatus,
     RunManifest,
     Severity,
     TestPack,
@@ -126,9 +128,27 @@ def _requirements(inputs: RunInputs) -> dict[str, Requirement]:
     return {r.id: r for name in inputs.profile.packs for r in inputs.catalogue.packs[name].requirements}
 
 
+def _approved_method(
+    mode: ExecutionMode, purpose: TestPurpose | None, requirements: dict[str, Requirement]
+) -> bool:
+    """A test method counts as approved in reviewed mode, when every requirement that it names is
+    approved and normative. A purpose that also names a draft is not, even if it runs for an
+    approved requirement whose path lists it."""
+    if mode is not ExecutionMode.REVIEWED or purpose is None or not purpose.requirements:
+        return False
+    named = [requirements.get(r) for r in purpose.requirements]
+    return all(
+        r is not None
+        and r.review_status is ReviewStatus.APPROVED
+        and r.authority_class is not AuthorityClass.ILLUSTRATIVE
+        for r in named
+    )
+
+
 def execute(plan: Plan, inputs: RunInputs, acquirer: Acquirer) -> dict[str, TestResult]:
     """Run each planned step in identifier order and return one result per step."""
     purposes = _purposes(inputs)
+    requirements = _requirements(inputs)
     results: dict[str, TestResult] = {}
     for step in plan.steps:
         purpose = purposes.get(step.test_purpose_id)
@@ -170,9 +190,9 @@ def execute(plan: Plan, inputs: RunInputs, acquirer: Acquirer) -> dict[str, Test
                     message="The replayed request differs from the recorded one. The inputs changed.",
                 )
         rules = purpose.verdict_rules if purpose else VerdictRules()
-        if plan.mode is not ExecutionMode.REVIEWED and rules.on_unreachable == "fail":
+        if rules.on_unreachable == "fail" and not _approved_method(plan.mode, purpose, requirements):
             # A connectivity failure does not prove a breach. Only an approved test method may
-            # say that it does (section 9), and only reviewed mode runs approved content alone.
+            # say that it does (section 9).
             rules = rules.model_copy(update={"on_unreachable": "inconclusive"})
         results[step.test_purpose_id] = TestResult(
             test_purpose_id=step.test_purpose_id,

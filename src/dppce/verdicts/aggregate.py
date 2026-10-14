@@ -127,6 +127,7 @@ def aggregate(
     """Build one result per planned requirement, sorted by requirement identifier."""
     conflicts = {c.requirement_id for c in plan.conflicts}
     not_run = {s.test_purpose_id for s in plan.steps if s.planned_status is not None}
+    left_out = {e.id: e.reason_code for e in plan.exclusions if e.kind == "test_purpose"}
     out: list[RequirementResult] = []
     for planned in sorted(plan.requirements, key=lambda p: p.requirement_id):
         requirement = requirements[planned.requirement_id]
@@ -151,7 +152,8 @@ def aggregate(
             # remain can pass. Keep it visible next to the verdict (section 7.3).
             for test_id in defined.get(path.path_id, ()):
                 if test_id not in path.tests:
-                    retained.append(f"{path.path_id}/{test_id}: left out (STEP.NOT_APPLICABLE)")
+                    code = left_out.get(test_id, "PLAN.STEP_MISSING")
+                    retained.append(f"{path.path_id}/{test_id}: left out ({code})")
             outcome = path_verdict(path.applicability, verdicts)
             # A gap of the path itself has no step entry above. Keep it, so that a pass of a
             # different path cannot hide it (section 7.3).

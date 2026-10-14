@@ -364,19 +364,25 @@ def cmd_replay(args: argparse.Namespace) -> int:
     stored = parse_strict((run / "inputs.json").read_bytes())
     original = EvidenceEnvelope.model_validate(parse_strict((run / "envelope.json").read_bytes()))
     records = read_recording(run / "recording", FileDataKeyProvider(args.keys))
-    inputs = _build_inputs(
-        root=data_root(args.data_root),
-        mode=ExecutionMode(stored["mode"]),
-        profile_id=stored["profile"],
-        ics=ICS.model_validate(stored["ics"]),
-        ixit=IXIT.model_validate(stored["ixit"]),
-        evaluation_time=parse_stamp(stored["evaluation_time"]),
-        import_packs=[Path(p) for p in stored["import_packs"]],
-        extra_packs=list(stored["extra_packs"]),
-        trust=TrustBundle.model_validate(stored["trust"]) if stored["trust"] else None,
-        authorization_token=stored["authorization_token"],
-        issuer=IssuerStatement.model_validate(stored["issuer"]),
-    )
+    try:
+        # Only the reading of the stored fields is guarded: a damaged file is an input error.
+        fields: dict[str, Any] = {
+            "mode": ExecutionMode(stored["mode"]),
+            "profile_id": str(stored["profile"]),
+            "ics": ICS.model_validate(stored["ics"]),
+            "ixit": IXIT.model_validate(stored["ixit"]),
+            "evaluation_time": parse_stamp(stored["evaluation_time"]),
+            "import_packs": [Path(p) for p in stored["import_packs"]],
+            "extra_packs": list(stored["extra_packs"]),
+            "trust": TrustBundle.model_validate(stored["trust"]) if stored["trust"] else None,
+            "authorization_token": stored["authorization_token"],
+            "issuer": IssuerStatement.model_validate(stored["issuer"]),
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise UsageError(
+            f"{run / 'inputs.json'} is not a valid record of run inputs: {type(exc).__name__}"
+        ) from exc
+    inputs = _build_inputs(root=data_root(args.data_root), **fields)
     expected = decision_digest(original.decision)
     digests: list[str] = []
     complete = True

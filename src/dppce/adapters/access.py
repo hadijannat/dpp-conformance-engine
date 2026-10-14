@@ -20,6 +20,7 @@ from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, 
 from dppce.catalogue import CatalogueError, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
+from dppce.infrastructure.redaction import REMOVED
 from dppce.models import CheckOutcome, Model
 from dppce.testdefs.registry import CheckContext, register
 
@@ -149,6 +150,11 @@ def _forms(text: str) -> list[str]:
 _URL_HEADERS = ("location", "content-location", "link")
 
 
+def _url_texts(record: Record) -> list[str]:
+    """Redirect targets and the URL values of the answer: a value can also leave through them."""
+    return [*record.redirects, *(v for k, v in record.headers if k.lower() in _URL_HEADERS)]
+
+
 def _look(
     record: Record, channel: str, withheld: list[str], canaries: list[Canary]
 ) -> tuple[list[str], bool] | CheckOutcome:
@@ -179,8 +185,7 @@ def _look(
             message = f"The body of the '{channel}' channel cannot be decoded as text."
             return blocked("ACCESS.RESPONSE.NOT_DECODABLE", message)
         texts = decoded
-    # A value can also leave through a redirect target or a link of the answer.
-    texts += [*record.redirects, *(v for k, v in record.headers if k.lower() in _URL_HEADERS)]
+    texts += _url_texts(record)
     haystack = [form for text in texts for form in _forms(text)]
     found = [path for path in withheld if document is not None and _holds_path(document, path)]
     # A canary is a leak in any format. Look in the raw bytes and in each decoded form.
@@ -215,6 +220,7 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
     records: list[Record] = []
     leaks: dict[str, list[str]] = {}
     canary_only: list[str] = []  # not JSON: only a canary value can be found there
+    redacted: list[str] = []  # a redirect or link URL lost a part to redaction
     for channel in _CHANNELS:
         template = policy.channels.get(channel)
         if template is None:
@@ -230,6 +236,10 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         found, is_json = looked
         if not is_json:
             canary_only.append(channel)
+        if any(REMOVED in text for text in _url_texts(record)):
+            # Redaction removed a part of a URL before the record existed. A canary could sit
+            # there. The search reads the record only, so that a replay gives the same result.
+            redacted.append(channel)
         if found:
             leaks[channel] = sorted(found)
     summary: dict[str, Any] = {
@@ -258,6 +268,12 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         message = (
             f"The channels {', '.join(canary_only)} are not JSON, and these withheld fields have no "
             f"canary to look for: {', '.join(unmarked)}."
+        )
+        return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", message)
+    if redacted and canaries:
+        message = (
+            f"On the channels {', '.join(redacted)}, a redirect or link URL held a credential-like value "
+            "that was removed before recording. A canary there cannot be seen."
         )
         return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", message)
     return completed(

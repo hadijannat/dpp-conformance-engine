@@ -269,11 +269,13 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
                     "A requirement of this test purpose is not approved."
                 )
                 out.append(Finding("CAT017", "error", test_id, message))
-        if purpose.manual and not isinstance(purpose.applicability, Const):
+        if not isinstance(purpose.applicability, Const) and _can_leave_a_passable_path(
+            test_id, requirements, purposes
+        ):
             # The ICS decides such an expression, and the supplier of the system writes the ICS.
             message = (
-                "A manual step with an applicability that reads a fact can leave its path. "
-                "The steps that remain can then pass alone."
+                "A step with an applicability that reads a fact can leave its path, and the "
+                "automated steps that remain can then pass alone."
             )
             out.append(Finding("CAT018", "warning", test_id, message))
 
@@ -302,6 +304,24 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
     return sorted(
         out, key=lambda f: ({"error": 0, "warning": 1, "info": 2}[f.severity], f.code, f.location, f.message)
     )
+
+
+def _can_leave_a_passable_path(
+    test_id: str, requirements: Mapping[str, Requirement], purposes: Mapping[str, TestPurpose]
+) -> bool:
+    """True if some path lists ``test_id`` next to automated steps only.
+
+    Without the step, such a path can still pass. A path that keeps a manual step cannot pass
+    in this version, so the step leaving it changes no verdict.
+    """
+    for requirement in requirements.values():
+        for path in requirement.assessment_paths:
+            if test_id not in path.tests:
+                continue
+            others = [purposes.get(t) for t in path.tests if t != test_id]
+            if others and all(p is not None and not p.manual for p in others):
+                return True
+    return False
 
 
 def trace(catalogue: Catalogue, testpacks: Mapping[str, TestPack]) -> list[TraceRow]:

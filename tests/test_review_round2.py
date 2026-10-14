@@ -609,6 +609,16 @@ def test_adapters14_a_canary_in_a_redirect_or_a_link_is_a_leak(tmp_path: Path) -
         assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH")
 
 
+def test_adapters14_a_url_part_removed_by_redaction_is_not_a_clean_channel(tmp_path: Path) -> None:
+    """Found by the automated review of the fix: a canary in ?session=... is redacted away."""
+    acquirer = _Redirected(b"<p>clean</p>", redirects=("http://sut.example/dpp/x?session=<removed>",))
+    outcome = restricted_fields(_context(tmp_path, _POLICY, acquirer))
+    assert (outcome.status, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        "ACCESS.POLICY.NOT_FULLY_CHECKABLE",
+    )
+
+
 def test_adapters15_a_withheld_field_with_the_value_null_is_withheld(tmp_path: Path) -> None:
     outcome = restricted_fields(
         _context(tmp_path, _POLICY, _Canned(b'{"id":"x","restricted":{"secret":null}}'))
