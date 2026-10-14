@@ -21,7 +21,7 @@ import pytest
 import tests.core.test_run_core as core  # registers the synthetic tests_core.* checks
 from dppce.evidence import merkle
 from dppce.evidence.canonical import MAX_SAFE_INTEGER, CanonicalizationError, canonical_bytes
-from dppce.evidence.envelope import build_decision, results_root
+from dppce.evidence.envelope import build_decision, records_root, results_root
 from dppce.evidence.jws import LocalSigner, SignatureError, sign_compact, verify_compact
 from dppce.evidence.recording import (
     commit,
@@ -31,7 +31,7 @@ from dppce.evidence.recording import (
     write_recording,
 )
 from dppce.infrastructure.interfaces import Record
-from dppce.models import IXIT, ClaimLevel, Exclusion, ExecutionMode, Verdict
+from dppce.models import IXIT, ClaimLevel, Conflict, Exclusion, ExecutionMode, Verdict
 from dppce.orchestrator.run import (  # noqa: TID251 - the run core is the unit under test
     RunInputs,
     execute,
@@ -312,3 +312,98 @@ def test_a_public_key_may_carry_its_identifier_use_and_algorithm() -> None:
     with pytest.raises(SignatureError) as caught:
         verify_compact(token, described | {"d": "private part"}, typ=TYP)
     assert caught.value.code == "KEY"
+
+
+# -- known answers: the published constructions, computed here without the engine -----------------
+
+
+def _published_root(label: str, leaves: list[bytes]) -> bytes:
+    """Architecture section 11.2, written out again so that a change of the engine shows."""
+    prefix = b"dppce.merkle.v1\x00" + label.encode("ascii") + b"\x00"
+
+    def sha(data: bytes) -> bytes:
+        return hashlib.sha256(data).digest()
+
+    def subtree(items: list[bytes]) -> bytes:
+        if len(items) == 1:
+            return sha(prefix + b"\x00" + items[0])
+        split = 1
+        while split * 2 < len(items):
+            split *= 2
+        return sha(prefix + b"\x01" + subtree(items[:split]) + subtree(items[split:]))
+
+    return subtree(leaves) if leaves else sha(prefix + b"\x02")
+
+
+def test_the_roots_are_the_published_construction_with_their_labels() -> None:
+    for count in range(8):
+        leaves = LEAVES[:count] + [b"x"] * max(0, count - len(LEAVES))
+        assert merkle.root("results", leaves) == _published_root("results", leaves), count
+    requirements = [make_requirement_result(i, "pass") for i in (1, 2)]
+    tests_ = [make_test_result(i, "pass") for i in (1, 2, 3)]
+    leaves = [canonical_bytes(r) for r in requirements] + [canonical_bytes(t) for t in tests_]
+    assert results_root(requirements, tests_) == _published_root("results", leaves).hex()
+    commitments = make_envelope(("pass", "fail")).decision.record_commitments
+    assert (
+        records_root(commitments)
+        == _published_root("records", [canonical_bytes(c) for c in commitments]).hex()
+    )
+
+
+def test_every_proof_of_every_tree_up_to_nine_leaves_verifies_and_a_changed_one_does_not() -> None:
+    for size in range(1, 10):
+        leaves = [f"leaf-{i}".encode() for i in range(size)]
+        expected = merkle.root("records", leaves)
+        for index in range(size):
+            proof = merkle.inclusion_proof("records", leaves, index)
+
+            def check(
+                leaf: bytes, at: int, path: tuple[bytes, ...], *, size: int = size, root: bytes = expected
+            ) -> bool:
+                return merkle.verify_inclusion(
+                    "records", leaf, index=at, size=size, proof=path, expected_root=root
+                )
+
+            assert check(leaves[index], index, proof), (size, index)
+            assert not check(b"other", index, proof)
+            for position in range(len(proof)):
+                changed = bytes([proof[position][0] ^ 1]) + proof[position][1:]
+                assert not check(leaves[index], index, (*proof[:position], changed, *proof[position + 1 :]))
+            if size > 1:
+                other = (index + 1) % size
+                assert not check(leaves[index], other, proof), (size, index, other)
+
+
+def test_a_decision_lists_conflicts_in_requirement_order() -> None:
+    template = make_envelope(("pass",)).decision
+    conflicts = [
+        Conflict(requirement_id=ident, declared="declared false", explanation="synthetic")
+        for ident in ("R-9", "R-1", "R-5")
+    ]
+    decision = build_decision(
+        manifest=template.manifest,
+        overall=template.overall,
+        overall_reason=template.overall_reason,
+        requirement_results=template.requirement_results,
+        test_results=template.test_results,
+        exclusions=(),
+        conflicts=conflicts,
+        coverage=template.coverage,
+        record_commitments=template.record_commitments,
+    )
+    assert [c.requirement_id for c in decision.conflicts] == ["R-1", "R-5", "R-9"]
+
+
+def test_purge_keeps_a_recording_with_an_extra_record_file_or_a_directory_in_place_of_one(
+    tmp_path: Path,
+) -> None:
+    runs, today = tmp_path / "runs", date(2026, 10, 13)
+    _expired(runs / "extra-file")
+    (runs / "extra-file" / "records" / "r0009.enc").write_bytes(b"not part of the index")
+    _expired(runs / "dir-as-record")
+    (runs / "dir-as-record" / "records" / "r0001.enc").unlink()
+    (runs / "dir-as-record" / "records" / "r0001.enc").mkdir()
+    (runs / "dir-as-record" / "records" / "r0001.enc" / "notes.txt").write_text("keep")
+    result = purge_expired(runs, today, _StrictKeys(), delete=True)
+    assert result.expired == ()
+    assert {path.name for path, _ in result.kept} == {"extra-file", "dir-as-record"}
