@@ -28,7 +28,8 @@ SAFE_RESPONSE_HEADERS: Final = frozenset(
 )  # fmt: skip
 # These hold URLs. They are kept, with each URL redacted.
 _URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location"})
-_LINK_TARGET: Final = re.compile(r"<([^<>]*)>")
+# One link: a target and relation names only. A different parameter can hold any text.
+_LINK: Final = re.compile(r'\s*<([^<>\s]*)>((?:\s*;\s*rel="?[A-Za-z][A-Za-z0-9 ._-]*"?)*)\s*')
 
 _SENSITIVE_PARAMETER: Final = re.compile(
     r"token|secret|passw|pwd|sig|key|auth|credential|session|code|jwt|bearer", re.IGNORECASE
@@ -60,6 +61,21 @@ def redact_url(url: str) -> str:
     return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
 
 
+def redact_link(value: str) -> str:
+    """Keep the redacted targets and the relation names of a ``Link`` header.
+
+    A value with any other parameter, or one that this simple reading cannot split, is removed
+    as a whole: a title or an anchor is free text that a system can fill with anything.
+    """
+    links: list[str] = []
+    for part in value.split(","):
+        match = _LINK.fullmatch(part)
+        if match is None:
+            return REMOVED
+        links.append(f"<{redact_url(match.group(1))}>{match.group(2)}")
+    return ", ".join(links)
+
+
 def redact_request_headers(headers: dict[str, str]) -> tuple[tuple[str, str], ...]:
     return tuple((k, v if k.lower() in SAFE_REQUEST_HEADERS else REMOVED) for k, v in sorted(headers.items()))
 
@@ -74,7 +90,7 @@ def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple
         elif lowered in _URL_RESPONSE_HEADERS:
             out.append((name, redact_url(value)))
         elif lowered == "link":
-            out.append((name, _LINK_TARGET.sub(lambda m: f"<{redact_url(m.group(1))}>", value)))
+            out.append((name, redact_link(value)))
         else:
             out.append((name, REMOVED))
     return tuple(out)

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from decimal import Decimal
 from typing import Any
 
 import rfc8785
@@ -71,14 +72,21 @@ def _reject_constant(name: str) -> Any:
     raise CanonicalizationError(f"{name} is not JSON")
 
 
-def parse_strict(raw: bytes | str) -> Any:
+def parse_strict(raw: bytes | str, *, decimals: bool = False) -> Any:
     """Parse JSON that two parsers cannot read differently.
 
     Rejects a repeated object key (parsers disagree on which value wins) and the non-JSON
     constants NaN and Infinity. Use this for every document whose content gets verified.
+    With ``decimals`` a number that is not an integer stays exact: a binary float would make
+    0.1 and 0.10000000000000001 the same number.
     """
     try:
-        return json.loads(raw, object_pairs_hook=_reject_duplicates, parse_constant=_reject_constant)
+        return json.loads(
+            raw,
+            object_pairs_hook=_reject_duplicates,
+            parse_constant=_reject_constant,
+            parse_float=Decimal if decimals else None,
+        )
     except (ValueError, RecursionError) as exc:
         if isinstance(exc, CanonicalizationError):
             raise

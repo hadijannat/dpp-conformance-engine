@@ -12,6 +12,8 @@ from __future__ import annotations
 import base64
 import binascii
 from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -144,6 +146,23 @@ def _may_sign_documents(leaf: x509.Certificate) -> bool:
     return bool(usage.digital_signature or usage.content_commitment)
 
 
+def _same_json(a: Any, b: Any) -> bool:
+    """Equality of two JSON values that were parsed with exact numbers.
+
+    Python calls ``True`` and ``1`` equal. JSON does not: a passport that signs ``true`` and
+    publishes ``1`` shows two different documents. The numbers 1 and 1.0 are one JSON number.
+    """
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a is b
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_same_json(value, b[key]) for key, value in a.items())
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(map(_same_json, a, b))
+    if isinstance(a, int | Decimal) and isinstance(b, int | Decimal):
+        return a == b
+    return type(a) is type(b) and bool(a == b)
+
+
 @register("integrity.jws", capability="integrity.jws")
 def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - the ordered findings of the contract
     if ctx.trust is None:
@@ -252,10 +271,10 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     # for the bodies of this engine (ADR 0006). It is not a rule for a passport of a third party:
     # a different key order, white space, or a decimal number is not a mismatch.
     try:
-        signed_document = parse_strict(payload)
+        same = _same_json(parse_strict(payload, decimals=True), parse_strict(item.body, decimals=True))
     except CanonicalizationError:
-        signed_document = None
-    if signed_document != document:
+        same = False
+    if not same:
         findings["payload"] = "differs from the published passport"
         return result(
             False, "INTEGRITY.PAYLOAD.MISMATCH", "The signed payload is not the published passport."

@@ -254,6 +254,34 @@ def test_f02_a_payload_that_differs_still_fails_and_a_broken_document_is_not_com
     )
 
 
+@pytest.mark.parametrize(
+    ("signed", "published"),
+    [
+        (b'{"a":true}', b'{"a":1}'),
+        (b'{"a":false}', b'{"a":0}'),
+        (b'{"a":1}', b'{"a":"1"}'),
+        (b'{"a":null}', b'{"a":0}'),
+        (b'{"a":0.1}', b'{"a":0.10000000000000001}'),
+        (b'{"a":[1,2]}', b'{"a":[2,1]}'),
+        (b'{"a":1}', b'{"a":1,"b":null}'),
+    ],
+)
+def test_f02_values_that_python_calls_equal_are_still_a_mismatch(
+    signed: bytes, published: bytes, pki: dict[str, Any]
+) -> None:
+    """Found by the review of the fix: ``True == 1`` in Python, and two decimals can share a float."""
+    token_ = token(pki["header"], signed, pki["leaf"][0])
+    for a, b in ((token_, published), (token(pki["header"], published, pki["leaf"][0]), signed)):
+        outcome = jws_check(integrity_context(Passport(a, b), pki["trust"]))
+        assert (outcome.passed, outcome.reason_code) == (False, "INTEGRITY.PAYLOAD.MISMATCH")
+
+
+def test_f02_one_number_in_two_notations_is_one_number(pki: dict[str, Any]) -> None:
+    signed = token(pki["header"], b'{"a":1.0,"b":1e2,"c":[0.50]}', pki["leaf"][0])
+    outcome = jws_check(integrity_context(Passport(signed, b'{"c":[0.5],"b":100,"a":1}'), pki["trust"]))
+    assert (outcome.passed, outcome.reason_code) == (True, "INTEGRITY.OK")
+
+
 # -- F-07 and F-16: certificates that the engine cannot judge ---------------------------------
 
 
@@ -633,6 +661,22 @@ def test_f12_a_response_header_value_is_kept_only_if_its_name_is_known_to_be_saf
     assert "page=2" in redacted["Link"]
     assert "http://h/first" in redacted["Link"]
     assert redacted["X-Session-Token"] == redacted["Server-Timing"] == "<removed>"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        '<http://h/a>; rel="next"; title="S3CRET"',
+        "<http://h/a>; anchor=S3CRET",
+        '<http://h/a>; rel="next", S3CRET',
+        "S3CRET",
+        '<http://h/a,b>; rel="next"; S3CRET',
+        "<http://h/a>; rel=next; type=S3CRET",
+    ],
+)
+def test_f12_a_link_header_with_anything_but_targets_and_relation_names_is_removed(value: str) -> None:
+    """Found by the review of the fix: a link parameter is free text."""
+    assert dict(redact_response_headers((("Link", value),)))["Link"] == "<removed>"
 
 
 # -- F-14 and F-15: confirmations by the operator ---------------------------------------------
