@@ -198,6 +198,26 @@ def _look(
     return found, document is not None
 
 
+def _partial_look(
+    withheld: list[str], canaries: list[Canary], canary_only: list[str], redacted: list[str]
+) -> str | None:
+    """Why a look that found no leak was not complete, or None if it was complete."""
+    unmarked = sorted(set(withheld) - {c.path for c in canaries})
+    if canary_only and unmarked:
+        # On a channel that is not JSON, only a canary value can be found. A withheld field with
+        # no canary could be there and stay unseen. That is not evidence of enforcement.
+        return (
+            f"The channels {', '.join(canary_only)} are not JSON, and these withheld fields have no "
+            f"canary to look for: {', '.join(unmarked)}."
+        )
+    if redacted and canaries:
+        return (
+            f"On the channels {', '.join(redacted)}, a redirect or link URL held a credential-like value "
+            "that was removed before recording. A canary there cannot be seen."
+        )
+    return None
+
+
 @register("access.restricted_fields", capability="access.policy")
 def restricted_fields(ctx: CheckContext) -> CheckOutcome:
     role = str(ctx.params.get("role", "anonymous"))
@@ -261,21 +281,8 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         channels = ", ".join(c for c in _CHANNELS if c in leaks)
         message = f"The role '{role}' receives withheld fields on: {channels}. {limit}"
         return completed(False, f"ACCESS.LEAK.{first.upper()}", message, [observation])
-    unmarked = sorted(set(withheld) - {c.path for c in canaries})
-    if canary_only and unmarked:
-        # On a channel that is not JSON, only a canary value can be found. A withheld field with
-        # no canary could be there and stay unseen. That is not evidence of enforcement.
-        message = (
-            f"The channels {', '.join(canary_only)} are not JSON, and these withheld fields have no "
-            f"canary to look for: {', '.join(unmarked)}."
-        )
-        return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", message)
-    if redacted and canaries:
-        message = (
-            f"On the channels {', '.join(redacted)}, a redirect or link URL held a credential-like value "
-            "that was removed before recording. A canary there cannot be seen."
-        )
-        return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", message)
+    if (gap := _partial_look(withheld, canaries, canary_only, redacted)) is not None:
+        return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", gap)
     return completed(
         True,
         "ACCESS.POLICY.ENFORCED",
