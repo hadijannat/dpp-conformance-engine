@@ -248,13 +248,9 @@ def _records_from(read: Reader, index: RecordingIndex, keys: DataKeyProvider) ->
 
 
 def read_index(directory: Path) -> RecordingIndex:
-    """Read the clear-text index. It is NOT authenticated: see ``read_verified_index``."""
+    """Read the clear-text index. It is NOT authenticated: ``read_recording`` checks it against
+    its sealed copy."""
     return _index_from(_path_reader(directory), directory)
-
-
-def read_verified_index(directory: Path, keys: DataKeyProvider) -> RecordingIndex:
-    """Read the index and check it against its sealed copy. Needs the data key."""
-    return _verified_index_from(_path_reader(directory), keys, directory)
 
 
 def read_recording(directory: Path, keys: DataKeyProvider) -> tuple[Record, ...]:

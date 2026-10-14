@@ -827,3 +827,20 @@ def test_gap4_a_passport_signed_with_the_key_of_a_self_signed_anchor_passes() ->
     for x5c in (_x5c(anchor), _x5c(anchor, anchor)):
         outcome = _check({}, key, bundle(anchor), x5c)
         assert outcome.reason_code == "INTEGRITY.OK", x5c
+
+
+def test_mutation_purge_neither_blocks_on_a_fifo_record_nor_stops_at_a_plain_file(tmp_path: Path) -> None:
+    """Found by mutation testing of the descriptor-based purge."""
+    runs = tmp_path / "runs"
+    runs.mkdir()
+    (runs / "0-a-plain-file.txt").write_text("not a recording")  # sorts before the recordings
+    _recording(runs / "b-expired", date(2026, 1, 1))
+    _recording(runs / "c-fifo", date(2026, 1, 1))
+    record = runs / "c-fifo" / "records" / "r0001.enc"
+    record.unlink()
+    os.mkfifo(record)
+    started = time.monotonic()
+    result = purge_expired(runs, date(2026, 10, 13), _Keys(), delete=True)
+    assert time.monotonic() - started < 5, "a FIFO in place of a record must not block"
+    assert result.expired == (runs / "b-expired",)
+    assert [path.name for path, _ in result.kept] == ["c-fifo"]
