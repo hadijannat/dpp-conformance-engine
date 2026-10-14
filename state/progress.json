@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 9,
+    "cycle": 13,
     "max_cycles": 20,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
-    "note": "The session was interrupted one time by an expired credential and was resumed. The cycle count continues.",
-    "stopped": "2026-10-14: usage limit reached. See TASKS.md, section 'State at the stop'."
+    "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
+    "state_at_end": "2026-10-14: all fast gates green. See TASKS.md, section 'State at the end of the session'."
   },
   "limits": {
     "max_parallel_tasks": 3,
@@ -18,46 +18,46 @@
   },
   "milestones": {
     "M0": {
-      "status": "in_progress",
+      "status": "complete",
       "research_passes": 2,
-      "review_rounds": 0,
-      "note": "Research pass 1 complete (9 groups). Pass 2: 2 of 3 refutation checks complete; the third was rerun. sources.yaml and the audit report are being written by a delegated task."
+      "review_rounds": 1,
+      "note": "Source audit: 9 research groups and 3 refutation checks. 128 source records. 45 high-risk claims checked: 44 confirmed, 1 refuted and corrected."
     },
     "M1": {
-      "status": "in_progress",
+      "status": "blocked",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Structure, schemas, CLI, capability manifest, community files, CI configuration, style rules, and documentation pages are written. CI has not run. Vale has not run. The documentation site build has not run."
+      "note": "Structure, schemas, CLI, capability manifest, community files, documentation, and a strict documentation build are done. Blocked: CI has never run (nothing is pushed), and Vale cannot be installed (OQ-005)."
     },
     "M2": {
-      "status": "in_progress",
+      "status": "complete",
       "research_passes": 0,
-      "review_rounds": 0,
-      "note": "Lifecycle, planning, applicability, coverage, and verdicts are implemented. The illustrative pack exists. The draft and placeholder packs and the exhaustive verdict tests are being written by delegated tasks."
+      "review_rounds": 1,
+      "note": "Semantics implemented and tested. One review round with two independent agent reviews (verdicts and planning; the draft EU interpretations). Every finding is fixed or filed. No interpretation is approved: that needs a human (OQ-002)."
     },
     "M3": {
-      "status": "in_progress",
+      "status": "complete",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "All three battery profiles run plan, run, record, replay, and report against the synthetic reference system. Thirteen checks are registered."
+      "note": "Three battery profiles run plan, run, record, replay, report, sign, and verify against the synthetic reference system."
     },
     "M4": {
-      "status": "in_progress",
+      "status": "complete",
       "research_passes": 0,
-      "review_rounds": 0,
-      "note": "Encrypted observations, canonical decision body, signing, scope binding, and the standalone verifier are implemented and tested. An independent security review by a second model is not done."
+      "review_rounds": 1,
+      "note": "Independent security review: 17 findings, all fixed with regression tests. Automated commit reviews found 4 gaps in the fixes; all fixed."
     },
     "M5": {
-      "status": "in_progress",
+      "status": "complete",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Fault catalogue, controls, five-run replays, and the validation runner exist and ran. No record is stored yet from a committed state. Mutation testing: not run. Differential checks against external validators: not run."
+      "note": "Method validation record from clean commit b7d3acf: 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, 15/15 replays. Mutation testing at 9066e64: 1157/1321 detected; survivors classified. Readiness page written."
     },
     "M6": {
-      "status": "in_progress",
+      "status": "blocked",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Audience documentation and workflows are written. Clean-environment installation: not run. Release workflows: never executed."
+      "note": "Documentation, changelog, and workflows are written. Blocked: no release, tag, push, or publication without the approval of the user; release workflows have never run; the container was never built (OQ-004)."
     }
   },
   "repair_attempts": {
@@ -114,6 +114,168 @@
       "limit": 3,
       "state": "fixed",
       "found_by": "automated commit review"
+    },
+    "aggregate-drops-retained-gaps": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "independent core tests"
+    },
+    "claim-level-of-illustrative-requirements": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "independent core tests"
+    },
+    "placeholder-can-pass": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "independent core tests"
+    },
+    "lint-misses-operand-type": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "independent core tests"
+    },
+    "migration-accepts-infinity": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "independent core tests"
+    },
+    "integrity-engine-limits-reported-as-failure": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-01, F-07"
+    },
+    "integrity-payload-comparison": {
+      "attempts": 2,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-02; the second attempt after an automated commit review found Python equality (True == 1)"
+    },
+    "role-request-without-credential": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-03, F-17"
+    },
+    "access-check-encoded-body": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-04"
+    },
+    "transport-total-request-time": {
+      "attempts": 2,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-05; the second attempt after the regression test showed that the timer lost the socket"
+    },
+    "transport-non-ascii-redirect": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-06"
+    },
+    "sample-file-read-after-check": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-08"
+    },
+    "recording-purge-and-index-authenticity": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-09, F-10, F-11"
+    },
+    "response-header-redaction": {
+      "attempts": 3,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-12; then two automated commit reviews (Link parameters; Link relation names). The limit is reached: a further defect here needs a different approach, not a fourth patch."
+    },
+    "verification-key-type": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-13"
+    },
+    "operator-confirmations": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-14, F-15"
+    },
+    "certificate-path-constraints": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review F-16"
+    },
+    "verifier-self-consistency": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "security review, contract gap 8"
+    },
+    "duplicate-test-purpose-id": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-01"
+    },
+    "unreachable-as-fail-without-approval": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-02"
+    },
+    "dropped-step-not-retained": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-03"
+    },
+    "replay-zero-times": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-04"
+    },
+    "result-model-verdict-status": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-05"
+    },
+    "stale-supersession": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-06"
+    },
+    "applicability-error-exit-code": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "verdicts and planning review V-07"
+    },
+    "eu-battery-date-clause": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "EU draft review F-01, F-02 (draft content; no approval)"
+    },
+    "jws-malformed-part-reported-as-bad-signature": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "mutation testing"
     }
   },
   "cycle_log": [
@@ -180,14 +342,39 @@
       "kind": "review",
       "milestone": "M4",
       "summary": "Independent security review by Fable completed. It reports open findings, three of them high. No finding is fixed. Source research complete: 45 high-risk claims checked, 44 confirmed, 1 refuted and corrected."
+    },
+    {
+      "cycle": 10,
+      "kind": "implement-and-check",
+      "milestone": "M2",
+      "summary": "Five defects found by the independent core tests fixed (commit ae33dcc). Fast suite 1079 passed."
+    },
+    {
+      "cycle": 11,
+      "kind": "implement-and-check",
+      "milestone": "M4",
+      "summary": "17 security review findings fixed with regression tests (52559e3); automated commit reviews found gaps in the payload comparison and the Link redaction, fixed (072b9c3, d6a7122). The architecture contract changed in section 9: a role request stops at a cross-origin redirect."
+    },
+    {
+      "cycle": 12,
+      "kind": "review",
+      "milestone": "M2",
+      "summary": "Independent agent reviews of verdicts and planning (9 findings) and of the draft EU interpretations (17 findings). Fixes in a9b509d and 81f6b73. OQ-021 to OQ-023 filed. No interpretation approved."
+    },
+    {
+      "cycle": 13,
+      "kind": "implement-and-check",
+      "milestone": "M5-M6",
+      "summary": "Core coverage 98 percent (gate 90). Mutation testing: 4 runs, 1157 of 1321 detected at 9066e64; one defect found and fixed. Method validation record from clean commit b7d3acf. Readiness page; strict documentation build passes. Fast suite 1200 passed; validation tests 63 passed."
     }
   ],
   "blockers": [
-    "Open high-severity findings of the independent security review, and 3 failing independent tests of the verdict code. Milestone M4 is not complete.",
+    "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
+    "Nothing is pushed or published: CI, release, and Scorecard workflows have never run. Publishing needs the approval of the user.",
     "Docker was not probed (the command was declined): the container image and the Compose file are not built or run. OQ-004.",
     "Homebrew cannot install vale and a native just: the Xcode license is not accepted. Vale checks are not run. OQ-005.",
-    "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
-    "Nothing is pushed or published: CI, release, and scorecard workflows have never run."
+    "No commit has a DCO sign-off: an agent must not sign for a person. OQ-018.",
+    "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user."
   ],
   "resume": "See TASKS.md, section 'Resume instructions'.",
   "process_deviations": [

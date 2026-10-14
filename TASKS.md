@@ -10,15 +10,16 @@ A check that was not executed is marked **not run**. It is never marked passed.
 
 | Milestone | Scope | Status |
 | --- | --- | --- |
-| M0 | Audit: inventory, routing, source audit, scope, risks, reuse decisions | in progress: research running |
-| M1 | Foundation: structure, community files, schemas, CLI, CI, docs, style checks, capability manifest | in progress: code done; community files, CI, docs site, and style checks not started |
-| M2 | Semantics: lifecycle, packs, ICS and IXIT validation, planning, applicability, coverage, verdicts | in progress: code done; packs and exhaustive verdict tests not started |
-| M3 | Vertical slice: three battery profiles, plan to report, core adapters | in progress: orchestrator, transport, report, and CLI done; adapters, reference system, and profiles not started |
-| M4 | Evidence: encryption, canonical body, signing, scope binding, standalone verifier | in progress: implemented and tested; independent security review not done |
-| M5 | Method validation: faults, controls, replays, property and mutation tests, readiness | not started; fault catalogue with expected outcomes is written |
-| M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | not started |
+| M0 | Audit: inventory, routing, source audit, scope, risks, reuse decisions | complete |
+| M1 | Foundation: structure, community files, schemas, CLI, CI, docs, style checks, capability manifest | blocked: CI never ran (nothing is pushed); Vale cannot be installed (OQ-005) |
+| M2 | Semantics: lifecycle, packs, ICS and IXIT validation, planning, applicability, coverage, verdicts | complete; no interpretation approved (needs a human, OQ-002) |
+| M3 | Vertical slice: three battery profiles, plan to report, core adapters | complete |
+| M4 | Evidence: encryption, canonical body, signing, scope binding, standalone verifier | complete |
+| M5 | Method validation: faults, controls, replays, property and mutation tests, readiness | complete |
+| M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | blocked: no release or publication without the approval of the user; workflows and container never ran |
 
-No milestone is complete. A milestone is complete only after the full quality gates run.
+"Complete" means that the local gates ran and passed for the milestone. It does not mean that
+a human reviewed the work. The evidence for each figure is in `docs/readiness.md`.
 
 ## M0 work log
 
@@ -74,68 +75,48 @@ Security findings from the automated commit review, all fixed in the cycle they 
 | `uv run python scripts/gen_schemas.py --check` | 0 | 14 schemas; checked |
 | `uv run just check` | 0 | ruff format, ruff check, mypy --strict (46 files), pytest: 162 passed |
 
-## State at the stop of 2026-10-14 (usage limit reached)
+## State at the end of the session (2026-10-14)
 
-The last commit is green for the committed files. The working tree holds uncommitted work of
-two delegated tasks that may be incomplete. Do not commit it before the checks below pass.
+All fast gates pass. Every finding of the three agent reviews is fixed or filed as an open
+question. The figures below come from commands that ran in this session.
 
-### Open defects: fix these first
+| Check | Result | Commit |
+| --- | --- | --- |
+| `uv run just check` | format, lint, mypy strict clean; 1200 passed, 63 deselected | `9066e64` |
+| `uv run pytest -m validation` | 63 passed | `9066e64` |
+| `uv run just cov` | core packages 98 percent (gate 90); all modules 93 percent | `9066e64` |
+| `uv run just mutation` | 1157 of 1321 mutants detected; 164 survivors classified in `validation/records/mutation-2026-10-14.md` | `9066e64` |
+| `uv run python -m validation.run` | 60/60 faults, 0/39 false positives, 8/8 boundary, 12/12 evidence faults, 15/15 replays | `b7d3acf` (clean tree) |
+| `uv run dppce catalogue lint` | 0 errors, 1 warning, 36 info | `9066e64` |
+| `uv run just docs` | strict build passes | the commit that adds `docs/readiness.md` |
 
-Independent security review (Fable), report: `validation/records/review-evidence-security-2026-10-13.md`.
-The review is an agent review. It is not a human approval and not an audit. All findings are **open**.
+Reviews (agent reviews, not human approvals):
 
-- F-01 high: `integrity.jws` reports engine limits (algorithm not in the allowlist, unknown header
-  parameter, non-P-256 leaf, HTTP 4xx or 5xx on `/signed`, a body that is not a JWS) as
-  `INTEGRITY.SIGNATURE.INVALID`, which is a fail of the tested system. Only `BAD_SIGNATURE` may fail.
-- F-02 high: `integrity.jws` applies the engine's integer-only canonical form to the third-party
-  payload. A float, a different key order, or white space gives `INTEGRITY.PAYLOAD.MISMATCH`.
-- F-03 high: an access probe for a role with no attached credential is sent as anonymous, is
-  recorded under the role, and can pass.
-- More findings, including F-17: read the report file. The task result was truncated in the session.
+- `validation/records/review-evidence-security-2026-10-13.md`: 17 findings, all fixed.
+- `validation/records/review-verdicts-and-planning-2026-10-14.md`: 9 findings, all fixed.
+- `validation/records/review-eu-battery-draft-2026-10-14.md`: 17 findings, applied to the
+  drafts; OQ-021 to OQ-023 filed. Every entry stays `draft-needs-review`.
 
-Independent core tests (`tests/core/`, committed): 782 passed, 10 failed. The 10 failures are
-kept on purpose. Each one documents a defect in the code or a gap in the contract. Do not skip them.
+### Not done, and why
 
-- `aggregate()` drops a path with no step, or with unknown applicability, from `retained` when a
-  different path passes (2 tests). Contract section 7.3 says that hidden problems stay in `retained`.
-- `claim_level(reviewed, illustrative, approved)`: the contract table and the code disagree (1 test).
-  Decide and state it in section 4: an illustrative requirement never gives a reviewed claim.
-- A placeholder requirement can pass if a mapped test passes (1 test). Contract section 4 says
-  that its verdict is `inconclusive`.
-- The lint does not report an ordering comparison whose operand type does not fit the declared
-  fact type, for example an integer fact compared with a date (3 tests).
-- The ICS migration accepts an infinite capacity (3 tests).
-
-Fast gate at this commit: format, lint, and types pass. Tests: **1069 passed, 10 failed**.
-`uv run just check` exits 1 because of those 10 tests.
-
-### Not done
-
-- [ ] Fix the defects above. Add a regression test for each. Run `uv run just check`.
-- [x] Catalogue task output committed: 128 source records, 36 draft interpretations of
-      Regulation (EU) 2023/1542 (none approved), 8 EN placeholders, 41 test purposes for the draft
-      pack (5 automated, 36 manual). `uv run dppce catalogue lint`: 0 errors. 21 content tests pass.
-      No draft entry can get `pass` or `fail` in this version: each path has a manual step, and
-      the engine has no input for a manual result (OQ-015).
-- [ ] Independent review of the draft legal interpretations and of the verdict and planner code.
-- [ ] Coverage of the core packages: not measured again with `tests/core`. Run `uv run just cov`. Gate: 90.
-- [ ] Mutation testing (`uv run just mutation`): not run.
-- [ ] Method-validation record from a clean commit (`uv run python -m validation.run`): none stored.
-- [ ] `uv run just docs`: not run. `docs/readiness.md`: not written. The README links to it.
-- [ ] Never executed: CI, release, and scorecard workflows; container build; Vale; manual
-      accessibility review.
+- [ ] Human review of the draft interpretations (OQ-002). An agent must not approve.
+- [ ] Push, CI, release, Scorecard, and publication. Each needs the approval of the user.
+- [ ] Container build and scan (OQ-004). Vale style checks (OQ-005). Manual accessibility review.
+- [ ] Dependency vulnerability scan. Not run.
+- [ ] DCO sign-off on the commits (OQ-018). An agent must not sign for a person.
+- [ ] A test against a real system. Needs a signed authorization of its owner and the approval of the user.
+- [ ] Mutation survivors "not tested: the exact size limit of a token" (3). Low value; listed in the record.
 
 ### Resume commands
 
 ```bash
 git status --short
 uv run just check
+uv run pytest -m validation
+uv run just cov
 uv run dppce catalogue lint
-uv run pytest tests/core
+uv run just docs
 ```
-
-The delegated tasks ran as workflow `wf_0c3db9e9-d6b`. If their files are incomplete, run the
-workflow again from its script with `resumeFromRunId`.
 
 ## Resume instructions
 

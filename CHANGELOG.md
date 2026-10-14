@@ -70,6 +70,9 @@ This is a release candidate. It has not been tagged or published.
   - The lint refuses a stale approved requirement next to its successor.
   - An applicability defect at run time is exit code 2.
 
+- Found by mutation testing: a signed token with a part that is not base64url is `MALFORMED`,
+  not `BAD_SIGNATURE`.
+
 ### Changed
 
 - `--allow-remote-read` is replaced by `--allow-remote-host HOST`.
