@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 13,
+    "cycle": 16,
     "max_cycles": 20,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
-    "state_at_end": "2026-10-14: all fast gates green. See TASKS.md, section 'State at the end of the session'."
+    "state_at_end": "2026-10-15: all fast gates green. See TASKS.md, section 'State at the end of the session'."
   },
   "limits": {
     "max_parallel_tasks": 3,
@@ -32,8 +32,8 @@
     "M2": {
       "status": "complete",
       "research_passes": 0,
-      "review_rounds": 1,
-      "note": "Semantics implemented and tested. One review round with two independent agent reviews (verdicts and planning; the draft EU interpretations). Every finding is fixed or filed. No interpretation is approved: that needs a human (OQ-002)."
+      "review_rounds": 2,
+      "note": "Semantics implemented and tested. Two review rounds (the maximum): round 1 with two agent reviews, round 2 with six areas, adversarial skeptics, a completeness critic, and four follow-up reviews. Every finding is fixed or filed. No interpretation is approved: that needs a human (OQ-002)."
     },
     "M3": {
       "status": "complete",
@@ -44,14 +44,14 @@
     "M4": {
       "status": "complete",
       "research_passes": 0,
-      "review_rounds": 1,
-      "note": "Independent security review: 17 findings, all fixed with regression tests. Automated commit reviews found four gaps in the fixes: two fixed in 072b9c3, one in d6a7122, one in 59e148f."
+      "review_rounds": 2,
+      "note": "Round 1: 17 security findings, all fixed. Round 2: transport, evidence, and adapter findings, and the findings of the follow-up reviews of those fixes, all fixed (validation/records/review-round-2-2026-10-14.md). Automated commit reviews found four gaps in the fixes: two fixed in 072b9c3, one in d6a7122, one in 59e148f."
     },
     "M5": {
       "status": "complete",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Method validation record from clean commit b7d3acf: 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, 15/15 replays. Mutation testing at 9066e64: 1157/1321 detected; survivors classified. Readiness page written."
+      "note": "Method validation record from clean commit 3284ce2: 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, 15/15 replays. Mutation testing at d149ee8: 1323/1499 detected; survivors classified. Readiness page updated."
     },
     "M6": {
       "status": "blocked",
@@ -158,10 +158,10 @@
       "found_by": "security review F-02; the second attempt after an automated commit review found Python equality (True == 1)"
     },
     "role-request-without-credential": {
-      "attempts": 1,
+      "attempts": 2,
       "limit": 3,
       "state": "fixed",
-      "found_by": "security review F-03, F-17"
+      "found_by": "round 1 F-03; round 2 transport-2 (anonymous identity with a secret)"
     },
     "access-check-encoded-body": {
       "attempts": 1,
@@ -170,10 +170,10 @@
       "found_by": "security review F-04"
     },
     "transport-total-request-time": {
-      "attempts": 2,
+      "attempts": 3,
       "limit": 3,
       "state": "fixed",
-      "found_by": "security review F-05; the second attempt after the regression test showed that the timer lost the socket"
+      "found_by": "round 1 F-05 (twice); round 2 transport-4 (per attempt, not per fetch). The limit is reached."
     },
     "transport-non-ascii-redirect": {
       "attempts": 1,
@@ -188,16 +188,16 @@
       "found_by": "security review F-08"
     },
     "recording-purge-and-index-authenticity": {
-      "attempts": 1,
+      "attempts": 3,
       "limit": 3,
       "state": "fixed",
-      "found_by": "security review F-09, F-10, F-11"
+      "found_by": "round 1 F-09 to F-11; round 2 evidence-3 and evidence-5; follow-up review gap3 (descriptor-based purge). The limit is reached."
     },
     "response-header-redaction": {
       "attempts": 3,
       "limit": 3,
       "state": "fixed",
-      "found_by": "security review F-12; then two automated commit reviews (Link parameters; Link relation names). The limit is reached: a further defect here needs a different approach, not a fourth patch."
+      "found_by": "round 1 F-12 and two commit reviews. Round 2 transport-6 (URL fragment) was handled in redact_url, which is the same root cause; it is counted under transport-url-fragment instead of a fourth attempt here."
     },
     "verification-key-type": {
       "attempts": 1,
@@ -218,10 +218,10 @@
       "found_by": "security review F-16"
     },
     "verifier-self-consistency": {
-      "attempts": 1,
+      "attempts": 3,
       "limit": 3,
       "state": "fixed",
-      "found_by": "security review, contract gap 8"
+      "found_by": "round 1 contract gap 8; round 2 evidence-2; follow-up review gap2 (coverage buckets). The limit is reached."
     },
     "duplicate-test-purpose-id": {
       "attempts": 1,
@@ -266,16 +266,64 @@
       "found_by": "verdicts and planning review V-07"
     },
     "eu-battery-date-clause": {
-      "attempts": 1,
+      "attempts": 2,
       "limit": 3,
       "state": "fixed",
-      "found_by": "EU draft review F-01, F-02 (draft content; no approval)"
+      "found_by": "round 1 EU review F-01/F-02; round 2 legal-1 and legal-2"
     },
     "jws-malformed-part-reported-as-bad-signature": {
       "attempts": 1,
       "limit": 3,
       "state": "fixed",
       "found_by": "mutation testing"
+    },
+    "transport-raises-on-unparsable-url": {
+      "attempts": 2,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 transport-1 (F-06 fix incomplete)"
+    },
+    "transport-url-fragment": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 transport-6"
+    },
+    "host-confirmation-by-host-not-origin": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 transport-7 (command-line change)"
+    },
+    "echoed-credential-in-record": {
+      "attempts": 2,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 transport-8; then the follow-up review gap1 (redirects, names, encodings, cut-off, short tokens)"
+    },
+    "integrity-certificate-handling": {
+      "attempts": 2,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 adapters-1, -3, -4, -8, -9, -11; follow-up review gap4 (self-signed anchor regression)"
+    },
+    "access-check-encodings-and-channels": {
+      "attempts": 3,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 1 F-04; round 2 adapters-2, -5, -14, -15, -16; commit review of 128b9ea (redacted URL). The limit is reached."
+    },
+    "verdict-engine-round2": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 verdicts-1 to -4"
+    },
+    "documentation-provenance": {
+      "attempts": 1,
+      "limit": 3,
+      "state": "fixed",
+      "found_by": "round 2 provenance-1 to -7 and adapters-17"
     }
   },
   "cycle_log": [
@@ -366,6 +414,24 @@
       "kind": "implement-and-check",
       "milestone": "M5-M6",
       "summary": "Core coverage 98 percent (gate 90). Mutation testing: 4 runs, 1157 of 1321 detected at 9066e64; one defect found and fixed. Method validation record from clean commit b7d3acf. Readiness page; strict documentation build passes. Fast suite 1200 passed; validation tests 63 passed."
+    },
+    {
+      "cycle": 14,
+      "kind": "review",
+      "milestone": "M2, M4",
+      "summary": "Review round 2 (workflow wf_a1f933e3-2e7, 83 agents, at most 3 at a time): six areas, 48 findings, adversarial skeptics, a completeness critic, and four follow-up reviews of the fixes with 14 findings. Record: validation/records/review-round-2-2026-10-14.md."
+    },
+    {
+      "cycle": 15,
+      "kind": "implement-and-check",
+      "milestone": "M2, M4",
+      "summary": "Repairs on branch fix/review-round-2 (7bbc652 to 8a23b39, d149ee8); merged into main by fast-forward. Accessibility checks of the report by an agent; reflow fixed."
+    },
+    {
+      "cycle": 16,
+      "kind": "implement-and-check",
+      "milestone": "M5, M6",
+      "summary": "Method validation from clean commit 3284ce2; mutation testing at d149ee8 (1323/1499); coverage, docs, REUSE, and clean installation re-measured; records and bookkeeping updated."
     }
   ],
   "blockers": [
@@ -382,6 +448,7 @@
     "The coordinator wrote most of the engine code directly, because the source audit held all three parallel task slots for about one hour. Independent tests and an independent review are delegated to compensate.",
     "The source audit workflow used 12 agents. The session guideline for one workflow is fewer than 10.",
     "Parallel task limit exceeded one time: a resumed workflow reran two refutation checks that were already complete, so four agents ran for about four minutes against a limit of three. The workflow was stopped and the one missing check was launched alone.",
-    "Two delegated tasks failed at launch with an expired credential (HTTP 401) and did no work. They were relaunched after the session resumed."
+    "Two delegated tasks failed at launch with an expired credential (HTTP 401) and did no work. They were relaunched after the session resumed.",
+    "Review round 2: the repair branch existed in a worktree inside the main checkout while the skeptics worked. Some skeptics judged findings against the already-fixed branch. The review record marks each such vote."
   ]
 }

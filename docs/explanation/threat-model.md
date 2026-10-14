@@ -98,6 +98,10 @@ Each one was found by an automated review of a commit, or by a test, before any 
 8. The access check passed when it had nothing to probe.
 9. The access check skipped the field paths when a body had a non-JSON label.
 
+A second review round on 2026-10-14 found 48 more items, and its follow-up reviews found 14 in the
+fixes. The record is `validation/records/review-round-2-2026-10-14.md`; the tests are in
+`tests/test_review_round2.py`.
+
 An independent review of 2026-10-13 found 17 more defects. The report is
 `validation/records/review-evidence-security-2026-10-13.md`. Each one has a regression test in
 `tests/test_review_findings.py`. The review was done by a development agent, not by a human auditor.

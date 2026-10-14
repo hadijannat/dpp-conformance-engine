@@ -84,20 +84,21 @@ _Historical log, closed. It shows the state at the time it was written. The curr
 | `uv run python scripts/gen_schemas.py --check` | 0 | 14 schemas; checked |
 | `uv run just check` | 0 | ruff format, ruff check, mypy --strict (46 files), pytest: 162 passed |
 
-## State at the end of the session (2026-10-14)
+## State at the end of the session (2026-10-15)
 
-All fast gates pass. Every finding of the three agent reviews is fixed or filed as an open
-question. The figures below come from commands that ran in this session.
+All fast gates pass. Both review rounds that the brief permits are complete. Every finding is
+fixed or filed as an open question. The figures below come from commands that ran in this
+session. The full table with evidence is in `docs/readiness.md`, section 2.
 
 | Check | Result | Commit |
 | --- | --- | --- |
-| `uv run just check` | format, lint, mypy strict clean; 1200 passed, 63 deselected | `9066e64` |
-| `uv run pytest -m validation` | 63 passed | `9066e64` |
-| `uv run just cov` | core packages 98 percent (gate 90); all modules 93 percent | `9066e64` |
-| `uv run just mutation` | 1157 of 1321 mutants detected; 164 survivors classified in `validation/records/mutation-2026-10-14.md` | `9066e64` |
-| `uv run python -m validation.run` | 60/60 faults, 0/39 false positives, 8/8 boundary, 12/12 evidence faults, 15/15 replays | `b7d3acf` (clean tree) |
-| `uv run dppce catalogue lint` | 0 errors, 1 warning, 36 info | `9066e64` |
-| `uv run just docs` | strict build passes | the commit that adds `docs/readiness.md` |
+| `uv run just check` | format, lint, mypy strict clean; 1270 passed, 63 deselected | `d149ee8` |
+| `uv run pytest -m validation` | 63 passed | `d149ee8` |
+| `uv run just cov` | core packages 98 percent (gate 90); all modules 93 percent | `d149ee8` |
+| `uv run just mutation` | 1323 of 1499 mutants detected; 176 survivors classified in `validation/records/mutation-2026-10-14.md` | `d149ee8` |
+| `uv run python -m validation.run` | 60/60 faults, 0/39 false positives, 8/8 boundary, 12/12 evidence faults, 15/15 replays | `3284ce2` (clean tree) |
+| `uv run dppce catalogue lint` | 0 errors, 1 warning, 36 info | `d149ee8` |
+| `uv run just docs` | strict build passes | `d149ee8` |
 
 Reviews (agent reviews, not human approvals):
 
@@ -105,12 +106,19 @@ Reviews (agent reviews, not human approvals):
 - `validation/records/review-verdicts-and-planning-2026-10-14.md`: 9 findings, all fixed.
 - `validation/records/review-eu-battery-draft-2026-10-14.md`: 17 findings, applied to the
   drafts; OQ-021 to OQ-023 filed. Every entry stays `draft-needs-review`.
+- `validation/records/review-round-2-2026-10-14.md`: 48 findings and 14 findings of the
+  follow-up reviews of the fixes; all handled. This was the last review round that the brief
+  permits for milestones M2 and M4.
 
 ### Not done, and why
 
 - [ ] Human review of the draft interpretations (OQ-002). An agent must not approve.
 - [ ] Push, CI, release, Scorecard, and publication. Each needs the approval of the user.
-- [ ] Container build and scan (OQ-004). Vale style checks (OQ-005). Manual accessibility review.
+- [ ] OQ-021 to OQ-023 on the draft EU pack, and the scoping of revocation serial numbers by issuer
+      (a change of the trust bundle format). Each needs a decision of a person.
+- [ ] Container build and scan (OQ-004). Vale style checks (OQ-005). An accessibility review by a
+      person, a screen reader review, and an accessibility scanner (an agent did the checks in
+      `docs/reference/accessibility.md`).
 - [ ] Dependency vulnerability scan. Not run.
 - [ ] DCO sign-off on the commits (OQ-018). An agent must not sign for a person.
 - [ ] A test against a real system. Needs a signed authorization of its owner and the approval of the user.

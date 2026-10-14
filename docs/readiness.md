@@ -18,27 +18,27 @@ ran the commands. No human has repeated them.
 | Dimension | What exists | What is missing |
 | --- | --- | --- |
 | Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. | Continuous integration has never run. The container image has never been built. |
-| Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Three agent reviews; every finding is fixed or recorded. | No independent human security audit. No dependency vulnerability scan ran. No trusted timestamp. Keys are files. |
+| Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No dependency vulnerability scan ran. No trusted timestamp. Keys are files. |
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
 | Operations | Command line with stable exit codes, retention and purge of recordings, documented how-to guides. | No key management service or hardware security module. No multi-user deployment. |
-| Accessibility | The HTML report uses semantic tables, headings, and text labels for each verdict. WCAG 2.2 AA is the target. | No manual accessibility review and no automated accessibility test ran. The Vale style rules did not run. |
+| Accessibility | The HTML report uses semantic tables, headings, and text labels for each verdict. WCAG 2.2 AA is the target. An agent checked structure, contrast, the first focus, and reflow at 320 pixels (`docs/reference/accessibility.md`). | No manual review by a person, no screen reader review, and no accessibility scanner. The Vale style rules did not run. |
 | Validation in a relevant environment | Method validation against a synthetic reference system: seeded faults, valid controls, boundary cases, evidence faults, and replays. | No validation against a real system or real data. The reference system and the checks come from the same project. |
 
 ## 2. Results of the commands
 
 | Command | Result | Commit |
 | --- | --- | --- |
-| `uv run just check` (format, lint, mypy strict, fast tests) | Format, lint, and type check clean. 1200 tests passed, 63 deselected (the slow validation tests). | `9066e64` |
-| `uv run pytest -m validation` | 63 passed. | `9066e64` |
-| `uv run just cov` | Core packages: 98 percent (2460 statements, 38 missed; 672 branches, 17 partial). All modules: 93 percent (3964 statements, 254 missed). Gate: 90 percent on the core packages. | `9066e64` |
-| `uv run just mutation` | 1321 mutants of the verdict and evidence code: 1155 killed, 2 timed out, 164 survived. 1157 of 1321 detected. Each survivor is classified in `validation/records/mutation-2026-10-14.md`; none of them changes a verdict. | `9066e64` |
-| `uv run python -m validation.run` | Seeded faults: 60 of 60 fault and profile combinations detected for the intended reason. Valid controls: 0 of 39 executed steps did not pass. Boundary cases: 8 of 8 as expected. Evidence faults: 12 of 12 failed on the named dimension, 0 not run. Replays: 15 of 15 with the same decision digest. Record: `validation/records/method-validation-20261014T040542Z.json`. | `b7d3acf`, clean working tree |
-| `uv run dppce catalogue lint` | 0 errors, 1 warning (`TP-NFC-001`: no NFC check is registered), 36 informational findings (unresolved points of the drafts). | `9066e64` |
-| Clean installation: `uv build --wheel`, then install the wheel alone in a new virtual environment | The wheel installs. `dppce --version` gives `0.1.0rc1`. The bundled catalogue lints with 0 errors. 14 JSON Schemas ship. `python -m dppce.verifier` runs. The wheel holds no test fixture. | `9066e64` |
+| `uv run just check` (format, lint, mypy strict, fast tests) | Format, lint, and type check clean. 1270 tests passed, 63 deselected (the slow validation tests). | `d149ee8` |
+| `uv run pytest -m validation` | 63 passed. | `d149ee8` |
+| `uv run just cov` | Core packages: 98 percent (2620 statements, 37 missed; 716 branches, 17 partial). All modules: 93 percent (4246 statements, 260 missed). Gate: 90 percent on the core packages. | `d149ee8` |
+| `uv run just mutation` | 1499 mutants of the verdict and evidence code: 1320 killed, 3 timed out, 176 survived. 1323 of 1499 detected. Each survivor is classified in `validation/records/mutation-2026-10-14.md`; none of them changes a verdict. | `d149ee8` |
+| `uv run python -m validation.run` | Seeded faults: 60 of 60 fault and profile combinations detected for the intended reason. Valid controls: 0 of 39 executed steps did not pass. Boundary cases: 8 of 8 as expected. Evidence faults: 12 of 12 failed on the named dimension, 0 not run. Replays: 15 of 15 with the same decision digest. Record: `validation/records/method-validation-20261014T214902Z.json`. | `3284ce2`, clean working tree |
+| `uv run dppce catalogue lint` | 0 errors, 1 warning (`TP-NFC-001`: no NFC check is registered), 36 informational findings (unresolved points of the drafts). | `d149ee8` |
+| Clean installation: `uv build --wheel`, then install the wheel alone in a new virtual environment | The wheel installs. `dppce --version` gives `0.1.0rc1`. The bundled catalogue lints with 0 errors. `python -m dppce.verifier` runs. The wheel holds no test and no fixture. | `d149ee8` |
 | `uv run just sbom` | A CycloneDX 1.6 SBOM with 111 components in `dist/sbom.cdx.json` (not committed). It describes the development environment, not only the runtime dependencies of the wheel. | `9066e64` |
-| `reuse lint` (REUSE 3.3) | 245 of 245 files have copyright and license information. Compliant. | The commit that adds this page |
-| `uv run just docs` (strict build) | Built with no warning. The ADR pages are outside the navigation; the build reports that as information. | The commit that adds this page |
+| `reuse lint` (REUSE 3.3) | 248 of 248 files have copyright and license information. Compliant. | `d149ee8` |
+| `uv run just docs` (strict build) | Built with no warning. The ADR pages are outside the navigation; the build reports that as information. | `d149ee8` |
 
 A check that is not in this table was not run in this session. The release workflow, the
 container build, the Scorecard workflow, the Vale style checks, and a manual accessibility
@@ -67,9 +67,10 @@ review is not a human approval and not an audit.
 | `validation/records/review-evidence-security-2026-10-13.md` | Evidence, transport, access, integrity, recording | 17 findings. All fixed, with a regression test each in `tests/test_review_findings.py`. |
 | `validation/records/review-verdicts-and-planning-2026-10-14.md` | Applicability, planning, verdicts, coverage, report | 9 findings. All fixed or reworded, with tests in `tests/test_review_verdicts.py`. |
 | `validation/records/review-eu-battery-draft-2026-10-14.md` | The 36 draft interpretations of Regulation (EU) 2023/1542 | 17 findings. Applied to the drafts. Three open questions filed (OQ-021 to OQ-023). Every entry stays `draft-needs-review`. |
+| `validation/records/review-round-2-2026-10-14.md` | Round 2: every fix of round 1, then the fixes of round 2 | 48 findings of six areas and 14 findings of four follow-up reviews. Each finding was checked by skeptics who tried to refute it: 52 confirmed for the reviewed code, 2 refuted, 8 informational. All are handled, with tests in `tests/test_review_round2.py`. |
 
-An automated review of each commit also ran. It found four gaps in the fixes: two fixed in commit
-`072b9c3`, one in `d6a7122`, and one in `59e148f`.
+An automated review of each commit also ran. It found four gaps in the fixes of round 1 and
+round 2: two fixed in commit `072b9c3`, one in `d6a7122`, and one in `59e148f`.
 
 ## 4. Evidence that is missing
 
