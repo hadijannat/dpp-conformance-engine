@@ -327,6 +327,12 @@ def test_evidence4_records_come_back_in_acquisition_order_past_r9999(tmp_path: P
     ]
 
 
+def _arrive(directory_fd: int) -> None:
+    handle = os.open("arrived-after-the-check.txt", os.O_WRONLY | os.O_CREAT, 0o600, dir_fd=directory_fd)
+    with os.fdopen(handle, "w") as target:
+        target.write("keep me")
+
+
 def test_evidence5_a_file_that_appears_after_the_check_is_never_deleted(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -334,9 +340,9 @@ def test_evidence5_a_file_that_appears_after_the_check_is_never_deleted(
     _recording(runs / "r", date(2026, 1, 1))
     original = recording_module._is_only_a_recording
 
-    def then_a_file_arrives(directory: Path, index: Any) -> bool:
-        answer = original(directory, index)
-        (directory / "arrived-after-the-check.txt").write_text("keep me")
+    def then_a_file_arrives(directory_fd: int, index: Any) -> bool:
+        answer = original(directory_fd, index)
+        _arrive(directory_fd)
         return answer
 
     monkeypatch.setattr(recording_module, "_is_only_a_recording", then_a_file_arrives)
@@ -640,10 +646,10 @@ def test_evidence5_a_recording_that_cannot_be_deleted_does_not_stop_the_next_one
     _recording(runs / "b", date(2026, 1, 1))
     original = recording_module._is_only_a_recording
 
-    def a_file_arrives_in_a(directory: Path, index: Any) -> bool:
-        answer = original(directory, index)
-        if directory.name == "a":
-            (directory / "arrived-after-the-check.txt").write_text("keep me")
+    def a_file_arrives_in_a(directory_fd: int, index: Any) -> bool:
+        answer = original(directory_fd, index)
+        if os.fstat(directory_fd).st_ino == os.stat(runs / "a").st_ino:
+            _arrive(directory_fd)
         return answer
 
     monkeypatch.setattr(recording_module, "_is_only_a_recording", a_file_arrives_in_a)
@@ -692,3 +698,132 @@ def test_evidence5_a_dry_run_does_not_list_a_recording_with_an_extra_record_file
     result = purge_expired(runs, date(2026, 10, 13), _Keys())
     assert result.expired == ()
     assert [reason for _, reason in result.kept] == ["holds files that are not part of the recording"]
+
+
+# -- follow-up reviews of the round-2 fixes (critic gaps 1 to 4) ------------------------------------
+
+from urllib.parse import quote  # noqa: E402 - only the gap tests below need it
+
+
+def _echo_engine(server: Any, *tokens: str) -> PolicyTransport:
+    roles = {f"role{i}": (server.origin, token) for i, token in enumerate(tokens)}
+    return transport(credentials=roles)
+
+
+def test_gap1_an_echoed_credential_is_removed_from_redirects_header_names_and_encoded_forms(
+    loopback: Any,
+) -> None:
+    secret = "TEST-ONLY-tok/en+S3CRET"
+
+    def echo(request: Any) -> None:
+        if request.path.startswith("/start"):
+            reply(request, 302, b"", {"Location": f"/cb/{secret}", "X-" + quote(secret, safe=""): "1"})
+        else:
+            reply(request, body=f"{secret} {quote(secret, safe='')}".encode())
+
+    server = loopback(echo)
+    engine = _echo_engine(server, secret)
+    for redirects in (3, 0):
+        engine = transport({"max_redirects": redirects}, credentials={"role0": (server.origin, secret)})
+        record = engine.fetch(Request("GET", f"{server.origin}/start", role="role0"))
+        assert "S3CRET" not in repr(record), redirects
+
+
+def test_gap1_a_credential_that_begins_with_another_is_removed_as_a_whole(loopback: Any) -> None:
+    short, longer = "TEST-ONLY-abcdef", "TEST-ONLY-abcdef-longer-tail"
+    server = loopback(lambda r: reply(r, body=f"echo {longer} end".encode()))
+    record = _echo_engine(server, short, longer).fetch(Request("GET", f"{server.origin}/x", role="role1"))
+    assert record.body == b"echo <removed> end"
+
+
+def test_gap1_a_credential_cut_by_the_body_limit_leaves_no_head(loopback: Any) -> None:
+    secret = "TEST-ONLY-cut-S3CRET-value"
+    body = b"x" * (1024 - 14) + secret.encode()  # the limit cuts the credential after 14 bytes
+    server = loopback(lambda r: reply(r, body=body))
+    engine = transport({"max_body_bytes": 1024}, credentials={"role0": (server.origin, secret)})
+    record = engine.fetch(Request("GET", f"{server.origin}/x", role="role0"))
+    assert record.truncated
+    assert b"TEST-ONLY-cut" not in record.body
+
+
+def test_gap1_a_short_credential_is_refused_before_any_request() -> None:
+    with pytest.raises(ValueError, match="12 characters"):
+        transport(credentials={"role0": ("http://127.0.0.1", "abc")})
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda c: {"by_review_status": {"approved": 1}},
+        lambda c: {"by_authority_class": {"illustrative": -1, "legal_obligation": 2}},
+        lambda c: {"by_review_status": {"certified": 1}},
+        lambda c: {
+            "implementation": c.implementation.model_copy(update={"numerator": 999, "denominator": 999})
+        },
+        lambda c: {
+            "implementation": c.implementation.model_copy(update={"of": "legal obligations of a regulation"})
+        },
+        lambda c: {"placeholders": 1},
+    ],
+    ids=[
+        "upgraded status",
+        "negative count",
+        "unknown status",
+        "implementation denominator",
+        "ratio label",
+        "placeholders",
+    ],
+)
+def test_gap2_a_coverage_figure_that_the_body_contradicts_fails_verification(
+    change: Any, signer: LocalSigner, trust: TrustBundle
+) -> None:
+    def altered(decision: Any) -> Any:
+        return decision.model_copy(
+            update={"coverage": decision.coverage.model_copy(update=change(decision.coverage))}
+        )
+
+    report = verify(_signed_variant(signer, altered), trust, AT)
+    outcomes = {d.name: d.outcome for d in report.dimensions}
+    assert (outcomes["signature"], outcomes["counts"], report.complete) == ("pass", "fail", False)
+
+
+def test_gap3_purge_never_empties_a_directory_that_was_swapped_in_after_the_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs = tmp_path / "runs"
+    write_recording(
+        runs / "expired",
+        [make_record(1), make_record(2)],
+        _Keys(),
+        created=date(2026, 1, 1),
+        retention_days=30,
+    )
+    write_recording(
+        runs / "fresh",
+        [make_record(1), make_record(2)],
+        _Keys(),
+        created=date(2026, 10, 1),
+        retention_days=30,
+    )
+    original = recording_module._is_only_a_recording
+
+    def then_swap(directory_fd: int, index: Any) -> bool:
+        answer = original(directory_fd, index)
+        if os.fstat(directory_fd).st_ino == os.stat(runs / "expired").st_ino:
+            (runs / "expired").rename(runs / "expired.moved")
+            (runs / "fresh").rename(runs / "expired")
+        return answer
+
+    monkeypatch.setattr(recording_module, "_is_only_a_recording", then_swap)
+    result = purge_expired(runs, date(2026, 10, 13), _Keys(), delete=True)
+    assert result.expired == ()
+    assert "replaced" in dict(result.kept)[runs / "expired"]
+    assert len(read_recording(runs / "expired", _Keys())) == 2, "the fresh recording is intact"
+
+
+def test_gap4_a_passport_signed_with_the_key_of_a_self_signed_anchor_passes() -> None:
+    key = ec.generate_private_key(ec.SECP256R1())
+    anchor = _self_signed(key, "anchor")
+    for x5c in (_x5c(anchor), _x5c(anchor, anchor)):
+        outcome = _check({}, key, bundle(anchor), x5c)
+        assert outcome.reason_code == "INTEGRITY.OK", x5c

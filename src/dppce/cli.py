@@ -43,7 +43,13 @@ from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, u
 from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_secret
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.resources import data_root
-from dppce.infrastructure.transport import ANONYMOUS, PolicyTransport, TransportConfig, origin_of
+from dppce.infrastructure.transport import (
+    ANONYMOUS,
+    MIN_SECRET_LENGTH,
+    PolicyTransport,
+    TransportConfig,
+    origin_of,
+)
 from dppce.models import (
     ICS,
     IXIT,
@@ -234,7 +240,13 @@ def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str,
                 f"the IXIT names a secret for role '{identity.role}'; confirm it with "
                 f"--role-secret {identity.role}=<the same reference>"
             )
-        credentials[identity.role] = (origin, resolve_secret(identity.secret_ref, secrets_dir=args.secrets))
+        secret = resolve_secret(identity.secret_ref, secrets_dir=args.secrets)
+        if len(secret) < MIN_SECRET_LENGTH:
+            raise UsageError(
+                f"the secret of role '{identity.role}' is shorter than {MIN_SECRET_LENGTH} characters; "
+                "a short secret cannot be kept out of the recording reliably"
+            )
+        credentials[identity.role] = (origin, secret)
     return credentials
 
 

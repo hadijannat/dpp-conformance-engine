@@ -297,8 +297,10 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - Limits: timeout, maximum body size (the body is truncated and flagged), maximum redirects,
   maximum request count, and minimum interval. Each limit that triggers is recorded.
 - Secrets are removed from request headers before a record is created. If the tested system
-  echoes a credential of the engine in a response header or body, the value is replaced with
-  `<removed>` in the record.
+  echoes a credential of the engine, its plain and percent-encoded forms are replaced with
+  `<removed>` in header names and values, redirect targets, and the body, also where the body
+  limit cut it. Other encodings, such as base64, are not recognized. A credential needs 12
+  characters or more, so that its removal cannot change unrelated text of the evidence.
 - A sample file is read only if it is still the regular file that was confirmed (device and
   inode). It is opened without following a link and without blocking.
 - Response bodies are bytes. HTML is never rendered or executed. Archives are never unpacked.
@@ -353,8 +355,10 @@ records/<id>.enc   one encrypted record each
 - `dppce purge` lists the recordings past that date. It deletes them only with `--yes`.
   It deletes a directory only if the index authenticates with the data key of the operator,
   every record decrypts and matches its commitment in that index, and the directory holds the
-  files of that recording and nothing else. It deletes those files by name and then the empty
-  directories, never recursively: a file that appears later stays, with the directory.
+  files of that recording and nothing else. It opens each directory once, without following a
+  link, and reads, checks, and deletes through that open directory. It deletes the files by
+  name and then the empty directories, never recursively: a file that appears later stays,
+  with the directory. A directory that was renamed or replaced during the purge is not removed.
 - `read_recording` returns the records in acquisition order (numeric order of the identifiers).
 - A response header is recorded only if its name is in a fixed list of safe names. Each other
   value is replaced with `<removed>`. A URL in a recorded header is redacted: userinfo, the
@@ -417,7 +421,7 @@ It reports each dimension separately:
 | `ordering` | yes | Result and record keys are strictly ascending. |
 | `results_root` | yes | The recomputed root and count equal the stated ones. |
 | `records_root` | yes | The recomputed root equals the stated one. |
-| `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed; the others are checked for their totals and bounds. Only a completed step has `pass` or `fail`. |
+| `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed. Each count by authority class, review status, and testability is a known value, not negative, at least the count of the results with it, and the counts sum to the total; the implementation ratio is over the total; the three ratio labels are the published ones; the placeholder count is bounded and agrees with its review status count. Only a completed step has `pass` or `fail`. |
 | `signature` | yes | At least one signature verifies with an allowlisted algorithm and binds the recomputed digest. |
 | `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. |
 | `status` | per trust policy | Fresh status or revocation evidence is present and good. |

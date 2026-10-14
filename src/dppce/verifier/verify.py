@@ -29,11 +29,13 @@ from dppce.evidence.envelope import (
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
 from dppce.models import (
     Attestation,
+    AuthorityClass,
     DecisionBody,
     EvidenceEnvelope,
     ExecutionStatus,
     Modality,
     ReviewStatus,
+    Testability,
     Tri,
     TrustBundle,
     TrustedKey,
@@ -42,6 +44,7 @@ from dppce.models import (
     VerificationReport,
 )
 from dppce.verdicts import claim_level, overall_verdict, path_verdict, requirement_verdict
+from dppce.verdicts.coverage import RATIO_LABELS
 
 Outcome = Literal["pass", "fail", "missing", "not_checked"]
 _STAMP = "%Y-%m-%dT%H:%M:%SZ"
@@ -122,16 +125,46 @@ def _coverage_follows(decision: DecisionBody, excluded: int) -> dict[str, bool]:
     )
     total = coverage.total_requirements
     placeholders = sum(1 for r in results if r.review_status is ReviewStatus.PLACEHOLDER)
+
+    def bucket_fits(counts: dict[str, int], values: list[str], known: set[str]) -> bool:
+        # Each known value counts at least the results that have it; the surplus is the excluded.
+        seen = Counter(values)
+        return (
+            set(counts) <= known
+            and all(n >= 0 for n in counts.values())
+            and all(counts.get(value, 0) >= n for value, n in seen.items())
+            and sum(counts.values()) == total
+        )
+
+    ratios = {
+        "implementation": coverage.implementation,
+        "execution": coverage.execution,
+        "passing": coverage.passing,
+    }
     return {
         "coverage by applicability": coverage.by_applicability == dict(sorted(applicability.items())),
         "unknown applicability": coverage.unknown_applicability
         == sum(1 for r in results if r.applicability is Tri.UNKNOWN),
         "manual steps missing": coverage.manual_missing == manual,
-        "placeholder bounds": placeholders <= coverage.placeholders <= total,
-        "category totals": all(
-            sum(counts.values()) == total
-            for counts in (coverage.by_authority_class, coverage.by_review_status, coverage.by_testability)
+        "placeholder bounds": placeholders <= coverage.placeholders <= placeholders + excluded
+        and coverage.placeholders == coverage.by_review_status.get(ReviewStatus.PLACEHOLDER.value, 0),
+        "authority classes": bucket_fits(
+            coverage.by_authority_class,
+            [r.authority_class.value for r in results],
+            {e.value for e in AuthorityClass},
         ),
+        "review statuses": bucket_fits(
+            coverage.by_review_status,
+            [r.review_status.value for r in results],
+            {e.value for e in ReviewStatus},
+        ),
+        "testabilities": bucket_fits(
+            coverage.by_testability, [r.testability.value for r in results], {e.value for e in Testability}
+        ),
+        # The implementation ratio needs the catalogue paths, which a report does not hold. Its
+        # numerator is checked for its bounds only; its denominator is every known requirement.
+        "implementation denominator": coverage.implementation.denominator == total,
+        "ratio labels": all(ratios[name].of == label for name, label in RATIO_LABELS.items()),
     }
 
 

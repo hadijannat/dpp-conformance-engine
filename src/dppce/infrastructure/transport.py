@@ -37,6 +37,10 @@ ANONYMOUS: Final = "anonymous"
 _REDIRECTS: Final = (301, 302, 303, 307, 308)
 _ACTIVE_SCOPES: Final = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ)
 _RETRYABLE: Final = ("connect", "timeout")
+# A shorter credential could match ordinary text, and its removal would change the evidence.
+MIN_SECRET_LENGTH: Final = 12
+# The shortest head of a credential that is removed where the body limit cut the credential.
+_MIN_CUT_HEAD: Final = 8
 
 
 class Resolver(Protocol):
@@ -161,7 +165,11 @@ class PolicyTransport:
         self._records: list[Record] = []
         # The identity of each sample file is taken now. A file read later must be the same one.
         self._samples = {name: (path.resolve(), _identity(path)) for name, path in config.samples.items()}
-        self._secrets = tuple(token for _, token in config.credentials.values() if token)
+        tokens = [token for _, token in config.credentials.values()]
+        if any(len(token) < MIN_SECRET_LENGTH for token in tokens):
+            raise ValueError(f"a credential needs {MIN_SECRET_LENGTH} characters or more")
+        # Longest first: a credential that begins with a shorter one is removed as a whole.
+        self._secrets = tuple(sorted(set(tokens), key=len, reverse=True))
         self._sent = 0
         self._last_sent: float | None = None
 
@@ -312,13 +320,26 @@ class PolicyTransport:
         return headers
 
     def _scrub(
-        self, headers: tuple[tuple[str, str], ...], body: bytes
-    ) -> tuple[tuple[tuple[str, str], ...], bytes]:
-        """Remove the engine's own credentials if the tested system echoes them back."""
+        self, headers: tuple[tuple[str, str], ...], body: bytes, redirects: list[str]
+    ) -> tuple[tuple[tuple[str, str], ...], bytes, tuple[str, ...]]:
+        """Remove the engine's own credentials if the tested system echoes them back.
+
+        The plain and the percent-encoded form are removed from header names and values, from
+        redirect targets, and from the body, also where the body limit cut a credential. Other
+        encodings, such as base64, are not recognized.
+        """
+        removed = REMOVED.encode("ascii")
         for token in self._secrets:
-            headers = tuple((k, v.replace(token, REMOVED)) for k, v in headers)
-            body = body.replace(token.encode("utf-8"), REMOVED.encode("ascii"))
-        return headers, body
+            for form in dict.fromkeys((token, quote(token, safe=""))):
+                headers = tuple((k.replace(form, REMOVED), v.replace(form, REMOVED)) for k, v in headers)
+                redirects = [target.replace(form, REMOVED) for target in redirects]
+                body = body.replace(form.encode("utf-8"), removed)
+            encoded = token.encode("utf-8")
+            for size in range(len(encoded) - 1, _MIN_CUT_HEAD - 1, -1):
+                if body.endswith(encoded[:size]):
+                    body = body[:-size] + removed
+                    break
+        return headers, body, tuple(redirects)
 
     # -- Acquirer ---------------------------------------------------------------------------
 
@@ -337,7 +358,7 @@ class PolicyTransport:
             body: bytes = b"",
             truncated: bool = False,
         ) -> Record:
-            headers, body = self._scrub(headers, body)
+            headers, body, kept_redirects = self._scrub(headers, body, redirects)
             record = Record(
                 record_id=f"r{len(self._records) + 1:04d}",
                 kind="http",
@@ -351,7 +372,7 @@ class PolicyTransport:
                 body=body,
                 truncated=truncated,
                 error=error,
-                redirects=tuple(redirects),
+                redirects=kept_redirects,
                 attempts=attempts,
                 salt=new_salt(),
             )

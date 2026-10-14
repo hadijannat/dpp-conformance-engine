@@ -90,6 +90,12 @@ This is a release candidate. It has not been tagged or published.
     of a URL.
   - `on_unreachable: fail` counts only for a test purpose whose requirements are all approved.
   - The report reflows at 320 CSS pixels.
+  - Found by the follow-up reviews of these fixes: the credential scrub also covers redirect
+    targets, header names, percent-encoded forms, and a credential cut by the body limit, and a
+    credential needs 12 characters or more; the verifier checks each coverage count, the
+    implementation denominator, the ratio labels, and the placeholder count; purge works
+    through open directories, so a directory swapped in after the check is not emptied; and a
+    passport signed with the key of a self-signed anchor passes again.
   - Draft EU pack: the status entries keep `unknown` for an earlier placing; the date rule is
     stated as the one comparison that it evaluates; the labels entry covers Article 13(1) to (3).
 

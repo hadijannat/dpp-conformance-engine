@@ -127,7 +127,9 @@ def trust_path(
         if depth >= _MAX_CHAIN:
             return None
         for candidate, is_anchor in candidates:
-            if candidate in path or not _may_issue(candidate, authorities_below=depth):
+            # An intermediate cannot appear twice. An anchor ends the path, so it can sign itself:
+            # a passport signed with the key of a self-signed anchor has the path [anchor, anchor].
+            if (not is_anchor and candidate in path) or not _may_issue(candidate, authorities_below=depth):
                 continue
             try:
                 path[-1].verify_directly_issued_by(candidate)

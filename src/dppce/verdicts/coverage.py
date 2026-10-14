@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping, Sequence
+from typing import Final
 
 from dppce.models import (
     CoverageSummary,
@@ -24,6 +25,12 @@ from dppce.models import (
 )
 
 _OF = "requirements in the selected catalogue"
+# The labels of the three ratios. A verifier checks them: a report must not relabel coverage.
+RATIO_LABELS: Final = {
+    "implementation": _OF,
+    "execution": "applicable " + _OF,
+    "passing": "applicable mandatory " + _OF,
+}
 
 
 def _counts(values: Sequence[str]) -> dict[str, int]:
@@ -81,16 +88,18 @@ def summarize(
         by_applicability=_counts([r.applicability.value for r in results] + ["excluded"] * excluded),
         by_testability=_counts([r.testability.value for r in requirements]),
         by_verdict=_counts([r.verdict.value for r in results] + ["excluded"] * excluded),
-        implementation=Ratio(numerator=implemented, denominator=len(requirements), of=_OF),
+        implementation=Ratio(
+            numerator=implemented, denominator=len(requirements), of=RATIO_LABELS["implementation"]
+        ),
         execution=Ratio(
             numerator=sum(1 for r in applicable if completed(r)),
             denominator=len(applicable),
-            of="applicable " + _OF,
+            of=RATIO_LABELS["execution"],
         ),
         passing=Ratio(
             numerator=sum(1 for r in mandatory if r.verdict is Verdict.PASS),
             denominator=len(mandatory),
-            of="applicable mandatory " + _OF,
+            of=RATIO_LABELS["passing"],
         ),
         placeholders=sum(1 for r in requirements if r.review_status is ReviewStatus.PLACEHOLDER),
         unknown_applicability=sum(1 for r in results if r.applicability is Tri.UNKNOWN),

@@ -391,6 +391,8 @@ The supported profile is ES256 on curve P-256, with the key in the first `x5c` c
 The leaf may sign a document if its key usage permits a digital signature and its extended key
 usage, when present, names `id-kp-documentSigning` (RFC 9336) or `anyExtendedKeyUsage`.
 The path search tries each candidate issuer, so a cross-signed authority can appear twice.
+A passport signed with the key of a self-signed anchor itself has the path from the anchor to
+the anchor.
 The payload is compared as a JSON value. Key order, white space, and number format do not matter.
 The canonical form of the engine applies to its own decision body only, not to a passport.
 The revocation snapshot lists serial numbers without their issuer. A serial number that is

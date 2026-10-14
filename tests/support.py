@@ -25,6 +25,7 @@ from dppce.models import (
     Verdict,
 )
 from dppce.verdicts import overall_verdict, requirement_verdict
+from dppce.verdicts.coverage import RATIO_LABELS
 
 ISSUER = "urn:example:test-lab"
 KID = "TEST-ONLY-report-key-1"
@@ -126,9 +127,9 @@ def make_envelope(verdicts: tuple[str, ...] = ("pass", "fail", "pass")) -> Evide
         by_applicability={"true": total},
         by_testability={"automated": total},
         by_verdict=counts,
-        implementation=Ratio(numerator=total, denominator=total, of="requirements"),
-        execution=Ratio(numerator=total, denominator=total, of="requirements"),
-        passing=Ratio(numerator=passed, denominator=total, of="requirements"),
+        implementation=Ratio(numerator=total, denominator=total, of=RATIO_LABELS["implementation"]),
+        execution=Ratio(numerator=total, denominator=total, of=RATIO_LABELS["execution"]),
+        passing=Ratio(numerator=passed, denominator=total, of=RATIO_LABELS["passing"]),
         placeholders=0,
         unknown_applicability=0,
         excluded=0,
