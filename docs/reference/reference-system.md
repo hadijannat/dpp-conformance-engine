@@ -216,12 +216,21 @@ or a canary value in the body, is a leak. On a channel that is not JSON, only a 
 can be found: if a withheld field has no canary, the check is `blocked` with
 `ACCESS.POLICY.NOT_FULLY_CHECKABLE`. It never passes on a partial look.
 
-The check looks for a canary in the decoded text, in each string value of a JSON body, and in
-the forms that an HTML character reference or a percent-encoding gives. It decodes the body
-with the declared character set, or with the byte order mark. A body that it cannot decode
-gives `blocked` with `ACCESS.RESPONSE.NOT_DECODABLE`. A body with a `Content-Encoding` other
-than `identity` gives `blocked` with `TRANSPORT.BODY_ENCODED`. The check does not find a value
-that a system hides on purpose, for example with encryption or a private encoding.
+The check looks for a canary in the decoded text, in each string value of a JSON body, in the
+redirect targets, and in the recorded `Location`, `Content-Location`, and `Link` values. It also
+looks in the forms that an HTML character reference, a percent-encoding, or a JSON string escape
+gives. It decodes the body with the byte order mark (UTF-32 before UTF-16), or with the declared
+character set, or with UTF-8. A declared UTF-16 or UTF-32 body without a mark is read in both
+byte orders. Text with NUL characters is also read as UTF-16 and UTF-32. The declared reading
+must work: a body that it cannot decode gives `blocked` with `ACCESS.RESPONSE.NOT_DECODABLE`.
+A body with a content or transfer coding gives `blocked` with `TRANSPORT.BODY_ENCODED`.
+
+A withheld field that is present with the value `null` is withheld. Any other value, also an
+empty string or a placeholder, is a leak. Response header values other than the URL headers
+above are not recorded, so a canary in such a header is not found. If redaction removed a part
+of a redirect or link URL, a canary could sit there: the check is then `blocked` with
+`ACCESS.POLICY.NOT_FULLY_CHECKABLE`. The check does not find a value that a system hides on
+purpose, for example with encryption or a private encoding.
 
 A role other than `anonymous` needs a credential for the origin of the API. Without one, the
 transport sends no request and the check reports `TRANSPORT.DENIED` with `unreachable: true`.
@@ -286,8 +295,8 @@ fixtures/reference/
   secrets/TEST-ONLY-<role>.token     the same tokens, one file for each role, for `--secrets`
   pki/TEST-ONLY-*.pem                fixture PKI (section 4.5)
   qr/{ev,lmt,industrial,invalid}.png QR images
-  ics/{ev,lmt,industrial}.yaml       declarations for each profile
-  ixit/{ev,lmt,industrial}.yaml      test information; `origin_override` is set by the rig
+  {ev,lmt,industrial}.ics.yaml       declarations for each profile
+  {ev,lmt,industrial}.ixit.yaml      test information; the rig replaces `origin_override`
   trust/TEST-ONLY-trust-bundle.json  anchors and keys for the reference system
   authorization/                     TEST-ONLY owner key and a signed test authorization
 ```
@@ -311,26 +320,29 @@ IXIT conventions for the reference rig:
 A sample path is relative to the directory of the IXIT file and must stay inside it.
 The IXIT is untrusted input: see the architecture contract, section 9.1. The operator supplies
 the trust bundle (`--trust`), the secrets directory (`--secrets`), and the confirmation of each
-non-public host (`--allow-private-host 127.0.0.1`). An identity uses
+non-public origin (`--allow-private-host http://127.0.0.1:8765`). An identity uses
 `secret_ref: "file:TEST-ONLY-authority.token"`, and the operator confirms it with
 `--role-secret authority=file:TEST-ONLY-authority.token`.
 
 Shared helpers in `dppce.adapters.common`:
 
 - `effective_url(ctx, url)`: applies the origin override.
-- `identifier_text(ctx)`: the carrier identifier. If `samples.qr_image` exists, decode it (this
+- `carrier_identifier(ctx)`: the carrier identifier. If `samples.qr_image` exists, decode it (this
   needs the `qr` extra; without it the check is `unsupported`). Otherwise use
   `samples.identifier`. If neither exists, the check is `blocked` with `CARRIER.SAMPLE.MISSING`.
 - `fetch_once(ctx, url, role)`: returns an earlier record of the same method, URL, and role if
   it has no error; otherwise fetches. This keeps the request count low and the replay stable.
-- `unreachable(ctx, record)`: builds the outcome for a record with a transport error:
+- `no_answer(ctx, record)`: builds the outcome for a record with a transport error:
   status `completed`, `passed: false`, `unreachable: true`. Reason code
   `TRANSPORT.REDIRECT_OUT_OF_SCOPE` for that error, `TRANSPORT.DENIED` for `policy_denied`,
   `authorization_denied`, and `budget_exhausted`, and `TRANSPORT.UNREACHABLE` for the others.
 
 A response that is not valid JSON where JSON is needed gives a `fail` with `<AREA>.RESPONSE.NOT_JSON`.
+The access check is the exception: it gives `blocked` with `ACCESS.RESPONSE.NOT_JSON`, because it
+cannot look at the field paths of such a body (section 5.2).
 A truncated body gives status `blocked` with `TRANSPORT.BODY_TRUNCATED`: a partial body proves nothing.
-A body with a content encoding gives status `blocked` with `TRANSPORT.BODY_ENCODED`: no check decompresses a body.
+A body with a content coding or a transfer coding other than `identity` or `chunked` gives status
+`blocked` with `TRANSPORT.BODY_ENCODED`: no check decompresses a body. Every header line counts.
 
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
@@ -359,33 +371,38 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | 2 | The IXIT gives no API endpoint or no passport identifier | `blocked` | `INTEGRITY.NO_TARGET` |
 | 3 | The system answers with status 500 or higher | fail, `unreachable: true` | `INTEGRITY.TOKEN.NO_ANSWER` |
 | 4 | The system answers with another status that is not 200 | fail | `INTEGRITY.TOKEN.NOT_AVAILABLE` |
-| 5 | The body is not a compact JWS, or a part of it cannot be decoded | fail | `INTEGRITY.TOKEN.MALFORMED` |
+| 5 | The body is not a compact JWS, a part of it cannot be decoded, or `x5c` does not hold certificates | fail | `INTEGRITY.TOKEN.MALFORMED` |
 | 6 | The token has no `x5c` header | `blocked` | `INTEGRITY.KEY.UNSUPPORTED` |
-| 7 | The token is larger than the limits of the engine | `blocked` | `INTEGRITY.TOKEN.TOO_LARGE` |
-| 8 | The algorithm, the type, a header, or the key is outside the supported profile | `blocked` | `INTEGRITY.TOKEN.NOT_PROCESSABLE` |
+| 7 | The token, or its `x5c` chain of more than 5 certificates, is larger than the limits of the engine | `blocked` | `INTEGRITY.TOKEN.TOO_LARGE` |
+| 8 | The algorithm, the type, a header, or the key (type or curve) is outside the supported profile | `blocked` | `INTEGRITY.TOKEN.NOT_PROCESSABLE` |
 | 9 | The signature does not verify with the key of the certificate | fail | `INTEGRITY.SIGNATURE.INVALID` |
 | 10 | No path leads to a trusted anchor | fail | `INTEGRITY.ISSUER.UNTRUSTED` |
-| 11 | The path has a constraint that the engine does not evaluate | `blocked` | `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` |
-| 12 | The certificate does not permit a digital signature | fail | `INTEGRITY.CERT.KEY_USAGE` |
-| 13 | A certificate is outside its validity period | fail | `INTEGRITY.CERT.EXPIRED` |
-| 14 | A mandatory status snapshot is missing or stale | `blocked` | `INTEGRITY.STATUS.MISSING` |
-| 15 | A certificate is revoked | fail | `INTEGRITY.CERT.REVOKED` |
-| 16 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
-| 17 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
+| 11 | The path has a constraint that the engine does not evaluate: name, policy, or inhibit-any-policy constraints, another critical extension, or extensions that cannot be read | `blocked` | `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` |
+| 12 | The extended key usage of the leaf names a purpose that the engine does not know | `blocked` | `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` |
+| 13 | The leaf does not permit a digital signature, or its extended key usage names other purposes only (for example TLS) | fail | `INTEGRITY.CERT.KEY_USAGE` |
+| 14 | The trust anchor is expired or revoked in the operator's trust bundle | `blocked` | `INTEGRITY.TRUST.ANCHOR_INVALID` |
+| 15 | A certificate below the anchor is outside its validity period | fail | `INTEGRITY.CERT.EXPIRED` |
+| 16 | A mandatory status snapshot is missing or stale | `blocked` | `INTEGRITY.STATUS.MISSING` |
+| 17 | A certificate below the anchor is in the revocation snapshot | fail | `INTEGRITY.CERT.REVOKED` |
+| 18 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
+| 19 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
 
 The supported profile is ES256 on curve P-256, with the key in the first `x5c` certificate.
+The leaf may sign a document if its key usage permits a digital signature and its extended key
+usage, when present, names `id-kp-documentSigning` (RFC 9336) or `anyExtendedKeyUsage`.
+The path search tries each candidate issuer, so a cross-signed authority can appear twice.
 The payload is compared as a JSON value. Key order, white space, and number format do not matter.
 The canonical form of the engine applies to its own decision body only, not to a passport.
+The revocation snapshot lists serial numbers without their issuer. A serial number that is
+revoked under one authority therefore also matches a certificate of a different authority.
+An outcome message names the error code, never a value from the token.
 
 Document URLs: item `{api}/dpp/{id}`, model `{api}/dpp/{id}/model`, signed
 `{api}/dpp/{id}/signed`, versions `{api}/dpp/{id}/versions`, registry `{registry}/registry/{id}`.
 The resolver URL is the carrier identifier itself.
 
-`integrity.jws` verifies in this order: (1) the JWS signature with the key of the leaf
-certificate, algorithm allowlist `ES256`; (2) the chain from the leaf to an anchor of the trust
-bundle; (3) the validity period of each certificate at the evaluation time; (4) the leaf serial
-against the revocation snapshot; (5) the payload against the canonical bytes of the anonymous
-item-level passport. Each step is a separate finding in the observation summary.
+`integrity.jws` follows the order of the table in section 8.1. Each step is a separate finding
+in the observation summary.
 
 `persistence.versions` checks: version numbers strictly ascend; `updated_at` never decreases;
 the last `content_digest` equals the digest of the current anonymous item-level passport.

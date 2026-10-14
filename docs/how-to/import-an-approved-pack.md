@@ -17,7 +17,7 @@ A human review is not accreditation. A result in reviewed mode is not a statemen
 | Mode | Requirements that a run can assess | Claim level of a result | Typical use |
 | --- | --- | --- | --- |
 | `illustrative` | Requirements with the authority class `illustrative` only. | `illustrative` | Demonstrate the engine with the synthetic rules. |
-| `exploratory` | Requirements with the review status `draft-needs-review` or `approved`, and illustrative ones. | `diagnostic`, or `illustrative` | Find problems early with draft interpretations. |
+| `exploratory` | Requirements with the review status `draft-needs-review` or `approved`, illustrative ones, and placeholders. | `diagnostic`, or `illustrative`; `none` for a placeholder | Find problems early with draft interpretations. |
 | `reviewed` | Requirements with the review status `approved` only. | `reviewed` | Report against interpretations that a human approved. |
 
 A run lists each requirement that the mode does not permit as an exclusion with a reason code.

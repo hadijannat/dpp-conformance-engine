@@ -73,9 +73,31 @@ This is a release candidate. It has not been tagged or published.
 - Found by mutation testing: a signed token with a part that is not base64url is `MALFORMED`,
   not `BAD_SIGNATURE`.
 
+- After review round 2 of 2026-10-14 (`validation/records/review-round-2-2026-10-14.md`):
+  - The transport never raises on a URL that cannot be parsed, sends no credential on an
+    anonymous request, applies one deadline to a whole fetch, reads a sample file only if it
+    is still the confirmed regular file, drops URL fragments from records, and removes its own
+    credential from a recorded answer that echoes it.
+  - Purge reads every record before it deletes, deletes named files only, and the retention
+    period is 0 to 3650 days. Records come back in acquisition order past r9999.
+  - The verifier also derives claim levels, reasons, and coverage figures again. A deeply
+    nested signature header is malformed, not a crash.
+  - The integrity check does not pass an unknown critical extension or a TLS-only key, never
+    raises on a malformed certificate, follows cross-signed paths, and reports a chain cap
+    and an invalid trust anchor as limits, not as failures of the tested system.
+  - The access check reads wide encodings and JSON escapes, searches redirect and link URLs,
+    treats a null field as withheld, and is not fully checkable when redaction removed part
+    of a URL.
+  - `on_unreachable: fail` counts only for a test purpose whose requirements are all approved.
+  - The report reflows at 320 CSS pixels.
+  - Draft EU pack: the status entries keep `unknown` for an earlier placing; the date rule is
+    stated as the one comparison that it evaluates; the labels entry covers Article 13(1) to (3).
+
 ### Changed
 
-- `--allow-remote-read` is replaced by `--allow-remote-host HOST`.
+- `--allow-remote-read` is replaced by `--allow-remote-host ORIGIN`.
+- `--allow-private-host` and `--allow-remote-host` take an origin, such as
+  `http://127.0.0.1:8765`, not a bare host.
 - `purge_expired` needs the data keys and returns what it kept and why.
 - A role request no longer follows a cross-origin redirect (architecture, section 9).
 

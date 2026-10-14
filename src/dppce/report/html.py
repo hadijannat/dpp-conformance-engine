@@ -28,7 +28,7 @@ a { color: var(--link); } a:focus, summary:focus { outline: 3px solid var(--link
 .scroll { overflow-x: auto; } table { border-collapse: collapse; width: 100%; margin: .5rem 0 1rem; }
 caption { text-align: left; font-weight: 600; padding: .4rem 0; }
 th, td { border: 1px solid var(--line); padding: .4rem .55rem; text-align: left; vertical-align: top; }
-th { background: var(--panel); } code { overflow-wrap: anywhere; }
+th { background: var(--panel); } code, dd { overflow-wrap: anywhere; }
 .verdict { font-weight: 700; white-space: nowrap; } dt { font-weight: 600; } dd { margin: 0 0 .6rem 0; }
 """
 
@@ -83,9 +83,9 @@ def _summary(envelope: EvidenceEnvelope) -> str:
         f"<strong>{_e(manifest.profile_id)}</strong> in <strong>{_e(manifest.mode.value)}</strong> mode.</p>"
         f"<p>Overall outcome for the selected catalogue: {_verdict(decision.overall.value)}. "
         f"{_e(decision.overall_reason)}</p>"
-        f"<p>Of {assessed} requirement results: {n('pass')} passed, {n('fail')} failed, "
-        f"{n('inconclusive')} are inconclusive, {n('not_applicable')} do not apply, and "
-        f"{n('error')} had an execution error. "
+        f"<p>Requirement results: {assessed}. Passed: {n('pass')}. Failed: {n('fail')}. "
+        f"Inconclusive: {n('inconclusive')}. Not applicable: {n('not_applicable')}. "
+        f"Execution error: {n('error')}. "
         f"{decision.coverage.excluded} more requirements were excluded and are listed below.</p>"
         '<p class="notice"><strong>This is a conformance test report. It is not a certificate.</strong> '
         "It does not show that product data are true, that a product is safe, or that all legal "

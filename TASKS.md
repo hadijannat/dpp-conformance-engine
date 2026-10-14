@@ -23,6 +23,9 @@ a human reviewed the work. The evidence for each figure is in `docs/readiness.md
 
 ## M0 work log
 
+_Historical log, closed. It shows the state at the time it was written. The current state is in
+"State at the end of the session" below. Do not resume work from this section._
+
 - [x] Workspace inventory. Result: empty apart from `.remember/` (session tooling, ignored by git).
 - [x] Toolchain probe. Result: see `docs/research/tool-model-routing.md`.
 - [x] Model routing probe. Result: four aliases accepted delegation.
@@ -32,6 +35,9 @@ a human reviewed the work. The evidence for each figure is in `docs/readiness.md
 - [ ] Scope statement, risk register, and reuse decisions.
 
 ## Implementation work log (cycle 3, coordinator)
+
+_Historical log, closed. It shows the state at the time it was written. The current state is in
+"State at the end of the session" below. Do not resume work from this section._
 
 Written and committed. Gates on this code: `uv run just check` exit 0.
 
@@ -58,6 +64,9 @@ Security findings from the automated commit review, all fixed in the cycle they 
 4. The IXIT could select the trust bundle, arbitrary secrets, files outside its directory, and private hosts.
 
 ## Commands executed
+
+_Historical log, closed. It shows the state at the time it was written. The current state is in
+"State at the end of the session" below. Do not resume work from this section._
 
 | Command | Exit status | Note |
 | --- | --- | --- |
@@ -122,4 +131,4 @@ uv run just docs
 
 1. Read `state/progress.json`. Do not exceed `session.max_cycles`.
 2. Read `docs/open-questions.md` and `docs/backlog.md`.
-3. Continue with the first unchecked item in the work log of the milestone that is in progress.
+3. Continue with the list "Not done, and why" in "State at the end of the session".

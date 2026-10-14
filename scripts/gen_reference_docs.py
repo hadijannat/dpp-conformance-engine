@@ -57,7 +57,8 @@ def cli_page() -> str:
         "| --- | --- |",
         "| 0 | The command completed. For `run` and `replay`: the overall outcome is `pass`. |",
         "| 1 | The system under test failed: the overall outcome is `fail`. |",
-        "| 2 | Usage or input error: bad arguments, an invalid file, or lint errors. |",
+        "| 2 | Usage or input error: bad arguments, an invalid file, lint errors, or an applicability rule "
+        "that compares two different types. |",
         "| 3 | Execution error: the overall outcome is `error`, or the engine failed. |",
         "| 4 | Report verification failed or is incomplete, or a replay digest differs. |",
         "| 5 | The run completed and the overall outcome is `inconclusive`. |\n",

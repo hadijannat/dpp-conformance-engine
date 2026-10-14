@@ -14,7 +14,7 @@ Engine version: `0.1.0rc1`.
 | --- | --- |
 | 0 | The command completed. For `run` and `replay`: the overall outcome is `pass`. |
 | 1 | The system under test failed: the overall outcome is `fail`. |
-| 2 | Usage or input error: bad arguments, an invalid file, or lint errors. |
+| 2 | Usage or input error: bad arguments, an invalid file, lint errors, or an applicability rule that compares two different types. |
 | 3 | Execution error: the overall outcome is `error`, or the engine failed. |
 | 4 | Report verification failed or is incomplete, or a replay digest differs. |
 | 5 | The run completed and the overall outcome is `inconclusive`. |
@@ -66,9 +66,8 @@ usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PAC
                  [--issuer-name ISSUER_NAME] [--issuer-id ISSUER_ID]
                  [--accreditation-status ACCREDITATION_STATUS]
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
-                 [--secrets SECRETS] [--role-secret ROLE=REFERENCE]
-                 [--allow-private-host ALLOW_PRIVATE_HOST] [--allow-remote-host HOST]
-                 [--retention-days RETENTION_DAYS]
+                 [--secrets SECRETS] [--role-secret ROLE=REFERENCE] [--allow-private-host ORIGIN]
+                 [--allow-remote-host ORIGIN] [--retention-days RETENTION_DAYS]
 
 Execute the plan, record the observations, and write the report.
 
@@ -98,12 +97,12 @@ options:
   --role-secret ROLE=REFERENCE
                         confirm the secret reference that the IXIT declares for one role; repeat
                         for each role
-  --allow-private-host ALLOW_PRIVATE_HOST
-                        confirm one loopback or private host that the IXIT asks for; repeat for
-                        each host
-  --allow-remote-host HOST
-                        state that the owner of one public host permits bounded read-only access;
-                        repeat for each host
+  --allow-private-host ORIGIN
+                        confirm one loopback or private origin, such as http://127.0.0.1:8765;
+                        repeat for each origin
+  --allow-remote-host ORIGIN
+                        state that the owner of one public origin permits bounded read-only
+                        access; repeat for each
   --retention-days RETENTION_DAYS
                         days to keep the recording; the operator decides; default: the value that
                         the IXIT asks for

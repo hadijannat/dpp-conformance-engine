@@ -11,8 +11,8 @@ Read-only access also needs the permission of the owner.
 
 | Activity | What you need |
 | --- | --- |
-| Bounded read-only requests to a public host | The owner's prior permission, and `--allow-remote-host HOST` for each host |
-| Requests to a loopback or private host | An entry in the IXIT, and `--allow-private-host HOST` for each host |
+| Bounded read-only requests to a public origin | The owner's prior permission, and `--allow-remote-host ORIGIN` for each origin, such as `https://dpp.example.com` |
+| Requests to a loopback or private origin | An entry in the IXIT, and `--allow-private-host ORIGIN` for each origin, such as `http://127.0.0.1:8765` |
 | Requests as a role with a credential | A signed authorization that names the origin, and `--role-secret ROLE=REFERENCE` |
 | Access probes, writes, tampering, fuzzing | A signed authorization that grants that scope |
 

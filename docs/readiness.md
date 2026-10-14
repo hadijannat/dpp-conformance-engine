@@ -68,7 +68,8 @@ review is not a human approval and not an audit.
 | `validation/records/review-verdicts-and-planning-2026-10-14.md` | Applicability, planning, verdicts, coverage, report | 9 findings. All fixed or reworded, with tests in `tests/test_review_verdicts.py`. |
 | `validation/records/review-eu-battery-draft-2026-10-14.md` | The 36 draft interpretations of Regulation (EU) 2023/1542 | 17 findings. Applied to the drafts. Three open questions filed (OQ-021 to OQ-023). Every entry stays `draft-needs-review`. |
 
-An automated review of each commit also ran. It found gaps in two of the fixes. Both are fixed.
+An automated review of each commit also ran. It found four gaps in the fixes: two fixed in commit
+`072b9c3`, one in `d6a7122`, and one in `59e148f`.
 
 ## 4. Evidence that is missing
 

@@ -27,7 +27,7 @@ from dppce.adapters.access import restricted_fields
 from dppce.adapters.integrity import jws_check
 from dppce.cli import main
 from dppce.evidence.envelope import build_decision, sign_envelope
-from dppce.evidence.jws import LocalSigner
+from dppce.evidence.jws import LocalSigner, SignatureError, sign_compact, verify_compact
 from dppce.evidence.recording import (
     RecordingError,
     purge_expired,
@@ -680,6 +680,18 @@ def test_f12_a_response_header_value_is_kept_only_if_its_name_is_known_to_be_saf
 def test_f12_a_link_header_with_anything_but_targets_and_relation_names_is_removed(value: str) -> None:
     """Found by the review of the fix: a link parameter is free text."""
     assert dict(redact_response_headers((("Link", value),)))["Link"] == "<removed>"
+
+
+# -- F-13: the type of the verification key --------------------------------------------------
+
+
+@pytest.mark.parametrize("kty", ["oct", "RSA", "OKP", ""])
+def test_f13_a_verification_key_that_is_not_an_elliptic_curve_key_is_refused(kty: str) -> None:
+    signer = LocalSigner.generate("TEST-ONLY-k")
+    signed = sign_compact(b'{"a":1}', signer, typ="dpp+jws")
+    with pytest.raises(SignatureError) as caught:
+        verify_compact(signed, signer.public_jwk() | {"kty": kty}, typ="dpp+jws")
+    assert caught.value.code == "KEY"
 
 
 # -- F-14 and F-15: confirmations by the operator ---------------------------------------------

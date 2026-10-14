@@ -45,7 +45,7 @@
       "status": "complete",
       "research_passes": 0,
       "review_rounds": 1,
-      "note": "Independent security review: 17 findings, all fixed with regression tests. Automated commit reviews found 4 gaps in the fixes; all fixed."
+      "note": "Independent security review: 17 findings, all fixed with regression tests. Automated commit reviews found four gaps in the fixes: two fixed in 072b9c3, one in d6a7122, one in 59e148f."
     },
     "M5": {
       "status": "complete",

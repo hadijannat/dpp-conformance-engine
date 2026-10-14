@@ -8,7 +8,7 @@ Prerequisites: none.
 
 The target is WCAG 2.2, level AA, for the HTML report that `dppce report` writes.
 This page does not claim conformity. Automated checks alone cannot establish conformity, and
-no manual review has been done.
+no manual review by a person has been done.
 
 ## What the design does
 
@@ -33,13 +33,19 @@ alternative directly below it.
 
 ## Verification status
 
+The checks below were run on 2026-10-14 by a development agent, on two reports that the
+reference system produced (a clean run and a run with three seeded faults). They are not a
+manual review by a person, and no accessibility scanner such as axe was run.
+
 | Check | Status | Evidence |
 | --- | --- | --- |
 | Automated accessibility scan of a generated report | not run | No scanner was available in the development session. |
-| Keyboard-only review | not performed | none |
+| Structure: language, title, landmarks, heading order, table captions and header scope, skip link target, no script, no external resource | run by an agent | A script that parses the generated HTML. No problem found. |
+| Contrast of the color tokens, light and dark scheme | measured by an agent | WCAG relative luminance from the tokens in `dppce.report.html`. Text at least 7.2:1; borders at least 4.1:1. |
+| Keyboard: first focusable element and its focus indicator | run by an agent in a browser | The first Tab reaches "Skip to the report", with a 3 px outline. A full keyboard-only review is not done. |
+| Reflow at 320 CSS pixels | run by an agent in a browser | First run: the page was 665 pixels wide, because hashes in the scope list did not wrap. Fixed with `overflow-wrap` on `dd`; after the fix the page is 320 pixels wide. Wide tables scroll inside their own labeled region. |
 | Screen reader review | not performed | none |
-| Contrast measurement | not performed | The colors were chosen for contrast. Nobody measured them. |
-| Reflow at 320 CSS pixels and 400 percent zoom | not performed | none |
+| 400 percent zoom, text spacing, and a full keyboard-only review | not performed | none |
 
 ## Manual review record
 
