@@ -297,7 +297,7 @@ test_purposes:
   requires_scope: none
   manual: true
 - id: TP-EU-77-2-ACCESS-MANUAL
-  title: 'Manual review: the access groups match Article 77(2)'
+  title: 'Manual review: the public gets Annex XIII point 1 and nothing from points 2 to 4'
   requirements:
   - EUBAT-77-2-ACCESS
   profiles:
@@ -310,7 +310,7 @@ test_purposes:
   stimulus:
     check: manual.review
   expected_evidence:
-  - A comparison of the declared access policy with the three groups and the Annex XIII points.
+  - A comparison of the declared public access with Annex XIII point 1, and evidence that points 2 to 4 are not public.
   - A record of what each tested role received. Field names only, never restricted values.
   - A signed manual review record that names the reviewer, the date, and the evidence examined.
   permitted_modes:

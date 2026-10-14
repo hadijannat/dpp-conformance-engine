@@ -258,6 +258,9 @@ sources:
     before use.
   - No independent check has this act as its subject. The check of Regulation (EU) 2023/1542 re-read its title,
     Article 53, and Article 59, and found no M3 marker in Articles 77 and 78 or in Annex XIII.
+  - The independent check of the Commission acts (docs/research/raw/commission-2026-acts.refutation.json) opened
+    the corrigendum of 2026-10-08 that amendment_history records. That check did not have this act as its subject
+    either. For that reason independent_check stays not_checked.
 - id: del-reg-eu-2025-606
   title: Commission Delegated Regulation (EU) 2025/606 of 21 March 2025 supplementing Regulation (EU) 2023/1542
     by establishing the methodology for calculation and verification of rates for recycling efficiency and recovery

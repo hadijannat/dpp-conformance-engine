@@ -11,11 +11,18 @@ description: 'Draft interpretations of Regulation (EU) 2023/1542 for the battery
   consolidated text, which is a documentation tool and has no legal effect: the Official Journal text with its
   corrigenda is the authentic text. A result from this pack is diagnostic. It is not a statement of legal compliance.'
 legal_as_of: '2026-10-13'
-scope_statement: Covers Article 13(6), first sentence and points (a) and (b), with Annex VI, Part C, and Article
-  13(7); Article 77(1) to (8) and (10); Article 78, points (a) to (h); and Annex XIII, points 1 to 4, of Regulation
-  (EU) 2023/1542, in the consolidated version of 2026-08-13. It does not cover Article 13(6), point (c), Article
-  77(9) (addressed to the Commission), the rest of the Regulation, any act that was not adopted on 2026-10-13,
-  or the content of any standard. A count of these entries is not coverage of the Regulation.
+scope_statement: Covers Article 13(6), first sentence, points (a) and (b), and the closing sentence after point
+  (c), with Annex VI, Part C, and Article 13(7); Article 77(1) to (8) and (10); Article 78, points (a) to (h);
+  and Annex XIII, points 1 to 4, of Regulation (EU) 2023/1542, in the consolidated version of 2026-08-13. It does
+  not cover Article 13(6), point (c), Article 77(9) (addressed to the Commission), the rest of the Regulation,
+  any act that was not adopted on 2026-10-13, or the content of any standard. A count of these entries is not
+  coverage of the Regulation. Two unresolved points apply to each entry that reads the dates of placing on the
+  market and putting into service. First, the exclusions of Article 1(5) and (6) (military, space, and nuclear
+  safety equipment) are not in the expression, because the profile declares no fact for them. Second, the expression
+  excludes a battery with a placing-on-the-market date before 2027-02-18, and a declaration with an unknown
+  placing-on-the-market date and a put-into-service date on or after 2027-02-18 gives 'unknown'. The expression
+  language has no value that means 'never placed on the market'. A boolean profile fact could close that gap.
+  That change is not applied. A human must accept or reject this trade-off.
 requirements:
 - id: EUBAT-13-6
   title: The battery bears a QR code
@@ -28,13 +35,18 @@ requirements:
   paraphrase: From 18 February 2027, a battery is marked with a QR code. The code has a high color contrast with
     its background and a size that a commonly available QR reader reads easily.
   applicability:
-    any:
-    - fact: ics.characteristics.placed_on_market_date
-      op: ge
-      value: '2027-02-18'
-    - fact: ics.characteristics.put_into_service_date
-      op: ge
-      value: '2027-02-18'
+    all:
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -42,7 +54,10 @@ requirements:
     text: 'Agent-authored draft reading of Art. 13(6), first sentence; Annex VI, Part C. Not approved. Support:
       docs/research/raw/batteries-regulation.json. The duty covers every battery category, so the expression holds
       the date only. The independent check in docs/research/raw/batteries-regulation.refutation.json confirmed
-      the date. Decoding a supplied image is partial evidence: it does not show the marking on the battery.'
+      the date. Decoding a supplied image is partial evidence: it does not show the marking on the battery.
+      Article 38(1) is a possible basis of the trigger, as the audit research records it: a manufacturer ensures
+      that a battery is marked and labeled under Article 13 when it places the battery on the market or puts it
+      into service. The exact wording was not confirmed.'
     status: draft-needs-review
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
@@ -52,9 +67,12 @@ requirements:
     - Annex VI, Part C names no symbology standard and no numeric limit for contrast or size.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -65,7 +83,7 @@ requirements:
   title: The QR code gives access to the battery passport
   source:
     source_id: reg-eu-2023-1542
-    citation: Art. 13(6), point (a)
+    citation: Art. 13(6), point (a) and closing sentence
     version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
   authority_class: legal_obligation
   modality: mandatory
@@ -94,14 +112,21 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
   - id: EUBAT-13-6A-I1
-    text: 'Agent-authored draft reading of Art. 13(6), point (a). Not approved. Support: docs/research/raw/batteries-regulation.json.
-      The category list and the limit are those of Article 77(1). The capacity limit is in the industrial branch
-      only and the comparison is strictly greater than 2000 Wh. The two automated steps show that a supplied code
-      decodes and that its link resolves.'
+    text: 'Agent-authored draft reading of Art. 13(6), point (a) and closing sentence. Not approved. Support:
+      docs/research/raw/batteries-regulation.json. The category list and the limit are those of Article 77(1).
+      The capacity limit is in the industrial branch only and the comparison is strictly greater than 2000 Wh.
+      The two automated steps show that a supplied code decodes and that its link resolves. Article 38(1) is a
+      possible basis of the trigger, as the audit research records it: a manufacturer ensures that a battery is
+      marked and labeled under Article 13 when it places the battery on the market or puts it into service. The
+      exact wording was not confirmed.'
     status: draft-needs-review
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
@@ -109,15 +134,20 @@ requirements:
     - Article 13(6) states the date and no trigger event. This draft applies the date to the placing on the market
       or the putting into service of the battery, as Article 77(1) does. A reviewer must confirm that reading.
     - Article 13(6) ends with the duty that the information is complete, up to date, and accurate. The audit did
-      not record how that sentence relates to each point of the paragraph.
+      not record how that sentence relates to each point of the paragraph. The agent review of 2026-10-14
+      (validation/records/review-eu-battery-draft-2026-10-14.md) read the sentence after point (c). A human
+      closes this point.
     - The Regulation does not define 'capacity' for the 2 kWh limit. The fact capacity_wh is a declared energy
       value. Commission FAQ material (non-binding) says that independent units are assessed one by one and integrated
       systems by their combined capacity.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -129,7 +159,7 @@ requirements:
   title: The QR code gives access to the information for a battery without a passport
   source:
     source_id: reg-eu-2023-1542
-    citation: Art. 13(6), point (b)
+    citation: Art. 13(6), point (b) and closing sentence
     version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
   authority_class: legal_obligation
   modality: mandatory
@@ -160,14 +190,21 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
   - id: EUBAT-13-6B-I1
-    text: 'Agent-authored draft reading of Art. 13(6), point (b). Not approved. Support: docs/research/raw/batteries-regulation.json.
-      The expression is the negation of the passport categories together with the date. For the shipped profiles
-      it can be true only for an industrial battery of 2000 Wh or less. Point (c) (SLI batteries) is not in this
-      pack: no profile exists for that category.'
+    text: 'Agent-authored draft reading of Art. 13(6), point (b) and closing sentence. Not approved. Support:
+      docs/research/raw/batteries-regulation.json. The expression is the negation of the passport categories together
+      with the date. For the shipped profiles it can be true only for an industrial battery of 2000 Wh or less.
+      Point (c) (SLI batteries) is not in this pack: no profile exists for that category. Article 38(1) is a possible
+      basis of the trigger, as the audit research records it: a manufacturer ensures that a battery is marked
+      and labeled under Article 13 when it places the battery on the market or puts it into service. The exact
+      wording was not confirmed.'
     status: draft-needs-review
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
@@ -177,14 +214,19 @@ requirements:
     - Each content item has its own start. The Article 52(3) report follows the due diligence date of 2027-08-18
       and the Article 47 exemption. The labels of Article 13(1) to (3) have no fixed start date. The audit did
       not read Article 74(1).
-    - The independent check did not re-read point (b) word by word.
+    - Point (b) was not compared character by character with the Official Journal.
     - Article 13(6) ends with the duty that the information is complete, up to date, and accurate. The audit did
-      not record how that sentence relates to each point of the paragraph.
+      not record how that sentence relates to each point of the paragraph. The agent review of 2026-10-14
+      (validation/records/review-eu-battery-draft-2026-10-14.md) read the sentence after point (c). A human
+      closes this point.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -203,20 +245,28 @@ requirements:
     Where the nature and size of the battery make that impossible or unwarranted, the code is on the packaging
     and on the documents that accompany the battery.
   applicability:
-    any:
-    - fact: ics.characteristics.placed_on_market_date
-      op: ge
-      value: '2027-02-18'
-    - fact: ics.characteristics.put_into_service_date
-      op: ge
-      value: '2027-02-18'
+    all:
+    - any:
+      - fact: ics.characteristics.placed_on_market_date
+        op: ge
+        value: '2027-02-18'
+      - fact: ics.characteristics.put_into_service_date
+        op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
   - id: EUBAT-13-7-QR-I1
     text: 'Agent-authored draft reading of Art. 13(7) (QR code). Not approved. Support: docs/research/raw/batteries-regulation.json.
       This entry covers the QR code only. It starts with the QR code duty of Article 13(6). The labels are in
-      EUBAT-13-7-LABELS because their start dates differ. No engine check can observe a physical marking.'
+      EUBAT-13-7-LABELS because their start dates differ. No engine check can observe a physical marking. Article
+      38(1) is a possible basis of the trigger, as the audit research records it: a manufacturer ensures that
+      a battery is marked and labeled under Article 13 when it places the battery on the market or puts it into
+      service. The exact wording was not confirmed.'
     status: draft-needs-review
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
@@ -226,9 +276,12 @@ requirements:
     - The Regulation gives no test method for 'indelibly' and no criterion for 'not possible or not warranted'.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -248,7 +301,9 @@ requirements:
     const: unknown
     reason: The label duties start on different dates. Article 13(1) to (3) start on the later of 2026-08-18 and
       18 months after the entry into force of the Article 13(10) implementing act. That act was not located as
-      adopted as of 2026-10-13. Article 13(4) applies from 2025-08-18. Article 13(5) states no date.
+      adopted as of 2026-10-13. Article 13(4) applies from 2025-08-18. Article 13(5) states no date. This 'unknown'
+      covers the labels of Article 13(1) to (3) only. The marking of Article 13(4) is outside the scope of this
+      pack.
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -302,6 +357,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -321,9 +380,12 @@ requirements:
       systems by their combined capacity.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
     - The Regulation does not say expressly whether a battery that was placed on the market before 2027-02-18
       needs a passport after a later change of status. Commission FAQ material (non-binding) says that a new passport
       is needed if such a battery is remanufactured after that date.
@@ -367,6 +429,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -390,16 +456,16 @@ requirements:
     tests:
     - TP-EU-77-2-CONTENT-MANUAL
 - id: EUBAT-77-2-ACCESS
-  title: The information is accessible in three groups
+  title: The public gets Annex XIII point 1 and nothing from points 2 to 4
   source:
     source_id: reg-eu-2023-1542
     citation: Art. 77(2), points (a) to (c)
     version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
   authority_class: legal_obligation
   modality: mandatory
-  paraphrase: The general public gets the information of Annex XIII point 1. Notified bodies, market surveillance
-    authorities, and the Commission get points 2 and 3. Persons with a legitimate interest get points 2 and 4,
-    for the purposes that the paragraph names.
+  paraphrase: The general public gets the information of Annex XIII point 1. Points 2 and 3 are accessible only
+    to notified bodies, market surveillance authorities, and the Commission. Points 2 and 4 are accessible only
+    to natural or legal persons with a legitimate interest, for the purposes that the paragraph names.
   applicability:
     all:
     - any:
@@ -422,6 +488,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -429,7 +499,10 @@ requirements:
     text: 'Agent-authored draft reading of Art. 77(2), points (a) to (c). Not approved. Support: docs/research/raw/batteries-regulation.json.
       The boundary between public and restricted information follows from Article 77(2) and Annex XIII without
       a further act. The automated step observes the anonymous role only. It uses the access policy that the owner
-      of the system declares.'
+      of the system declares. This entry assesses the public boundary only: the public gets point 1, and points
+      2 to 4 are accessible only to the groups that the paragraph names. Which persons have a legitimate interest,
+      and what they may receive, is assessed under EUBAT-78-B and EUBAT-78-F and stays unknown until the Article
+      77(9) act exists.'
     status: draft-needs-review
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
@@ -442,6 +515,9 @@ requirements:
       to point 4 is not resolved.
     - The engine cannot confirm that the declared access policy matches the groups of Article 77(2). The manual
       step must compare them.
+    - This draft narrows the entry to the public boundary and the exclusivity. The alternative is a 'const unknown'
+      clause in the applicability, as in EUBAT-78-B, which makes the entry inconclusive for every system. A human
+      must choose between the two.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -480,6 +556,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -500,9 +580,12 @@ requirements:
       systems by their combined capacity.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
   assessment_paths:
   - id: default
     description: Every step is needed. The manual step decides. An automated step alone cannot give a pass.
@@ -541,6 +624,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
@@ -599,6 +686,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -631,7 +722,7 @@ requirements:
   modality: mandatory
   paraphrase: All information in the battery passport is based on open standards, has an interoperable format,
     can be transferred through an open interoperable data exchange network without vendor lock-in, and is machine-readable,
-    structured, and searchable.
+    structured, and searchable, in line with the essential requirements of Article 78.
   applicability:
     all:
     - any:
@@ -654,6 +745,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -665,8 +760,6 @@ requirements:
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
     unresolved:
-    - 'The audit recorded paragraphs 5 and 6 of Article 77 together. The split used here (paragraph 5: format;
-      paragraph 6: access) must be confirmed against the Official Journal.'
     - The Regulation names no standard, format, or network, and gives no criterion for 'open standards', 'interoperable',
       'searchable', or 'vendor lock-in'.
     - Implementing Decision (EU) 2026/1736 cites six standards under Regulation (EU) 2024/1781. The presumption
@@ -712,6 +805,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -723,8 +820,6 @@ requirements:
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
     unresolved:
-    - 'The audit recorded paragraphs 5 and 6 of Article 77 together. The split used here (paragraph 5: format;
-      paragraph 6: access) must be confirmed against the Official Journal.'
     - Article 78, points (b) and (f) refer to the Article 77(9) implementing act. No adopted act was located as
       of 2026-10-13.
     - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
@@ -767,6 +862,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
     - const: unknown
       reason: The profile declares no fact for a change of battery status. The engine cannot tell whether the
@@ -827,6 +926,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
     - const: unknown
       reason: The profile declares no fact that says whether the status of the battery changed to waste.
   testability: manual
@@ -836,7 +939,8 @@ requirements:
     text: 'Agent-authored draft reading of Art. 77(7) (waste). Not approved. Support: docs/research/raw/batteries-regulation.json.
       The audit obtained short exact quotations for this paragraph (docs/research/raw/batteries-regulation.json).
       A transfer of responsibility is an organizational fact. A passport system can show it only if it records
-      the responsible party.'
+      the responsible party. This draft reads the entry as follows: the new responsible party holds the duty of
+      Article 77(4). Nothing in Article 77(7) requires the passport to record the responsible party.'
     status: draft-needs-review
     author_kind: agent
     source_version: CELEX 02023R1542-20260813 (consolidated version of 2026-08-13, EN 003.001)
@@ -878,6 +982,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
     - const: unknown
       reason: The profile declares no fact that says whether the battery was recycled.
@@ -931,6 +1039,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -951,9 +1063,12 @@ requirements:
     - Which data a battery registration needs in addition to the unique identifier is not resolved. Article 8(7)
       of Implementing Regulation (EU) 2026/1778 refers to delegated acts under Article 77 of Regulation (EU) 2023/1542.
       The audit did not examine such acts.
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
   assessment_paths:
   - id: default
     description: One manual step. The engine has no check for this provision.
@@ -991,6 +1106,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
@@ -1048,6 +1167,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
     - const: unknown
       reason: The access rights depend on the Article 77(9) implementing act. No adopted act was located as of
         2026-10-13.
@@ -1104,6 +1227,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1156,6 +1283,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1206,6 +1337,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
@@ -1260,6 +1395,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
     - const: unknown
       reason: The access rights depend on the Article 77(9) implementing act. No adopted act was located as of
@@ -1320,6 +1459,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: mixed
   review_status: draft-needs-review
   interpretations:
@@ -1376,6 +1519,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1429,6 +1576,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
@@ -1488,6 +1639,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
     - const: unknown
       reason: The start follows Article 7(1) and (2). For each category it is the later of a fixed date and 12
         or 18 months after the entry into force of a delegated or implementing act. No such act was located as
@@ -1543,6 +1698,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
     - const: unknown
       reason: The item follows the due diligence obligations, which apply from 2027-08-18 (Article 48(1) as amended
@@ -1605,6 +1764,10 @@ requirements:
         op: ge
         value: '2027-02-18'
     - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
+    - not:
         all:
         - fact: ics.product_category
           op: eq
@@ -1613,9 +1776,10 @@ requirements:
           op: eq
           value: true
     - const: unknown
-      reason: 'The start follows Article 8(1): the later of 2028-08-18 and 24 months after the entry into force
-        of a delegated act, and 2033-08-18 for LMT batteries. The delegated act was not located as adopted as
-        of 2026-10-13. No start date is fixed.'
+      reason: 'The start follows Article 8(1): for industrial and electric vehicle batteries the later of 2028-08-18
+        and 24 months after the entry into force of a delegated act, which was not located as adopted as of 2026-10-13;
+        for LMT batteries 2033-08-18, fixed in the text. Whether the item attaches by the trigger date of the
+        battery is not settled. No date before 2028-08-18 is possible.'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1660,6 +1824,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1674,9 +1842,12 @@ requirements:
     - The audit recorded no definition or test for this value.
     - 'The exclusions of Article 1(5) and (6) (military, space, and nuclear safety equipment) are not in the expression:
       the profile declares no fact for them.'
-    - The expression gives 'true' when a put-into-service date on or after 2027-02-18 is declared, also for a
-      battery that was placed on the market before that date. Article 3(1), point (18) limits putting into service
-      to a battery that was not placed on the market before. The expression language cannot state that limit.
+    - A declaration with an unknown placing-on-the-market date and a put-into-service date on or after 2027-02-18
+      gives 'unknown' where the other clauses hold. The expression excludes a battery with a placing-on-the-market
+      date before 2027-02-18, because Article 3(1), point (18) limits putting into service to a battery that was
+      not placed on the market before. The expression language has no value that means 'never placed on the market'.
+      A boolean profile fact could close that gap. That change is not applied. A human must accept or reject this
+      trade-off.
     - The audit read this provision through a summarizing fetch tool. The wording was not compared character by
       character with the Official Journal.
   assessment_paths:
@@ -1715,6 +1886,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
@@ -1771,6 +1946,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -1822,6 +2001,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
     - any:
       - fact: ics.product_category
@@ -1887,6 +2070,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
     - any:
       - fact: ics.product_category
         op: in
@@ -1951,6 +2138,10 @@ requirements:
       - fact: ics.characteristics.put_into_service_date
         op: ge
         value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
+        value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review
   interpretations:
@@ -2008,6 +2199,10 @@ requirements:
         value: '2027-02-18'
       - fact: ics.characteristics.put_into_service_date
         op: ge
+        value: '2027-02-18'
+    - not:
+        fact: ics.characteristics.placed_on_market_date
+        op: lt
         value: '2027-02-18'
   testability: manual
   review_status: draft-needs-review

@@ -39,6 +39,17 @@ The output of a run is a conformance test report.
 The shipped catalogue has no approved interpretation.
 A result from the pack `eu-battery/draft` has the claim level `diagnostic`. A person must review it before any use.
 
+No verdict from the pack `eu-battery/draft` is `pass` or `fail`, in any mode.
+Each verdict is `inconclusive` or `not_applicable`. The one exception is `error`, for a check that raises an exception.
+
+- Each assessment path holds a manual step. The engine has no input for the result of a manual step.
+- A manual step gives `inconclusive`, and one `inconclusive` step makes its path `inconclusive`. No path can give `pass`.
+- Each automated step gives `inconclusive` when its check does not pass. No step can give `fail`.
+- No entry has a `declared_support` expression. A declaration of the owner cannot give `fail`.
+- The modes `illustrative` and `reviewed` do not assess these entries. The engine lists each entry as an exclusion.
+
+See rows OQ-015 and OQ-016 of the [open questions](../open-questions.md).
+
 ## 3. Authority classes
 
 Each requirement has one authority class. The engine reports each class separately.
@@ -142,13 +153,18 @@ No entry states, quotes, or summarizes the content of a standard.
 | Article 13(6): QR code on all batteries | 2027-02-18 | Fixed in the text. |
 | Annex XIII, point 1(d): responsible sourcing | Follows the due diligence date of 2027-08-18 | Fixed by Regulation (EU) 2025/1561. The exemption of Article 47 can apply. |
 | Annex XIII, point 1(c): carbon footprint | Follows Article 7 | Not fixed. The acts of Article 7 were not located as adopted. |
-| Annex XIII, point 1(e): recycled content | Follows Article 8(1) | Not fixed. The delegated act was not located as adopted. |
+| Annex XIII, point 1(e): recycled content | Follows Article 8(1) | Not fixed for industrial and electric vehicle batteries: the delegated act was not located as adopted. For LMT batteries the text gives 2033-08-18. |
 | Article 13(1) to (3): labels | The later of 2026-08-18 and 18 months after an implementing act | Not fixed. The act was not located as adopted. |
 | Article 77(9): access rights act | Deadline for the Commission: 2026-08-18 | Not located as adopted. |
 
 The passport duty covers each LMT battery, each industrial battery with a capacity greater than 2 kWh, and each electric vehicle battery.
 The capacity limit is for industrial batteries only. The comparison is "greater than", not "at least".
 The trigger is the placing on the market or the putting into service.
+
+Putting into service is the first use of a battery that was not placed on the market before (Article 3(1), point (18)).
+A placing-on-the-market date before 2027-02-18 therefore gives `false`. A later put-into-service date does not change that.
+An unknown placing-on-the-market date with a put-into-service date on or after 2027-02-18 gives `unknown`.
+The expression language has no value that means "never placed on the market". A human must accept or reject this trade-off.
 
 The draft pack never invents a date. Where a date is not fixed, the applicability is `unknown` and the entry gives the reason.
 A missing fact gives `unknown`. It never gives `false` and never gives `not_applicable`.

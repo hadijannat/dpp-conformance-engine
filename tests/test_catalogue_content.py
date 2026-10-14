@@ -18,8 +18,12 @@ from dppce.catalogue import Catalogue, load_catalogue, load_data, load_profiles,
 from dppce.catalogue.lint import Finding, lint
 from dppce.infrastructure.resources import data_root
 from dppce.models import (
+    All,
     AuthorityClass,
+    Compare,
     ExecutionMode,
+    Not,
+    Op,
     Requirement,
     ReviewStatus,
     TestPack,
@@ -194,9 +198,14 @@ def _facts(category: str, capacity: int | str, placed: str, put: str) -> dict[st
         (_facts("industrial", 2001, "2027-02-18", "unknown"), Tri.TRUE),
         (_facts("industrial", "unknown", "2027-02-18", "unknown"), Tri.UNKNOWN),
         (_facts("lmt", 500, "2027-02-18", "unknown"), Tri.TRUE),  # the limit is for industrial batteries only
-        (_facts("ev", 75000, "2027-02-17", "unknown"), Tri.UNKNOWN),  # one unknown date is not a 'no'
+        # Changed after review F-02 (validation/records/review-eu-battery-draft-2026-10-14.md): by
+        # Article 3(1)(18) a battery placed on the market cannot be put into service later. The
+        # known date decides; the unknown one cannot change the answer. Was: Tri.UNKNOWN.
+        (_facts("ev", 75000, "2027-02-17", "unknown"), Tri.FALSE),
         (_facts("ev", 75000, "2027-02-17", "2027-02-17"), Tri.FALSE),
-        (_facts("ev", 75000, "unknown", "2027-02-18"), Tri.TRUE),  # placed on the market OR put into service
+        # Changed after review F-01: an unknown placing date can be before 2027-02-18, and then the
+        # later service date is void. The draft accepts this trade-off (OQ-021). Was: Tri.TRUE.
+        (_facts("ev", 75000, "unknown", "2027-02-18"), Tri.UNKNOWN),
         (_facts("portable", 50, "2027-03-01", "unknown"), Tri.FALSE),
         (_facts("unknown", 50, "2027-03-01", "unknown"), Tri.UNKNOWN),
     ],
@@ -215,3 +224,54 @@ def test_an_item_that_waits_for_an_unadopted_act_is_never_applicable(catalogue: 
     for ident in ("EUBAT-AXIII-1C", "EUBAT-AXIII-1D", "EUBAT-AXIII-1E", "EUBAT-78-B", "EUBAT-78-F"):
         assert evaluate(requirements[ident].applicability, inside).value is Tri.UNKNOWN, ident
         assert evaluate(requirements[ident].applicability, outside).value is Tri.FALSE, ident
+
+
+# The cases of validation/records/review-eu-battery-draft-2026-10-14.md, section 5, after correction F-01.
+_DATE_CASES = {
+    "a": (_facts("ev", 75000, "2027-03-01", "unknown"), Tri.TRUE),
+    "b": (_facts("ev", 75000, "2026-12-01", "unknown"), Tri.FALSE),  # no later putting into service can exist
+    "c": (_facts("lmt", 500, "2027-03-01", "unknown"), Tri.TRUE),
+    "d": (_facts("industrial", 2000, "2027-03-01", "unknown"), Tri.FALSE),
+    "e": (_facts("industrial", 2001, "2027-03-01", "unknown"), Tri.TRUE),
+    "f": (_facts("industrial", "unknown", "2027-03-01", "unknown"), Tri.UNKNOWN),
+    "g": (_facts("portable", 50, "2027-03-01", "unknown"), Tri.FALSE),
+    "h": (_facts("ev", 75000, "unknown", "unknown"), Tri.UNKNOWN),
+    "x": (
+        _facts("ev", 75000, "2026-12-01", "2027-03-01"),
+        Tri.FALSE,
+    ),  # the service date is void by definition
+    "y": (
+        _facts("ev", 75000, "unknown", "2027-03-01"),
+        Tri.UNKNOWN,
+    ),  # no value says 'never placed on the market'
+}
+_EARLIER_PLACING = Not(
+    operand=Compare(fact="ics.characteristics.placed_on_market_date", op=Op.LT, value="2027-02-18")
+)
+
+
+@pytest.mark.parametrize("case", _DATE_CASES)
+def test_a_placing_before_the_start_date_puts_a_battery_outside_article_77_1(
+    catalogue: Catalogue, case: str
+) -> None:
+    facts, expected = _DATE_CASES[case]
+    requirement = next(r for r in catalogue.packs[EU_PACK].requirements if r.id == "EUBAT-77-1")
+    assert evaluate(requirement.applicability, facts).value is expected
+
+
+def test_each_entry_with_a_date_clause_excludes_an_earlier_placing(catalogue: Catalogue) -> None:
+    requirements = {r.id: r for r in catalogue.packs[EU_PACK].requirements}
+    assert len(requirements) == 36
+    assert all(r.review_status is ReviewStatus.DRAFT for r in requirements.values())
+    carriers = {
+        ident
+        for ident, r in requirements.items()
+        if isinstance(r.applicability, All) and _EARLIER_PLACING in r.applicability.all
+    }
+    assert len(carriers) == 35
+    assert set(requirements) - carriers == {"EUBAT-13-7-LABELS"}, "that entry reads no date"
+    # A date-only entry, and an entry where a sibling 'const: unknown' hid the wrong 'true'.
+    for ident in ("EUBAT-13-6", "EUBAT-78-B"):
+        for case in "bx":
+            facts, _ = _DATE_CASES[case]
+            assert evaluate(requirements[ident].applicability, facts).value is Tri.FALSE, (ident, case)
