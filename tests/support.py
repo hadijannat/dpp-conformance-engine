@@ -14,13 +14,17 @@ from dppce.infrastructure.interfaces import Record
 from dppce.models import (
     CoverageSummary,
     EvidenceEnvelope,
+    ExecutionMode,
     Ratio,
     RequirementResult,
+    ReviewStatus,
     RunManifest,
     SutIdentity,
     TestResult,
+    Tri,
+    Verdict,
 )
-from dppce.verdicts import overall_verdict
+from dppce.verdicts import overall_verdict, requirement_verdict
 
 ISSUER = "urn:example:test-lab"
 KID = "TEST-ONLY-report-key-1"
@@ -58,7 +62,10 @@ def make_requirement_result(index: int, verdict: str, **changes: Any) -> Require
         "applicability": "true",
         "applicability_reason": "always",
         "verdict": verdict,
-        "verdict_reason": "test",
+        # The reason that the published rules give for this verdict; the verifier derives it again.
+        "verdict_reason": requirement_verdict(
+            Tri.TRUE, False, [Verdict(verdict)], ExecutionMode.ILLUSTRATIVE, ReviewStatus.DRAFT
+        )[1],
         "claim_level": "illustrative",
         "paths": [
             {"path_id": "default", "applicability": "true", "verdict": verdict, "steps": [f"TP-{index:03d}"]}

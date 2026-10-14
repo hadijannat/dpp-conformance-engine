@@ -9,6 +9,7 @@ Every command accepts ``--json`` and then writes one JSON document to standard o
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import sys
 from collections.abc import Callable
@@ -16,6 +17,7 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
+from urllib.parse import urlsplit
 
 from pydantic import ValidationError
 
@@ -41,7 +43,7 @@ from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, u
 from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_secret
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.resources import data_root
-from dppce.infrastructure.transport import PolicyTransport, TransportConfig, origin_of
+from dppce.infrastructure.transport import ANONYMOUS, PolicyTransport, TransportConfig, origin_of
 from dppce.models import (
     ICS,
     IXIT,
@@ -223,6 +225,10 @@ def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str,
     for identity in ixit.identities:
         if identity.secret_ref is None:
             continue
+        if identity.role == ANONYMOUS:
+            raise UsageError(
+                "the IXIT names a secret for the role 'anonymous'; the anonymous role has no credential"
+            )
         if confirmed.get(identity.role) != identity.secret_ref:
             raise UsageError(
                 f"the IXIT names a secret for role '{identity.role}'; confirm it with "
@@ -230,6 +236,21 @@ def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str,
             )
         credentials[identity.role] = (origin, resolve_secret(identity.secret_ref, secrets_dir=args.secrets))
     return credentials
+
+
+def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
+    """Parse the origins that the operator confirmed. A bare host would confirm every port of it."""
+    origins = set()
+    for value in values:
+        try:
+            parts = urlsplit(value)
+            origin = origin_of(value)
+        except ValueError as exc:
+            raise UsageError(f"{flag} {value!r} is not an origin") from exc
+        if parts.scheme not in ("http", "https") or not parts.hostname or parts.path not in ("", "/"):
+            raise UsageError(f"{flag} takes an origin such as http://127.0.0.1:8765, not {value!r}")
+        origins.add(origin)
+    return frozenset(origins)
 
 
 def cmd_plan(args: argparse.Namespace) -> int:
@@ -251,16 +272,32 @@ def cmd_run(args: argparse.Namespace) -> int:
     if out.exists() and any(out.iterdir()):
         raise UsageError(f"{out} is not empty; a run never overwrites an earlier run")
     ixit, base = inputs.ixit, args.ixit.resolve().parent
-    unconfirmed = sorted(set(ixit.network.allow_private_hosts) - set(args.allow_private_host))
+    if args.retention_days is not None and not 0 <= args.retention_days <= 3650:
+        raise UsageError("--retention-days must be from 0 to 3650")
+    private = _confirmed_origins(args.allow_private_host, "--allow-private-host")
+    remote = _confirmed_origins(args.allow_remote_host, "--allow-remote-host")
+    confirmed_hosts = {urlsplit(origin).hostname for origin in private}
+    unconfirmed = sorted({h.lower() for h in ixit.network.allow_private_hosts} - confirmed_hosts)
     if unconfirmed:
         raise UsageError(
-            "the IXIT asks for non-public hosts; confirm each one with --allow-private-host: "
+            "the IXIT asks for non-public hosts; confirm the origin of each with --allow-private-host: "
             + ", ".join(unconfirmed)
         )
     # A role credential goes only to an origin that a validated authorization names.
-    target = origin_of(ixit.endpoints.get("origin_override") or ixit.endpoints.get("api", ""))
-    permitted = inputs.authorization is not None and target in inputs.authorization.endpoints
-    credentials = _credentials(args, ixit, target) if permitted else {}
+    try:
+        target = origin_of(ixit.endpoints.get("origin_override") or ixit.endpoints.get("api", ""))
+    except ValueError as exc:
+        raise UsageError(f"the API endpoint of the IXIT is not a URL: {exc}") from exc
+    authorized = set()
+    for endpoint in inputs.authorization.endpoints if inputs.authorization else ():
+        with contextlib.suppress(ValueError):
+            authorized.add(origin_of(endpoint))
+    credentials = _credentials(args, ixit, target)
+    if credentials and target not in authorized:
+        raise UsageError(
+            f"the IXIT names role secrets, but no valid authorization names the origin {target}; "
+            "a role credential is sent only to an origin that the owner authorized"
+        )
     samples = {
         name: path
         for name, value in ixit.samples.items()
@@ -274,7 +311,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             engine_version=__version__,
             credentials=credentials,
             authorization=inputs.authorization,
-            remote_read_hosts=frozenset(h.lower() for h in args.allow_remote_host),
+            remote_read_origins=remote,
+            private_origins=private,
             samples=samples,
         ),
         SystemClock(),
@@ -536,14 +574,15 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         "--allow-private-host",
         action="append",
         default=[],
-        help="confirm one loopback or private host that the IXIT asks for; repeat for each host",
+        metavar="ORIGIN",
+        help="confirm one loopback or private origin, such as http://127.0.0.1:8765; repeat for each origin",
     )
     run.add_argument(
         "--allow-remote-host",
         action="append",
         default=[],
-        metavar="HOST",
-        help="state that the owner of one public host permits bounded read-only access; repeat for each host",
+        metavar="ORIGIN",
+        help="state that the owner of one public origin permits bounded read-only access; repeat for each",
     )
     run.add_argument(
         "--retention-days",

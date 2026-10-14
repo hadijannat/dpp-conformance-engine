@@ -9,6 +9,7 @@ separately. The result says nothing new about the tested system.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from itertools import pairwise
@@ -32,6 +33,7 @@ from dppce.models import (
     EvidenceEnvelope,
     ExecutionStatus,
     Modality,
+    ReviewStatus,
     Tri,
     TrustBundle,
     TrustedKey,
@@ -39,7 +41,7 @@ from dppce.models import (
     VerificationDimension,
     VerificationReport,
 )
-from dppce.verdicts import overall_verdict, path_verdict, requirement_verdict
+from dppce.verdicts import claim_level, overall_verdict, path_verdict, requirement_verdict
 
 Outcome = Literal["pass", "fail", "missing", "not_checked"]
 _STAMP = "%Y-%m-%dT%H:%M:%SZ"
@@ -96,10 +98,41 @@ def _verdicts_follow(decision: DecisionBody) -> bool:
             [p.verdict for p in result.paths],
             decision.manifest.mode,
             result.review_status,
-        )[0]
-        if derived is not result.verdict:
+        )
+        # The reason is part of what the reader sees, so it must follow too.
+        if derived != (result.verdict, result.verdict_reason):
             return False
     return True
+
+
+def _coverage_follows(decision: DecisionBody, excluded: int) -> dict[str, bool]:
+    """The coverage figures that the report holds enough data to recompute, as in ``summarize``.
+
+    The figures over all requirements (by authority class, review status, testability, the
+    implementation ratio, and placeholders) also count excluded requirements, which a report
+    lists by identifier only. Those are checked for their totals and bounds.
+    """
+    results, coverage = decision.requirement_results, decision.coverage
+    status = {t.test_purpose_id: t.execution_status for t in decision.test_results}
+    applicability = Counter([r.applicability.value for r in results] + ["excluded"] * excluded)
+    manual = sum(
+        1
+        for r in results
+        if any(status.get(step) is ExecutionStatus.MANUAL_UNAVAILABLE for p in r.paths for step in p.steps)
+    )
+    total = coverage.total_requirements
+    placeholders = sum(1 for r in results if r.review_status is ReviewStatus.PLACEHOLDER)
+    return {
+        "coverage by applicability": coverage.by_applicability == dict(sorted(applicability.items())),
+        "unknown applicability": coverage.unknown_applicability
+        == sum(1 for r in results if r.applicability is Tri.UNKNOWN),
+        "manual steps missing": coverage.manual_missing == manual,
+        "placeholder bounds": placeholders <= coverage.placeholders <= total,
+        "category totals": all(
+            sum(counts.values()) == total
+            for counts in (coverage.by_authority_class, coverage.by_review_status, coverage.by_testability)
+        ),
+    }
 
 
 def _execution_coverage(decision: DecisionBody) -> tuple[int, int]:
@@ -137,7 +170,11 @@ def _counts(decision: DecisionBody) -> tuple[Outcome, str]:
             r.numerator <= r.denominator
             for r in (coverage.implementation, coverage.execution, coverage.passing)
         ),
-        "overall outcome": decision.overall is overall_verdict(results)[0],
+        "overall outcome": (decision.overall, decision.overall_reason) == overall_verdict(results),
+        "claim levels": all(
+            r.claim_level is claim_level(decision.manifest.mode, r.authority_class, r.review_status)
+            for r in results
+        ),
         "verdicts follow from the test results": _verdicts_follow(decision),
         "pass and fail only for a completed step": all(
             t.execution_status is ExecutionStatus.COMPLETED
@@ -146,6 +183,7 @@ def _counts(decision: DecisionBody) -> tuple[Outcome, str]:
         ),
         "execution ratio": (coverage.execution.numerator, coverage.execution.denominator)
         == _execution_coverage(decision),
+        **_coverage_follows(decision, excluded),
     }
     bad = [name for name, ok in checks.items() if not ok]
     if bad:

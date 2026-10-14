@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from decimal import Decimal
 from typing import Any
 
@@ -72,6 +73,14 @@ def _reject_constant(name: str) -> Any:
     raise CanonicalizationError(f"{name} is not JSON")
 
 
+def _finite_float(text: str) -> float:
+    """A JSON number like 1e999 overflows to infinity. JSON has no infinity, so it is refused."""
+    value = float(text)
+    if not math.isfinite(value):
+        raise CanonicalizationError(f"number {text} is outside the range of a float")
+    return value
+
+
 def parse_strict(raw: bytes | str, *, decimals: bool = False) -> Any:
     """Parse JSON that two parsers cannot read differently.
 
@@ -85,7 +94,7 @@ def parse_strict(raw: bytes | str, *, decimals: bool = False) -> Any:
             raw,
             object_pairs_hook=_reject_duplicates,
             parse_constant=_reject_constant,
-            parse_float=Decimal if decimals else None,
+            parse_float=Decimal if decimals else _finite_float,
         )
     except (ValueError, RecursionError) as exc:
         if isinstance(exc, CanonicalizationError):

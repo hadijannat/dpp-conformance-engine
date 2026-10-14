@@ -13,9 +13,9 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import os
 import re
 import secrets
-import shutil
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -135,6 +135,8 @@ def write_recording(
     directory: Path, records: Sequence[Record], keys: DataKeyProvider, *, created: date, retention_days: int
 ) -> RecordingIndex:
     """Encrypt each record with AES-256-GCM and write the index. Never overwrites a recording."""
+    if retention_days < 0:
+        raise RecordingError("the retention period cannot be negative")
     if directory.exists() and any(directory.iterdir()):
         raise RecordingError(f"{directory}: is not empty; a recording is never overwritten")
     index = RecordingIndex(
@@ -214,7 +216,8 @@ def read_recording(directory: Path, keys: DataKeyProvider) -> tuple[Record, ...]
         if record.record_id != entry.record_id or not hmac.compare_digest(commit(record), entry.commitment):
             raise RecordingError(f"{entry.record_id}: does not match the commitment in the index")
         records.append(record)
-    return tuple(records)
+    # Identifiers are numbered in acquisition order. Text order breaks from r10000 on.
+    return tuple(sorted(records, key=lambda r: int(r.record_id[1:])))
 
 
 @dataclass(frozen=True)
@@ -256,6 +259,10 @@ def purge_expired(root: Path, today: date, keys: DataKeyProvider, *, delete: boo
         try:
             index = read_verified_index(directory, keys)
             is_expired = date.fromisoformat(index.delete_after) < today
+            if is_expired:
+                # Each record must belong to this index. An authentic index copied from a
+                # different, expired recording does not match the records of this one.
+                read_recording(directory, keys)
         except (RecordingError, ValueError, LookupError) as exc:
             kept.append((directory, f"not an authentic recording: {exc}"))
             continue
@@ -264,7 +271,27 @@ def purge_expired(root: Path, today: date, keys: DataKeyProvider, *, delete: boo
         if not _is_only_a_recording(directory, index):
             kept.append((directory, "holds files that are not part of the recording"))
             continue
-        expired.append(directory)
         if delete:
-            shutil.rmtree(directory)
+            try:
+                _delete_recording(directory, index)
+            except OSError as exc:
+                kept.append((directory, f"not deleted completely: {exc}"))
+                continue
+        expired.append(directory)
     return PurgeResult(expired=tuple(expired), kept=tuple(kept), deleted=delete)
+
+
+def _delete_recording(directory: Path, index: RecordingIndex) -> None:
+    """Delete the files of the recording by name, then the empty directories.
+
+    No recursive delete: a file that appeared after the check makes ``rmdir`` fail, and the
+    directory stays with that file in it. ``unlink`` does not follow a link.
+    """
+    records = directory / _RECORDS_DIR
+    for entry in index.records:
+        (records / f"{entry.record_id}.enc").unlink(missing_ok=True)
+    if records.exists():
+        os.rmdir(records)
+    for name in (_INDEX_FILE, _SEAL_FILE):
+        (directory / name).unlink()
+    os.rmdir(directory)

@@ -48,8 +48,10 @@ _NAT64: Final = (ipaddress.ip_network("64:ff9b::/96"), ipaddress.ip_network("64:
 
 
 def redact_url(url: str) -> str:
-    """Return ``url`` without userinfo and without the values of credential-like query parameters.
+    """Return ``url`` without userinfo, without a fragment, and without the values of
+    credential-like query parameters.
 
+    A fragment is never sent to a server, and an OAuth-style redirect can carry a token in it.
     A URL with nothing to remove is returned unchanged, byte for byte.
     """
     try:
@@ -59,7 +61,7 @@ def redact_url(url: str) -> str:
     except ValueError:
         return REMOVED
     sensitive = any(_SENSITIVE_PARAMETER.search(name) for name, _ in pairs)
-    if not has_userinfo and not sensitive:
+    if not has_userinfo and not sensitive and not parts.fragment and not url.endswith("#"):
         return url
     netloc = parts.netloc.rpartition("@")[2] if has_userinfo else parts.netloc
     query = (
@@ -67,7 +69,7 @@ def redact_url(url: str) -> str:
         if sensitive
         else parts.query
     )
-    return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
+    return urlunsplit((parts.scheme, netloc, parts.path, query, ""))
 
 
 def redact_link(value: str) -> str:

@@ -55,7 +55,7 @@ uv run dppce run \
   --ixit fixtures/reference/ev.ixit.yaml \
   --trust fixtures/reference/trust/TEST-ONLY-trust-bundle.json \
   --secrets fixtures/reference/secrets \
-  --allow-private-host 127.0.0.1 \
+  --allow-private-host http://127.0.0.1:8765 \
   --role-secret legitimate_interest=file:TEST-ONLY-legitimate_interest.token \
   --role-secret authority=file:TEST-ONLY-authority.token \
   --at 2026-10-13T12:00:00Z \

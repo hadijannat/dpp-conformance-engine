@@ -99,6 +99,7 @@ class ReferenceRig:
         if self._server is not None:
             self._server.start()
         origin = self._server.origin if self._server is not None else UNREACHABLE_ORIGIN
+        self.origin = origin
         rig = self.work / "rig"
         shutil.copytree(FIXTURES / "qr", rig / "qr")
         ixit = yaml.safe_load((FIXTURES / f"{self.profile}.ixit.yaml").read_text(encoding="utf-8"))
@@ -150,7 +151,7 @@ class ReferenceRig:
             "--out", str(out),
             "--keys", str(self.work / "keys"),
             "--secrets", str(FIXTURES / "secrets"),
-            "--allow-private-host", "127.0.0.1",
+            "--allow-private-host", self.origin,
             "--issuer-name", "dppce test rig (synthetic)",
             "--issuer-id", LAB,
         ]  # fmt: skip

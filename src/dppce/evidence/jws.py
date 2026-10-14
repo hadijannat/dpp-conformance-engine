@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import base64
 import binascii
-import json
 import re
 from collections.abc import Mapping
 from pathlib import Path
@@ -22,7 +21,7 @@ from joserfc.errors import BadSignatureError, DecodeError, ExceededSizeError, Jo
 from joserfc.jwk import ECKey
 from joserfc.jws import JWSRegistry
 
-from dppce.evidence.canonical import canonical_bytes
+from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.infrastructure.interfaces import Signer
 
 ALLOWED_ALGORITHMS: Final = ("ES256",)
@@ -92,8 +91,9 @@ def header_of(token: str) -> dict[str, Any]:
         raise SignatureError("a compact JWS is three base64url parts")
     parts = token.split(".")
     try:
-        header = json.loads(_unb64(parts[0]))
-    except ValueError as exc:
+        header = parse_strict(_unb64(parts[0]))
+    except (CanonicalizationError, RecursionError) as exc:
+        # A repeated member (two "alg") or a nesting deeper than the parser handles is not a header.
         raise SignatureError("the protected header is not JSON") from exc
     if not isinstance(header, dict):
         raise SignatureError("the protected header is not a JSON object")

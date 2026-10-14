@@ -11,6 +11,7 @@ import http.client
 import os
 import socket
 import ssl
+import stat
 import threading
 import time
 from collections.abc import Callable, Mapping
@@ -23,6 +24,7 @@ from dppce.evidence.recording import new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Clock, Record, Request, TransportError
 from dppce.infrastructure.redaction import (
+    REMOVED,
     is_public_address,
     redact_request_headers,
     redact_response_headers,
@@ -66,6 +68,24 @@ def origin_of(url: str) -> str:
     return f"{parts.scheme}://{shown}" + ("" if port == default else f":{port}")
 
 
+def _origins(urls: tuple[str, ...] | frozenset[str]) -> frozenset[str]:
+    """The origins of ``urls``. A URL that cannot be parsed names no origin."""
+    found = set()
+    for url in urls:
+        with contextlib.suppress(ValueError):
+            found.add(origin_of(url))
+    return frozenset(found)
+
+
+def _identity(path: Path) -> tuple[int, int] | None:
+    """Device and inode of a regular file, or None if there is none at ``path`` now."""
+    try:
+        found = os.stat(path, follow_symlinks=False)
+    except OSError:
+        return None
+    return (found.st_dev, found.st_ino) if stat.S_ISREG(found.st_mode) else None
+
+
 @dataclass(frozen=True)
 class TransportConfig:
     policy: NetworkPolicy
@@ -73,8 +93,12 @@ class TransportConfig:
     # role -> (origin, bearer token). A token is sent only to its own origin.
     credentials: Mapping[str, tuple[str, str]] = field(default_factory=dict)
     authorization: Authorization | None = None
-    # Public hosts for which the operator states that the owner permits bounded read-only access.
-    remote_read_hosts: frozenset[str] = frozenset()
+    # Public origins for which the operator states that the owner permits bounded read-only access.
+    remote_read_origins: frozenset[str] = frozenset()
+    # Non-public origins that the operator confirmed. None: any port of a host in
+    # ``policy.allow_private_hosts`` (library use). The command line always sets it, so that the
+    # IXIT cannot choose a different service on a confirmed host.
+    private_origins: frozenset[str] | None = None
     samples: Mapping[str, Path] = field(default_factory=dict)
     max_artifact_bytes: int = 8 * 1024 * 1024
 
@@ -135,7 +159,9 @@ class PolicyTransport:
         self._sleep = sleep
         self._monotonic = monotonic
         self._records: list[Record] = []
-        self._samples = {name: path.resolve() for name, path in config.samples.items()}
+        # The identity of each sample file is taken now. A file read later must be the same one.
+        self._samples = {name: (path.resolve(), _identity(path)) for name, path in config.samples.items()}
+        self._secrets = tuple(token for _, token in config.credentials.values() if token)
         self._sent = 0
         self._last_sent: float | None = None
 
@@ -147,11 +173,13 @@ class PolicyTransport:
     def _target(self, url: str, method: str, role: str) -> _Target:
         """Check one hop against the policy and pin its address. Raises ``_DeniedError``."""
         policy, auth = self._config.policy, self._config.authorization
-        parts = urlsplit(url)
-        host = (parts.hostname or "").lower()
         try:
+            parts = urlsplit(url)
+            host = (parts.hostname or "").lower()
             port = parts.port or (443 if parts.scheme == "https" else 80)
+            origin = origin_of(url)
         except ValueError as exc:
+            # A URL that cannot be parsed is outside every policy. It is never raised.
             raise _DeniedError("policy_denied") from exc
         if parts.scheme not in ("http", "https") or not host or parts.username or parts.password:
             raise _DeniedError("policy_denied")
@@ -171,13 +199,15 @@ class PolicyTransport:
         # Every answer must pass. One private answer among public ones is a rebinding attempt.
         if not all(public) and not private_ok:
             raise _DeniedError("policy_denied")
-        if any(public) and auth is None and host not in self._config.remote_read_hosts:
+        confirmed = self._config.private_origins
+        if not all(public) and confirmed is not None and origin not in confirmed:
+            raise _DeniedError("policy_denied")
+        if any(public) and auth is None and origin not in self._config.remote_read_origins:
             raise _DeniedError("authorization_denied")
-        origin = origin_of(url)
         if auth is not None:
             now = self._clock.now()
             permitted = (
-                origin in {origin_of(endpoint) for endpoint in auth.endpoints}
+                origin in _origins(auth.endpoints)
                 and method in auth.methods
                 and role in auth.roles
                 and parse_stamp(auth.not_before) <= now <= parse_stamp(auth.not_after)
@@ -198,7 +228,7 @@ class PolicyTransport:
     # -- one HTTP request -------------------------------------------------------------------
 
     def _send(
-        self, target: _Target, method: str, headers: Mapping[str, str], body: bytes | None
+        self, target: _Target, method: str, headers: Mapping[str, str], body: bytes | None, left: float
     ) -> tuple[int, tuple[tuple[str, str], ...], bytes, bool] | TransportError:
         policy = self._config.policy
         if self._last_sent is not None and policy.min_interval_ms:
@@ -207,7 +237,8 @@ class PolicyTransport:
                 self._sleep(wait)
         self._sent += 1
         self._last_sent = self._monotonic()
-        timeout = policy.timeout_ms / 1000
+        # ``left`` is what remains of the total time of the whole fetch: every hop and attempt.
+        timeout = max(0.001, min(policy.timeout_ms / 1000, left))
         connection: http.client.HTTPConnection = (
             _PinnedHTTPSConnection(target.host, target.port, target.address, timeout)
             if target.scheme == "https"
@@ -227,7 +258,7 @@ class PolicyTransport:
             connection.connect()
             # Keep the socket itself. http.client forgets it when a response says that the
             # connection closes, and the body is still being read at that time.
-            timer = threading.Timer(policy.total_timeout_ms / 1000, expire, (connection.sock,))
+            timer = threading.Timer(left, expire, (connection.sock,))
             timer.daemon = True
             timer.start()
             connection.request(method, target.path, body=body, headers=dict(headers))
@@ -275,17 +306,29 @@ class PolicyTransport:
         if target.origin == first_origin:
             headers.update(request.headers)
         credential = self._config.credentials.get(request.role)
-        if credential is not None and origin_of(credential[0]) == target.origin:
+        # The anonymous role never carries a credential, also if one is configured under its name.
+        if request.role != ANONYMOUS and credential is not None and origin_of(credential[0]) == target.origin:
             headers["Authorization"] = f"Bearer {credential[1]}"
         return headers
 
+    def _scrub(
+        self, headers: tuple[tuple[str, str], ...], body: bytes
+    ) -> tuple[tuple[tuple[str, str], ...], bytes]:
+        """Remove the engine's own credentials if the tested system echoes them back."""
+        for token in self._secrets:
+            headers = tuple((k, v.replace(token, REMOVED)) for k, v in headers)
+            body = body.replace(token.encode("utf-8"), REMOVED.encode("ascii"))
+        return headers, body
+
     # -- Acquirer ---------------------------------------------------------------------------
 
-    def fetch(self, request: Request) -> Record:
+    def fetch(self, request: Request) -> Record:  # noqa: PLR0912 - one loop over hops; each branch is one outcome
         method = request.method.upper()
         sent_headers: dict[str, str] = {}
         redirects: list[str] = []
         attempts = 0
+        # One deadline for the whole fetch: every redirect hop and every retry share it.
+        deadline = self._monotonic() + self._config.policy.total_timeout_ms / 1000
 
         def done(
             error: TransportError | None,
@@ -294,6 +337,7 @@ class PolicyTransport:
             body: bytes = b"",
             truncated: bool = False,
         ) -> Record:
+            headers, body = self._scrub(headers, body)
             record = Record(
                 record_id=f"r{len(self._records) + 1:04d}",
                 kind="http",
@@ -332,8 +376,11 @@ class PolicyTransport:
             for _ in range(1 + (self._config.policy.retries if method in SAFE_METHODS else 0)):
                 if not self._budget_left():
                     return done("budget_exhausted")
+                left = deadline - self._monotonic()
+                if left <= 0:
+                    return done("timeout")
                 attempts += 1
-                result = self._send(target, method, sent_headers, request.body)
+                result = self._send(target, method, sent_headers, request.body, left)
                 if not isinstance(result, str) or result not in _RETRYABLE:
                     break
             if isinstance(result, str):
@@ -344,7 +391,11 @@ class PolicyTransport:
                 return done(None, status, headers, body, truncated)
             if len(redirects) >= self._config.policy.max_redirects:
                 return done("too_many_redirects", status, headers)
-            next_url = urljoin(f"{target.origin}{target.path}", location)
+            try:
+                next_url = urljoin(f"{target.origin}{target.path}", location)
+            except ValueError:
+                # The system sent a Location that is not a URL. The engine does not follow it.
+                return done("redirect_out_of_scope", status, headers)
             redirects.append(redact_url(next_url))
             try:
                 target = self._target(next_url, method, request.role)
@@ -357,22 +408,27 @@ class PolicyTransport:
                 return done("redirect_out_of_scope", status, headers)
 
     def artifact(self, name: str) -> Record:
-        path = self._samples.get(name)
+        sample = self._samples.get(name)
         body = b""
         error: TransportError | None = None
-        if path is None:
+        if sample is None:
             error = "artifact_unavailable"
         else:
+            path, identity = sample
             try:
                 # The path was resolved when the transport was built. If a component is a link
                 # now, the file is not the one that was confirmed. The final component is opened
-                # without following a link. A change of a parent directory between these two
-                # steps stays possible for a process that can write to the sample directory.
+                # without following a link and without blocking (a FIFO would block). The open
+                # file must be a regular file, and the same file that was confirmed.
                 if path.resolve(strict=True) != path:
                     raise OSError("the sample path changed after it was confirmed")
-                handle = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+                flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+                handle = os.open(path, flags)
                 with os.fdopen(handle, "rb") as source:
-                    if os.fstat(source.fileno()).st_size > self._config.max_artifact_bytes:
+                    found = os.fstat(source.fileno())
+                    if not stat.S_ISREG(found.st_mode) or (found.st_dev, found.st_ino) != identity:
+                        raise OSError("the sample is not the confirmed regular file")
+                    if found.st_size > self._config.max_artifact_bytes:
                         error = "body_too_large"
                     else:
                         body = source.read(self._config.max_artifact_bytes)

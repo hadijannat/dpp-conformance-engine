@@ -692,7 +692,9 @@ def test_f14_remote_read_is_confirmed_for_each_public_host() -> None:
 
     policy = NetworkPolicy(allowed_hosts=("a.example", "b.example"))
     engine = PolicyTransport(
-        TransportConfig(policy=policy, engine_version="1", remote_read_hosts=frozenset({"a.example"})),
+        TransportConfig(
+            policy=policy, engine_version="1", remote_read_origins=frozenset({"http://a.example"})
+        ),
         FrozenClock(NOW),
         Public(),
     )
