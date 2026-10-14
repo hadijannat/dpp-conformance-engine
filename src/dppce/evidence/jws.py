@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+import re
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Final
@@ -27,6 +28,8 @@ from dppce.infrastructure.interfaces import Signer
 ALLOWED_ALGORITHMS: Final = ("ES256",)
 _PUBLIC_JWK_FIELDS: Final = frozenset({"kty", "crv", "x", "y"})
 _SUPPORTED_HEADERS: Final = frozenset({"alg", "kid", "typ", "x5c"})
+# A compact JWS is three base64url parts with no padding (RFC 7515, section 7.1).
+_COMPACT: Final = re.compile(r"[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*")
 
 
 # Explicit size limits. The library default for a header is 512 bytes, which is smaller than
@@ -83,9 +86,11 @@ def sign_compact(payload: bytes, signer: Signer, *, typ: str) -> str:
 
 def header_of(token: str) -> dict[str, Any]:
     """Return the protected header WITHOUT verifying anything. Use it only to find the key."""
+    if not _COMPACT.fullmatch(token):
+        # Checked before the library sees the token: a broken part is a malformed token, not
+        # a signature that does not verify.
+        raise SignatureError("a compact JWS is three base64url parts")
     parts = token.split(".")
-    if len(parts) != 3:
-        raise SignatureError("a compact JWS has three parts")
     try:
         header = json.loads(_unb64(parts[0]))
     except ValueError as exc:
