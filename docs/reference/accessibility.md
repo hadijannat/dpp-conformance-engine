@@ -39,7 +39,7 @@ manual review by a person.
 
 | Check | Status | Evidence |
 | --- | --- | --- |
-| Automated accessibility scan of a generated report: axe-core 4.10.2. Rules: WCAG 2.0, 2.1, and 2.2, A and AA, and best practice | run by an agent in a browser, 2026-10-15 | Both reports: 0 violations, 44 rules passed. One rule is incomplete. axe could not compute the contrast of 96 elements. Mostly, it could not resolve the color values. The direct measurement of the tokens in the next row covers that. |
+| Automated accessibility scan of a generated report with axe-core | run by an agent in a browser, 2026-10-15 | axe-core version 4.10.2 checked the rules for WCAG 2.0, 2.1, and 2.2 (A and AA) and best practice. Both reports: 0 violations, 44 rules passed. One rule is incomplete. axe could not compute the contrast of 96 elements. Mostly, it could not resolve the color values. The direct measurement of the tokens in the next row covers that. |
 | Structure: language, title, landmarks, heading order, table captions and header scope, skip link target, no script, no external resource | run by an agent | A script that parses the generated HTML. No problem found. |
 | Contrast of the color tokens, light and dark scheme | measured by an agent | WCAG relative luminance from the tokens in `dppce.report.html`. Text at least 7.2:1; borders at least 4.1:1. |
 | Keyboard: first focusable element and its focus indicator | run by an agent in a browser | The first Tab reaches "Skip to the report", with a 3 px outline. A full keyboard-only review is not done. |
