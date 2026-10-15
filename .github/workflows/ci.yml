@@ -48,7 +48,7 @@ jobs:
       # No test may reach a real DPP system or any third-party service.
       - name: Tests with no network except loopback
         run: |
-          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m 'not validation' --cov --cov-report=xml --cov-report="
+          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m 'not validation' --cov --cov-report=xml --cov-report="
       - name: Coverage gate on the core packages
         run: uv run --no-sync just cov-report
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -72,7 +72,7 @@ jobs:
       - run: uv run --no-sync dppce capabilities
       - name: Core tests that need no extra
         run: |
-          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m 'not validation and not qr and not aas'"
+          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m 'not validation and not qr and not aas'"
 
   validate:
     name: Method validation
@@ -91,10 +91,10 @@ jobs:
         run: uv sync --frozen --all-extras
       - name: Fault matrix and replays with no network except loopback
         run: |
-          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m validation"
+          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m validation"
       - name: Method-validation record
         run: |
-          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env PATH='$PATH' UV_OFFLINE=1 uv run --no-sync python -m validation.run"
+          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync python -m validation.run"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: method-validation-record
