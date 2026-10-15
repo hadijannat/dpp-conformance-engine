@@ -436,3 +436,19 @@ def test_a_local_signer_refuses_a_key_on_a_different_curve_and_keeps_its_key_id(
     pem = tmp_path / "TEST-ONLY-key.pem"
     pem.write_bytes(LocalSigner.generate("TEST-ONLY-a").to_pem())
     assert LocalSigner.from_pem(pem, "TEST-ONLY-b").key_id == "TEST-ONLY-b"
+
+
+def test_the_token_size_limit_is_exact() -> None:
+    """Found by mutation testing: a token of exactly the limit passes the size check, one more does not."""
+    from dppce.evidence.jws import MAX_HEADER_BYTES, MAX_PAYLOAD_BYTES, MAX_SIGNATURE_BYTES  # noqa: PLC0415
+
+    limit = MAX_HEADER_BYTES + MAX_PAYLOAD_BYTES * 2 + MAX_SIGNATURE_BYTES
+    jwk = LocalSigner.generate("TEST-ONLY-k").public_jwk()
+    at_limit = "e30." + "A" * (limit - 8) + ".AAA"  # three base64url parts, but no usable header
+    assert len(at_limit) == limit
+    with pytest.raises(SignatureError) as caught:
+        verify_compact(at_limit, jwk, typ=TYP)
+    assert caught.value.code != "TOO_LARGE", "the size check lets a token of exactly the limit through"
+    with pytest.raises(SignatureError) as caught:
+        verify_compact(at_limit + "A", jwk, typ=TYP)
+    assert caught.value.code == "TOO_LARGE"
