@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Status: written, not built. Docker was not available in the development session (OQ-004, BL-003).
+# Status: built and smoke-tested on 2026-10-15 (docs/readiness.md). No image scan has run.
 # The base images are pinned by tag. Pin them by digest before the first release (BL-005).
 
 FROM python:3.12-slim AS build

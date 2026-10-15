@@ -118,7 +118,9 @@ Reviews (agent reviews, not human approvals):
 - [ ] Release and tag. Each needs the approval of the user.
 - [ ] OQ-021 to OQ-023 on the draft EU pack, and the scoping of revocation serial numbers by issuer
       (a change of the trust bundle format). Each needs a decision of a person.
-- [ ] Container build and scan (OQ-004). Docker commands are blocked by the permission settings.
+- [x] Container build and smoke test (2026-10-15, run by the owner): builds; version, catalogue lint, and the
+      unprivileged user are as expected.
+- [ ] Container image scan, and pinning the base images by digest (BL-005).
 - [ ] An accessibility review by a person, a screen reader review, and an accessibility scanner
       (an agent did the checks in `docs/reference/accessibility.md`).
 - [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.

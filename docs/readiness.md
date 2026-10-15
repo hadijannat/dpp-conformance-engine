@@ -43,7 +43,7 @@ ran the commands. No human has repeated them.
 | `uv run just docs` (strict build) | Built with no warning. The ADR pages are outside the navigation; the build reports that as information. | `d149ee8` |
 | `uvx pip-audit` over `uv export --all-extras --all-groups` (dependency vulnerability scan, 2026-10-15) | pip-audit 2.10.1: no known vulnerabilities in the 111 locked packages. The scan sends package names and versions to the vulnerability databases. | `a2c72ef` |
 | `uv run just style` (Vale 3.22.0, the project rules in `styles/STE`) | 0 errors, 0 warnings. Suggestions remain (forms in -ing, passive voice, long list items); `just style` prints their current count. The first run found a defect in `.vale.ini` and 7 sentences of more than 25 words; both are fixed. The rule for long procedure steps counts whole list items, so it is a suggestion. | The commit that records this row |
-| Container build | Not run. Docker commands are blocked by the permission settings of the session. | none |
+| Container build and smoke test (Docker Desktop, run by the owner; the agent read the output) | `docker build -t dppce:0.1.0rc1 .` builds. In the image, `dppce --version` gives `0.1.0rc1`, `dppce catalogue lint` gives 0 errors, 1 warning, and 36 informational findings, and the process runs as `uid=10001(dppce)`. No image scan ran. | `ef3ced8` |
 | GitHub Actions `scorecard` (run 38709214957, public repository) | The analysis runs and publishes. These checks were below the maximum. Code review 0: no reviewed changesets. Branch protection 0: added later. SAST 0: CodeQL is added after this run. Best-practices badge 0. Fuzzing 0: the Hypothesis property tests are not counted. Maintained 0: the repository is new. Security policy 4: private reporting is added later. Pinned dependencies 8: the base image has a tag, not a digest (BL-005). | `9c7b2b0` |
 | Repository settings (2026-10-15, with the approval of the owner) | Private vulnerability reporting is enabled; `SECURITY.md` points to it. Branch `main` is protected: the checks of `ci` and `codeql` must pass before a merge, and force pushes and deletion are blocked. Reviews are not required, because there is one maintainer. | none |
 | GitHub Actions `codeql` (Python, security-extended queries) | 0 open alerts. The first analysis found two. A TLS context did not state its minimum version (high). The reference server built a header value from the request path (medium). Both are fixed. | `2c0c6ab` |
@@ -90,7 +90,7 @@ These items block a claim that the engine is ready for use on a real system:
    system was contacted.
 3. An independent human security audit.
 4. A run of the release workflow.
-5. A build and a scan of the container image (OQ-004).
+5. A scan of the container image for known vulnerabilities.
 6. An accessibility review of the HTML report by a person, with a screen reader.
 7. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
 8. A trusted timestamp on a report (BL-004), and a key management service.
