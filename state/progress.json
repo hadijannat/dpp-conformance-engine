@@ -4,7 +4,7 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 16,
+    "cycle": 17,
     "max_cycles": 20,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
@@ -432,6 +432,12 @@
       "kind": "implement-and-check",
       "milestone": "M5, M6",
       "summary": "Method validation from clean commit 3284ce2; mutation testing at d149ee8 (1323/1499); coverage, docs, REUSE, and clean installation re-measured; records and bookkeeping updated."
+    },
+    {
+      "cycle": 17,
+      "kind": "implement-and-check",
+      "milestone": "M6",
+      "summary": "Owner approval (2026-10-15). Tag v0.1.0rc1 on 6573e4c after CI and CodeQL passed; release workflow run 38722322047 green; attestations verified; released wheel installed alone; GitHub pre-release created; records updated."
     }
   ],
   "blockers": [
