@@ -1,4 +1,4 @@
-# Dependency updates. Status: configured; it takes effect when the repository is on GitHub.
+# Dependency updates. Active on GitHub since 2026-10-15.
 version: 2
 updates:
   - package-ecosystem: uv
@@ -16,3 +16,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # The image runs the Python version that CI tests (3.12). A new minor or major Python
+    # version is a decision with its own CI run, not an automatic update. Digest updates stay.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
