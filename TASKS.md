@@ -120,7 +120,8 @@ Reviews (agent reviews, not human approvals):
       (a change of the trust bundle format). Each needs a decision of a person.
 - [x] Container build and smoke test (2026-10-15, run by the owner): builds; version, catalogue lint, and the
       unprivileged user are as expected.
-- [ ] Container image scan, and pinning the base images by digest (BL-005).
+- [x] Pinning the base images by digest (BL-005), 2026-10-15.
+- [ ] Container image scan.
 - [ ] An accessibility review by a person, a screen reader review, and an accessibility scanner
       (an agent did the checks in `docs/reference/accessibility.md`).
 - [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.

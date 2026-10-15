@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
 # Status: built and smoke-tested on 2026-10-15 (docs/readiness.md). No image scan has run.
-# The base images are pinned by tag. Pin them by digest before the first release (BL-005).
+# Every base image is pinned by index digest (BL-005). Dependabot proposes digest updates.
 
-FROM python:3.12-slim AS build
-COPY --from=ghcr.io/astral-sh/uv:0.9.24 /uv /usr/local/bin/uv
+# python:3.12-slim is 3.12.15 on Debian trixie at this index digest (read on 2026-10-15).
+FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS build
+COPY --from=ghcr.io/astral-sh/uv:0.9.24@sha256:816fdce3387ed2142e37d2e56e1b1b97ccc1ea87731ba199dc8a25c04e4997c5 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 WORKDIR /app
 # Dependencies first, from the lockfile only, so that this layer changes only when uv.lock changes.
@@ -16,7 +17,7 @@ COPY profiles ./profiles
 COPY testpacks ./testpacks
 RUN uv sync --frozen --no-dev --all-extras --no-editable
 
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
 LABEL org.opencontainers.image.title="dpp-conformance-engine" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.description="Conformance test engine for Digital Product Passports. Its reports are not certificates."
