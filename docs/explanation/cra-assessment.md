@@ -36,7 +36,7 @@ The answer depends on facts that this repository does not decide.
 
 | Topic | Artifact | State |
 | --- | --- | --- |
-| Vulnerability handling policy | `SECURITY.md` | Written. Reports go through private vulnerability reporting on GitHub. A contact for the code of conduct is open (OQ-019). |
+| Vulnerability handling policy | `SECURITY.md` | Written. Reports go through private vulnerability reporting on GitHub. Code-of-conduct reports go to the email address of the maintainer in `CODE_OF_CONDUCT.md`. |
 | Secure development | Strict typing, lint, tests, an automated review of each commit, the [threat model](threat-model.md) | In use during development. No independent audit. |
 | Component inventory | `uv.lock` with hashes; `uv run just sbom` writes a CycloneDX SBOM | The release workflow writes a CycloneDX SBOM. The pre-release `v0.1.0rc1` has one as an asset. |
 | Dependency licenses | `docs/reference/dependency-licenses.md` | Generated from the environment. |
