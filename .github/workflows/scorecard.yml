@@ -26,7 +26,8 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          publish_results: true
+          # The OpenSSF API takes results of public repositories only.
+          publish_results: ${{ !github.event.repository.private }}
       - uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           sarif_file: results.sarif
