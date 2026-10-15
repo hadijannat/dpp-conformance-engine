@@ -8,7 +8,7 @@
     "max_cycles": 20,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
-    "state_at_end": "2026-10-15: CI green on GitHub; repository public. See TASKS.md."
+    "state_at_end": "2026-10-15: pre-release v0.1.0rc1 published on GitHub; CI green; repository public. See TASKS.md."
   },
   "limits": {
     "max_parallel_tasks": 3,
@@ -54,10 +54,10 @@
       "note": "Method validation record from clean commit 3284ce2: 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, 15/15 replays. Mutation testing at d149ee8: 1323/1499 detected; survivors classified. Readiness page updated."
     },
     "M6": {
-      "status": "blocked",
+      "status": "complete",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Documentation, changelog, and workflows are written; CI runs green. Blocked: no release or tag without the approval of the user; the release workflow and the container build never ran (Docker is blocked by the permission settings)."
+      "note": "GitHub pre-release v0.1.0rc1 on 2026-10-15, approved by the owner (\"do all remained yourself i trust you\"). Release workflow run 38722322047: all jobs passed; gh attestation verify passed for the wheel, the sdist, the SBOM, and the image. Not published on PyPI."
     }
   },
   "repair_attempts": {
@@ -436,10 +436,8 @@
   ],
   "blockers": [
     "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
-    "Docker was not probed (the command was declined): the container image and the Compose file are not built or run. OQ-004.",
     "No commit has a DCO sign-off: an agent must not sign for a person. OQ-018.",
-    "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user.",
-    "No release or tag: needs the approval of the user. The container build is blocked by the permission settings of the session."
+    "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user."
   ],
   "resume": "See TASKS.md, section 'Resume instructions'.",
   "process_deviations": [

@@ -1,11 +1,13 @@
-# Status: configured. This workflow has not run. See docs/readiness.md.
+# Status: first run on tag v0.1.0rc1, 2026-10-15 (run 38722322047): all jobs passed.
+# See docs/readiness.md.
 # Every action is pinned to a commit. The comment gives the release that the commit belongs to.
 #
 # It builds the packages and the container image, writes a CycloneDX SBOM, and creates signed
 # build provenance. A release needs an approval from a human maintainer: see GOVERNANCE.md.
 #
-# The job that can sign runs no third-party tool. The build job has read permission only, and
-# every tool that it runs is pinned with hashes in uv.lock.
+# The build job has read permission only, and every tool that it runs is pinned with hashes in
+# uv.lock. The attest job runs only the attestation action. The image job can sign: it runs the
+# pinned Docker actions and the attestation action.
 name: release
 
 on:

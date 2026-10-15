@@ -4,8 +4,8 @@ Audience: a decision maker, an assessor, or a laboratory that considers using th
 Purpose: state what was shown, by which command, and what was not shown.
 Prerequisites: read [what the engine tests and what it does not claim](explanation/scope-and-legal-mapping.md).
 
-**Version 0.1.0rc1 is a release candidate. Tag `v0.1.0rc1` marks the candidate commit. No package is published on PyPI.**
-The result of the release workflow is recorded on the `main` branch after the tag.
+**Version 0.1.0rc1 is a release candidate. It is a GitHub pre-release with tag `v0.1.0rc1`. No package is published on PyPI.**
+Section 2 records the run of the release workflow.
 The source repository is public at https://github.com/hadijannat/dpp-conformance-engine since
 2026-10-15; the owner made it public.
 This page states no technology readiness level. It makes no statement of legal compliance,
@@ -21,7 +21,7 @@ agent ran or read the commands. No human has repeated them.
 
 | Dimension | What exists | What is missing |
 | --- | --- | --- |
-| Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. Continuous integration runs on GitHub (Linux, Python 3.12 and 3.13). No independent build of the same commit. |
+| Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. Continuous integration runs on GitHub (Linux, Python 3.12 and 3.13). A GitHub pre-release with signed build provenance. | No independent rebuild of the release commit by a second party. |
 | Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No trusted timestamp. Keys are files. |
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
@@ -50,6 +50,7 @@ agent ran or read the commands. No human has repeated them.
 | GitHub Actions `scorecard` (run 38709214957, public repository) | The analysis runs and publishes. These checks were below the maximum. Code review 0: no reviewed changesets. Branch protection 0: added later. SAST 0: CodeQL is added after this run. Best-practices badge 0. Fuzzing 0: the Hypothesis property tests are not counted. Maintained 0: the repository is new. Security policy 4: private reporting is added later. Pinned dependencies 8: the base image has a tag, not a digest (BL-005). | `9c7b2b0` |
 | Repository settings (2026-10-15, with the approval of the owner) | Private vulnerability reporting is enabled; `SECURITY.md` points to it. Branch `main` is protected: the checks of `ci` and `codeql` must pass before a merge, and force pushes and deletion are blocked. Reviews are not required, because there is one maintainer. | none |
 | GitHub Actions `codeql` (Python, security-extended queries) | 0 open alerts. The first analysis found two. A TLS context did not state its minimum version (high). The reference server built a header value from the request path (medium). Both are fixed. | `2c0c6ab` |
+| GitHub Actions `release` (run 38722322047, tag `v0.1.0rc1`, 2026-10-15) | All three jobs passed on the first run. They built the sdist, the wheel, and the SBOM, and signed build provenance for the packages and the image. The image is `ghcr.io/hadijannat/dpp-conformance-engine:v0.1.0rc1` with digest `sha256:09055b7e140659ec37ce05491c9bda8fc66549018901813d4a5a58596502b3ce`. The package page shows it as public. `gh attestation verify` passed for the wheel, the sdist, the SBOM, and the image. Each attestation is SLSA provenance v1 for tag `v0.1.0rc1`, commit `6573e4c`, and `release.yml`. The wheel of the run installs alone in a new environment. There, `dppce --version` gives `0.1.0rc1` and the catalogue lints with 0 errors. The three files are assets of the GitHub pre-release, with the same SHA-256 values. | `6573e4c` |
 | GitHub Actions `ci` (run 38708494167, Linux) | Fast gates on Python 3.12 and 3.13 pass: format, lint, types, schema sync, and catalogue lint. 1270 tests passed with no network except loopback. Core coverage is 98 percent. Core without optional extras: 1236 passed. Method validation job: 63 passed. Its record shows 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, and 15/15 replays. The first two runs failed on defects of the workflow and of the transport on Linux; both are fixed. | `4c2928e` |
 
 A check that is not in this table was not run in this session. A manual accessibility review is
@@ -92,10 +93,9 @@ These items block a claim that the engine is ready for use on a real system:
 2. A test run against a real DPP system, with a signed authorization of its owner. No real
    system was contacted.
 3. An independent human security audit.
-4. A run of the release workflow.
-5. An accessibility review of the HTML report by a person, with a screen reader.
-6. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
-7. A trusted timestamp on a report (BL-004), and a key management service.
+4. An accessibility review of the HTML report by a person, with a screen reader.
+5. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
+6. A trusted timestamp on a report (BL-004), and a key management service.
 
 ## 5. Records that can support a laboratory quality system
 

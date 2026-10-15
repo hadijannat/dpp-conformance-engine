@@ -16,7 +16,7 @@ A check that was not executed is marked **not run**. It is never marked passed.
 | M3 | Vertical slice: three battery profiles, plan to report, core adapters | complete |
 | M4 | Evidence: encryption, canonical body, signing, scope binding, standalone verifier | complete |
 | M5 | Method validation: faults, controls, replays, property and mutation tests, readiness | complete |
-| M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | blocked: no release or tag without the approval of the user; the release workflow and the container build never ran |
+| M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | complete: GitHub pre-release `v0.1.0rc1` on 2026-10-15 with the approval of the owner; release workflow green; not on PyPI |
 
 "Complete" means that the local gates ran and passed for the milestone. It does not mean that
 a human reviewed the work. The evidence for each figure is in `docs/readiness.md`.
@@ -115,7 +115,8 @@ Reviews (agent reviews, not human approvals):
 - [ ] Human review of the draft interpretations (OQ-002). An agent must not approve.
 - [x] Push and CI (2026-10-15): private repository created and pushed with the approval of the user; CI green
       at `4c2928e`. The owner made the repository public.
-- [ ] Release and tag. Each needs the approval of the user.
+- [x] Release candidate (2026-10-15, approved by the owner): tag `v0.1.0rc1`, release workflow run 38722322047 green,
+      attestations verified, GitHub pre-release with the wheel, the sdist, and the SBOM. Not published on PyPI.
 - [ ] OQ-021 to OQ-023 on the draft EU pack, and the scoping of revocation serial numbers by issuer
       (a change of the trust bundle format). Each needs a decision of a person.
 - [x] Container build and smoke test (2026-10-15, run by the owner): builds; version, catalogue lint, and the
