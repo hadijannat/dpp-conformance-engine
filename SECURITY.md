@@ -13,8 +13,9 @@ Prerequisites: none.
 ## How to report
 
 Do not open a public issue for a vulnerability.
-Use the private vulnerability reporting of the repository host when the repository is public.
-A dedicated security contact does not exist yet. See the open question OQ-019.
+Report it privately on GitHub: open the **Security** tab of
+[the repository](https://github.com/hadijannat/dpp-conformance-engine/security), then select
+**Report a vulnerability**. Only the maintainer sees the report.
 
 Include: the affected version or commit, how to reproduce the problem, and the effect.
 
