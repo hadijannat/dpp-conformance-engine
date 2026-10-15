@@ -122,8 +122,8 @@ Reviews (agent reviews, not human approvals):
       unprivileged user are as expected.
 - [x] Pinning the base images by digest (BL-005), 2026-10-15. The pinned rebuild gives the same image.
 - [x] Container image scan (2026-10-15, Trivy 0.56.2): 0 high or critical findings with a fix.
-- [ ] An accessibility review by a person, a screen reader review, and an accessibility scanner
-      (an agent did the checks in `docs/reference/accessibility.md`).
+- [x] Accessibility scanner (axe-core 4.10.2, 2026-10-15): 0 violations on both reports.
+- [ ] An accessibility review by a person and a screen reader review.
 - [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.
 - [x] Vale style checks (2026-10-15): 0 errors, 0 warnings; suggestions remain.
 - [ ] DCO sign-off on the commits (OQ-018). An agent must not sign for a person.
