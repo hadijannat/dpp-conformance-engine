@@ -14,6 +14,7 @@ import ssl
 import stat
 import threading
 import time
+import weakref
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -81,13 +82,29 @@ def _origins(urls: tuple[str, ...] | frozenset[str]) -> frozenset[str]:
     return frozenset(found)
 
 
-def _identity(path: Path) -> tuple[int, int] | None:
-    """Device and inode of a regular file, or None if there is none at ``path`` now."""
+def _pin(path: Path) -> tuple[tuple[int, int] | None, int | None]:
+    """Open a regular file and return its device and inode, and the open descriptor.
+
+    The descriptor stays open while the transport lives. An open file keeps its inode, so a file
+    that replaces it at the same path gets a different inode number: some file systems reuse a
+    freed number at once. Returns (None, None) if there is no regular file at ``path`` now.
+    """
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
     try:
-        found = os.stat(path, follow_symlinks=False)
+        handle = os.open(path, flags)
     except OSError:
-        return None
-    return (found.st_dev, found.st_ino) if stat.S_ISREG(found.st_mode) else None
+        return None, None
+    found = os.fstat(handle)
+    if not stat.S_ISREG(found.st_mode):
+        os.close(handle)
+        return None, None
+    return (found.st_dev, found.st_ino), handle
+
+
+def _close_all(handles: tuple[int, ...]) -> None:
+    for handle in handles:
+        with contextlib.suppress(OSError):
+            os.close(handle)
 
 
 @dataclass(frozen=True)
@@ -164,7 +181,14 @@ class PolicyTransport:
         self._monotonic = monotonic
         self._records: list[Record] = []
         # The identity of each sample file is taken now. A file read later must be the same one.
-        self._samples = {name: (path.resolve(), _identity(path)) for name, path in config.samples.items()}
+        self._samples: dict[str, tuple[Path, tuple[int, int] | None]] = {}
+        pins: list[int] = []
+        for name, path in config.samples.items():
+            identity, handle = _pin(path.resolve())
+            self._samples[name] = (path.resolve(), identity)
+            if handle is not None:
+                pins.append(handle)
+        weakref.finalize(self, _close_all, tuple(pins))
         tokens = [token for _, token in config.credentials.values()]
         if any(len(token) < MIN_SECRET_LENGTH for token in tokens):
             raise ValueError(f"a credential needs {MIN_SECRET_LENGTH} characters or more")
