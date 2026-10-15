@@ -239,6 +239,14 @@ class ReferenceServer:
                 status, media_type, body, headers = system.handle(
                     self.path, self.headers.get("Authorization")
                 )
+                if any("\r" in value or "\n" in value for value in headers.values()):
+                    # A value built from the request path must never start a new header line.
+                    status, media_type, body, headers = (
+                        400,
+                        "application/json",
+                        b'{"error":"bad_request"}',
+                        {},
+                    )
                 self.send_response(status)
                 self.send_header("Content-Type", media_type)
                 self.send_header("Content-Length", str(len(body)))

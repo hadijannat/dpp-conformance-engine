@@ -844,3 +844,41 @@ def test_mutation_purge_neither_blocks_on_a_fifo_record_nor_stops_at_a_plain_fil
     assert time.monotonic() - started < 5, "a FIFO in place of a record must not block"
     assert result.expired == (runs / "b-expired",)
     assert [path.name for path, _ in result.kept] == ["c-fifo"]
+
+
+# -- CodeQL alerts of 2026-10-15 ------------------------------------------------------------------
+
+
+def test_codeql_a_tls_connection_refuses_versions_below_1_2() -> None:
+    import ssl  # noqa: PLC0415 - only this test needs it
+
+    from dppce.infrastructure.transport import _PinnedHTTPSConnection  # noqa: PLC0415 - the unit under test
+
+    connection = _PinnedHTTPSConnection("sut.example", 443, "93.184.216.34", 1.0)
+    assert connection._tls.minimum_version is ssl.TLSVersion.TLSv1_2
+    assert connection._tls.verify_mode is ssl.CERT_REQUIRED
+    assert connection._tls.check_hostname
+
+
+def test_codeql_the_reference_server_never_writes_a_header_value_with_a_line_break(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import http.client  # noqa: PLC0415 - only this test needs it
+
+    from dppce.infrastructure import reference_server  # noqa: PLC0415 - the unit under test
+
+    def hostile(self: Any, target: str, authorization: str | None) -> Any:
+        return 303, "text/plain", b"", {"Location": "/dpp/x\r\nX-Injected: 1"}
+
+    monkeypatch.setattr(reference_server.ReferenceSystem, "handle", hostile)
+    server = reference_server.ReferenceServer(FIXTURES)
+    server.start()
+    try:
+        connection = http.client.HTTPConnection("127.0.0.1", int(server.origin.rsplit(":", 1)[1]), timeout=5)
+        connection.request("GET", "/01/09506000134352/21/EV0001")
+        response = connection.getresponse()
+        assert response.status == 400
+        assert response.getheader("X-Injected") is None
+        connection.close()
+    finally:
+        server.stop()

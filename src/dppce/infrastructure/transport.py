@@ -154,6 +154,9 @@ class _PinnedHTTPConnection(http.client.HTTPConnection):
 class _PinnedHTTPSConnection(http.client.HTTPSConnection):
     def __init__(self, host: str, port: int, address: str, timeout: float) -> None:
         self._tls = ssl.create_default_context()
+        # The default already refuses TLS 1.0 and 1.1. Stated here, so that no change of a default
+        # can lower it.
+        self._tls.minimum_version = ssl.TLSVersion.TLSv1_2
         super().__init__(host, port, timeout=timeout, context=self._tls)
         self._address = address
 
