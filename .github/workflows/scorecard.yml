@@ -13,6 +13,10 @@ permissions: read-all
 
 jobs:
   analysis:
+    # On a private repository Scorecard needs a personal access token for its GraphQL queries;
+    # the GITHUB_TOKEN gets 'Resource not accessible by integration'. The job runs once the
+    # repository is public. The owner can add a token secret instead; no agent creates one.
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
