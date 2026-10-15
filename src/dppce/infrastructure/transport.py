@@ -151,19 +151,27 @@ class _PinnedHTTPConnection(http.client.HTTPConnection):
         self.sock = socket.create_connection((self._address, self.port), self.timeout)
 
 
+def _tls_context() -> ssl.SSLContext:
+    """A client context that checks certificates and host names and refuses TLS below 1.2.
+
+    The default context already refuses TLS 1.0 and 1.1. The minimum is stated here, so that no
+    change of a default can lower it.
+    """
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
 class _PinnedHTTPSConnection(http.client.HTTPSConnection):
     def __init__(self, host: str, port: int, address: str, timeout: float) -> None:
-        self._tls = ssl.create_default_context()
-        # The default already refuses TLS 1.0 and 1.1. Stated here, so that no change of a default
-        # can lower it.
-        self._tls.minimum_version = ssl.TLSVersion.TLSv1_2
-        super().__init__(host, port, timeout=timeout, context=self._tls)
+        super().__init__(host, port, timeout=timeout, context=_tls_context())
         self._address = address
 
     def connect(self) -> None:
         raw = socket.create_connection((self._address, self.port), self.timeout)
         # The certificate is checked against the host name, not against the pinned address.
-        self.sock = self._tls.wrap_socket(raw, server_hostname=self.host)
+        context = _tls_context()
+        self.sock = context.wrap_socket(raw, server_hostname=self.host)
 
 
 class PolicyTransport:

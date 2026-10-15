@@ -251,7 +251,7 @@ class ReferenceServer:
                 self.send_header("Content-Type", media_type)
                 self.send_header("Content-Length", str(len(body)))
                 for name, value in headers.items():
-                    self.send_header(name, value)
+                    self.send_header(name, value.replace("\r", "").replace("\n", ""))
                 self.end_headers()
                 self.wfile.write(body)
 
