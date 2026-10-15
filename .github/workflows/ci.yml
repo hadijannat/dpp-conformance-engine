@@ -1,4 +1,4 @@
-# Status: configured. This workflow has not run. See docs/readiness.md.
+# Status: runs on GitHub since 2026-10-15; the first green run is 38708494167. See docs/readiness.md.
 # Every action is pinned to a commit. The comment gives the release that the commit belongs to.
 name: ci
 

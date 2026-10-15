@@ -4,7 +4,9 @@ Audience: a decision maker, an assessor, or a laboratory that considers using th
 Purpose: state what was shown, by which command, and what was not shown.
 Prerequisites: read [what the engine tests and what it does not claim](explanation/scope-and-legal-mapping.md).
 
-**Version 0.1.0rc1 is a release candidate. It is not released, tagged, or published.**
+**Version 0.1.0rc1 is a release candidate. It is not released or tagged, and no package is published.**
+The source repository is public at https://github.com/hadijannat/dpp-conformance-engine since
+2026-10-15; the owner made it public.
 This page states no technology readiness level. It makes no statement of legal compliance,
 product safety, data truth, or accreditation. The outputs of the engine are conformance test
 reports. They are not certificates.
@@ -17,7 +19,7 @@ ran the commands. No human has repeated them.
 
 | Dimension | What exists | What is missing |
 | --- | --- | --- |
-| Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. | Continuous integration has never run. The container image has never been built. |
+| Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. Continuous integration runs on GitHub (Linux, Python 3.12 and 3.13). | The container image has never been built. The release workflow has never run. |
 | Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No trusted timestamp. Keys are files. |
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
@@ -42,9 +44,11 @@ ran the commands. No human has repeated them.
 | `uvx pip-audit` over `uv export --all-extras --all-groups` (dependency vulnerability scan, 2026-10-15) | pip-audit 2.10.1: no known vulnerabilities in the 111 locked packages. The scan sends package names and versions to the vulnerability databases. | `a2c72ef` |
 | `uv run just style` (Vale 3.22.0, the project rules in `styles/STE`) | 0 errors, 0 warnings, 274 suggestions (forms in -ing, passive voice, long list items). The first run found a defect in `.vale.ini` and 7 sentences of more than 25 words; both are fixed. The rule for long procedure steps counts whole list items, so it is a suggestion. | The commit that records this row |
 | Container build | Not run. Docker commands are blocked by the permission settings of the session. | none |
+| GitHub Actions `scorecard` (run 38709214957, public repository) | The analysis runs and publishes. Checks below the maximum: code review 0 (no reviewed changesets), branch protection 0, SAST 0 (no tool; a CodeQL workflow is added after this run), best-practices badge 0, fuzzing 0 (the Hypothesis property tests are not counted), maintained 0 (the repository is new), security policy 4 (no contact linked, OQ-019), pinned dependencies 8 (the base image is pinned by tag, not by digest, BL-005). | `9c7b2b0` |
+| GitHub Actions `ci` (run 38708494167, Linux) | Fast gates on Python 3.12 and 3.13: format, lint, types, schema sync, catalogue lint, and 1270 tests passed with no network except loopback; core coverage 98 percent. Core without optional extras: 1236 passed. Method validation job: 63 passed, and the record shows 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, 15/15 replays. The first two runs failed on defects of the workflow and of the transport on Linux; both are fixed. | `4c2928e` |
 
 A check that is not in this table was not run in this session. The release workflow, the
-container build, the Scorecard workflow, and a manual accessibility review are "not run".
+container build, and a manual accessibility review are "not run".
 
 ### 2.1 Core packages of the coverage gate
 
@@ -83,7 +87,7 @@ These items block a claim that the engine is ready for use on a real system:
 2. A test run against a real DPP system, with a signed authorization of its owner. No real
    system was contacted.
 3. An independent human security audit.
-4. A run of the continuous integration, release, and Scorecard workflows.
+4. A run of the release workflow.
 5. A build and a scan of the container image (OQ-004).
 6. An accessibility review of the HTML report by a person, with a screen reader.
 7. A sign-off on each commit under the DCO by the copyright holder (OQ-018).

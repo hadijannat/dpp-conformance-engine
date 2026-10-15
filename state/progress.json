@@ -8,7 +8,7 @@
     "max_cycles": 20,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
-    "state_at_end": "2026-10-15: all fast gates green. See TASKS.md, section 'State at the end of the session'."
+    "state_at_end": "2026-10-15: CI green on GitHub; repository public. See TASKS.md."
   },
   "limits": {
     "max_parallel_tasks": 3,
@@ -24,10 +24,10 @@
       "note": "Source audit: 9 research groups and 3 refutation checks. 128 source records. 45 high-risk claims checked: 44 confirmed, 1 refuted and corrected."
     },
     "M1": {
-      "status": "blocked",
+      "status": "complete",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Structure, schemas, CLI, capability manifest, community files, documentation, and a strict documentation build are done. Blocked: CI has never run (nothing is pushed), and Vale cannot be installed (OQ-005)."
+      "note": "Structure, schemas, CLI, capability manifest, community files, documentation, a strict documentation build, Vale (0 errors, 0 warnings), and CI on GitHub (green at 4c2928e, Linux, Python 3.12 and 3.13)."
     },
     "M2": {
       "status": "complete",
@@ -57,7 +57,7 @@
       "status": "blocked",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "Documentation, changelog, and workflows are written. Blocked: no release, tag, push, or publication without the approval of the user; release workflows have never run; the container was never built (OQ-004)."
+      "note": "Documentation, changelog, and workflows are written; CI runs green. Blocked: no release or tag without the approval of the user; the release workflow and the container build never ran (Docker is blocked by the permission settings)."
     }
   },
   "repair_attempts": {
@@ -436,11 +436,10 @@
   ],
   "blockers": [
     "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
-    "Nothing is pushed or published: CI, release, and Scorecard workflows have never run. Publishing needs the approval of the user.",
     "Docker was not probed (the command was declined): the container image and the Compose file are not built or run. OQ-004.",
-    "Homebrew cannot install vale and a native just: the Xcode license is not accepted. Vale checks are not run. OQ-005.",
     "No commit has a DCO sign-off: an agent must not sign for a person. OQ-018.",
-    "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user."
+    "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user.",
+    "No release or tag: needs the approval of the user. The container build is blocked by the permission settings of the session."
   ],
   "resume": "See TASKS.md, section 'Resume instructions'.",
   "process_deviations": [

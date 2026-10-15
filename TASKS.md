@@ -11,12 +11,12 @@ A check that was not executed is marked **not run**. It is never marked passed.
 | Milestone | Scope | Status |
 | --- | --- | --- |
 | M0 | Audit: inventory, routing, source audit, scope, risks, reuse decisions | complete |
-| M1 | Foundation: structure, community files, schemas, CLI, CI, docs, style checks, capability manifest | blocked: CI never ran (nothing is pushed); Vale cannot be installed (OQ-005) |
+| M1 | Foundation: structure, community files, schemas, CLI, CI, docs, style checks, capability manifest | complete: CI runs green on GitHub; Vale runs through uvx |
 | M2 | Semantics: lifecycle, packs, ICS and IXIT validation, planning, applicability, coverage, verdicts | complete; no interpretation approved (needs a human, OQ-002) |
 | M3 | Vertical slice: three battery profiles, plan to report, core adapters | complete |
 | M4 | Evidence: encryption, canonical body, signing, scope binding, standalone verifier | complete |
 | M5 | Method validation: faults, controls, replays, property and mutation tests, readiness | complete |
-| M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | blocked: no release or publication without the approval of the user; workflows and container never ran |
+| M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | blocked: no release or tag without the approval of the user; the release workflow and the container build never ran |
 
 "Complete" means that the local gates ran and passed for the milestone. It does not mean that
 a human reviewed the work. The evidence for each figure is in `docs/readiness.md`.
@@ -113,7 +113,9 @@ Reviews (agent reviews, not human approvals):
 ### Not done, and why
 
 - [ ] Human review of the draft interpretations (OQ-002). An agent must not approve.
-- [ ] Push, CI, release, Scorecard, and publication. Each needs the approval of the user.
+- [x] Push and CI (2026-10-15): private repository created and pushed with the approval of the user; CI green
+      at `4c2928e`. The owner made the repository public.
+- [ ] Release and tag. Each needs the approval of the user.
 - [ ] OQ-021 to OQ-023 on the draft EU pack, and the scoping of revocation serial numbers by issuer
       (a change of the trust bundle format). Each needs a decision of a person.
 - [ ] Container build and scan (OQ-004). Docker commands are blocked by the permission settings.
