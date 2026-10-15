@@ -121,7 +121,7 @@ Reviews (agent reviews, not human approvals):
 - [x] Container build and smoke test (2026-10-15, run by the owner): builds; version, catalogue lint, and the
       unprivileged user are as expected.
 - [x] Pinning the base images by digest (BL-005), 2026-10-15. The pinned rebuild gives the same image.
-- [ ] Container image scan.
+- [x] Container image scan (2026-10-15, Trivy 0.56.2): 0 high or critical findings with a fix.
 - [ ] An accessibility review by a person, a screen reader review, and an accessibility scanner
       (an agent did the checks in `docs/reference/accessibility.md`).
 - [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.

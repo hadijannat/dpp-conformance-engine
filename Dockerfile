@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Status: built and smoke-tested on 2026-10-15 (docs/readiness.md). No image scan has run.
+# Status: built, smoke-tested, and scanned with Trivy on 2026-10-15 (docs/readiness.md).
 # Every base image is pinned by index digest (BL-005). Dependabot proposes digest updates.
 
 # python:3.12-slim is 3.12.15 on Debian trixie at this index digest (read on 2026-10-15).

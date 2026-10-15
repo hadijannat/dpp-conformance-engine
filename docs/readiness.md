@@ -43,7 +43,8 @@ ran the commands. No human has repeated them.
 | `uv run just docs` (strict build) | Built with no warning. The ADR pages are outside the navigation; the build reports that as information. | `d149ee8` |
 | `uvx pip-audit` over `uv export --all-extras --all-groups` (dependency vulnerability scan, 2026-10-15) | pip-audit 2.10.1: no known vulnerabilities in the 111 locked packages. The scan sends package names and versions to the vulnerability databases. | `a2c72ef` |
 | `uv run just style` (Vale 3.22.0, the project rules in `styles/STE`) | 0 errors, 0 warnings. Suggestions remain (forms in -ing, passive voice, long list items); `just style` prints their current count. The first run found a defect in `.vale.ini` and 7 sentences of more than 25 words; both are fixed. The rule for long procedure steps counts whole list items, so it is a suggestion. | The commit that records this row |
-| Container build and smoke test (Docker Desktop, run by the owner; the agent read the output) | `docker build -t dppce:0.1.0rc1 .` builds. In the image, `dppce --version` gives `0.1.0rc1`, `dppce catalogue lint` gives 0 errors, 1 warning, and 36 informational findings, and the process runs as `uid=10001(dppce)`. No image scan ran. Commit `832d15f` pins the base images by the index digests that this build resolved; the owner confirmed them with `docker buildx imagetools inspect`. The rebuild of the pinned Dockerfile gives the same image manifest (`sha256:c9020b87...`) and image config (`sha256:89372e3c...`) as the first build. | `ef3ced8`, `832d15f` |
+| Container image scan: Trivy 0.56.2 (`aquasec/trivy`), vulnerability database of 2026-10-15, run by the owner | `--severity HIGH,CRITICAL --ignore-unfixed`: 0 findings in the Debian 13.7 base (87 packages) and in the Python packages. The secret scan reported nothing. Lower severities and findings with no fix were not in scope of this scan. | `832d15f` |
+| Container build and smoke test (Docker Desktop, run by the owner; the agent read the output) | `docker build -t dppce:0.1.0rc1 .` builds. In the image, `dppce --version` gives `0.1.0rc1`, `dppce catalogue lint` gives 0 errors, 1 warning, and 36 informational findings, and the process runs as `uid=10001(dppce)`. Commit `832d15f` pins the base images by the index digests that this build resolved; the owner confirmed them with `docker buildx imagetools inspect`. The rebuild of the pinned Dockerfile gives the same image manifest (`sha256:c9020b87...`) and image config (`sha256:89372e3c...`) as the first build. | `ef3ced8`, `832d15f` |
 | GitHub Actions `scorecard` (run 38709214957, public repository) | The analysis runs and publishes. These checks were below the maximum. Code review 0: no reviewed changesets. Branch protection 0: added later. SAST 0: CodeQL is added after this run. Best-practices badge 0. Fuzzing 0: the Hypothesis property tests are not counted. Maintained 0: the repository is new. Security policy 4: private reporting is added later. Pinned dependencies 8: the base image has a tag, not a digest (BL-005). | `9c7b2b0` |
 | Repository settings (2026-10-15, with the approval of the owner) | Private vulnerability reporting is enabled; `SECURITY.md` points to it. Branch `main` is protected: the checks of `ci` and `codeql` must pass before a merge, and force pushes and deletion are blocked. Reviews are not required, because there is one maintainer. | none |
 | GitHub Actions `codeql` (Python, security-extended queries) | 0 open alerts. The first analysis found two. A TLS context did not state its minimum version (high). The reference server built a header value from the request path (medium). Both are fixed. | `2c0c6ab` |
@@ -90,10 +91,9 @@ These items block a claim that the engine is ready for use on a real system:
    system was contacted.
 3. An independent human security audit.
 4. A run of the release workflow.
-5. A scan of the container image for known vulnerabilities.
-6. An accessibility review of the HTML report by a person, with a screen reader.
-7. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
-8. A trusted timestamp on a report (BL-004), and a key management service.
+5. An accessibility review of the HTML report by a person, with a screen reader.
+6. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
+7. A trusted timestamp on a report (BL-004), and a key management service.
 
 ## 5. Records that can support a laboratory quality system
 
