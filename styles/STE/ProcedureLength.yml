@@ -1,7 +1,9 @@
-# Procedural text: at most 20 words in a sentence. Scope: list items, where procedures live.
+# Procedural text: at most 20 words in a sentence. Vale cannot scope a check to the sentences of a
+# list item, so this rule counts the words of the whole item. A descriptive item with several short
+# sentences can match. It is therefore a suggestion: review each finding.
 extends: occurrence
-message: "This step has more than 20 words. Split it."
+message: "This list item has more than 20 words. If it is a procedure step, keep each sentence at 20 words or fewer."
 scope: list
-level: warning
+level: suggestion
 max: 20
 token: '\b[\w''-]+\b'

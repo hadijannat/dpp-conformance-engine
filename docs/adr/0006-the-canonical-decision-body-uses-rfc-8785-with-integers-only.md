@@ -16,7 +16,7 @@ The engine serializes its own decision body with RFC 8785 (JCS). A number must b
 
 - The digest does not depend on float formatting.
 - Contracts cannot hold a fractional number. They use a smaller unit or a string.
-- The verifier also requires a document to equal the canonical form of the validated model, so a default or a coerced value cannot hide a difference.
+- The verifier also requires a document to equal the canonical form of the validated model. A default or a coerced value then cannot hide a difference.
 
 ## Alternatives considered
 

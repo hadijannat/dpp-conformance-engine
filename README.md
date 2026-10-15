@@ -17,8 +17,8 @@ The first profiles are for battery passports. The core does not depend on a prod
 - Aggregates verdicts with a published truth table: `pass`, `fail`, `inconclusive`,
   `not_applicable`, `error`.
 - Replays a recording and reproduces the same verdicts and the same decision digest.
-- Writes a JSON report and an accessible HTML report, signs the report, and verifies it with a
-  standalone verifier that needs neither the engine nor the tested system.
+- Writes a JSON report and an accessible HTML report, and signs the report. A standalone verifier
+  checks it. The verifier needs neither the engine nor the tested system.
 
 ## What the shipped catalogue is, and is not
 

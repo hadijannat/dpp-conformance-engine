@@ -336,7 +336,7 @@ Point 1(d) follows the due diligence date of 2027-08-18. Points 1(c) and 1(e) wa
 
 - Which requirements each standard covers. No standard was obtained or opened.
 - Whether a decision that cites EN 18239:2026 and EN 18246:2026 exists. None was located.
-- The meaning of "or their equivalent" in Article 77(3), and the relation of the ISO/IEC 15459 editions to EN 18219:2026 and EN 18220:2026.
+- The meaning of "or their equivalent" in Article 77(3). Also the relation of the ISO/IEC 15459 editions to EN 18219:2026 and EN 18220:2026.
 - The current status of several ISO and IEC documents at the publisher. The publisher pages were not readable for some of them.
 - The status of the parts of IEC 63278 that are in development. The data come from mirrors and aggregators.
 

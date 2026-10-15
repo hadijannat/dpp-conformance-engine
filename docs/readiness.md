@@ -18,7 +18,7 @@ ran the commands. No human has repeated them.
 | Dimension | What exists | What is missing |
 | --- | --- | --- |
 | Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. | Continuous integration has never run. The container image has never been built. |
-| Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No dependency vulnerability scan ran. No trusted timestamp. Keys are files. |
+| Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No trusted timestamp. Keys are files. |
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
 | Operations | Command line with stable exit codes, retention and purge of recordings, documented how-to guides. | No key management service or hardware security module. No multi-user deployment. |
@@ -39,10 +39,12 @@ ran the commands. No human has repeated them.
 | `uv run just sbom` | A CycloneDX 1.6 SBOM with 111 components in `dist/sbom.cdx.json` (not committed). It describes the development environment, not only the runtime dependencies of the wheel. | `9066e64` |
 | `reuse lint` (REUSE 3.3) | 248 of 248 files have copyright and license information. Compliant. | `d149ee8` |
 | `uv run just docs` (strict build) | Built with no warning. The ADR pages are outside the navigation; the build reports that as information. | `d149ee8` |
+| `uvx pip-audit` over `uv export --all-extras --all-groups` (dependency vulnerability scan, 2026-10-15) | pip-audit 2.10.1: no known vulnerabilities in the 111 locked packages. The scan sends package names and versions to the vulnerability databases. | `a2c72ef` |
+| `uv run just style` (Vale 3.22.0, the project rules in `styles/STE`) | 0 errors, 0 warnings, 274 suggestions (forms in -ing, passive voice, long list items). The first run found a defect in `.vale.ini` and 7 sentences of more than 25 words; both are fixed. The rule for long procedure steps counts whole list items, so it is a suggestion. | The commit that records this row |
+| Container build | Not run. Docker commands are blocked by the permission settings of the session. | none |
 
 A check that is not in this table was not run in this session. The release workflow, the
-container build, the Scorecard workflow, the Vale style checks, and a manual accessibility
-review are "not run".
+container build, the Scorecard workflow, and a manual accessibility review are "not run".
 
 ### 2.1 Core packages of the coverage gate
 
@@ -83,10 +85,9 @@ These items block a claim that the engine is ready for use on a real system:
 3. An independent human security audit.
 4. A run of the continuous integration, release, and Scorecard workflows.
 5. A build and a scan of the container image (OQ-004).
-6. A dependency vulnerability scan.
-7. A manual accessibility review of the HTML report, and a run of the Vale style rules (OQ-005).
-8. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
-9. A trusted timestamp on a report (BL-004), and a key management service.
+6. An accessibility review of the HTML report by a person, with a screen reader.
+7. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
+8. A trusted timestamp on a report (BL-004), and a key management service.
 
 ## 5. Records that can support a laboratory quality system
 

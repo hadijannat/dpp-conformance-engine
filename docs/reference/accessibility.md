@@ -33,8 +33,8 @@ alternative directly below it.
 
 ## Verification status
 
-The checks below were run on 2026-10-14 by a development agent, on two reports that the
-reference system produced (a clean run and a run with three seeded faults). They are not a
+A development agent ran the checks below on 2026-10-14 and 2026-10-15. It used two reports that
+the reference system produced: a clean run and a run with three seeded faults. They are not a
 manual review by a person, and no accessibility scanner such as axe was run.
 
 | Check | Status | Evidence |

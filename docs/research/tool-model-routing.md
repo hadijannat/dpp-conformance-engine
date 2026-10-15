@@ -26,7 +26,7 @@ Its identifier is not stated, so this file does not name one.
 
 The task brief asks for Fable as advisor and coordinator.
 The coordinating session runs on Opus 5.5 and cannot change its own model.
-The compensating control is this: Fable performs the independent reviews, and the `advisor` tool is consulted before each approach is fixed and before each milestone is declared complete.
+The compensating control is this. Fable performs the independent reviews. The coordinator consulted the `advisor` tool while it was available. It was not available at the end of the session.
 
 ### Routing rules
 

@@ -116,10 +116,11 @@ Reviews (agent reviews, not human approvals):
 - [ ] Push, CI, release, Scorecard, and publication. Each needs the approval of the user.
 - [ ] OQ-021 to OQ-023 on the draft EU pack, and the scoping of revocation serial numbers by issuer
       (a change of the trust bundle format). Each needs a decision of a person.
-- [ ] Container build and scan (OQ-004). Vale style checks (OQ-005). An accessibility review by a
-      person, a screen reader review, and an accessibility scanner (an agent did the checks in
-      `docs/reference/accessibility.md`).
-- [ ] Dependency vulnerability scan. Not run.
+- [ ] Container build and scan (OQ-004). Docker commands are blocked by the permission settings.
+- [ ] An accessibility review by a person, a screen reader review, and an accessibility scanner
+      (an agent did the checks in `docs/reference/accessibility.md`).
+- [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.
+- [x] Vale style checks (2026-10-15): 0 errors, 0 warnings, 274 suggestions.
 - [ ] DCO sign-off on the commits (OQ-018). An agent must not sign for a person.
 - [ ] A test against a real system. Needs a signed authorization of its owner and the approval of the user.
 - [ ] Mutation survivors "not tested: the exact size limit of a token" (3). Low value; listed in the record.

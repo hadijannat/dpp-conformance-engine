@@ -72,6 +72,6 @@ docs: reference
 docs-publish version:
     uv run --group docs mike deploy --push --update-aliases {{version}} latest
 
-# Style checks. Needs the `vale` binary, which this project does not install.
+# Style checks with Vale and the project rules in styles/STE. `uvx` downloads Vale on first use.
 style:
-    vale docs README.md
+    uvx vale docs README.md
