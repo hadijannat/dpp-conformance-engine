@@ -442,7 +442,7 @@
   ],
   "blockers": [
     "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
-    "No commit has a DCO sign-off: an agent must not sign for a person. OQ-018.",
+    "Commit a6283be of the copyright holder certifies the 87 commits before it (OQ-018, closed). A later commit of an agent has no sign-off until the person who submits it signs off.",
     "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user."
   ],
   "resume": "See TASKS.md, section 'Resume instructions'.",

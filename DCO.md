@@ -34,5 +34,9 @@ With that line you certify the statements of the certificate for that commit.
 
 A development agent created the first commits of this repository in one session.
 Those commits have no sign-off line, because an agent must not sign for a person.
-The copyright holder decides how to certify them before the first public release.
-See the open question OQ-018 in `docs/open-questions.md`.
+On 2026-10-15, the copyright holder certified them with commit `a6283be`. That commit names each
+of the 87 commits up to `a1522ad` and has the sign-off of the copyright holder. See OQ-018 in
+`docs/open-questions.md`.
+
+A development agent still does not sign off. The person who submits a later commit of an agent
+reviews it and signs off.

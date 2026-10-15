@@ -94,7 +94,8 @@ These items block a claim that the engine is ready for use on a real system:
    system was contacted.
 3. An independent human security audit.
 4. An accessibility review of the HTML report by a person, with a screen reader.
-5. A sign-off on each commit under the DCO by the copyright holder (OQ-018).
+5. A DCO sign-off on each commit that a development agent made after commit `a6283be`. That
+   commit of the copyright holder certifies the 87 commits before it (OQ-018).
 6. A trusted timestamp on a report (BL-004), and a key management service.
 
 ## 5. Records that can support a laboratory quality system

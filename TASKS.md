@@ -127,9 +127,11 @@ Reviews (agent reviews, not human approvals):
 - [ ] An accessibility review by a person and a screen reader review.
 - [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.
 - [x] Vale style checks (2026-10-15): 0 errors, 0 warnings; suggestions remain.
-- [ ] DCO sign-off on the commits (OQ-018). An agent must not sign for a person.
+- [x] DCO sign-off (2026-10-15, by the owner): commit `a6283be` certifies the 87 commits up to `a1522ad` (OQ-018).
+      A later commit of an agent needs the sign-off of the person who submits it.
 - [ ] A test against a real system. Needs a signed authorization of its owner and the approval of the user.
-- [ ] Mutation survivors "not tested: the exact size limit of a token" (3). Low value; listed in the record.
+- [ ] Mutation survivors "not tested: the exact size limit of a token" (3). Commit `31ac1e8` adds a test for the
+      exact limit. Mutation testing was not run again, so the record still lists them.
 
 ### Resume commands
 
