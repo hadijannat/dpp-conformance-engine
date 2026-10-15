@@ -122,7 +122,7 @@ Reviews (agent reviews, not human approvals):
 - [ ] An accessibility review by a person, a screen reader review, and an accessibility scanner
       (an agent did the checks in `docs/reference/accessibility.md`).
 - [x] Dependency vulnerability scan (2026-10-15): no known vulnerabilities in 111 packages.
-- [x] Vale style checks (2026-10-15): 0 errors, 0 warnings, 274 suggestions.
+- [x] Vale style checks (2026-10-15): 0 errors, 0 warnings; suggestions remain.
 - [ ] DCO sign-off on the commits (OQ-018). An agent must not sign for a person.
 - [ ] A test against a real system. Needs a signed authorization of its owner and the approval of the user.
 - [ ] Mutation survivors "not tested: the exact size limit of a token" (3). Low value; listed in the record.
