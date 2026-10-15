@@ -1,4 +1,4 @@
-# Status: configured. This workflow has not run. See docs/readiness.md.
+# Status: runs on the private repository since 2026-10-15. See docs/readiness.md.
 # Every action is pinned to a commit. The comment gives the release that the commit belongs to.
 name: scorecard
 
@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
+      # A job-level list replaces read-all: a private repository needs contents read to check out.
+      contents: read
+      actions: read
       security-events: write
       id-token: write
     steps:
