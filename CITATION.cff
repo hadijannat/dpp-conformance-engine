@@ -6,6 +6,8 @@ authors:
   - family-names: Jannatabadi
     given-names: Hadi
 version: 0.1.0rc1
+date-released: 2026-10-15
+repository-code: https://github.com/hadijannat/dpp-conformance-engine
 license: Apache-2.0
 abstract: >-
   An open-source, vendor-neutral conformance test engine for Digital Product Passports, with

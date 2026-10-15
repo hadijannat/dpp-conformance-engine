@@ -6,9 +6,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.1.0rc1] - not released
+## [0.1.0rc1] - 2026-10-15
 
-This is a release candidate. It has not been tagged or published.
+This is a release candidate. Tag `v0.1.0rc1` marks it. It is not published on PyPI.
 
 ### Added
 
@@ -110,5 +110,5 @@ This is a release candidate. It has not been tagged or published.
 - `purge_expired` needs the data keys and returns what it kept and why.
 - A role request no longer follows a cross-origin redirect (architecture, section 9).
 
-[Unreleased]: https://example.invalid/compare/v0.1.0rc1...HEAD
-[0.1.0rc1]: https://example.invalid/releases/tag/v0.1.0rc1
+[Unreleased]: https://github.com/hadijannat/dpp-conformance-engine/compare/v0.1.0rc1...HEAD
+[0.1.0rc1]: https://github.com/hadijannat/dpp-conformance-engine/releases/tag/v0.1.0rc1

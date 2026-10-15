@@ -4,27 +4,29 @@ Audience: a decision maker, an assessor, or a laboratory that considers using th
 Purpose: state what was shown, by which command, and what was not shown.
 Prerequisites: read [what the engine tests and what it does not claim](explanation/scope-and-legal-mapping.md).
 
-**Version 0.1.0rc1 is a release candidate. It is not released or tagged, and no package is published.**
+**Version 0.1.0rc1 is a release candidate. Tag `v0.1.0rc1` marks the candidate commit. No package is published on PyPI.**
+The result of the release workflow is recorded on the `main` branch after the tag.
 The source repository is public at https://github.com/hadijannat/dpp-conformance-engine since
 2026-10-15; the owner made it public.
 This page states no technology readiness level. It makes no statement of legal compliance,
 product safety, data truth, or accreditation. The outputs of the engine are conformance test
 reports. They are not certificates.
 
-Each figure on this page comes from a command that ran in the development session of
-2026-10-14 on one macOS host. The commit is named next to each figure. A development agent
-ran the commands. No human has repeated them.
+Each figure on this page comes from a command that ran in the development sessions of
+2026-10-14 and 2026-10-15. Most ran on one macOS host. The table names the others: GitHub
+Actions, and Docker Desktop of the owner. The commit is named next to each figure. A development
+agent ran or read the commands. No human has repeated them.
 
 ## 1. Summary
 
 | Dimension | What exists | What is missing |
 | --- | --- | --- |
-| Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. Continuous integration runs on GitHub (Linux, Python 3.12 and 3.13). | The container image has never been built. The release workflow has never run. |
+| Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. Continuous integration runs on GitHub (Linux, Python 3.12 and 3.13). No independent build of the same commit. |
 | Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No trusted timestamp. Keys are files. |
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
 | Operations | Command line with stable exit codes, retention and purge of recordings, documented how-to guides. | No key management service or hardware security module. No multi-user deployment. |
-| Accessibility | The HTML report uses semantic tables, headings, and text labels for each verdict. WCAG 2.2 AA is the target. An agent checked structure, contrast, the first focus, and reflow at 320 pixels (`docs/reference/accessibility.md`). | No manual review by a person and no screen reader review. An axe-core scan found 0 violations. The Vale style rules did not run. |
+| Accessibility | The HTML report uses semantic tables, headings, and text labels for each verdict. WCAG 2.2 AA is the target. An agent checked structure, contrast, the first focus, and reflow at 320 pixels (`docs/reference/accessibility.md`). | No manual review by a person and no screen reader review. An axe-core scan found 0 violations. |
 | Validation in a relevant environment | Method validation against a synthetic reference system: seeded faults, valid controls, boundary cases, evidence faults, and replays. | No validation against a real system or real data. The reference system and the checks come from the same project. |
 
 ## 2. Results of the commands
@@ -50,8 +52,8 @@ ran the commands. No human has repeated them.
 | GitHub Actions `codeql` (Python, security-extended queries) | 0 open alerts. The first analysis found two. A TLS context did not state its minimum version (high). The reference server built a header value from the request path (medium). Both are fixed. | `2c0c6ab` |
 | GitHub Actions `ci` (run 38708494167, Linux) | Fast gates on Python 3.12 and 3.13 pass: format, lint, types, schema sync, and catalogue lint. 1270 tests passed with no network except loopback. Core coverage is 98 percent. Core without optional extras: 1236 passed. Method validation job: 63 passed. Its record shows 60/60 faults, 0/39 false positives, 8/8 boundary cases, 12/12 evidence faults, and 15/15 replays. The first two runs failed on defects of the workflow and of the transport on Linux; both are fixed. | `4c2928e` |
 
-A check that is not in this table was not run in this session. The release workflow, the
-container build, and a manual accessibility review are "not run".
+A check that is not in this table was not run in this session. A manual accessibility review is
+"not run".
 
 ### 2.1 Core packages of the coverage gate
 
