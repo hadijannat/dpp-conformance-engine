@@ -172,11 +172,12 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
     (
         "evidence.devlog",
         "evidence",
-        _E,
-        "File-backed Merkle log for development. It does not "
-        "implement RFC 9162 and does not protect against equivocation.",
+        _I,
+        "File-backed Merkle log for development.",
         None,
-        "",
+        "A log implementation exists in dppce.evidence, with append, inclusion-proof, and "
+        "consistency-proof tests on local fixtures. Its documentation states whether it implements "
+        "RFC 9162 and what protection it gives against equivocation.",
     ),
     ("evidence.cose", "evidence", _I, "COSE report signatures.", None, "A separately tested COSE profile."),
     (

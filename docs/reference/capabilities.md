@@ -34,7 +34,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `registry.official` | registry | interface_only |  | Checks against an official registry environment. | A separately authorized official environment is available. Passive checks are separate from registration and update operations. |
 | `aas.validate` | aas | experimental | `aas_test_engines` | Wrap a pinned aas-test-engines release. A valid Asset Administration Shell is not a complete DPP conformance statement. |  |
 | `evidence.jws_es256` | evidence | supported |  | Sign and verify reports with JWS ES256. |  |
-| `evidence.devlog` | evidence | experimental |  | File-backed Merkle log for development. It does not implement RFC 9162 and does not protect against equivocation. |  |
+| `evidence.devlog` | evidence | interface_only |  | File-backed Merkle log for development. | A log implementation exists in dppce.evidence, with append, inclusion-proof, and consistency-proof tests on local fixtures. Its documentation states whether it implements RFC 9162 and what protection it gives against equivocation. |
 | `evidence.cose` | evidence | interface_only |  | COSE report signatures. | A separately tested COSE profile. |
 | `evidence.rfc3161` | evidence | interface_only |  | RFC 3161 timestamps on reports. | See BL-004. A mock timestamp authority is used in tests. |
 | `evidence.status_list` | evidence | interface_only |  | Bitstring Status List for report credentials. | A separately tested profile with a mock status service. |
