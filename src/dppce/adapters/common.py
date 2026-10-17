@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import io
 from collections.abc import Mapping, Sequence
-from decimal import InvalidOperation
 from typing import Any, Final
 from urllib.parse import urlsplit
 
@@ -124,8 +123,7 @@ def json_object(record: Record, *, decimals: bool = False) -> dict[str, Any] | N
     """
     try:
         value = parse_strict(record.body, decimals=decimals)
-    except (CanonicalizationError, InvalidOperation):
-        # An exponent beyond the Decimal limits raises InvalidOperation, not ValueError.
+    except CanonicalizationError:
         return None
     return value if isinstance(value, dict) else None
 

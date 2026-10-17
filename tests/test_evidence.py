@@ -61,6 +61,12 @@ def test_strict_parse_rejects_what_two_parsers_can_read_differently(raw: str) ->
         parse_strict(raw)
 
 
+def test_strict_parse_with_decimals_rejects_an_exponent_beyond_the_decimal_limits() -> None:
+    # Decimal raises InvalidOperation here, which is not a ValueError.
+    with pytest.raises(CanonicalizationError):
+        parse_strict('{"a":1e999999999999999999999}', decimals=True)
+
+
 # -- Merkle tree ------------------------------------------------------------------------------
 
 

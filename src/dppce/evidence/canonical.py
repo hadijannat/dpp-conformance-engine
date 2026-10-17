@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 import rfc8785
@@ -96,7 +96,8 @@ def parse_strict(raw: bytes | str, *, decimals: bool = False) -> Any:
             parse_constant=_reject_constant,
             parse_float=Decimal if decimals else _finite_float,
         )
-    except (ValueError, RecursionError) as exc:
+    # An exponent beyond the Decimal limits raises InvalidOperation, which is not a ValueError.
+    except (ValueError, RecursionError, InvalidOperation) as exc:
         if isinstance(exc, CanonicalizationError):
             raise
         raise CanonicalizationError(f"not valid JSON: {exc}") from exc
