@@ -201,18 +201,22 @@ def decode_qr(
                     record,
                     blocked("CARRIER.SAMPLE.TOO_LARGE", "The image is larger than the limit."),
                 )
-            symbols = [
-                s
-                for s in zxingcpp.read_barcodes(image.convert("L"))
-                if s.format == zxingcpp.BarcodeFormat.QRCode
-            ]
+            # With errors returned, a damaged second symbol is still counted. Without them, an
+            # image with one clean and one damaged symbol looked like one symbol and passed.
+            found = zxingcpp.read_barcodes(image.convert("L"), return_errors=True)
     except (UnidentifiedImageError, OSError, ValueError):
         return None, record, blocked("CARRIER.SAMPLE.UNREADABLE", "The sample is not a readable image.")
-    if len(symbols) != 1 or not symbols[0].text:
-        observation = ctx.observation(
-            0, kind="artifact", records=[record], summary={"qr_symbols": len(symbols)}
+    qr = (zxingcpp.BarcodeFormat.QRCode, zxingcpp.BarcodeFormat.MicroQRCode)
+    symbols = [s for s in found if s.valid and s.format == zxingcpp.BarcodeFormat.QRCode]
+    # zxing-cpp can report a damaged QR symbol as a Micro QR candidate, so both formats count.
+    unreadable = sum(1 for s in found if not s.valid and s.format in qr)
+    if len(symbols) != 1 or unreadable or not symbols[0].text:
+        summary = {"qr_symbols": len(symbols), "qr_symbols_unreadable": unreadable}
+        observation = ctx.observation(0, kind="artifact", records=[record], summary=summary)
+        message = (
+            f"The image holds {len(symbols)} readable QR symbols and {unreadable} detected but "
+            "unreadable ones; exactly one readable symbol and no other is needed."
         )
-        message = f"The image holds {len(symbols)} QR symbols with text; exactly one is needed."
         return None, record, completed(False, "CARRIER.QR.NOT_DECODED", message, [observation])
     return str(symbols[0].text), record, None
 

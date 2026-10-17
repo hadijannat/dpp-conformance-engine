@@ -1,0 +1,83 @@
+{
+  "note": "TEST-ONLY synthetic images from scripts/gen_fixtures.py. They are not real labels and say nothing about print quality. Each entry is the expected outcome of carrier.qr_decode. A summary entry lists only the keys that the test compares.",
+  "cases": {
+    "TEST-ONLY-blur-mild.png": {
+      "status": "completed",
+      "passed": true,
+      "reason_code": "CARRIER.QR.OK",
+      "summary": {"qr_symbols": 1, "payload_characters": 51}
+    },
+    "TEST-ONLY-blur-heavy.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 0}
+    },
+    "TEST-ONLY-rotated-30.png": {
+      "status": "completed",
+      "passed": true,
+      "reason_code": "CARRIER.QR.OK",
+      "summary": {"qr_symbols": 1, "payload_characters": 51}
+    },
+    "TEST-ONLY-contrast-reduced.png": {
+      "status": "completed",
+      "passed": true,
+      "reason_code": "CARRIER.QR.OK",
+      "summary": {"qr_symbols": 1, "payload_characters": 51}
+    },
+    "TEST-ONLY-contrast-very-low.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 0}
+    },
+    "TEST-ONLY-occluded-small.png": {
+      "status": "completed",
+      "passed": true,
+      "reason_code": "CARRIER.QR.OK",
+      "summary": {"qr_symbols": 1, "payload_characters": 51}
+    },
+    "TEST-ONLY-occluded-large.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 0}
+    },
+    "TEST-ONLY-module-1px.png": {
+      "status": "completed",
+      "passed": true,
+      "reason_code": "CARRIER.QR.OK",
+      "summary": {"qr_symbols": 1, "payload_characters": 51}
+    },
+    "TEST-ONLY-module-half-px.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 0}
+    },
+    "TEST-ONLY-two-symbols.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 2}
+    },
+    "TEST-ONLY-two-symbols-one-finder-wiped.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 1}
+    },
+    "TEST-ONLY-two-symbols-one-blotted.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 1}
+    },
+    "TEST-ONLY-truncated.png": {
+      "status": "blocked",
+      "passed": null,
+      "reason_code": "CARRIER.SAMPLE.UNREADABLE",
+      "summary": null
+    }
+  }
+}

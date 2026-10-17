@@ -7,12 +7,17 @@ to rotate them. Every key, certificate, and token here is a test value: its file
 with ``TEST-ONLY-``. None of them protects anything.
 
 Needs the ``qr`` extra (zxing-cpp and Pillow) for the QR images.
+
+``--degraded-qr-only`` writes only the degraded QR images in ``qr/degraded``. They have no
+randomness, so this option rotates no key.
 """
 
 from __future__ import annotations
 
+import io
 import json
 import secrets
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -23,7 +28,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 
 from dppce.evidence.jws import LocalSigner
 from dppce.infrastructure.authorization import issue_authorization
@@ -163,12 +168,62 @@ def _documents() -> None:
     _qr(OUT / "qr" / "invalid.png", "this text is not a URL")
 
 
-def _qr(path: Path, text: str) -> None:
-    image = zxingcpp.write_barcode_to_image(
-        zxingcpp.create_barcode(text, zxingcpp.BarcodeFormat.QRCode), scale=6
+def _qr_image(text: str, scale: int = 6) -> Image.Image:
+    return Image.fromarray(
+        zxingcpp.write_barcode_to_image(
+            zxingcpp.create_barcode(text, zxingcpp.BarcodeFormat.QRCode), scale=scale
+        )
     )
+
+
+def _qr(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(image).save(path, format="PNG", optimize=True)
+    _qr_image(text).save(path, format="PNG", optimize=True)
+
+
+def _blot(image: Image.Image, box: tuple[int, int, int, int], fill: int) -> Image.Image:
+    copy = image.copy()
+    ImageDraw.Draw(copy).rectangle(box, fill=fill)
+    return copy
+
+
+def _degraded_qr() -> None:
+    """Write TEST-ONLY degraded QR images. Their expected outcomes are in qr/degraded/expected.json.
+
+    No randomness: the same library versions give the same images.
+    """
+    out = OUT / "qr" / "degraded"
+    out.mkdir(parents=True, exist_ok=True)
+    text = f"{PUBLIC_ORIGIN}/01/{GTIN}/21/{ITEMS['ev'][0]}"
+    clean, tiny = _qr_image(text), _qr_image(text, scale=1)
+    side, gap = clean.width, 24
+    pair = Image.new("L", (2 * side + gap, side), 255)
+    pair.paste(clean, (0, 0))
+    pair.paste(_qr_image(f"{PUBLIC_ORIGIN}/01/{GTIN}/21/EV0002"), (side + gap, 0))
+    right = side + gap  # left edge of the second symbol
+
+    def part(percent: int) -> int:
+        return side * percent // 100
+
+    images = {
+        "blur-mild": clean.filter(ImageFilter.GaussianBlur(1)),
+        "blur-heavy": clean.filter(ImageFilter.GaussianBlur(6)),
+        "rotated-30": clean.rotate(30, Image.Resampling.BICUBIC, expand=True, fillcolor=255),
+        "contrast-reduced": clean.point(lambda v: 64 if v < 128 else 192),
+        "contrast-very-low": clean.point(lambda v: 124 if v < 128 else 132),
+        "occluded-small": _blot(clean, (part(40), part(40), part(50), part(50)), 0),
+        "occluded-large": _blot(clean, (part(30), part(30), part(70), part(70)), 0),
+        "module-1px": tiny,
+        "module-half-px": tiny.resize((tiny.width // 2, tiny.height // 2), Image.Resampling.BOX),
+        "two-symbols": pair,
+        "two-symbols-one-finder-wiped": _blot(pair, (right, 0, right + part(35), part(35)), 255),
+        "two-symbols-one-blotted": _blot(pair, (right + part(30), part(30), right + part(70), part(70)), 0),
+    }
+    for name, image in images.items():
+        image.save(out / f"TEST-ONLY-{name}.png", format="PNG", optimize=True)
+    whole = io.BytesIO()
+    clean.save(whole, format="PNG", optimize=True)
+    _write(out / "TEST-ONLY-truncated.png", whole.getvalue()[: len(whole.getvalue()) // 2])
 
 
 def _name(common_name: str) -> x509.Name:
@@ -305,6 +360,10 @@ def _roles() -> None:
 
 
 def main() -> None:
+    _degraded_qr()
+    if sys.argv[1:] == ["--degraded-qr-only"]:
+        print(f"wrote degraded QR images to {OUT / 'qr' / 'degraded'}")
+        return
     _documents()
     _roles()
     _trust_and_authorization(_pki())
