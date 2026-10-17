@@ -46,7 +46,9 @@ Rules:
 3. A check reaches the outside world only through the `Acquirer` protocol.
 4. YAML is parsed only by `dppce.catalogue.load_data`. It uses a subclass of PyYAML's
    `SafeLoader` that also rejects a repeated key. A test proves that a `!!python/object` tag is
-   rejected. No YAML value is evaluated as code or as a template.
+   rejected. No YAML value is evaluated as code or as a template. A URL template (section 9.2)
+   is not evaluated either. The engine only replaces named placeholders with percent-encoded
+   values under a fixed grammar.
 5. No module fetches a schema, a JSON-LD context, or a `$ref` from the network. Every such
    resource is a pinned local file.
 
@@ -263,6 +265,12 @@ Initial registry:
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
 | `aas.validate` | `aas.validate` | Wrap aas-test-engines. Needs the `aas` extra. |
 
+`identifier.resolve` takes two optional parameters. `accept` sets the `Accept` request header.
+`accepted_media_types` lists the final media types that count as resolved. Without
+`accepted_media_types` the check needs a final JSON object, as before. `IDENTIFIER.RESOLVED`
+always means a final JSON object. A pass on another listed media type gives
+`IDENTIFIER.RESOLVED.MEDIA_TYPE`. The observation summary always records the final media type.
+
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.
 
@@ -329,6 +337,59 @@ does not let those files decide what the test host trusts or discloses:
   are compared in one normal form. Role secrets for an origin that no authorization names are
   an input error, not a run without credentials.
 - A path in the IXIT is resolved and must stay inside the directory of the IXIT file.
+- A URL template of the IXIT is a path under an endpoint that the IXIT names. It cannot select
+  a scheme, a host, or a port (section 9.2).
+- The identifier split uses a fixed separator, not a pattern. A supplied regular expression
+  could make the engine use unbounded time.
+- The ICS cannot select the API contract or the access policy. It names the identifier that it
+  expects. A different bound file gives `blocked`.
+- The IXIT cannot select the contract operation that `api.contract` judges. The bound contract
+  marks it. The IXIT template must match that path.
+
+### 9.2 Resource templates and bound files
+
+The IXIT gives the URL of each fetched passport resource. No adapter holds a URL path for a
+passport resource.
+
+- `IXIT.resources` maps a resource name to an endpoint name and a path template. The names are
+  `item`, `model`, `signed`, `versions`, and `registry_record`.
+- A path template starts with one `/`. It holds URL path and query characters and named
+  placeholders, for example `/passports/{gtin}/{serial}/data`. It has no fragment.
+- A URL template is not evaluated. The engine only replaces each named placeholder with a
+  percent-encoded value. The template grammar is fixed.
+- `{id}` is `IXIT.samples.passport_id`. `IXIT.id_parts` splits that value at a fixed separator
+  into named parts. The split is data, not code.
+- The split uses the first n-1 separators for n names. The last part keeps any further
+  separator. No part can be empty.
+- If the split fails, a template that uses a part gives `blocked`.
+- One helper, `dppce.adapters.common.template_url`, builds the URL of every passport resource and
+  access channel. It percent-encodes each placeholder value and appends the path to the endpoint.
+- The resolver checks fetch the carrier identifier itself. That URL does not come from a template.
+- The endpoint must be an `http` or `https` URL with a host and with no query or fragment. A
+  template therefore cannot change the scheme, the host, or the port.
+- The transport policy (section 9) applies as before. A template cannot add a host or an origin
+  that the operator did not confirm.
+- A resource with no template gives `blocked` with `<AREA>.NO_TARGET`. The engine has no default
+  path.
+- The access policy names its probe channels as path templates under the `api` endpoint. The
+  same helper builds them with the same placeholders.
+
+The profile binds the API contract and the access policy. The ICS names the identifier of each
+one in `api.contract` and `access.policy`.
+
+- The contract states its identifier in the top-level key `x-dppce-contract-id`. The policy
+  states it in `policy_id`.
+- If the ICS value is `unknown`, the check gives `blocked` with `API.CONTRACT.NOT_DECLARED` or
+  `ACCESS.POLICY.NOT_DECLARED`.
+- If the identifiers differ, the check gives `blocked` with `API.CONTRACT.ICS_MISMATCH` or
+  `ACCESS.POLICY.ICS_MISMATCH`.
+- A contract path item marks its resource with `x-dppce-resource`. `api.contract` judges only the
+  marked operation.
+- If the IXIT template path differs from the marked path, `api.contract` gives `blocked` with
+  `API.CONTRACT.PATH_MISMATCH`. Nothing is fetched.
+- The run manifest records `sha256:<hex>` of the raw bytes of each bound file in `bound_files`.
+  These files are the contract, the policy, the schemas, and the rule packs.
+- A replay reads the bound files again. A changed file gives a different decision digest.
 
 ## 10. Recording
 

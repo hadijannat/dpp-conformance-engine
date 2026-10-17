@@ -39,5 +39,6 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | system under test | The DPP system that a run examines. |
 | test purpose | A declarative description of one test step: what it checks, for which requirements, and how a result maps to a verdict. |
 | trust bundle | The explicit list of keys and anchors that the operator trusts. |
+| URL template | A path with named placeholders under an IXIT endpoint. It gives the URL of one fetched resource. It cannot change the scheme, the host, or the port. |
 | verdict | `pass`, `fail`, `inconclusive`, `not_applicable`, or `error`. |
 | verification | The check of a report against a trust bundle. It says nothing new about the tested system. |

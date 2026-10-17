@@ -29,11 +29,16 @@ refuses them without a matching authorization.
 4. Write the ICS and the IXIT with the owner. Treat both files as untrusted input.
 5. Set `network.allowed_hosts`, the request limit, the minimum interval, and a contact in the IXIT.
    The contact appears in the `User-Agent` header of each request.
-6. Run `dppce plan` first. Check which steps the plan executes and which it blocks.
-7. Run `dppce run` with `--trust`, `--authorization`, and the confirmations.
-8. Keep the data key directory apart from the run directory.
-9. List the recordings past the retention period with `dppce purge --runs DIR --keys DIR`.
-10. Check the list. Then delete those recordings with the same command and `--yes`.
+6. Check the URL templates in `IXIT.resources` and the split in `IXIT.id_parts`.
+   A template cannot change the scheme, the host, or the port of its endpoint.
+7. Copy the data root and point a profile at the owner's contract and access policy.
+   Add `x-dppce-contract-id` and an `x-dppce-resource` mark to your copy of the contract.
+   Give the copy with `--data-root`. The run manifest records the hash of each bound file.
+8. Run `dppce plan` first. Check which steps the plan executes and which it blocks.
+9. Run `dppce run` with `--trust`, `--authorization`, and the confirmations.
+10. Keep the data key directory apart from the run directory.
+11. List the recordings past the retention period with `dppce purge --runs DIR --keys DIR`.
+12. Check the list. Then delete those recordings with the same command and `--yes`.
 
 ## What the engine enforces
 

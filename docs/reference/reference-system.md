@@ -14,7 +14,14 @@ It binds to `127.0.0.1` on a port that the caller selects (port `0` means any fr
 
 ```python
 class ReferenceServer:
-    def __init__(self, fixtures: Path, *, faults: frozenset[str] = frozenset(), port: int = 0) -> None: ...
+    def __init__(
+        self,
+        fixtures: Path,
+        *,
+        faults: frozenset[str] = frozenset(),
+        port: int = 0,
+        system: ReferenceSystem | None = None,  # a test can serve a subclass, for example another URL layout
+    ) -> None: ...
     @property
     def origin(self) -> str: ...          # for example "http://127.0.0.1:49152"
     def start(self) -> None: ...          # serves in a daemon thread
@@ -56,6 +63,10 @@ Three synthetic items, one for each profile:
 ## 3. Endpoints
 
 All are `GET`. `{id}` is `<gtin>-<serial>`, for example `09506000134352-EV0001`.
+
+These paths are the URL layout of the reference system only. The engine does not assume them.
+The IXIT declares a URL template for each fetched resource (architecture contract, section 9.2).
+The test rig also serves a second layout, `/passports/{gtin}/{serial}/data`, to show this.
 
 | Path | Answer |
 | --- | --- |
@@ -210,6 +221,16 @@ channels:
 The policy states what the system owner declares. The check observes whether the system
 enforces that declaration. It does not decide who has a legal entitlement.
 
+Each channel is a path template under the `api` endpoint. It can use `{id}` and the parts that
+`IXIT.id_parts` declares, for example `{serial}`. A channel outside the template grammar makes
+the policy not valid: the check gives `blocked` with `ACCESS.POLICY.MISSING`. The check builds
+every channel URL before the first request. A placeholder without a value gives `blocked` with
+`ACCESS.NO_TARGET`, and nothing is sent.
+
+The ICS names the policy in `access.policy`. The value `unknown` gives `blocked` with
+`ACCESS.POLICY.NOT_DECLARED`. A value other than `policy_id` gives `blocked` with
+`ACCESS.POLICY.ICS_MISMATCH`.
+
 For the role under test, the check reads each channel. It always tries to parse the body as
 JSON, whatever media type the system declares. A restricted path that the role may not see,
 or a canary value in the body, is a leak. On a channel that is not JSON, only a canary
@@ -247,6 +268,28 @@ type>.schema`, and local `#/components/schemas/...` references. A contract that 
 else gives status `unsupported` with `API.CONTRACT.UNSUPPORTED_FEATURE`.
 Reason codes: `API.CONTRACT.STATUS`, `API.CONTRACT.CONTENT_TYPE`, `API.CONTRACT.SCHEMA`,
 `API.CONTRACT.OK`.
+
+The contract carries two OpenAPI extensions of this engine:
+
+- `x-dppce-contract-id` (top level): the identifier that the ICS names in `api.contract`.
+- `x-dppce-resource` (on a path item): the IXIT resource whose operation `api.contract` judges.
+
+The check selects the operation from the contract, not from the IXIT. It takes the first row
+that applies:
+
+| Condition | Status | Reason code |
+| --- | --- | --- |
+| The profile names no contract, it cannot be read, or it is not a mapping | `blocked` | `API.CONTRACT.MISSING` |
+| The ICS gives `unknown` for `api.contract` | `blocked` | `API.CONTRACT.NOT_DECLARED` |
+| `x-dppce-contract-id` is missing or differs from the ICS value | `blocked` | `API.CONTRACT.ICS_MISMATCH` |
+| The method is not `get` | `unsupported` | `API.CONTRACT.UNSUPPORTED_FEATURE` |
+| The IXIT gives no template for the resource | `blocked` | `API.CONTRACT.NO_TARGET` |
+| The `path` parameter differs from the template path | `blocked` | `API.CONTRACT.PATH_MISMATCH` |
+| The contract marks no operation, or two, for the resource | `unsupported` | `API.CONTRACT.UNSUPPORTED_FEATURE` |
+| The template path differs from the marked path | `blocked` | `API.CONTRACT.PATH_MISMATCH` |
+
+Path parameter names do not count in the last comparison: `{passportId}` matches `{id}`.
+None of these rows sends a request.
 
 ### 5.4 Context allowlist
 
@@ -314,8 +357,24 @@ IXIT conventions for the reference rig:
 - `endpoints.api` and `endpoints.registry`: base URLs in public form (`https://id.example.test`).
 - `endpoints.public_origin` and `endpoints.origin_override`: see section 2.
 - `samples.qr_image`: path of a QR image. `samples.identifier`: the public identifier as text.
-- `samples.passport_id`: the `{id}` path segment, for example `09506000134352-EV0001`.
+- `samples.passport_id`: the `{id}` placeholder value, for example `09506000134352-EV0001`.
 - `samples.aas_file`: path of an Asset Administration Shell JSON file (optional).
+- `resources`: one URL template for each fetched resource: `item`, `model`, `signed`,
+  `versions`, and `registry_record`. Each names an endpoint and a path template.
+- `id_parts`: splits `passport_id` at a fixed separator into named parts. The reference
+  fixtures use separator `-` and the names `gtin` and `serial`.
+
+The reference fixtures declare the reference layout of section 3:
+
+```yaml
+resources:
+  item: {endpoint: api, path: "/dpp/{id}"}
+  model: {endpoint: api, path: "/dpp/{id}/model"}
+  signed: {endpoint: api, path: "/dpp/{id}/signed"}
+  versions: {endpoint: api, path: "/dpp/{id}/versions"}
+  registry_record: {endpoint: registry, path: "/registry/{id}"}
+id_parts: {separator: "-", names: [gtin, serial]}
+```
 
 A sample path is relative to the directory of the IXIT file and must stay inside it.
 The IXIT is untrusted input: see the architecture contract, section 9.1. The operator supplies
@@ -330,8 +389,12 @@ Shared helpers in `dppce.adapters.common`:
 - `carrier_identifier(ctx)`: the carrier identifier. If `samples.qr_image` exists, decode it (this
   needs the `qr` extra; without it the check is `unsupported`). Otherwise use
   `samples.identifier`. If neither exists, the check is `blocked` with `CARRIER.SAMPLE.MISSING`.
-- `fetch_once(ctx, url, role)`: returns an earlier record of the same method, URL, and role if
-  it has no error; otherwise fetches. This keeps the request count low and the replay stable.
+- `fetch_once(ctx, url, role, accept)`: returns an earlier record of the same method, URL, role,
+  and `Accept` value if it has no error; otherwise fetches. This keeps the request count low and
+  the replay stable. The default `Accept` value is `*/*`.
+- `resource_url(ctx, resource, area)` and `template_url(ctx, endpoint, template, area)`: build a
+  URL from an IXIT template. A missing template, endpoint, or placeholder value gives `blocked`
+  with `<AREA>.NO_TARGET`.
 - `no_answer(ctx, record)`: builds the outcome for a record with a transport error:
   status `completed`, `passed: false`, `unreachable: true`. Reason code
   `TRANSPORT.REDIRECT_OUT_OF_SCOPE` for that error, `TRANSPORT.DENIED` for `policy_denied`,
@@ -348,9 +411,9 @@ A body with a content coding or a transfer coding other than `identity` or `chun
 | --- | --- | --- | --- |
 | `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING` |
 | `identifier.parse` | `scheme` (default: `ics.identifier_scheme`) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail); `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN` |
-| `identifier.resolve` | none | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail) |
+| `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | none | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport |
-| `api.contract` | `path` (for example `/dpp/{id}`), `method` (default `get`) | `API.CONTRACT.OK` | see section 5.3 |
+| `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
 | `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values |
 | `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
@@ -368,7 +431,7 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | Order | Condition | Status | Reason code |
 | --- | --- | --- | --- |
 | 1 | No trust bundle is configured | `blocked` | `INTEGRITY.TRUST.MISSING` |
-| 2 | The IXIT gives no API endpoint or no passport identifier | `blocked` | `INTEGRITY.NO_TARGET` |
+| 2 | The IXIT gives no URL template for `signed` or `item`, or such a URL cannot be built | `blocked` | `INTEGRITY.NO_TARGET` |
 | 3 | The system answers with status 500 or higher | fail, `unreachable: true` | `INTEGRITY.TOKEN.NO_ANSWER` |
 | 4 | The system answers with another status that is not 200 | fail | `INTEGRITY.TOKEN.NOT_AVAILABLE` |
 | 5 | The body is not a compact JWS, a part of it cannot be decoded, or `x5c` does not hold certificates | fail | `INTEGRITY.TOKEN.MALFORMED` |
@@ -399,8 +462,9 @@ The revocation snapshot lists serial numbers without their issuer. A serial numb
 revoked under one authority therefore also matches a certificate of a different authority.
 An outcome message names the error code, never a value from the token.
 
-Document URLs: item `{api}/dpp/{id}`, model `{api}/dpp/{id}/model`, signed
-`{api}/dpp/{id}/signed`, versions `{api}/dpp/{id}/versions`, registry `{registry}/registry/{id}`.
+Document URLs come from `IXIT.resources`. For the reference fixtures they are: item
+`{api}/dpp/{id}`, model `{api}/dpp/{id}/model`, signed `{api}/dpp/{id}/signed`, versions
+`{api}/dpp/{id}/versions`, and registry `{registry}/registry/{id}`.
 The resolver URL is the carrier identifier itself.
 
 `integrity.jws` follows the order of the table in section 8.1. Each step is a separate finding
@@ -422,7 +486,7 @@ Requirement pack `illustrative/core` (file `catalogue/packs/illustrative-core.ya
 | `ILL-ID-001` | mandatory | always | `TP-ID-001` (`identifier.parse`) |
 | `ILL-ID-002` | mandatory | always | `TP-ID-002` (`identifier.resolve`) |
 | `ILL-ID-003` | mandatory | always | `TP-ID-003` (`identifier.consistency`) |
-| `ILL-API-001` | mandatory | always | `TP-API-001` (`api.contract`, path `/dpp/{id}`) |
+| `ILL-API-001` | mandatory | always | `TP-API-001` (`api.contract`, resource `item`) |
 | `ILL-DATA-001` | mandatory | always; `declared_support`: `ics.features.item_data eq true` | `TP-DATA-001` (`data.jsonschema`, item) |
 | `ILL-DATA-002` | mandatory | always | `TP-DATA-002` (`data.jsonschema`, model) |
 | `ILL-DATA-003` | mandatory | always | `TP-DATA-003` (`data.context`, item) |
