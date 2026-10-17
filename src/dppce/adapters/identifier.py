@@ -22,7 +22,7 @@ from dppce.adapters.common import (
 from dppce.models import CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext, register
 
-_GS1_PATH = re.compile(r"^/01/(?P<gtin>\d{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
+_GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
 _LIMIT = "Digital consistency does not prove physical authenticity."
 
 

@@ -31,3 +31,20 @@ def test_a_gtin_with_a_wrong_check_digit_is_invalid_syntax(
     # The cause must be the check digit, not a path shape that a later regex change rejects.
     reason = None if passed else "the GTIN check digit is wrong"
     assert outcome.observations[0].summary.get("reason") == reason
+
+
+def test_a_gtin_in_non_ascii_digits_is_invalid_syntax(tmp_path: Path) -> None:
+    # Arabic-Indic digits are Unicode decimals: `\d` and int() accept them, GS1 does not.
+    gtin = "09506000134352".translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩"))
+    base = _context(tmp_path, _POLICY, _Canned(b"{}"))
+    ics = ICS.model_validate(base.ics.model_dump(mode="json") | {"identifier_scheme": "gs1-digital-link"})
+    samples = {"identifier": f"https://id.example/01/{gtin}/21/EV0001"}
+    ixit = IXIT.model_validate(base.ixit.model_dump(mode="json") | {"samples": samples})
+    outcome = parse(replace(base, ics=ics, ixit=ixit))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "IDENTIFIER.SYNTAX.INVALID",
+    )
+    reason = "the path does not have the form /01/<14 digits>/21/<serial>"
+    assert outcome.observations[0].summary.get("reason") == reason

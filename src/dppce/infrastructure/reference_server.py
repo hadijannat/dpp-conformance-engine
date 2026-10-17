@@ -43,10 +43,10 @@ _RESTRICTED: Final = {
 }
 _RESTRICTED_VALUES: Final = {"dismantling_notes": NOTES_CANARY, "supplier_reference": CANARY}
 _ITEM_PATH: Final = re.compile(
-    r"^/dpp/(?P<id>\d{14}-[A-Za-z0-9]+)(?P<rest>/model|/signed|/versions|/export|\.html)?$"
+    r"^/dpp/(?P<id>[0-9]{14}-[A-Za-z0-9]+)(?P<rest>/model|/signed|/versions|/export|\.html)?$"
 )
-_RESOLVER_PATH: Final = re.compile(r"^/01/(?P<gtin>\d{14})/21/(?P<serial>[A-Za-z0-9]+)$")
-_REGISTRY_PATH: Final = re.compile(r"^/registry/(?P<id>\d{14}-[A-Za-z0-9]+)$")
+_RESOLVER_PATH: Final = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9]+)$")
+_REGISTRY_PATH: Final = re.compile(r"^/registry/(?P<id>[0-9]{14}-[A-Za-z0-9]+)$")
 
 Reply = tuple[int, str, bytes, dict[str, str]]
 
