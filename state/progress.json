@@ -4,11 +4,12 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 17,
-    "max_cycles": 20,
+    "cycle": 19,
+    "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
-    "state_at_end": "2026-10-15: pre-release v0.1.0rc1 published on GitHub; CI green; repository public. See TASKS.md."
+    "state_at_end": "2026-10-15: pre-release v0.1.0rc1 published on GitHub; CI green; repository public. See TASKS.md.",
+    "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
     "max_parallel_tasks": 3,
@@ -58,6 +59,12 @@
       "research_passes": 0,
       "review_rounds": 0,
       "note": "GitHub pre-release v0.1.0rc1 on 2026-10-15, approved by the owner (\"do all remained yourself i trust you\"). Release workflow run 38722322047: all jobs passed; gh attestation verify passed for the wheel, the sdist, the SBOM, and the image. Not published on PyPI."
+    },
+    "M7": {
+      "status": "in progress",
+      "research_passes": 0,
+      "review_rounds": 0,
+      "note": "T1 technical readiness: the agent-buildable T1 packages of docs/research/gap-assessment-2026-10-15.md, section 6.2. Owner decisions of 2026-10-18 in chat: protected T1 contract edits (O1-2 to O1-10) allowed, each protected diff shown to the owner before it lands; issuer Hadi Jannatabadi, 'not accredited' (OQ-003); standing approvals to land reviewed branches, add pinned dependencies, and push main after ci and codeql. Not in scope for an agent: interpretation approval (OQ-002), OQ-016 and other reviewer readings, a real-system run, an independent audit."
     }
   },
   "repair_attempts": {
@@ -438,6 +445,18 @@
       "kind": "implement-and-check",
       "milestone": "M6",
       "summary": "Owner approval (2026-10-15). Tag v0.1.0rc1 on 6573e4c after CI and CodeQL passed; release workflow run 38722322047 green; attestations verified; released wheel installed alone; GitHub pre-release created; records updated."
+    },
+    {
+      "cycle": 18,
+      "kind": "research",
+      "milestone": "post-M6",
+      "summary": "Gap assessment toward a full-fledged engine (2026-10-15 to 2026-10-17): 5 repository maps, 2 web notes, 8 dimension analysts with two skeptic lenses each, a completeness critic, an Opus synthesis. Committed as b3facf0."
+    },
+    {
+      "cycle": 19,
+      "kind": "implement-and-check",
+      "milestone": "post-M6",
+      "summary": "T0 corrections of the assessment (2026-10-18): 982c58e (D4-01), 1a00cfe (D6-09), 34aa95a (D4-02), 6e022b6 (D8-17). uv run just check: 1277 passed. Pushed; ci and codeql passed on 6e022b6. Owner sign-off 1de751d."
     }
   ],
   "blockers": [
@@ -452,6 +471,7 @@
     "The source audit workflow used 12 agents. The session guideline for one workflow is fewer than 10.",
     "Parallel task limit exceeded one time: a resumed workflow reran two refutation checks that were already complete, so four agents ran for about four minutes against a limit of three. The workflow was stopped and the one missing check was launched alone.",
     "Two delegated tasks failed at launch with an expired credential (HTTP 401) and did no work. They were relaunched after the session resumed.",
-    "Review round 2: the repair branch existed in a worktree inside the main checkout while the skeptics worked. Some skeptics judged findings against the already-fixed branch. The review record marks each such vote."
+    "Review round 2: the repair branch existed in a worktree inside the main checkout while the skeptics worked. Some skeptics judged findings against the already-fixed branch. The review record marks each such vote.",
+    "The gap assessment (cycle 18) ran up to 16 read-only agents in parallel, above max_parallel_tasks 3. No agent edited a file. The Fable synthesis failed on usage credits; at the direction of the owner, Opus wrote the judgment sections."
   ]
 }
