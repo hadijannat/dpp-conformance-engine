@@ -8,6 +8,7 @@ reported as such. SHACL validation is an interface only in this version.
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import Any, Literal, Self
 
 from pydantic import Field, ValidationError, model_validator
@@ -82,7 +83,7 @@ class RulePack(Model):
 
 
 def _fetch_document(
-    ctx: CheckContext, kind: str
+    ctx: CheckContext, kind: str, *, decimals: bool = False
 ) -> tuple[dict[str, Any] | None, Record | None, CheckOutcome | None]:
     """Fetch the item-level passport or the model-level data: (document, record, outcome if not usable)."""
     area = "DATA"
@@ -96,7 +97,7 @@ def _fetch_document(
     record = fetch_once(ctx, url)
     if (problem := unusable(ctx, record)) is not None:
         return None, record, problem
-    document = json_object(record) if record.status == 200 else None
+    document = json_object(record, decimals=decimals) if record.status == 200 else None
     if document is None:
         observation = ctx.observation(0, kind="exchange", records=[record], summary={"status": record.status})
         message = f"The {kind}-level document is not a JSON object (status {record.status})."
@@ -163,7 +164,7 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     )
 
 
-def _compare(left: int, op: str, right: int) -> bool:
+def _compare(left: int | Decimal, op: str, right: int | Decimal) -> bool:
     return {
         "lt": left < right,
         "le": left <= right,
@@ -173,8 +174,9 @@ def _compare(left: int, op: str, right: int) -> bool:
     }[op]
 
 
-def _is_int(value: Any) -> bool:
-    return type(value) is int
+def _is_number(value: Any) -> bool:
+    """An integer (not a boolean) or a finite exact decimal. A binary float is never accepted."""
+    return type(value) is int or (type(value) is Decimal and value.is_finite())
 
 
 def rule_holds(rule: Rule, document: dict[str, Any], now: datetime) -> bool:
@@ -185,14 +187,14 @@ def rule_holds(rule: Rule, document: dict[str, Any], now: datetime) -> bool:
         left, right = dig(document, rule.left), dig(document, rule.right)
         if left is MISSING or right is MISSING:
             return True
-        return _is_int(left) and _is_int(right) and _compare(left, rule.op, right)
+        return _is_number(left) and _is_number(right) and _compare(left, rule.op, right)
     value = dig(document, rule.field)
     if value is MISSING:
         return True
     if rule.kind == "unit":
         return value in rule.allowed
     if rule.kind == "range":
-        if not _is_int(value):
+        if not _is_number(value):
             return False
         return (rule.min is None or value >= rule.min) and (rule.max is None or value <= rule.max)
     if rule.max_age_days is None:
@@ -214,7 +216,9 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
         packs = [load_model(ctx.data_root / path, RulePack) for path in ctx.profile.rule_packs]
     except (CatalogueError, ValidationError):
         return blocked("DATA.RULES.MISSING", "A pinned rule pack cannot be read or is not valid.")
-    document, record, problem = _fetch_document(ctx, kind)
+    # Exact decimals: a third-party passport may hold 97.5, and a binary float would make close
+    # values equal. The summary below holds rule ids only, so no Decimal reaches the decision body.
+    document, record, problem = _fetch_document(ctx, kind, decimals=True)
     if problem is not None or document is None or record is None:
         return problem or blocked("DATA.NO_TARGET", "No document is available.")
     facts = facts_from(ctx.ics, ctx.profile)

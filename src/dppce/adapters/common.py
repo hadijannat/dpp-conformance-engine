@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import io
 from collections.abc import Mapping, Sequence
+from decimal import InvalidOperation
 from typing import Any, Final
 from urllib.parse import urlsplit
 
@@ -115,11 +116,16 @@ def unusable(ctx: CheckContext, record: Record) -> CheckOutcome | None:
     return None
 
 
-def json_object(record: Record) -> dict[str, Any] | None:
-    """Parse the body as one JSON object. A repeated key is ambiguous, so it is not accepted."""
+def json_object(record: Record, *, decimals: bool = False) -> dict[str, Any] | None:
+    """Parse the body as one JSON object. A repeated key is ambiguous, so it is not accepted.
+
+    With ``decimals`` a non-integer number is an exact ``Decimal``. Such a document is for
+    comparison only: a Decimal must never reach an observation or a decision body.
+    """
     try:
-        value = parse_strict(record.body)
-    except CanonicalizationError:
+        value = parse_strict(record.body, decimals=decimals)
+    except (CanonicalizationError, InvalidOperation):
+        # An exponent beyond the Decimal limits raises InvalidOperation, not ValueError.
         return None
     return value if isinstance(value, dict) else None
 
