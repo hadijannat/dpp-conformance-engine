@@ -17,7 +17,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `carrier.rfid` | carrier | interface_only |  | Read an RFID tag. | A reader integration exists and is tested against physical tags in a recorded test campaign. |
 | `identifier.parse` | identifier | supported |  | Scheme-aware syntax check of the carrier payload. |  |
 | `identifier.resolve` | identifier | supported |  | Bounded resolution of an identifier to a passport. |  |
-| `identifier.consistency` | identifier | supported |  | Compare the identifier in the carrier, the resolver, the passport, and the ICS. Digital consistency does not prove physical authenticity. |  |
+| `identifier.consistency` | identifier | supported |  | Compare the carrier identifier, as exact text, with the id of the resolved passport. With a QR image, also compare it with the declared sample identifier. Digital consistency does not prove physical authenticity. |  |
 | `api.contract` | api | supported |  | Check a response against a pinned, maintainer-supplied OpenAPI contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. |  |
 | `api.fuzz` | api | interface_only |  | Schemathesis fuzzing of the API. | Runs only with a signed authorization that grants the scope 'fuzz'. Tested against the reference system with a request budget. |
 | `data.jsonschema` | data | supported |  | Validate a document against a pinned JSON Schema. |  |

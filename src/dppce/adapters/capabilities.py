@@ -48,8 +48,9 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "identifier.consistency",
         "identifier",
         _S,
-        "Compare the identifier in the carrier, the resolver, "
-        "the passport, and the ICS. Digital consistency does not prove physical authenticity.",
+        "Compare the carrier identifier, as exact text, with the id of the resolved passport. "
+        "With a QR image, also compare it with the declared sample identifier. "
+        "Digital consistency does not prove physical authenticity.",
         None,
         "",
     ),
