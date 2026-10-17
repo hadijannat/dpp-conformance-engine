@@ -11,17 +11,17 @@ from __future__ import annotations
 
 import html
 import re
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 from urllib.parse import unquote
 
-from pydantic import ValidationError, model_validator
+from pydantic import Field, ValidationError, model_validator
 
-from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, unusable
+from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, template_url, unusable
 from dppce.catalogue import CatalogueError, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
 from dppce.infrastructure.redaction import REMOVED
-from dppce.models import CheckOutcome, Model
+from dppce.models import PATH_TEMPLATE_PATTERN, UNKNOWN, CheckOutcome, Model
 from dppce.testdefs.registry import CheckContext, register
 
 # The first leaking channel in this order names the reason code.
@@ -45,7 +45,8 @@ class AccessPolicy(Model):
     basis: dict[str, str]
     restricted: tuple[Restricted, ...]
     canaries: tuple[Canary, ...] = ()
-    channels: dict[str, str]
+    # Path templates under the `api` endpoint. A value outside the grammar makes the policy invalid.
+    channels: dict[str, Annotated[str, Field(max_length=512, pattern=PATH_TEMPLATE_PATTERN)]]
 
     @model_validator(mode="after")
     def _known_channels_only(self) -> Self:
@@ -218,34 +219,56 @@ def _partial_look(
     return None
 
 
-@register("access.restricted_fields", capability="access.policy")
-def restricted_fields(ctx: CheckContext) -> CheckOutcome:
-    role = str(ctx.params.get("role", "anonymous"))
-    origin, passport_id = ctx.ixit.endpoints.get("api"), ctx.ixit.samples.get("passport_id")
-    if ctx.profile.access_policy is None or not origin or not passport_id:
-        return blocked(
-            "ACCESS.POLICY.MISSING", "The profile names no access policy, or the IXIT gives no target."
-        )
+def _bound_policy(ctx: CheckContext) -> AccessPolicy | CheckOutcome:
+    """The policy that the profile binds, if it is the one that the ICS names."""
+    if ctx.profile.access_policy is None:
+        return blocked("ACCESS.POLICY.MISSING", "The profile names no access policy.")
     try:
         policy = load_model(ctx.data_root / ctx.profile.access_policy, AccessPolicy)
     except (CatalogueError, ValidationError):
         return blocked("ACCESS.POLICY.MISSING", "The pinned access policy cannot be read or is not valid.")
+    expected = ctx.ics.access.policy
+    if expected == UNKNOWN:
+        message = "The ICS does not name the access policy that it expects."
+        return blocked("ACCESS.POLICY.NOT_DECLARED", message)
+    if policy.policy_id != expected:
+        message = f"The bound access policy is not the policy '{expected}' that the ICS names."
+        return blocked("ACCESS.POLICY.ICS_MISMATCH", message)
+    return policy
+
+
+def _channel_urls(ctx: CheckContext, policy: AccessPolicy) -> dict[str, str] | CheckOutcome:
+    """Every channel URL, built before the first request: a channel without a target sends nothing."""
+    urls: dict[str, str] = {}
+    for channel in _CHANNELS:
+        if channel in policy.channels:
+            url = template_url(ctx, "api", policy.channels[channel], "ACCESS")
+            if isinstance(url, CheckOutcome):
+                return url
+            urls[channel] = url
+    return urls
+
+
+@register("access.restricted_fields", capability="access.policy")
+def restricted_fields(ctx: CheckContext) -> CheckOutcome:
+    role = str(ctx.params.get("role", "anonymous"))
+    policy = _bound_policy(ctx)
+    if isinstance(policy, CheckOutcome):
+        return policy
     withheld = [r.path for r in policy.restricted if role not in r.roles]
     if not withheld or not policy.channels:
         # Nothing to look for, or nowhere to look. That is not evidence of enforcement.
         message = f"The policy withholds no field from the role '{role}', or it names no channel."
         return blocked("ACCESS.POLICY.NOTHING_TO_PROBE", message)
     canaries = [c for c in policy.canaries if c.path in withheld]
-    serial = passport_id.partition("-")[2]
+    urls = _channel_urls(ctx, policy)
+    if isinstance(urls, CheckOutcome):
+        return urls
     records: list[Record] = []
     leaks: dict[str, list[str]] = {}
     canary_only: list[str] = []  # not JSON: only a canary value can be found there
     redacted: list[str] = []  # a redirect or link URL lost a part to redaction
-    for channel in _CHANNELS:
-        template = policy.channels.get(channel)
-        if template is None:
-            continue
-        url = origin.rstrip("/") + template.replace("{id}", passport_id).replace("{serial}", serial)
+    for channel, url in urls.items():
         record = fetch_once(ctx, url, role)
         if (problem := unusable(ctx, record)) is not None:
             return problem

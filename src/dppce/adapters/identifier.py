@@ -16,6 +16,7 @@ from dppce.adapters.common import (
     completed,
     fetch_once,
     json_object,
+    media_type,
     not_done,
     unusable,
 )
@@ -23,6 +24,10 @@ from dppce.models import CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext, register
 
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
+# Test-purpose parameters of identifier.resolve. Printable ASCII only: no CR, no LF.
+_ACCEPT = re.compile(r"[\x20-\x7e]{1,256}")
+_MEDIA_TYPE = re.compile(r"[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*")
+_MAX_MEDIA_TYPES = 16
 _LIMIT = "Digital consistency does not prove physical authenticity."
 
 
@@ -77,8 +82,31 @@ def parse(ctx: CheckContext) -> CheckOutcome:
     )
 
 
+def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None] | None:
+    """The validated ``accept`` and ``accepted_media_types`` parameters, or None if malformed.
+
+    fullmatch, not ``$``: a trailing newline must not pass. CR and LF are outside the classes.
+    """
+    accept = ctx.params.get("accept")
+    accepted = ctx.params.get("accepted_media_types")
+    if accept is not None and not (isinstance(accept, str) and _ACCEPT.fullmatch(accept)):
+        return None
+    if accepted is not None and not (
+        isinstance(accepted, list)
+        and 1 <= len(accepted) <= _MAX_MEDIA_TYPES
+        and all(isinstance(t, str) and _MEDIA_TYPE.fullmatch(t) for t in accepted)
+    ):
+        return None
+    return accept, [str(t) for t in accepted] if accepted is not None else None
+
+
 @register("identifier.resolve", capability="identifier.resolve")
 def resolve(ctx: CheckContext) -> CheckOutcome:
+    params = _resolve_params(ctx)
+    if params is None:
+        message = "The parameters 'accept' or 'accepted_media_types' are not valid. Nothing is fetched."
+        return blocked("IDENTIFIER.PARAMS.INVALID", message)
+    accept, accepted = params
     text, _, transformations, problem = carrier_identifier(ctx)
     if problem is not None or text is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
@@ -92,10 +120,11 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
             "The carrier identifier is not a URL, so it cannot resolve.",
             [observation],
         )
-    record = fetch_once(ctx, text)
+    record = fetch_once(ctx, text, accept=accept)
     if (problem := unusable(ctx, record)) is not None:
         return problem
-    summary = {"status": record.status, "redirects": len(record.redirects)}
+    final = media_type(record)
+    summary = {"status": record.status, "redirects": len(record.redirects), "media_type": final}
     observation = ctx.observation(
         0, kind="exchange", records=[record], summary=summary, transformations=transformations
     )
@@ -110,6 +139,17 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
         return completed(
             False, "IDENTIFIER.RESOLUTION.STATUS", f"The resolver answers {record.status}.", [observation]
         )
+    if accepted is not None and final not in accepted:
+        message = (
+            f"The resolved resource has the media type '{final}', which the test purpose does not accept."
+        )
+        return completed(False, "IDENTIFIER.RESPONSE.MEDIA_TYPE", message, [observation])
+    if accepted is not None and not (final == "application/json" or final.endswith("+json")):
+        message = (
+            f"The identifier resolves to a resource of the accepted media type '{final}'. "
+            "This does not show that the resource is the passport of the product."
+        )
+        return completed(True, "IDENTIFIER.RESOLVED.MEDIA_TYPE", message, [observation])
     if json_object(record) is None:
         return completed(
             False,

@@ -6,9 +6,10 @@ Contract: docs/reference/reference-system.md, section 8.
 from __future__ import annotations
 
 import io
+import re
 from collections.abc import Mapping, Sequence
 from typing import Any, Final
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 import jsonschema
 from referencing import Registry
@@ -16,7 +17,15 @@ from referencing import Registry
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.infrastructure.redaction import redact_url
-from dppce.models import CheckOutcome, ExecutionStatus, JsonValue, Observation
+from dppce.models import (
+    PATH_TEMPLATE_PATTERN,
+    PLACEHOLDER_PATTERN,
+    CheckOutcome,
+    ExecutionStatus,
+    JsonValue,
+    Observation,
+    ResourceName,
+)
 from dppce.testdefs.registry import CheckContext
 
 MISSING: Final = object()
@@ -60,15 +69,27 @@ def effective_url(ctx: CheckContext, url: str) -> tuple[str, tuple[str, ...]]:
     return url, ()
 
 
-def fetch_once(ctx: CheckContext, url: str, role: str = "anonymous") -> Record:
-    """Fetch a URL, or reuse an earlier good record of the same request. Keeps the request count low."""
+def _accept_of(record: Record) -> str:
+    # The request headers, not Record.header(): that one searches the response headers.
+    return next((v for k, v in record.request_headers if k.lower() == "accept"), "*/*")
+
+
+def fetch_once(ctx: CheckContext, url: str, role: str = "anonymous", accept: str | None = None) -> Record:
+    """Fetch a URL, or reuse an earlier good record of the same request. Keeps the request count low.
+
+    A record is reused only if it asked for the same ``Accept`` value. ``*/*`` is the default of
+    the transport, and a record without an ``Accept`` header counts as that default.
+    """
     target, _ = effective_url(ctx, url)
     recorded = redact_url(target)
+    wanted = accept or "*/*"
     for record in ctx.acquirer.records():
         same = (record.kind, record.method, record.url, record.role) == ("http", "GET", recorded, role)
-        if same and record.error is None:
+        if same and record.error is None and _accept_of(record) == wanted:
             return record
-    return ctx.acquirer.fetch(Request("GET", target, role=role))
+    # The key is spelled as the transport spells its default, so it replaces that entry.
+    headers = {"Accept": accept} if accept else {}
+    return ctx.acquirer.fetch(Request("GET", target, role=role, headers=headers))
 
 
 def no_answer(ctx: CheckContext, record: Record) -> CheckOutcome:
@@ -128,13 +149,60 @@ def json_object(record: Record, *, decimals: bool = False) -> dict[str, Any] | N
     return value if isinstance(value, dict) else None
 
 
-def api_url(ctx: CheckContext, suffix: str = "", base: str = "api") -> str | None:
-    """Build ``{base}/dpp/{id}{suffix}`` in public form, or None if the IXIT lacks the parts."""
-    origin = ctx.ixit.endpoints.get(base)
-    passport_id = ctx.ixit.samples.get("passport_id")
-    if not origin or not passport_id:
-        return None
-    return f"{origin.rstrip('/')}/dpp/{passport_id}{suffix}"
+def media_type(record: Record) -> str:
+    """The response media type without parameters, in lower case. Empty if absent."""
+    return (record.header("content-type") or "").split(";")[0].strip().lower()
+
+
+def template_url(ctx: CheckContext, endpoint: str, template: str, area: str) -> str | CheckOutcome:
+    """Build the public URL of a path template under an IXIT endpoint, or a blocked outcome.
+
+    The template is not evaluated. Each named placeholder is replaced with its percent-encoded
+    value, and the path is appended to the endpoint. The template starts with one '/' and the
+    endpoint has no query or fragment, so the scheme, the host, and the port cannot change.
+    """
+    if re.fullmatch(PATH_TEMPLATE_PATTERN, template) is None:
+        # The IXIT and the access policy validate every template first. This is an engine defect.
+        raise ValueError("not a path template")
+    base = ctx.ixit.endpoints.get(endpoint, "")
+    try:
+        parts = urlsplit(base)
+        plain = parts.scheme in ("http", "https") and bool(parts.hostname)
+    except ValueError:
+        plain = False
+    if not plain or parts.query or parts.fragment or "#" in base or "?" in base:
+        return blocked(
+            f"{area}.NO_TARGET",
+            f"The IXIT gives no http or https endpoint '{endpoint}' without a query or a fragment.",
+        )
+    passport_id = ctx.ixit.samples.get("passport_id", "")
+    values = {"id": passport_id} if passport_id else {}
+    split = ctx.ixit.id_parts
+    if split is not None and passport_id:
+        pieces = passport_id.split(split.separator, len(split.names) - 1)
+        if len(pieces) == len(split.names) and all(pieces):
+            values |= dict(zip(split.names, pieces, strict=True))
+    for name in re.findall(PLACEHOLDER_PATTERN, template):
+        if name in values:
+            continue
+        if name == "id" or not passport_id:
+            message = "The IXIT gives no passport identifier."
+        elif split is None or name not in split.names:
+            message = f"The IXIT declares no identifier split for '{name}'."
+        else:
+            message = "The passport identifier does not split into the declared parts."
+        return blocked(f"{area}.NO_TARGET", message)
+    path = re.sub(PLACEHOLDER_PATTERN, lambda m: quote(values[m[1]], safe=""), template)
+    return base.rstrip("/") + path
+
+
+def resource_url(ctx: CheckContext, resource: ResourceName, area: str) -> str | CheckOutcome:
+    """The public URL of a passport resource from its IXIT template, or a blocked outcome."""
+    template = ctx.ixit.resources.get(resource)
+    if template is None:
+        message = f"The IXIT declares no URL template for the resource '{resource}'."
+        return blocked(f"{area}.NO_TARGET", message + " The engine has no default path.")
+    return template_url(ctx, template.endpoint, template.path, area)
 
 
 def dig(document: Any, dotted: str) -> Any:

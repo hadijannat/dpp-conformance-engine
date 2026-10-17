@@ -7,6 +7,7 @@ same recording gives the same decision digest.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -220,6 +221,20 @@ def _dependency_versions() -> dict[str, str]:
     return dict(sorted(versions.items()))
 
 
+def _bound_files(inputs: RunInputs) -> dict[str, str]:
+    """sha256 of the raw bytes of each file that the profile binds, keyed by its path."""
+    profile = inputs.profile
+    named = (profile.api_contract, profile.access_policy, profile.item_schema, profile.model_schema)
+    bound: dict[str, str] = {}
+    for path in sorted({p for p in (*named, *profile.rule_packs) if p}):
+        try:
+            bound[path] = "sha256:" + hashlib.sha256((inputs.data_root / path).read_bytes()).hexdigest()
+        except OSError:
+            # The check that needs the file is blocked anyway. The manifest says so honestly.
+            bound[path] = "unavailable"
+    return bound
+
+
 def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
     acquired = sorted(r.acquired_at for r in acquirer.records())
     packs = inputs.catalogue.pack_hashes()
@@ -249,6 +264,7 @@ def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
         else inputs.ixit.trust.policy_version,
         issuer=inputs.issuer,
         limitations=(*_LIMITATIONS, _MODE_LIMITATIONS[inputs.mode]),
+        bound_files=_bound_files(inputs),
     )
 
 

@@ -138,6 +138,10 @@ def integrity_context(acquirer: Passport, trust: TrustBundle) -> CheckContext:
             "schema_version": "dppce.ixit/1",
             "endpoints": {"api": "http://sut.example"},
             "samples": {"passport_id": "P1"},
+            "resources": {
+                "item": {"endpoint": "api", "path": "/dpp/{id}"},
+                "signed": {"endpoint": "api", "path": "/dpp/{id}/signed"},
+            },
         }
     )
     return CheckContext(

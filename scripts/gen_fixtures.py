@@ -147,6 +147,15 @@ def _documents() -> None:
                     "identifier": identifier,
                     "passport_id": f"{GTIN}-{serial}",
                 },
+                # The URL layout of the reference system. A real system declares its own.
+                "resources": {
+                    "item": {"endpoint": "api", "path": "/dpp/{id}"},
+                    "model": {"endpoint": "api", "path": "/dpp/{id}/model"},
+                    "signed": {"endpoint": "api", "path": "/dpp/{id}/signed"},
+                    "versions": {"endpoint": "api", "path": "/dpp/{id}/versions"},
+                    "registry_record": {"endpoint": "registry", "path": "/registry/{id}"},
+                },
+                "id_parts": {"separator": "-", "names": ["gtin", "serial"]},
                 "identities": [
                     {"role": "anonymous"},
                     {"role": "legitimate_interest", "secret_ref": "file:TEST-ONLY-legitimate_interest.token"},

@@ -15,12 +15,12 @@ from itertools import pairwise
 from typing import Any
 
 from dppce.adapters.common import (
-    api_url,
     blocked,
     completed,
     fetch_once,
     json_object,
     not_done,
+    resource_url,
     unusable,
 )
 from dppce.evidence.canonical import CanonicalizationError, digest
@@ -30,9 +30,12 @@ from dppce.testdefs.registry import CheckContext, register
 
 @register("persistence.versions", capability="persistence.versions")
 def versions(ctx: CheckContext) -> CheckOutcome:
-    versions_url, item_url = api_url(ctx, "/versions"), api_url(ctx)
-    if versions_url is None or item_url is None:
-        return blocked("PERSISTENCE.NO_TARGET", "The IXIT gives no API endpoint or no passport identifier.")
+    versions_url = resource_url(ctx, "versions", "PERSISTENCE")
+    if isinstance(versions_url, CheckOutcome):
+        return versions_url
+    item_url = resource_url(ctx, "item", "PERSISTENCE")
+    if isinstance(item_url, CheckOutcome):
+        return item_url
     history, item = fetch_once(ctx, versions_url), fetch_once(ctx, item_url)
     for record in (history, item):
         if (problem := unusable(ctx, record)) is not None:
@@ -72,14 +75,13 @@ def versions(ctx: CheckContext) -> CheckOutcome:
 
 @register("registry.consistency", capability="registry.mock")
 def registry_consistency(ctx: CheckContext) -> CheckOutcome:
-    origin, passport_id, item_url = (
-        ctx.ixit.endpoints.get("registry"),
-        ctx.ixit.samples.get("passport_id"),
-        api_url(ctx),
-    )
-    if not origin or not passport_id or item_url is None:
-        return blocked("REGISTRY.NO_TARGET", "The IXIT gives no registry endpoint or no passport identifier.")
-    lookup = fetch_once(ctx, f"{origin.rstrip('/')}/registry/{passport_id}")
+    record_url = resource_url(ctx, "registry_record", "REGISTRY")
+    if isinstance(record_url, CheckOutcome):
+        return record_url
+    item_url = resource_url(ctx, "item", "REGISTRY")
+    if isinstance(item_url, CheckOutcome):
+        return item_url
+    lookup = fetch_once(ctx, record_url)
     if (problem := unusable(ctx, lookup)) is not None:
         return problem
     if lookup.status in (401, 403, 404):

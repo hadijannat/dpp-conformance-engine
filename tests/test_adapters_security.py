@@ -211,13 +211,20 @@ def _context(tmp_path: Path, policy: dict[str, Any], acquirer: _Canned) -> Check
         }
     )
     ics = ICS.model_validate(
-        {"schema_version": "dppce.ics/1", "sut": {"name": "s", "identifier": "urn:x"}, "profile": "p/x"}
+        {
+            "schema_version": "dppce.ics/1",
+            "sut": {"name": "s", "identifier": "urn:x"},
+            "profile": "p/x",
+            "access": {"policy": "test/policy"},
+        }
     )
     ixit = IXIT.model_validate(
         {
             "schema_version": "dppce.ixit/1",
             "endpoints": {"api": "http://sut.example"},
             "samples": {"passport_id": "09506000134352-EV0001"},
+            "resources": {"item": {"endpoint": "api", "path": "/dpp/{id}"}},
+            "id_parts": {"separator": "-", "names": ["gtin", "serial"]},
         }
     )
     return CheckContext(

@@ -15,12 +15,12 @@ from pydantic import Field, ValidationError, model_validator
 
 from dppce.adapters.common import (
     MISSING,
-    api_url,
     blocked,
     completed,
     dig,
     fetch_once,
     json_object,
+    resource_url,
     schema_errors,
     unusable,
     validator,
@@ -87,13 +87,9 @@ def _fetch_document(
 ) -> tuple[dict[str, Any] | None, Record | None, CheckOutcome | None]:
     """Fetch the item-level passport or the model-level data: (document, record, outcome if not usable)."""
     area = "DATA"
-    url = api_url(ctx, "/model" if kind == "model" else "")
-    if url is None:
-        return (
-            None,
-            None,
-            blocked(f"{area}.NO_TARGET", "The IXIT gives no API endpoint or no passport identifier."),
-        )
+    url = resource_url(ctx, "model" if kind == "model" else "item", area)
+    if isinstance(url, CheckOutcome):
+        return None, None, url
     record = fetch_once(ctx, url)
     if (problem := unusable(ctx, record)) is not None:
         return None, record, problem

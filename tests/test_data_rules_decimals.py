@@ -20,7 +20,7 @@ from dppce.adapters.data import Rule, rule_holds
 from dppce.evidence.canonical import canonical_bytes
 from dppce.evidence.envelope import decision_digest
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.models import IXIT, ExecutionMode, ExecutionStatus, Verdict
+from dppce.models import IXIT, ExecutionMode, ExecutionStatus, ResourceTemplate, Verdict
 from dppce.orchestrator.run import RunInputs, evaluate  # noqa: TID251 - a run shows the decision body
 from tests.core import builders as b
 from tests.support import AT, make_record
@@ -167,6 +167,7 @@ def run_rules(tmp_path: Path, body: bytes) -> Any:
             schema_version="dppce.ixit/1",
             endpoints={"api": "http://127.0.0.1"},
             samples={"passport_id": "P-1"},
+            resources={"item": ResourceTemplate(endpoint="api", path="/dpp/{id}")},
         ),
         data_root=tmp_path,
         evaluation_time=AT,

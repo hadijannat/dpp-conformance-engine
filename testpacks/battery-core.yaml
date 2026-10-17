@@ -83,7 +83,7 @@ test_purposes:
   stimulus:
     check: api.contract
     params:
-      path: /dpp/{id}
+      resource: item
       method: get
   expected_evidence:
   - Status, media type, and schema result.

@@ -20,7 +20,7 @@ from cryptography.exceptions import InvalidSignature, UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import ExtendedKeyUsageOID
 
-from dppce.adapters.common import api_url, blocked, completed, fetch_once, json_object, unusable
+from dppce.adapters.common import blocked, completed, fetch_once, json_object, resource_url, unusable
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, public_jwk_of, verify_compact
 from dppce.infrastructure.clock import parse_stamp
@@ -244,9 +244,12 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
         return blocked(
             "INTEGRITY.TRUST.MISSING", "No trust bundle is configured. Nothing is trusted by default."
         )
-    signed_url, item_url = api_url(ctx, "/signed"), api_url(ctx)
-    if signed_url is None or item_url is None:
-        return blocked("INTEGRITY.NO_TARGET", "The IXIT gives no API endpoint or no passport identifier.")
+    signed_url = resource_url(ctx, "signed", "INTEGRITY")
+    if isinstance(signed_url, CheckOutcome):
+        return signed_url
+    item_url = resource_url(ctx, "item", "INTEGRITY")
+    if isinstance(item_url, CheckOutcome):
+        return item_url
     record = fetch_once(ctx, signed_url)
     if (problem := unusable(ctx, record)) is not None:
         return problem

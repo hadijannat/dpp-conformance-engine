@@ -9,6 +9,27 @@ samples:
   qr_image: qr/ev.png
   identifier: https://id.example.test/01/09506000134352/21/EV0001
   passport_id: 09506000134352-EV0001
+resources:
+  item:
+    endpoint: api
+    path: /dpp/{id}
+  model:
+    endpoint: api
+    path: /dpp/{id}/model
+  signed:
+    endpoint: api
+    path: /dpp/{id}/signed
+  versions:
+    endpoint: api
+    path: /dpp/{id}/versions
+  registry_record:
+    endpoint: registry
+    path: /registry/{id}
+id_parts:
+  separator: '-'
+  names:
+  - gtin
+  - serial
 identities:
 - role: anonymous
 - role: legitimate_interest
