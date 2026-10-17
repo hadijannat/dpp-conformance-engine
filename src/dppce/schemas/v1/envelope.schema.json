@@ -649,6 +649,23 @@
           "default": null,
           "title": "Authorization Ref"
         },
+        "bound_files": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "pattern": "^(sha256:[0-9a-f]{64}|unavailable)$",
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "sha256 of the raw bytes of each file that the profile binds, keyed by its path under the data root. Absent in a body from an earlier version.",
+          "title": "Bound Files"
+        },
         "catalogue_hash": {
           "title": "Catalogue Hash",
           "type": "string"

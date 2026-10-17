@@ -1,5 +1,33 @@
 {
   "$defs": {
+    "IdParts": {
+      "additionalProperties": false,
+      "description": "Splits samples.passport_id at the first n-1 occurrences of the separator.\n\nThe last part keeps any further separator. No part can be empty.",
+      "properties": {
+        "names": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Names",
+          "type": "array"
+        },
+        "separator": {
+          "maxLength": 8,
+          "minLength": 1,
+          "title": "Separator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "separator",
+        "names"
+      ],
+      "title": "IdParts",
+      "type": "object"
+    },
     "NetworkPolicy": {
       "additionalProperties": false,
       "description": "Destinations the transport may reach. Loopback and private ranges need an explicit entry.",
@@ -100,6 +128,30 @@
       "title": "ObservationPolicy",
       "type": "object"
     },
+    "ResourceTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "description": "Key of IXIT.endpoints.",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path template under the endpoint. It cannot change the scheme, the host, or the port.",
+          "maxLength": 512,
+          "pattern": "^/(?:(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@%?]|\\{[a-z][a-z0-9_]{0,31}\\})(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@%/?]|\\{[a-z][a-z0-9_]{0,31}\\})*)?$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "endpoint",
+        "path"
+      ],
+      "title": "ResourceTemplate",
+      "type": "object"
+    },
     "RoleIdentity": {
       "additionalProperties": false,
       "properties": {
@@ -181,6 +233,17 @@
       "title": "Endpoints",
       "type": "object"
     },
+    "id_parts": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IdParts"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "identities": {
       "default": [
         {
@@ -216,6 +279,22 @@
         "retention_days": 30,
         "store_bodies": true
       }
+    },
+    "resources": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ResourceTemplate"
+      },
+      "propertyNames": {
+        "enum": [
+          "item",
+          "model",
+          "signed",
+          "versions",
+          "registry_record"
+        ]
+      },
+      "title": "Resources",
+      "type": "object"
     },
     "samples": {
       "additionalProperties": {

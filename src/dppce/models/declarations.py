@@ -2,11 +2,23 @@
 
 from __future__ import annotations
 
-from typing import Literal
+import re
+from typing import Annotated, Literal, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from dppce.models.base import Model, Scope, Unknown
+
+# No lookaround and no nested quantifier: pydantic checks these with its linear-time engine.
+# Engine code applies them with re.fullmatch, because Python's `$` also matches before a "\n".
+PLACEHOLDER_NAME = r"^[a-z][a-z0-9_]{0,31}$"
+PLACEHOLDER_PATTERN = r"\{([a-z][a-z0-9_]{0,31})\}"
+PATH_TEMPLATE_PATTERN = (
+    r"^/(?:(?:[A-Za-z0-9\-._~!$&'()*+,;=:@%?]|\{[a-z][a-z0-9_]{0,31}\})"
+    r"(?:[A-Za-z0-9\-._~!$&'()*+,;=:@%/?]|\{[a-z][a-z0-9_]{0,31}\})*)?$"
+)
+
+ResourceName = Literal["item", "model", "signed", "versions", "registry_record"]
 
 
 class SutIdentity(Model):
@@ -83,17 +95,60 @@ class TrustConfig(Model):
     policy_version: str = "unset"
 
 
+class ResourceTemplate(Model):
+    endpoint: str = Field(pattern=PLACEHOLDER_NAME, description="Key of IXIT.endpoints.")
+    path: str = Field(
+        max_length=512,
+        pattern=PATH_TEMPLATE_PATTERN,
+        description="Path template under the endpoint. It cannot change the scheme, the host, or the port.",
+    )
+
+
+class IdParts(Model):
+    """Splits samples.passport_id at the first n-1 occurrences of the separator.
+
+    The last part keeps any further separator. No part can be empty.
+    """
+
+    separator: str = Field(min_length=1, max_length=8)
+    names: tuple[Annotated[str, Field(pattern=PLACEHOLDER_NAME)], ...] = Field(min_length=2, max_length=8)
+
+    @model_validator(mode="after")
+    def _distinct_names(self) -> Self:
+        if len(set(self.names)) != len(self.names) or "id" in self.names:
+            raise ValueError("the part names must be distinct and must not be 'id'")
+        return self
+
+
 class IXIT(Model):
     """Implementation eXtra Information for Testing."""
 
     schema_version: Literal["dppce.ixit/1"]
     endpoints: dict[str, str] = Field(default_factory=dict)
     samples: dict[str, str] = Field(default_factory=dict)
+    # No default template and no default split: either would be a hidden layout assumption.
+    resources: dict[ResourceName, ResourceTemplate] = Field(default_factory=dict)
+    id_parts: IdParts | None = None
     identities: tuple[RoleIdentity, ...] = (RoleIdentity(role="anonymous"),)
     authorization_ref: str | None = None
     network: NetworkPolicy = NetworkPolicy()
     trust: TrustConfig = TrustConfig()
     observation: ObservationPolicy = ObservationPolicy()
+
+    @model_validator(mode="after")
+    def _templates_are_complete(self) -> Self:
+        declared = {"id", *(self.id_parts.names if self.id_parts else ())}
+        for name in sorted(self.resources):
+            template = self.resources[name]
+            if template.endpoint not in self.endpoints:
+                raise ValueError(
+                    f"the resource '{name}' names the endpoint '{template.endpoint}', "
+                    "which 'endpoints' does not give"
+                )
+            unknown = sorted(set(re.findall(PLACEHOLDER_PATTERN, template.path)) - declared)
+            if unknown:
+                raise ValueError(f"the resource '{name}' uses undeclared placeholders {unknown}")
+        return self
 
 
 class Authorization(Model):

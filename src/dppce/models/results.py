@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer
 
 from dppce.models.base import (
     AuthorityClass,
@@ -110,6 +110,22 @@ class RunManifest(Model):
     trust_policy_version: str
     issuer: IssuerStatement = IssuerStatement()
     limitations: tuple[str, ...]
+    bound_files: dict[str, Annotated[str, Field(pattern=r"^(sha256:[0-9a-f]{64}|unavailable)$")]] | None = (
+        Field(
+            default=None,
+            description="sha256 of the raw bytes of each file that the profile binds, keyed by its path "
+            "under the data root. Absent in a body from an earlier version.",
+        )
+    )
+
+    @model_serializer(mode="wrap")
+    def _omit_absent(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # Left out when absent, so an earlier decision body keeps its canonical bytes and digest.
+        # Field(exclude_if=...) would need pydantic 2.11; the declared floor is 2.9.
+        data: dict[str, Any] = handler(self)
+        if self.bound_files is None:
+            data.pop("bound_files", None)
+        return data
 
 
 class RecordCommitment(Model):
