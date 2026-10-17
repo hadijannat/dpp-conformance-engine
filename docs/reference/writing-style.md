@@ -30,8 +30,8 @@ replacements, likely passive constructions, words that end in -ing, and likely n
 vale docs README.md
 ```
 
-Status: the rules are written. They have not run, because the `vale` program was not
-available in the development session. See OQ-005 and BL-002.
+Status: on 2026-10-15, `uv run just style` ran Vale 3.22.0 with these rules. It found 0 errors
+and 0 warnings. Suggestions remain. See the [readiness page](../readiness.md), section 2.
 
 ## Limits
 

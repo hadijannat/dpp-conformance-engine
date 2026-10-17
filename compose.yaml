@@ -1,5 +1,5 @@
 # The local reference DPP system for demonstrations. All data are synthetic.
-# Status: written, not run. Docker was not available in the development session (OQ-004, BL-003).
+# Status: the owner built the image on 2026-10-15 (docs/readiness.md). This Compose file has not run (BL-003).
 #
 # The reference system binds to the loopback interface inside its container, so the engine
 # runs in the same network namespace. Nothing is published to the host, and nothing here

@@ -16,7 +16,7 @@ Each raw record gets `HMAC-SHA256(salt, tag || plaintext)` with 32 random bytes 
 
 - A commitment hides a predictable value.
 - A replay reads the stored salts, so the digest repeats. A fresh run has fresh salts.
-- The file-backed log is a development component. It does not implement RFC 9162 and gives no protection against equivocation.
+- The engine has no transparency log. The file-backed development log (`evidence.devlog`) is `interface_only`, so nothing protects against equivocation.
 
 ## Alternatives considered
 

@@ -119,5 +119,5 @@ An independent review of 2026-10-13 found 17 more defects. The report is
 | A signed passport outside the supported profile | The engine supports ES256 with an `x5c` certificate path only. Each other token gives `inconclusive`. Name constraints and policy constraints are not evaluated; a path that has them gives `inconclusive`. |
 | The reference system and the checks come from the same project | Method validation shows that known faults are found. It does not show that all faults are found. |
 | A denial of service against the engine by a slow tested system | Timeouts and budgets limit it. A parallel run scheduler does not exist. |
-| The file-backed Merkle log | A development component. No protection against equivocation. |
-| Dependencies | Pinned with hashes in `uv.lock`. No vulnerability scan ran in the development session. |
+| No transparency log | Open. The file-backed development log (`evidence.devlog`) is `interface_only`. Nothing protects against equivocation. |
+| Dependencies | Pinned with hashes in `uv.lock`. On 2026-10-15, pip-audit found no known vulnerability in the locked packages, and Trivy found no high or critical finding with a fix in the image. The [readiness page](../readiness.md), section 2, states the scope of each scan. |

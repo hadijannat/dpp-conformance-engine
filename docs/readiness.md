@@ -26,7 +26,7 @@ agent ran or read the commands. No human has repeated them.
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
 | Operations | Command line with stable exit codes, retention and purge of recordings, documented how-to guides. | No key management service or hardware security module. No multi-user deployment. |
-| Accessibility | The HTML report uses semantic tables, headings, and text labels for each verdict. WCAG 2.2 AA is the target. An agent checked structure, contrast, the first focus, and reflow at 320 pixels (`docs/reference/accessibility.md`). | No manual review by a person and no screen reader review. An axe-core scan found 0 violations. |
+| Accessibility | The HTML report uses semantic tables, headings, and text labels for each verdict. WCAG 2.2 AA is the target. An agent checked structure, contrast, the first focus, and reflow at 320 pixels (`docs/reference/accessibility.md`). An axe-core scan found 0 violations. | No manual review by a person and no screen reader review. |
 | Validation in a relevant environment | Method validation against a synthetic reference system: seeded faults, valid controls, boundary cases, evidence faults, and replays. | No validation against a real system or real data. The reference system and the checks come from the same project. |
 
 ## 2. Results of the commands
@@ -94,8 +94,9 @@ These items block a claim that the engine is ready for use on a real system:
    system was contacted.
 3. An independent human security audit.
 4. An accessibility review of the HTML report by a person, with a screen reader.
-5. A DCO sign-off on each commit that a development agent made after commit `a6283be`. That
-   commit of the copyright holder certifies the 87 commits before it (OQ-018).
+5. A DCO sign-off on each commit that a development agent made. Commit `a6283be` of the owner
+   certifies the 87 commits up to `a1522ad` (OQ-018). Later sign-off commits of the owner
+   certify the agent commits up to `b80f659`. Each newer agent commit needs one too.
 6. A trusted timestamp on a report (BL-004), and a key management service.
 
 ## 5. Records that can support a laboratory quality system
