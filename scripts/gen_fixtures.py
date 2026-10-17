@@ -168,12 +168,10 @@ def _documents() -> None:
     _qr(OUT / "qr" / "invalid.png", "this text is not a URL")
 
 
-def _qr_image(text: str, scale: int = 6) -> Image.Image:
-    return Image.fromarray(
-        zxingcpp.write_barcode_to_image(
-            zxingcpp.create_barcode(text, zxingcpp.BarcodeFormat.QRCode), scale=scale
-        )
-    )
+def _qr_image(
+    text: str, scale: int = 6, fmt: zxingcpp.BarcodeFormat = zxingcpp.BarcodeFormat.QRCode
+) -> Image.Image:
+    return Image.fromarray(zxingcpp.write_barcode_to_image(zxingcpp.create_barcode(text, fmt), scale=scale))
 
 
 def _qr(path: Path, text: str) -> None:
@@ -201,6 +199,10 @@ def _degraded_qr() -> None:
     pair.paste(clean, (0, 0))
     pair.paste(_qr_image(f"{PUBLIC_ORIGIN}/01/{GTIN}/21/EV0002"), (side + gap, 0))
     right = side + gap  # left edge of the second symbol
+    # A readable symbol of another format next to the QR also means the image is not one QR.
+    qr_and_micro = Image.new("L", pair.size, 255)
+    qr_and_micro.paste(clean, (0, 0))
+    qr_and_micro.paste(_qr_image("EV0002", fmt=zxingcpp.BarcodeFormat.MicroQRCode), (right, 0))
 
     def part(percent: int) -> int:
         return side * percent // 100
@@ -218,6 +220,7 @@ def _degraded_qr() -> None:
         "two-symbols": pair,
         "two-symbols-one-finder-wiped": _blot(pair, (right, 0, right + part(35), part(35)), 255),
         "two-symbols-one-blotted": _blot(pair, (right + part(30), part(30), right + part(70), part(70)), 0),
+        "two-symbols-qr-and-micro-qr": qr_and_micro,
     }
     for name, image in images.items():
         image.save(out / f"TEST-ONLY-{name}.png", format="PNG", optimize=True)

@@ -59,19 +59,25 @@
       "status": "completed",
       "passed": false,
       "reason_code": "CARRIER.QR.NOT_DECODED",
-      "summary": {"qr_symbols": 2}
+      "summary": {"qr_symbols": 2, "other_symbols": 0}
     },
     "TEST-ONLY-two-symbols-one-finder-wiped.png": {
       "status": "completed",
       "passed": false,
       "reason_code": "CARRIER.QR.NOT_DECODED",
-      "summary": {"qr_symbols": 1}
+      "summary": {"qr_symbols": 1, "other_symbols": 1}
     },
     "TEST-ONLY-two-symbols-one-blotted.png": {
       "status": "completed",
       "passed": false,
       "reason_code": "CARRIER.QR.NOT_DECODED",
-      "summary": {"qr_symbols": 1}
+      "summary": {"qr_symbols": 1, "other_symbols": 1}
+    },
+    "TEST-ONLY-two-symbols-qr-and-micro-qr.png": {
+      "status": "completed",
+      "passed": false,
+      "reason_code": "CARRIER.QR.NOT_DECODED",
+      "summary": {"qr_symbols": 1, "other_symbols": 1}
     },
     "TEST-ONLY-truncated.png": {
       "status": "blocked",

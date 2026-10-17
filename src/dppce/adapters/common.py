@@ -206,16 +206,17 @@ def decode_qr(
             found = zxingcpp.read_barcodes(image.convert("L"), return_errors=True)
     except (UnidentifiedImageError, OSError, ValueError):
         return None, record, blocked("CARRIER.SAMPLE.UNREADABLE", "The sample is not a readable image.")
-    qr = (zxingcpp.BarcodeFormat.QRCode, zxingcpp.BarcodeFormat.MicroQRCode)
     symbols = [s for s in found if s.valid and s.format == zxingcpp.BarcodeFormat.QRCode]
-    # zxing-cpp can report a damaged QR symbol as a Micro QR candidate, so both formats count.
-    unreadable = sum(1 for s in found if not s.valid and s.format in qr)
-    if len(symbols) != 1 or unreadable or not symbols[0].text:
-        summary = {"qr_symbols": len(symbols), "qr_symbols_unreadable": unreadable}
+    # Every other detection counts, readable or not, in any format. zxing-cpp can report a damaged
+    # QR symbol as an unreadable Micro QR candidate, and a readable symbol of another format next
+    # to the QR also means the image is not one QR symbol.
+    others = len(found) - len(symbols)
+    if len(symbols) != 1 or others or not symbols[0].text:
+        summary = {"qr_symbols": len(symbols), "other_symbols": others}
         observation = ctx.observation(0, kind="artifact", records=[record], summary=summary)
         message = (
-            f"The image holds {len(symbols)} readable QR symbols and {unreadable} detected but "
-            "unreadable ones; exactly one readable symbol and no other is needed."
+            f"The image holds {len(symbols)} readable QR symbols and {others} other detected "
+            "symbols; exactly one readable QR symbol and no other symbol is needed."
         )
         return None, record, completed(False, "CARRIER.QR.NOT_DECODED", message, [observation])
     return str(symbols[0].text), record, None
