@@ -10,17 +10,19 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Final, Literal
+from urllib.parse import urlsplit
 
 import yaml
 
 from dppce.cli import main
 from dppce.evidence.jws import LocalSigner
 from dppce.infrastructure.authorization import issue_authorization
-from dppce.infrastructure.reference_server import ReferenceServer
+from dppce.infrastructure.reference_server import ReferenceServer, ReferenceSystem, Reply
 from dppce.models import Authorization, EvidenceEnvelope
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,6 +35,88 @@ DEFAULT_AT = "2026-10-13T12:00:00Z"
 # Nothing listens here, so a connection is refused at once.
 UNREACHABLE_ORIGIN = "http://127.0.0.1:1"
 _ROLES = ("legitimate_interest", "authority")
+
+# -- a second URL layout (gap D3-01, criterion 3) -----------------------------------------------
+
+_ALT_ITEM: Final = re.compile(
+    r"^/passports/(?P<gtin>[0-9]{14})/(?P<serial>[A-Za-z0-9]+)"
+    r"/(?P<what>data|model-data|jws|history|export|view)$"
+)
+_ALT_LOOKUP: Final = re.compile(r"^/lookup/(?P<gtin>[0-9]{14})/(?P<serial>[A-Za-z0-9]+)$")
+_ALT_RESOLVER: Final = re.compile(r"^/01/[0-9]{14}/21/[A-Za-z0-9]+$")
+_REFERENCE_ITEM: Final = re.compile(r"^/dpp/(?P<gtin>[0-9]{14})-(?P<serial>[A-Za-z0-9]+)$")
+_SUFFIX: Final = {
+    "data": "",
+    "model-data": "/model",
+    "jws": "/signed",
+    "history": "/versions",
+    "export": "/export",
+    "view": ".html",
+}
+_ALT_PATHS: Final = {
+    "/dpp/{id}": "/passports/{gtin}/{serial}/data",
+    "/dpp/{id}/model": "/passports/{gtin}/{serial}/model-data",
+}
+_ALT_CHANNELS: Final = {
+    "fetch": "/passports/{gtin}/{serial}/data",
+    "export": "/passports/{gtin}/{serial}/export",
+    "search": "/find?q={serial}",
+    "error": "/passports/{gtin}/{serial}/missing",
+    "html": "/passports/{gtin}/{serial}/view",
+}
+_ALT_IXIT: Final[dict[str, Any]] = {
+    "resources": {
+        "item": {"endpoint": "api", "path": "/passports/{gtin}/{serial}/data"},
+        "model": {"endpoint": "api", "path": "/passports/{gtin}/{serial}/model-data"},
+        "signed": {"endpoint": "api", "path": "/passports/{gtin}/{serial}/jws"},
+        "versions": {"endpoint": "api", "path": "/passports/{gtin}/{serial}/history"},
+        "registry_record": {"endpoint": "registry", "path": "/lookup/{gtin}/{serial}"},
+    },
+    "id_parts": {"separator": ".", "names": ["gtin", "serial"]},
+}
+CONTRACT: Final = Path("profiles/battery/contracts/reference-api.openapi.yaml")
+POLICY: Final = Path("profiles/battery/access/reference-policy.yaml")
+
+
+class AlternateLayout(ReferenceSystem):
+    """The reference system under a different URL layout. Test use only, on loopback.
+
+    Each alternate path maps to one reference path. Every other path, each reference path
+    included, is not found. The resolver path does not change.
+    """
+
+    def handle(self, target: str, authorization: str | None) -> Reply:
+        parts = urlsplit(target)
+        path = parts.path
+        if _ALT_RESOLVER.match(path):
+            status, media_type, body, headers = super().handle(target, authorization)
+            moved = _REFERENCE_ITEM.match(headers.get("Location", ""))
+            if moved is not None:
+                headers = {**headers, "Location": f"/passports/{moved['gtin']}/{moved['serial']}/data"}
+            return status, media_type, body, headers
+        if (item := _ALT_ITEM.match(path)) is not None:
+            reference = f"/dpp/{item['gtin']}-{item['serial']}{_SUFFIX[item['what']]}"
+            return super().handle(reference, authorization)
+        if (lookup := _ALT_LOOKUP.match(path)) is not None:
+            return super().handle(f"/registry/{lookup['gtin']}-{lookup['serial']}", authorization)
+        if path == "/find":
+            return super().handle("/search" + (f"?{parts.query}" if parts.query else ""), authorization)
+        return self.not_found(path)
+
+
+def _alternate_data(data: Path) -> None:
+    """Rewrite the copied contract and policy for the alternate layout."""
+    contract_file = data / CONTRACT
+    contract = yaml.safe_load(contract_file.read_text(encoding="utf-8"))
+    # Each path item moves unchanged, so its x-dppce-resource marker moves with it.
+    contract["paths"] = {_ALT_PATHS.get(key, key): item for key, item in contract["paths"].items()}
+    contract["x-dppce-contract-id"] = "battery/alternate-api"
+    contract_file.write_text(yaml.safe_dump(contract, sort_keys=False), encoding="utf-8")
+    policy_file = data / POLICY
+    policy = yaml.safe_load(policy_file.read_text(encoding="utf-8"))
+    policy["channels"] = dict(_ALT_CHANNELS)
+    policy["policy_id"] = "battery/alternate-policy"
+    policy_file.write_text(yaml.safe_dump(policy, sort_keys=False), encoding="utf-8")
 
 
 @dataclass(frozen=True)
@@ -87,13 +171,21 @@ class ReferenceRig:
         ics_changes: dict[str, Any] | None = None,
         qr: str | None = None,
         serve: bool = True,
+        layout: Literal["reference", "alternate"] = "reference",
+        data_root: Path | None = None,
     ) -> None:
         self.work = work
         self.profile = profile
         self._ics_changes = ics_changes or {}
         self._qr = qr or profile
-        self._server = ReferenceServer(FIXTURES, faults=faults) if serve else None
+        self._alternate = layout == "alternate"
+        system = AlternateLayout(FIXTURES, faults) if self._alternate else None
+        self._server = ReferenceServer(FIXTURES, faults=faults, system=system) if serve else None
+        self.data_root = data_root or (work / "data" if self._alternate else ROOT)
         self._runs = 0
+
+    def _data_arguments(self) -> list[str]:
+        return [] if self.data_root == ROOT else ["--data-root", str(self.data_root)]
 
     def __enter__(self) -> ReferenceRig:
         if self._server is not None:
@@ -105,11 +197,22 @@ class ReferenceRig:
         ixit = yaml.safe_load((FIXTURES / f"{self.profile}.ixit.yaml").read_text(encoding="utf-8"))
         ixit["endpoints"]["origin_override"] = origin
         ixit["samples"]["qr_image"] = f"qr/{self._qr}.png"
-        (rig / "ixit.yaml").write_text(yaml.safe_dump(ixit, sort_keys=False), encoding="utf-8")
         ics = yaml.safe_load((FIXTURES / f"{self.profile}.ics.yaml").read_text(encoding="utf-8"))
-        (rig / "ics.yaml").write_text(
-            yaml.safe_dump(_merge(ics, self._ics_changes), sort_keys=False), encoding="utf-8"
-        )
+        if self._alternate:
+            if not (self.data_root / CONTRACT).exists():
+                for name in ("catalogue", "profiles", "testpacks"):
+                    shutil.copytree(ROOT / name, self.data_root / name)
+            _alternate_data(self.data_root)
+            ixit |= _ALT_IXIT
+            ixit["samples"]["passport_id"] = ixit["samples"]["passport_id"].replace("-", ".", 1)
+            alternate_ids = {
+                "api": {"contract": "battery/alternate-api"},
+                "access": {"policy": "battery/alternate-policy"},
+            }
+            ics = _merge(ics, alternate_ids)
+        ics = _merge(ics, self._ics_changes)
+        (rig / "ixit.yaml").write_text(yaml.safe_dump(ixit, sort_keys=False), encoding="utf-8")
+        (rig / "ics.yaml").write_text(yaml.safe_dump(ics, sort_keys=False), encoding="utf-8")
         owner = LocalSigner.from_pem(
             FIXTURES / "authorization" / "TEST-ONLY-owner.key.pem", "TEST-ONLY-owner-key-1"
         )
@@ -154,6 +257,7 @@ class ReferenceRig:
             "--allow-private-host", self.origin,
             "--issuer-name", "dppce test rig (synthetic)",
             "--issuer-id", LAB,
+            *self._data_arguments(),
         ]  # fmt: skip
         for role in _ROLES:
             arguments += ["--role-secret", f"{role}=file:TEST-ONLY-{role}.token"]
@@ -162,9 +266,14 @@ class ReferenceRig:
         return RunResult(code, summary, out, envelope)
 
     def replay(self, run: RunResult, times: int = 1) -> tuple[int, dict[str, Any]]:
-        return _cli(
-            ["replay", "--run", str(run.run_dir), "--keys", str(self.work / "keys"), "--times", str(times)]
-        )
+        arguments = [
+            "replay",
+            "--run", str(run.run_dir),
+            "--keys", str(self.work / "keys"),
+            "--times", str(times),
+            *self._data_arguments(),
+        ]  # fmt: skip
+        return _cli(arguments)
 
     def sign(self, run: RunResult) -> Path:
         envelope = run.run_dir / "envelope.json"

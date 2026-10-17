@@ -10,11 +10,14 @@ The fast suite runs every case on one profile. `just validate` runs the full mat
 
 from __future__ import annotations
 
+import hashlib
+import shutil
 from pathlib import Path
 
 import pytest
+import yaml
 from validation import cases
-from validation.rig import ReferenceRig
+from validation.rig import FIXTURES, ROOT, AlternateLayout, ReferenceRig
 
 from dppce.models import ExecutionStatus, Modality, Tri, Verdict
 
@@ -117,6 +120,82 @@ def test_the_recording_holds_no_clear_text_of_what_was_observed(tmp_path: Path) 
         assert secret not in stored
     envelope = (run.run_dir / "envelope.json").read_bytes()
     assert b"CANARY-7f3a-supplier" not in envelope, "a report carries commitments, not restricted payloads"
+
+
+def test_the_manifest_records_the_hash_of_each_bound_file(tmp_path: Path) -> None:
+    with ReferenceRig(tmp_path) as rig:
+        run = rig.run()
+    profile = yaml.safe_load((ROOT / "profiles" / "battery" / "ev.yaml").read_text(encoding="utf-8"))
+    paths = {
+        profile[key]
+        for key in ("api_contract", "access_policy", "item_schema", "model_schema")
+        if profile[key]
+    } | set(profile["rule_packs"])
+    expected = {p: "sha256:" + hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in sorted(paths)}
+    assert run.envelope.decision.manifest.bound_files == expected
+
+
+def _data_copy(target: Path) -> Path:
+    for name in ("catalogue", "profiles", "testpacks"):
+        shutil.copytree(ROOT / name, target / name)
+    return target
+
+
+def test_a_changed_bound_file_gives_a_replay_mismatch(tmp_path: Path) -> None:
+    data = _data_copy(tmp_path / "data")
+    with ReferenceRig(tmp_path, data_root=data) as rig:
+        run = rig.run()
+    contract = data / "profiles" / "battery" / "contracts" / "reference-api.openapi.yaml"
+    contract.write_text(contract.read_text(encoding="utf-8") + "# changed after the run\n", encoding="utf-8")
+    code, summary = rig.replay(run)
+    assert (code, summary["match"]) == (4, False), "a changed bound file changes the decision digest"
+
+
+def test_an_ics_that_names_a_different_contract_blocks_the_contract_step(tmp_path: Path) -> None:
+    with ReferenceRig(tmp_path, ics_changes={"api": {"contract": "battery/other-api"}}) as rig:
+        run = rig.run()
+    step = run.step("TP-API-001")
+    assert (step["verdict"], step["reason_code"]) == ("inconclusive", "API.CONTRACT.ICS_MISMATCH")
+
+
+def test_the_alternate_layout_answers_only_its_own_paths() -> None:
+    system = AlternateLayout(FIXTURES)
+    ident, gtin, serial = "09506000134352-EV0001", "09506000134352", "EV0001"
+    for path in (f"/dpp/{ident}", f"/dpp/{ident}/model", f"/registry/{ident}", "/search?q=EV0001"):
+        assert system.handle(path, None)[0] == 404, path
+    for path in ("data", "model-data", "jws", "history", "export", "view"):
+        assert system.handle(f"/passports/{gtin}/{serial}/{path}", None)[0] == 200, path
+    assert system.handle(f"/lookup/{gtin}/{serial}", None)[0] == 200
+    assert b"results" in system.handle(f"/find?q={serial}", None)[2]
+    status, _, _, headers = system.handle(f"/01/{gtin}/21/{serial}", None)
+    assert (status, headers["Location"]) == (303, f"/passports/{gtin}/{serial}/data")
+
+
+def test_the_alternate_rig_contract_keeps_the_resource_markers(tmp_path: Path) -> None:
+    with ReferenceRig(tmp_path, layout="alternate") as rig:
+        contract_path = rig.data_root / "profiles" / "battery" / "contracts" / "reference-api.openapi.yaml"
+        contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+    paths = contract["paths"]
+    assert sorted(paths) == ["/passports/{gtin}/{serial}/data", "/passports/{gtin}/{serial}/model-data"]
+    assert paths["/passports/{gtin}/{serial}/data"]["x-dppce-resource"] == "item"
+    assert paths["/passports/{gtin}/{serial}/model-data"]["x-dppce-resource"] == "model"
+    assert contract["x-dppce-contract-id"] == "battery/alternate-api"
+
+
+def test_a_different_url_layout_gives_the_same_steps_and_verdicts(tmp_path: Path) -> None:
+    """Criterion 3 of gap D3-01: only the IXIT templates change, not the engine."""
+    outcomes = []
+    for layout in ("reference", "alternate"):
+        with ReferenceRig(tmp_path / layout, layout=layout) as rig:
+            run = rig.run()
+        assert (run.exit_code, run.envelope.decision.overall) == (0, Verdict.PASS), layout
+        outcomes.append(
+            sorted(
+                (t.test_purpose_id, t.execution_status.value, t.verdict.value, t.reason_code)
+                for t in run.envelope.decision.test_results
+            )
+        )
+    assert outcomes[0] == outcomes[1]
 
 
 @pytest.mark.validation

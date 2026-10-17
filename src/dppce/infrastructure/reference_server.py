@@ -226,8 +226,15 @@ class ReferenceSystem:
 class ReferenceServer:
     """Serve a ``ReferenceSystem`` on the loopback interface."""
 
-    def __init__(self, fixtures: Path, *, faults: frozenset[str] = frozenset(), port: int = 0) -> None:
-        system = ReferenceSystem(fixtures, faults)
+    def __init__(
+        self,
+        fixtures: Path,
+        *,
+        faults: frozenset[str] = frozenset(),
+        port: int = 0,
+        system: ReferenceSystem | None = None,
+    ) -> None:
+        behavior = system or ReferenceSystem(fixtures, faults)
 
         class Handler(http.server.BaseHTTPRequestHandler):
             server_version = "dppce-reference/1"
@@ -236,7 +243,7 @@ class ReferenceServer:
                 return
 
             def do_GET(self) -> None:
-                status, media_type, body, headers = system.handle(
+                status, media_type, body, headers = behavior.handle(
                     self.path, self.headers.get("Authorization")
                 )
                 if any("\r" in value or "\n" in value for value in headers.values()):
