@@ -417,14 +417,15 @@ def main() -> None:
         _add_manual_key()
         print(f"added {MANUAL_KID} to {OUT / 'trust' / 'TEST-ONLY-trust-bundle.json'}")
         return
-    _fault_qr()
     if sys.argv[1:] == ["--fault-qr-only"]:
+        _fault_qr()
         print(f"wrote fault QR images to {OUT / 'qr'}")
         return
     _degraded_qr()
     if sys.argv[1:] == ["--degraded-qr-only"]:
         print(f"wrote degraded QR images to {OUT / 'qr' / 'degraded'}")
         return
+    _fault_qr()
     _documents()
     _roles()
     _trust_and_authorization(_pki())

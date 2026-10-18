@@ -399,7 +399,9 @@ def _test_source(file: str, name: str) -> str:
     start = text.find(f"\ndef {name}(")
     assert start >= 0, f"{file} does not define {name}"
     start = text.rfind("\n\n", 0, start) + 2  # the decorators directly above the def
-    end = re.compile(r"\n(?:def |@|class )").search(text, text.index(f"def {name}(", start) + 1)
+    # The next column-0 line that is not blank, a comment, or a closing bracket of a multi-line
+    # signature, so the module constants after the last test are excluded.
+    end = re.compile(r"\n(?=[^\s#)\]}])").search(text, text.index(f"def {name}(", start) + 1)
     return text[start : end.start() if end else len(text)]
 
 
@@ -410,6 +412,10 @@ def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -
     codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
     assert len(codes) == 21
     assert codes == set(PRODUCERS)
+    # The window of the last test must stop before the module constants, which name every code.
+    assert '"CARRIER.QR.OK"' not in _test_source(
+        "tests/test_adapters_identifier.py", "test_consistency_of_a_different_passport_id_is_a_mismatch"
+    )
     degraded = {case["reason_code"] for case in json.loads(DEGRADED_EXPECTED.read_text())["cases"].values()}
     for code, tests in PRODUCERS.items():
         for test in tests:
