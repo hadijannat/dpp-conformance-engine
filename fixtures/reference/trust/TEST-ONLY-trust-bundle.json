@@ -1,5 +1,5 @@
 {
-  "schema_version": "dppce.trust/1",
+  "schema_version": "dppce.trust/2",
   "policy_version": "TEST-ONLY-reference-1",
   "require_status": false,
   "require_timestamp": false,
@@ -56,8 +56,9 @@
       "certificate_pem": "-----BEGIN CERTIFICATE-----\nMIIBezCCASCgAwIBAgIUMTV/di7Vow4KiHYVe+lLqI7Bw5owCgYIKoZIzj0EAwIw\nKTEnMCUGA1UEAwweVEVTVC1PTkxZIGRwcGNlIHJlZmVyZW5jZSByb290MB4XDTI2\nMDEwMTAwMDAwMFoXDTM2MDEwMTAwMDAwMFowKTEnMCUGA1UEAwweVEVTVC1PTkxZ\nIGRwcGNlIHJlZmVyZW5jZSByb290MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n9wmcrJf97X/j7ChFE96ZbvBvogdef2fSbid5307iZKTmSP+dMOELMUVbTGbJcPJO\nHb2bSG7D+MhM/+o/xDDtiqMmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8B\nAf8EBAMCAQYwCgYIKoZIzj0EAwIDSQAwRgIhAO3omn5BjdUwuBXdltnjAPl/Rk9E\ny9nhOdQpjfHYDKByAiEA6kSLn0qo/i2A81s06ZJysJPyYlI4IcB4l7Vx44RyS9g=\n-----END CERTIFICATE-----\n"
     }
   ],
-  "revoked_serials": [],
-  "revoked_kids": [],
+  "timestamp_anchors": [],
+  "revoked_certificates": [],
+  "revoked_keys": [],
   "status_as_of": null,
   "status_max_age_days": 7
 }

@@ -126,7 +126,7 @@ INSTANCES: dict[str, Model] = {
     "outcome": CheckOutcome(status=ExecutionStatus.COMPLETED, passed=True, reason_code="A.OK", message="m"),
     "rules": VerdictRules(),
     "ratio": Ratio(numerator=1, denominator=2, of="requirements"),
-    "trust": TrustBundle(schema_version="dppce.trust/1", policy_version="test-1"),
+    "trust": TrustBundle(schema_version="dppce.trust/2", policy_version="test-1"),
     "const": Const(const=Tri.TRUE),
     "compare": Compare(fact="ics.x", op="eq", value=1),
     "all": All(all=(Const(const=Tri.TRUE),)),
@@ -561,7 +561,7 @@ SCHEMA_DOCUMENTS = {
     "trust": INSTANCES["trust"],
     "authorization": Authorization.model_validate(AUTHORIZATION),
     "runinputs": RunInputsRecord(
-        schema_version="dppce.runinputs/2",
+        schema_version="dppce.runinputs/3",
         mode=ExecutionMode.ILLUSTRATIVE,
         profile=b.PROFILE_ID,
         evaluation_time="2026-10-13T12:00:00Z",
@@ -734,13 +734,15 @@ def test_a_version_1_record_of_run_inputs_gets_null_hashes_and_empty_lists(rc1: 
     assert new == {
         **old,
         **expected,
-        "schema_version": "dppce.runinputs/2",
+        # The chain continues to version 3. A null trust bundle stays null.
+        "schema_version": "dppce.runinputs/3",
         "data_root": None,
         "input_hashes": None,
     }
     record = RunInputsRecord.model_validate(new)
     assert (record.data_root, record.input_hashes) == (None, None)
-    assert migrations.CURRENT["runinputs"] == "dppce.runinputs/2"
+    assert migrations.CURRENT["runinputs"] == "dppce.runinputs/3"
+    assert migrations.CURRENT["trust"] == "dppce.trust/2"
 
 
 def test_a_version_1_record_that_holds_a_version_2_field_is_refused() -> None:

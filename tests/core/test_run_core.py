@@ -527,7 +527,7 @@ def test_evaluate_states_the_run_in_the_manifest(tmp_path: Path) -> None:
 
 
 def test_evaluate_takes_the_trust_policy_version_from_the_operator_bundle(tmp_path: Path) -> None:
-    bundle = TrustBundle(schema_version="dppce.trust/1", policy_version="operator-7")
+    bundle = TrustBundle(schema_version="dppce.trust/2", policy_version="operator-7")
     with_bundle = evaluate(mixed_inputs(tmp_path, trust=bundle), ReplayAcquirer(recorded()))
     assert with_bundle.manifest.trust_policy_version == "operator-7"
 

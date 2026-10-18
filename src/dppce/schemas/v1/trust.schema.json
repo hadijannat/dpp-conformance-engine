@@ -1,8 +1,94 @@
 {
   "$defs": {
+    "RevokedCertificate": {
+      "additionalProperties": false,
+      "description": "A certificate serial number scoped by its issuer. Both must match (gap D8-10).",
+      "properties": {
+        "issuer_key_id": {
+          "anyOf": [
+            {
+              "pattern": "^([0-9A-Fa-f]{2})+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hex key identifier, compared with the authority key identifier of the certificate.",
+          "title": "Issuer Key Id"
+        },
+        "issuer_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "RFC 4514 issuer name, compared attribute by attribute without case folding.",
+          "title": "Issuer Name"
+        },
+        "revoked_at": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revoked At"
+        },
+        "serial": {
+          "pattern": "^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$",
+          "title": "Serial",
+          "type": "string"
+        }
+      },
+      "required": [
+        "serial",
+        "revoked_at"
+      ],
+      "title": "RevokedCertificate",
+      "type": "object"
+    },
+    "RevokedKey": {
+      "additionalProperties": false,
+      "description": "A key of the bundle that the operator revoked.",
+      "properties": {
+        "kid": {
+          "minLength": 1,
+          "title": "Kid",
+          "type": "string"
+        },
+        "revoked_at": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revoked At"
+        }
+      },
+      "required": [
+        "kid",
+        "revoked_at"
+      ],
+      "title": "RevokedKey",
+      "type": "object"
+    },
     "TrustAnchor": {
       "additionalProperties": false,
-      "description": "An X.509 certificate that ends a passport signature chain.",
+      "description": "An X.509 certificate that ends a certificate path, or a pinned TSA certificate.",
       "properties": {
         "certificate_pem": {
           "title": "Certificate Pem",
@@ -110,25 +196,24 @@
       "title": "Require Timestamp",
       "type": "boolean"
     },
-    "revoked_kids": {
+    "revoked_certificates": {
       "default": [],
       "items": {
-        "type": "string"
+        "$ref": "#/$defs/RevokedCertificate"
       },
-      "title": "Revoked Kids",
+      "title": "Revoked Certificates",
       "type": "array"
     },
-    "revoked_serials": {
+    "revoked_keys": {
       "default": [],
       "items": {
-        "pattern": "^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$",
-        "type": "string"
+        "$ref": "#/$defs/RevokedKey"
       },
-      "title": "Revoked Serials",
+      "title": "Revoked Keys",
       "type": "array"
     },
     "schema_version": {
-      "const": "dppce.trust/1",
+      "const": "dppce.trust/2",
       "title": "Schema Version",
       "type": "string"
     },
@@ -151,6 +236,14 @@
       "minimum": 0,
       "title": "Status Max Age Days",
       "type": "integer"
+    },
+    "timestamp_anchors": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TrustAnchor"
+      },
+      "title": "Timestamp Anchors",
+      "type": "array"
     }
   },
   "required": [

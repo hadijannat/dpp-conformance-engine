@@ -132,7 +132,16 @@ def _time(text: str | None) -> datetime:
 
 
 def _trust(path: Path | None) -> TrustBundle | None:
-    return TrustBundle.model_validate(parse_strict(path.read_bytes())) if path else None
+    """Load a trust bundle. A ``dppce.trust/1`` bundle is migrated (architecture section 11.4)."""
+    if path is None:
+        return None
+    document = parse_strict(path.read_bytes())
+    if not isinstance(document, dict):
+        raise UsageError(f"TRUST.BUNDLE.NOT_OBJECT: {path} is not a JSON object")
+    try:
+        return TrustBundle.model_validate(migrate("trust", document))
+    except MigrationError as exc:
+        raise UsageError(f"{path}: {exc}") from exc
 
 
 @dataclass(frozen=True)
@@ -496,7 +505,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     if bound is None:  # a new run writes dppce.decision/2, which always holds bound_files
         raise RuntimeError("the decision body of a new run has no bound_files")
     record = RunInputsRecord(
-        schema_version="dppce.runinputs/2",
+        schema_version="dppce.runinputs/3",
         mode=inputs.mode,
         profile=args.profile,
         evaluation_time=utc_stamp(inputs.evaluation_time),

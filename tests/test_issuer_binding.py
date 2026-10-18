@@ -39,7 +39,7 @@ def _key(signer: LocalSigner, issuer: str) -> TrustedKey:
 
 
 def _bundle(*keys: TrustedKey) -> TrustBundle:
-    return TrustBundle(schema_version="dppce.trust/1", policy_version="test-1", keys=keys)
+    return TrustBundle(schema_version="dppce.trust/2", policy_version="test-1", keys=keys)
 
 
 def _signed(

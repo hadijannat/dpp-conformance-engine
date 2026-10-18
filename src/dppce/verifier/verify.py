@@ -236,7 +236,7 @@ def _key_state(key: TrustedKey, trust: TrustBundle, at: datetime) -> str | None:
         return f"Key '{key.kid}' is not trusted for reports."
     if not _stamp(key.not_before) <= at <= _stamp(key.not_after):
         return f"Key '{key.kid}' is outside its validity period at the evaluation time."
-    if key.kid in trust.revoked_kids:
+    if trust.key_revoked(key.kid, at):
         return f"Key '{key.kid}' is revoked."
     return None
 

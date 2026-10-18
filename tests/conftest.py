@@ -30,7 +30,7 @@ def trust(signer: LocalSigner) -> TrustBundle:
         not_before="2026-01-01T00:00:00Z",
         not_after="2027-01-01T00:00:00Z",
     )
-    return TrustBundle(schema_version="dppce.trust/1", policy_version="test-1", keys=(key,))
+    return TrustBundle(schema_version="dppce.trust/2", policy_version="test-1", keys=(key,))
 
 
 @pytest.fixture

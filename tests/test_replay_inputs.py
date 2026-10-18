@@ -66,7 +66,7 @@ def write_pair(directory: Path, title: str | None = None) -> tuple[Path, Path]:
 class Run:
     """One run on a copied data root ``tmp/root-a``. Nothing here contacts a host."""
 
-    def __init__(self, tmp_path: Path, imports: Imports = "select") -> None:
+    def __init__(self, tmp_path: Path, imports: Imports = "select", trust: Path | None = None) -> None:
         self.root = tmp_path / "root-a"
         for name in ("catalogue", "profiles", "testpacks"):
             shutil.copytree(ROOT / name, self.root / name)
@@ -84,6 +84,8 @@ class Run:
             arguments += ["--import-pack", str(self.pack), "--import-testpack", str(self.testpack)]
         if imports == "select":
             arguments += ["--pack", PACK, "--testpack", TESTPACK]
+        if trust is not None:
+            arguments += ["--trust", str(trust)]
         self.code = cli.main(arguments)
         self.envelope = EvidenceEnvelope.model_validate_json((self.dir / "envelope.json").read_bytes())
 
@@ -96,11 +98,11 @@ def _json(capsys: pytest.CaptureFixture[str]) -> dict[str, Any]:
     return document
 
 
-def test_run_writes_a_version_2_record_that_round_trips(tmp_path: Path) -> None:
+def test_run_writes_a_version_3_record_that_round_trips(tmp_path: Path) -> None:
     run = Run(tmp_path)
     raw = (run.dir / "inputs.json").read_bytes()
     record = RunInputsRecord.model_validate(parse_strict(raw))
-    assert record.schema_version == "dppce.runinputs/2"
+    assert record.schema_version == "dppce.runinputs/3"
     assert canonical_bytes(record) + b"\n" == raw
     jsonschema.Draft202012Validator(schemas.load("runinputs")).validate(json.loads(raw))
     assert record.data_root == str(run.root.resolve())
@@ -232,6 +234,28 @@ def test_a_version_1_record_from_main_and_from_rc1_still_replays(
     assert (code, summary["match"], summary["input_check"]) == (run.code, True, "not_run")
     assert run.replay("--data-root", str(run.root)) == run.code
     assert "REPLAY.INPUT.NOT_RECORDED" in capsys.readouterr().out
+
+
+def test_a_version_2_record_with_a_version_1_trust_bundle_replays_to_the_same_digest(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The step from dppce.runinputs/2 to version 3 changes only the embedded trust bundle."""
+    run = Run(
+        tmp_path, "none", trust=ROOT / "fixtures" / "reference" / "trust" / "TEST-ONLY-trust-bundle.json"
+    )
+    path = run.dir / "inputs.json"
+    document = json.loads(path.read_bytes())
+    trust = document["trust"]
+    for name in ("revoked_certificates", "revoked_keys", "timestamp_anchors"):
+        assert trust.pop(name) == []
+    trust.update(schema_version="dppce.trust/1", revoked_serials=[], revoked_kids=[])
+    document["schema_version"] = "dppce.runinputs/2"
+    path.write_bytes(canonical_bytes(document) + b"\n")
+    capsys.readouterr()
+    code = run.replay("--json")
+    summary = _json(capsys)
+    assert (code, summary["match"], summary["input_check"]) == (run.code, True, "pass")
+    assert run.envelope.decision.manifest.trust_policy_version == "TEST-ONLY-reference-1"
 
 
 def test_a_migrated_record_still_detects_a_changed_bound_file_by_digest(

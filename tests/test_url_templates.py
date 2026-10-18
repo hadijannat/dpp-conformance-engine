@@ -298,7 +298,7 @@ def test_an_endpoint_that_is_not_a_plain_base_url_gives_no_target(
 
 
 def _trust() -> TrustBundle:
-    return TrustBundle(schema_version="dppce.trust/1", policy_version="test")
+    return TrustBundle(schema_version="dppce.trust/2", policy_version="test")
 
 
 @pytest.mark.parametrize(

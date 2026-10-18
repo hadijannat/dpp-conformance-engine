@@ -88,7 +88,7 @@ def _trusted_key(header: dict[str, object], trust: TrustBundle, key_valid_at: da
         valid = _time(key.not_before) <= key_valid_at <= _time(key.not_after)
     except ValueError:
         valid = False
-    if key.kid in trust.revoked_kids or not valid:
+    if trust.key_revoked(key.kid, key_valid_at) or not valid:
         raise ManualResultError(
             "MANUAL.KEY.NOT_VALID", "The key is revoked or not valid at the evaluation time."
         )

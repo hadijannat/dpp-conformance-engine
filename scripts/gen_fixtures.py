@@ -342,7 +342,7 @@ def _trust_and_authorization(root: x509.Certificate) -> None:
     _write(OUT / "authorization" / "TEST-ONLY-owner.key.pem", owner.to_pem())
     _write(OUT / "trust" / "TEST-ONLY-manual-signing.key.pem", manual.to_pem())
     bundle = TrustBundle(
-        schema_version="dppce.trust/1",
+        schema_version="dppce.trust/2",
         policy_version="TEST-ONLY-reference-1",
         keys=(
             TrustedKey(

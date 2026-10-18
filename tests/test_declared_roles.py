@@ -191,6 +191,11 @@ def test_replay_refuses_a_role_that_the_current_profile_does_not_declare(
         document = json.loads(record.read_bytes())
         del document["data_root"], document["input_hashes"]
         document["schema_version"] = "dppce.runinputs/1"
+        # A version 1 record embeds a dppce.trust/1 bundle. The rig's bundle revokes nothing.
+        trust = document["trust"]
+        for name in ("revoked_certificates", "revoked_keys", "timestamp_anchors"):
+            assert trust.pop(name) == []
+        trust.update(schema_version="dppce.trust/1", revoked_serials=[], revoked_kids=[])
         record.write_bytes(canonical_bytes(document) + b"\n")
     data = _data_copy(tmp_path / "data")
     profile = data / "profiles" / "battery" / "ev.yaml"

@@ -47,6 +47,7 @@ from dppce.models import (
     ExecutionMode,
     ExecutionStatus,
     ManualResult,
+    RevokedKey,
     TestPurpose,
     TestResult,
     TrustBundle,
@@ -94,7 +95,7 @@ def _key(signer: LocalSigner, purposes: tuple[str, ...], **changes: Any) -> Trus
 
 
 UNIT_TRUST = TrustBundle(
-    schema_version="dppce.trust/1",
+    schema_version="dppce.trust/2",
     policy_version="test-1",
     keys=(_key(MANUAL, ("manual",)), _key(REPORT, ("report",))),
 )
@@ -254,7 +255,7 @@ _PAYLOAD = canonical_bytes(result())
 _EXPIRED = UNIT_TRUST.model_copy(
     update={"keys": (_key(MANUAL, ("manual",), not_after="2026-10-01T00:00:00Z"), UNIT_TRUST.keys[1])}
 )
-_REVOKED = UNIT_TRUST.model_copy(update={"revoked_kids": (MANUAL.key_id,)})
+_REVOKED = UNIT_TRUST.model_copy(update={"revoked_keys": (RevokedKey(kid=MANUAL.key_id, revoked_at=None),)})
 _NO_OUTCOME = canonical_bytes({k: v for k, v in result().model_dump(mode="json").items() if k != "outcome"})
 
 # (id, body, error, trust, expected reason code)
@@ -704,7 +705,7 @@ def test_verifier_manual_results_dimension(
     elif mode == "sut-version-changed":
         document["decision"]["manifest"]["sut"]["version"] = "2"
     else:
-        trust = trust.model_copy(update={"revoked_kids": (manual_kid,)})
+        trust = trust.model_copy(update={"revoked_keys": (RevokedKey(kid=manual_kid, revoked_at=None),)})
     report = verify(document, trust, VERIFY_AT)
     assert {d.name: d.outcome for d in report.dimensions}["manual_results"] == "fail"
     assert not report.complete

@@ -7,7 +7,12 @@ never guesses how to read it.
 A decision body has no step. It is signed, so it is never rewritten: the verifier reads
 ``dppce.decision/1`` and ``dppce.decision/2`` as written, and a new run writes version 2.
 
-The record of run inputs (``inputs.json``) has one step, from ``dppce.runinputs/1`` to version 2.
+The record of run inputs (``inputs.json``) has two steps: from ``dppce.runinputs/1`` to version 2,
+and from version 2 to version 3. The second step upgrades only the embedded trust bundle.
+
+The trust bundle has one step, from ``dppce.trust/1`` to version 2 (architecture section 11.4).
+It checks the shape of the version 1 fields first. It refuses revoked serial numbers, because
+their issuer is unknown: a guess would either drop a revocation or apply it to every issuer.
 """
 
 from __future__ import annotations
@@ -17,7 +22,7 @@ from copy import deepcopy
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-CURRENT: dict[str, str] = {"ics": "dppce.ics/1", "runinputs": "dppce.runinputs/2"}
+CURRENT: dict[str, str] = {"ics": "dppce.ics/1", "runinputs": "dppce.runinputs/3", "trust": "dppce.trust/2"}
 
 Document = dict[str, Any]
 
@@ -68,9 +73,58 @@ def _runinputs_1_to_2(document: Document) -> Document:
     return out
 
 
+def _trust_1_to_2(document: Document) -> Document:
+    """Scope revocations by issuer and date them (gap D8-10). Each kid becomes ``revoked_at`` null.
+
+    Null means revoked at every time, so the effect of a revoked kid does not change. Other fields
+    are left to the validation of the bundle.
+    """
+    malformed = "TRUST.MIGRATION.MALFORMED: "
+    present = sorted({"revoked_certificates", "revoked_keys", "timestamp_anchors"} & document.keys())
+    if present:
+        raise MigrationError(f"{malformed}a dppce.trust/1 bundle holds no {', '.join(present)}")
+    kids = document.get("revoked_kids", [])
+    if not isinstance(kids, list) or not all(isinstance(k, str) and k for k in kids):
+        raise MigrationError(f"{malformed}revoked_kids is not a list of non-empty strings")
+    serials = document.get("revoked_serials", [])
+    if not isinstance(serials, list):
+        raise MigrationError(f"{malformed}revoked_serials is not a list")
+    if serials:
+        raise MigrationError(
+            "TRUST.MIGRATION.UNSCOPED_SERIAL: a dppce.trust/1 bundle lists revoked serial numbers "
+            "without their issuer; write each one in revoked_certificates of a dppce.trust/2 bundle"
+        )
+    out = deepcopy(document)
+    out.pop("revoked_serials", None)
+    out["revoked_keys"] = [{"kid": k, "revoked_at": None} for k in dict.fromkeys(out.pop("revoked_kids", []))]
+    out["revoked_certificates"] = []
+    out["timestamp_anchors"] = []
+    out["schema_version"] = "dppce.trust/2"
+    return out
+
+
+def _runinputs_2_to_3(document: Document) -> Document:
+    """Version 3 embeds a ``dppce.trust/2`` bundle. The decision digest does not change."""
+    out = deepcopy(document)
+    trust = out.get("trust")
+    if trust is not None and not isinstance(trust, dict):
+        raise MigrationError("TRUST.MIGRATION.MALFORMED: the trust bundle of the record is not an object")
+    if isinstance(trust, dict):
+        if trust.get("schema_version") != "dppce.trust/1":
+            raise MigrationError(
+                "TRUST.MIGRATION.MALFORMED: a dppce.runinputs/2 record embeds a dppce.trust/1 bundle, "
+                f"not {trust.get('schema_version')!r}"
+            )
+        out["trust"] = _trust_1_to_2(trust)
+    out["schema_version"] = "dppce.runinputs/3"
+    return out
+
+
 _STEPS: dict[tuple[str, str], Callable[[Document], Document]] = {
     ("ics", "dppce.ics/0"): _ics_0_to_1,
     ("runinputs", "dppce.runinputs/1"): _runinputs_1_to_2,
+    ("runinputs", "dppce.runinputs/2"): _runinputs_2_to_3,
+    ("trust", "dppce.trust/1"): _trust_1_to_2,
 }
 
 

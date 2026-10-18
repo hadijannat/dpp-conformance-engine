@@ -7,6 +7,7 @@ A fake resolver stands in for DNS, so that rebinding and public-address cases ne
 from __future__ import annotations
 
 import http.server
+import json
 import os
 import socket
 from collections.abc import Callable
@@ -25,7 +26,8 @@ from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_se
 from dppce.infrastructure.redaction import is_public_address, redact_url
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.transport import PolicyTransport, TransportConfig
-from dppce.models import Authorization, NetworkPolicy, TrustBundle
+from dppce.migrations import migrate
+from dppce.models import Authorization, NetworkPolicy, RevokedKey, TrustBundle
 from tests.support import ISSUER, Handler, LoopbackServer, reply
 
 NOW = datetime(2026, 10, 13, 12, tzinfo=UTC)
@@ -320,12 +322,18 @@ def test_only_a_trusted_issuer_can_authorize(signer: LocalSigner, trust: TrustBu
         ("AUTHZ.EXPIRED", trust, datetime(2026, 11, 5, tzinfo=UTC), "urn:example:sut"),
         (
             "AUTHZ.ISSUER.KEY_NOT_VALID",
-            trust.model_copy(update={"revoked_kids": (signer.key_id,)}),
+            trust.model_copy(update={"revoked_keys": (RevokedKey(kid=signer.key_id, revoked_at=None),)}),
             NOW,
             "urn:example:sut",
         ),
         ("AUTHZ.ISSUER.UNTRUSTED", trust.model_copy(update={"keys": ()}), NOW, "urn:example:sut"),
     ]
+    # A dppce.trust/1 bundle that revoked the kid keeps that effect after migration.
+    version_1 = json.loads(trust.model_dump_json(exclude={"revoked_certificates", "revoked_keys"}))
+    del version_1["timestamp_anchors"]
+    version_1.update(schema_version="dppce.trust/1", revoked_kids=[signer.key_id], revoked_serials=[])
+    migrated = TrustBundle.model_validate(migrate("trust", version_1))
+    cases.append(("AUTHZ.ISSUER.KEY_NOT_VALID", migrated, NOW, "urn:example:sut"))
     for code, bundle, at, sut in cases:
         with pytest.raises(AuthorizationError) as caught:
             validate_authorization(token, bundle, at, sut)

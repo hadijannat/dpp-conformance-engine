@@ -13,6 +13,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from dppce.evidence.canonical import parse_strict
+from dppce.migrations import migrate
 from dppce.models import TrustBundle
 from dppce.verifier.verify import verify_json
 
@@ -25,7 +26,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         raw = args.envelope.read_bytes()
-        trust = TrustBundle.model_validate(parse_strict(args.trust.read_bytes()))
+        document = parse_strict(args.trust.read_bytes())
+        if not isinstance(document, dict):
+            raise ValueError(f"TRUST.BUNDLE.NOT_OBJECT: {args.trust} is not a JSON object")
+        # A dppce.trust/1 bundle is migrated. A MigrationError is a ValueError: exit status 2.
+        trust = TrustBundle.model_validate(migrate("trust", document))
         at = datetime.strptime(args.at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
     except (OSError, ValueError, ValidationError) as exc:
         print(f"error: {str(exc).splitlines()[0]}", file=sys.stderr)

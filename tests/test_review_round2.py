@@ -373,7 +373,7 @@ from dppce.adapters.access import restricted_fields  # noqa: E402
 from dppce.adapters.common import same_json as _same_json  # noqa: E402
 from dppce.adapters.common import unusable  # noqa: E402
 from dppce.adapters.integrity import jws_check  # noqa: E402
-from dppce.models import ExecutionStatus  # noqa: E402
+from dppce.models import ExecutionStatus, RevokedCertificate  # noqa: E402
 from tests.test_adapters_security import _POLICY, _Canned, _context, bundle  # noqa: E402
 from tests.test_review_findings import Passport, _certificate, _x5c, integrity_context, pki, token  # noqa: E402
 
@@ -513,11 +513,31 @@ def test_adapters9_an_expired_or_revoked_anchor_is_a_problem_of_the_bundle_not_o
     )
     valid_root = _self_signed(root_key, "old root")
     leaf = _certificate("leaf", key.public_key(), (root_key, valid_root))
-    revoked_anchor = _check({}, key, bundle(valid_root, revoked_serials=("1111",)), _x5c(leaf))
+    entry = RevokedCertificate(serial="1111", issuer_name=valid_root.issuer.rfc4514_string(), revoked_at=None)
+    revoked_anchor = _check({}, key, bundle(valid_root, revoked_certificates=(entry,)), _x5c(leaf))
     assert (revoked_anchor.status, revoked_anchor.reason_code) == (
         ExecutionStatus.BLOCKED,
         "INTEGRITY.TRUST.ANCHOR_INVALID",
     )
+
+
+def test_d8_10_a_serial_revoked_under_another_authority_does_not_revoke_the_leaf(
+    pki: dict[str, Any],
+) -> None:
+    key, leaf = _leaf(pki)
+    serial = f"{leaf.serial_number:x}"
+    other = RevokedCertificate(serial=serial, issuer_name="CN=TEST-ONLY other authority", revoked_at=None)
+    root = pki["root"][1]
+    outcome = _check({}, key, bundle(root, revoked_certificates=(other,)), _x5c(leaf))
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.COMPLETED, "INTEGRITY.OK")
+    same = RevokedCertificate(serial=serial, issuer_name=leaf.issuer.rfc4514_string(), revoked_at=None)
+    outcome = _check({}, key, bundle(root, revoked_certificates=(same,)), _x5c(leaf))
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.COMPLETED, "INTEGRITY.CERT.REVOKED")
+    later = RevokedCertificate(
+        serial=serial, issuer_name=leaf.issuer.rfc4514_string(), revoked_at="2030-01-01T00:00:00Z"
+    )
+    outcome = _check({}, key, bundle(root, revoked_certificates=(later,)), _x5c(leaf))
+    assert outcome.reason_code == "INTEGRITY.OK", "a revocation dated after the evaluation time"
 
 
 def test_adapters11_a_cross_signed_authority_listed_twice_still_finds_the_trusted_path() -> None:

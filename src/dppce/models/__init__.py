@@ -88,7 +88,7 @@ from dppce.models.testing import (
     TestResult,
     VerdictRules,
 )
-from dppce.models.trust import TrustAnchor, TrustBundle, TrustedKey
+from dppce.models.trust import RevokedCertificate, RevokedKey, TrustAnchor, TrustBundle, TrustedKey
 
 # Contracts that have a published JSON Schema, keyed by schema file stem.
 SCHEMA_MODELS: dict[str, type[Model]] = {
@@ -177,6 +177,8 @@ __all__ = [
     "ResourceName",
     "ResourceTemplate",
     "ReviewStatus",
+    "RevokedCertificate",
+    "RevokedKey",
     "RoleIdentity",
     "RunInputsRecord",
     "RunManifest",

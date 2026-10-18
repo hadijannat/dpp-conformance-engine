@@ -45,7 +45,7 @@ def validate_authorization(
     key = next((k for k in trust.keys if k.kid == kid and "authorization" in k.purposes), None)
     if key is None:
         raise AuthorizationError("AUTHZ.ISSUER.UNTRUSTED", f"Key '{kid}' is not trusted to authorize tests.")
-    if kid in trust.revoked_kids or not parse_stamp(key.not_before) <= at <= parse_stamp(key.not_after):
+    if trust.key_revoked(kid, at) or not parse_stamp(key.not_before) <= at <= parse_stamp(key.not_after):
         raise AuthorizationError(
             "AUTHZ.ISSUER.KEY_NOT_VALID", f"Key '{kid}' is revoked or outside its validity."
         )

@@ -21,7 +21,7 @@ from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, par
 from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import LocalSigner, SignatureError, sign_compact, verify_compact
 from dppce.evidence.recording import RecordingError, commit, read_recording, write_recording
-from dppce.models import EvidenceEnvelope, TrustBundle
+from dppce.models import EvidenceEnvelope, RevokedKey, TrustBundle
 from dppce.verifier import verify, verify_json
 from tests.support import AT, ISSUER, make_envelope, make_record
 
@@ -247,7 +247,7 @@ def test_a_revoked_key_and_a_wrong_issuer_are_not_trusted(
     signed: EvidenceEnvelope, trust: TrustBundle, signer: LocalSigner
 ) -> None:
     document = json.loads(signed.model_dump_json())
-    revoked = trust.model_copy(update={"revoked_kids": (trust.keys[0].kid,)})
+    revoked = trust.model_copy(update={"revoked_keys": (RevokedKey(kid=trust.keys[0].kid, revoked_at=None),)})
     assert _outcomes(document, revoked)[0]["issuer_trust"] == "fail"
     other = sign_envelope(
         make_envelope(), signer, issuer="urn:example:impostor", signed_at="2026-10-13T12:05:00Z"

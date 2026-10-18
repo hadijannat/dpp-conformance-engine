@@ -193,8 +193,10 @@ class EvidenceEnvelope(Model):
     decision: DecisionBody
     # JWS Compact Serialization. Empty until ``dppce sign`` runs.
     signatures: tuple[str, ...] = ()
-    # Optional status and timestamp evidence, added by separately tested profiles.
+    # Optional status evidence, added by a separately tested profile.
     status_evidence: tuple[str, ...] = ()
+    # Each entry is standard padded base64 of a DER TimeStampToken (architecture section 11.3).
+    # The dimension `timestamp` judges a malformed entry, not `structure`.
     timestamp_evidence: tuple[str, ...] = ()
 
 
@@ -218,7 +220,7 @@ class RunInputsRecord(Model):
     ``null`` is written explicitly.
     """
 
-    schema_version: Literal["dppce.runinputs/2"]
+    schema_version: Literal["dppce.runinputs/3"]
     mode: ExecutionMode
     profile: str
     evaluation_time: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

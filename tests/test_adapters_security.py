@@ -20,7 +20,8 @@ from cryptography.x509.oid import NameOID
 from pydantic import ValidationError
 
 from dppce.adapters.access import AccessPolicy, restricted_fields
-from dppce.adapters.integrity import revoked, trust_path
+from dppce.adapters.integrity import trust_path
+from dppce.evidence.x509path import revoked
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.models import (
     ICS,
@@ -28,6 +29,7 @@ from dppce.models import (
     Authorization,
     ExecutionStatus,
     Profile,
+    RevokedCertificate,
     TestPurpose,
     TrustAnchor,
     TrustBundle,
@@ -74,7 +76,7 @@ def issue(
 
 def bundle(*anchors: x509.Certificate, **more: Any) -> TrustBundle:
     return TrustBundle(
-        schema_version="dppce.trust/1",
+        schema_version="dppce.trust/2",
         policy_version="test",
         anchors=tuple(
             TrustAnchor(
@@ -143,11 +145,17 @@ def test_a_different_root_and_a_self_signed_leaf_give_no_path() -> None:
 # -- revocation -------------------------------------------------------------------------------
 
 
+def _revoked(serial: str, issuer: x509.Certificate) -> RevokedCertificate:
+    """An entry scoped by the issuer name of ``issuer``'s certificates (trust bundle version 2)."""
+    return RevokedCertificate(serial=serial, issuer_name=issuer.subject.rfc4514_string(), revoked_at=None)
+
+
 @pytest.mark.parametrize("form", ["{:x}", "{:X}", "0{:x}", "00{:X}"])
 def test_a_revoked_serial_matches_in_any_hexadecimal_form(form: str) -> None:
     root = issue("root", None, ca=True)
     leaf = issue("leaf", root, ca=False)
-    assert revoked([leaf[1], root[1]], bundle(root[1], revoked_serials=(form.format(leaf[1].serial_number),)))
+    trust = bundle(root[1], revoked_certificates=(_revoked(form.format(leaf[1].serial_number), root[1]),))
+    assert revoked([leaf[1], root[1]], trust.revoked_certificates, START)
 
 
 def test_colons_and_a_revoked_authority_are_handled() -> None:
@@ -158,17 +166,18 @@ def test_colons_and_a_revoked_authority_are_handled() -> None:
     text = text if len(text) % 2 == 0 else "0" + text
     with_colons = ":".join(text[i : i + 2] for i in range(0, len(text), 2)).upper()
     path = [leaf[1], middle[1], root[1]]
-    assert revoked(path, bundle(root[1], revoked_serials=(with_colons,))), (
-        "any certificate of the path counts"
+    trust = bundle(root[1], revoked_certificates=(_revoked(with_colons, root[1]),))
+    assert revoked(path, trust.revoked_certificates, START), "any certificate of the path counts"
+    assert not revoked(
+        path, bundle(root[1], revoked_certificates=(_revoked("01", root[1]),)).revoked_certificates, START
     )
-    assert not revoked(path, bundle(root[1], revoked_serials=("01",)))
-    assert not revoked(path, bundle(root[1]))
+    assert not revoked(path, bundle(root[1]).revoked_certificates, START)
 
 
 @pytest.mark.parametrize("serial", ["not-hex", "", "12 34", "0x1f", "12::34"])
 def test_a_serial_that_cannot_be_parsed_is_rejected_when_the_bundle_loads(serial: str) -> None:
     with pytest.raises(ValidationError):
-        bundle(revoked_serials=(serial,))
+        bundle(revoked_certificates=({"serial": serial, "issuer_name": "CN=root", "revoked_at": None},))
 
 
 # -- access -----------------------------------------------------------------------------------
