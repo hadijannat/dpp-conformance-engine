@@ -256,6 +256,34 @@ options:
   --testpack TESTPACK   look in this test pack only, by identifier
 ```
 
+### `dppce timestamp imprint`
+
+```text
+usage: dppce timestamp imprint [-h] [--json] --envelope ENVELOPE
+
+Print the SHA-256 imprint of each signature of an envelope, for a timestamp request.
+
+options:
+  -h, --help           show this help message and exit
+  --json
+  --envelope ENVELOPE
+```
+
+### `dppce timestamp attach`
+
+```text
+usage: dppce timestamp attach [-h] [--json] --envelope ENVELOPE --response RESPONSE --out OUT
+
+Add the token of a TimeStampResp file to a copy of an envelope. It does not verify the token.
+
+options:
+  -h, --help           show this help message and exit
+  --json
+  --envelope ENVELOPE
+  --response RESPONSE  DER TimeStampResp that the operator obtained
+  --out OUT            new envelope file; never the input
+```
+
 ### `dppce coverage`
 
 ```text

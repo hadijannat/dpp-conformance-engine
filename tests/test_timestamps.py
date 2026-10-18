@@ -17,10 +17,12 @@ from typing import Any
 import pytest
 from cryptography.x509.oid import ExtendedKeyUsageOID
 
+from dppce.adapters.capabilities import manifest
 from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import LocalSigner
 from dppce.evidence.timestamp import MAX_TOKEN_BYTES, MAX_TOKEN_TEXT, MAX_TOKENS
 from dppce.models import (
+    CapabilityState,
     EvidenceEnvelope,
     IssuerStatement,
     RevokedCertificate,
@@ -542,3 +544,12 @@ def test_a_good_signature_with_an_expired_key_then_a_broken_one_passes_the_signa
     assert dim(report, "signature")[0] == "pass"
     assert dim(report, "issuer_trust")[0] == "fail"
     assert not report.complete
+
+
+# -- capability -------------------------------------------------------------------------------------
+
+
+def test_the_capability_manifest_lists_rfc3161_supported() -> None:
+    entry = next(c for c in manifest().capabilities if c.id == "evidence.rfc3161")
+    assert (entry.state, entry.available, entry.acceptance_criteria) == (CapabilityState.SUPPORTED, True, "")
+    assert "contacts no timestamp authority" in entry.description

@@ -195,10 +195,11 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
     (
         "evidence.rfc3161",
         "evidence",
-        _I,
-        "RFC 3161 timestamps on reports.",
+        _S,
+        "Verify RFC 3161 timestamp tokens over report signatures against the timestamp anchors of the "
+        "trust bundle. The engine contacts no timestamp authority.",
         None,
-        "See BL-004. A mock timestamp authority is used in tests.",
+        "",
     ),
     (
         "evidence.status_list",

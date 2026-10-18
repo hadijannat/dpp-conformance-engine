@@ -35,8 +35,29 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the digest of each input of the run.
 - `dppce replay` checks the inputs before it evaluates. A missing data root or a changed input
   gives exit code 2 with `REPLAY.DATA_ROOT.MISSING` or `REPLAY.INPUT.CHANGED`.
+- RFC 3161 timestamps (ADR 0015). The verifier checks each token in `timestamp_evidence` against
+  the `timestamp_anchors` of the trust bundle. The imprint is SHA-256 over a report signature
+  value. The `timestamp` dimension can give `pass`. The capability `evidence.rfc3161` is
+  `supported`. The verifier does no network I/O.
+- `dppce timestamp imprint` prints the imprint of each signature. `dppce timestamp attach` adds
+  the token of a `TimeStampResp` file that the operator obtained. No command contacts a timestamp
+  authority.
+- The run-time dependency `asn1crypto` (MIT) parses timestamp tokens.
 
 ### Changed
+
+- The trust bundle is version `dppce.trust/2`. `revoked_certificates` scopes each revoked serial
+  number by its issuer name or issuer key identifier (D8-10). `revoked_keys` and
+  `revoked_certificates` carry `revoked_at`. `dppce.migrations` upgrades a version 1 bundle. It
+  refuses one with revoked serial numbers (`TRUST.MIGRATION.UNSCOPED_SERIAL`) or a field of the
+  wrong shape (`TRUST.MIGRATION.MALFORMED`).
+- `inputs.json` is version `dppce.runinputs/3`, with a version 2 trust bundle. A version 2 record
+  is upgraded. Decision digests do not change.
+- `issuer_trust` checks a report key at the earliest `genTime` of a good timestamp over its
+  signature, or else at the evaluation time. Each detail names that time. The revoked text is now
+  "is revoked at" a time. A later failure ends with "Key validity was checked at" a time.
+- The `signature` dimension passes if any signature verifies and binds. Before, a failing
+  signature after a good signature whose key was not valid gave `fail`.
 
 - `issuer_trust` binds the issuer statement to the signing key (ADR 0014). A signed report whose
   issuer identifier differs from the issuer of the key, or is `unspecified`, does not verify as
