@@ -37,6 +37,7 @@ FAULTS: Final = frozenset(
         "data_wrong_unit", "data_relationship", "context_invalid", "registry_inconsistent",
         "version_undeclared_change", "over_restrict_legitimate_interest",
         "leak_supplier_to_legitimate_interest", "leak_usage_log_anonymous", "deny_all",
+        "resolver_5xx", "resolver_html",
     }
 )  # fmt: skip
 _RESTRICTED: Final = {
@@ -202,18 +203,25 @@ class ReferenceSystem:
             detail += f" Internal reference: {CANARY}."
         return _json(404, {"error": "not_found", "detail": detail})
 
+    def resolve(self, path: str, ident: str) -> Reply:
+        faults = self.faults
+        if "resolver_404" in faults or ident not in self._items:
+            return self.not_found(path)
+        if "resolver_5xx" in faults:
+            return _json(503, {"error": "unavailable"})
+        if "resolver_html" in faults:
+            return 200, "text/html; charset=utf-8", b"<!doctype html><title>passport</title>", {}
+        if "redirect_out_of_scope" in faults:
+            return 302, "text/plain", b"", {"Location": "http://out-of-scope.example.test/"}
+        return 303, "text/plain", b"", {"Location": f"/dpp/{ident}"}
+
     def handle(self, target: str, authorization: str | None) -> Reply:
         parts = urlsplit(target)
         path, role, faults = parts.path, self.role_of(authorization), self.faults
         if "deny_all" in faults:
             return _json(403, {"error": "forbidden"})
         if (resolver := _RESOLVER_PATH.match(path)) is not None:
-            ident = f"{resolver['gtin']}-{resolver['serial']}"
-            if "resolver_404" in faults or ident not in self._items:
-                return self.not_found(path)
-            if "redirect_out_of_scope" in faults:
-                return 302, "text/plain", b"", {"Location": "http://out-of-scope.example.test/"}
-            return 303, "text/plain", b"", {"Location": f"/dpp/{ident}"}
+            return self.resolve(path, f"{resolver['gtin']}-{resolver['serial']}")
         if (registry := _REGISTRY_PATH.match(path)) is not None and registry["id"] in self._items:
             return _json(200, self.registry(registry["id"]))
         if path == "/search":

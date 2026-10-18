@@ -366,6 +366,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `cert_expired` | the JWS is signed by the expired leaf |
 | `id_mismatch` | the passport `id` names serial `OTHER0001` |
 | `resolver_404` | `/01/...` answers `404` |
+| `resolver_5xx` | `/01/...` answers `503` with a JSON error body |
+| `resolver_html` | `/01/...` answers `200` with an HTML page |
 | `redirect_out_of_scope` | `/01/...` answers `302` to `http://out-of-scope.example.test/` |
 | `data_wrong_type` | `state_of_health_percent` is the string `"99"` |
 | `data_missing_required` | `rated_capacity` is absent |
@@ -381,7 +383,13 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `deny_all` | every path answers `403` with `{"error": "forbidden"}` |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
-encodes plain text that is not a URL. The fault `unreachable` is a rig condition: no server runs.
+encodes plain text that is not a URL. Three more QR faults are fixtures too:
+
+- `qr_wrong_shape`: `qr/TEST-ONLY-wrong-shape.png` encodes a GTIN of 13 digits.
+- `qr_non_ascii_digits`: `qr/TEST-ONLY-non-ascii-digits.png` encodes the GTIN in Arabic-Indic digits.
+- `qr_two_symbols`: `qr/degraded/TEST-ONLY-two-symbols.png` holds two readable QR symbols.
+
+The fault `unreachable` is a rig condition: no server runs.
 
 ## 7. Fixtures
 
@@ -393,6 +401,8 @@ fixtures/reference/
   secrets/TEST-ONLY-<role>.token     the same tokens, one file for each role, for `--secrets`
   pki/TEST-ONLY-*.pem                fixture PKI (section 4.5)
   qr/{ev,lmt,industrial,invalid}.png QR images
+  qr/TEST-ONLY-wrong-shape.png       QR image of fault F-30
+  qr/TEST-ONLY-non-ascii-digits.png  QR image of fault F-31
   {ev,lmt,industrial}.ics.yaml       declarations for each profile
   {ev,lmt,industrial}.ixit.yaml      test information; the rig replaces `origin_override`
   trust/TEST-ONLY-trust-bundle.json  anchors and keys for the reference system
@@ -403,6 +413,8 @@ fixtures/reference/
 `scripts/gen_fixtures.py` writes the PKI, the QR images, the trust bundle, and the
 authorization. Keys are random, so the generated files are committed. The script is rerun only
 to rotate them. QR images are generated with zxing-cpp and Pillow (the `qr` extra).
+`scripts/gen_fixtures.py --fault-qr-only` writes only the QR images of faults F-30 and F-31. It
+rotates no key.
 `scripts/gen_fixtures.py --add-manual-key` adds only the manual signing key to the trust bundle.
 The rig signs manual results with it for the synthetic reference system only.
 
