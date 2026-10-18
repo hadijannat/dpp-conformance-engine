@@ -12,7 +12,7 @@ Prerequisites: read `docs/explanation/architecture.md` sections 8 and 9, and
 | --- | --- |
 | Date | 2026-10-18 |
 | Commit reviewed | `5aaca24`. The skeptics ran on the local `main` at `6cbd042`. |
-| Fixes | `58f15d7..2da2f4b` on branch `worktree-wf_46368434-d41-36`, and the commit "fix: apply adapter review check findings" that follows them (see "Check of the fixes") |
+| Fixes | `58f15d7..2da2f4b` on branch `worktree-wf_46368434-d41-36`, and the commit "fix: apply adapter review check findings" that follows them (see "Check of the fixes"). After the rebase onto `dbc88e0`, the fixes are `4e48f6b..ed5779c` (see "After this record") |
 | Reviewers | AI agents. Finders, reproduce skeptics, and the fixer are AI agents. None of them wrote the code under review. |
 | Nature | **An agent review. It is not an audit. No person has reviewed this record.** |
 
@@ -273,3 +273,23 @@ test generates a TEST-ONLY certificate authority and leaf. It trusts the authori
 `SSL_CERT_FILE`, which the default verify paths read. Verification stays on. A trusted
 certificate gives an answer. An untrusted certificate and a certificate for another host give
 the transport error `tls`. A check then reports `TRANSPORT.UNREACHABLE`, never a pass.
+
+## After this record
+
+The coordinator rebased the fixes onto `dbc88e0`. That commit holds report status lists,
+signer roles (ADR 0016), and the mutation tests of 2026-10-18. The rebase had no conflict.
+The commit identifiers in "Red runs" and "Findings" name the commits before the rebase. The red
+runs ran on those commits and were not run again. Each old commit has a new identifier:
+
+| Before the rebase | After the rebase |
+| --- | --- |
+| `58f15d7` | `4e48f6b` |
+| `641252f` | `c24a1a1` |
+| `a6e7d04` | `12bfb55` |
+| `742f0e0` | `95360d9` |
+| `28eb959` | `4d75b9a` |
+| `075b0a6` | `e0be256` |
+| `5c7a800` | `ae7e0fc` |
+| `2da2f4b` | `43afe2d` |
+| `c9bcbf4` | `0bdd982` |
+| `dbfed27` ("fix: apply adapter review check findings") | `ed5779c` |
