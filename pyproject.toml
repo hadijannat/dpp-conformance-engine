@@ -146,5 +146,5 @@ only_mutate = [
     "src/dppce/infrastructure/authorization.py",
 ]
 pytest_add_cli_args_test_selection = ["tests/"]
-also_copy = ["catalogue", "profiles", "testpacks", "fixtures", "validation", "scripts"]
+also_copy = ["catalogue", "profiles", "testpacks", "fixtures", "validation", "scripts", "docs"]
 pytest_add_cli_args = ["-m", "not validation and not qr", "-p", "no:cacheprovider", "-x"]
