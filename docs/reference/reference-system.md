@@ -150,6 +150,11 @@ Item-level data and model-level data are separate documents with separate schema
 `content_digest` is `dppce.evidence.canonical.digest` of the anonymous item-level passport of
 that version. Declared update rule of the reference system: a change of content needs a higher
 version number and a later or equal `updated_at`. The last entry describes the current document.
+The check compares `updated_at` values as instants. Each value must be an RFC 3339 date-time with
+an offset. A missing or other value breaks the rule. If the current passport has no canonical
+form, for example because it holds a decimal number, the digest cannot be compared. The check
+then gives `blocked` with `PERSISTENCE.DIGEST.NOT_COMPARABLE`, unless another part of the rule
+already fails.
 
 ### 4.4 Registry record (`/registry/{id}`)
 
@@ -195,9 +200,15 @@ rules:
 
 `basis.class` is `normative`, `engineering`, or `illustrative`. A `normative` rule must give
 `source_id` and `citation`. An `engineering` rule is a project threshold and is reported as such.
-The freshness limit is inclusive: an age of exactly `max_age_days` passes.
+The freshness limit is inclusive: an age of exactly `max_age_days` passes. An update time after
+the evaluation time fails the rule. The value must have the form `YYYY-MM-DDTHH:MM:SSZ` in ASCII
+digits.
+Each rule must give the fields of its kind: `fields` with no empty entry, `field` and `allowed`,
+`field` and `min` or `max`, `left` and `right`, or `field` and `max_age_days`. A pack with a rule
+that lacks them cannot be read.
 Field paths are dotted. A rule whose `when` expression is `false` is skipped; `unknown` makes
-the check inconclusive with the reason code `DATA.RULES.APPLICABILITY_UNKNOWN`.
+the check inconclusive with the reason code `DATA.RULES.APPLICABILITY_UNKNOWN`. If no rule
+applies to the document, the check gives `blocked` with `DATA.RULES.NONE_APPLIED`.
 
 Reason codes, in this order of precedence when more than one rule fails:
 `DATA.COMPLETENESS.MISSING`, `DATA.UNIT.INVALID`, `DATA.RANGE.VIOLATED`,
@@ -370,6 +381,8 @@ After the fetch:
 
 A profile constant `allowed_contexts` is not expressive enough, so the test purpose passes
 `params.allowed_contexts`: a list of exact context URLs. No context is fetched.
+The check reads every `@context` in the document, also in nested nodes and `@graph` members.
+`DATA.CONTEXT.MISSING` depends on the top-level `@context` only.
 Reason codes: `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, `DATA.CONTEXT.OK`.
 
 ## 6. Fault flags
@@ -501,6 +514,10 @@ Shared helpers in `dppce.adapters.common`:
   A record with no transport error and a status from 500 to 599 gives `TRANSPORT.SERVER_ERROR`.
 - `unusable(ctx, record)`: gives the outcome of `no_answer` for a transport error and for a
   status from 500 to 599. It also blocks a truncated or encoded body.
+- `not_200(ctx, area, record, records)`: the data, persistence, and registry checks judge a
+  document only with status 200. Status 401, 403, or 404 gives `blocked` with
+  `<AREA>.RESPONSE.NOT_CONCLUSIVE`: an anonymous request that is refused or not found proves
+  nothing about the document. Any other status gives a fail with `<AREA>.RESPONSE.STATUS`.
 
 A response that is not valid JSON where JSON is needed gives a `fail` with `<AREA>.RESPONSE.NOT_JSON`.
 The access check is the exception: it gives `blocked` with `ACCESS.RESPONSE.NOT_JSON`, because it
@@ -525,8 +542,8 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
 | `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
-| `persistence.versions` | none | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail) |
-| `registry.consistency` | none | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
+| `persistence.versions` | none | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail); no canonical form of the passport: `blocked`, `PERSISTENCE.DIGEST.NOT_COMPARABLE` (section 4.3) |
+| `registry.consistency` | none | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail). Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`) | `AAS.VALID` | `AAS.INVALID` (fail); sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
 
 ### 8.1 Outcomes of `integrity.jws`

@@ -148,6 +148,26 @@ def unusable(
     return None
 
 
+def not_200(ctx: CheckContext, area: str, record: Record, records: Sequence[Record]) -> CheckOutcome | None:
+    """Return an outcome if ``record`` did not answer 200, or None. Call it after ``unusable``.
+
+    401, 403, and 404 on an anonymous fetch prove nothing about the data, so the step is
+    ``blocked``. Any other status is a fail with ``<AREA>.RESPONSE.STATUS``. The body is not read.
+    """
+    if record.status == 200:
+        return None
+    observation = ctx.observation(0, kind="exchange", records=records, summary={"status": record.status})
+    if record.status in (401, 403, 404):
+        return CheckOutcome(
+            status=ExecutionStatus.BLOCKED,
+            reason_code=f"{area}.RESPONSE.NOT_CONCLUSIVE",
+            message=f"A document answers {record.status} to an anonymous request. That proves nothing.",
+            observations=(observation,),
+        )
+    message = f"A document answers {record.status}, not 200."
+    return completed(False, f"{area}.RESPONSE.STATUS", message, [observation])
+
+
 def json_object(record: Record, *, decimals: bool = False) -> dict[str, Any] | None:
     """Parse the body as one JSON object. A repeated key is ambiguous, so it is not accepted.
 

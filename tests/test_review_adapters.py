@@ -10,14 +10,20 @@ from __future__ import annotations
 import dataclasses
 import http.server
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from dppce.adapters.common import resource_url, schema_errors, validator
+from dppce.adapters.data import Rule, rule_holds
+from dppce.evidence.canonical import digest
+from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.models import CheckOutcome, ExecutionStatus
+from dppce.models import CheckOutcome, ExecutionStatus, Verdict, VerdictRules
+from dppce.verdicts import step_verdict
 from tests.support import make_record, reply
 from tests.test_resolved_target import (
     ITEM_PATH,
@@ -30,7 +36,8 @@ from tests.test_resolved_target import (
     served,
     template_mode,
 )
-from tests.test_url_templates import CONTRACT, REFERENCE, Canned, context, ixit, run, sent, write_data
+from tests.test_server_errors import Status
+from tests.test_url_templates import API, CONTRACT, REFERENCE, Canned, context, ixit, run, sent, write_data
 
 LENIENT = b'{"anything": true}'
 
@@ -363,3 +370,366 @@ def test_data_lifecycle_6_a_schema_bound_is_compared_exactly(
     (tmp_path / "schema.json").write_text(json.dumps(schema), encoding="utf-8")
     outcome = run(context(tmp_path, "data.jsonschema", acquirer=Canned(body)))
     assert (outcome.passed, outcome.reason_code) == expected
+
+
+# -- data and lifecycle: answers by URL --------------------------------------------------------------
+
+PID = "09506000134352-EV0001"
+ITEM_URL, VERSIONS_URL, REGISTRY_URL = (
+    f"{API}/dpp/{PID}",
+    f"{API}/dpp/{PID}/versions",
+    f"{API}/registry/{PID}",
+)
+ITEM: dict[str, Any] = {"id": "x"}
+ENTRY = b'{"identifier":"https://id/x","operator_identifier":"urn:op:1"}'
+
+
+class ByUrl(Canned):
+    """Answers each URL with its own status and body. Every other URL is not found."""
+
+    def __init__(self, answers: dict[str, tuple[int, bytes]]) -> None:
+        super().__init__()
+        self._answers = answers
+
+    def fetch(self, request: Request) -> Record:
+        status, body = self._answers.get(request.url, (404, b"{}"))
+        record = dataclasses.replace(make_record(len(self._records) + 1, body, request.url), status=status)
+        self._records.append(record)
+        return record
+
+
+def _history(*entries: dict[str, Any]) -> bytes:
+    return json.dumps({"versions": list(entries)}).encode()
+
+
+def _entry(version: int, stamp: str | None, content: dict[str, Any] = ITEM) -> dict[str, Any]:
+    entry: dict[str, Any] = {"version": version, "content_digest": digest(content)}
+    return entry | ({"updated_at": stamp} if stamp is not None else {})
+
+
+def _versions(
+    tmp_path: Path, history: bytes, item: bytes = b'{"id": "x"}', statuses: tuple[int, int] = (200, 200)
+) -> CheckOutcome:
+    answers = {VERSIONS_URL: (statuses[0], history), ITEM_URL: (statuses[1], item)}
+    return run(context(tmp_path, "persistence.versions", acquirer=ByUrl(answers)))
+
+
+def _not_a_finding(outcome: CheckOutcome) -> None:
+    """An answer that the engine cannot judge is never a completed fail against the system."""
+    assert outcome.passed is not True
+    verdict = step_verdict(outcome.status, outcome.passed, outcome.unreachable, VerdictRules())
+    assert verdict is Verdict.INCONCLUSIVE
+
+
+# -- data-lifecycle-1 and data-lifecycle-7: a refused or missing document ----------------------------
+
+HISTORY = _history(_entry(1, "2026-09-01T08:00:00Z"))
+
+
+@pytest.mark.parametrize("status", [401, 403, 404])
+def test_data_lifecycle_1_versions_does_not_judge_a_refused_item(status: int, tmp_path: Path) -> None:
+    outcome = _versions(tmp_path, HISTORY, b'{"error":"unauthorized"}', (200, status))
+    assert outcome.reason_code != "PERSISTENCE.UNDECLARED_CHANGE"
+    _not_a_finding(outcome)
+
+
+@pytest.mark.parametrize("status", [401, 403, 404])
+def test_data_lifecycle_1_versions_does_not_judge_a_refused_history(status: int, tmp_path: Path) -> None:
+    outcome = _versions(tmp_path, b'{"error":"denied"}', statuses=(status, 200))
+    assert outcome.reason_code != "PERSISTENCE.RESPONSE.NOT_JSON"
+    _not_a_finding(outcome)
+
+
+@pytest.mark.parametrize("status", [401, 403, 404])
+def test_data_lifecycle_1_registry_does_not_judge_a_refused_item(status: int, tmp_path: Path) -> None:
+    answers = {REGISTRY_URL: (200, ENTRY), ITEM_URL: (status, b'{"error":"unauthorized"}')}
+    outcome = run(context(tmp_path, "registry.consistency", acquirer=ByUrl(answers)))
+    assert outcome.reason_code != "REGISTRY.INCONSISTENT"
+    _not_a_finding(outcome)
+
+
+DATA_CHECKS: list[tuple[str, dict[str, Any]]] = [
+    ("data.rules", {}),
+    ("data.jsonschema", {"document": "item"}),
+    ("data.jsonschema", {"document": "model"}),
+    ("data.context", {"allowed_contexts": ["https://example.test/c"]}),
+]
+
+
+@pytest.mark.parametrize("status", [401, 403, 404])
+@pytest.mark.parametrize(("check", "params"), DATA_CHECKS)
+def test_data_lifecycle_7_a_refused_document_is_not_a_data_failure(
+    check: str, params: dict[str, Any], status: int, tmp_path: Path
+) -> None:
+    outcome = run(context(tmp_path, check, params=params, acquirer=Status(status, b'{"error":"x"}')))
+    assert outcome.reason_code != "DATA.RESPONSE.NOT_JSON", "the body is JSON"
+    _not_a_finding(outcome)
+    assert outcome.observations
+    assert outcome.observations[0].summary.get("status") == status
+
+
+def test_data_lifecycle_7_a_200_body_that_is_not_json_is_still_not_json(tmp_path: Path) -> None:
+    outcome = run(context(tmp_path, "data.jsonschema", acquirer=Status(200, b"<html>")))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "DATA.RESPONSE.NOT_JSON",
+    )
+
+
+# -- data-lifecycle-2 and server-clock-fixes-4: update times are instants ---------------------------
+
+
+@pytest.mark.parametrize(
+    "stamps",
+    [
+        ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00Z"),
+        ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00.5Z"),
+        ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00Z"),
+        ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00+01:00"),
+    ],
+    ids=["forward", "fractional-forward", "equal", "offset-equal"],
+)
+def test_data_lifecycle_2_a_later_or_equal_update_time_passes(
+    stamps: tuple[str, str], tmp_path: Path
+) -> None:
+    history = _history(_entry(1, stamps[0], {"id": "old"}), _entry(2, stamps[1]))
+    assert _versions(tmp_path, history).reason_code == "PERSISTENCE.OK"
+
+
+@pytest.mark.parametrize(
+    "stamps",
+    [
+        ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00+05:00"),
+        ("2026-10-10T08:00:00Z", "2026-9-01T08:00:00Z"),
+        (None, None),
+        ("2026-01-01T09:00:00Z", "not a time"),
+        ("2026-01-01T09:00:00", "2026-01-01T10:00:00Z"),
+        ("\u0662\u0660\u0662\u0666-01-01T09:00:00Z", "2026-01-01T10:00:00Z"),
+    ],
+    ids=["offset-back", "unpadded-back", "missing", "unparsable", "no-offset", "non-ascii"],
+)
+def test_data_lifecycle_2_a_backward_or_invalid_update_time_never_passes(
+    stamps: tuple[str | None, str | None], tmp_path: Path
+) -> None:
+    history = _history(_entry(1, stamps[0], {"id": "old"}), _entry(2, stamps[1]))
+    outcome = _versions(tmp_path, history)
+    assert (outcome.passed, outcome.reason_code) == (False, "PERSISTENCE.UNDECLARED_CHANGE")
+
+
+# -- data-lifecycle-3: a passport that has no canonical form ----------------------------------------
+
+
+@pytest.mark.parametrize("item", [b'{"id": "x", "soh": 97.5}', b'{"id": "x", "serial": 9007199254740993}'])
+def test_data_lifecycle_3_a_passport_without_canonical_form_is_not_an_undeclared_change(
+    item: bytes, tmp_path: Path
+) -> None:
+    stamp, last = "2026-01-01T00:00:00Z", "sha256:" + "0" * 64
+    history = _history({"version": 1, "updated_at": stamp, "content_digest": last})
+    outcome = _versions(tmp_path, history, item)
+    assert (outcome.status, outcome.passed) == (ExecutionStatus.BLOCKED, None)
+
+
+def test_data_lifecycle_3_a_real_rule_break_still_fails_without_a_digest(tmp_path: Path) -> None:
+    history = _history(_entry(2, "2026-01-01T00:00:00Z"), _entry(1, "2026-01-02T00:00:00Z"))
+    outcome = _versions(tmp_path, history, b'{"id": "x", "soh": 97.5}')
+    assert (outcome.passed, outcome.reason_code) == (False, "PERSISTENCE.UNDECLARED_CHANGE")
+
+
+# -- data-lifecycle-4: the registry compares present values as JSON values ---------------------------
+
+
+def _registry(tmp_path: Path, entry: dict[str, Any], passport: dict[str, Any]) -> CheckOutcome:
+    answers = {
+        REGISTRY_URL: (200, json.dumps(entry).encode()),
+        ITEM_URL: (200, json.dumps(passport).encode()),
+    }
+    return run(context(tmp_path, "registry.consistency", acquirer=ByUrl(answers)))
+
+
+@pytest.mark.parametrize(
+    ("entry", "passport"),
+    [
+        ({}, {}),
+        ({"identifier": PID}, {"id": PID}),
+        ({"identifier": 1, "operator_identifier": 1}, {"id": True, "operator": {"identifier": True}}),
+    ],
+    ids=["both-empty", "operator-absent-both", "true-is-not-1"],
+)
+def test_data_lifecycle_4_registry_never_passes_on_absent_or_type_confused_fields(
+    entry: dict[str, Any], passport: dict[str, Any], tmp_path: Path
+) -> None:
+    outcome = _registry(tmp_path, entry, passport)
+    assert outcome.passed is False
+    assert outcome.reason_code != "REGISTRY.OK"
+
+
+def test_data_lifecycle_4_registry_passes_when_present_fields_match(tmp_path: Path) -> None:
+    entry = {"identifier": PID, "operator_identifier": "op-1"}
+    outcome = _registry(tmp_path, entry, {"id": PID, "operator": {"identifier": "op-1"}})
+    assert (outcome.passed, outcome.reason_code) == (True, "REGISTRY.OK")
+
+
+# -- data-lifecycle-5: every @context in the document ------------------------------------------------
+
+ALLOWED = ["https://ok.example.test/ctx"]
+EVIL = "https://evil.example.test/ctx"
+
+
+def _contexts(tmp_path: Path, body: dict[str, Any]) -> CheckOutcome:
+    params = {"allowed_contexts": ALLOWED}
+    return run(context(tmp_path, "data.context", params=params, acquirer=Canned(json.dumps(body).encode())))
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"@context": ALLOWED, "operator": {"@context": EVIL, "name": "x"}},
+        {"@context": ALLOWED, "@graph": [{"@context": EVIL, "id": "x"}]},
+        {"@context": ALLOWED, "parts": [{"@context": {"x": "https://evil.example.test/v#"}}]},
+        {"@context": ALLOWED, "a": {"b": [{"c": {"@context": [ALLOWED[0], EVIL]}}]}},
+    ],
+    ids=["nested-node", "graph-member", "nested-inline", "deep-list"],
+)
+def test_data_lifecycle_5_a_nested_foreign_context_is_not_allowed(
+    body: dict[str, Any], tmp_path: Path
+) -> None:
+    outcome = _contexts(tmp_path, body)
+    assert (outcome.passed, outcome.reason_code) == (False, "DATA.CONTEXT.NOT_ALLOWED")
+    assert outcome.observations[0].summary["not_allowed"]
+
+
+def test_data_lifecycle_5_a_nested_allowed_context_still_passes(tmp_path: Path) -> None:
+    outcome = _contexts(tmp_path, {"@context": ALLOWED, "operator": {"@context": ALLOWED[0], "name": "x"}})
+    assert (outcome.passed, outcome.reason_code) == (True, "DATA.CONTEXT.OK")
+
+
+# -- data-lifecycle-8: a rule pack that judges nothing -----------------------------------------------
+
+BASIS = {"class": "illustrative"}
+
+
+def _rules(tmp_path: Path, rules: list[dict[str, Any]]) -> CheckOutcome:
+    write_data(tmp_path)
+    pack = {"schema_version": "dppce.rulepack/1", "rulepack_id": "t/r", "version": "1", "rules": rules}
+    (tmp_path / "rules.json").write_text(json.dumps(pack), encoding="utf-8")
+    return run(context(tmp_path, "data.rules", acquirer=Canned(b"{}")))
+
+
+SWITCHED_OFF = {"fact": "profile.product_category", "op": "eq", "value": "ev"}
+
+
+@pytest.mark.parametrize(
+    "rules",
+    [
+        [],
+        [{"id": "M", "kind": "required_fields", "document": "model", "fields": ["id"], "basis": BASIS}],
+        [
+            {
+                "id": "W",
+                "kind": "required_fields",
+                "document": "item",
+                "fields": ["id"],
+                "when": SWITCHED_OFF,
+                "basis": BASIS,
+            }
+        ],
+    ],
+    ids=["empty-pack", "only-model-rules", "switched-off"],
+)
+def test_data_lifecycle_8_zero_applied_rules_is_not_a_pass(
+    rules: list[dict[str, Any]], tmp_path: Path
+) -> None:
+    outcome = _rules(tmp_path, rules)
+    assert outcome.passed is not True
+    assert outcome.reason_code != "DATA.RULES.OK"
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {"kind": "required_fields", "fields": []},
+        {"kind": "required_fields", "fields": [""]},
+        {"kind": "range", "field": "x"},
+        {"kind": "unit", "field": "", "allowed": ["Wh"]},
+        {"kind": "unit", "field": "u", "allowed": []},
+        {"kind": "freshness", "field": "updated_at"},
+        {"kind": "relationship", "left": "", "right": "b"},
+    ],
+    ids=[
+        "required-no-fields",
+        "required-empty-field",
+        "range-no-bounds",
+        "unit-empty-field",
+        "unit-empty-allowed",
+        "freshness-no-limit",
+        "relationship-empty-side",
+    ],
+)
+def test_data_lifecycle_8_a_rule_that_cannot_judge_is_refused(fields: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        Rule.model_validate({"id": "X", "document": "item", "basis": BASIS} | fields)
+
+
+# -- data-lifecycle-10, server-clock-fixes-5, server-clock-fixes-6: update times for freshness --------
+
+NOW = datetime(2026, 10, 13, 12, tzinfo=UTC)
+FRESH = Rule.model_validate(
+    {
+        "id": "R-F",
+        "kind": "freshness",
+        "document": "item",
+        "field": "updated_at",
+        "max_age_days": 30,
+        "basis": BASIS,
+    }
+)
+
+
+def test_server_clock_fixes_6_the_freshness_limit_is_inclusive() -> None:
+    assert rule_holds(FRESH, {"updated_at": utc_stamp(NOW - timedelta(days=30))}, NOW)
+    assert rule_holds(FRESH, {"updated_at": utc_stamp(NOW)}, NOW)
+
+
+@pytest.mark.parametrize("ahead", [timedelta(seconds=1), timedelta(days=26_000)])
+def test_data_lifecycle_10_and_server_clock_fixes_6_a_future_update_time_is_not_fresh(
+    ahead: timedelta,
+) -> None:
+    assert not rule_holds(FRESH, {"updated_at": utc_stamp(NOW + ahead)}, NOW)
+
+
+NON_CANONICAL = [
+    "\u0662\u0660\u0662\u0666-10-10T08:00:00Z",
+    "\uff12\uff10\uff12\uff16-10-10T08:00:00Z",
+    "2026-1-1T1:1:1Z",
+    "2026-10-10T08:00:00z",
+    " 2026-10-10T08:00:00Z",
+]
+
+
+def test_server_clock_fixes_5_a_canonical_stamp_round_trips() -> None:
+    assert utc_stamp(parse_stamp("2026-10-10T08:00:00Z")) == "2026-10-10T08:00:00Z"
+
+
+@pytest.mark.parametrize("text", NON_CANONICAL)
+def test_server_clock_fixes_5_parse_stamp_refuses_what_utc_stamp_never_writes(text: str) -> None:
+    with pytest.raises(ValueError, match="canonical"):
+        parse_stamp(text)
+
+
+@pytest.mark.parametrize("text", NON_CANONICAL[:2])
+def test_server_clock_fixes_5_the_freshness_rule_fails_a_non_ascii_stamp(text: str) -> None:
+    assert not rule_holds(FRESH, {"updated_at": text}, datetime(2026, 10, 18, tzinfo=UTC))
+
+
+def test_server_clock_fixes_5_the_pinned_item_schema_refuses_a_non_ascii_stamp() -> None:
+    # Python reads \\d as any Unicode digit; ECMA-262, the regex dialect of JSON Schema, does not.
+    root = Path(__file__).resolve().parents[1]
+    schema = json.loads((root / "profiles/battery/schemas/item.schema.json").read_text(encoding="utf-8"))
+    check = validator(schema["properties"]["updated_at"])
+    assert check is not None
+    assert schema_errors(check, "2026-10-10T08:00:00Z") == []
+    assert schema_errors(check, NON_CANONICAL[0]) == [{"path": "/", "keyword": "pattern"}]
+    assert "\\d" not in (root / "profiles/battery/contracts/reference-api.openapi.yaml").read_text(
+        encoding="utf-8"
+    )

@@ -81,10 +81,13 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `DATA.NO_TARGET` | DATA | `data.context`, `data.jsonschema`, `data.rules` | `dppce.adapters.data._fetch_document`, `dppce.adapters.data.context_check`, `dppce.adapters.data.jsonschema_check`, `dppce.adapters.data.rules_check` | inconclusive |
 | `DATA.RANGE.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here |
 | `DATA.RELATIONSHIP.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here |
+| `DATA.RESPONSE.NOT_CONCLUSIVE` | DATA |  | `dppce.adapters.data._fetch_document` | inconclusive |
 | `DATA.RESPONSE.NOT_JSON` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule |
+| `DATA.RESPONSE.STATUS` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule |
 | `DATA.RESPONSE.TOO_DEEP` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.RULES.APPLICABILITY_UNKNOWN` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
 | `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
+| `DATA.RULES.NONE_APPLIED` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
 | `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass |
 | `DATA.SCHEMA.INVALID` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | fail; inconclusive under a non-default verdict rule |
 | `DATA.SCHEMA.MISSING` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
@@ -158,9 +161,12 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `MODE.NOT_PERMITTED` | MODE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
 | `PATH.APPLICABILITY_UNKNOWN` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `PATH.NO_STEP` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
+| `PERSISTENCE.DIGEST.NOT_COMPARABLE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.NO_TARGET` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.OK` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | pass |
+| `PERSISTENCE.RESPONSE.NOT_CONCLUSIVE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.RESPONSE.NOT_JSON` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
+| `PERSISTENCE.RESPONSE.STATUS` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
 | `PERSISTENCE.UNDECLARED_CHANGE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
 | `PLAN.BLOCKED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
 | `PLAN.MANUAL_UNAVAILABLE` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
@@ -169,11 +175,14 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `PLAN.STEP_MISSING` | PLAN |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `PLAN.UNSUPPORTED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
 | `PROFILE.NOT_SELECTED` | PROFILE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
+| `REGISTRY.FIELD.MISSING` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
 | `REGISTRY.INCONSISTENT` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
 | `REGISTRY.LOOKUP.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive; fail under a non-default verdict rule |
 | `REGISTRY.NO_TARGET` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
 | `REGISTRY.OK` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | pass |
+| `REGISTRY.RESPONSE.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
 | `REGISTRY.RESPONSE.NOT_JSON` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
+| `REGISTRY.RESPONSE.STATUS` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
 | `REPLAY.DATA_ROOT.MISSING` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
 | `REPLAY.INPUT.CHANGED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
 | `REPLAY.INPUT.NOT_RECORDED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |

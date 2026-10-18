@@ -21,6 +21,7 @@ from dppce.adapters.common import (
     fetch_once,
     item_url,
     json_object,
+    not_200,
     resource_url,
     schema_errors,
     unassertable_formats,
@@ -76,6 +77,20 @@ class Rule(Model):
     right: str = ""
     max_age_days: int | None = Field(default=None, ge=0)
 
+    @model_validator(mode="after")
+    def _judges_something(self) -> Self:
+        # A rule without the fields of its kind always holds. It would count as applied and pass.
+        needed: dict[str, bool] = {
+            "required_fields": bool(self.fields) and all(self.fields),
+            "unit": bool(self.field and self.allowed),
+            "range": bool(self.field) and (self.min is not None or self.max is not None),
+            "relationship": bool(self.left and self.right),
+            "freshness": bool(self.field) and self.max_age_days is not None,
+        }
+        if not needed[self.kind]:
+            raise ValueError(f"a {self.kind} rule needs the fields of its kind")
+        return self
+
 
 class RulePack(Model):
     schema_version: Literal["dppce.rulepack/1"]
@@ -103,9 +118,9 @@ def _fetch_document(
     if isinstance(url, CheckOutcome):
         return None, None, url
     record = fetch_once(ctx, url)
-    if (problem := unusable(ctx, record)) is not None:
+    if (problem := unusable(ctx, record) or not_200(ctx, area, record, [record])) is not None:
         return None, record, problem
-    document = json_object(record, decimals=decimals) if record.status == 200 else None
+    document = json_object(record, decimals=decimals)
     if document is None:
         observation = ctx.observation(0, kind="exchange", records=[record], summary={"status": record.status})
         message = f"The {kind}-level document is not a JSON object (status {record.status})."
@@ -165,9 +180,22 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
         return problem or blocked("DATA.NO_TARGET", "No document is available.")
     declared = document.get("@context")
     entries = declared if isinstance(declared, list) else [declared] if declared is not None else []
+    # A JSON-LD processor also reads a scoped @context in any nested node, so each one counts.
+    # A work list, not recursion: a deeply nested document must not stop the check.
+    every: list[Any] = []
+    pending: list[Any] = [document]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, dict):
+            value = node.get("@context")
+            if value is not None:
+                every.extend(value if isinstance(value, list) else [value])
+            pending.extend(node.values())
+        elif isinstance(node, list):
+            pending.extend(node)
     # An inline context object is not a pinned reference, so it is never in the allowlist.
     foreign = sorted(
-        str(e) if isinstance(e, str) else "<inline context>" for e in entries if e not in allowed
+        {str(e) if isinstance(e, str) else "<inline context>" for e in every if e not in allowed}
     )
     summary = {"document": kind, "contexts": len(entries), "not_allowed": foreign}
     observation = ctx.observation(0, kind="exchange", records=[record], summary=summary)
@@ -220,8 +248,9 @@ def rule_holds(rule: Rule, document: dict[str, Any], now: datetime) -> bool:
         updated = parse_stamp(str(value))
     except ValueError:
         return False
-    # The limit is inclusive: an age of exactly max_age_days passes.
-    return now - updated <= timedelta(days=rule.max_age_days)
+    # The limit is inclusive: an age of exactly max_age_days passes. An update time after the
+    # evaluation time is not a real last update, as for the trust status snapshot (integrity.py).
+    return timedelta(0) <= now - updated <= timedelta(days=rule.max_age_days)
 
 
 @register("data.rules", capability="data.rules", params=DocumentParams)
@@ -265,6 +294,12 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
         "failed_engineering_rules": [r.id for r in failed if r.basis.basis_class == "engineering"],
     }
     observation = ctx.observation(0, kind="exchange", records=[record], summary=summary)
+    if not applied:
+        # No rule judged the document, so a pass would claim what was never checked.
+        return blocked(
+            "DATA.RULES.NONE_APPLIED",
+            f"No rule of the pinned rule packs applies to the {kind}-level document.",
+        )
     if not failed:
         return completed(
             True, "DATA.RULES.OK", f"The document obeys the {applied} rules that apply.", [observation]

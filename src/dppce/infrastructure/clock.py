@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 
 STAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+# Explicit ASCII digits: strptime reads any Unicode digit and accepts unpadded fields.
+_STAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+_RFC3339 = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-9]{2})"
+)
 
 
 def utc_stamp(moment: datetime) -> str:
@@ -15,7 +21,20 @@ def utc_stamp(moment: datetime) -> str:
 
 
 def parse_stamp(text: str) -> datetime:
+    """Parse exactly the form that ``utc_stamp`` writes. Anything else is a ValueError."""
+    if not _STAMP.fullmatch(text):
+        raise ValueError("not a canonical timestamp")
     return datetime.strptime(text, STAMP_FORMAT).replace(tzinfo=UTC)
+
+
+def parse_instant(text: str) -> datetime:
+    """Parse an RFC 3339 date-time with an explicit offset, as a system under test may write it.
+
+    ponytail: at most six fractional digits, the precision of datetime; a longer fraction is a ValueError.
+    """
+    if not _RFC3339.fullmatch(text):
+        raise ValueError("not an RFC 3339 date-time with an offset")
+    return datetime.fromisoformat(text)
 
 
 class SystemClock:

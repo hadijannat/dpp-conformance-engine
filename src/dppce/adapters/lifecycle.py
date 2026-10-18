@@ -10,21 +10,27 @@ Each of these checks states a limit that its verdict must not hide:
 
 from __future__ import annotations
 
+from datetime import datetime
 from itertools import pairwise
 from typing import Any
 
 from pydantic import Field
 
 from dppce.adapters.common import (
+    MISSING,
     blocked,
     completed,
+    dig,
     fetch_once,
     json_object,
+    not_200,
     not_done,
     resource_url,
+    same_json,
     unusable,
 )
 from dppce.evidence.canonical import CanonicalizationError, digest, parse_strict
+from dppce.infrastructure.clock import parse_instant
 from dppce.models import CheckOutcome, ExecutionStatus, Model
 from dppce.testdefs.registry import CheckContext, register
 
@@ -39,7 +45,9 @@ def versions(ctx: CheckContext) -> CheckOutcome:
         return item_url
     history, item = fetch_once(ctx, versions_url), fetch_once(ctx, item_url)
     for record in (history, item):
-        if (problem := unusable(ctx, record)) is not None:
+        if (
+            problem := unusable(ctx, record) or not_200(ctx, "PERSISTENCE", record, [history, item])
+        ) is not None:
             return problem
     listing, current = json_object(history), json_object(item)
     entries = listing.get("versions") if listing else None
@@ -52,26 +60,42 @@ def versions(ctx: CheckContext) -> CheckOutcome:
         )
     problems: list[str] = []
     numbers = [e["version"] for e in entries if isinstance(e, dict) and type(e.get("version")) is int]
-    stamps = [str(e.get("updated_at", "")) if isinstance(e, dict) else "" for e in entries]
     if len(numbers) != len(entries) or any(a >= b for a, b in pairwise(numbers)):
         problems.append("version numbers do not strictly ascend")
-    if any(a > b for a, b in pairwise(stamps)):
+    # Instants, not text: an offset or a fraction changes the text order.
+    stamps = [_instant(e.get("updated_at") if isinstance(e, dict) else None) for e in entries]
+    known = [stamp for stamp in stamps if stamp is not None]
+    if len(known) != len(stamps):
+        problems.append("an update time is missing or is not an RFC 3339 date-time with an offset")
+    elif any(a > b for a, b in pairwise(known)):
         problems.append("an update time goes back")
+    last = entries[-1].get("content_digest") if isinstance(entries[-1], dict) else None
     try:
-        last = entries[-1].get("content_digest") if isinstance(entries[-1], dict) else None
-        if last != digest(current):
-            problems.append("the last digest is not the digest of the current passport")
+        current_digest: str | None = digest(current)
     except CanonicalizationError:
-        problems.append("the current passport cannot be put in canonical form")
+        current_digest = None
+    if current_digest is not None and last != current_digest:
+        problems.append("the last digest is not the digest of the current passport")
     summary: dict[str, Any] = {"entries": len(entries), "problems": problems}
     observation = ctx.observation(0, kind="exchange", records=[history, item], summary=summary)
     limit = "A few observations cannot prove lifetime availability."
     if problems:
         message = f"The history breaks the declared update rule: {'; '.join(problems)}. {limit}"
         return completed(False, "PERSISTENCE.UNDECLARED_CHANGE", message, [observation])
+    if current_digest is None:
+        # The passport holds a number outside the canonical range, so its digest cannot be compared.
+        message = "The current passport has no canonical form, so the engine cannot compare its digest."
+        return blocked("PERSISTENCE.DIGEST.NOT_COMPARABLE", message)
     return completed(
         True, "PERSISTENCE.OK", f"The version history obeys the declared update rule. {limit}", [observation]
     )
+
+
+def _instant(value: Any) -> datetime | None:
+    try:
+        return parse_instant(value) if isinstance(value, str) else None
+    except ValueError:
+        return None
 
 
 @register("registry.consistency", capability="registry.mock")
@@ -94,8 +118,11 @@ def registry_consistency(ctx: CheckContext) -> CheckOutcome:
     item = fetch_once(ctx, item_url)
     if (problem := unusable(ctx, item)) is not None:
         return problem
+    for record in (lookup, item):
+        if (problem := not_200(ctx, "REGISTRY", record, [lookup, item])) is not None:
+            return problem
     entry, passport = json_object(lookup), json_object(item)
-    if lookup.status != 200 or entry is None or passport is None:
+    if entry is None or passport is None:
         observation = ctx.observation(
             0, kind="exchange", records=[lookup, item], summary={"status": lookup.status}
         )
@@ -105,17 +132,26 @@ def registry_consistency(ctx: CheckContext) -> CheckOutcome:
             "The registry record or the passport is not usable JSON.",
             [observation],
         )
-    operator = passport.get("operator")
-    expected = {
-        "identifier": passport.get("id"),
-        "operator_identifier": operator.get("identifier") if isinstance(operator, dict) else None,
+    pairs = {
+        "identifier": (entry.get("identifier", MISSING), dig(passport, "id")),
+        "operator_identifier": (
+            entry.get("operator_identifier", MISSING),
+            dig(passport, "operator.identifier"),
+        ),
     }
-    different = sorted(name for name, value in expected.items() if entry.get(name) != value)
-    summary = {"compared": sorted(expected), "different": different}
+    # A field absent on either side was not compared, so it cannot agree (rule 7).
+    missing = sorted(name for name, pair in pairs.items() if MISSING in pair or None in pair)
+    compared = sorted(set(pairs) - set(missing))
+    # JSON values, not Python equality: true is not 1.
+    different = [name for name in compared if not same_json(*pairs[name])]
+    summary = {"compared": compared, "different": different, "missing": missing}
     observation = ctx.observation(0, kind="exchange", records=[lookup, item], summary=summary)
     if different:
         message = f"The registry record differs from the passport in: {', '.join(different)}."
         return completed(False, "REGISTRY.INCONSISTENT", message, [observation])
+    if missing:
+        message = f"The registry record or the passport has no value for: {', '.join(missing)}."
+        return completed(False, "REGISTRY.FIELD.MISSING", message, [observation])
     return completed(
         True,
         "REGISTRY.OK",

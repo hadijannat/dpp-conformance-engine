@@ -79,7 +79,7 @@ def test_a_server_error_is_no_answer_for_each_fetching_check(
 @pytest.mark.parametrize(("status", "server_error"), [(499, False), (500, True), (599, True), (600, False)])
 def test_the_server_error_range_is_500_to_599(status: int, server_error: bool, tmp_path: Path) -> None:
     outcome = _fetching(tmp_path, "data.jsonschema", {"document": "item"}, status)
-    expected = ("TRANSPORT.SERVER_ERROR", True) if server_error else ("DATA.RESPONSE.NOT_JSON", False)
+    expected = ("TRANSPORT.SERVER_ERROR", True) if server_error else ("DATA.RESPONSE.STATUS", False)
     assert (outcome.reason_code, outcome.unreachable) == expected
     assert outcome.passed is False
 
