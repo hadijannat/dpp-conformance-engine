@@ -10,6 +10,9 @@ Needs the ``qr`` extra (zxing-cpp and Pillow) for the QR images.
 
 ``--degraded-qr-only`` writes only the degraded QR images in ``qr/degraded``. They have no
 randomness, so this option rotates no key.
+
+``--add-manual-key`` adds the key ``TEST-ONLY-manual-key-1`` (trust purpose ``manual``) to the
+existing trust bundle and writes its private key. It rotates no other key.
 """
 
 from __future__ import annotations
@@ -42,6 +45,8 @@ SUT = "urn:example:sut:reference-dpp"
 OPERATOR = "urn:example:operator:0001"
 LAB = "urn:example:test-lab"
 VALID_FROM, VALID_TO = "2026-01-01T00:00:00Z", "2036-01-01T00:00:00Z"
+# The key identifier names no person. A laboratory maps it to the performer in its own records.
+MANUAL_KID = "TEST-ONLY-manual-key-1"
 
 # profile -> (serial, rated Wh, remaining Wh, nominal V, mass kg)
 ITEMS = {
@@ -321,8 +326,10 @@ def _pki() -> x509.Certificate:
 def _trust_and_authorization(root: x509.Certificate) -> None:
     report = LocalSigner.generate("TEST-ONLY-report-key-1")
     owner = LocalSigner.generate("TEST-ONLY-owner-key-1")
+    manual, manual_key = _manual_key()
     _write(OUT / "trust" / "TEST-ONLY-report-signing.key.pem", report.to_pem())
     _write(OUT / "authorization" / "TEST-ONLY-owner.key.pem", owner.to_pem())
+    _write(OUT / "trust" / "TEST-ONLY-manual-signing.key.pem", manual.to_pem())
     bundle = TrustBundle(
         schema_version="dppce.trust/1",
         policy_version="TEST-ONLY-reference-1",
@@ -335,6 +342,7 @@ def _trust_and_authorization(root: x509.Certificate) -> None:
                 kid=owner.key_id, issuer=OPERATOR, purposes=("authorization",), public_jwk=owner.public_jwk(),
                 not_before=VALID_FROM, not_after=VALID_TO,
             ),
+            manual_key,
         ),
         anchors=(
             TrustAnchor(
@@ -364,6 +372,28 @@ def _trust_and_authorization(root: x509.Certificate) -> None:
     )
 
 
+def _manual_key() -> tuple[LocalSigner, TrustedKey]:
+    """A TEST-ONLY key of a person who signs manual results for the synthetic reference system."""
+    signer = LocalSigner.generate(MANUAL_KID)
+    key = TrustedKey(
+        kid=signer.key_id, issuer=LAB, purposes=("manual",), public_jwk=signer.public_jwk(),
+        not_before=VALID_FROM, not_after=VALID_TO,
+    )  # fmt: skip
+    return signer, key
+
+
+def _add_manual_key() -> None:
+    """Append the manual key to the existing bundle. No other key rotates."""
+    path = OUT / "trust" / "TEST-ONLY-trust-bundle.json"
+    bundle = TrustBundle.model_validate_json(path.read_bytes())
+    if any(k.kid == MANUAL_KID for k in bundle.keys):
+        raise SystemExit(f"{path} already holds the key {MANUAL_KID}")
+    signer, key = _manual_key()
+    _write(OUT / "trust" / "TEST-ONLY-manual-signing.key.pem", signer.to_pem())
+    bundle = bundle.model_copy(update={"keys": (*bundle.keys, key)})
+    _write(path, bundle.model_dump_json(indent=2) + "\n")
+
+
 def _roles() -> None:
     tokens = {role: f"TEST-ONLY-{secrets.token_urlsafe(18)}" for role in ("legitimate_interest", "authority")}
     _json(OUT / "roles.json", {"tokens": {token: role for role, token in tokens.items()}})
@@ -372,6 +402,10 @@ def _roles() -> None:
 
 
 def main() -> None:
+    if sys.argv[1:] == ["--add-manual-key"]:
+        _add_manual_key()
+        print(f"added {MANUAL_KID} to {OUT / 'trust' / 'TEST-ONLY-trust-bundle.json'}")
+        return
     _degraded_qr()
     if sys.argv[1:] == ["--degraded-qr-only"]:
         print(f"wrote degraded QR images to {OUT / 'qr' / 'degraded'}")

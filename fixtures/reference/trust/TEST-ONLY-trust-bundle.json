@@ -33,6 +33,21 @@
       },
       "not_before": "2026-01-01T00:00:00Z",
       "not_after": "2036-01-01T00:00:00Z"
+    },
+    {
+      "kid": "TEST-ONLY-manual-key-1",
+      "issuer": "urn:example:test-lab",
+      "purposes": [
+        "manual"
+      ],
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "GF1Xm3iADFGkVwo33q9tHsp9ctSoNHTZIl4WdWcJMBY",
+        "y": "8MWY4cO79ZppFud4xTcq5HZzMj1NCSiMeLDeYj5iFyE"
+      },
+      "not_before": "2026-01-01T00:00:00Z",
+      "not_after": "2036-01-01T00:00:00Z"
     }
   ],
   "anchors": [
