@@ -23,13 +23,15 @@ from dppce.adapters.carrier import qr_decode
 from dppce.adapters.common import effective_url, resource_url, schema_errors, validator
 from dppce.adapters.data import Rule, rule_holds
 from dppce.adapters.identifier import consistency, parse_gs1_digital_link, resolve
-from dppce.evidence.canonical import digest
+from dppce.evidence.canonical import canonical_bytes, digest
+from dppce.evidence.jws import LocalSigner, sign_compact
+from dppce.infrastructure.authorization import AUTHORIZATION_TYP, AuthorizationError, validate_authorization
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.models import CheckOutcome, ExecutionStatus, Verdict, VerdictRules
+from dppce.models import CheckOutcome, ExecutionStatus, TrustBundle, Verdict, VerdictRules
 from dppce.testdefs.registry import CheckContext
 from dppce.verdicts import step_verdict
-from tests.support import make_record, reply
+from tests.support import AT, make_record, reply
 from tests.test_adapters_identifier import Resolver, _with_identifier, live
 from tests.test_adapters_security import _POLICY, _Canned, _context
 from tests.test_resolved_target import (
@@ -45,6 +47,7 @@ from tests.test_resolved_target import (
 )
 from tests.test_review_findings import transport as review_transport
 from tests.test_server_errors import Status
+from tests.test_transport import authorization
 from tests.test_url_templates import API, CONTRACT, REFERENCE, Canned, context, ixit, run, sent, write_data
 
 LENIENT = b'{"anything": true}'
@@ -758,6 +761,41 @@ def test_server_clock_fixes_5_the_pinned_item_schema_refuses_a_non_ascii_stamp()
     assert "\\d" not in (root / "profiles/battery/contracts/reference-api.openapi.yaml").read_text(
         encoding="utf-8"
     )
+
+
+# The models must refuse what parse_stamp refuses, or an input defect surfaces as an engine error.
+MODEL_REFUSES = NON_CANONICAL[:3]
+
+
+@pytest.mark.parametrize("text", MODEL_REFUSES)
+@pytest.mark.parametrize("end", ["not_before", "not_after"])
+def test_integration_1_a_signed_authorization_with_a_non_canonical_stamp_is_malformed(
+    signer: LocalSigner, trust: TrustBundle, end: str, text: str
+) -> None:
+    payload = authorization().model_dump(mode="json") | {end: text}
+    # Canonical bytes, so that only the stamp can make the payload malformed.
+    token = sign_compact(canonical_bytes(payload), signer, typ=AUTHORIZATION_TYP)
+    with pytest.raises(AuthorizationError) as caught:
+        validate_authorization(token, trust, AT, "urn:example:sut")
+    assert caught.value.code == "AUTHZ.MALFORMED"
+
+
+@pytest.mark.parametrize("text", MODEL_REFUSES)
+@pytest.mark.parametrize("end", ["not_before", "not_after"])
+def test_integration_1_a_trusted_key_with_a_non_canonical_stamp_is_refused(
+    trust: TrustBundle, end: str, text: str
+) -> None:
+    key = trust.keys[0].model_dump() | {end: text}
+    with pytest.raises(ValidationError):
+        TrustBundle.model_validate(trust.model_dump() | {"keys": [key]})
+
+
+@pytest.mark.parametrize("text", MODEL_REFUSES)
+def test_integration_1_a_status_snapshot_with_a_non_canonical_stamp_is_refused(
+    trust: TrustBundle, text: str
+) -> None:
+    with pytest.raises(ValidationError):
+        TrustBundle.model_validate(trust.model_dump() | {"status_as_of": text})
 
 
 # -- identifier-carrier-1, -3, -4: a carrier text that is not a usable URL ----------------------------

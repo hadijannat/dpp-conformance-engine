@@ -12,7 +12,8 @@ from pydantic import Field, field_validator, model_validator
 
 from dppce.models.base import Model
 
-STAMP = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
+# Explicit ASCII digits: pydantic reads \d as any Unicode digit, and parse_stamp refuses those.
+STAMP = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
 # Hexadecimal, colons permitted. Compared as an integer.
 SERIAL = r"^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$"
 

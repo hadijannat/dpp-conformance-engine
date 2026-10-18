@@ -50,10 +50,12 @@
       "type": "array"
     },
     "not_after": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
       "title": "Not After",
       "type": "string"
     },
     "not_before": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
       "title": "Not Before",
       "type": "string"
     },

@@ -244,10 +244,15 @@ The owner authorized T1 contract edits on 2026-10-18. These edits were made:
 - `docs/explanation/architecture.md` section 9.1: no query and no fragment in a resolved URL;
   the judged fetch of `api.contract` follows no redirect.
 - `docs/reference/reference-system.md`: the new reason codes and rules.
-- `tests/test_server_errors.py`: status 499 now expects `DATA.RESPONSE.STATUS`. It is still a
-  fail and still not `unreachable`. Only the reason code changed.
+- `tests/test_server_errors.py`: status 499 and status 600 now expect `DATA.RESPONSE.STATUS`
+  (not_200). Both are still a fail and not `unreachable`. Only the reason code changed.
 - `profiles/battery/schemas/item.schema.json` and
   `profiles/battery/contracts/reference-api.openapi.yaml`: `\d` became `[0-9]`.
+- `src/dppce/models/trust.py`: `STAMP` uses `[0-9]`, not `\d`. It applies to the trust bundle,
+  the attestation (`valid_until`), and the status list (`issued_at`).
+- `src/dppce/models/declarations.py`: `Authorization.not_before` and `not_after` now have the
+  `STAMP` pattern. Before, they had no pattern.
+- `src/dppce/schemas/v1/`: `scripts/gen_schemas.py` regenerated five schemas.
 
 The check of the fixes added these edits to `docs/reference/reference-system.md`: a response
 with `$ref`, an empty `content` map, a malformed schema, `DATA.SCHEMA.MALFORMED`, and a
@@ -263,6 +268,8 @@ lower-case `T` and `Z`. `docs/reference/reason-codes.md` was regenerated with
 - A credential echoed in base64 or in a mix of forms is still not recognized.
 - A leap second (`:60`) in `updated_at` fails the declared rule. The owner can accept that as
   the declared profile in section 4.3, or ask for a `blocked` outcome in `lifecycle.py`.
+- A stamp with a date that does not exist, such as month 13, passes the `STAMP` pattern.
+  `parse_stamp` then raises `ValueError`. This was so before the fixes too.
 - The brief permits two agent review rounds. This review and its check came after those two.
   The owner has not stated how they relate to that limit.
 
@@ -293,3 +300,12 @@ runs ran on those commits and were not run again. Each old commit has a new iden
 | `2da2f4b` | `43afe2d` |
 | `c9bcbf4` | `0bdd982` |
 | `dbfed27` ("fix: apply adapter review check findings") | `ed5779c` |
+
+An integration review of the rebased branch found one more defect. The fix of
+server-clock-fixes-5 made `parse_stamp` strict, but the models still accepted other stamps.
+An unpadded stamp or a stamp with Unicode digits passed the models. Then `parse_stamp` raised
+`ValueError` in the authorization check, the policy transport, and the status check. Each case
+reported an input defect as an engine defect. Now the models refuse these stamps. A signed
+authorization with such a stamp gives `AUTHZ.MALFORMED`. The tests start with `integration_1`.
+Against `cb3041e`, 12 of the 15 new cases failed. The 3 unpadded cases for a trusted key and a
+status snapshot passed, because `\d{2}` already refused them.

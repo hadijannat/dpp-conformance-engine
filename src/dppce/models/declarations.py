@@ -8,6 +8,7 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, model_validator
 
 from dppce.models.base import Model, Scope, Unknown
+from dppce.models.trust import STAMP
 
 # No lookaround and no nested quantifier: pydantic checks these with its linear-time engine.
 # Engine code applies them with re.fullmatch, because Python's `$` also matches before a "\n".
@@ -172,6 +173,6 @@ class Authorization(Model):
     methods: tuple[str, ...] = Field(min_length=1)
     roles: tuple[str, ...] = Field(min_length=1)
     scopes: tuple[Scope, ...] = Field(min_length=1)
-    not_before: str
-    not_after: str
+    not_before: str = Field(pattern=STAMP)
+    not_after: str = Field(pattern=STAMP)
     max_requests: int = Field(ge=1)

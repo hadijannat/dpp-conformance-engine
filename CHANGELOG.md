@@ -114,7 +114,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - The data, persistence, and registry checks judge a document only with status 200. 401, 403,
     and 404 give `<AREA>.RESPONSE.NOT_CONCLUSIVE`; another status gives `<AREA>.RESPONSE.STATUS`.
   - Update times are instants. A future update time is not fresh. `parse_stamp` accepts only the
-    canonical ASCII form.
+    canonical ASCII form. The trust, authorization, attestation, and status list models refuse
+    other stamps too. A signed authorization with such a stamp gives `AUTHZ.MALFORMED`.
   - `data.context` reads every `@context`, and `data.rules` with no applied rule is `blocked`.
   - The registry check compares JSON values and never passes on an absent field.
   - Carrier texts without a usable URL are unresolved, and hostile images are blocked. The
