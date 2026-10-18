@@ -33,6 +33,7 @@ from dppce.models import (
     Authorization,
     CheckOutcome,
     ExecutionStatus,
+    Observation,
     RevokedCertificate,
     RevokedKey,
     StatusList,
@@ -822,6 +823,7 @@ STAMP_FIELDS = [
     (Authorization, "not_after"),
     (Attestation, "valid_until"),
     (StatusList, "issued_at"),
+    (Observation, "acquired_at"),
 ]
 
 
@@ -837,6 +839,17 @@ def test_integration_2_every_stamp_field_refuses_a_moment_that_does_not_exist(
     assert check.validate_python("2026-10-10T08:00:00Z") == "2026-10-10T08:00:00Z"
     with pytest.raises(ValidationError):
         check.validate_python(text)
+
+
+@pytest.mark.parametrize("text", MODEL_REFUSES)
+@pytest.mark.parametrize(("model", "name"), STAMP_FIELDS)
+def test_integration_2_every_stamp_field_refuses_a_non_canonical_stamp(
+    model: type[Any], name: str, text: str
+) -> None:
+    field = model.model_fields[name]
+    kind = Annotated[field.annotation, *field.metadata] if field.metadata else field.annotation
+    with pytest.raises(ValidationError):
+        TypeAdapter(kind).validate_python(text)
 
 
 @pytest.mark.parametrize("text", IMPOSSIBLE)

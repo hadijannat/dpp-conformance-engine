@@ -305,7 +305,7 @@
       "description": "A minimized record of what a check saw.\n\n``summary`` holds only what the verdict needs, for example field names and status codes.\nIt must not hold restricted payload values. Raw bytes stay in the encrypted recording.",
       "properties": {
         "acquired_at": {
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
           "title": "Acquired At",
           "type": "string"
         },

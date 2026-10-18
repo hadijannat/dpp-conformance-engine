@@ -162,6 +162,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   origin `http://127.0.0.1`, so a confirmation or a credential for port 80 also covered it, and
   the transport connected to port 80. `--allow-private-host`, `--allow-remote-host`, and the
   endpoints of `dppce authorize` refuse port 0.
+- `Observation.acquired_at` uses the shared stamp type. It refuses non-ASCII digits and a moment
+  that does not exist, such as `2026-02-30T00:00:00Z`. The schemas `decision`, `envelope`,
+  `opening`, and `proof` now give the pattern with `[0-9]`.
 
 ## [0.1.0rc1] - 2026-10-15
 

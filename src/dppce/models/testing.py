@@ -18,6 +18,7 @@ from dppce.models.base import (
 )
 from dppce.models.catalogue import ID_PATTERN
 from dppce.models.expr import Expr
+from dppce.models.trust import Stamp
 
 # An access role: one lowercase token. Not the performer role of a manual result (ManualResult.role).
 ROLE_NAME_PATTERN = r"^[a-z][a-z0-9_]{0,63}$"
@@ -181,7 +182,7 @@ class Observation(Model):
     id: str
     test_purpose_id: str
     kind: Literal["exchange", "artifact", "declaration", "derived"]
-    acquired_at: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+    acquired_at: Stamp
     record_ids: tuple[str, ...] = ()
     summary: dict[str, JsonValue] = Field(default_factory=dict)
     transformations: tuple[str, ...] = ()
