@@ -921,3 +921,52 @@ def test_identifier_carrier_2_a_hostile_image_is_blocked(body: bytes, code: str,
     pytest.importorskip("zxingcpp", reason="needs the optional 'qr' extra")
     outcome = qr_decode(_context(tmp_path, _POLICY, _Image(body, "image/png")))
     assert (outcome.status, outcome.passed, outcome.reason_code) == (ExecutionStatus.BLOCKED, None, code)
+
+
+# -- server-clock-fixes-1 and -2: the credential scrub --------------------------------------------------
+
+SECRET = "TEST-ONLY-tok/en+S3CRET"
+
+
+@pytest.mark.parametrize(
+    "echoed",
+    [
+        b'{"you_sent":"TEST-ONLY-tok\\/en+S3CRET"}',
+        b"TEST-ONLY-tok%2fen%2bS3CRET",
+        b"TEST-ONLY-tok/en%2BS3CRET",
+        b"TEST-ONLY-tok/en%2bS3CRET",
+    ],
+    ids=["json-solidus", "lower-hex", "quote-default", "quote-default-lower-hex"],
+)
+def test_server_clock_fixes_1_an_echoed_credential_in_a_common_encoding_is_removed(
+    echoed: bytes, loopback: Any
+) -> None:
+    server = loopback(lambda r: reply(r, body=echoed, headers={"X-Echo": echoed.decode()}))
+    engine = review_transport(credentials={"role0": (server.origin, SECRET)})
+    record = engine.fetch(Request("GET", f"{server.origin}/x", role="role0"))
+    assert record.status == 200
+    assert b"S3CRET" not in record.body
+    assert all("S3CRET" not in value for _, value in record.headers)
+
+
+@pytest.mark.parametrize(
+    "tail", [b"TEST-ONLY-tok%2Fen%2BS3CRET", b"TEST-ONLY-tok%2fen%2bS3CRET", b"TEST-ONLY-tok/en+S3CRET"]
+)
+def test_server_clock_fixes_1_a_credential_cut_by_the_body_limit_leaves_no_head(
+    tail: bytes, loopback: Any
+) -> None:
+    body = b"x" * 1004 + tail
+    server = loopback(lambda r: reply(r, body=body))
+    engine = review_transport({"max_body_bytes": 1024}, credentials={"role0": (server.origin, SECRET)})
+    record = engine.fetch(Request("GET", f"{server.origin}/x", role="role0"))
+    assert record.truncated
+    assert record.body == b"x" * 1004 + b"<removed>"
+
+
+def test_server_clock_fixes_2_a_complete_body_ending_in_a_credential_head_is_kept(loopback: Any) -> None:
+    body = b"see the key named TEST-ONLY-ab"
+    server = loopback(lambda r: reply(r, body=body))
+    engine = review_transport(credentials={"role0": (server.origin, "TEST-ONLY-abcdefghijkl")})
+    record = engine.fetch(Request("GET", f"{server.origin}/ok"))
+    assert record.truncated is False
+    assert record.body == body, "only a body that the limit cut may lose a credential head"

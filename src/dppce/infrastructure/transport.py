@@ -9,6 +9,7 @@ from __future__ import annotations
 import contextlib
 import http.client
 import os
+import re
 import socket
 import ssl
 import stat
@@ -71,6 +72,18 @@ def origin_of(url: str) -> str:
     port = parts.port or default
     shown = f"[{host}]" if ":" in host else host
     return f"{parts.scheme}://{shown}" + ("" if port == default else f":{port}")
+
+
+def _forms(token: str) -> tuple[str, ...]:
+    """The spellings of a credential that a system commonly echoes, longest first.
+
+    Plain; percent-encoded with or without '/' kept, in upper-case or lower-case hex; and with
+    the JSON escape of '/' that PHP writes by default.
+    """
+    encoded = (quote(token, safe=""), quote(token))
+    lower = tuple(re.sub("%[0-9A-F]{2}", lambda m: m[0].lower(), form) for form in encoded)
+    forms = {token, token.replace("/", "\\/"), *encoded, *lower}
+    return tuple(sorted(forms, key=len, reverse=True))
 
 
 def _origins(urls: tuple[str, ...] | frozenset[str]) -> frozenset[str]:
@@ -358,25 +371,34 @@ class PolicyTransport:
         return headers
 
     def _scrub(
-        self, headers: tuple[tuple[str, str], ...], body: bytes, redirects: list[str]
+        self, headers: tuple[tuple[str, str], ...], body: bytes, redirects: list[str], *, truncated: bool
     ) -> tuple[tuple[tuple[str, str], ...], bytes, tuple[str, ...]]:
         """Remove the engine's own credentials if the tested system echoes them back.
 
-        The plain and the percent-encoded form are removed from header names and values, from
-        redirect targets, and from the body, also where the body limit cut a credential. Other
-        encodings, such as base64, are not recognized.
+        Each form of ``_forms`` is removed from header names and values, from redirect targets,
+        and from the body. Where the body limit cut the body, a cut head of a form is removed
+        too. A complete body keeps its tail: it is evidence. Other encodings, such as base64 or a
+        mix of forms, are not recognized.
         """
         removed = REMOVED.encode("ascii")
         for token in self._secrets:
-            for form in dict.fromkeys((token, quote(token, safe=""))):
+            forms = _forms(token)
+            for form in forms:
                 headers = tuple((k.replace(form, REMOVED), v.replace(form, REMOVED)) for k, v in headers)
                 redirects = [target.replace(form, REMOVED) for target in redirects]
                 body = body.replace(form.encode("utf-8"), removed)
-            encoded = token.encode("utf-8")
-            for size in range(len(encoded) - 1, _MIN_CUT_HEAD - 1, -1):
-                if body.endswith(encoded[:size]):
-                    body = body[:-size] + removed
-                    break
+            heads = [form.encode("utf-8") for form in forms] if truncated else []
+            # The longest cut head of any form first, so that no shorter head leaves a remainder.
+            size = next(
+                (
+                    size
+                    for size in range(max(map(len, heads), default=0) - 1, _MIN_CUT_HEAD - 1, -1)
+                    if any(len(head) > size and body.endswith(head[:size]) for head in heads)
+                ),
+                0,
+            )
+            if size:
+                body = body[:-size] + removed
         return headers, body, tuple(redirects)
 
     # -- Acquirer ---------------------------------------------------------------------------
@@ -396,7 +418,7 @@ class PolicyTransport:
             body: bytes = b"",
             truncated: bool = False,
         ) -> Record:
-            headers, body, kept_redirects = self._scrub(headers, body, redirects)
+            headers, body, kept_redirects = self._scrub(headers, body, redirects, truncated=truncated)
             record = Record(
                 record_id=f"r{len(self._records) + 1:04d}",
                 kind="http",

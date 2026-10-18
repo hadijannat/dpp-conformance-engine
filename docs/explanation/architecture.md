@@ -522,10 +522,12 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - Limits: timeout, maximum body size (the body is truncated and flagged), maximum redirects,
   maximum request count, and minimum interval. Each limit that triggers is recorded.
 - Secrets are removed from request headers before a record is created. If the tested system
-  echoes a credential of the engine, its plain and percent-encoded forms are replaced with
-  `<removed>` in header names and values, redirect targets, and the body, also where the body
-  limit cut it. Other encodings, such as base64, are not recognized. A credential needs 12
-  characters or more, so that its removal cannot change unrelated text of the evidence.
+  echoes a credential of the engine, its common forms are replaced with `<removed>` in header
+  names and values, redirect targets, and the body. The forms are: plain, percent-encoded with or
+  without `/` kept, in upper-case or lower-case hex, and with `/` written as `\/`. Where the body
+  limit cut the body, a cut head of a form at its end is removed too. A complete body keeps its
+  end. Other encodings, such as base64 or a mix of forms, are not recognized. A credential needs
+  12 characters or more, so that its removal cannot change unrelated text of the evidence.
 - A sample file is read only if it is still the regular file that was confirmed (device and
   inode). It is opened without following a link and without blocking.
 - Response bodies are bytes. HTML is never rendered or executed. Archives are never unpacked.
