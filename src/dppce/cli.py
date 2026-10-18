@@ -37,6 +37,7 @@ from dppce.catalogue import (
     load_testpacks,
 )
 from dppce.catalogue.lint import lint, trace
+from dppce.evidence import status as status_lists
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.envelope import decision_digest, in_layout_of, sign_envelope
 from dppce.evidence.jws import LocalSigner, SignatureError, header_of
@@ -83,6 +84,7 @@ from dppce.models import (
     IssuerStatement,
     Profile,
     RunInputsRecord,
+    StatusReference,
     TestPack,
     TrustBundle,
     Verdict,
@@ -122,6 +124,9 @@ _INPUT_ERRORS: Final = (
 )
 
 
+_STATUS_LIST_HELP: Final = "signed status list file of the report issuer; nothing is fetched"
+
+
 class UsageError(ValueError):
     """The arguments or the input files cannot be used."""
 
@@ -154,6 +159,21 @@ def _trust(path: Path | None) -> TrustBundle | None:
         return TrustBundle.model_validate(migrate("trust", document))
     except MigrationError as exc:
         raise UsageError(f"{path}: {exc}") from exc
+    except ValidationError as exc:
+        # The first message carries the reason code, for example TRUST.KEY.ROLE_CONFLICT.
+        raise UsageError(f"{_first_message(exc)} ({path})") from exc
+
+
+def _first_message(exc: ValidationError) -> str:
+    return str(exc.errors()[0]["msg"]).removeprefix("Value error, ")
+
+
+def _status_list(path: Path | None) -> bytes | None:
+    """Read a status list file. One byte over the limit is enough for the verifier to refuse it."""
+    if path is None:
+        return None
+    with path.open("rb") as handle:
+        return handle.read(status_lists.MAX_TOKEN_BYTES + 1)
 
 
 @dataclass(frozen=True)
@@ -661,6 +681,8 @@ def _changed_inputs(recorded: InputHashes, current: InputHashes) -> list[str]:
 def cmd_report(args: argparse.Namespace) -> int:
     raw = args.envelope.read_bytes()
     envelope = EvidenceEnvelope.model_validate(parse_strict(raw))
+    if args.status_list is not None and (args.trust is None or args.at is None):
+        raise UsageError("STATUSLIST.FILE.OPTION: a status list needs --trust and --at")
     if args.format == "json":
         text = envelope.model_dump_json(by_alias=True, indent=2) + "\n"
     else:
@@ -668,7 +690,11 @@ def cmd_report(args: argparse.Namespace) -> int:
         if trust is not None and args.at is None:
             # Verification needs an explicit evaluation time. "Now" is never assumed.
             raise UsageError("a report with a verification section needs an explicit time: --at")
-        verification = verify_json(raw, trust, _time(args.at)) if trust else None
+        verification = (
+            verify_json(raw, trust, _time(args.at), status_list=_status_list(args.status_list))
+            if trust
+            else None
+        )
         text = render(envelope, verification)
     if args.out:
         args.out.write_text(text, encoding="utf-8")
@@ -681,10 +707,29 @@ def cmd_report(args: argparse.Namespace) -> int:
 def cmd_sign(args: argparse.Namespace) -> int:
     envelope = EvidenceEnvelope.model_validate(parse_strict(args.envelope.read_bytes()))
     signer = LocalSigner.from_pem(args.key, args.kid)
-    signed = sign_envelope(envelope, signer, issuer=args.issuer, signed_at=utc_stamp(_now()))
+    if (args.status_list_id is None) != (args.status_index is None):
+        raise UsageError("SIGN.OPTION.INVALID: --status-list-id and --status-index go together")
+    try:
+        entry = (
+            None
+            if args.status_list_id is None
+            else StatusReference(list_id=args.status_list_id, index=args.status_index)
+        )
+        signed = sign_envelope(
+            envelope,
+            signer,
+            issuer=args.issuer,
+            signed_at=utc_stamp(_now()),
+            role=args.role,
+            status=entry,
+            valid_until=args.valid_until,
+            supersedes=args.supersedes,
+        )
+    except ValidationError as exc:
+        raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
     out: Path = args.out or args.envelope
     out.write_text(signed.model_dump_json(by_alias=True) + "\n", encoding="utf-8")
-    summary = {"written": str(out), "signatures": len(signed.signatures), "kid": args.kid}
+    summary = {"written": str(out), "signatures": len(signed.signatures), "kid": args.kid, "role": args.role}
     _emit(args, summary, f"signed with key '{args.kid}'; wrote {out}")
     return EXIT_OK
 
@@ -693,7 +738,9 @@ def cmd_verify(args: argparse.Namespace) -> int:
     trust = _trust(args.trust)
     if trust is None:
         raise UsageError("verification needs an explicit trust bundle")
-    report = verify_json(args.envelope.read_bytes(), trust, _time(args.at))
+    report = verify_json(
+        args.envelope.read_bytes(), trust, _time(args.at), status_list=_status_list(args.status_list)
+    )
     lines = [f"{d.name:14} {d.outcome:12} {d.detail}" for d in report.dimensions]
     state = "complete" if report.complete else "NOT complete"
     text = "\n".join([*lines, f"verification is {state} at {report.evaluation_time}", report.note])
@@ -997,6 +1044,7 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     report.add_argument("--out", type=Path)
     report.add_argument("--trust", type=Path, help="include a verification section (HTML only)")
     report.add_argument("--at")
+    report.add_argument("--status-list", type=Path, help=_STATUS_LIST_HELP)
 
     sign = add("sign", cmd_sign, "Sign an envelope with a local key (development and tests).")
     sign.add_argument("--envelope", type=Path, required=True)
@@ -1004,11 +1052,24 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     sign.add_argument("--kid", required=True)
     sign.add_argument("--issuer", required=True, help="issuer identifier that the trust bundle names")
     sign.add_argument("--out", type=Path)
+    sign.add_argument(
+        "--role",
+        choices=["issuer", "reviewer"],
+        default="issuer",
+        help="declared role; reviewer: a person signs with a key that only that person holds",
+    )
+    sign.add_argument("--valid-until", help="issuer only: last time at which the report is valid")
+    sign.add_argument(
+        "--supersedes", help="issuer only: decision digest of the earlier report that this replaces"
+    )
+    sign.add_argument("--status-list-id", help="issuer only: identifier of the status list of the report")
+    sign.add_argument("--status-index", type=int, help="issuer only: index of the report in that status list")
 
     verify = add("verify", cmd_verify, "Verify a signed envelope against an explicit trust bundle.")
     verify.add_argument("--envelope", type=Path, required=True)
     verify.add_argument("--trust", type=Path, required=True)
     verify.add_argument("--at", required=True, help="explicit evaluation time")
+    verify.add_argument("--status-list", type=Path, help=_STATUS_LIST_HELP)
 
     catalogue = commands.add_parser("catalogue", help="Catalogue tools.").add_subparsers(
         dest="catalogue_command", required=True
