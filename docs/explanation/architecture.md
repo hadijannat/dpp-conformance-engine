@@ -1091,7 +1091,8 @@ A bit of 0 gives `pass` with `STATUSLIST.REPORT.ACTIVE`. The detail names the li
 - If no passing issuer signature exists, the outcome is `not_checked` with
   `VALIDITY.REPORT.UNSIGNED`.
 - `valid_until` and `issued_at` must name a time that exists. A month 13 makes the attestation or
-  the list invalid.
+  the list invalid. This is a model rule only. `attestation.schema.json` and
+  `statuslist.schema.json` do not show it.
 - `supersedes` names the decision digest of an earlier report. The `signers` detail and the HTML
   report show it.
 - The verifier does not read the earlier report. To withdraw that report, the issuer sets its bit
