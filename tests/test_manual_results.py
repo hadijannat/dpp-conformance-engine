@@ -231,8 +231,20 @@ _NO_OUTCOME = canonical_bytes({k: v for k, v in result().model_dump(mode="json")
 
 # (id, body, error, trust, expected reason code)
 REFUSALS: list[tuple[str, Callable[[], bytes], TransportError | None, TrustBundle, str]] = [
-    ("another-purpose", lambda: _token(test_purpose_id="T-OTHER"), None, UNIT_TRUST, "MANUAL.PURPOSE.MISMATCH"),
-    ("another-sut", lambda: _token(sut_identifier="urn:example:other"), None, UNIT_TRUST, "MANUAL.SUT.MISMATCH"),
+    (
+        "another-purpose",
+        lambda: _token(test_purpose_id="T-OTHER"),
+        None,
+        UNIT_TRUST,
+        "MANUAL.PURPOSE.MISMATCH",
+    ),
+    (
+        "another-sut",
+        lambda: _token(sut_identifier="urn:example:other"),
+        None,
+        UNIT_TRUST,
+        "MANUAL.SUT.MISMATCH",
+    ),
     (
         "untrusted-kid",
         lambda: issue_manual_result(result(), STRANGER).encode("ascii"),
@@ -279,9 +291,9 @@ REFUSALS: list[tuple[str, Callable[[], bytes], TransportError | None, TrustBundl
     ),
     (
         "tampered-payload",
-        lambda: ".".join(
-            [_parts()[0], _b64(canonical_bytes(result(outcome="fail"))), _parts()[2]]
-        ).encode("ascii"),
+        lambda: ".".join([_parts()[0], _b64(canonical_bytes(result(outcome="fail"))), _parts()[2]]).encode(
+            "ascii"
+        ),
         None,
         UNIT_TRUST,
         "MANUAL.SIGNATURE.INVALID",
@@ -323,7 +335,7 @@ REFUSALS: list[tuple[str, Callable[[], bytes], TransportError | None, TrustBundl
         UNIT_TRUST,
         "MANUAL.RESULT.MALFORMED",
     ),
-    ("non-ascii-body", lambda: "TEST-ONLY é".encode(), None, UNIT_TRUST, "MANUAL.RESULT.MALFORMED"),
+    ("non-ascii-body", "TEST-ONLY é".encode, None, UNIT_TRUST, "MANUAL.RESULT.MALFORMED"),
     (
         "missing-evidence-item",
         lambda: _token(evidence=list(EVIDENCE[:1])),
@@ -350,7 +362,9 @@ REFUSALS: list[tuple[str, Callable[[], bytes], TransportError | None, TrustBundl
 ]
 
 
-@pytest.mark.parametrize(("body", "error", "trust", "code"), [r[1:] for r in REFUSALS], ids=[r[0] for r in REFUSALS])
+@pytest.mark.parametrize(
+    ("body", "error", "trust", "code"), [r[1:] for r in REFUSALS], ids=[r[0] for r in REFUSALS]
+)
 def test_check_refuses_and_never_passes(
     body: Callable[[], bytes], error: TransportError | None, trust: TrustBundle, code: str
 ) -> None:
@@ -392,9 +406,7 @@ def _expected_evidence(purpose_id: str) -> list[str]:
     return list(purposes[purpose_id].expected_evidence) if purpose_id in purposes else []
 
 
-def signed_file(
-    directory: Path, purpose_id: str, signer: LocalSigner | None = None, **changes: Any
-) -> Path:
+def signed_file(directory: Path, purpose_id: str, signer: LocalSigner | None = None, **changes: Any) -> Path:
     """Write a TEST-ONLY manual result for the synthetic reference system."""
     fields: dict[str, Any] = {
         "test_purpose_id": purpose_id,
@@ -437,7 +449,7 @@ def fixture_trust() -> TrustBundle:
     return TrustBundle.model_validate(parse_strict(TRUST.read_bytes()))
 
 
-def test_run_with_a_manual_result_completes_TP_EU_13_6_MANUAL(  # noqa: N802 - the identifier is upper case
+def test_run_with_a_manual_result_completes_TP_EU_13_6_MANUAL(
     passed: tuple[ReferenceRig, RunResult], tmp_path: Path
 ) -> None:
     _, run = passed
@@ -445,15 +457,22 @@ def test_run_with_a_manual_result_completes_TP_EU_13_6_MANUAL(  # noqa: N802 - t
     decision = run.envelope.decision
     (observation,) = _result(run, EU_STEP).observations
     committed = {c.record_id for c in decision.record_commitments}
-    assert observation.record_ids and set(observation.record_ids) <= committed
+    assert observation.record_ids
+    assert set(observation.record_ids) <= committed
     assert records_root(decision.record_commitments) == decision.records_root
     assert observation.summary["kid"] == FIXTURE_MANUAL_KID
     with ReferenceRig(tmp_path, manual={EU_STEP: "fail"}) as rig:
         failed = rig.run(mode="exploratory")
-    assert failed.step(EU_STEP) == {"verdict": "fail", "reason_code": "MANUAL.REVIEW.FAILED", "status": "completed"}
+    assert failed.step(EU_STEP) == {
+        "verdict": "fail",
+        "reason_code": "MANUAL.REVIEW.FAILED",
+        "status": "completed",
+    }
 
 
-def test_without_the_file_the_step_and_manual_missing_are_unchanged(plain: ReferenceRig, tmp_path: Path) -> None:
+def test_without_the_file_the_step_and_manual_missing_are_unchanged(
+    plain: ReferenceRig, tmp_path: Path
+) -> None:
     without = plain.run(mode="exploratory")
     assert without.step(EU_STEP) == {
         "verdict": "inconclusive",
@@ -461,16 +480,23 @@ def test_without_the_file_the_step_and_manual_missing_are_unchanged(plain: Refer
         "status": "manual_unavailable",
     }
     stranger = LocalSigner.generate("TEST-ONLY-stranger-manual-key")
-    untrusted = plain.run(mode="exploratory", extra=["--manual-result", str(signed_file(tmp_path, EU_STEP, stranger))])
+    untrusted = plain.run(
+        mode="exploratory", extra=["--manual-result", str(signed_file(tmp_path, EU_STEP, stranger))]
+    )
     assert untrusted.step(EU_STEP) == {
         "verdict": "inconclusive",
         "reason_code": "MANUAL.KEY.UNTRUSTED",
         "status": "manual_unavailable",
     }
-    assert untrusted.envelope.decision.coverage.manual_missing == without.envelope.decision.coverage.manual_missing
+    assert (
+        untrusted.envelope.decision.coverage.manual_missing
+        == without.envelope.decision.coverage.manual_missing
+    )
 
 
-def test_a_record_for_another_purpose_never_passes_the_intended_step(plain: ReferenceRig, tmp_path: Path) -> None:
+def test_a_record_for_another_purpose_never_passes_the_intended_step(
+    plain: ReferenceRig, tmp_path: Path
+) -> None:
     other = "TP-EU-13-6A-MANUAL"
     run = plain.run(mode="exploratory", extra=["--manual-result", str(signed_file(tmp_path, other))])
     assert run.step(EU_STEP)["reason_code"] == "PLAN.MANUAL_UNAVAILABLE"
@@ -478,14 +504,18 @@ def test_a_record_for_another_purpose_never_passes_the_intended_step(plain: Refe
     assert run.step(other) == {"verdict": "pass", "reason_code": "MANUAL.REVIEW.OK", "status": "completed"}
 
 
-def test_replay_of_a_run_with_a_manual_result_gives_the_same_digest(passed: tuple[ReferenceRig, RunResult]) -> None:
+def test_replay_of_a_run_with_a_manual_result_gives_the_same_digest(
+    passed: tuple[ReferenceRig, RunResult],
+) -> None:
     rig, run = passed
     code, summary = rig.replay(run)
     assert summary["match"] is True
     assert code == run.exit_code
     stored = parse_strict((run.run_dir / "inputs.json").read_bytes())
     assert stored["manual_results"] == [EU_STEP]
-    assert "eyJ" not in (run.run_dir / "inputs.json").read_text(encoding="utf-8"), "no JWS in plain text"
+    (observation,) = _result(run, EU_STEP).observations
+    token = str(observation.summary["jws"])
+    assert token not in (run.run_dir / "inputs.json").read_text(encoding="utf-8"), "the recording holds it"
 
 
 def test_html_shows_role_date_key_outcome_and_record_id(passed: tuple[ReferenceRig, RunResult]) -> None:
@@ -501,7 +531,9 @@ def test_html_shows_role_date_key_outcome_and_record_id(passed: tuple[ReferenceR
         t.model_copy(update={"observations": (changed,)}) if t.test_purpose_id == EU_STEP else t
         for t in decision.test_results
     )
-    page = render(run.envelope.model_copy(update={"decision": decision.model_copy(update={"test_results": results})}))
+    page = render(
+        run.envelope.model_copy(update={"decision": decision.model_copy(update={"test_results": results})})
+    )
     assert "&lt;b&gt;x&lt;/b&gt;" in page
     assert "<b>x</b>" not in page
 

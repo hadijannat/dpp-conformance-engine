@@ -53,7 +53,9 @@ def make_record(index: int, body: bytes = b"{}", url: str | None = None) -> Reco
     )
 
 
-def make_artifact(name: str, body: bytes = b"", error: TransportError | None = None, index: int = 1) -> Record:
+def make_artifact(
+    name: str, body: bytes = b"", error: TransportError | None = None, index: int = 1
+) -> Record:
     """A local input artifact as the transport records it."""
     return Record(
         record_id=f"r{index:04d}",
