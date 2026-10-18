@@ -577,9 +577,10 @@ does not let those files decide what the test host trusts or discloses:
   reference with `--role-secret ROLE=REFERENCE`. An IXIT alone can never select a secret, for
   example one that belongs to a different system that the same laboratory tests.
 - A role credential is sent only to an origin that a validated authorization names. Origins
-  are compared in one normal form. In that form only an absent port means the default port, and
-  `--allow-private-host`, `--allow-remote-host`, and `dppce authorize` refuse port 0. Role secrets
-  for an origin that no authorization names are an input error, not a run without credentials.
+  are compared in one normal form. In that form an explicit default port, such as `:80` for
+  `http`, equals no port. An explicit port 0 is never the default port. `--allow-private-host`,
+  `--allow-remote-host`, and `dppce authorize` refuse port 0. Role secrets for an origin that no
+  authorization names are an input error, not a run without credentials.
 - A path in the IXIT is resolved and must stay inside the directory of the IXIT file.
 - A URL template of the IXIT is a path under an endpoint that the IXIT names. It cannot select
   a scheme, a host, or a port (section 9.2).
