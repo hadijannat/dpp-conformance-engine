@@ -129,6 +129,18 @@
       "title": "Product Category",
       "type": "string"
     },
+    "roles": {
+      "default": [
+        "anonymous"
+      ],
+      "description": "Closed set of access roles. A role that the access policy, an IXIT identity, the authorization, or a test purpose names must be in it. It always holds 'anonymous'.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9_]{0,63}$",
+        "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
     "rule_packs": {
       "default": [],
       "items": {

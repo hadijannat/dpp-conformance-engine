@@ -19,6 +19,9 @@ from dppce.models.base import (
 from dppce.models.catalogue import ID_PATTERN
 from dppce.models.expr import Expr
 
+# An access role: one lowercase token. Not the performer role of a manual result (ManualResult.role).
+ROLE_NAME_PATTERN = r"^[a-z][a-z0-9_]{0,63}$"
+
 
 class FactSpec(Model):
     """A fact that a profile reads from the ICS ``characteristics`` map."""
@@ -44,6 +47,19 @@ class Profile(Model):
     testpacks: tuple[str, ...]
     facts: dict[str, FactSpec] = Field(default_factory=dict)
     constants: dict[str, str | int | bool] = Field(default_factory=dict)
+    roles: tuple[Annotated[str, Field(pattern=ROLE_NAME_PATTERN)], ...] = Field(
+        default=("anonymous",),
+        description=(
+            "Closed set of access roles. A role that the access policy, an IXIT identity, the "
+            "authorization, or a test purpose names must be in it. It always holds 'anonymous'."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _roles_are_a_closed_set(self) -> Self:
+        if "anonymous" not in self.roles or len(set(self.roles)) != len(self.roles):
+            raise ValueError("'roles' must be distinct and must include 'anonymous'")
+        return self
 
 
 class Stimulus(Model):

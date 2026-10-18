@@ -144,6 +144,10 @@ apply the same rules.
   message lists every problem of the ICS. A problem with a characteristic names the fact.
 - A selected test pack with a test purpose whose parameters do not fit its registered check
   (section 8). The message names each such test purpose.
+- A role that the profile does not declare in `roles`. The rule reads the roles of each IXIT identity and of the validated authorization.
+  It also reads the access policy that the profile binds and each test purpose in the selected test packs.
+  For a test purpose, it reads `roles` and the parameter `role` of `access.restricted_fields`. One message lists each such role and its source.
+  A profile without `roles` declares `anonymous` only. A bound policy that cannot be read is not an input error here: the access check reports it (section 8.2).
 
 For each requirement in the selected packs:
 
@@ -308,7 +312,7 @@ Initial registry:
 | `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. |
 | `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. |
 | `data.rules` | `data.rules` | Rule pack: completeness, units, ranges, relationships, freshness. |
-| `access.restricted_fields` | `access.policy` | A role does not get fields that the declared policy withholds. |
+| `access.restricted_fields` | `access.policy` | A role gets each field that the declared policy gives it, and no field that the policy withholds from it. |
 | `integrity.jws` | `integrity.jws` | Signature validity, issuer trust, and certificate validity, as separate findings. |
 | `persistence.versions` | `persistence.versions` | Version history obeys the declared update rule. |
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
@@ -368,6 +372,55 @@ The outcome `fail` is a check that did not pass (`MANUAL.REVIEW.FAILED`). Sectio
 The step then holds one observation of kind `artifact`. It references the record. Its summary holds `jws`, `kid`, `role`, `performed_at`, `outcome`, and `test_purpose_digest`.
 A refused result puts no content of the file in the report. Its observation holds the record identifier only.
 The engine does not perform the review. A valid signature shows who signed the result. It does not show that the review was correct.
+
+### 8.2 Access probes
+
+`access.restricted_fields` probes the access policy that the profile binds. The parameter `role` names the probed role.
+
+- Each entry in `restricted` names a field path and the roles that may receive it.
+- The path is entitled for each of those roles. It is withheld from every other role.
+- An entry that names every declared role is a public path. The policy schema stays `dppce.accesspolicy/1`.
+- A policy that names one path in two entries of `restricted`, or of `canaries`, is not valid.
+- If the role has a withheld path, the check reads every channel of the policy. Otherwise it reads only the `fetch` channel.
+- The check reads the channels in the order fetch, export, search, error, html. It stops reading after a transport error.
+- A withheld path or a canary value in a channel is a leak. Section 5.2 of the reference system page gives the search rules.
+- Each entitled path must be at the root of the `fetch` body, with a value other than `null`.
+- Only the `fetch` channel must give content. The check reads the other channels for leaks only.
+- A `401` or `403` answer on `fetch` to a role with an entitled path is a failure. The body of that answer does not change this.
+- For a role with no entitled path, a `401` or `403` answer is not a failure. The check still searches its body for leaks.
+- A policy that gives a role no path cannot tell a refusal from correct enforcement for that role.
+
+The check takes the first row that applies.
+
+| Condition | Status | Reason code |
+| --- | --- | --- |
+| The profile binds no readable and valid policy, or the ICS names no policy or a different one | `blocked` | `ACCESS.POLICY.MISSING`, `ACCESS.POLICY.NOT_DECLARED`, `ACCESS.POLICY.ICS_MISMATCH` |
+| The role has no entitled path and no withheld path, or the policy names no channel | `blocked` | `ACCESS.POLICY.NOTHING_TO_PROBE` |
+| A channel to read has a placeholder with no value | `blocked` | `ACCESS.NO_TARGET` |
+| A channel leaks | `completed`, not passed | `ACCESS.LEAK.<CHANNEL>`, for the first leaking channel in reading order |
+| `fetch` answers `401` or `403` to a role with an entitled path | `completed`, not passed | `ACCESS.ENTITLEMENT.REFUSED` |
+| An entitled path is absent or `null` in a `fetch` body that is JSON | `completed`, not passed | `ACCESS.ENTITLEMENT.MISSING` |
+| A channel answer cannot be judged. The first such answer in reading order decides. | `blocked`, or as in section 9 for a transport error | `TRANSPORT.*`, `ACCESS.RESPONSE.NOT_JSON`, `ACCESS.RESPONSE.NOT_DECODABLE` |
+| The role has an entitled path, and the policy names no `fetch` channel | `blocked` | `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL` |
+| A withheld path has no canary on a channel that is not JSON, or redaction removed a part of a URL | `blocked` | `ACCESS.POLICY.NOT_FULLY_CHECKABLE` |
+| Otherwise | `completed`, passed | `ACCESS.POLICY.ENFORCED` |
+
+An answer cannot be judged in these cases:
+
+- It has a transport error, a truncated body, or an encoded body.
+- The role has a withheld path, and the body cannot be searched.
+- The role has an entitled path, and the `fetch` body is not JSON.
+
+Only a leak or an entitlement failure outranks such an answer.
+
+The message of `ACCESS.ENTITLEMENT.MISSING` names the status of the `fetch` answer and the missing paths.
+
+Every outcome names the probed role and the credential issuer in its message. Each observation summary holds them as `role` and `credential_issuer`.
+The credential issuer is the issuer of the validated authorization that grants the role. It is `null` for the anonymous role, and when no validated authorization grants the role.
+The engine does not read a credential to find its issuer. No outcome holds a secret or a secret reference.
+
+The observation summary holds the entitled paths, the missing paths, the leaked paths, and the status of the `fetch` answer. It never holds a field value.
+A field that is present can still hold a wrong value. The public paths of the reference policy are a synthetic list. They are not a reading of Annex XIII.
 
 ## 9. Transport policy
 
@@ -430,6 +483,8 @@ does not let those files decide what the test host trusts or discloses:
   authorization, or `--allow-remote-host ORIGIN`. A bare host is refused: it would confirm
   every port of that host.
 - An IXIT may not name a secret for the role `anonymous`.
+- The profile declares the closed set of roles. The IXIT cannot add a role. A role outside the set is an input error (section 6).
+- The credential issuer in a report comes from the validated authorization. The IXIT cannot name it.
 - A secret reference is `env:DPPCE_SECRET_<NAME>` or `file:<name>` inside the directory that
   the operator gives with `--secrets`. No other environment variable or file can be named.
 - The IXIT declares a secret reference for a role. The operator must repeat exactly that

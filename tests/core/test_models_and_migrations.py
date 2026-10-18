@@ -439,6 +439,17 @@ def test_a_test_purpose_names_a_requirement_a_profile_and_a_mode() -> None:
     assert (default.manual, default.requires_scope, default.roles) == (False, Scope.READ, ("anonymous",))
 
 
+def test_a_profile_declares_a_closed_set_of_roles_that_holds_anonymous() -> None:
+    assert b.profile().roles == ("anonymous",), "a profile without roles declares anonymous only"
+    assert b.profile(roles=["anonymous", "authority"]).roles == ("anonymous", "authority")
+    with pytest.raises(ValidationError, match="anonymous"):
+        b.profile(roles=["legitimate_interest"])
+    with pytest.raises(ValidationError, match="distinct"):
+        b.profile(roles=["anonymous", "authority", "authority"])
+    with pytest.raises(ValidationError, match="roles"):
+        b.profile(roles=["anonymous", "Legitimate-Interest"])
+
+
 AUTHORIZATION: dict[str, Any] = {
     "schema_version": "dppce.authorization/1",
     "authorization_id": "TEST-ONLY-authorization",
