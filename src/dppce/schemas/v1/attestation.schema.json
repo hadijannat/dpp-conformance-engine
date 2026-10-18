@@ -1,8 +1,34 @@
 {
+  "$defs": {
+    "StatusReference": {
+      "additionalProperties": false,
+      "description": "The entry of a report in a status list of its issuer: one bit of one list (section 11.4).",
+      "properties": {
+        "index": {
+          "maximum": 134217727,
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "list_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "List Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "list_id",
+        "index"
+      ],
+      "title": "StatusReference",
+      "type": "object"
+    }
+  },
   "$id": "urn:dppce:schema:v1:attestation",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "Payload of the signature. It binds the digest of the whole decision body.",
+  "description": "Payload of the signature. It binds the digest of the whole decision body.\n\nVersion 2 adds the role of the signer and the lifecycle that the issuer states. A version 1\nattestation is the issuer's and keeps its canonical bytes.",
   "properties": {
     "decision_digest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
@@ -21,14 +47,70 @@
       "title": "Results Root",
       "type": "string"
     },
+    "role": {
+      "anyOf": [
+        {
+          "enum": [
+            "issuer",
+            "reviewer"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
     "schema_version": {
-      "const": "dppce.attestation/1",
+      "enum": [
+        "dppce.attestation/1",
+        "dppce.attestation/2"
+      ],
       "title": "Schema Version",
       "type": "string"
     },
     "signed_at": {
       "title": "Signed At",
       "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StatusReference"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes"
+    },
+    "valid_until": {
+      "anyOf": [
+        {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid Until"
     }
   },
   "required": [

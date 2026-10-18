@@ -20,7 +20,7 @@ from dppce.models.base import (
 )
 from dppce.models.declarations import ICS, IXIT, SutIdentity
 from dppce.models.testing import Conflict, Exclusion, TestResult
-from dppce.models.trust import TrustBundle
+from dppce.models.trust import STAMP, TrustBundle
 
 BoundFileHash = Annotated[str, Field(pattern=r"^(sha256:[0-9a-f]{64}|unavailable)$")]
 
@@ -175,15 +175,77 @@ class DecisionBody(Model):
         return self
 
 
-class Attestation(Model):
-    """Payload of the signature. It binds the digest of the whole decision body."""
+SignerRole = Literal["issuer", "reviewer"]
+DIGEST: Final = r"^sha256:[0-9a-f]{64}$"
+# The largest list that the verifier decodes: 16 MiB of bits.
+MAX_STATUS_INDEX: Final = 16 * 1024 * 1024 * 8 - 1
 
-    schema_version: Literal["dppce.attestation/1"]
-    decision_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+
+class StatusReference(Model):
+    """The entry of a report in a status list of its issuer: one bit of one list (section 11.4)."""
+
+    list_id: str = Field(min_length=1, max_length=512)
+    index: int = Field(ge=0, le=MAX_STATUS_INDEX)
+
+
+class Attestation(Model):
+    """Payload of the signature. It binds the digest of the whole decision body.
+
+    Version 2 adds the role of the signer and the lifecycle that the issuer states. A version 1
+    attestation is the issuer's and keeps its canonical bytes.
+    """
+
+    schema_version: Literal["dppce.attestation/1", "dppce.attestation/2"]
+    decision_digest: str = Field(pattern=DIGEST)
     results_root: str
     records_root: str
     issuer: str
     signed_at: str
+    # Version 2 only. Each is written explicitly, null when it has no value.
+    role: SignerRole | None = None
+    status: StatusReference | None = None
+    valid_until: str | None = Field(default=None, pattern=STAMP)
+    supersedes: str | None = Field(default=None, pattern=DIGEST)
+
+    @property
+    def signer_role(self) -> SignerRole:
+        return self.role or "issuer"  # a version 1 attestation is the issuer's
+
+    @property
+    def lifecycle(self) -> tuple[StatusReference | None, str | None, str | None]:
+        return (self.status, self.valid_until, self.supersedes)
+
+    @model_serializer(mode="wrap")
+    def _omit_in_version_1(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # Same pattern as RunManifest._omit_absent: a /1 payload keeps its canonical bytes.
+        data: dict[str, Any] = handler(self)
+        if self.schema_version == "dppce.attestation/1":
+            for name in ("role", "status", "valid_until", "supersedes"):
+                data.pop(name, None)
+        return data
+
+    @model_validator(mode="after")
+    def _fields_match_the_version(self) -> Self:
+        new = (self.role, self.status, self.valid_until, self.supersedes)
+        if self.schema_version == "dppce.attestation/1" and any(v is not None for v in new):
+            raise ValueError("role, status, valid_until, and supersedes need dppce.attestation/2")
+        if self.schema_version == "dppce.attestation/2" and self.role is None:
+            raise ValueError("dppce.attestation/2 states a role")
+        if self.role == "reviewer" and any(v is not None for v in new[1:]):
+            raise ValueError("only the issuer states status, valid_until, and supersedes")
+        if self.supersedes == self.decision_digest:
+            raise ValueError("a report cannot supersede itself")
+        return self
+
+
+class StatusList(Model):
+    """Payload of a signed status list. The issuer keeps it; the operator supplies it to the verifier."""
+
+    schema_version: Literal["dppce.statuslist/1"]
+    id: str = Field(min_length=1, max_length=512)
+    status_purpose: Literal["revocation", "suspension"]
+    issued_at: str = Field(pattern=STAMP)
+    encoded_list: str = Field(pattern=r"^u[A-Za-z0-9_-]+$")
 
 
 class EvidenceEnvelope(Model):

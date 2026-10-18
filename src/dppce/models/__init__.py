@@ -51,6 +51,7 @@ from dppce.models.declarations import (
 )
 from dppce.models.expr import ALWAYS, All, AnyOf, Compare, Const, Expr, Not, Op
 from dppce.models.results import (
+    MAX_STATUS_INDEX,
     NOT_ACCREDITED,
     AcquisitionWindow,
     Attestation,
@@ -67,6 +68,9 @@ from dppce.models.results import (
     RequirementResult,
     RunInputsRecord,
     RunManifest,
+    SignerRole,
+    StatusList,
+    StatusReference,
     VerificationDimension,
     VerificationReport,
 )
@@ -108,12 +112,14 @@ SCHEMA_MODELS: dict[str, type[Model]] = {
     "trust": TrustBundle,
     "manualresult": ManualResult,
     "runinputs": RunInputsRecord,
+    "statuslist": StatusList,
 }
 
 __all__ = [
     "ALWAYS",
     "ICS",
     "IXIT",
+    "MAX_STATUS_INDEX",
     "NOT_ACCREDITED",
     "PATH_TEMPLATE_PATTERN",
     "PLACEHOLDER_PATTERN",
@@ -184,8 +190,11 @@ __all__ = [
     "RunManifest",
     "Scope",
     "Severity",
+    "SignerRole",
     "SourceRecord",
     "SourceRef",
+    "StatusList",
+    "StatusReference",
     "Stimulus",
     "SutIdentity",
     "TestPack",

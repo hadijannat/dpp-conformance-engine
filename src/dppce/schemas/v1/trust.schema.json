@@ -141,7 +141,9 @@
               "report",
               "authorization",
               "passport",
-              "manual"
+              "manual",
+              "review",
+              "status"
             ],
             "type": "string"
           },

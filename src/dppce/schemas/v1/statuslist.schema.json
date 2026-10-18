@@ -1,0 +1,46 @@
+{
+  "$id": "urn:dppce:schema:v1:statuslist",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Payload of a signed status list. The issuer keeps it; the operator supplies it to the verifier.",
+  "properties": {
+    "encoded_list": {
+      "pattern": "^u[A-Za-z0-9_-]+$",
+      "title": "Encoded List",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "issued_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "title": "Issued At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.statuslist/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status_purpose": {
+      "enum": [
+        "revocation",
+        "suspension"
+      ],
+      "title": "Status Purpose",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "status_purpose",
+    "issued_at",
+    "encoded_list"
+  ],
+  "title": "StatusList",
+  "type": "object"
+}
