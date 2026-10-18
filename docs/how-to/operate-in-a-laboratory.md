@@ -24,8 +24,11 @@ See [the release and the unreleased source](install-and-verify-a-release.md#the-
 
 1. Give each run a new `--out` directory.
 2. Keep the `--keys` directory apart from the run directories.
-3. Set `--retention-days N` from 0 to 3650. You decide the period.
-4. Without `--retention-days`, the engine uses the value that the IXIT asks for.
+3. Name the data key with `--data-key-id`. The default is `local-data-key-1`.
+4. Give `--create-data-key` on the first run only. Without it, a missing key gives
+   `KEYS.DATA_KEY.UNAVAILABLE`, and the run sends no request.
+5. Set `--retention-days N` from 0 to 3650. You decide the period.
+6. Without `--retention-days`, the engine uses the value that the IXIT asks for.
 
 An answer with a status from 500 to 599 is no answer, like a transport error.
 Most checks then give `TRANSPORT.SERVER_ERROR`. The step is `inconclusive` by default.
@@ -43,8 +46,41 @@ The run directory holds these files:
 ## 3. Sign
 
 `dppce sign` signs an envelope with a local P-256 key in a PEM file.
-Its help text says "development and tests". This version has no key management service.
-Protect the key file. Do not claim more for the signature than this.
+This version has no key management service. Protect the key file.
+Do not claim more for the signature than this.
+
+### Make a signing key
+
+1. Generate a passphrase of at least 32 bytes, for example with `secrets.token_urlsafe(32)`.
+   Do not use a passphrase that a person chose.
+2. Put it in an environment variable whose name starts with `DPPCE_SECRET_`.
+   Or put it in a file in a secrets directory, and give that directory with `--secrets`.
+3. Generate the key:
+
+```bash
+dppce keys generate --out lab.key.pem --passphrase-ref env:DPPCE_SECRET_LAB_PASSPHRASE > lab.jwk.json
+```
+
+4. Add `lab.jwk.json` to your trust bundle with `dppce trust-bundle add-key` and the purpose `report`.
+
+The key file has mode 0600. It is PKCS#8 PEM, encrypted with PBES2.
+PBES2 here is PBKDF2-HMAC-SHA256 with 2048 iterations and AES-256-CBC.
+The installed `cryptography` package sets these values.
+2048 iterations make a guess cheap, so the passphrase must have high entropy.
+No option takes the passphrase itself. No command prints it.
+
+### Sign an envelope
+
+```bash
+dppce sign --envelope RUN_DIR/envelope.json --key lab.key.pem --kid lab-key-1 \
+  --issuer ISSUER --passphrase-ref env:DPPCE_SECRET_LAB_PASSPHRASE --out RUN_DIR/envelope.signed.json
+```
+
+- Give `--out NEW_FILE` or `--in-place`, exactly one. `sign` never writes over a file by default.
+- `--in-place` keeps the mode of the input. It refuses a symbolic link (`SIGN.INPUT.LINK`).
+- `sign` refuses an unencrypted key (`KEYS.KEY.UNENCRYPTED`). `--allow-unencrypted-key` is for
+  TEST-ONLY keys.
+- `sign` first checks the body of the envelope. A body that fails gives `ENVELOPE.BODY.INVALID`.
 
 `--role` declares the role of a signature: `issuer` (the default) or `reviewer`.
 Only an issuer signature can state the lifecycle of the report:
@@ -112,6 +148,8 @@ These dimensions of the output need the most attention:
 | `signers` | Always | Each signature that names a key of your trust bundle verifies. The key has the purpose of the declared role. |
 | `status` | When your policy sets `require_status`, you supply a list, or the report names a status entry | The status list is usable, and it does not set the bit of the report. |
 | `validity` | When the issuer states `valid_until` | The evaluation time is not later than `valid_until`. |
+| `opening` | When you supply `--opening` | The record opening matches its commitment, and the report holds that commitment. |
+| `proof` | When you supply `--proof` | The inclusion proof leads from its result to a root of the report. |
 
 - A fresh `status_as_of` date alone does not pass `status`. A report that names a status entry
   is not complete without a usable list.
@@ -119,6 +157,10 @@ These dimensions of the output need the most attention:
 - A reviewer key needs the purpose `review`. One key cannot have the purposes `review` and
   `report` (`TRUST.KEY.ROLE_CONFLICT`).
 - A bad reviewer signature makes the verification incomplete. It does not change `signature`.
+- `opening` or `proof` is `not_checked` when the root of its tree does not match the body.
+
+`dppce open` writes the opening of one record. `dppce prove` writes the proof of one result.
+An opening holds the plaintext of a record. Give it only to a party that is entitled to it.
 
 The verifier checks the signing key at the earliest `genTime` of a good timestamp over its signature.
 Without such a timestamp, it checks the key at the evaluation time.
@@ -169,6 +211,8 @@ After a purge, a replay is not possible. The signed report still verifies.
 | Status | The status list that you supplied does not withdraw the report. | The status in a list that you did not supply. |
 | Reviewer signature | A key with the purpose `review` signed the report. | Which person reviewed it, or what that person checked. |
 | Timestamp | A timestamp authority in your `timestamp_anchors` states that the signature existed at `genTime`. | That the time of the authority is correct. |
+| Record opening | The salt and the plaintext give a commitment that the report holds. | That the response was true, or more than this one record. |
+| Inclusion proof | The report holds this result at this position. | Anything about the other results. A trusted signature over the report gives the result its trust. |
 | Method-validation record | Seeded faults on a synthetic system, with numerators and denominators. | A result on a real system. `human_review_and_signature` is always `null`. |
 | Purge | The recording is deleted. | The deletion of other files or of copies. |
 

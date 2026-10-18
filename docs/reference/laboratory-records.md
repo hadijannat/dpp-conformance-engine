@@ -22,13 +22,18 @@ lists the differences that affect a laboratory.
 | Run manifest: the versions and the input hashes | `dppce run` | `envelope.json` |
 | Verdicts, exclusions, retained problems, coverage, and limitations | `dppce run` | `envelope.json`, `report.html` |
 | Decision digest | `dppce run` (output); `dppce sign` (attestation) | Output of the run; inside each signature in `envelope.json` after signing |
-| Signatures, each with the role `issuer` or `reviewer` | `dppce sign` | `envelope.json` |
+| Signatures, each with the role `issuer` or `reviewer` | `dppce sign` | The new file at `--out`, or `envelope.json` with `--in-place` |
+| Encrypted signing key and its public JWK | `dppce keys generate` | The key file at `--out`, with mode 0600; the JWK in the output only |
+| Signed test authorization | `dppce authorize`, run by the system owner | The new file at `--out` |
+| Trust bundle with one more key | `dppce trust-bundle add-key` | The new file at `--out` |
+| Record opening (`dppce.opening/1`): the salt and the plaintext of one record | `dppce open` | The new file at `--out`, with mode 0600. It holds plaintext. |
+| Inclusion proof (`dppce.proof/1`) of one result | `dppce prove` | The new file at `--out` |
 | Run inputs (`dppce.runinputs/3`), in clear text | `dppce run` | `inputs.json` |
 | Encrypted recording with the delete-after date | `dppce run` | `recording/` |
 | Signature imprints for a timestamp request | `dppce timestamp imprint` | Output only |
 | Report with an attached timestamp token | `dppce timestamp attach` | A new envelope file at `--out` |
 | Replay result | `dppce replay` | Output only |
-| Verification result, with the dimensions `signers`, `status`, and `validity` | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
+| Verification result, with the dimensions `signers`, `status`, `validity`, `opening`, and `proof` | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
 | Coverage | `dppce coverage` | Output only |
 | Trace from a source provision to a check | `dppce catalogue trace` | Output only |
 | Lint findings | `dppce catalogue lint` | Output only |

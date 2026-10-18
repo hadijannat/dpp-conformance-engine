@@ -23,9 +23,26 @@ refuses them without a matching authorization.
 
 1. Agree the scope with the owner: origins, methods, roles, period, and request limit.
 2. Ask the owner to sign an authorization for that scope. The payload format is the
-   `authorization` schema. `dppce.infrastructure.authorization.issue_authorization` signs one.
+   `authorization` schema. The owner signs it with `dppce authorize`:
+
+   ```bash
+   dppce keys generate --out owner.key.pem --passphrase-ref env:DPPCE_SECRET_OWNER_PASSPHRASE > owner.jwk.json
+   dppce authorize --document authorization.json --key owner.key.pem --kid owner-key-1 \
+     --passphrase-ref env:DPPCE_SECRET_OWNER_PASSPHRASE --out authorization.jws
+   ```
+
+   The owner generates the passphrase, for example with `secrets.token_urlsafe(32)`.
+   The owner then sends you `authorization.jws` and `owner.jwk.json`.
 3. Add the owner's public key to **your** trust bundle, with the purpose `authorization`.
    Get the key through a channel that you trust.
+
+   ```bash
+   dppce trust-bundle add-key --bundle trust.json --out trust-2.json --kid owner-key-1 \
+     --issuer urn:example:owner --purpose authorization --public-key owner.jwk.json \
+     --not-before 2026-01-01T00:00:00Z --not-after 2027-01-01T00:00:00Z
+   ```
+
+   The issuer must equal `issuer` in the authorization. Use `trust-2.json` from now on.
 4. Write the ICS and the IXIT with the owner. Treat both files as untrusted input.
 5. Set `network.allowed_hosts`, the request limit, the minimum interval, and a contact in the IXIT.
    The contact appears in the `User-Agent` header of each request.
@@ -36,6 +53,7 @@ refuses them without a matching authorization.
    Give the copy with `--data-root`. The run manifest records the hash of each bound file.
 8. Run `dppce plan` first. Check which steps the plan executes and which it blocks.
 9. Run `dppce run` with `--trust`, `--authorization`, and the confirmations.
+   Name the data key with `--data-key-id`. Give `--create-data-key` the first time only.
 10. Keep the data key directory apart from the run directory.
 11. List the recordings past the retention period with `dppce purge --runs DIR --keys DIR`.
 12. Check the list. Then delete those recordings with the same command and `--yes`.
@@ -62,6 +80,29 @@ A manual step needs a signed manual result. The engine does not perform the revi
 
 A result for a step that the plan does not execute is an input error.
 A result that the check refuses keeps the status `manual_unavailable`, with a `MANUAL.*` reason code.
+
+## Disclose one record
+
+The owner or a reader can ask for the evidence behind a result.
+A record opening gives the salt and the plaintext of one record.
+
+1. Find the record identifier in the observations of the result, for example `r0001`.
+2. Write the opening:
+
+   ```bash
+   dppce open --run ./runs/r1 --keys ./keys --record r0001 --out r0001.opening.json
+   ```
+
+3. Read the warning. The file holds the plaintext of the record, with mode 0600.
+4. Give the file only to a party that is entitled to it. A response body can hold personal data.
+5. The reader checks the opening against the report:
+
+   ```bash
+   dppce verify --envelope ./runs/r1/envelope.json --trust trust.json \
+     --at 2026-10-14T00:00:00Z --opening r0001.opening.json
+   ```
+
+The dimension `opening` passes with `OPENING.RECORD.OK` when the record matches its commitment.
 
 ## What the engine enforces
 

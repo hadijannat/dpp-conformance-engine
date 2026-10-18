@@ -11,8 +11,16 @@ It tells you nothing new about the tested system.
 
 1. Get the public key of the issuer through a channel that you trust.
    Do not take the key from the report.
-2. Write a trust bundle. Use `fixtures/reference/trust/TEST-ONLY-trust-bundle.json` as a model
-   for the format. Give each key an issuer, the purpose `report`, and a validity period.
+2. Write a trust bundle with `dppce trust-bundle add-key`. Give each key an issuer, the purpose
+   `report`, and a validity period.
+
+```bash
+dppce trust-bundle add-key --policy-version my-policy-1 --out my-trust-bundle.json \
+  --kid lab-key-1 --issuer urn:example:test-lab --purpose report --public-key lab.jwk.json \
+  --not-before 2026-01-01T00:00:00Z --not-after 2027-01-01T00:00:00Z
+```
+
+   Add a key to an existing bundle with `--bundle` in place of `--policy-version`.
 3. Choose the evaluation time. Use the time at which you rely on the report.
 4. Run the verifier.
 
@@ -40,6 +48,8 @@ python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10
 | `status` | The status list sets the bit of the report, or the list is not usable. Or the report names a status entry, a list is supplied, or your policy needs status, and no usable list is supplied. |
 | `validity` | The issuer states a `valid_until` time that is before the evaluation time. |
 | `timestamp` | No token is good, or your policy needs a trusted timestamp and the report has none. The detail names the reason code of the first token. |
+| `opening` | The record opening that you supplied does not match its commitment, or the report does not hold that commitment. `not_checked` means that `records_root` failed. |
+| `proof` | The inclusion proof that you supplied names a different report, or its path does not lead to the root. `not_checked` means that the root of its tree failed. |
 
 To check manual steps, your trust bundle must hold the keys of the performers with the purpose `manual`.
 To check timestamps, list the certificate of each timestamp authority that you trust in
@@ -62,6 +72,28 @@ python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10
 4. Read the dimension `status`. `STATUSLIST.REPORT.ACTIVE` means that the bit of the report is 0.
 
 A report that names a status entry is not complete without a usable list.
+
+## Check one result or one record
+
+An inclusion proof shows that a report holds one result. A record opening discloses one record.
+
+1. Get the proof from the issuer. The issuer writes it with `dppce prove`:
+
+```bash
+dppce prove --envelope envelope.json --result R:EUBAT-77-2-CONTENT --out result.proof.json
+```
+
+2. Run the verifier with the proof. Add `--opening FILE` to check a record opening.
+
+```bash
+python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z \
+  --proof result.proof.json
+```
+
+3. Read the dimension `proof`. `PROOF.LEAF.OK` names the key and the verdict of the result.
+
+The verifier checks each file against the envelope, not against a root that the file states.
+A trusted signature over the report gives the result its trust.
 
 ## Check a reviewer signature
 

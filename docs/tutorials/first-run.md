@@ -49,10 +49,11 @@ uv run dppce run \
   --role-secret authority=file:TEST-ONLY-authority.token \
   --issuer-name "synthetic test laboratory" --issuer-id urn:example:test-lab \
   --at 2026-10-13T12:00:00Z \
-  --keys ./runs/keys --out ./runs/ev-1
+  --keys ./runs/keys --create-data-key --out ./runs/ev-1
 ```
 
 The command prints the overall outcome and the decision digest. The exit code is `0`.
+`--create-data-key` makes the data key in `./runs/keys`. A later run needs no such option.
 The issuer identifier must equal the issuer of the signing key in the trust bundle.
 Otherwise the signed report of step 7 does not verify as complete.
 The options `--allow-private-host`, `--secrets`, and `--role-secret` are confirmations.
@@ -88,13 +89,18 @@ Sign the report with the test key.
 ```bash
 uv run dppce sign --envelope ./runs/ev-1/envelope.json \
   --key fixtures/reference/trust/TEST-ONLY-report-signing.key.pem \
-  --kid TEST-ONLY-report-key-1 --issuer urn:example:test-lab
+  --kid TEST-ONLY-report-key-1 --issuer urn:example:test-lab \
+  --allow-unencrypted-key --out ./runs/ev-1/envelope.signed.json
 ```
 
-Verify it with the standalone verifier.
+The TEST-ONLY key is not encrypted, so `sign` needs `--allow-unencrypted-key`.
+A real key is encrypted. `dppce keys generate` makes one.
+`sign` writes a new file and leaves `envelope.json` as it is.
+
+Verify the signed file with the standalone verifier.
 
 ```bash
-uv run python -m dppce.verifier ./runs/ev-1/envelope.json \
+uv run python -m dppce.verifier ./runs/ev-1/envelope.signed.json \
   --trust fixtures/reference/trust/TEST-ONLY-trust-bundle.json --at 2026-10-14T00:00:00Z
 ```
 

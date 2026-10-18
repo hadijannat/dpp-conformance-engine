@@ -37,6 +37,7 @@ services:
       - --role-secret=authority=file:TEST-ONLY-authority.token
       - --at=2026-10-13T12:00:00Z
       - --keys=/work/keys
+      - --create-data-key
       - --out=/work/run
 
 volumes:

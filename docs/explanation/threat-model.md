@@ -112,7 +112,7 @@ An independent review of 2026-10-13 found 17 more defects. The report is
 | Risk | State |
 | --- | --- |
 | No independent security audit | Open. Needed before any production use. |
-| The trust bundle and the data key are files on the operator's host | By design for development. KMS and PKCS#11 providers are interfaces only. |
+| The trust bundle and the data key are files on the operator's host | By design for development. KMS and PKCS#11 providers are interfaces only. A signing key from `dppce keys generate` is a file encrypted with PBES2: PBKDF2-HMAC-SHA256 with 2048 iterations, and AES-256-CBC. That cost is low, so the passphrase must be generated with high entropy, at least 32 bytes. `dppce sign` refuses an unencrypted key without `--allow-unencrypted-key`. |
 | A timestamp authority states a false time, or its key is compromised | The operator trusts only the TSA certificates and CAs in its `timestamp_anchors` (ADR 0015). A compromised TSA key can backdate a token. Revoke its certificate with `revoked_at` null or the time of the compromise. |
 | No timestamp of an archived report again | Open. A token stays good after its TSA certificate expires, while the operator keeps the anchor and no revocation applies. |
 | Untrusted DER in timestamp tokens | asn1crypto parses each token. A token is at most 64 KiB with five certificates. Each parse or verification error gives `fail`, never an exception. Property tests check this. |

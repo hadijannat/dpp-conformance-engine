@@ -55,8 +55,30 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `TRUST.KEY.ROLE_CONFLICT`.
 - The verifier has the mandatory dimension `signers` and the dimension `validity`. The HTML report
   lists each signature as declared. The fault catalogue version 0.5.0 adds `E-14` and `E-15`.
+- Operator key tooling (D6-08). `dppce keys generate` writes a P-256 key as encrypted PKCS#8 and
+  prints its public JWK. `dppce authorize` signs a test authorization with the key of the system
+  owner. `dppce trust-bundle add-key` writes a `dppce.trust/2` bundle with one more key.
+- `dppce open` writes the salt and the plaintext of one record. `dppce prove` writes the inclusion
+  proof of one result. The schemas `opening` (`dppce.opening/1`) and `proof` (`dppce.proof/1`).
+- `--opening` and `--proof` on `dppce verify` and `python -m dppce.verifier`. A supplied file adds
+  the mandatory dimension `opening` or `proof`.
+- `--data-key-id` and `--create-data-key` on `dppce run`. `--passphrase-ref`, `--secrets`, and
+  `--allow-unencrypted-key` on `dppce sign`.
 
 ### Changed
+
+- `dppce sign` needs `--out NEW_FILE` or `--in-place`. It no longer writes over the input by
+  default. `--out` refuses the input path and any existing file.
+- `dppce sign --in-place` refuses an input that is a symbolic link (`SIGN.INPUT.LINK`). The
+  replaced file keeps the mode of the input.
+- `dppce sign` refuses an unencrypted key unless `--allow-unencrypted-key` is given. The shipped
+  TEST-ONLY report key is not encrypted, so the tutorial, the README, and the validation rig give
+  that option.
+- `dppce sign` refuses an envelope that fails `structure`, `ordering`, `results_root`,
+  `records_root`, or `counts` (`ENVELOPE.BODY.INVALID`, exit code 2).
+- `dppce run` no longer creates a missing data key. Give `--create-data-key` the first time.
+  `--data-key-id` selects the key; the default is `local-data-key-1`. `compose.yaml`, the README,
+  the tutorial, and the validation rig give `--create-data-key`.
 
 - `status` no longer passes on a fresh `status_as_of` date alone. It needs a supplied status list
   with a clear bit. A report with `require_status` and no list is not complete.

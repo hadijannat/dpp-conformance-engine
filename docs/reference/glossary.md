@@ -26,6 +26,7 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | exclusion | Something in the selected catalogue that a run left out, with the reason. |
 | execution mode | Illustrative, exploratory, or reviewed. The mode decides which requirements a run can assess. |
 | ICS | Implementation Conformance Statement. What the owner declares about the system. |
+| inclusion proof | The audit path of one leaf of a tree of a report. It shows that the report holds that result or commitment. |
 | interpretation | A statement of what a source provision requires. Agent-authored interpretations are drafts. |
 | IXIT | Implementation eXtra Information for Testing. What the tester needs to run the tests. |
 | laboratory record | A document that a laboratory keeps under its own procedures. The engine does not produce it. |
@@ -36,6 +37,7 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | placeholder | A requirement entry with no paraphrase and no test. It marks a source that nobody has interpreted. |
 | profile | The selection of packs, test packs, and resources for one product type. |
 | record | One raw exchange or input artifact, kept encrypted in a recording. |
+| record opening | The salt and the plaintext of one record, with the inclusion proof of its commitment. It discloses that record. |
 | recording | The encrypted records of one run. A replay evaluates a recording again. |
 | reference system | The synthetic local DPP system in this repository. It is an example, not an authority. |
 | requirement | One testable statement with a source, an authority class, a modality, and a review status. |

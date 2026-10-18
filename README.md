@@ -60,7 +60,7 @@ uv run dppce run \
   --role-secret authority=file:TEST-ONLY-authority.token \
   --issuer-name "synthetic test laboratory" --issuer-id urn:example:test-lab \
   --at 2026-10-13T12:00:00Z \
-  --keys ./runs/keys --out ./runs/ev-1
+  --keys ./runs/keys --create-data-key --out ./runs/ev-1
 ```
 
 The issuer identifier must equal the issuer of the signing key in the trust bundle.
@@ -75,11 +75,14 @@ uv run dppce replay --run ./runs/ev-1 --keys ./runs/keys --times 5
 ```bash
 uv run dppce sign --envelope ./runs/ev-1/envelope.json \
   --key fixtures/reference/trust/TEST-ONLY-report-signing.key.pem \
-  --kid TEST-ONLY-report-key-1 --issuer urn:example:test-lab
+  --kid TEST-ONLY-report-key-1 --issuer urn:example:test-lab \
+  --allow-unencrypted-key --out ./runs/ev-1/envelope.signed.json
 ```
 
+The TEST-ONLY key is not encrypted. A real key comes from `dppce keys generate`.
+
 ```bash
-uv run python -m dppce.verifier ./runs/ev-1/envelope.json \
+uv run python -m dppce.verifier ./runs/ev-1/envelope.signed.json \
   --trust fixtures/reference/trust/TEST-ONLY-trust-bundle.json --at 2026-10-14T00:00:00Z
 ```
 
