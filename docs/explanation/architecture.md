@@ -45,10 +45,14 @@ Rules:
 2. `verifier` never imports `orchestrator`, `adapters`, `testdefs`, or the transport.
 3. A check reaches the outside world only through the `Acquirer` protocol.
 4. YAML is parsed only by `dppce.catalogue.load_data`. It uses a subclass of PyYAML's
-   `SafeLoader` that also rejects a repeated key. A test proves that a `!!python/object` tag is
-   rejected. No YAML value is evaluated as code or as a template. A URL template (section 9.2)
-   is not evaluated either. The engine only replaces named placeholders with percent-encoded
-   values under a fixed grammar.
+   `SafeLoader` that also rejects a repeated key and a key that cannot be a mapping key.
+   `load_data` parses a JSON file with `parse_strict` (section 11), so a repeated key, `NaN`,
+   `Infinity`, and a number outside the float range are rejected. A nesting deeper than the
+   parser handles is an input error, not a crash. The envelope, the trust bundle, the recording,
+   the manual result, the authorization, and the JWS header and payload are also parsed with
+   `parse_strict`. A test proves that a `!!python/object` tag is rejected. No YAML value is
+   evaluated as code or as a template. A URL template (section 9.2) is not evaluated either. The
+   engine only replaces named placeholders with percent-encoded values under a fixed grammar.
 5. No module fetches a schema, a JSON-LD context, or a `$ref` from the network. Every such
    resource is a pinned local file.
 
@@ -324,6 +328,16 @@ Initial registry:
 `accepted_media_types` the check needs a final JSON object, as before. `IDENTIFIER.RESOLVED`
 always means a final JSON object. A pass on another listed media type gives
 `IDENTIFIER.RESOLVED.MEDIA_TYPE`. The observation summary always records the final media type.
+
+`identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
+`http://`, `https://`, `HTTP://`, or `HTTPS://`. The host part is not empty and holds only `A-Z`,
+`a-z`, `0-9`, `.`, `-`, `:`, `[`, and `]`. So user information and an IPv6 zone identifier are
+refused. The path is `/01/<GTIN>/21/<serial>`. The GTIN is 14 ASCII digits with a correct check
+digit. The serial is 1 to 20 characters from `A-Z`, `a-z`, `0-9`, `.`, `_`, and `-`. The whole
+URL holds only the characters that RFC 3986 permits in a URI, including `%`. Every other text
+gives `IDENTIFIER.SYNTAX.INVALID`. This includes forms that GS1 permits, such as a GTIN without
+a serial, a key qualifier, or a path prefix. The check reads the query and the fragment only for
+their characters.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.
@@ -682,7 +696,11 @@ RFC 9162 and gives no protection against equivocation.
 ### 11.3 Signing profile
 
 One profile: JWS Compact Serialization (RFC 7515) with `ES256`. The allowlist is `["ES256"]`.
-The payload is `JCS(attestation)`. The protected header holds `alg`, `kid`, and
+The payload is `JCS(attestation)`.
+The verification key is a public P-256 JWK with `kty`, `crv`, `x`, and `y`. It can also have
+`kid`, `use`, and `alg`. A key whose `use` is not `sig` is refused. A key whose `alg` is not
+`ES256` is refused.
+The protected header holds `alg`, `kid`, and
 `typ: "dppce-attestation+jws"`. Keys in the repository are test keys and say so in their names.
 Production keys come from a `Signer` implementation for a KMS or PKCS#11 device.
 Qualified electronic seals, COSE, RFC 3161, Bitstring Status List, and UNTP DCC export are
