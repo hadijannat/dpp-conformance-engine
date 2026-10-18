@@ -64,6 +64,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the mandatory dimension `opening` or `proof`.
 - `--data-key-id` and `--create-data-key` on `dppce run`. `--passphrase-ref`, `--secrets`, and
   `--allow-unencrypted-key` on `dppce sign`.
+- `keys generate`, `sign --out`, `authorize`, `trust-bundle add-key`, `open`, and `prove` remove
+  their new output file when the write fails, for example on a full disk. A retry then works.
+  `dppce open` prints its warning before it writes the file.
 
 ### Changed
 
@@ -79,6 +82,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `dppce run` no longer creates a missing data key. Give `--create-data-key` the first time.
   `--data-key-id` selects the key; the default is `local-data-key-1`. `compose.yaml`, the README,
   the tutorial, and the validation rig give `--create-data-key`.
+- `--allow-private-host` and `--allow-remote-host` on `dppce run` refuse a value with userinfo, a
+  query, or a fragment. This includes an empty query or fragment, such as `http://127.0.0.1:8765?`.
+  `dppce authorize` refuses such an endpoint with `AUTHORIZE.ENDPOINT.INVALID`.
 
 - `status` no longer passes on a fresh `status_as_of` date alone. It needs a supplied status list
   with a clear bit. A report with `require_status` and no list is not complete.
@@ -126,6 +132,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- A secret reference whose value is not valid UTF-8 gives exit code 2 with a fixed message.
+  Before, `dppce run` gave exit code 3 with a message that named one byte of the secret and its
+  position.
 - After the agent review of the adapters of 2026-10-18
   (`validation/records/review-adapters-2026-10-18.md`):
   - `api.contract` judges only the answer of the marked operation. A redirect, a query, or a

@@ -11,6 +11,8 @@ import json
 import os
 import secrets
 import stat
+import subprocess
+import sys
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -29,6 +31,7 @@ from dppce.evidence.jws import LocalSigner, _b64, public_jwk_of
 from dppce.infrastructure.authorization import validate_authorization
 from dppce.models import Authorization, TrustBundle
 from tests.support import ISSUER, make_envelope
+from tests.test_review_round2 import FIXTURES, _run_arguments
 
 PASSPHRASE_ENV = "DPPCE_SECRET_TEST_ONLY_PASSPHRASE"
 PASSPHRASE_REF = f"env:{PASSPHRASE_ENV}"
@@ -96,6 +99,23 @@ def _add_key(
 def _envelope(path: Path) -> Path:
     path.write_text(make_envelope().model_dump_json(by_alias=True) + "\n", encoding="utf-8")
     return path
+
+
+def limited(limit: int, *arguments: str) -> subprocess.CompletedProcess[str]:
+    """Run the command line in a child whose files cannot grow past ``limit`` bytes.
+
+    A write past the limit fails with EFBIG, as a write to a full disk fails. Python ignores SIGXFSZ.
+    """
+    code = (
+        "import resource, sys\n"
+        "from dppce.cli import main\n"
+        f"resource.setrlimit(resource.RLIMIT_FSIZE, ({limit}, {limit}))\n"
+        "sys.exit(main(sys.argv[1:]))\n"
+    )
+    environment = os.environ | {"PYTHONDONTWRITEBYTECODE": "1"}
+    return subprocess.run(  # noqa: S603 - fixed code; the arguments are test paths
+        [sys.executable, "-c", code, *arguments], capture_output=True, text=True, check=False, env=environment
+    )
 
 
 # -- keys generate ------------------------------------------------------------------------------------
@@ -169,6 +189,39 @@ def test_keys_generate_refusals(
         assert code == 2, reference
         assert not path.exists()
         assert literal not in err
+
+
+def test_a_failed_write_leaves_no_file_and_a_retry_succeeds(
+    run: Run, passphrase: str, tmp_path: Path
+) -> None:
+    path = tmp_path / "TEST-ONLY-report.key.pem"
+    arguments = ("keys", "generate", "--out", str(path), "--passphrase-ref", PASSPHRASE_REF)
+    done = limited(100, *arguments)
+    assert done.returncode == 2, done.stderr
+    assert not path.exists(), path.stat().st_size
+    assert passphrase not in done.stderr
+    code, _, err = run(*arguments)
+    assert code == 0, err
+
+
+def test_a_secret_that_is_not_utf8_is_refused_without_its_bytes(
+    run: Run, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Section 11.3: no command prints a passphrase. A decoder message would print one byte and its position.
+    directory = tmp_path / "secrets"
+    directory.mkdir()
+    (directory / "TEST-ONLY-passphrase").write_bytes(b"TEST-ONLY-" + b"x" * 12 + b"\xfe" + b"y" * 20)
+    monkeypatch.setenv(PASSPHRASE_ENV, "TEST-ONLY-" + "x" * 12 + "\udcfe" + "y" * 20)
+    path = tmp_path / "TEST-ONLY-refused.key.pem"
+    for reference in ("file:TEST-ONLY-passphrase", PASSPHRASE_REF):
+        code, out, err = run(
+            "keys", "generate", "--out", str(path), "--passphrase-ref", reference, "--secrets", str(directory)
+        )
+        assert code == 2, (reference, err)
+        for leak in ("0xfe", "\\udcfe", "\udcfe", "position", "x" * 12):
+            assert leak not in err, (reference, err)
+            assert leak not in out, (reference, out)
+        assert not path.exists()
 
 
 # -- sign ---------------------------------------------------------------------------------------------
@@ -445,7 +498,17 @@ def test_authorize_refusals(run: Run, tmp_path: Path) -> None:
         code, err = authorize(document)
         assert (code, "AUTHORIZE.PERIOD.INVALID" in err) == (2, True), err
         assert not out.exists()
-    for endpoint in ("https://h.example/path", "ftp://h.example", "h.example"):
+    for endpoint in (
+        "https://h.example/path",
+        "ftp://h.example",
+        "h.example",
+        "http://TEST-ONLY-user:TEST-ONLY-password@127.0.0.1:8765",
+        "http://@127.0.0.1:8765",
+        "http://127.0.0.1:8765?a=1",
+        "http://127.0.0.1:8765/?",
+        "http://127.0.0.1:8765#f",
+        "http://127.0.0.1:8765/#",
+    ):
         code, err = authorize(_authorization(endpoints=[endpoint]))
         assert (code, "AUTHORIZE.ENDPOINT.INVALID" in err) == (2, True), err
         assert not out.exists()
@@ -639,3 +702,21 @@ def test_run_creates_a_missing_data_key_only_with_the_flag(
         second = rig.run(create_data_key=False, extra=["--data-key-id", "TEST-ONLY-data-key-7"])
         assert second.exit_code == first.exit_code
         assert key.read_bytes() == before
+
+
+@pytest.mark.parametrize("flag", ["--allow-private-host", "--allow-remote-host"])
+def test_run_refuses_a_confirmed_origin_with_userinfo_a_query_or_a_fragment(
+    run: Run, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, flag: str
+) -> None:
+    def refuse(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("no transport may be built for an origin that is not valid")
+
+    monkeypatch.setattr(cli, "PolicyTransport", refuse)
+    for value in (
+        "http://TEST-ONLY-user:TEST-ONLY-password@127.0.0.1:8765",
+        "http://127.0.0.1:8765?",
+        "http://127.0.0.1:8765/#f",
+    ):
+        code, _, err = run(*_run_arguments(FIXTURES, tmp_path, extra=(flag, value, "--create-data-key")))
+        assert (code, f"{flag} takes an origin" in err) == (2, True), err
+        assert not (tmp_path / "run").exists()

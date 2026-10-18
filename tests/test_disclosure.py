@@ -30,6 +30,7 @@ from dppce.models import EvidenceEnvelope, InclusionProof, OpenedRecord, RecordO
 from dppce.verifier import verify
 from dppce.verifier.__main__ import main as verifier_main
 from tests.support import AT, make_artifact, make_envelope, make_record
+from tests.test_cli_keys import limited
 
 AT_TEXT = "2026-10-14T00:00:00Z"
 NOT_CHECKED = "Not checked because the root of the report does not match its body."
@@ -338,6 +339,18 @@ def test_open_writes_salt_and_plaintext_with_a_warning(run: Run, runs: Runs, tmp
     document = json.loads(stdout)
     assert (document["written"], document["record_id"]) == (str(second), "r0001")
     assert "plaintext" in document["warning"]
+
+
+@pytest.mark.qr
+def test_a_failed_open_leaves_no_plaintext_and_has_warned_first(run: Run, runs: Runs, tmp_path: Path) -> None:
+    out = tmp_path / "opening.json"
+    arguments = ["open", "--run", str(runs.first.run_dir), "--keys", str(runs.keys), "--record", "r0001"]
+    done = limited(64, *arguments, "--out", str(out))
+    assert done.returncode == 2, done.stderr
+    assert done.stderr.startswith("WARNING"), done.stderr
+    assert not out.exists(), out.stat().st_size
+    code, _, err = _open(run, runs, out)
+    assert code == 0, err
 
 
 @pytest.mark.qr

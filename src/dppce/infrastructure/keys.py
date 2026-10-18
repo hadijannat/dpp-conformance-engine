@@ -6,6 +6,7 @@ device. Those integrations are interfaces only in this version.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import secrets
@@ -71,10 +72,18 @@ class FileDataKeyProvider:
 
 
 def write_new_file(path: Path, data: bytes, mode: int = 0o666) -> None:
-    """Create ``path`` with ``data``. Never replaces a file and never follows a link."""
-    handle = os.open(path, _NEW_FILE, mode)
-    with os.fdopen(handle, "wb") as out:
-        out.write(data)
+    """Create ``path`` with ``data``. Never replaces a file and never follows a link.
+
+    A failed write removes the file again: a partial key or opening never stays, and a retry works.
+    """
+    handle = os.open(path, _NEW_FILE, mode)  # outside the try: a file that exists is not ours to remove
+    try:
+        with os.fdopen(handle, "wb") as out:
+            out.write(data)
+    except BaseException:
+        with contextlib.suppress(FileNotFoundError):
+            os.unlink(path)
+        raise
 
 
 def generate_signing_key(path: Path, passphrase: str) -> dict[str, str]:
@@ -146,10 +155,10 @@ def resolve_secret(
         if not target.startswith(SECRET_ENV_PREFIX):
             raise KeyError_(f"an environment secret must have a name that starts with {SECRET_ENV_PREFIX}")
         try:
-            return (os.environ if environ is None else environ)[target]
+            value = (os.environ if environ is None else environ)[target]
         except KeyError as exc:
             raise KeyError_(f"the environment secret '{target}' is not set") from exc
-    if kind == "file":
+    elif kind == "file":
         if secrets_dir is None:
             raise KeyError_("a file secret needs a secrets directory from the operator")
         root = secrets_dir.resolve()
@@ -157,7 +166,15 @@ def resolve_secret(
         if not path.is_relative_to(root):
             raise KeyError_("a file secret must lie inside the secrets directory")
         try:
-            return path.read_text(encoding="utf-8").strip()
-        except OSError as exc:
-            raise KeyError_("a file secret cannot be read") from exc
-    raise KeyError_("a secret reference starts with 'env:' or 'file:'")
+            value = path.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            # A decoder message names a byte of the secret and its position (section 11.3).
+            raise KeyError_("a file secret cannot be read as UTF-8 text") from None
+    else:
+        raise KeyError_("a secret reference starts with 'env:' or 'file:'")
+    try:
+        # An environment value with a byte that is not UTF-8 arrives as a lone surrogate.
+        value.encode("utf-8")
+    except UnicodeError:
+        raise KeyError_("a secret is not valid UTF-8") from None
+    return value

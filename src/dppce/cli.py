@@ -501,7 +501,13 @@ def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
             origin = origin_of(value)
         except ValueError as exc:
             raise UsageError(f"{flag} {value!r} is not an origin") from exc
-        if parts.scheme not in ("http", "https") or not parts.hostname or parts.path not in ("", "/"):
+        # An origin has no userinfo, query, or fragment. urlsplit drops an empty "?" or "#", so test the text.
+        if (
+            parts.scheme not in ("http", "https")
+            or not parts.hostname
+            or parts.path not in ("", "/")
+            or any(mark in value for mark in "@?#")
+        ):
             raise UsageError(f"{flag} takes an origin such as http://127.0.0.1:8765, not {value!r}")
         origins.add(origin)
     return frozenset(origins)
@@ -954,13 +960,14 @@ def cmd_open(args: argparse.Namespace) -> int:
         opening = disclosure.open_record(envelope.decision, record)
     except disclosure.DisclosureError as exc:
         raise UsageError(f"{exc.code}: {exc}") from exc
-    write_new_file(args.out, canonical_bytes(opening) + b"\n", 0o600)
     warning = (
         f"WARNING: {args.out} holds the plaintext of record {record.record_id}: the request without "
         "secrets, the response headers, and the response body. Give it only to a party that is "
         "entitled to it."
     )
+    # Before the write: no plaintext is ever on disk without the warning.
     print(warning, file=sys.stderr)
+    write_new_file(args.out, canonical_bytes(opening) + b"\n", 0o600)
     _emit(
         args,
         {"written": str(args.out), "record_id": record.record_id, "warning": warning},
