@@ -447,10 +447,21 @@ def test_f03_the_access_check_does_not_pass_for_a_role_that_was_never_authentica
         ("http://example.com:8080/a?b", "http://example.com:8080"),
         ("http://[::1]:8080/x", "http://[::1]:8080"),
         ("https://[2001:DB8::1]/", "https://[2001:db8::1]"),
+        ("http://127.0.0.1:0/x", "http://127.0.0.1:0"),
+        ("https://example.com:0", "https://example.com:0"),
     ],
 )
 def test_f17_an_origin_has_one_normal_form(url: str, origin: str) -> None:
     assert origin_of(url) == origin
+
+
+def test_f17_an_explicit_port_0_is_never_the_default_port() -> None:
+    # Port 0 is falsy. It must not become port 80, or a confirmation of port 80 would cover it.
+    target = transport()._target("http://127.0.0.1:0/x", "GET", "anonymous")
+    assert (target.port, target.origin) == (0, "http://127.0.0.1:0")
+    confirmed = transport(private_origins=frozenset({"http://127.0.0.1"}))
+    with pytest.raises(Exception, match=r"^policy_denied$"):
+        confirmed._target("http://127.0.0.1:0/x", "GET", "anonymous")
 
 
 # -- F-04: an encoded or disguised body ------------------------------------------------------

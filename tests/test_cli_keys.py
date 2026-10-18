@@ -547,6 +547,7 @@ def test_authorize_refusals(run: Run, passphrase: str, tmp_path: Path) -> None:
         "https://dpp.example\n.evil.example",
         " http://127.0.0.1:8765",
         "\x01http://127.0.0.1:8765",
+        "http://127.0.0.1:0",
     ):
         code, err = authorize(_authorization(endpoints=[endpoint]))
         assert (code, "AUTHORIZE.ENDPOINT.INVALID" in err) == (2, True), err
@@ -794,6 +795,8 @@ def test_run_refuses_a_confirmed_origin_with_userinfo_a_query_or_a_fragment(
         "http://127.0.0.1:87\t65",
         "http://127.0.0.1:8765\n",
         " http://127.0.0.1:8765",
+        # No service listens on port 0, so no operator confirms it.
+        "http://127.0.0.1:0",
     ):
         code, _, err = run(*_run_arguments(FIXTURES, tmp_path, extra=(flag, value, "--create-data-key")))
         assert (code, f"{flag} takes an origin" in err) == (2, True), err

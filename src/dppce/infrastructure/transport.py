@@ -69,7 +69,8 @@ def origin_of(url: str) -> str:
     parts = urlsplit(url)
     host = (parts.hostname or "").lower()
     default = 443 if parts.scheme == "https" else 80
-    port = parts.port or default
+    # Not "parts.port or default": an explicit port 0 is not the default port.
+    port = default if parts.port is None else parts.port
     shown = f"[{host}]" if ":" in host else host
     return f"{parts.scheme}://{shown}" + ("" if port == default else f":{port}")
 
@@ -232,7 +233,7 @@ class PolicyTransport:
         try:
             parts = urlsplit(url)
             host = (parts.hostname or "").lower()
-            port = parts.port or (443 if parts.scheme == "https" else 80)
+            port = (443 if parts.scheme == "https" else 80) if parts.port is None else parts.port
             origin = origin_of(url)
         except ValueError as exc:
             # A URL that cannot be parsed is outside every policy. It is never raised.

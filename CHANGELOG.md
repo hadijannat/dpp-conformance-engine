@@ -158,6 +158,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     transport refuses a URL with a control character or a space.
   - The credential scrub covers more echo forms and keeps the end of a complete body.
   - A validation control fails when a planned step stops completing.
+- An explicit port 0 is no longer read as the default port. Before, `http://127.0.0.1:0` had the
+  origin `http://127.0.0.1`, so a confirmation or a credential for port 80 also covered it, and
+  the transport connected to port 80. `--allow-private-host`, `--allow-remote-host`, and the
+  endpoints of `dppce authorize` refuse port 0.
 
 ## [0.1.0rc1] - 2026-10-15
 

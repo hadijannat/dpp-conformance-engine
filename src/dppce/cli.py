@@ -517,6 +517,8 @@ def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
             parts.scheme not in ("http", "https")
             or not parts.hostname
             or parts.path not in ("", "/")
+            # No service listens on port 0, so no operator confirms it.
+            or parts.port == 0
             or any(mark in value for mark in "@?#")
             or any(c <= " " or c == "\x7f" for c in value)
         ):
