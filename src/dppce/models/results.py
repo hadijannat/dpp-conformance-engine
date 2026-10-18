@@ -281,6 +281,82 @@ class EvidenceEnvelope(Model):
     timestamp_evidence: tuple[str, ...] = ()
 
 
+# RFC 8785 serializes numbers as IEEE 754 doubles. Integers are exact only inside this range.
+MAX_SAFE_INTEGER: Final = 2**53 - 1
+_HEX64: Final = r"^[0-9a-f]{64}$"
+
+
+class InclusionProof(Model):
+    """An audit path of one leaf of a tree of a decision body (architecture section 11.2).
+
+    No field has a default: a writer states each value.
+    """
+
+    schema_version: Literal["dppce.proof/1"]
+    decision_digest: str = Field(pattern=DIGEST)
+    label: Literal["results", "records"]
+    key: str = Field(min_length=1, description='"R:" or "T:" plus an identifier, or a record identifier.')
+    index: int = Field(ge=0, le=MAX_SAFE_INTEGER)
+    size: int = Field(ge=1, le=MAX_SAFE_INTEGER)
+    leaf: RequirementResult | TestResult | RecordCommitment
+    path: tuple[Annotated[str, Field(pattern=_HEX64)], ...] = Field(max_length=64)
+    root: str = Field(pattern=_HEX64)
+
+    @model_validator(mode="after")
+    def _leaf_fits(self) -> Self:
+        if self.index >= self.size:
+            raise ValueError("index must be less than size")
+        if isinstance(self.leaf, RecordCommitment):
+            expected = ("records", self.leaf.record_id)
+        elif isinstance(self.leaf, RequirementResult):
+            expected = ("results", f"R:{self.leaf.requirement_id}")
+        else:
+            expected = ("results", f"T:{self.leaf.test_purpose_id}")
+        if (self.label, self.key) != expected:
+            raise ValueError("label and key must fit the leaf")
+        return self
+
+
+class OpenedRecord(Model):
+    """Every field of one record except the salt. Its RFC 8785 form is the plaintext of the commitment.
+
+    ``error`` is a string here: the models import nothing else of the engine.
+    """
+
+    record_id: str = Field(pattern=r"^r\d{4,6}$")
+    kind: Literal["http", "artifact"]
+    acquired_at: str
+    method: str
+    url: str
+    role: str
+    request_headers: tuple[tuple[str, str], ...]
+    status: int | None
+    headers: tuple[tuple[str, str], ...]
+    body: str = Field(description="Standard base64 of the raw body.")
+    truncated: bool
+    error: str | None
+    redirects: tuple[str, ...]
+    attempts: int
+
+
+class RecordOpening(Model):
+    """The salt and the plaintext of one record, for a disclosure to an entitled party (ADR 0009).
+
+    It holds the plaintext of a recorded exchange. Protect it as you protect the recording.
+    """
+
+    schema_version: Literal["dppce.opening/1"]
+    record: OpenedRecord
+    salt: str = Field(pattern=r"^[A-Za-z0-9+/]{43}=$", description="Standard base64 of the 32-byte salt.")
+    proof: InclusionProof
+
+    @model_validator(mode="after")
+    def _proof_is_of_this_record(self) -> Self:
+        if self.proof.label != "records" or self.proof.key != self.record.record_id:
+            raise ValueError("the proof must be of the commitment of this record")
+        return self
+
+
 class InputHashes(Model):
     """Digests of the inputs that a replay reads again: the profile, the sources, every loaded pack
     and test pack, and the bound files.
