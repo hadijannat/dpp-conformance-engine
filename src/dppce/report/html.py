@@ -12,7 +12,8 @@ from collections.abc import Iterable, Sequence
 from html import escape
 
 from dppce.evidence.envelope import decision_digest
-from dppce.models import EvidenceEnvelope, Ratio, VerificationReport
+from dppce.evidence.manual import MANUAL_CHECK
+from dppce.models import EvidenceEnvelope, ExecutionStatus, Ratio, TestResult, VerificationReport
 
 _CSS = """
 :root { color-scheme: light dark; --fg: #1a1a1a; --bg: #ffffff; --muted: #4a4a4a; --line: #767676;
@@ -159,6 +160,26 @@ def _coverage(envelope: EvidenceEnvelope) -> str:
     )
 
 
+def _manual_row(t: TestResult) -> tuple[str, ...]:
+    """One manual step. Only a completed step shows signed fields; the report holds no name."""
+    summary = t.observations[0].summary if t.observations else {}
+    record = t.observations[0].record_ids[0] if t.observations and t.observations[0].record_ids else None
+    signed = t.execution_status is ExecutionStatus.COMPLETED
+
+    def field(name: str) -> str:
+        return _e(summary.get(name, "none")) if signed else "none"
+
+    return (
+        f"<code>{_e(t.test_purpose_id)}</code>",
+        _e(t.execution_status.value.replace("_", " ")),
+        field("role"),
+        field("performed_at"),
+        f"<code>{field('kid')}</code>",
+        field("outcome"),
+        f"<code>{_e(record)}</code>" if record else "none",
+    )
+
+
 def _results(envelope: EvidenceEnvelope) -> str:
     d = envelope.decision
     requirements = _table(
@@ -207,6 +228,12 @@ def _results(envelope: EvidenceEnvelope) -> str:
             for t in d.test_results
         ),
     )
+    manual_rows = [_manual_row(t) for t in d.test_results if t.check == MANUAL_CHECK]
+    manual = _table(
+        "Manual steps",
+        ("Test purpose", "Execution", "Role", "Performed at", "Key id", "Outcome", "Record id"),
+        manual_rows,
+    )
     exclusions = _table(
         "Exclusions",
         ("Kind", "Identifier", "Reason code", "Reason"),
@@ -225,8 +252,15 @@ def _results(envelope: EvidenceEnvelope) -> str:
         ("Requirement", "Declared", "Explanation"),
         ((f"<code>{_e(c.requirement_id)}</code>", _e(c.declared), _e(c.explanation)) for c in d.conflicts),
     )
+    manual_note = (
+        "<p>A manual result names no person. The key id links it to the performer in the records "
+        "of the laboratory.</p>"
+        if manual_rows
+        else ""
+    )
     return (
-        f'<section aria-labelledby="results"><h2 id="results">Results</h2>{requirements}{tests}</section>'
+        f'<section aria-labelledby="results"><h2 id="results">Results</h2>{requirements}{tests}'
+        f"{manual}{manual_note}</section>"
         f'<section aria-labelledby="left-out"><h2 id="left-out">Exclusions and conflicts</h2>'
         f"<p>Nothing in the selected catalogue is left out silently.</p>{exclusions}{conflicts}</section>"
     )
