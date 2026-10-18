@@ -6,8 +6,13 @@ Contract: docs/explanation/architecture.md, section 8.1.
 from __future__ import annotations
 
 from dppce.adapters.common import completed
-from dppce.evidence.canonical import digest
-from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX, ManualResultError, verify_manual_result
+from dppce.evidence.manual import (
+    MANUAL_CHECK,
+    SAMPLE_PREFIX,
+    ManualResultError,
+    test_purpose_digest,
+    verify_manual_result,
+)
 from dppce.models import CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext, NoParams, register
 
@@ -45,7 +50,7 @@ def review(ctx: CheckContext) -> CheckOutcome:
         token = record.body.decode("ascii").strip()
     except UnicodeDecodeError:
         return unavailable("MANUAL.RESULT.MALFORMED", "The manual result is not a compact JWS.")
-    purpose_digest = digest(ctx.purpose)
+    purpose_digest = test_purpose_digest(ctx.purpose)
     try:
         result, key = verify_manual_result(
             token,

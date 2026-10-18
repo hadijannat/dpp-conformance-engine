@@ -12,10 +12,10 @@ import re
 from datetime import UTC, datetime
 from typing import Final
 
-from dppce.evidence.canonical import canonical_bytes, parse_strict
+from dppce.evidence.canonical import canonical_bytes, digest, parse_strict
 from dppce.evidence.jws import ALLOWED_ALGORITHMS, SignatureError, header_of, sign_compact, verify_compact
 from dppce.infrastructure.interfaces import Signer
-from dppce.models import ManualResult, SutIdentity, TrustBundle, TrustedKey
+from dppce.models import ManualResult, SutIdentity, TestPurpose, TrustBundle, TrustedKey
 
 MANUAL_RESULT_TYP: Final = "dppce-manual-result+jws"
 MANUAL_CHECK: Final = "manual.review"
@@ -43,6 +43,14 @@ class ManualResultError(ValueError):
 
 def _time(value: str) -> datetime:
     return datetime.strptime(value, _STAMP).replace(tzinfo=UTC)
+
+
+def test_purpose_digest(purpose: TestPurpose) -> str:
+    """sha256 of the RFC 8785 form of the test purpose as loaded (section 8.1).
+
+    The check ``manual.review`` and ``dppce manual digest`` both use this function.
+    """
+    return digest(purpose)
 
 
 def declared_sut_version(sut: SutIdentity) -> str | None:

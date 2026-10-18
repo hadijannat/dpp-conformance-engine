@@ -753,6 +753,91 @@ def test_e13_flip_manual_outcome_fails_on_manual_results(
         TAMPER["flip_manual_outcome"](json.loads(make_envelope().model_dump_json(by_alias=True)))
 
 
+# -- dppce manual digest ------------------------------------------------------------------------
+
+
+def _digest_command(capsys: pytest.CaptureFixture[str], *arguments: str) -> tuple[int, dict[str, Any] | None]:
+    capsys.readouterr()
+    code = cli.main(["manual", "digest", "--json", *arguments])
+    out = capsys.readouterr().out
+    return code, json.loads(out) if out.strip() else None
+
+
+def test_manual_digest_prints_the_digest_that_the_check_records(
+    passed: tuple[ReferenceRig, RunResult], capsys: pytest.CaptureFixture[str]
+) -> None:
+    rig, run = passed
+    code, printed = _digest_command(capsys, "--test-purpose", EU_STEP, "--data-root", str(rig.data_root))
+    (observation,) = _result(run, EU_STEP).observations
+    assert code == 0
+    assert printed is not None
+    assert printed["test_purpose_digest"] == observation.summary["test_purpose_digest"]
+    assert (printed["test_purpose_id"], printed["testpack_id"]) == (EU_STEP, "eu-battery/draft-tests")
+    # Without --json the output is the digest alone, so that a script can capture it.
+    assert cli.main(["manual", "digest", "--test-purpose", EU_STEP]) == 0
+    assert capsys.readouterr().out == f"{printed['test_purpose_digest']}\n"
+
+
+def test_a_result_signed_with_the_printed_digest_passes(
+    plain: ReferenceRig, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, printed = _digest_command(capsys, "--test-purpose", EU_STEP)
+    assert printed is not None
+    path = signed_file(tmp_path, EU_STEP, test_purpose_digest=printed["test_purpose_digest"])
+    run = plain.run(mode="exploratory", extra=["--manual-result", str(path)])
+    assert run.step(EU_STEP) == {"verdict": "pass", "reason_code": "MANUAL.REVIEW.OK", "status": "completed"}
+
+
+def _manual_testpack(directory: Path, name: str, purpose: TestPurpose) -> Path:
+    path = directory / f"{name}.yaml"
+    path.write_text(
+        b.purposes_pack(purpose, testpack_id=f"test-only/{name}").model_dump_json(by_alias=True),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_manual_digest_reads_an_imported_test_pack(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from dppce.adapters import manual as adapter  # noqa: PLC0415 - the identity of the shared function
+    from dppce.evidence.manual import test_purpose_digest  # noqa: PLC0415 - imported where it is tested
+
+    path = _manual_testpack(tmp_path, "imported", PURPOSE)
+    code, printed = _digest_command(capsys, "--test-purpose", "T-MAN", "--import-testpack", str(path))
+    loaded = load_testpacks(ROOT, extra_testpacks=[path])["test-only/imported"].test_purposes[0]
+    assert code == 0
+    assert printed == {
+        "test_purpose_id": "T-MAN",
+        "testpack_id": "test-only/imported",
+        "test_purpose_digest": test_purpose_digest(loaded),
+    }
+    assert adapter.test_purpose_digest is test_purpose_digest
+
+
+def test_manual_digest_refuses_unknown_ambiguous_and_automated_purposes(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert cli.main(["manual", "digest", "--test-purpose", "TEST-ONLY-NO-SUCH-PURPOSE"]) == 2
+    assert "MANUAL.DIGEST.PURPOSE_UNKNOWN" in capsys.readouterr().err
+
+    first = _manual_testpack(tmp_path, "first", PURPOSE)
+    second = _manual_testpack(tmp_path, "second", CHANGED_PURPOSE)
+    both = ["--import-testpack", str(first), "--import-testpack", str(second)]
+    capsys.readouterr()
+    assert cli.main(["manual", "digest", "--test-purpose", "T-MAN", *both]) == 2
+    assert "MANUAL.DIGEST.PURPOSE_AMBIGUOUS" in capsys.readouterr().err
+    code, printed = _digest_command(
+        capsys, "--test-purpose", "T-MAN", *both, "--testpack", "test-only/second"
+    )
+    assert code == 0
+    assert printed is not None
+    assert printed["test_purpose_digest"] == digest(CHANGED_PURPOSE)
+
+    assert cli.main(["manual", "digest", "--test-purpose", "TP-CARRIER-001"]) == 2
+    assert "MANUAL.DIGEST.NOT_MANUAL" in capsys.readouterr().err
+
+
 # -- input errors -------------------------------------------------------------------------------
 
 

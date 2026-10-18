@@ -38,7 +38,13 @@ from dppce.catalogue.lint import lint, trace
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.envelope import decision_digest, in_layout_of, sign_envelope
 from dppce.evidence.jws import LocalSigner, SignatureError
-from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX, ManualResultError, claimed_test_purpose
+from dppce.evidence.manual import (
+    MANUAL_CHECK,
+    SAMPLE_PREFIX,
+    ManualResultError,
+    claimed_test_purpose,
+    test_purpose_digest,
+)
 from dppce.evidence.recording import RecordingError, purge_expired, read_recording, write_recording
 from dppce.infrastructure.authorization import AuthorizationError, validate_authorization
 from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, utc_stamp
@@ -669,6 +675,38 @@ def cmd_catalogue_trace(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_manual_digest(args: argparse.Namespace) -> int:
+    """Print the digest that a manual result must name. It writes and signs nothing."""
+    testpacks = load_testpacks(data_root(args.data_root), extra_testpacks=args.import_testpack)
+    ident = args.test_purpose
+    found = sorted(
+        ((name, p) for name, pack in testpacks.items() for p in pack.test_purposes if p.id == ident),
+        key=lambda pair: pair[0],
+    )
+    if args.testpack is not None:
+        found = [(name, p) for name, p in found if name == args.testpack]
+    if not found:
+        raise UsageError(
+            f"MANUAL.DIGEST.PURPOSE_UNKNOWN: no loaded test pack defines the test purpose {ident}"
+        )
+    if len(found) > 1:
+        names = ", ".join(name for name, _ in found)
+        raise UsageError(
+            f"MANUAL.DIGEST.PURPOSE_AMBIGUOUS: the test purpose {ident} is defined in the test packs "
+            f"{names}; select one with --testpack"
+        )
+    ((testpack_id, purpose),) = found
+    if not purpose.manual or purpose.stimulus.check != MANUAL_CHECK:
+        raise UsageError(
+            f"MANUAL.DIGEST.NOT_MANUAL: the test purpose {ident} is not a manual step with the check "
+            f"{MANUAL_CHECK}"
+        )
+    value = test_purpose_digest(purpose)
+    document = {"test_purpose_id": ident, "testpack_id": testpack_id, "test_purpose_digest": value}
+    _emit(args, document, value)
+    return EXIT_OK
+
+
 def cmd_coverage(args: argparse.Namespace) -> int:
     envelope = EvidenceEnvelope.model_validate(parse_strict(args.envelope.read_bytes()))
     coverage = envelope.decision.coverage
@@ -853,6 +891,22 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         sub.add_argument("--json", action="store_true")
         sub.set_defaults(handler=handler)
         catalogue_options(sub)
+
+    manual = commands.add_parser("manual", help="Manual-step tools.").add_subparsers(
+        dest="manual_command", required=True
+    )
+    summary = "Print the test_purpose_digest that a signed manual result must name."
+    digest_command = manual.add_parser("digest", help=summary, description=summary)
+    digest_command.add_argument("--json", action="store_true")
+    digest_command.set_defaults(handler=cmd_manual_digest)
+    digest_command.add_argument(
+        "--data-root", type=Path, help="directory with catalogue, profiles, and testpacks"
+    )
+    digest_command.add_argument(
+        "--import-testpack", type=Path, action="append", default=[], help="import a test pack file"
+    )
+    digest_command.add_argument("--test-purpose", required=True, help="identifier of the manual test purpose")
+    digest_command.add_argument("--testpack", help="look in this test pack only, by identifier")
 
     coverage = add("coverage", cmd_coverage, "Show the coverage of the selected catalogue for a run.")
     coverage.add_argument("--envelope", type=Path, required=True)
