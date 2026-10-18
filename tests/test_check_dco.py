@@ -11,13 +11,27 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "check_dco.py"
 TRAILER = "Signed-off-by: Test Author <AUTHOR@example.org>"
+# Inherited from a git hook or a rebase --exec, these would point git at another repository.
+_GIT_LOCATION = frozenset(
+    {
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "GIT_INDEX_FILE",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "GIT_COMMON_DIR",
+        "GIT_NAMESPACE",
+        "GIT_PREFIX",
+        "GIT_CEILING_DIRECTORIES",
+    }
+)
 
 
 class Repo:
     def __init__(self, root: Path) -> None:
         self.root = root
         self.env = {
-            **os.environ,
+            **{name: value for name, value in os.environ.items() if name not in _GIT_LOCATION},
             # Keep the owner's gpgsign, hooks, and templates out of the temporary repository.
             "GIT_CONFIG_GLOBAL": os.devnull,
             "GIT_CONFIG_NOSYSTEM": "1",
@@ -69,6 +83,30 @@ def sign_off_body(covered: str) -> str:
 @pytest.fixture
 def repo(tmp_path: Path) -> Repo:
     return Repo(tmp_path)
+
+
+def test_an_inherited_git_location_does_not_redirect_the_temporary_repository(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A git hook or a rebase --exec exports GIT_DIR; the fixture must still use its own repository.
+    other = tmp_path / "other.git"
+    subprocess.run(  # noqa: S603 - fixed arguments, local temporary repository
+        ["git", "init", "-q", "--bare", str(other)],  # noqa: S607 - git from PATH
+        check=True,
+        capture_output=True,
+    )
+    monkeypatch.setenv("GIT_DIR", str(other))
+    monkeypatch.setenv("GIT_WORK_TREE", str(tmp_path / "elsewhere"))
+    (tmp_path / "own").mkdir()
+    repo = Repo(tmp_path / "own")
+    assert (tmp_path / "own" / ".git").is_dir()
+    untouched = subprocess.run(  # noqa: S603 - fixed arguments, local temporary repository
+        ["git", "--git-dir", str(other), "rev-parse", "--verify", "-q", "HEAD"],  # noqa: S607
+        capture_output=True,
+        check=False,
+    )
+    assert untouched.returncode != 0
+    assert repo.check(repo.base, repo.commit("feat: signed", TRAILER)).returncode == 0
 
 
 def test_commit_signed_by_its_author_passes(repo: Repo) -> None:
