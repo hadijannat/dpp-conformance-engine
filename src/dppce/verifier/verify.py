@@ -622,8 +622,10 @@ def _status(
         return "fail", f"{exc.code}: {exc}."
     shown = f"{named} ({listed.status_purpose}, issued at {listed.issued_at})"
     if withdrawn:
-        word = "revoked" if listed.status_purpose == "revocation" else "suspended"
-        return "fail", f"STATUSLIST.REPORT.{word.upper()}: {shown} marks the report as {word}."
+        # Literal codes, so that the generated reason-code catalogue finds both.
+        if listed.status_purpose == "revocation":
+            return "fail", f"STATUSLIST.REPORT.REVOKED: {shown} marks the report as revoked."
+        return "fail", f"STATUSLIST.REPORT.SUSPENDED: {shown} marks the report as suspended."
     return "pass", f"STATUSLIST.REPORT.ACTIVE: the bit of {shown} is 0."
 
 

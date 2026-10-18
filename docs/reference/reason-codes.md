@@ -177,9 +177,35 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `REPLAY.RECORDING_MISMATCH` | REPLAY |  | `dppce.orchestrator.run.execute` | error |
 | `RESULT.MISSING` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `RESULT.NOT_PLANNED` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
+| `SIGN.OPTION.INVALID` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
+| `SIGNATURE.ISSUER.NONE` | SIGNATURE |  | `dppce.verifier.verify` | not fixed here |
+| `SIGNER.ISSUER.MISMATCH` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
+| `SIGNER.KEY.NOT_TRUSTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
+| `SIGNER.KEY.UNKNOWN` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here |
+| `SIGNER.LIFECYCLE.CONFLICT` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here |
+| `SIGNER.ROLE.NOT_GRANTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
+| `SIGNER.ROLE.OK` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
+| `SIGNER.SIGNATURE.INVALID` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here |
 | `STATUS.SUPERSEDED` | STATUS |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
 | `STATUS.SUPERSEDED_BY_SELECTED` | STATUS |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
 | `STATUS.WITHDRAWN` | STATUS |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
+| `STATUSLIST.FILE.MALFORMED` | STATUSLIST |  | `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.FILE.MISSING` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.FILE.OPTION` | STATUSLIST |  | `dppce.cli.cmd_report` | not fixed here |
+| `STATUSLIST.FILE.TOO_LARGE` | STATUSLIST |  | `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.ID.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.INDEX.OUT_OF_RANGE` | STATUSLIST |  | `dppce.evidence.status.bit_is_set` | not fixed here |
+| `STATUSLIST.ISSUER.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.KEY.NOT_TRUSTED` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.KEY.PURPOSE` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.KEY.UNKNOWN` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.REFERENCE.NONE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.REPORT.ACTIVE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.REPORT.REVOKED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.REPORT.SUSPENDED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.REPORT.UNSIGNED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
+| `STATUSLIST.SIGNATURE.INVALID` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.TIME.STALE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
 | `STEP.NOT_APPLICABLE` | STEP |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
 | `TIMESTAMP.CMS.SIGNATURE_INVALID` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here |
 | `TIMESTAMP.CMS.SIGNING_CERT` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here |
@@ -212,5 +238,11 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRUST.BUNDLE.NOT_OBJECT` | TRUST |  | `dppce.cli._trust`, `dppce.verifier.__main__.main` | not fixed here |
+| `TRUST.KEY.ROLE_CONFLICT` | TRUST |  | `dppce.models.trust.TrustBundle._review_keys_are_personal` | not fixed here |
 | `TRUST.MIGRATION.MALFORMED` | TRUST |  | `dppce.migrations._runinputs_2_to_3`, `dppce.migrations._trust_1_to_2` | not fixed here |
 | `TRUST.MIGRATION.UNSCOPED_SERIAL` | TRUST |  | `dppce.migrations._trust_1_to_2` | not fixed here |
+| `TRUST.SNAPSHOT.STALE` | TRUST |  | `dppce.verifier.verify._status` | not fixed here |
+| `VALIDITY.PERIOD.EXPIRED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
+| `VALIDITY.PERIOD.NOT_STATED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
+| `VALIDITY.PERIOD.OK` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
+| `VALIDITY.REPORT.UNSIGNED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
