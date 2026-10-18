@@ -40,7 +40,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `evidence.devlog` | evidence | interface_only |  | File-backed Merkle log for development. | A log implementation exists in dppce.evidence, with append, inclusion-proof, and consistency-proof tests on local fixtures. Its documentation states whether it implements RFC 9162 and what protection it gives against equivocation. |
 | `evidence.cose` | evidence | interface_only |  | COSE report signatures. | A separately tested COSE profile. |
 | `evidence.rfc3161` | evidence | supported |  | Verify RFC 3161 timestamp tokens over report signatures against the timestamp anchors of the trust bundle. The engine contacts no timestamp authority. |  |
-| `evidence.status_list` | evidence | interface_only |  | Bitstring Status List for report credentials. | A separately tested profile with a mock status service. |
+| `evidence.status_list` | evidence | supported |  | Verify a signed status list file that the operator supplies. The bitstring uses the W3C Bitstring Status List encoding. The engine fetches no status. |  |
 | `evidence.untp_dcc` | evidence | interface_only |  | Export a report as a UNTP Digital Conformity Credential. | A pinned DCC version is selected by a maintainer. The export validates against that pinned schema without invented accreditation or endorsement claims. |
 | `evidence.qualified_seal` | evidence | interface_only |  | Qualified electronic seal. | A separately validated integration with a qualified trust service provider. |
 | `keys.kms` | infrastructure | interface_only |  | Signing and data keys in a cloud KMS. | An implementation of the Signer and DataKeyProvider protocols, tested against a KMS emulator. |

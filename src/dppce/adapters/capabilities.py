@@ -204,10 +204,11 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
     (
         "evidence.status_list",
         "evidence",
-        _I,
-        "Bitstring Status List for report credentials.",
+        _S,
+        "Verify a signed status list file that the operator supplies. The bitstring uses the W3C "
+        "Bitstring Status List encoding. The engine fetches no status.",
         None,
-        "A separately tested profile with a mock status service.",
+        "",
     ),
     (
         "evidence.untp_dcc",
