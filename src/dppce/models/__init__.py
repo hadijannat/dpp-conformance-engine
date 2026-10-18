@@ -51,6 +51,7 @@ from dppce.models.declarations import (
 )
 from dppce.models.expr import ALWAYS, All, AnyOf, Compare, Const, Expr, Not, Op
 from dppce.models.results import (
+    NOT_ACCREDITED,
     AcquisitionWindow,
     Attestation,
     Capability,
@@ -110,6 +111,7 @@ __all__ = [
     "ALWAYS",
     "ICS",
     "IXIT",
+    "NOT_ACCREDITED",
     "PATH_TEMPLATE_PATTERN",
     "PLACEHOLDER_PATTERN",
     "SCHEMA_MODELS",

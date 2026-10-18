@@ -54,6 +54,7 @@ from dppce.infrastructure.transport import (
 from dppce.models import (
     ICS,
     IXIT,
+    NOT_ACCREDITED,
     EvidenceEnvelope,
     ExecutionMode,
     IssuerStatement,
@@ -240,6 +241,11 @@ def _inputs_from_args(
         _confined(base, ixit.authorization_ref, "authorization_ref") if ixit.authorization_ref else None
     )
     token = token_path.read_text(encoding="ascii").strip() if token_path else None
+    if args.accreditation_status != NOT_ACCREDITED and not args.accreditation_reference.strip():
+        raise UsageError(
+            "ISSUER.ACCREDITATION.NO_REFERENCE: an accreditation status other than "
+            f"'{NOT_ACCREDITED}' needs --accreditation-reference"
+        )
     issuer = IssuerStatement(
         name=args.issuer_name,
         identifier=args.issuer_id,
@@ -668,9 +674,23 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
             "repeat for each",
         )
         sub.add_argument("--at", help="evaluation time, for example 2026-10-13T12:00:00Z; default: now")
-        sub.add_argument("--issuer-name", default="unspecified")
-        sub.add_argument("--issuer-id", default="unspecified")
-        sub.add_argument("--accreditation-status", default="not accredited")
+        sub.add_argument(
+            "--issuer-name",
+            default="unspecified",
+            help="issuer name, declared by the operator; the verifier does not check it",
+        )
+        sub.add_argument(
+            "--issuer-id",
+            default="unspecified",
+            help="issuer identifier; it must equal the issuer that the trust bundle names for the report "
+            "signing key",
+        )
+        sub.add_argument(
+            "--accreditation-status",
+            default=NOT_ACCREDITED,
+            help="declared by the operator and not validated by the engine; a value other than "
+            f"'{NOT_ACCREDITED}' needs --accreditation-reference",
+        )
         sub.add_argument("--accreditation-reference", default="")
 
     run_options(add("plan", cmd_plan, "Show which requirements and test steps a run would select."))

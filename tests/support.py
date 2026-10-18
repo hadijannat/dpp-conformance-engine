@@ -16,6 +16,7 @@ from dppce.models import (
     CoverageSummary,
     EvidenceEnvelope,
     ExecutionMode,
+    IssuerStatement,
     Ratio,
     RequirementResult,
     ReviewStatus,
@@ -137,8 +138,12 @@ def make_test_result(index: int, verdict: str) -> TestResult:
 
 
 def make_manifest(**changes: Any) -> RunManifest:
-    """A manifest for a dppce.decision/2 body. ``bound_files=None`` gives one for a /1 body."""
-    fields: dict[str, Any] = {"bound_files": {}} | changes
+    """A manifest for a dppce.decision/2 body. ``bound_files=None`` gives one for a /1 body.
+
+    The issuer identifier is ``ISSUER``, the issuer of the TEST-ONLY report key (ADR 0014).
+    """
+    issuer = IssuerStatement(name="TEST-ONLY synthetic laboratory", identifier=ISSUER)
+    fields: dict[str, Any] = {"bound_files": {}, "issuer": issuer} | changes
     return RunManifest(
         engine_version="0.0.0-test",
         dependency_versions={},
@@ -159,7 +164,9 @@ def make_manifest(**changes: Any) -> RunManifest:
     )
 
 
-def make_envelope(verdicts: tuple[str, ...] = ("pass", "fail", "pass")) -> EvidenceEnvelope:
+def make_envelope(
+    verdicts: tuple[str, ...] = ("pass", "fail", "pass"), issuer: IssuerStatement | None = None
+) -> EvidenceEnvelope:
     """An unsigned envelope with one requirement and one test result per verdict, and two records."""
     requirements = [make_requirement_result(i, v) for i, v in enumerate(verdicts, start=1)]
     tests = [make_test_result(i, v) for i, v in enumerate(verdicts, start=1)]
@@ -184,7 +191,7 @@ def make_envelope(verdicts: tuple[str, ...] = ("pass", "fail", "pass")) -> Evide
     )
     overall, reason = overall_verdict(requirements)
     decision = build_decision(
-        manifest=make_manifest(),
+        manifest=make_manifest() if issuer is None else make_manifest(issuer=issuer),
         overall=overall,
         overall_reason=reason,
         requirement_results=requirements,

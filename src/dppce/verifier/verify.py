@@ -29,11 +29,13 @@ from dppce.evidence.envelope import (
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
 from dppce.evidence.manual import MANUAL_CHECK, ManualResultError, verify_manual_result
 from dppce.models import (
+    NOT_ACCREDITED,
     Attestation,
     AuthorityClass,
     DecisionBody,
     EvidenceEnvelope,
     ExecutionStatus,
+    IssuerStatement,
     Modality,
     ReviewStatus,
     Testability,
@@ -281,12 +283,40 @@ def _signatures(
                 f"The attestation names issuer '{attestation.issuer}', but the key belongs to '{key.issuer}'."
             )
         if problem is None:
+            problem = _issuer_problem(envelope.decision.manifest.issuer, key)
+        if problem is None:
+            statement = envelope.decision.manifest.issuer
+            reference = statement.accreditation_reference
             return signature, (
                 "pass",
-                f"Key '{key.kid}' of issuer '{key.issuer}' is trusted at the evaluation time.",
+                f"Key '{key.kid}' of issuer '{key.issuer}' is trusted at the evaluation time, and the "
+                "report states that issuer. The verifier does not check the issuer name. Accreditation "
+                f"status as declared by the operator: {statement.accreditation_status!r}, reference "
+                f"{repr(reference) if reference else 'none'}. The engine does not validate accreditation.",
             )
         issuer = ("fail", problem)
     return signature, issuer
+
+
+def _issuer_problem(statement: IssuerStatement, key: TrustedKey) -> str | None:
+    """Bind the stated issuer to the key (ADR 0014). ``repr`` escapes each value of the report."""
+    if statement.identifier == "unspecified":
+        # Also when a trust bundle names a key with this issuer: a signed report must name its issuer.
+        return (
+            "ISSUER.STATEMENT.UNSPECIFIED: The report states the issuer 'unspecified'. "
+            f"Key '{key.kid}' belongs to {key.issuer!r}."
+        )
+    if statement.identifier != key.issuer:
+        return (
+            f"ISSUER.STATEMENT.MISMATCH: The report states the issuer {statement.identifier!r}, "
+            f"but key '{key.kid}' belongs to {key.issuer!r}."
+        )
+    if statement.accreditation_status != NOT_ACCREDITED and not statement.accreditation_reference.strip():
+        return (
+            "ISSUER.ACCREDITATION.NO_REFERENCE: The report states the accreditation status "
+            f"{statement.accreditation_status!r} with no reference."
+        )
+    return None
 
 
 def _manual_results(decision: DecisionBody, trust: TrustBundle, at: datetime) -> tuple[Outcome, str]:

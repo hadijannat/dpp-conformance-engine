@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, Final, Literal, Self
 
 from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
 
@@ -75,12 +75,15 @@ class CoverageSummary(Model):
     manual_missing: int
 
 
+NOT_ACCREDITED: Final = "not accredited"
+
+
 class IssuerStatement(Model):
     """Who issues the report. The default states that the issuer is not accredited."""
 
     name: str = "unspecified"
     identifier: str = "unspecified"
-    accreditation_status: str = "not accredited"
+    accreditation_status: str = NOT_ACCREDITED
     accreditation_reference: str = ""
 
 

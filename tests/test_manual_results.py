@@ -723,7 +723,9 @@ def test_verifier_does_not_raise_on_an_impossible_manifest_time(
     assert verifier_main([str(envelope), "--trust", str(TRUST), "--at", "2026-10-14T00:00:00Z"]) == 4
 
 
-def test_rc1_envelope_still_verifies_complete(signer: LocalSigner, trust: TrustBundle) -> None:
+def test_rc1_envelope_verifies_every_dimension_but_its_unspecified_issuer(
+    signer: LocalSigner, trust: TrustBundle
+) -> None:
     raw = (Path(__file__).parent / "fixtures" / "rc1-envelope-decision-v1.json").read_bytes()
     document = json.loads(raw)
     loaded = EvidenceEnvelope.model_validate(document)
@@ -731,8 +733,12 @@ def test_rc1_envelope_still_verifies_complete(signer: LocalSigner, trust: TrustB
         sign_envelope(loaded, signer, issuer=ISSUER, signed_at="2026-10-13T12:05:00Z").signatures[-1]
     ]
     report = verify_json(json.dumps(document).encode(), trust, AT)
-    assert report.complete
-    assert {d.name: d.outcome for d in report.dimensions}["manual_results"] == "pass"
+    dimensions = {d.name: d for d in report.dimensions}
+    assert dimensions["manual_results"].outcome == "pass"
+    # The rc1 fixture states the issuer 'unspecified' (ADR 0014).
+    assert dimensions["issuer_trust"].outcome == "fail"
+    assert "ISSUER.STATEMENT.UNSPECIFIED" in dimensions["issuer_trust"].detail
+    assert not report.complete
 
 
 def test_e13_flip_manual_outcome_fails_on_manual_results(

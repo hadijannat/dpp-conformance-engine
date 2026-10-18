@@ -98,10 +98,13 @@ def _scope(envelope: EvidenceEnvelope) -> str:
     manifest = envelope.decision.manifest
     issuer = manifest.issuer
     rows = [
-        ("Issuer", _e(issuer.name)),
+        ("Issuer (declared by the operator)", _e(issuer.name)),
         ("Issuer identifier", f"<code>{_e(issuer.identifier)}</code>"),
-        ("Accreditation status of the issuer", _e(issuer.accreditation_status)),
-        ("Accreditation reference", _e(issuer.accreditation_reference or "none")),
+        (
+            "Accreditation status of the issuer (declared by the operator; the engine does not validate it)",
+            _e(issuer.accreditation_status),
+        ),
+        ("Accreditation reference (declared by the operator)", _e(issuer.accreditation_reference or "none")),
         ("System under test", f"{_e(manifest.sut.name)} (<code>{_e(manifest.sut.identifier)}</code>)"),
         ("System version", _e(manifest.sut.version)),
         ("System operator", _e(manifest.sut.operator)),

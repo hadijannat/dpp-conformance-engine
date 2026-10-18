@@ -1,7 +1,8 @@
 """Decision body versions: a new run writes dppce.decision/2, and a dppce.decision/1 body still verifies.
 
 The fixture ``rc1-envelope-decision-v1.json`` is ``tests.support.make_envelope()`` as the code at
-tag v0.1.0rc1 serialized it. ``RC1_DIGEST`` is the decision digest that the same code computed.
+tag v0.1.0rc1 serialized it, when the default issuer was 'unspecified'. ``RC1_DIGEST`` is the
+decision digest that the same code computed.
 """
 
 from __future__ import annotations
@@ -73,7 +74,7 @@ def test_a_version_2_body_needs_a_manifest_with_bound_files() -> None:
         )
 
 
-def test_an_rc1_version_1_body_keeps_its_digest_and_verifies_complete(
+def test_an_rc1_version_1_body_keeps_its_digest_and_fails_only_issuer_trust(
     signer: LocalSigner, trust: TrustBundle
 ) -> None:
     raw = RC1_ENVELOPE.read_bytes()
@@ -89,7 +90,15 @@ def test_an_rc1_version_1_body_keeps_its_digest_and_verifies_complete(
     document["signatures"] = [token]
     report = verify_json(json.dumps(document).encode(), trust, AT)
     assert report.decision_digest == RC1_DIGEST
-    assert report.complete, {d.name: d.outcome for d in report.dimensions}
+    # The rc1 fixture states the issuer 'unspecified'. ADR 0014: such a signed report is not complete.
+    dimensions = {d.name: d for d in report.dimensions}
+    mandatory = ("structure", "ordering", "results_root", "records_root", "counts", "signature")
+    assert {name: dimensions[name].outcome for name in (*mandatory, "manual_results")} == dict.fromkeys(
+        (*mandatory, "manual_results"), "pass"
+    )
+    assert dimensions["issuer_trust"].outcome == "fail"
+    assert "ISSUER.STATEMENT.UNSPECIFIED" in dimensions["issuer_trust"].detail
+    assert not report.complete
 
 
 def test_a_version_1_body_with_bound_files_is_a_structure_error(
