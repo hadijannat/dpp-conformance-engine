@@ -340,8 +340,9 @@ def dig(document: Any, dotted: str) -> Any:
 
 
 _URI: Final = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]*")
-# The default checkers of jsonschema, plus "uri": without an optional package jsonschema skips it.
-_FORMATS: Final = jsonschema.FormatChecker()
+# A fixed set, so that an installed optional package cannot change what a run asserts. These
+# checkers of jsonschema need only the standard library. "uri" is the engine's own.
+_FORMATS: Final = jsonschema.FormatChecker(formats=("date", "email", "idn-email", "ipv4", "ipv6", "uuid"))
 
 
 @_FORMATS.checks("uri")

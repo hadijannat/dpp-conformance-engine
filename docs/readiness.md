@@ -80,6 +80,7 @@ review is not a human approval and not an audit.
 | `validation/records/review-verdicts-and-planning-2026-10-14.md` | Applicability, planning, verdicts, coverage, report | 9 findings. All fixed or reworded, with tests in `tests/test_review_verdicts.py`. |
 | `validation/records/review-eu-battery-draft-2026-10-14.md` | The 36 draft interpretations of Regulation (EU) 2023/1542 | 17 findings. Applied to the drafts. Three open questions filed (OQ-021 to OQ-023). Every entry stays `draft-needs-review`. |
 | `validation/records/review-round-2-2026-10-14.md` | Round 2: every fix of round 1, then the fixes of round 2 | 48 findings of six areas and 14 findings of four follow-up reviews. Each finding was checked by skeptics who tried to refute it: 52 confirmed for the reviewed code, 2 refuted, 8 informational. All are handled, with tests in `tests/test_review_round2.py`. |
+| `validation/records/review-adapters-2026-10-18.md` | Adapters, transport scrub, clock, validation controls | 31 findings. Each was checked by a skeptic with a reproducing test: 30 confirmed and fixed, 1 refuted. Tests in `tests/test_review_adapters.py` and `tests/test_validation_controls.py`. |
 
 An automated review of each commit also ran. It found four gaps in the fixes of round 1 and
 round 2: two fixed in commit `072b9c3`, one in `d6a7122`, and one in `59e148f`.

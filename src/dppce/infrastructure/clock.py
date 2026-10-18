@@ -9,7 +9,7 @@ STAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 # Explicit ASCII digits: strptime reads any Unicode digit and accepts unpadded fields.
 _STAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
 _RFC3339 = re.compile(
-    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-9]{2})"
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})"
 )
 
 
@@ -30,7 +30,7 @@ def parse_stamp(text: str) -> datetime:
 def parse_instant(text: str) -> datetime:
     """Parse an RFC 3339 date-time with an explicit offset, as a system under test may write it.
 
-    ponytail: at most six fractional digits, the precision of datetime; a longer fraction is a ValueError.
+    ponytail: datetime keeps microseconds, so a step back of less than a microsecond is not seen.
     """
     if not _RFC3339.fullmatch(text):
         raise ValueError("not an RFC 3339 date-time with an offset")

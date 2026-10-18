@@ -348,9 +348,12 @@ def test_data_lifecycle_9_data_jsonschema_never_passes_a_body_that_breaks_format
     assert (outcome.passed, outcome.reason_code) == (False, "DATA.SCHEMA.INVALID")
 
 
-def test_data_lifecycle_9_a_format_that_the_engine_cannot_assert_is_not_passed(tmp_path: Path) -> None:
+@pytest.mark.parametrize("format_name", ["iri-reference", "date-time", "time", "hostname", "regex"])
+def test_data_lifecycle_9_a_format_that_the_engine_cannot_assert_is_not_passed(
+    format_name: str, tmp_path: Path
+) -> None:
     write_data(tmp_path)
-    schema = {"properties": {"id": {"type": "string", "format": "iri-reference"}}}
+    schema = {"properties": {"id": {"type": "string", "format": format_name}}}
     (tmp_path / "schema.json").write_text(json.dumps(schema), encoding="utf-8")
     outcome = run(context(tmp_path, "data.jsonschema", acquirer=Canned(b'{"id": "x"}')))
     assert outcome.passed is not True
@@ -495,8 +498,9 @@ def test_data_lifecycle_7_a_200_body_that_is_not_json_is_still_not_json(tmp_path
         ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00.5Z"),
         ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00Z"),
         ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00+01:00"),
+        ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00.123456789Z"),
     ],
-    ids=["forward", "fractional-forward", "equal", "offset-equal"],
+    ids=["forward", "fractional-forward", "equal", "offset-equal", "nanoseconds"],
 )
 def test_data_lifecycle_2_a_later_or_equal_update_time_passes(
     stamps: tuple[str, str], tmp_path: Path

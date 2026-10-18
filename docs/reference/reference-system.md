@@ -362,8 +362,8 @@ for these features:
 - a response key that is not a three-digit status, for example `default` or `2XX`;
 - a media type key with a range, a parameter, or an upper-case letter;
 - a `responses`, response, `content`, or media entry that is not a mapping, and a boolean schema;
-- a `format` value that the engine cannot assert. The engine asserts `uri` and the formats that
-  `jsonschema` asserts without an optional package.
+- a `format` value that the engine cannot assert. The engine asserts `uri`, `date`, `email`,
+  `idn-email`, `ipv4`, `ipv6`, and `uuid`. The set is fixed, so an installed package cannot change it.
 
 An unquoted status key such as `200` in YAML names the same status as `'200'`.
 

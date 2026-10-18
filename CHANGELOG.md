@@ -169,6 +169,24 @@ This is a release candidate. Tag `v0.1.0rc1` marks it. It is not published on Py
 - Found by mutation testing: a signed token with a part that is not base64url is `MALFORMED`,
   not `BAD_SIGNATURE`.
 
+- After the agent review of the adapters of 2026-10-18
+  (`validation/records/review-adapters-2026-10-18.md`):
+  - `api.contract` judges only the answer of the marked operation. A redirect, a query, or a
+    dot segment gives `blocked`. A contract outside the subset is `unsupported` before the fetch.
+    The body may be any JSON value.
+  - JSON Schema checks use exact decimals and assert `format: uri`. A format that the engine
+    cannot assert is never passed. A body too deep to validate is `blocked`.
+  - The data, persistence, and registry checks judge a document only with status 200. 401, 403,
+    and 404 give `<AREA>.RESPONSE.NOT_CONCLUSIVE`; another status gives `<AREA>.RESPONSE.STATUS`.
+  - Update times are instants. A future update time is not fresh. `parse_stamp` accepts only the
+    canonical ASCII form.
+  - `data.context` reads every `@context`, and `data.rules` with no applied rule is `blocked`.
+  - The registry check compares JSON values and never passes on an absent field.
+  - Carrier texts without a usable URL are unresolved, and hostile images are blocked. The
+    transport refuses a URL with a control character or a space.
+  - The credential scrub covers more echo forms and keeps the end of a complete body.
+  - A validation control fails when a planned step stops completing.
+
 - After review round 2 of 2026-10-14 (`validation/records/review-round-2-2026-10-14.md`):
   - The transport never raises on a URL that cannot be parsed, sends no credential on an
     anonymous request, applies one deadline to a whole fetch, reads a sample file only if it
