@@ -251,7 +251,8 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     if isinstance(item_url, CheckOutcome):
         return item_url
     record = fetch_once(ctx, signed_url)
-    if (problem := unusable(ctx, record)) is not None:
+    # The signed passport keeps its own code for a status of 500 or higher (INTEGRITY.TOKEN.NO_ANSWER).
+    if (problem := unusable(ctx, record, server_error_is_no_answer=False)) is not None:
         return problem
     findings: dict[str, JsonValue] = {"status": record.status}
     more: list[Record] = []

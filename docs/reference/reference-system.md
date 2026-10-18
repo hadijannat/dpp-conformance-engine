@@ -289,6 +289,8 @@ the `fetch` channel only.
   The message names the status of the `fetch` answer and the missing paths.
 - A `fetch` body that is not JSON gives `blocked` with `ACCESS.RESPONSE.NOT_JSON`.
 - A policy without a `fetch` channel gives `blocked` with `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL`.
+- An answer with a status from 500 to 599 on any channel cannot be judged. It gives
+  `TRANSPORT.SERVER_ERROR` with `unreachable: true`. The check still searches its body for a leak.
 
 The check reads the channels in the order fetch, export, search, error, html. It stops after a
 transport error. Then it takes the first outcome that applies, in this order:
@@ -465,10 +467,13 @@ Shared helpers in `dppce.adapters.common`:
 - `resource_url(ctx, resource, area)` and `template_url(ctx, endpoint, template, area)`: build a
   URL from an IXIT template. A missing template, endpoint, or placeholder value gives `blocked`
   with `<AREA>.NO_TARGET`.
-- `no_answer(ctx, record)`: builds the outcome for a record with a transport error:
-  status `completed`, `passed: false`, `unreachable: true`. Reason code
+- `no_answer(ctx, record)`: builds the outcome for a record with a transport error or a server
+  error: status `completed`, `passed: false`, `unreachable: true`. Reason code
   `TRANSPORT.REDIRECT_OUT_OF_SCOPE` for that error, `TRANSPORT.DENIED` for `policy_denied`,
   `authorization_denied`, and `budget_exhausted`, and `TRANSPORT.UNREACHABLE` for the others.
+  A record with no transport error and a status from 500 to 599 gives `TRANSPORT.SERVER_ERROR`.
+- `unusable(ctx, record)`: gives the outcome of `no_answer` for a transport error and for a
+  status from 500 to 599. It also blocks a truncated or encoded body.
 
 A response that is not valid JSON where JSON is needed gives a `fail` with `<AREA>.RESPONSE.NOT_JSON`.
 The access check is the exception: it gives `blocked` with `ACCESS.RESPONSE.NOT_JSON`, because it
@@ -476,12 +481,16 @@ cannot look at the field paths of such a body (section 5.2).
 A truncated body gives status `blocked` with `TRANSPORT.BODY_TRUNCATED`: a partial body proves nothing.
 A body with a content coding or a transfer coding other than `identity` or `chunked` gives status
 `blocked` with `TRANSPORT.BODY_ENCODED`: no check decompresses a body. Every header line counts.
+An answer with a status from 500 to 599 is no answer, like a transport error. It gives
+`TRANSPORT.SERVER_ERROR` with `unreachable: true`, so the step is `inconclusive` by default. This
+is an owner decision of 2026-10-18. The access check still searches such a body for a leak. The
+signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.1).
 
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
 | `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING` |
 | `identifier.parse` | `scheme` (default: `ics.identifier_scheme`) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail); `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN` |
-| `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
+| `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | none | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
 | `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values |
@@ -517,8 +526,9 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | 15 | A certificate below the anchor is outside its validity period | fail | `INTEGRITY.CERT.EXPIRED` |
 | 16 | A mandatory status snapshot is missing or stale | `blocked` | `INTEGRITY.STATUS.MISSING` |
 | 17 | A certificate below the anchor is in the revocation snapshot | fail | `INTEGRITY.CERT.REVOKED` |
-| 18 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
-| 19 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
+| 18 | The published passport answers with a status from 500 to 599 | fail, `unreachable: true` | `TRANSPORT.SERVER_ERROR` |
+| 19 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
+| 20 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
 
 The supported profile is ES256 on curve P-256, with the key in the first `x5c` certificate.
 The leaf may sign a document if its key usage permits a digital signature and its extended key

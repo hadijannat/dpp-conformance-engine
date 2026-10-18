@@ -20,6 +20,7 @@ from pydantic import Field, ValidationError, model_validator
 
 from dppce.adapters.common import (
     MISSING,
+    SERVER_ERRORS,
     blocked,
     completed,
     dig,
@@ -389,16 +390,20 @@ def _read_channels(
             # A denied or unreachable origin gets no further attempt.
             seen.keep(no_answer(ctx, record))
             break
-        bad = unusable(ctx, record)
+        bad = unusable(ctx, record, server_error_is_no_answer=False)
+        server_error = record.status in SERVER_ERRORS
         if channel == "fetch":
             seen.fetched = record
             # A refusal is judged without its body. Any other answer needs a usable body.
-            if entitled and (record.status in _REFUSALS or bad is None):
+            if entitled and not server_error and (record.status in _REFUSALS or bad is None):
                 judged = _entitlement(record, entitled, role)
                 if isinstance(judged, CheckOutcome):
                     seen.keep(judged)
                 else:
                     seen.shortfall = judged
+        if server_error:
+            # A 5xx answer cannot be judged (owner decision of 2026-10-18). A leak in its body still counts.
+            seen.keep(no_answer(ctx, record))
         if bad is not None:
             seen.keep(bad)
         elif withheld:

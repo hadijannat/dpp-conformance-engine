@@ -199,6 +199,11 @@ A check that raises an exception gives status `error`. It never gives `fail`.
 A check cannot report `passed` and `unreachable` together. The result models refuse a step
 verdict that this table does not give for the execution status.
 
+A server error is not a failing observation. An answer with a status from 500 to 599 counts as a
+connectivity failure (section 9). The check reports `unreachable`, and the step verdict follows
+`on_unreachable`. By default that is `inconclusive`. It is `fail` only under the approved rule
+below. This rule is an owner decision of 2026-10-18.
+
 `on_unreachable: fail` is for an approved test method only: a connectivity failure does not
 prove a breach. The engine reads the rule as written only in `reviewed` mode, and only if every
 requirement that the test purpose names is approved and not illustrative. Otherwise it reads
@@ -329,6 +334,9 @@ Initial registry:
 always means a final JSON object. A pass on another listed media type gives
 `IDENTIFIER.RESOLVED.MEDIA_TYPE`. The observation summary always records the final media type.
 
+`identifier.resolve` reports an answer with a status from 500 to 599 as `unreachable` (section 9).
+Any other status except 200, 404, and 410 gives `IDENTIFIER.RESOLUTION.STATUS`.
+
 `identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. The host part is not empty and holds only `A-Z`,
 `a-z`, `0-9`, `.`, `-`, `:`, `[`, and `]`. So user information and an IPv6 zone identifier are
@@ -414,7 +422,7 @@ The check takes the first row that applies.
 | A channel leaks | `completed`, not passed | `ACCESS.LEAK.<CHANNEL>`, for the first leaking channel in reading order |
 | `fetch` answers `401` or `403` to a role with an entitled path | `completed`, not passed | `ACCESS.ENTITLEMENT.REFUSED` |
 | An entitled path is absent or `null` in a `fetch` body that is JSON | `completed`, not passed | `ACCESS.ENTITLEMENT.MISSING` |
-| A channel answer cannot be judged. The first such answer in reading order decides. | `blocked`, or as in section 9 for a transport error | `TRANSPORT.*`, `ACCESS.RESPONSE.NOT_JSON`, `ACCESS.RESPONSE.NOT_DECODABLE` |
+| A channel answer cannot be judged. The first such answer in reading order decides. | `blocked`, or as in section 9 for a transport error or a server error | `TRANSPORT.*`, `ACCESS.RESPONSE.NOT_JSON`, `ACCESS.RESPONSE.NOT_DECODABLE` |
 | The role has an entitled path, and the policy names no `fetch` channel | `blocked` | `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL` |
 | A withheld path has no canary on a channel that is not JSON, or redaction removed a part of a URL | `blocked` | `ACCESS.POLICY.NOT_FULLY_CHECKABLE` |
 | Otherwise | `completed`, passed | `ACCESS.POLICY.ENFORCED` |
@@ -424,6 +432,8 @@ An answer cannot be judged in these cases:
 - It has a transport error, a truncated body, or an encoded body.
 - The role has a withheld path, and the body cannot be searched.
 - The role has an entitled path, and the `fetch` body is not JSON.
+- A channel answers with a status from 500 to 599. This applies to every channel and every role.
+  The check still searches that body for a leak. A leak in it is a failing observation.
 
 Only a leak or an entitlement failure outranks such an answer.
 
@@ -477,6 +487,18 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 
 A transport failure is data: `Record.error`. The check reports `unreachable`.
 By default that is `inconclusive`, because a connectivity failure does not prove a breach.
+
+A server error counts the same way (owner decision of 2026-10-18). An answer with a status from
+500 to 599 gives `unreachable` with `TRANSPORT.SERVER_ERROR`. The check does not judge the body of
+such an answer, also if it is JSON. Two exceptions apply:
+
+- `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` for the signed passport. As before, it reads
+  every status of 500 or higher as no answer.
+- `access.restricted_fields` still searches such a body for a leak, on every channel. A leak is a
+  failing observation. Otherwise the check reports `unreachable` (section 8.2).
+
+The shared helper `dppce.adapters.common.unusable` applies the rule. So every check that fetches
+applies it in the same way.
 
 ### 9.1 The IXIT is untrusted input
 

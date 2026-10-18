@@ -30,6 +30,7 @@ from dppce.testdefs.registry import CheckContext
 
 MISSING: Final = object()
 _DENIED: Final = ("policy_denied", "authorization_denied", "budget_exhausted")
+SERVER_ERRORS: Final = range(500, 600)
 _MAX_QR_PIXELS: Final = 4096 * 4096
 
 
@@ -93,8 +94,13 @@ def fetch_once(ctx: CheckContext, url: str, role: str = "anonymous", accept: str
 
 
 def no_answer(ctx: CheckContext, record: Record) -> CheckOutcome:
-    """The outcome for a record with a transport error. A missing answer is not a failure."""
-    if record.error == "redirect_out_of_scope":
+    """The outcome for a transport error or a server error. A missing answer is not a failure."""
+    summary: dict[str, JsonValue] = {"transport_error": record.error}
+    if record.error is None:
+        # No transport error here means a 5xx answer (owner decision of 2026-10-18).
+        code, text = "TRANSPORT.SERVER_ERROR", f"The system answers {record.status}, a server error."
+        summary = {"status": record.status}
+    elif record.error == "redirect_out_of_scope":
         code, text = (
             "TRANSPORT.REDIRECT_OUT_OF_SCOPE",
             "The engine did not follow a redirect to a host outside the scope.",
@@ -103,17 +109,21 @@ def no_answer(ctx: CheckContext, record: Record) -> CheckOutcome:
         code, text = "TRANSPORT.DENIED", f"The transport policy refused the request ({record.error})."
     else:
         code, text = "TRANSPORT.UNREACHABLE", f"The system gave no answer ({record.error})."
-    observation = ctx.observation(
-        0, kind="exchange", records=[record], summary={"transport_error": record.error}
-    )
+    observation = ctx.observation(0, kind="exchange", records=[record], summary=summary)
     return completed(
         False, code, text + " A connectivity failure does not prove a breach.", [observation], no_answer=True
     )
 
 
-def unusable(ctx: CheckContext, record: Record) -> CheckOutcome | None:
-    """Return an outcome if the record cannot be judged, or None if its body can be used."""
-    if record.error is not None:
+def unusable(
+    ctx: CheckContext, record: Record, *, server_error_is_no_answer: bool = True
+) -> CheckOutcome | None:
+    """Return an outcome if the record cannot be judged, or None if its body can be used.
+
+    A status from 500 to 599 is no answer, like a transport error. A check that judges such an
+    answer itself passes ``server_error_is_no_answer=False``.
+    """
+    if record.error is not None or (server_error_is_no_answer and record.status in SERVER_ERRORS):
         return no_answer(ctx, record)
     if record.truncated:
         return blocked(
