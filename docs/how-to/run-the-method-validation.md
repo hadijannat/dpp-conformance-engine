@@ -28,6 +28,7 @@ uv run python -m validation.run
 ```
 
 3. Read the record in `validation/records/`. Each figure has a numerator and a denominator.
+   The field `human_review_and_signature` is always `null`. The engine never fills it.
 
 ## How to read the record
 

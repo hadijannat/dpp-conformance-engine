@@ -59,7 +59,7 @@ sbom:
 licenses:
     uv run python scripts/gen_license_report.py
 
-# Regenerate the reference pages for the command line, the capabilities, and the schemas.
+# Regenerate the generated reference pages: command line, capabilities, schemas, verdict truth table, and reason codes.
 reference:
     uv run python scripts/gen_reference_docs.py
 

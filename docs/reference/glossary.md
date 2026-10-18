@@ -13,6 +13,7 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | attestation | The signed statement that binds the decision digest of one report. |
 | authority class | The kind of authority behind a requirement: legal obligation, standard method, implementation contract, guidance, or illustrative. |
 | authorization | A signed permission from the owner of a system for a test with a stated scope and period. |
+| build provenance | The signed statement of the workflow, the tag, and the commit that built a release file. GitHub calls it an attestation. It is not the attestation of a report. |
 | capability | Something the engine can do, with a state: supported, experimental, interface only, or unsupported. |
 | check | Deterministic code that performs one test step. A test purpose names a check from the registry. |
 | claim level | What a result can be cited as: none, illustrative, diagnostic, or reviewed. |
@@ -27,6 +28,7 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | ICS | Implementation Conformance Statement. What the owner declares about the system. |
 | interpretation | A statement of what a source provision requires. Agent-authored interpretations are drafts. |
 | IXIT | Implementation eXtra Information for Testing. What the tester needs to run the tests. |
+| laboratory record | A document that a laboratory keeps under its own procedures. The engine does not produce it. |
 | manual result | The signed result of one manual step. The person who performed the step signs it. It names a role and no person. |
 | observation | A minimized record of what one check saw. It holds no restricted payload value. |
 | operator | The person who runs the engine. The operator supplies the trust bundle and confirms sensitive inputs. |

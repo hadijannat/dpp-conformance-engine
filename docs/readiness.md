@@ -116,6 +116,8 @@ accreditation. The engine produces these records, which a laboratory can evaluat
 | The limits of each result | Limitations, exclusions, and retained problems in each report |
 | Retention and deletion of observations | `dppce purge` |
 
+The [laboratory records](reference/laboratory-records.md) page lists each output and the records that the engine does not produce.
+
 ## 6. Known limitations
 
 - Read [the threat model](explanation/threat-model.md), section 6, for the open risks.

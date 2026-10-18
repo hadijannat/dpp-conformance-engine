@@ -33,10 +33,15 @@ nav:
       - Test a real system with authorization: how-to/test-a-real-system.md
       - Import an approved pack: how-to/import-an-approved-pack.md
       - Run the method validation: how-to/run-the-method-validation.md
+      - Install and verify a release: how-to/install-and-verify-a-release.md
+      - Operate the engine in a laboratory: how-to/operate-in-a-laboratory.md
+      - Add a check and a test pack: how-to/add-a-check-and-a-test-pack.md
   - Reference:
       - Command line: reference/cli.md
       - Capability manifest: reference/capabilities.md
       - Verdict truth table: reference/verdict-truth-table.md
+      - Reason codes: reference/reason-codes.md
+      - Laboratory records: reference/laboratory-records.md
       - Schemas: reference/schemas.md
       - Reference system and data formats: reference/reference-system.md
       - Glossary: reference/glossary.md

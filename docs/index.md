@@ -19,8 +19,9 @@ Read the [readiness page](readiness.md) before you rely on a result.
 | An economic operator or a vendor | [Run the engine against the reference system](tutorials/first-run.md), then [declare your system](how-to/write-an-ics-and-an-ixit.md) |
 | An assessor | [Architecture and verdict rules](explanation/architecture.md), [source audit](research/source-audit.md), [fault catalogue](how-to/run-the-method-validation.md) |
 | An authority or a report recipient | [Verify a report](how-to/verify-a-report.md) |
-| A contributor | [Architecture contract](explanation/architecture.md), [decision records](adr/README.md), [writing style](reference/writing-style.md) |
+| A contributor | [Architecture contract](explanation/architecture.md), [decision records](adr/README.md), [writing style](reference/writing-style.md), [add a check and a test pack](how-to/add-a-check-and-a-test-pack.md), [reason codes](reference/reason-codes.md) |
 | An operator of the engine | [Test a real system with authorization](how-to/test-a-real-system.md), [threat model](explanation/threat-model.md) |
+| A testing laboratory | [Install and verify a release](how-to/install-and-verify-a-release.md), [operate the engine in a laboratory](how-to/operate-in-a-laboratory.md), [laboratory records](reference/laboratory-records.md) |
 
 ## How the documentation is organized
 
