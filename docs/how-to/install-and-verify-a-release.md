@@ -20,16 +20,28 @@ section 2, records for `v0.1.0rc1`. This documentation change did not run them a
 The workflow `release.yml` signed build provenance for each item. The format is SLSA provenance v1.
 The package is not published on PyPI.
 
-### The release and the current source
+### The release and the unreleased source
 
+This page describes the release `v0.1.0rc1`.
 The [operate page](operate-in-a-laboratory.md) and the [laboratory records](../reference/laboratory-records.md)
-page describe the current source.
-The current source is later than `v0.1.0rc1`. It reports the same version string, `0.1.0rc1`.
-These functions are not in `v0.1.0rc1`:
+page describe the unreleased source after `v0.1.0rc1`.
+That source reports the same version string, `0.1.0rc1`.
+The section Unreleased of `CHANGELOG.md` records changes after that release.
+These changes are not in `v0.1.0rc1`, and they affect a laboratory:
 
 - The replay input check and the data-root check (`REPLAY.INPUT.CHANGED`, `REPLAY.DATA_ROOT.MISSING`).
 - The issuer binding of [ADR 0014](../adr/0014-the-issuer-statement-of-a-report-is-bound-to-the-signing-key.md).
-  With the current source, give `--issuer-id` to `dppce run`.
+  With the unreleased source, give `--issuer-id` to `dppce run`.
+- The trust bundle version `dppce.trust/2`. Each revoked serial number names its issuer, and each
+  revocation has a `revoked_at` time. `v0.1.0rc1` reads version 1 only.
+- The unreleased source upgrades a version 1 trust bundle when it loads it. It refuses a bundle
+  that lists revoked serial numbers (`TRUST.MIGRATION.UNSCOPED_SERIAL`).
+- The run-inputs file `inputs.json` with version `dppce.runinputs/3`. `v0.1.0rc1` writes version 1.
+- The decision body `dppce.decision/2`. The verifier of `v0.1.0rc1` rejects it.
+- RFC 3161 timestamps (ADR 0015) and the commands `dppce timestamp imprint` and
+  `dppce timestamp attach`.
+- An answer with a status from 500 to 599 counts as no answer. Most checks then give
+  `TRANSPORT.SERVER_ERROR`, and the step is `inconclusive` by default.
 
 If you install the engine from source, keep the commit and the output of `dppce --version`.
 

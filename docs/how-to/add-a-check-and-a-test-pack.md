@@ -6,6 +6,8 @@ Prerequisites: a development environment from `uv sync --all-extras`. Read the
 [architecture contract](../explanation/architecture.md), sections 6, 8, and 9. Read ADR 0002,
 ADR 0005, and ADR 0011 in the [decision records](../adr/README.md).
 
+This page describes the unreleased source after the release `v0.1.0rc1`.
+
 ## Part A: a check
 
 A new check is a contract change. The owner approves the change of the architecture contract
@@ -28,6 +30,14 @@ and of the test list.
 10. Give the entry a state, a description, an optional import, and acceptance criteria.
 
 Without a capability entry, the planner gives the step `unsupported`. It never gives a pass.
+
+### URLs and answers
+
+1. Build each URL with `resource_url` of `src/dppce/adapters/common.py`. For the item passport, use `item_url`.
+2. `item_url` follows `IXIT.item_target`: the `item` template, or the URL that the carrier resolves to.
+3. Pass each fetched record to `unusable` before you judge its body.
+4. `unusable` gives the outcome of `no_answer` for a transport error and for a status from 500 to 599.
+5. A check that judges a server error itself passes `server_error_is_no_answer=False`.
 
 ### Outcomes and reason codes
 
@@ -71,6 +81,7 @@ A test pack is a YAML file of test purposes.
 | `permitted_modes` | The execution modes that can run the step. |
 | `requires_scope` | The authorization scope that the step needs. |
 | `verdict_rules` | Optional. How a failed check and a missing answer map to a verdict. |
+| `severity` | Optional. The default is `major`. The HTML report shows it for each step. |
 | `manual` | Optional. `true` for a manual step. |
 
 A shipped test pack is listed under `testpacks:` in a profile.
@@ -88,3 +99,4 @@ dppce catalogue lint --import-testpack FILE
 | `CAT006` | The check is not registered. The step will be `unsupported`. |
 | `CAT016` | A shipped test pack already uses the test purpose identifier. |
 | `CAT019` | The parameters do not fit the check. |
+| `CAT023` | The check probes a role that is not in `roles`. An absent `role` parameter counts as the default role of the check. |

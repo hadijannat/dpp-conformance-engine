@@ -11,6 +11,10 @@ that standard.
 A laboratory decides which records its procedures need.
 The engine gives no accreditation. A report is a conformance test report, not a certificate.
 
+This page describes the unreleased source after the release `v0.1.0rc1`.
+[Install and verify a release](../how-to/install-and-verify-a-release.md#the-release-and-the-unreleased-source)
+lists the differences that affect a laboratory.
+
 ## 1. Outputs that the engine produces
 
 | Output | Produced by | Where |
@@ -19,8 +23,10 @@ The engine gives no accreditation. A report is a conformance test report, not a 
 | Verdicts, exclusions, retained problems, coverage, and limitations | `dppce run` | `envelope.json`, `report.html` |
 | Decision digest | `dppce run` (output); `dppce sign` (attestation) | Output of the run; inside each signature in `envelope.json` after signing |
 | Signatures | `dppce sign` | `envelope.json` |
-| Run inputs, in clear text | `dppce run` | `inputs.json` |
+| Run inputs (`dppce.runinputs/3`), in clear text | `dppce run` | `inputs.json` |
 | Encrypted recording with the delete-after date | `dppce run` | `recording/` |
+| Signature imprints for a timestamp request | `dppce timestamp imprint` | Output only |
+| Report with an attached timestamp token | `dppce timestamp attach` | A new envelope file at `--out` |
 | Replay result | `dppce replay` | Output only |
 | Verification result | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
 | Coverage | `dppce coverage` | Output only |
@@ -37,7 +43,8 @@ The engine gives no accreditation. A report is a conformance test report, not a 
 | Fault catalogue | Written by hand, `validation/fault-catalogue.yaml` | The method validation reads it. |
 | Authorization token | Issued by the system owner | The engine validates it and copies it into `inputs.json`. |
 | Signed manual result | Signed by the person who performed the step | The engine checks it. Its observation is in the report. |
-| Trust bundle | Chosen by the operator | The engine verifies signatures with it and copies it into `inputs.json`. |
+| Trust bundle, version `dppce.trust/2` | Chosen by the operator | The engine checks signatures, revoked keys and certificates, and timestamps against it. It copies the bundle into `inputs.json`. |
+| Timestamp token | Issued by a timestamp authority that the operator selects | The verifier checks it against `timestamp_anchors` of the trust bundle. |
 
 ## 3. Outputs of the release pipeline
 
@@ -51,6 +58,7 @@ The engine writes these outputs to the terminal only. Keep them yourself:
 
 - the replay result
 - the verification result, unless you render the HTML report with `--trust`
+- the signature imprints
 - the coverage, the trace, the lint findings, and the capability manifest
 - the purge list
 
@@ -64,6 +72,8 @@ Each item names a limit of the engine:
 - The permission of the owner for read-only access. `--allow-remote-host` is a confirmation only.
 - The person who performed a manual step. A manual result names a role.
 - How and from where you got a trusted key, and each change to the trust bundle.
+- The source and the date of each revocation entry and each timestamp anchor in the trust bundle.
+- A timestamp token. The engine never contacts a timestamp authority.
 - The signed human approval record of an interpretation (ADR 0007).
 - The review and signature of a report or of a method-validation record by a person.
   `human_review_and_signature` is always `null`.
