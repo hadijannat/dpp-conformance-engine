@@ -102,7 +102,10 @@ def test_a_family_expands_and_an_unknown_composition_is_refused() -> None:
 
 
 def test_the_check_name_comes_from_the_register_decorator() -> None:
-    source = '@register("demo.check", capability="demo")\ndef f(ctx):\n    return completed(True, "DEMO.OK", "m")\n'
+    source = (
+        '@register("demo.check", capability="demo")\n'
+        'def f(ctx):\n    return completed(True, "DEMO.OK", "m")\n'
+    )
     assert [s.check for s in _sites(source)] == ["demo.check"]
 
 

@@ -1,4 +1,6 @@
-"""Write the generated reference pages: command line, capability manifest, and schemas.
+"""Write the generated reference pages.
+
+The pages are: command line, capability manifest, schemas, verdict truth table, and reason codes.
 
 Usage: ``uv run python scripts/gen_reference_docs.py`` writes the pages.
 ``uv run python scripts/gen_reference_docs.py --check`` exits 1 if a page is stale.
@@ -7,16 +9,20 @@ Usage: ``uv run python scripts/gen_reference_docs.py`` writes the pages.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
+import re
 import sys
+from collections.abc import Iterator, Mapping
 from itertools import combinations
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 os.environ["COLUMNS"] = "100"  # argparse wraps help text to the terminal width
 
 from dppce import __version__, schemas
+from dppce.adapters import access
 from dppce.adapters.capabilities import manifest
 from dppce.cli import _parser
 from dppce.models import (
@@ -271,11 +277,424 @@ def verdicts_page() -> str:
     return "\n".join(parts)
 
 
+SRC = Path(__file__).resolve().parent.parent / "src" / "dppce"
+CODE = re.compile(r"[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*)+")
+_SEGMENT = r"(?:[A-Z][A-Z0-9_]*|\*)"
+# A trailing sentence period ends a token; a dot followed by a segment continues it.
+_TOKEN = re.compile(rf"(?<![\w.*]){_SEGMENT}(?:\.{_SEGMENT})+(?![\w*]|\.[A-Z*])")
+# f"{param}.REST" is a parameter template only when REST is code segments, not f"{stem}.schema.json".
+_SUFFIX = re.compile(r"\.([A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*)*)")
+_TOP = "(module level)"
+_FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef)
+_ALT_RULES = VerdictRules.model_validate({"on_check_failed": "inconclusive", "on_unreachable": "fail"})
+
+
+class CodeSite(NamedTuple):
+    code: str  # full code, matches CODE
+    module: str  # dotted, e.g. "dppce.adapters.data"
+    function: str  # qualified name inside the module, or "(module level)"
+    check: str | None  # first argument of @register(...) on the enclosing top-level function
+    effect: str | None  # None: the call that produces the code does not fix the verdict
+
+
+class _Param(NamedTuple):
+    name: str
+
+
+class _Scope(NamedTuple):
+    module: str
+    function: str
+    check: str | None
+    name: str  # bare function name, empty at module level
+    positional: tuple[str, ...]
+    keyword_only: tuple[str, ...]
+    params: frozenset[str]
+    constants: dict[str, ast.Constant]  # names assigned once to a str literal
+
+
+class _Template(NamedTuple):
+    module: str
+    function: str
+    positional: tuple[str, ...]
+    keyword_only: tuple[str, ...]
+    suffixes: set[tuple[str, str, str | None]]  # (parameter, suffix, effect)
+
+
+def source_modules() -> dict[str, str]:
+    """Every module of the engine, by dotted name."""
+    return {
+        ".".join(path.relative_to(SRC.parent).with_suffix("").parts).removesuffix(
+            ".__init__"
+        ): path.read_text(encoding="utf-8")
+        for path in sorted(SRC.rglob("*.py"))
+    }
+
+
+# ponytail: two codes take one segment from a run-time value. The closed sets come from the code.
+def code_families() -> dict[str, tuple[str, ...]]:
+    # orchestrator/run.py builds PLAN.<status>; only a check, never the planner, gives COMPLETED or ERROR.
+    planned = tuple(
+        s.value.upper()
+        for s in ExecutionStatus
+        if s not in (ExecutionStatus.COMPLETED, ExecutionStatus.ERROR)
+    )
+    return {"ACCESS.LEAK.*": tuple(c.upper() for c in access._CHANNELS), "PLAN.*": planned}
+
+
+def _own_nodes(function: ast.AST) -> Iterator[ast.AST]:
+    """The nodes of a function body, without nested functions, lambdas, and classes."""
+    for child in ast.iter_child_nodes(function):
+        yield child
+        if not isinstance(child, (*_FUNCTIONS, ast.Lambda, ast.ClassDef)):
+            yield from _own_nodes(child)
+
+
+def _local_constants(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, params: frozenset[str]
+) -> dict[str, ast.Constant]:
+    nodes = list(_own_nodes(function))
+    stores: dict[str, int] = {}
+    for node in nodes:
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            stores[node.id] = stores.get(node.id, 0) + 1
+    found: dict[str, ast.Constant] = {}
+    for node in nodes:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target, value = node.targets[0], node.value
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            target, value = node.target, node.value
+        else:
+            continue
+        if (
+            isinstance(target, ast.Name)
+            and isinstance(value, ast.Constant)
+            and isinstance(value.value, str)
+            and stores.get(target.id) == 1
+            and target.id not in params
+        ):
+            found[target.id] = value
+    return found
+
+
+def _check_name(function: ast.AST) -> str | None:
+    for decorator in getattr(function, "decorator_list", []):
+        if isinstance(decorator, ast.Call) and _callee(decorator) == "register" and decorator.args:
+            first = decorator.args[0]
+            if isinstance(first, ast.Constant) and isinstance(first.value, str):
+                return first.value
+    return None
+
+
+def _callee(call: ast.Call) -> str:
+    if isinstance(call.func, ast.Name):
+        return call.func.id
+    return call.func.attr if isinstance(call.func, ast.Attribute) else ""
+
+
+def _status(node: ast.AST | None) -> ExecutionStatus | None:
+    if (
+        isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "ExecutionStatus"
+        and node.attr in ExecutionStatus.__members__
+    ):
+        return ExecutionStatus[node.attr]
+    return None
+
+
+def _flag(node: ast.AST | None, absent: tuple[bool | None, ...]) -> tuple[bool | None, ...]:
+    """The possible values of a bool argument: a literal gives one, anything else gives both."""
+    if node is None:
+        return absent
+    if isinstance(node, ast.Constant) and isinstance(node.value, bool):
+        return (node.value,)
+    return (True, False)
+
+
+def _call_effect(call: ast.Call, key: int | str) -> str | None:
+    """The step verdict that the call fixes for the code in argument ``key``, or None."""
+    name, keywords = _callee(call), {k.arg: k.value for k in call.keywords if k.arg}
+    positional = call.args
+    if name == "completed" and key == 1:
+        status: ExecutionStatus | None = ExecutionStatus.COMPLETED
+        passed = _flag(positional[0], (None,))
+        unreachable = _flag(keywords.get("no_answer"), (False,))
+    elif name == "blocked" and key == 0:
+        status, passed, unreachable = ExecutionStatus.BLOCKED, (None,), (False,)
+    elif name == "not_done" and key == 1:
+        status, passed, unreachable = _status(positional[0]), (None,), (False,)
+    elif name == "CheckOutcome" and key == "reason_code":
+        status = _status(keywords.get("status"))
+        passed = _flag(keywords.get("passed"), (None,))
+        unreachable = _flag(keywords.get("unreachable"), (False,))
+    else:
+        return None
+    if status is None or len(unreachable) != 1:
+        return None
+    default, alt = (
+        {step_verdict(status, p, bool(unreachable[0]), rules).value for p in passed}
+        for rules in (VerdictRules(), _ALT_RULES)
+    )
+    text = " or ".join(sorted(default))
+    if alt != default:
+        text += "; " + " or ".join(sorted(alt)) + " under a non-default verdict rule"
+    return text
+
+
+class _Module:
+    def __init__(self, name: str, text: str) -> None:
+        self.name = name
+        self.tree = ast.parse(text)
+        self.parents = {child: node for node in ast.walk(self.tree) for child in ast.iter_child_nodes(node)}
+        self.skip: set[ast.AST] = set()  # docstrings, parts of an f-string, and format specs
+        for node in ast.walk(self.tree):
+            body = getattr(node, "body", None)
+            if isinstance(node, (ast.Module, ast.ClassDef, *_FUNCTIONS)) and body:
+                first = body[0]
+                if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant):
+                    self.skip.add(first.value)
+            if isinstance(node, ast.JoinedStr):
+                self.skip.update(node.values)
+            if isinstance(node, ast.FormattedValue) and node.format_spec is not None:
+                self.skip.add(node.format_spec)
+        self._scopes: dict[ast.AST | None, _Scope] = {}
+
+    def nodes(self, kind: type[Any]) -> list[Any]:
+        return [n for n in ast.walk(self.tree) if isinstance(n, kind) and n not in self.skip]
+
+    def scope(self, node: ast.AST) -> _Scope:
+        chain: list[ast.AST] = []
+        parent = self.parents.get(node)
+        while parent is not None:
+            if isinstance(parent, (ast.ClassDef, *_FUNCTIONS)):
+                chain.insert(0, parent)
+            parent = self.parents.get(parent)
+        functions = [n for n in chain if isinstance(n, _FUNCTIONS)]
+        inner = functions[-1] if functions else None
+        if inner not in self._scopes:
+            self._scopes[inner] = self._make_scope(chain, functions)
+        return self._scopes[inner]
+
+    def _make_scope(self, chain: list[ast.AST], functions: list[Any]) -> _Scope:
+        if not functions:
+            return _Scope(self.name, _TOP, None, "", (), (), frozenset(), {})
+        inner = functions[-1]
+        qualname = ".".join(getattr(n, "name", "") for n in chain[: chain.index(inner) + 1])
+        args = inner.args
+        positional = tuple(a.arg for a in (*args.posonlyargs, *args.args))
+        keyword_only = tuple(a.arg for a in args.kwonlyargs)
+        extra = tuple(a.arg for a in (args.vararg, args.kwarg) if a is not None)
+        params = frozenset((*positional, *keyword_only, *extra))
+        check = _check_name(functions[0])
+        return _Scope(
+            self.name,
+            qualname,
+            check,
+            inner.name,
+            positional,
+            keyword_only,
+            params,
+            _local_constants(inner, params),
+        )
+
+    def effect(self, node: ast.AST) -> str | None:
+        parent = self.parents.get(node)
+        if isinstance(parent, ast.keyword) and parent.arg:
+            call, key = self.parents.get(parent), parent.arg
+        elif isinstance(parent, ast.Call) and any(a is node for a in parent.args):
+            call, key = parent, next(i for i, a in enumerate(parent.args) if a is node)
+        else:
+            return None
+        return _call_effect(call, key) if isinstance(call, ast.Call) else None
+
+    def parts(self, node: ast.JoinedStr) -> list[str | _Param | None]:
+        """Literal text, a local constant's text, a parameter, or None for any other value."""
+        scope, found = self.scope(node), []
+        for value in node.values:
+            if isinstance(value, ast.Constant):
+                found.append(str(value.value))
+                continue
+            plain = (
+                isinstance(value, ast.FormattedValue) and value.conversion == -1 and value.format_spec is None
+            )
+            name = value.value.id if plain and isinstance(value.value, ast.Name) else None
+            if name in scope.constants:
+                found.append(str(scope.constants[name].value))
+            elif name in scope.params:
+                found.append(_Param(name))
+            else:
+                found.append(None)
+        return found
+
+
+def _template_of(parts: list[str | _Param | None]) -> tuple[str, str] | None:
+    """(parameter, suffix) for the form f"{param}.REST", else None."""
+    first, rest = parts[0] if parts else None, parts[1:]
+    if not isinstance(first, _Param) or not all(isinstance(p, str) for p in rest):
+        return None
+    suffix = _SUFFIX.fullmatch("".join(p for p in rest if isinstance(p, str)))
+    return (first.name, suffix[1]) if suffix else None
+
+
+def _scan(text: str, families: Mapping[str, tuple[str, ...]], where: str) -> Iterator[str]:
+    for token in _TOKEN.findall(text):
+        if "*" not in token:
+            yield token
+        elif token in families:
+            yield from (token.replace("*", member) for member in families[token])
+        elif any(segment != "*" for segment in token.split(".")):
+            raise ValueError(
+                f"unresolved composed reason code {token!r} in {where}; add it to code_families()"
+            )
+
+
+def _argument(call: ast.Call, template: _Template, param: str) -> ast.expr | None:
+    if param in template.positional:
+        index = template.positional.index(param)
+        before = call.args[: index + 1]
+        if len(call.args) > index and not any(isinstance(a, ast.Starred) for a in before):
+            return call.args[index]
+    return next((k.value for k in call.keywords if k.arg == param), None)
+
+
+def _templates(modules: list[_Module]) -> dict[str, _Template]:
+    """Pass 1: functions that build a code from a parameter, through forwarding, to a fixpoint."""
+    templates: dict[str, _Template] = {}
+
+    def add(scope: _Scope, param: str, suffix: str, effect: str | None) -> bool:
+        known = templates.setdefault(
+            scope.name, _Template(scope.module, scope.function, scope.positional, scope.keyword_only, set())
+        )
+        if (known.module, known.function) != (scope.module, scope.function):
+            raise ValueError(
+                f"two functions named {scope.name!r} build reason codes from a parameter: "
+                f"{known.module}.{known.function} and {scope.module}.{scope.function}"
+            )
+        entry = (param, suffix, effect)
+        if entry in known.suffixes:
+            return False
+        known.suffixes.add(entry)
+        return True
+
+    for module in modules:
+        for node in module.nodes(ast.JoinedStr):
+            found = _template_of(module.parts(node))
+            if found:
+                add(module.scope(node), *found, module.effect(node))
+    changed = True
+    while changed:
+        changed = False
+        for module in modules:
+            for call in module.nodes(ast.Call):
+                template = templates.get(_callee(call))
+                if template is None:
+                    continue
+                scope = module.scope(call)
+                for param, suffix, effect in sorted(template.suffixes, key=str):
+                    argument = _argument(call, template, param)
+                    if isinstance(argument, ast.Name) and argument.id in scope.params:
+                        changed |= add(scope, argument.id, suffix, effect)
+    return templates
+
+
+def _call_sites(modules: list[_Module], templates: dict[str, _Template]) -> Iterator[CodeSite]:
+    """Pass 2a: each call that gives a template its prefix as a literal emits the code."""
+    for module in modules:
+        for call in module.nodes(ast.Call):
+            template = templates.get(_callee(call))
+            if template is None:
+                continue
+            scope = module.scope(call)
+            for param, suffix, effect in sorted(template.suffixes, key=str):
+                argument = _argument(call, template, param)
+                if isinstance(argument, ast.Name) and argument.id in scope.constants:
+                    argument = scope.constants[argument.id]
+                if isinstance(argument, ast.Constant) and isinstance(argument.value, str):
+                    module.skip.add(argument)  # a prefix such as "API.CONTRACT" is not a code
+                    yield CodeSite(
+                        f"{argument.value}.{suffix}", module.name, scope.function, scope.check, effect
+                    )
+                elif not (isinstance(argument, ast.Name) and argument.id in scope.params):
+                    raise ValueError(
+                        f"cannot resolve the argument {param!r} of {_callee(call)} "
+                        f"in {module.name}.{scope.function}, line {call.lineno}"
+                    )
+
+
+def _literal_sites(module: _Module, families: Mapping[str, tuple[str, ...]]) -> Iterator[CodeSite]:
+    """Pass 2b: codes in string literals and in f-strings."""
+    for node in module.nodes(ast.Constant):
+        if isinstance(node.value, str):
+            scope = module.scope(node)
+            for code in _scan(node.value, families, f"{module.name}.{scope.function}"):
+                yield CodeSite(code, module.name, scope.function, scope.check, module.effect(node))
+    for node in module.nodes(ast.JoinedStr):
+        parts = module.parts(node)
+        if _template_of(parts):
+            continue
+        scope = module.scope(node)
+        text = "".join(p if isinstance(p, str) else "*" for p in parts)
+        for code in _scan(text, families, f"{module.name}.{scope.function}"):
+            yield CodeSite(code, module.name, scope.function, scope.check, module.effect(node))
+
+
+def extract_reason_codes(
+    sources: Mapping[str, str], families: Mapping[str, tuple[str, ...]]
+) -> list[CodeSite]:
+    """Every reason-code site in the sources. Docstrings and comments are not read."""
+    modules = [_Module(name, text) for name, text in sorted(sources.items())]
+    templates = _templates(modules)
+    sites = set(_call_sites(modules, templates))
+    for module in modules:
+        sites.update(_literal_sites(module, families))
+    for site in sites:
+        if not CODE.fullmatch(site.code):
+            raise ValueError(f"not a reason code: {site.code!r} in {site.module}.{site.function}")
+    return sorted(sites, key=lambda s: (s.code, s.module, s.function, s.check or "", s.effect or ""))
+
+
+def reason_codes_page() -> str:
+    by_code: dict[str, list[CodeSite]] = {}
+    for site in extract_reason_codes(source_modules(), code_families()):
+        by_code.setdefault(site.code, []).append(site)
+    rows = []
+    for code, group in sorted(by_code.items()):
+        checks = ", ".join(f"`{c}`" for c in sorted({s.check for s in group if s.check}))
+        places = sorted({s.module if s.function == _TOP else f"{s.module}.{s.function}" for s in group})
+        effects = " / ".join(sorted({s.effect or "not fixed here" for s in group}))
+        produced = ", ".join(f"`{p}`" for p in places)
+        rows.append(f"| `{code}` | {code.split('.')[0]} | {checks} | {produced} | {effects} |")
+    parts = [
+        "# Reason-code catalogue\n",
+        "Audience: operators, assessors, and contributors who read a report.",
+        "Purpose: list each reason code that the engine can write, where it comes from, and its effect "
+        "on a step verdict.",
+        "Prerequisites: read the [verdict truth table](verdict-truth-table.md), section 1.\n",
+        NOTE,
+        f"Engine version: `{__version__}`.\n",
+        "The page is built from the string literals in `src/dppce`. Docstrings and comments are not read.\n",
+        "The step verdict applies under the default verdict rules, where the call that produces the code "
+        'fixes the execution status. "not fixed here" means that the place that writes the code does not '
+        "fix a step verdict.\n",
+        "Some codes are not step reason codes. They are messages of the command line, the verifier, and "
+        "the authorization check, plan exclusions, and retained problems.\n",
+        "A test purpose can change some verdicts with `verdict_rules`. Only an approved test method can "
+        "make a missing answer fail. See the truth table.\n",
+        "A code with a run-time segment is listed once for each value of its closed set.\n",
+        "Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` reports them.\n",
+        "| Code | Area | Check | Produced in | Step verdict |",
+        "| --- | --- | --- | --- | --- |",
+        *rows,
+    ]
+    return "\n".join(parts) + "\n"
+
+
 PAGES = {
     "verdict-truth-table.md": verdicts_page,
     "cli.md": cli_page,
     "capabilities.md": capabilities_page,
     "schemas.md": schemas_page,
+    "reason-codes.md": reason_codes_page,
 }
 
 
