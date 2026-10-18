@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -215,3 +215,23 @@ class TestResult(Model):
         if (self.verdict is Verdict.ERROR) != (self.execution_status is ExecutionStatus.ERROR):
             raise ValueError("a step has 'error' if and only if its execution status is 'error'")
         return self
+
+
+class ManualResult(Model):
+    """Payload of a signed manual-step result. The person who performed the step signs it.
+
+    It names no person. The key identifier in the JWS header links it to the performer in the
+    records of the laboratory. Canonical bodies hold strings only here (ADR 0006).
+    """
+
+    schema_version: Literal["dppce.manualresult/1"]
+    test_purpose_id: str = Field(pattern=ID_PATTERN)
+    sut_identifier: str = Field(min_length=1, max_length=512)
+    # One lowercase token, such as "inspector". A token cannot carry a name or free text.
+    role: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,63}$")
+    # Regex only, like RunManifest.evaluation_time; verify_manual_result parses it and refuses
+    # an impossible date (2026-02-30) as MANUAL.RESULT.MALFORMED.
+    performed_at: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+    outcome: Literal["pass", "fail"]
+    # Exactly the expected_evidence items of the test purpose, same text and order.
+    evidence: tuple[Annotated[str, Field(min_length=1, max_length=2000)], ...] = ()

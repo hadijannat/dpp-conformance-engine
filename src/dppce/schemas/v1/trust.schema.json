@@ -54,7 +54,8 @@
             "enum": [
               "report",
               "authorization",
-              "passport"
+              "passport",
+              "manual"
             ],
             "type": "string"
           },

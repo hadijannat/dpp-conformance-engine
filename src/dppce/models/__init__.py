@@ -72,6 +72,7 @@ from dppce.models.testing import (
     Conflict,
     Exclusion,
     FactSpec,
+    ManualResult,
     Observation,
     Plan,
     PlannedPath,
@@ -102,6 +103,7 @@ SCHEMA_MODELS: dict[str, type[Model]] = {
     "capabilities": CapabilityManifest,
     "verification": VerificationReport,
     "trust": TrustBundle,
+    "manualresult": ManualResult,
 }
 
 __all__ = [
@@ -146,6 +148,7 @@ __all__ = [
     "IssuerStatement",
     "JsonScalar",
     "JsonValue",
+    "ManualResult",
     "Modality",
     "Model",
     "NetworkPolicy",

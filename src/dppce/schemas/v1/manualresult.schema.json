@@ -1,0 +1,62 @@
+{
+  "$id": "urn:dppce:schema:v1:manualresult",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Payload of a signed manual-step result. The person who performed the step signs it.\n\nIt names no person. The key identifier in the JWS header links it to the performer in the\nrecords of the laboratory. Canonical bodies hold strings only here (ADR 0006).",
+  "properties": {
+    "evidence": {
+      "default": [],
+      "items": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "outcome": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "performed_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "title": "Performed At",
+      "type": "string"
+    },
+    "role": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Role",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.manualresult/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sut_identifier": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Sut Identifier",
+      "type": "string"
+    },
+    "test_purpose_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+      "title": "Test Purpose Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "test_purpose_id",
+    "sut_identifier",
+    "role",
+    "performed_at",
+    "outcome"
+  ],
+  "title": "ManualResult",
+  "type": "object"
+}

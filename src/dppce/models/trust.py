@@ -16,7 +16,7 @@ class TrustedKey(Model):
 
     kid: str
     issuer: str
-    purposes: tuple[Literal["report", "authorization", "passport"], ...] = Field(min_length=1)
+    purposes: tuple[Literal["report", "authorization", "passport", "manual"], ...] = Field(min_length=1)
     public_jwk: dict[str, str]
     not_before: str = Field(pattern=STAMP)
     not_after: str = Field(pattern=STAMP)
