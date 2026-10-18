@@ -14,6 +14,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `CAT020`: the cited version has no version token of the source record. `CAT021`, a warning: the
   source record shows a later version or amendment. `CAT022`: a date in a legal obligation is not
   in `applicable_dates` of its source.
+- Lint code `CAT023`: the check of a test purpose probes a role that the test purpose does not
+  list in `roles`. An absent parameter `role` counts as the default role of the check.
+- Reason code `STATUS.SUPERSEDED_BY_SELECTED`. The planner excludes a draft in each mode if an
+  approved entry in a selected pack names it in `supersedes` and the mode permits that entry.
+  Both entries must be illustrative, or neither. The planner does not change a pack file.
+- The HTML report shows the severity of each test step. A step whose test purpose is not
+  available shows the stored value with the label "Default".
 - Signed manual-step results (ADR 0013). The operator supplies one with `--manual-result PATH` on
   `dppce plan` and `dppce run`. The check `manual.review` verifies it with a key of the trust
   purpose `manual`. The payload schema is `manualresult`.

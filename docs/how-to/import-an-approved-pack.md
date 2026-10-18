@@ -113,6 +113,7 @@ The lint rejects an interpretation with `author_kind: agent` and `status: approv
 | `CAT020` | The cited version has no version token of the source record. | Cite the edition that `sources.yaml` records. |
 | `CAT021` | Warning: the source record shows a later version or amendment. | Check if the cited version is still the correct one. |
 | `CAT022` | A date in a legal obligation is not in `applicable_dates` of its source. | Use a date that the source record lists. |
+| `CAT023` | The check probes a role that the test purpose does not list in `roles`. | Add the role to `roles`, or change the parameter `role`. |
 
 `dppce plan`, `dppce run`, and `dppce replay` refuse a test pack whose parameters do not fit its check.
 
@@ -135,7 +136,8 @@ uv run dppce catalogue trace \
      --profile battery/ev --ics /path/to/ics.yaml --ixit /path/to/ixit.yaml
    ```
 
-2. Read the exclusions. Each shipped draft and each placeholder has the reason code `MODE.NOT_APPROVED`.
+2. Read the exclusions. Each shipped draft and each placeholder has the reason code `MODE.NOT_APPROVED`,
+   except a draft that a selected approved entry supersedes. That draft has `STATUS.SUPERSEDED_BY_SELECTED`.
 3. Make sure that the plan has your approved requirements and their steps.
 4. Start the run with the same options and the options of `dppce run`. See the [command line reference](../reference/cli.md).
 
@@ -205,15 +207,20 @@ A manual step with a different check always has the status `manual_unavailable`.
 
 ## 6. What `supersedes` does
 
-`supersedes` is a link for the trace. It says that an approved entry replaces a draft.
+`supersedes` says that an approved entry replaces a draft.
 
 - The lint checks that each named requirement exists, and that it is not still `approved` (`CAT010`).
 - An entry with `superseded_by` must have the status `superseded`. The planner then excludes it.
-- `supersedes` does not remove the draft from a run. The planner does not read the field.
-- In reviewed mode the draft is an exclusion in any case, because it is not approved.
-- In exploratory mode a run assesses the draft and the approved entry. The report shows the two results.
+- The planner excludes a draft with the reason code `STATUS.SUPERSEDED_BY_SELECTED` if all of these are true:
+  - The approved entry is in a selected pack. Use `--import-pack` and `--pack`.
+  - The mode permits the approved entry.
+  - The status of the named entry is `draft-needs-review`.
+  - Both entries are illustrative, or neither is.
+- This exclusion applies in each mode. The reason names the approved entry. The plan assesses the approved entry only.
+- The planner does not read the ICS for this rule. It does not change the shipped pack.
+- If one condition is false, `supersedes` has no effect on the plan.
 
-A draft leaves all modes only when its own entry has `review_status: superseded` and `superseded_by`.
+Without such a selected approved entry, a draft leaves all modes only when its own entry has `review_status: superseded`.
 That is a change to the shipped pack. Make it with a reviewed change to the repository, not with an imported file.
 
 ## 7. Limits
@@ -222,5 +229,6 @@ That is a change to the shipped pack. Make it with a reviewed change to the repo
 - The project checked `--import-pack` and `--pack` with a draft entry.
 - The test suite checks `--import-pack`, `--pack`, `--import-testpack`, and `--testpack` in reviewed mode.
   It uses a TEST-ONLY fixture with a synthetic approval record. No review took place.
+- The test suite checks `supersedes` with a TEST-ONLY approved entry that supersedes a shipped draft. No review took place.
 - The project did not run these options with a real approved entry, because no review record exists.
 - A pack that you import is your responsibility. The engine checks its form. It does not check that an interpretation is correct.
