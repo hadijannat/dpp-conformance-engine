@@ -9,6 +9,7 @@ signed authorization.
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Any, Literal, cast, get_args
 from urllib.parse import unquote, urlsplit
 
@@ -120,6 +121,11 @@ def _operation(
     return resource, template, responses
 
 
+def _unsafe(segment: str) -> bool:
+    """True if a decoded path segment holds a separator or a control character."""
+    return any(c in "/\\" or unicodedata.category(c) == "Cc" for c in segment)
+
+
 def _within(ctx: CheckContext, template: ResourceTemplate, url: str) -> bool:
     """True if a resolved URL is the marked operation under the endpoint of the item template.
 
@@ -138,6 +144,10 @@ def _within(ctx: CheckContext, template: ResourceTemplate, url: str) -> bool:
     rest = parts.path[len(origin.path) :]
     # A server collapses an empty segment and resolves a dot segment, so the path would name another resource.
     if "//" in rest or any(unquote(segment) in {".", ".."} for segment in rest.split("/")):
+        return False
+    # A server may decode a segment before it routes, so an encoded separator or control would
+    # name another resource. ponytail: every segment is checked, so a literal %2F in a template blocks too.
+    if any(_unsafe(unquote(segment)) for segment in rest.split("/")):
         return False
     pattern = "".join(
         "[^/]+" if part.startswith("{") else re.escape(part)
