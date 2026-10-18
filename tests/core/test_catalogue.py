@@ -430,6 +430,28 @@ def test_test_packs_load_and_a_duplicate_id_is_rejected(tmp_path: Path) -> None:
         load_testpacks(tmp_path)
 
 
+def test_an_imported_test_pack_is_added_and_the_shipped_files_stay_unchanged(tmp_path: Path) -> None:
+    root, outside = tmp_path / "root", tmp_path / "outside"
+    shipped = write(root / "testpacks" / "shipped.yaml", as_text(b.purposes_pack(b.purpose("T-1"))))
+    before = shipped.read_bytes()
+    extra = b.purposes_pack(b.purpose("T-2"), testpack_id="tp/imported")
+    imported = write(outside / "imported.yaml", as_text(extra))
+    loaded = load_testpacks(root, extra_testpacks=[imported])
+    assert sorted(loaded) == ["tp/a", "tp/imported"]
+    assert loaded["tp/imported"] == extra
+    assert shipped.read_bytes() == before
+    assert sorted(p.name for p in (root / "testpacks").iterdir()) == ["shipped.yaml"]
+    assert sorted(load_testpacks(root)) == ["tp/a"]
+
+
+def test_an_imported_test_pack_cannot_replace_a_shipped_test_pack(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    write(root / "testpacks" / "shipped.yaml", as_text(b.purposes_pack(b.purpose("T-1"))))
+    imported = write(tmp_path / "outside" / "same-id.yaml", as_text(b.purposes_pack(b.purpose("T-2"))))
+    with pytest.raises(CatalogueError, match="tp/a"):
+        load_testpacks(root, extra_testpacks=[imported])
+
+
 def test_empty_directories_load_as_empty_mappings(tmp_path: Path) -> None:
     assert load_profiles(tmp_path) == {}
     assert load_testpacks(tmp_path) == {}

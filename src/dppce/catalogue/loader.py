@@ -114,8 +114,10 @@ def load_profiles(root: Path) -> dict[str, Profile]:
     return _load_all(list((root / "profiles").glob("*/*.yaml")), Profile, "id")
 
 
-def load_testpacks(root: Path) -> dict[str, TestPack]:
-    return _load_all(list((root / "testpacks").glob("*.yaml")), TestPack, "testpack_id")
+def load_testpacks(root: Path, extra_testpacks: Sequence[Path] = ()) -> dict[str, TestPack]:
+    """Load ``root/testpacks``. ``extra_testpacks`` are imported; the shipped files stay unchanged."""
+    shipped = list((root / "testpacks").glob("*.yaml"))
+    return _load_all([*shipped, *extra_testpacks], TestPack, "testpack_id")
 
 
 def load_ics(path: Path) -> ICS:

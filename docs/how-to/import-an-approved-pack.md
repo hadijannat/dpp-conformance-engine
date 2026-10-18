@@ -87,10 +87,11 @@ The lint rejects an interpretation with `author_kind: agent` and `status: approv
 
 ## 3. Check the pack
 
-1. Run the lint with the pack.
+1. Run the lint with the pack and the test pack of section 5.
 
    ```bash
-   uv run dppce catalogue lint --import-pack /path/to/pack.yaml
+   uv run dppce catalogue lint \
+     --import-pack /path/to/pack.yaml --import-testpack /path/to/testpack.yaml
    ```
 
 2. Make sure that the last line starts with `0 errors`. The exit status is `0`.
@@ -112,16 +113,19 @@ The lint rejects an interpretation with `author_kind: agent` and `status: approv
 You can see the trace from the provision to the check with this command.
 
 ```bash
-uv run dppce catalogue trace --import-pack /path/to/pack.yaml
+uv run dppce catalogue trace \
+  --import-pack /path/to/pack.yaml --import-testpack /path/to/testpack.yaml
 ```
 
 ## 4. Use the pack in reviewed mode
 
-1. Show the plan. `--import-pack` loads the file. `--pack` selects it for the profile.
+1. Show the plan. `--import-pack` loads the pack file. `--pack` selects it for the profile.
+   `--import-testpack` and `--testpack` do the same for the test pack.
 
    ```bash
    uv run dppce plan --mode reviewed \
      --import-pack /path/to/pack.yaml --pack <organization>/eu-battery-reviewed \
+     --import-testpack /path/to/testpack.yaml --testpack <organization>/eu-battery-reviewed-tests \
      --profile battery/ev --ics /path/to/ics.yaml --ixit /path/to/ixit.yaml
    ```
 
@@ -131,28 +135,58 @@ uv run dppce catalogue trace --import-pack /path/to/pack.yaml
 
 `--pack` works only together with `--import-pack` for a pack that is not shipped.
 Without the file, the command stops with the message "requirement pack not found".
+`--testpack` and `--import-testpack` work in the same way. Without the file, the message is "test pack not found".
 
-The shipped catalogue stays unchanged. The engine reads the imported file and writes nothing to `catalogue/`.
+The shipped files stay unchanged. The engine reads the imported files. It writes nothing to `catalogue/`, `profiles/`, or `testpacks/`.
 The report names the catalogue and each pack by a digest, so a recipient can see which pack a run used.
+The run manifest also names each selected test pack by a digest.
+
+`dppce run` writes the paths of the imported files and the selected identifiers to `inputs.json`.
+`dppce replay` reads the files again from these paths. Do not move or change the files after a run.
 
 ## 5. Test purposes for reviewed mode
 
 An approved requirement needs test purposes that permit reviewed mode.
-This version has two limits. Plan for them.
-
-- The shipped test purposes `TP-EU-...` permit exploratory mode only. In reviewed mode they are exclusions.
-- The command line has no option that imports a test pack. The engine reads test packs from the data root only.
+The shipped test purposes `TP-EU-...` permit exploratory mode only. In reviewed mode they are exclusions.
 
 If a path names a test purpose that is not available in the mode, the step is "not run" and the requirement verdict is `inconclusive`.
 It is never `pass`.
 
 To run steps in reviewed mode, do these steps.
 
-1. Copy the directories `catalogue`, `profiles`, and `testpacks` to a data root outside the repository.
-2. Add a test pack to `testpacks/` in that data root. Give each test purpose `permitted_modes: [reviewed]`.
-3. Add the identifier of the test pack to the field `testpacks` of the profile in that data root.
+1. Create one YAML test pack file in a directory that is not part of the repository.
+2. Give the test pack a new `testpack_id`. The loader rejects the identifier of a shipped test pack.
+3. Give each test purpose a new `id`. Set `permitted_modes: [reviewed]`.
 4. Make each test purpose list the approved requirement, and make the requirement list the test purpose.
-5. Add `--data-root /path/to/data-root` to each command of sections 3 and 4.
+5. Add `--import-testpack /path/to/testpack.yaml` to each command of sections 3 and 4.
+6. Add `--testpack <organization>/eu-battery-reviewed-tests` to `dppce plan` and `dppce run`.
+
+This example shows the structure. A text between angle brackets is a field to fill in.
+
+```yaml
+schema_version: dppce.testpack/1
+testpack_id: <organization>/eu-battery-reviewed-tests
+version: 1.0.0
+title: <title of the test pack>
+test_purposes:
+- id: <NEW-TP-001>
+  title: <title>
+  requirements:
+  - <NEW-ID-001>
+  profiles:
+  - battery/ev
+  applicability:
+    const: 'true'
+  stimulus:
+    check: <check name from the registry>
+  permitted_modes:
+  - reviewed
+```
+
+A test purpose identifier names one test purpose.
+If a shipped test pack already uses the identifier, the lint reports `CAT016`.
+`dppce plan` and `dppce run` stop with exit status `2` if they select the two test packs.
+Each shipped profile selects each shipped test pack.
 
 A human must approve the test method too. The review record states which steps the reviewer accepted.
 
@@ -176,6 +210,8 @@ That is a change to the shipped pack. Make it with a reviewed change to the repo
 ## 7. Limits
 
 - The steps of sections 2 to 5 follow the loader, the lint, and the planner as they are in this version.
-- The project checked `--import-pack`, `--pack`, and the data root procedure of section 5 with a draft entry.
-  It did not run them with an approved entry, because no approval record exists.
+- The project checked `--import-pack` and `--pack` with a draft entry.
+- The test suite checks `--import-pack`, `--pack`, `--import-testpack`, and `--testpack` in reviewed mode.
+  It uses a TEST-ONLY fixture with a synthetic approval record. No review took place.
+- The project did not run these options with a real approved entry, because no review record exists.
 - A pack that you import is your responsibility. The engine checks its form. It does not check that an interpretation is correct.

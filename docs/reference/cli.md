@@ -26,9 +26,10 @@ Each command accepts `--json` and then writes one JSON document to standard outp
 ### `dppce plan`
 
 ```text
-usage: dppce plan [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK] --profile
-                  PROFILE --ics ICS --ixit IXIT [--mode {illustrative,exploratory,reviewed}]
-                  [--pack PACK] [--trust TRUST] [--authorization AUTHORIZATION] [--at AT]
+usage: dppce plan [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK]
+                  [--import-testpack IMPORT_TESTPACK] --profile PROFILE --ics ICS --ixit IXIT
+                  [--mode {illustrative,exploratory,reviewed}] [--pack PACK] [--testpack TESTPACK]
+                  [--trust TRUST] [--authorization AUTHORIZATION] [--at AT]
                   [--issuer-name ISSUER_NAME] [--issuer-id ISSUER_ID]
                   [--accreditation-status ACCREDITATION_STATUS]
                   [--accreditation-reference ACCREDITATION_REFERENCE]
@@ -42,11 +43,14 @@ options:
                         directory with catalogue, profiles, and testpacks
   --import-pack IMPORT_PACK
                         import a requirement pack file
+  --import-testpack IMPORT_TESTPACK
+                        import a test pack file
   --profile PROFILE     profile identifier, for example battery/ev
   --ics ICS             implementation conformance statement
   --ixit IXIT           extra information for testing
   --mode {illustrative,exploratory,reviewed}
   --pack PACK           select one more pack by identifier
+  --testpack TESTPACK   select one more test pack by identifier
   --trust TRUST         trust bundle (JSON); only the operator supplies it
   --authorization AUTHORIZATION
                         signed test authorization (compact JWS)
@@ -60,9 +64,10 @@ options:
 ### `dppce run`
 
 ```text
-usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK] --profile
-                 PROFILE --ics ICS --ixit IXIT [--mode {illustrative,exploratory,reviewed}]
-                 [--pack PACK] [--trust TRUST] [--authorization AUTHORIZATION] [--at AT]
+usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK]
+                 [--import-testpack IMPORT_TESTPACK] --profile PROFILE --ics ICS --ixit IXIT
+                 [--mode {illustrative,exploratory,reviewed}] [--pack PACK] [--testpack TESTPACK]
+                 [--trust TRUST] [--authorization AUTHORIZATION] [--at AT]
                  [--issuer-name ISSUER_NAME] [--issuer-id ISSUER_ID]
                  [--accreditation-status ACCREDITATION_STATUS]
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
@@ -78,11 +83,14 @@ options:
                         directory with catalogue, profiles, and testpacks
   --import-pack IMPORT_PACK
                         import a requirement pack file
+  --import-testpack IMPORT_TESTPACK
+                        import a test pack file
   --profile PROFILE     profile identifier, for example battery/ev
   --ics ICS             implementation conformance statement
   --ixit IXIT           extra information for testing
   --mode {illustrative,exploratory,reviewed}
   --pack PACK           select one more pack by identifier
+  --testpack TESTPACK   select one more test pack by identifier
   --trust TRUST         trust bundle (JSON); only the operator supplies it
   --authorization AUTHORIZATION
                         signed test authorization (compact JWS)
@@ -179,6 +187,7 @@ options:
 
 ```text
 usage: dppce catalogue lint [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK]
+                            [--import-testpack IMPORT_TESTPACK]
 
 Check the catalogue, the profiles, and the test packs.
 
@@ -189,12 +198,15 @@ options:
                         directory with catalogue, profiles, and testpacks
   --import-pack IMPORT_PACK
                         import a requirement pack file
+  --import-testpack IMPORT_TESTPACK
+                        import a test pack file
 ```
 
 ### `dppce catalogue trace`
 
 ```text
 usage: dppce catalogue trace [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK]
+                             [--import-testpack IMPORT_TESTPACK]
 
 Print the trace from source provision to executable check.
 
@@ -205,6 +217,8 @@ options:
                         directory with catalogue, profiles, and testpacks
   --import-pack IMPORT_PACK
                         import a requirement pack file
+  --import-testpack IMPORT_TESTPACK
+                        import a test pack file
 ```
 
 ### `dppce coverage`

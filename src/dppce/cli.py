@@ -129,6 +129,8 @@ def _build_inputs(
     evaluation_time: datetime,
     import_packs: list[Path],
     extra_packs: list[str],
+    import_testpacks: list[Path],
+    extra_testpacks: list[str],
     trust: TrustBundle | None,
     authorization_token: str | None,
     issuer: IssuerStatement,
@@ -139,6 +141,8 @@ def _build_inputs(
     profile = profiles[profile_id]
     if extra_packs:
         profile = profile.model_copy(update={"packs": (*profile.packs, *extra_packs)})
+    if extra_testpacks:
+        profile = profile.model_copy(update={"testpacks": (*profile.testpacks, *extra_testpacks)})
     problems = check_ics(ics, profile)
     if problems:
         raise UsageError("the ICS does not fit the profile: " + " ".join(problems))
@@ -153,7 +157,7 @@ def _build_inputs(
         mode=mode,
         profile=profile,
         catalogue=load_catalogue(root, extra_packs=import_packs),
-        testpacks=load_testpacks(root),
+        testpacks=load_testpacks(root, extra_testpacks=import_testpacks),
         ics=ics,
         ixit=ixit,
         data_root=root,
@@ -189,6 +193,8 @@ def _inputs_from_args(args: argparse.Namespace) -> tuple[RunInputs, str | None, 
         evaluation_time=_time(args.at),
         import_packs=args.import_pack,
         extra_packs=args.pack,
+        import_testpacks=args.import_testpack,
+        extra_testpacks=args.testpack,
         trust=trust,
         authorization_token=token,
         issuer=issuer,
@@ -351,6 +357,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         "ixit": ixit.model_dump(mode="json"),
         "import_packs": [str(p.resolve()) for p in args.import_pack],
         "extra_packs": list(args.pack),
+        "import_testpacks": [str(p.resolve()) for p in args.import_testpack],
+        "extra_testpacks": list(args.testpack),
         "trust": trust.model_dump(mode="json") if trust else None,
         "authorization_token": token,
         "issuer": inputs.issuer.model_dump(mode="json"),
@@ -386,6 +394,9 @@ def cmd_replay(args: argparse.Namespace) -> int:
             "evaluation_time": parse_stamp(stored["evaluation_time"]),
             "import_packs": [Path(p) for p in stored["import_packs"]],
             "extra_packs": list(stored["extra_packs"]),
+            # A run recorded before the test-pack import existed imported no test pack.
+            "import_testpacks": [Path(p) for p in stored.get("import_testpacks", [])],
+            "extra_testpacks": list(stored.get("extra_testpacks", [])),
             "trust": TrustBundle.model_validate(stored["trust"]) if stored["trust"] else None,
             "authorization_token": stored["authorization_token"],
             "issuer": IssuerStatement.model_validate(stored["issuer"]),
@@ -466,7 +477,7 @@ def cmd_catalogue_lint(args: argparse.Namespace) -> int:
     findings = lint(
         load_catalogue(root, extra_packs=args.import_pack),
         load_profiles(root),
-        load_testpacks(root),
+        load_testpacks(root, extra_testpacks=args.import_testpack),
         registry.names(),
         root,
     )
@@ -479,7 +490,10 @@ def cmd_catalogue_lint(args: argparse.Namespace) -> int:
 
 def cmd_catalogue_trace(args: argparse.Namespace) -> int:
     root = data_root(args.data_root)
-    rows = trace(load_catalogue(root, extra_packs=args.import_pack), load_testpacks(root))
+    rows = trace(
+        load_catalogue(root, extra_packs=args.import_pack),
+        load_testpacks(root, extra_testpacks=args.import_testpack),
+    )
     lines = [
         f"{r.source_id} {r.citation or '-'} -> {r.requirement_id} [{r.review_status}] -> "
         f"{r.test_purpose_id or '(no test)'} -> {r.check or '-'}"
@@ -559,6 +573,9 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         sub.add_argument(
             "--import-pack", type=Path, action="append", default=[], help="import a requirement pack file"
         )
+        sub.add_argument(
+            "--import-testpack", type=Path, action="append", default=[], help="import a test pack file"
+        )
 
     def run_options(sub: argparse.ArgumentParser) -> None:
         catalogue_options(sub)
@@ -567,6 +584,9 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         sub.add_argument("--ixit", type=Path, required=True, help="extra information for testing")
         sub.add_argument("--mode", choices=[m.value for m in ExecutionMode], default="illustrative")
         sub.add_argument("--pack", action="append", default=[], help="select one more pack by identifier")
+        sub.add_argument(
+            "--testpack", action="append", default=[], help="select one more test pack by identifier"
+        )
         sub.add_argument("--trust", type=Path, help="trust bundle (JSON); only the operator supplies it")
         sub.add_argument("--authorization", type=Path, help="signed test authorization (compact JWS)")
         sub.add_argument("--at", help="evaluation time, for example 2026-10-13T12:00:00Z; default: now")
