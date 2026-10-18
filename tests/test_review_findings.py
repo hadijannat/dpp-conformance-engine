@@ -11,6 +11,7 @@ import base64
 import gzip
 import json
 import os
+import re
 import time
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -49,6 +50,7 @@ from dppce.models import (
     TestPurpose,
     TrustBundle,
 )
+from dppce.report import render
 from dppce.testdefs.registry import CheckContext
 from dppce.verdicts import overall_verdict
 from dppce.verifier import verify
@@ -790,6 +792,40 @@ def test_a_signed_report_whose_verdict_does_not_follow_from_its_results_fails_ve
     assert outcomes["signature"] == "pass", "the issuer did sign it"
     assert outcomes["counts"] == "fail", "but the report does not agree with itself"
     assert not report.complete
+
+
+DEFAULT_SEVERITY = "<br><small>Default: the test purpose is not available.</small>"
+
+
+def test_the_html_step_table_shows_the_severity() -> None:
+    """D1-11: the severity of each step is visible. A fallback value is labeled as a default."""
+    base = make_envelope()
+    fallback = make_test_result(9, "inconclusive").model_copy(
+        update={
+            "test_purpose_id": "TP-GONE",
+            "requirement_ids": (),
+            "check": "unavailable",
+            "execution_status": ExecutionStatus.NOT_RUN,
+        }
+    )
+    decision = base.decision.model_copy(update={"test_results": (*base.decision.test_results, fallback)})
+    page = render(base.model_copy(update={"decision": decision}))
+    table = page.split("<caption>Test step results</caption>", 1)[1].split("</table>", 1)[0]
+    assert (
+        '<th scope="col">Verdict</th><th scope="col">Severity</th><th scope="col">Reason code</th>' in table
+    )
+    rows = {
+        re.findall(r"<td><code>(.*?)</code></td>", row)[0]: re.findall(r"<td>(.*?)</td>", row)
+        for row in table.split("<tr>")[2:]
+    }
+    assert sorted(rows) == ["TP-001", "TP-002", "TP-003", "TP-GONE"]
+    for test_id, cells in rows.items():
+        assert 'class="verdict"' in cells[3]
+        if test_id == "TP-GONE":
+            assert cells[4] == "major" + DEFAULT_SEVERITY
+        else:
+            assert cells[4] == "major"
+            assert DEFAULT_SEVERITY not in "".join(cells)
 
 
 __all__ = ["Handler", "LoopbackServer"]

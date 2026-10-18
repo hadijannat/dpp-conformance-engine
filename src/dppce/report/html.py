@@ -218,13 +218,21 @@ def _results(envelope: EvidenceEnvelope) -> str:
     )
     tests = _table(
         "Test step results",
-        ("Test purpose", "Check", "Execution", "Verdict", "Reason code", "Message"),
+        ("Test purpose", "Check", "Execution", "Verdict", "Severity", "Reason code", "Message"),
         (
             (
                 f"<code>{_e(t.test_purpose_id)}</code>",
                 f"<code>{_e(t.check)}</code>",
                 _e(t.execution_status.value.replace("_", " ")),
                 _verdict(t.verdict.value),
+                # A test purpose names at least one requirement, so an empty list means that the
+                # run stored the fallback severity of a step whose test purpose is not available.
+                _e(t.severity.value)
+                + (
+                    ""
+                    if t.requirement_ids
+                    else "<br><small>Default: the test purpose is not available.</small>"
+                ),
                 f"<code>{_e(t.reason_code)}</code>",
                 _e(t.message),
             )

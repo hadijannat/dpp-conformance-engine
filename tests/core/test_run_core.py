@@ -9,6 +9,7 @@ The checks and the acquirer here are fakes. Nothing reaches a network.
 from __future__ import annotations
 
 import dataclasses
+import inspect
 import re
 from collections.abc import Iterator, Sequence
 from datetime import timedelta
@@ -31,6 +32,7 @@ from dppce.models import (
     Model,
     Requirement,
     Scope,
+    Severity,
     TestPurpose,
     TestResult,
     TrustBundle,
@@ -44,6 +46,14 @@ from dppce.orchestrator.run import (  # noqa: TID251 - the run core is the unit 
     make_plan,
 )
 from dppce.testdefs import registry
+from dppce.verdicts import (
+    aggregate,
+    claim_level,
+    overall_verdict,
+    path_verdict,
+    requirement_verdict,
+    step_verdict,
+)
 from tests.core import builders as b
 from tests.support import AT, make_record
 
@@ -566,3 +576,27 @@ def test_a_change_in_an_input_or_in_a_record_changes_the_decision_digest(tmp_pat
     assert digest_of(mixed_inputs(tmp_path), other_body)[0] != reference
     other_salt = [dataclasses.replace(records[0], salt=bytes(32))]
     assert digest_of(mixed_inputs(tmp_path), other_salt)[0] != reference, "the commitment is salted"
+
+
+# --- Severity is a label only (D1-11) ------------------------------------------------------
+
+
+def test_no_verdict_function_reads_severity(tmp_path: Path) -> None:
+    for function in (
+        step_verdict,
+        path_verdict,
+        requirement_verdict,
+        overall_verdict,
+        claim_level,
+        aggregate,
+    ):
+        assert "severity" not in inspect.signature(function).parameters, function.__name__
+    inputs = mixed_inputs(tmp_path)
+    plan = make_plan(inputs)
+    results = execute(plan, inputs, ReplayAcquirer(recorded()))
+    assert {r.execution_status for r in results.values()} >= {COMPLETED}, "some steps executed"
+    requirements = {r.id: r for p in inputs.catalogue.packs.values() for r in p.requirements}
+    reference = aggregate(plan, requirements, results)
+    for severity in Severity:
+        relabeled = {k: r.model_copy(update={"severity": severity}) for k, r in results.items()}
+        assert aggregate(plan, requirements, relabeled) == reference, severity
