@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import base64
 import contextlib
+import gzip
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,8 +24,9 @@ from dppce.catalogue import CatalogueError, load_data
 from dppce.evidence.canonical import MAX_SAFE_INTEGER, CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import _COMPACT, LocalSigner, SignatureError, header_of, sign_compact, verify_compact
+from dppce.evidence.status import STATUS_LIST_TYP, StatusError, decode_list, read_status_list
 from dppce.infrastructure.redaction import _SENSITIVE_PARAMETER, REMOVED, redact_url
-from dppce.models import TrustBundle
+from dppce.models import TrustBundle, TrustedKey
 from dppce.verifier import verify_json
 from tests.support import ISSUER, make_envelope
 
@@ -33,7 +35,7 @@ TYP = "dppce-attestation+jws"
 CHECKED_AT = datetime(2026, 10, 13, 13, tzinfo=UTC)
 DIMENSIONS = {
     "structure", "ordering", "results_root", "records_root", "counts", "signature", "issuer_trust",
-    "manual_results", "status", "timestamp",
+    "signers", "manual_results", "status", "validity", "timestamp",
 }  # fmt: skip
 DEEP = "[" * 100_000
 
@@ -188,6 +190,50 @@ def test_a_signed_token_reads_back_its_header_and_payload(
     token = sign_compact(payload, signer, typ=typ)
     assert header_of(token) == {"alg": "ES256", "kid": signer.key_id, "typ": typ}
     assert verify_compact(token, signer.public_jwk(), typ=typ) == payload
+
+
+# -- status lists -------------------------------------------------------------------------------
+
+STATUS_SIGNER = LocalSigner.generate("TEST-ONLY-status-key-1")
+
+
+@pytest.fixture(scope="module")
+def status_trust(trust: TrustBundle) -> TrustBundle:
+    key = TrustedKey(
+        kid=STATUS_SIGNER.key_id,
+        issuer=ISSUER,
+        purposes=("status",),
+        public_jwk=STATUS_SIGNER.public_jwk(),
+        not_before="2026-01-01T00:00:00Z",
+        not_after="2027-01-01T00:00:00Z",
+    )
+    return trust.model_copy(update={"keys": (*trust.keys, key)})
+
+
+@SETTINGS
+@given(text=st.text(max_size=200) | st.binary(max_size=200).map(lambda b: "u" + _b64(b)))
+@example(text="u" + _b64(gzip.compress(b"\x00")))
+@example(text="u" + _b64(gzip.compress(b"\x00") + b"\x00"))
+@example(text="u" + _b64(gzip.compress(b"\x00")[:-3]))
+@example(text="u=")
+def test_decode_list_raises_only_a_status_error(text: str) -> None:
+    with contextlib.suppress(StatusError):
+        decode_list(text)
+
+
+@SETTINGS
+@given(
+    raw=st.binary(max_size=300)
+    | _PARTS.map(".".join).map(str.encode)
+    | (JSON_VALUES.map(canonical_bytes) | st.binary(max_size=200)).map(
+        lambda payload: sign_compact(payload, STATUS_SIGNER, typ=STATUS_LIST_TYP).encode("ascii")
+    )
+)
+@example(raw=DEEP.encode())
+@example(raw=b"\xff")
+def test_read_status_list_raises_only_a_status_error(status_trust: TrustBundle, raw: bytes) -> None:
+    with contextlib.suppress(StatusError):
+        read_status_list(raw, status_trust, CHECKED_AT)
 
 
 # -- verifier entry point -----------------------------------------------------------------------

@@ -162,6 +162,7 @@ def test_control_an_unmodified_signed_envelope_verifies(signed: EvidenceEnvelope
         "counts",
         "signature",
         "issuer_trust",
+        "signers",
     )
     assert all(outcomes[name] == "pass" for name in mandatory)
     assert report.complete
@@ -271,7 +272,9 @@ def test_mandatory_status_or_timestamp_evidence_that_is_missing_prevents_complet
     stale = needs_status.model_copy(update={"status_as_of": "2026-09-01T00:00:00Z"})
     assert _outcomes(document, stale) == (outcomes | {"status": "fail"}, False)
     fresh = needs_status.model_copy(update={"status_as_of": "2026-10-13T00:00:00Z"})
-    assert _outcomes(document, fresh)[1] is True
+    # D6-03: a status_as_of date alone no longer gives pass. A clear bit of a signed status list
+    # does; tests/test_report_status.py covers that case.
+    assert _outcomes(document, fresh) == (outcomes, False)
     needs_time = trust.model_copy(update={"require_timestamp": True})
     assert _outcomes(document, needs_time) == (
         outcomes | {"status": "not_checked", "timestamp": "missing"},

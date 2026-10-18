@@ -20,13 +20,15 @@
 # is no longer a failure of the system under test. Version 0.4.0 also adds F-35. The commit
 # that adds F-35 and changes F-32 comes before the commit that adds the flag resolver_divergent
 # and before the commit that changes the 5xx outcome in the adapters.
+# Version 0.5.0 adds E-14 and E-15. Their entry commit comes before the commits that add the
+# status list, the attestation version 2, and the dimension signers.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.4.0
+version: 0.5.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
@@ -298,3 +300,5 @@ evidence_faults:
   - {id: E-11, tamper: alg_none, description: The signature header names the algorithm "none"., dimension: signature}
   - {id: E-12, tamper: expired_key, description: The trusted key is past its validity at the evaluation time., dimension: issuer_trust}
   - {id: E-13, tamper: flip_manual_outcome, description: The outcome of a completed manual step is changed., dimension: manual_results}
+  - {id: E-14, tamper: revoked_bit, description: The status list sets the bit of the report to revoked., dimension: status}
+  - {id: E-15, tamper: role_swap, description: The report key adds a second signature that declares the role reviewer., dimension: signers}
