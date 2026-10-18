@@ -104,8 +104,9 @@ uv run python -m dppce.verifier ./runs/ev-1/envelope.signed.json \
   --trust fixtures/reference/trust/TEST-ONLY-trust-bundle.json --at 2026-10-14T00:00:00Z
 ```
 
-The verifier reports each dimension separately. `status` and `timestamp` are `not_checked`,
-because the test trust policy does not need them and the report carries no such evidence.
+The verifier reports each dimension separately. `status`, `validity`, and `timestamp` are
+`not_checked`. The test trust policy does not need them. The report names no status entry, states
+no `valid_until` time, and carries no timestamp.
 
 ## 8. See a failure
 

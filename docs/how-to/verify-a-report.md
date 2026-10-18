@@ -2,7 +2,8 @@
 
 Audience: report recipients, authorities, and assessors.
 Purpose: check that a report is intact and comes from an issuer that you trust.
-Prerequisites: the report file (`envelope.json`), and a trust bundle that **you** control.
+Prerequisites: the signed report file that `dppce sign` wrote (for example `envelope.signed.json`),
+and a trust bundle that **you** control.
 
 Verification tells you whether the report is intact and who signed it.
 It tells you nothing new about the tested system.
@@ -25,7 +26,7 @@ dppce trust-bundle add-key --policy-version my-policy-1 --out my-trust-bundle.js
 4. Run the verifier.
 
 ```bash
-python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z
+python -m dppce.verifier envelope.signed.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z
 ```
 
 5. Read the exit code. `0` means that every mandatory dimension passed. `4` means that the
@@ -65,7 +66,7 @@ status list.
 3. Run the verifier with the list.
 
 ```bash
-python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z \
+python -m dppce.verifier envelope.signed.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z \
   --status-list status-list.jws
 ```
 
@@ -80,13 +81,13 @@ An inclusion proof shows that a report holds one result. A record opening disclo
 1. Get the proof from the issuer. The issuer writes it with `dppce prove`:
 
 ```bash
-dppce prove --envelope envelope.json --result R:EUBAT-77-2-CONTENT --out result.proof.json
+dppce prove --envelope envelope.signed.json --result R:ILL-DATA-001 --out result.proof.json
 ```
 
 2. Run the verifier with the proof. Add `--opening FILE` to check a record opening.
 
 ```bash
-python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z \
+python -m dppce.verifier envelope.signed.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z \
   --proof result.proof.json
 ```
 
@@ -108,7 +109,7 @@ The engine never contacts a timestamp authority. You get the token yourself.
 1. Print the imprint of each signature.
 
 ```bash
-dppce timestamp imprint --envelope envelope.json
+dppce timestamp imprint --envelope envelope.signed.json
 ```
 
 2. Make a request with the hexadecimal imprint. One way is OpenSSL:
@@ -122,7 +123,7 @@ openssl ts -query -digest <hex> -sha256 -cert -out request.tsq
 4. Attach the token to a copy of the report. The command does not verify the token.
 
 ```bash
-dppce timestamp attach --envelope envelope.json --response response.tsr --out stamped.json
+dppce timestamp attach --envelope envelope.signed.json --response response.tsr --out stamped.json
 ```
 
 5. Verify `stamped.json` with a trust bundle that lists the authority in `timestamp_anchors`.
