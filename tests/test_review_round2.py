@@ -370,8 +370,9 @@ from cryptography.hazmat.primitives.asymmetric import ec  # noqa: E402
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID  # noqa: E402
 
 from dppce.adapters.access import restricted_fields  # noqa: E402
+from dppce.adapters.common import same_json as _same_json  # noqa: E402
 from dppce.adapters.common import unusable  # noqa: E402
-from dppce.adapters.integrity import _same_json, jws_check  # noqa: E402
+from dppce.adapters.integrity import jws_check  # noqa: E402
 from dppce.models import ExecutionStatus  # noqa: E402
 from tests.test_adapters_security import _POLICY, _Canned, _context, bundle  # noqa: E402
 from tests.test_review_findings import Passport, _certificate, _x5c, integrity_context, pki, token  # noqa: E402

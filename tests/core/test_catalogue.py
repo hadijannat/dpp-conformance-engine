@@ -505,6 +505,8 @@ def test_the_sanitized_ixit_holds_no_secret_reference() -> None:
 def test_the_sanitized_ixit_changes_nothing_else() -> None:
     ixit = full_ixit()
     original = ixit.model_dump(mode="json")
+    # The default item target is left out, so an IXIT without the field keeps its hash (D4-05).
+    assert original.pop("item_target") == "template"
     clean = sanitized_ixit(ixit)
     assert clean.keys() == original.keys()
     for key in original:
@@ -517,7 +519,9 @@ def test_the_sanitized_ixit_changes_nothing_else() -> None:
     assert clean["identities"][0] == original["identities"][0], "an identity with no secret is unchanged"
     assert [i.secret_ref for i in ixit.identities] == [None, *SECRETS], "the IXIT itself is not changed"
     plain = IXIT(schema_version="dppce.ixit/1")
-    assert sanitized_ixit(plain) == plain.model_dump(mode="json")
+    assert sanitized_ixit(plain) == {
+        k: v for k, v in plain.model_dump(mode="json").items() if k != "item_target"
+    }
 
 
 # --- check_ics -----------------------------------------------------------------------------

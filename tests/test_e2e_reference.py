@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 import yaml
 from validation import cases
-from validation.rig import FIXTURES, ROOT, AlternateLayout, ReferenceRig
+from validation.rig import FIXTURES, ROOT, AlternateLayout, ReferenceRig, RunResult
 
 from dppce import cli
 from dppce.evidence.envelope import decision_digest
@@ -91,6 +91,38 @@ def test_replay_reproduces_the_verdicts_and_the_decision_digest(tmp_path: Path) 
     assert summary["match"] is True
     assert summary["replay_digests"] == [summary["expected_digest"]] * 5
     assert code == 0
+
+
+def test_the_resolved_item_target_binds_api_data_and_integrity(tmp_path: Path) -> None:
+    """Gap D4-05: the resolver serves a different passport than the API item target."""
+    faults = frozenset({"resolver_divergent"})
+    with ReferenceRig(tmp_path / "resolved", faults=faults, ixit_changes={"item_target": "resolved"}) as rig:
+        resolved = rig.run()
+    with ReferenceRig(tmp_path / "template", faults=faults) as rig:
+        template = rig.run()
+
+    def outcome(run: RunResult, ident: str) -> tuple[str, str]:
+        step = run.step(ident)
+        return step["verdict"], step["reason_code"]
+
+    # The resolver answers 200 on the carrier path, which is not the operation that the contract marks.
+    assert outcome(resolved, "TP-API-001") == ("inconclusive", "API.CONTRACT.PATH_MISMATCH")
+    assert outcome(resolved, "TP-INTEGRITY-001") == ("fail", "INTEGRITY.PAYLOAD.MISMATCH")
+    assert outcome(template, "TP-INTEGRITY-001") == ("pass", "INTEGRITY.OK")
+    assert outcome(template, "TP-ID-003") == ("fail", "IDENTIFIER.BINDING.MISMATCH")
+    assert outcome(resolved, "TP-ID-003") == ("fail", "IDENTIFIER.BINDING.MISMATCH"), "always both routes"
+
+
+def test_replay_of_a_run_with_the_resolved_item_target_gives_the_same_digest(tmp_path: Path) -> None:
+    """Criterion 4 of gap D4-05."""
+    with ReferenceRig(tmp_path, ixit_changes={"item_target": "resolved"}) as rig:
+        run = rig.run()
+    # The resolver redirects to /dpp/{id}, which matches the item template, so the control passes.
+    assert (run.envelope.decision.overall, run.exit_code) == (Verdict.PASS, 0)
+    assert run.step("TP-API-001")["reason_code"] == "API.CONTRACT.OK"
+    code, summary = rig.replay(run, times=2)
+    assert summary["expected_digest"] == run.summary["decision_digest"]
+    assert (code, summary["match"], summary["replay_digests"]) == (0, True, [summary["expected_digest"]] * 2)
 
 
 def test_two_live_runs_differ_only_where_they_must(tmp_path: Path) -> None:

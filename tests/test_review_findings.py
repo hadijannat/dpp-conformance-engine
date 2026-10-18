@@ -88,16 +88,20 @@ def token(header: dict[str, Any], payload: bytes, key: ec.EllipticCurvePrivateKe
 class Passport:
     """An acquirer that serves one signed passport and one published passport."""
 
-    def __init__(self, signed: str | bytes, published: bytes, status: int = 200) -> None:
+    def __init__(
+        self, signed: str | bytes, published: bytes, status: int = 200, published_status: int = 200
+    ) -> None:
         self._signed = signed.encode() if isinstance(signed, str) else signed
         self._published, self._status, self._records = published, status, []  # type: ignore[var-annotated]
+        self._published_status = published_status
 
     def fetch(self, request: Request) -> Record:
         is_signed = request.url.endswith("/signed")
         base = make_record(
             len(self._records) + 1, self._signed if is_signed else self._published, request.url
         )
-        record = Record(**{**base.__dict__, "status": self._status if is_signed else 200})
+        status = self._status if is_signed else self._published_status
+        record = Record(**{**base.__dict__, "status": status})
         self._records.append(record)
         return record
 
@@ -222,6 +226,18 @@ def test_f01_a_server_error_is_no_answer_and_a_missing_token_has_its_own_code(pk
     )
     not_a_token = jws_check(integrity_context(Passport("<html>maintenance</html>", item), pki["trust"]))
     assert (not_a_token.passed, not_a_token.reason_code) == (False, "INTEGRITY.TOKEN.MALFORMED")
+
+
+def test_f01_a_server_error_on_the_published_passport_is_no_answer(pki: dict[str, Any]) -> None:
+    """Owner decision of 2026-10-18: a 5xx answer counts like a connectivity failure."""
+    item, signed = b'{"a":1}', token(pki["header"], b'{"a":1}', pki["leaf"][0])
+    outcome = jws_check(integrity_context(Passport(signed, item, published_status=503), pki["trust"]))
+    assert (outcome.status, outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        True,
+        "TRANSPORT.SERVER_ERROR",
+    )
 
 
 def test_f01_only_a_failed_cryptographic_check_is_an_invalid_signature(pki: dict[str, Any]) -> None:

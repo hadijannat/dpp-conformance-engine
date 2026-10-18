@@ -291,12 +291,29 @@ def test_resolve_of_a_404_or_410_answer_is_unresolved(status: int, tmp_path: Pat
     assert (outcome.passed, outcome.reason_code) == (False, "IDENTIFIER.UNRESOLVED")
 
 
-@pytest.mark.parametrize("status", [500, 503])
-def test_resolve_of_a_5xx_answer_is_a_status_failure(status: int, tmp_path: Path, loopback: Any) -> None:
+@pytest.mark.parametrize("status", [500, 503, 599])
+def test_resolve_of_a_5xx_answer_is_unreachable(status: int, tmp_path: Path, loopback: Any) -> None:
+    # Owner decision of 2026-10-18: a server error counts like a connectivity failure.
     resolver = Resolver(loopback, b"{}", "application/json", status)
     outcome = resolve(live(tmp_path, resolver, {}))
-    assert (outcome.passed, outcome.reason_code) == (False, "IDENTIFIER.RESOLUTION.STATUS")
+    assert (outcome.status, outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        True,
+        "TRANSPORT.SERVER_ERROR",
+    )
     assert len(resolver.server.seen) == 1, "a 5xx answer is not retried"
+
+
+@pytest.mark.parametrize("status", [403, 600])
+def test_resolve_of_another_status_is_a_status_failure(status: int, tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json", status)
+    outcome = resolve(live(tmp_path, resolver, {}))
+    assert (outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        False,
+        False,
+        "IDENTIFIER.RESOLUTION.STATUS",
+    )
 
 
 def test_consistency_of_a_text_that_is_not_a_url_is_blocked(tmp_path: Path, loopback: Any) -> None:
@@ -311,7 +328,7 @@ def test_consistency_of_a_text_that_is_not_a_url_is_blocked(tmp_path: Path, loop
 
 
 @pytest.mark.parametrize(
-    ("status", "body", "media_type"), [(200, HTML, "text/html"), (503, b"{}", "application/json")]
+    ("status", "body", "media_type"), [(200, HTML, "text/html"), (404, b"{}", "application/json")]
 )
 def test_consistency_without_a_json_passport_is_blocked(
     status: int, body: bytes, media_type: str, tmp_path: Path, loopback: Any
@@ -322,6 +339,17 @@ def test_consistency_without_a_json_passport_is_blocked(
         ExecutionStatus.BLOCKED,
         None,
         "IDENTIFIER.NOT_RESOLVED",
+    )
+
+
+def test_consistency_of_a_5xx_resolver_answer_is_unreachable(tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json", 503)
+    outcome = consistency(live(tmp_path, resolver, {}))
+    assert (outcome.status, outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        True,
+        "TRANSPORT.SERVER_ERROR",
     )
 
 
@@ -343,13 +371,203 @@ def test_consistency_of_a_different_passport_id_is_a_mismatch(
     assert outcome.observations[0].summary["different"] == ["passport"]
 
 
+# -- identifier.consistency with compare_item (gap D4-05) ---------------------------------------
+
+SERIAL_PATH = "/01/09506000134352/21/EV0001"
+
+
+class Site:
+    """A loopback system. The resolver path answers one passport, every other path the item."""
+
+    def __init__(self, loopback: Any, *, item_status: int = 200, item_type: str = "application/json") -> None:
+        self.resolved: Any = None
+        self.item: Any = None
+
+        def body(value: Any) -> bytes:
+            return value if isinstance(value, bytes) else json.dumps(value).encode()
+
+        def handle(request: http.server.BaseHTTPRequestHandler) -> None:
+            if request.path == SERIAL_PATH:
+                reply(request, 200, body(self.resolved))
+            else:
+                reply(request, item_status, body(self.item), {"Content-Type": item_type})
+
+        self.server = loopback(handle)
+        self.identifier = f"{self.server.origin}{SERIAL_PATH}"
+
+    def item_requests(self) -> int:
+        return sum(1 for seen in self.server.seen if seen["path"] != SERIAL_PATH)
+
+
+def binding(
+    tmp_path: Path, site: Site, params: dict[str, Any] | None = None, *, item_template: bool = True
+) -> CheckContext:
+    base = _context(tmp_path, _POLICY, _Canned(b"{}"))
+    chosen = {"compare_item": True} if params is None else params
+    stimulus = base.purpose.stimulus.model_copy(update={"check": "identifier.consistency", "params": chosen})
+    fields = base.ixit.model_dump(mode="json") | {
+        "endpoints": {"api": site.server.origin},
+        "samples": {"identifier": site.identifier, "passport_id": "09506000134352-EV0001"},
+        "resources": {"item": {"endpoint": "api", "path": "/dpp/{id}"}} if item_template else {},
+    }
+    return replace(
+        base,
+        purpose=base.purpose.model_copy(update={"stimulus": stimulus}),
+        ixit=IXIT.model_validate(fields),
+        acquirer=transport(),
+    )
+
+
+def _passport(site_id: str, **more: Any) -> dict[str, Any]:
+    return {"id": site_id, "version": 3, **more}
+
+
+def _site(loopback: Any, resolved: Any = None, item: Any = None, **options: Any) -> Site:
+    site = Site(loopback, **options)
+    site.resolved = _passport(site.identifier) if resolved is None else resolved
+    site.item = _passport(site.identifier) if item is None else item
+    return site
+
+
+def test_consistency_compares_the_resolved_and_api_passports(tmp_path: Path, loopback: Any) -> None:
+    site = _site(loopback)
+    outcome = consistency(binding(tmp_path, site))
+    assert (outcome.passed, outcome.reason_code) == (True, "IDENTIFIER.CONSISTENT")
+    summary = outcome.observations[0].summary
+    assert summary["compared"] == ["carrier", "passport", "api_item"]
+    assert summary["different"] == []
+    assert site.item_requests() == 1
+    assert len(outcome.observations[0].records) == 2
+
+
+def test_consistency_of_a_divergent_api_passport_is_a_binding_mismatch(tmp_path: Path, loopback: Any) -> None:
+    site = _site(loopback)
+    site.resolved = _passport(site.identifier, version=4)
+    outcome = consistency(binding(tmp_path, site))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "IDENTIFIER.BINDING.MISMATCH",
+    )
+    assert outcome.observations[0].summary["different"] == ["api_item"]
+    assert "Digital consistency does not prove physical authenticity." in outcome.message
+
+
+@pytest.mark.parametrize(
+    ("resolved", "item", "same"),
+    [
+        (b'{"version": 3, "id": "ID"}', b'{"id":"ID","version":3}', True),
+        (b'{"id": "ID", "n": 1.0}', b'{"id": "ID", "n": 1}', True),
+        (b'{"id": "ID", "n": 1.10}', b'{"id": "ID", "n": 1.1}', True),
+        (b'{"id": "ID", "n": true}', b'{"id": "ID", "n": 1}', False),
+        (b'{"id": "ID", "n": null}', b'{"id": "ID"}', False),
+    ],
+)
+def test_binding_compares_json_values(
+    resolved: bytes, item: bytes, same: bool, tmp_path: Path, loopback: Any
+) -> None:
+    site = _site(loopback)
+    site.resolved = resolved.replace(b"ID", site.identifier.encode())
+    site.item = item.replace(b"ID", site.identifier.encode())
+    outcome = consistency(binding(tmp_path, site))
+    assert (outcome.passed, outcome.reason_code) == (
+        (True, "IDENTIFIER.CONSISTENT") if same else (False, "IDENTIFIER.BINDING.MISMATCH")
+    )
+
+
+def test_an_identifier_mismatch_wins_and_skips_the_item_fetch(tmp_path: Path, loopback: Any) -> None:
+    site = _site(loopback, resolved={"id": "https://id.example.test/01/09506000134352/21/OTHER0001"})
+    outcome = consistency(binding(tmp_path, site))
+    assert (outcome.passed, outcome.reason_code) == (False, "IDENTIFIER.MISMATCH")
+    assert outcome.observations[0].summary["different"] == ["passport"]
+    assert site.item_requests() == 0
+
+
+def test_an_identifier_mismatch_without_an_item_template_is_still_a_mismatch(
+    tmp_path: Path, loopback: Any
+) -> None:
+    site = _site(loopback, resolved={"id": "https://id.example.test/01/09506000134352/21/OTHER0001"})
+    outcome = consistency(binding(tmp_path, site, item_template=False))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "IDENTIFIER.MISMATCH",
+    )
+
+
+def test_binding_without_an_item_template_is_blocked_and_fetches_no_item(
+    tmp_path: Path, loopback: Any
+) -> None:
+    site = _site(loopback)
+    outcome = consistency(binding(tmp_path, site, item_template=False))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.NO_TARGET",
+    )
+    assert [seen["path"] for seen in site.server.seen] == [SERIAL_PATH]
+
+
+@pytest.mark.parametrize(
+    ("status", "body", "media_type"), [(200, HTML, "text/html"), (404, b'{"error": "x"}', "application/json")]
+)
+def test_binding_with_a_non_json_or_404_item_is_not_comparable(
+    status: int, body: bytes, media_type: str, tmp_path: Path, loopback: Any
+) -> None:
+    site = _site(loopback, item=body, item_status=status, item_type=media_type)
+    outcome = consistency(binding(tmp_path, site))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.BINDING.NOT_COMPARABLE",
+    )
+
+
+def test_binding_with_a_5xx_item_is_unreachable(tmp_path: Path, loopback: Any) -> None:
+    site = _site(loopback, item=b'{"error": "unavailable"}', item_status=503)
+    outcome = consistency(binding(tmp_path, site))
+    assert (outcome.status, outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        True,
+        "TRANSPORT.SERVER_ERROR",
+    )
+
+
+@pytest.mark.parametrize("params", [{}, {"compare_item": False}])
+def test_consistency_without_compare_item_never_fetches_the_item(
+    params: dict[str, Any], tmp_path: Path, loopback: Any
+) -> None:
+    site = _site(loopback)
+    site.item = {"id": "something else entirely"}
+    outcome = consistency(binding(tmp_path, site, params))
+    assert (outcome.passed, outcome.reason_code) == (True, "IDENTIFIER.CONSISTENT")
+    assert outcome.observations[0].summary["compared"] == ["carrier", "passport"]
+    assert site.item_requests() == 0
+
+
+@pytest.mark.parametrize("value", ["yes", 1, None])
+def test_consistency_refuses_a_non_bool_compare_item_before_any_request(
+    value: object, tmp_path: Path, loopback: Any
+) -> None:
+    site = _site(loopback)
+    outcome = consistency(binding(tmp_path, site, {"compare_item": value}))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.PARAMS.INVALID",
+    )
+    assert site.server.seen == []
+
+
 ROOT = Path(__file__).resolve().parent.parent
 ADAPTERS = ROOT / "src" / "dppce" / "adapters"
 DEGRADED_EXPECTED = ROOT / "fixtures" / "reference" / "qr" / "degraded" / "expected.json"
 DEGRADED_TEST = "tests/test_adapters_carrier.py::test_a_degraded_image_gives_the_expected_outcome"
 _HERE = "tests/test_adapters_identifier.py::"
-# Seeded faults F-20, F-30, F-31, F-32, F-33, and F-34 also produce identifier and carrier codes
+# Seeded faults F-20, F-30, F-31, F-33, F-34, and F-35 also produce identifier and carrier codes
 # in tests/test_e2e_reference.py. Their codes come from the fault catalogue, so they are not listed.
+# F-32 gives a transport code since the owner decision of 2026-10-18.
 PRODUCERS: dict[str, list[str]] = {
     "IDENTIFIER.SCHEME.UNKNOWN": [_HERE + "test_parse_without_a_declared_scheme_is_blocked"],
     "IDENTIFIER.SCHEME.UNSUPPORTED": [_HERE + "test_parse_of_a_scheme_without_a_parser_is_unsupported"],
@@ -367,7 +585,7 @@ PRODUCERS: dict[str, list[str]] = {
         _HERE + "test_resolve_of_a_text_that_is_not_a_url_is_unresolved",
         _HERE + "test_resolve_of_a_404_or_410_answer_is_unresolved",
     ],
-    "IDENTIFIER.RESOLUTION.STATUS": [_HERE + "test_resolve_of_a_5xx_answer_is_a_status_failure"],
+    "IDENTIFIER.RESOLUTION.STATUS": [_HERE + "test_resolve_of_another_status_is_a_status_failure"],
     "IDENTIFIER.RESPONSE.MEDIA_TYPE": [_HERE + "test_resolve_refuses_a_media_type_outside_the_accepted_list"],
     "IDENTIFIER.RESOLVED.MEDIA_TYPE": [
         _HERE + "test_resolve_with_accepted_media_types_accepts_an_html_resolver"
@@ -382,6 +600,12 @@ PRODUCERS: dict[str, list[str]] = {
     "IDENTIFIER.NOT_RESOLVED": [_HERE + "test_consistency_without_a_json_passport_is_blocked"],
     "IDENTIFIER.CONSISTENT": [_HERE + "test_consistency_of_the_same_identifier_is_consistent"],
     "IDENTIFIER.MISMATCH": [_HERE + "test_consistency_of_a_different_passport_id_is_a_mismatch"],
+    "IDENTIFIER.BINDING.MISMATCH": [
+        _HERE + "test_consistency_of_a_divergent_api_passport_is_a_binding_mismatch"
+    ],
+    "IDENTIFIER.BINDING.NOT_COMPARABLE": [
+        _HERE + "test_binding_with_a_non_json_or_404_item_is_not_comparable"
+    ],
     "CARRIER.SAMPLE.MISSING": [_HERE + "test_an_ixit_without_a_carrier_sample_is_blocked"],
     "CARRIER.QR.DEPENDENCY_MISSING": [_HERE + "test_qr_decode_without_the_decoder_is_unsupported"],
     "CARRIER.SAMPLE.TOO_LARGE": [
@@ -410,7 +634,7 @@ def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -
         (ADAPTERS / name).read_text(encoding="utf-8") for name in ("identifier.py", "carrier.py", "common.py")
     )
     codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
-    assert len(codes) == 21
+    assert len(codes) == 23
     assert codes == set(PRODUCERS)
     # The window of the last test must stop before the module constants, which name every code.
     assert '"CARRIER.QR.OK"' not in _test_source(

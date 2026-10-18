@@ -21,8 +21,8 @@ from pydantic import ValidationError
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce.adapters.common import resource_url, template_url
-from dppce.catalogue import load_model
-from dppce.evidence.canonical import canonical_bytes
+from dppce.catalogue import load_model, sanitized_ixit
+from dppce.evidence.canonical import canonical_bytes, digest
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.models import (
     ICS,
@@ -230,6 +230,25 @@ def test_an_ixit_template_names_a_declared_endpoint_and_declared_placeholders() 
 def test_id_parts_names_are_distinct_and_never_id(names: list[str]) -> None:
     with pytest.raises(ValidationError):
         ixit(id_parts={"separator": "-", "names": names})
+
+
+def test_item_target_defaults_to_template_and_refuses_other_values() -> None:
+    assert ixit().item_target == "template"
+    assert ixit(item_target="template").item_target == "template"
+    assert ixit(item_target="resolved").item_target == "resolved"
+    for value in ("RESOLVED", "", None):
+        with pytest.raises(ValidationError):
+            ixit(item_target=value)
+
+
+def test_the_default_item_target_does_not_change_the_sanitized_ixit() -> None:
+    plain = sanitized_ixit(ixit())
+    assert "item_target" not in plain
+    without = {k: v for k, v in ixit().model_dump(mode="json").items() if k != "item_target"}
+    assert digest(plain) == digest(without), "an IXIT without the option keeps its hash"
+    resolved = sanitized_ixit(ixit(item_target="resolved"))
+    assert resolved["item_target"] == "resolved"
+    assert digest(resolved) != digest(plain)
 
 
 @pytest.mark.parametrize("profile", ["ev", "lmt", "industrial"])

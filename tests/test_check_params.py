@@ -50,7 +50,6 @@ CONTRACT_CHECKS = (
     "registry.consistency",
 )
 NO_PARAMETERS = (
-    "identifier.consistency",
     "integrity.jws",
     "manual.review",
     "persistence.versions",
@@ -63,6 +62,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "carrier.qr_decode": ({"artefact": "qr_image"}, "artefact"),
     "identifier.parse": ({"schema": "gs1-digital-link"}, "schema"),
     "identifier.resolve": ({"acept": "text/html"}, "acept"),
+    "identifier.consistency": ({"compre_item": True}, "compre_item"),
     "api.contract": ({"resorce": "item"}, "resorce"),
     "data.jsonschema": ({"documnet": "item"}, "documnet"),
     "data.context": ({"document": "item", "allowed_context": ["https://example.test/c"]}, "allowed_context"),
@@ -85,6 +85,8 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("identifier.parse", {"scheme": None}),
     ("identifier.resolve", {"accept": 7}),
     ("identifier.resolve", {"accept": "text/html\n"}),
+    ("identifier.consistency", {"compare_item": "yes"}),
+    ("identifier.consistency", {"compare_item": 1}),
     ("api.contract", {"resource": 7}),
     ("data.jsonschema", {"document": 7}),
     ("data.rules", {"document": 7}),
