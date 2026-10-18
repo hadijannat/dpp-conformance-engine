@@ -153,4 +153,9 @@ only_mutate = [
 ]
 pytest_add_cli_args_test_selection = ["tests/"]
 also_copy = ["catalogue", "profiles", "testpacks", "fixtures", "validation", "scripts", "docs"]
-pytest_add_cli_args = ["-m", "not validation and not qr", "-p", "no:cacheprovider", "-x"]
+# The reason-code page test reads the source next to it. In mutants/ that source is mutmut's
+# rewritten copy, so the test fails there and mutmut cannot collect its stats.
+pytest_add_cli_args = [
+    "-m", "not validation and not qr", "-p", "no:cacheprovider", "-x",
+    "--deselect", "tests/test_reference_docs.py::test_the_reason_code_page_is_current",
+]
