@@ -101,6 +101,16 @@ def _extra_member(document: dict[str, Any]) -> None:
     document["surprise"] = 1
 
 
+STRUCTURE = "ENVELOPE.BODY.INVALID: the envelope fails these checks: structure"
+
+
+def _duplicate_key(source: Path, target: Path) -> Path:
+    """The envelope with a repeated key: not strict JSON, so it fails ``structure``."""
+    text = source.read_text(encoding="utf-8")
+    target.write_text('{"schema_version": "dppce.envelope/1", ' + text[1:], encoding="utf-8")
+    return target
+
+
 # -- the commitment plaintext -------------------------------------------------------------------------
 
 
@@ -272,6 +282,10 @@ def test_prove_refusals(run: Run, tmp_path: Path) -> None:
     code, _, err = run("prove", "--envelope", str(broken), "--result", "R:ILL-001", "--out", str(out))
     assert (code, "ENVELOPE.BODY.INVALID" in err) == (2, True), err
     assert not out.exists()
+    duplicate = _duplicate_key(envelope, tmp_path / "duplicate.json")
+    code, _, err = run("prove", "--envelope", str(duplicate), "--result", "R:ILL-001", "--out", str(out))
+    assert (code, STRUCTURE in err) == (2, True), err
+    assert not out.exists()
     out.write_text("{}\n", encoding="utf-8")
     code, _, err = run("prove", "--envelope", str(envelope), "--result", "R:ILL-001", "--out", str(out))
     assert (code, "PROVE.OUTPUT.EXISTS" in err, out.read_text(encoding="utf-8")) == (2, True, "{}\n"), err
@@ -417,6 +431,10 @@ def test_open_refusals(run: Run, runs: Runs, tmp_path: Path) -> None:
     broken = _edited(runs.signed, tmp_path / "broken.json", _wrong_results_root)
     code, _, err = _open(run, runs, out, "--envelope", str(broken))
     assert (code, "ENVELOPE.BODY.INVALID" in err) == (2, True), err
+    assert not out.exists()
+    duplicate = _duplicate_key(runs.signed, tmp_path / "duplicate.json")
+    code, _, err = _open(run, runs, out, "--envelope", str(duplicate))
+    assert (code, STRUCTURE in err) == (2, True), err
     assert not out.exists()
 
     copy = tmp_path / "copy"

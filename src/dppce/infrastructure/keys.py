@@ -114,7 +114,10 @@ def load_signing_key(
 
     No message holds the passphrase or text of the cryptography library.
     """
-    data = path.read_bytes()
+    try:
+        data = path.read_bytes()
+    except OSError:
+        raise KeyError_(f"KEYS.KEY.UNREADABLE: {path} cannot be read") from None
     unreadable = f"KEYS.KEY.UNREADABLE: {path} is not a private key that this passphrase decrypts"
     try:
         key = serialization.load_pem_private_key(data, password=None)

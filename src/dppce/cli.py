@@ -191,7 +191,12 @@ def _read_capped(path: Path | None, limit: int) -> bytes | None:
 
 def _checked_envelope(path: Path) -> EvidenceEnvelope:
     """Read an envelope whose body passes the checks that need no trust (section 11.4)."""
-    envelope, dimensions = body_dimensions(parse_strict(path.read_bytes()))
+    try:
+        document = parse_strict(path.read_bytes())
+    except CanonicalizationError as exc:
+        # The verifier gives such a file `structure` fail, so the command names the same dimension.
+        raise UsageError("ENVELOPE.BODY.INVALID: the envelope fails these checks: structure") from exc
+    envelope, dimensions = body_dimensions(document)
     failed = [name for name, (outcome, _) in dimensions.items() if outcome == "fail"]
     if envelope is None or failed:
         raise UsageError(f"ENVELOPE.BODY.INVALID: the envelope fails these checks: {', '.join(failed)}")
@@ -565,13 +570,13 @@ def cmd_run(args: argparse.Namespace) -> int:
     }
     # The transport pins each file as it pins any sample. The check reads it as an artifact.
     samples |= {SAMPLE_PREFIX + ident: path.resolve() for ident, path in manual.items()}
-    keys = FileDataKeyProvider(args.keys, args.data_key_id)
-    if args.create_data_key:
-        keys.create()
     try:
         # Checked before the first request: a run whose recording cannot be written sends nothing.
+        keys = FileDataKeyProvider(args.keys, args.data_key_id)
+        if args.create_data_key:
+            keys.create()
         keys.data_key(args.data_key_id)
-    except KeyError_ as exc:
+    except (KeyError_, OSError) as exc:
         raise UsageError(
             f"KEYS.DATA_KEY.UNAVAILABLE: data key {args.data_key_id!r} is not available in {args.keys}; "
             "create it with --create-data-key, or name an existing key with --data-key-id"

@@ -315,6 +315,10 @@ def test_sign_refuses_a_missing_or_wrong_passphrase(
     code, _, err = _sign(run, envelope, p384, "--out", str(out), "--allow-unencrypted-key")
     assert code == 2
     assert "KEYS.KEY.NOT_P256" in err
+    for unreadable in (tmp_path / "TEST-ONLY-missing.key.pem", tmp_path):
+        code, _, err = _sign(run, envelope, unreadable, "--out", str(out), "--allow-unencrypted-key")
+        assert (code, err.startswith(f"error: KEYS.KEY.UNREADABLE: {unreadable} ")) == (2, True), err
+        assert not out.exists()
 
 
 def test_sign_never_overwrites_its_input(run: Run, tmp_path: Path) -> None:
@@ -406,6 +410,22 @@ def test_sign_refuses_an_envelope_whose_body_fails(
         assert dimension in err
     assert not out.exists()
     assert envelope.read_bytes() == before
+
+
+def test_sign_refuses_an_envelope_that_is_not_strict_json(run: Run, tmp_path: Path) -> None:
+    key = _plain_key(tmp_path)
+    valid = make_envelope().model_dump_json(by_alias=True)
+    envelope, out = tmp_path / "envelope.json", tmp_path / "signed.json"
+    for text in ('{"schema_version": "dppce.envelope/1", ' + valid[1:], valid[:-1], ""):
+        envelope.write_text(text, encoding="utf-8")
+        for target in (["--out", str(out)], ["--in-place"]):
+            code, _, err = _sign(run, envelope, key, "--allow-unencrypted-key", *target)
+            assert (code, "ENVELOPE.BODY.INVALID: the envelope fails these checks: structure" in err) == (
+                2,
+                True,
+            ), err
+        assert not out.exists()
+        assert envelope.read_text(encoding="utf-8") == text
 
 
 # -- authorize ----------------------------------------------------------------------------------------
@@ -619,6 +639,11 @@ def test_trust_bundle_add_key_refusals(run: Run, tmp_path: Path) -> None:
         assert (target.read_bytes() if target.exists() else None) == before
 
     refused("TRUST.KEY.PRIVATE", jwk_path=_jwk(tmp_path, "private", d="TEST-ONLY-not-a-real-scalar"))
+    # A WebCrypto or jose export of a private key holds members that are not strings.
+    refused(
+        "TRUST.KEY.PRIVATE",
+        jwk_path=_jwk(tmp_path, "webcrypto", d="TEST-ONLY-not-a-real-scalar", ext=True, key_ops=["sign"]),
+    )
     refused("TRUST.KEY.NOT_P256", jwk_path=_jwk(tmp_path, "p384", ec.SECP384R1()))
     document = json.loads(jwk.read_text(encoding="utf-8"))
     refused(
@@ -683,11 +708,12 @@ def test_run_creates_a_missing_data_key_only_with_the_flag(
         assert "KEYS.DATA_KEY.UNAVAILABLE" in err
         assert not out.exists()
         assert built == []
-        code, _, err = run(
-            *rig.run_arguments(tmp_path / "bad-id"), "--data-key-id", "../x", "--create-data-key"
-        )
-        assert code == 2
-        assert not (tmp_path / "bad-id").exists()
+        for bad in ("../x", "bad id"):
+            code, _, err = run(
+                *rig.run_arguments(tmp_path / "bad-id"), "--data-key-id", bad, "--create-data-key"
+            )
+            assert (code, "KEYS.DATA_KEY.UNAVAILABLE" in err) == (2, True), err
+            assert not (tmp_path / "bad-id").exists()
         monkeypatch.setattr(cli, "PolicyTransport", real)
 
         first = rig.run(extra=["--data-key-id", "TEST-ONLY-data-key-7"])

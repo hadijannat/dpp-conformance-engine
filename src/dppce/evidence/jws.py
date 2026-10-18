@@ -175,10 +175,13 @@ def public_jwk_from(document: object) -> dict[str, str]:
     ``document`` is untrusted JSON. A private member gives the code ``PRIVATE``. Anything else
     outside the one profile, a point that is not on the curve included, gives ``KEY``.
     """
-    if not isinstance(document, dict) or not all(isinstance(v, str) for v in document.values()):
+    # "d" first: a private JWK from WebCrypto or jose also holds members that are not strings.
+    if not isinstance(document, dict):
         raise SignatureError("a public key is a JSON object of strings", "KEY")
     if "d" in document:
         raise SignatureError("the JWK holds the private member 'd'; give the public key only", "PRIVATE")
+    if not all(isinstance(v, str) for v in document.values()):
+        raise SignatureError("a public key is a JSON object of strings", "KEY")
     if set(document) - {"kid", "use", "alg"} != _PUBLIC_JWK_FIELDS:
         raise SignatureError("the JWK is not an EC public key with kty, crv, x, and y", "KEY")
     if document["kty"] != "EC" or document["crv"] != "P-256":
