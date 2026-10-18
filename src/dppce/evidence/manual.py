@@ -97,10 +97,10 @@ def verify_manual_result(
     evaluation_time: datetime,
     key_valid_at: datetime,
 ) -> tuple[ManualResult, TrustedKey]:
-    """Verify a manual result in the order of section 8.1, tests 2 to 11. The first failure raises.
+    """Verify a manual result in the order of section 8.1, tests 2 to 14. The first failure raises.
 
     The function reads no clock. The evidence list is not compared here: the verifier does not
-    hold the test pack, so the check compares it (test 12).
+    hold the test pack, so the check compares it (test 15). No maximum age applies (ADR 0013).
     """
     try:
         header = header_of(token)
@@ -128,10 +128,23 @@ def verify_manual_result(
         ) from exc
     if result.test_purpose_id != test_purpose_id:
         raise ManualResultError("MANUAL.PURPOSE.MISMATCH", "The result names a different test purpose.")
+    if result.test_purpose_digest != test_purpose_digest:
+        raise ManualResultError(
+            "MANUAL.PURPOSE.DIGEST_MISMATCH", "The result answers a different version of the test purpose."
+        )
     if result.sut_identifier != sut.identifier:
         raise ManualResultError("MANUAL.SUT.MISMATCH", "The result names a different system under test.")
+    if result.sut_version != declared_sut_version(sut):
+        raise ManualResultError(
+            "MANUAL.SUT.VERSION_MISMATCH", "The result does not name the SUT version that the ICS declares."
+        )
     if performed > evaluation_time:
         raise ManualResultError(
             "MANUAL.TIME.AFTER_EVALUATION", "The review is later than the evaluation time."
+        )
+    # _trusted_key parsed both stamps already. A result signed outside the window is a replay risk.
+    if not _time(key.not_before) <= performed <= _time(key.not_after):
+        raise ManualResultError(
+            "MANUAL.TIME.OUTSIDE_KEY_VALIDITY", "The review is outside the validity period of the key."
         )
     return result, key

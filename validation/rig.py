@@ -22,8 +22,8 @@ import yaml
 
 from dppce.catalogue import load_testpacks
 from dppce.cli import main
-from dppce.evidence.jws import LocalSigner
 from dppce.evidence.canonical import digest
+from dppce.evidence.jws import LocalSigner
 from dppce.evidence.manual import declared_sut_version, issue_manual_result
 from dppce.infrastructure.authorization import issue_authorization
 from dppce.infrastructure.reference_server import ReferenceServer, ReferenceSystem, Reply
