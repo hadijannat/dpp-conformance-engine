@@ -117,8 +117,9 @@ Reviews (agent reviews, not human approvals):
       at `4c2928e`. The owner made the repository public.
 - [x] Release candidate (2026-10-15, approved by the owner): tag `v0.1.0rc1`, release workflow run 38722322047 green,
       attestations verified, GitHub pre-release with the wheel, the sdist, and the SBOM. Not published on PyPI.
-- [ ] OQ-021 to OQ-023 on the draft EU pack, and the scoping of revocation serial numbers by issuer
-      (a change of the trust bundle format). Each needs a decision of a person.
+- [ ] OQ-021 to OQ-023 on the draft EU pack. Each needs a decision of a person.
+- [ ] The scoping of revocation serial numbers by issuer is implemented as trust bundle version 2
+      (D8-10, ADR 0015, proposed). A person must confirm the format.
 - [x] Container build and smoke test (2026-10-15, run by the owner): builds; version, catalogue lint, and the
       unprivileged user are as expected.
 - [x] Pinning the base images by digest (BL-005), 2026-10-15. The pinned rebuild gives the same image.

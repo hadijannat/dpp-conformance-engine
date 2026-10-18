@@ -30,10 +30,11 @@ deterministic code and versioned data.
 | `dppce.catalogue` | Load sources and packs, lifecycle rules, lint, import of approved packs. | `models`, `applicability` |
 | `dppce.profiles` | Load profiles and the resources that they name. | `models` |
 | `dppce.testdefs` | Load YAML test packs. Hold the allowlisted check registry. | `models`, `infrastructure.interfaces` |
-| `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws`, `evidence.manual` |
+| `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws`, `evidence.manual`, `evidence.x509path` |
 | `dppce.verdicts` | Aggregation truth table and coverage. Pure functions. | `models` |
-| `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing. | `models`, `infrastructure.interfaces` |
-| `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence`, `verdicts` |
+| `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing, X.509 paths, and RFC 3161 timestamp tokens. | `models`, `infrastructure.interfaces` |
+| `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence`, `verdicts`, `migrations` |
+| `dppce.migrations` | Upgrade a stored document to the current schema version. | nothing in `dppce` |
 | `dppce.infrastructure` | Transport, recorder, replay, clock, key providers, reference server. | `models`, `evidence` |
 | `dppce.orchestrator` | Plan, run, replay. | all of the above except `verifier` |
 | `dppce.report` | JSON and HTML rendering. | `models`, `evidence` |
@@ -694,7 +695,7 @@ method, URL, or role gives `recording_mismatch`, which is an execution error.
 `dppce run` writes `inputs.json` next to the recording. `dppce replay` reads it to rebuild the
 inputs of the evaluation.
 
-- The file is `JCS(RunInputsRecord)` with the schema version `dppce.runinputs/2`. The JSON
+- The file is `JCS(RunInputsRecord)` with the schema version `dppce.runinputs/3`. The JSON
   Schema is `runinputs`.
 - It holds the mode, the profile, the evaluation time, the ICS, the IXIT, the trust bundle, the
   authorization token, and the issuer statement.
@@ -735,6 +736,13 @@ manual-result fields, which 0.1.0rc1 did not write. It sets `data_root` and `inp
 `null`. A replay of such a record uses `--data-root` or the default data root. It does not
 compare input hashes: `input_check` is `not_run`, with `REPLAY.INPUT.NOT_RECORDED`. The decision
 digest comparison still applies.
+
+`dppce.migrations` also upgrades a `dppce.runinputs/2` record to version 3. The step changes only
+the embedded trust bundle, from `dppce.trust/1` to version 2 (section 11.4). A record whose trust
+bundle lists revoked serial numbers cannot be upgraded. A record whose trust bundle has a field
+of the wrong shape cannot be upgraded either. Replay then gives exit code 2 with the reason code
+of the migration. The decision body holds only the policy version of the trust bundle. The step
+therefore does not change a decision digest.
 
 `inputs.json` is not encrypted or signed. It keeps the trust bundle and the authorization token
 in clear text, as before.
@@ -782,8 +790,33 @@ The verification key is a public P-256 JWK with `kty`, `crv`, `x`, and `y`. It c
 The protected header holds `alg`, `kid`, and
 `typ: "dppce-attestation+jws"`. Keys in the repository are test keys and say so in their names.
 Production keys come from a `Signer` implementation for a KMS or PKCS#11 device.
-Qualified electronic seals, COSE, RFC 3161, Bitstring Status List, and UNTP DCC export are
-separate profiles with their own capability states.
+
+A report signature can carry RFC 3161 timestamp tokens (ADR 0015). The timestamp profile:
+
+- The message imprint is SHA-256 over the signature value. The signature value is the
+  base64url-decoded third part of the compact JWS.
+- The imprint uses `id-sha256`. Any other hash algorithm is outside the profile.
+- `timestamp_evidence` holds each token as standard base64 with padding (RFC 4648, section 4)
+  of the DER `TimeStampToken`.
+- A token binds a signature through its imprint, not through its position in the list.
+- A token is at most 64 KiB, which is 87384 base64 characters. It holds at most five
+  certificates. An envelope holds at most 16 tokens.
+- The token is CMS `SignedData` with one signer. The signed attributes hold the content type,
+  the message digest, and a signing certificate attribute of version 1 or 2.
+- Digest algorithms: SHA-256, SHA-384, and SHA-512. Signature algorithms: RSA PKCS#1 v1.5 with
+  2048 bits or more, and ECDSA on P-256 or P-384.
+- The TSA certificate has one critical extended key usage extension, and `id-kp-timeStamping`
+  is its only purpose.
+
+`dppce timestamp imprint` prints the SHA-256 imprint of each signature in an envelope, in
+hexadecimal. The operator makes a request with that imprint and sends it to a timestamp
+authority of their choice. `dppce timestamp attach` adds the token of a `TimeStampResp` file to
+an envelope. `attach` accepts only the status `granted` or `grantedWithMods`. The token imprint
+must equal the imprint of a signature in the envelope. `attach` does not check trust.
+`dppce verify` does. The engine never contacts a timestamp authority.
+
+COSE, Bitstring Status List, qualified electronic seals, and UNTP DCC export are separate profiles
+with their own capability states.
 
 ### 11.4 Verification
 
@@ -797,11 +830,11 @@ It reports each dimension separately:
 | `results_root` | yes | The recomputed root and count equal the stated ones. |
 | `records_root` | yes | The recomputed root equals the stated one. |
 | `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed. Each count by authority class, review status, and testability is a known value, not negative, at least the count of the results with it, and the counts sum to the total; the implementation ratio is over the total; the three ratio labels are the published ones; the placeholder count is bounded and agrees with its review status count. Only a completed step has `pass` or `fail`. |
-| `signature` | yes | At least one signature verifies with an allowlisted algorithm and binds the recomputed digest. |
-| `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. The attestation names the issuer that the trust bundle states for the key. `manifest.issuer.identifier` equals that issuer and is not `unspecified`. An accreditation status other than `not accredited` has a reference. |
+| `signature` | yes | At least one signature verifies with a key of the trust bundle and binds the decision body. The detail names the first such key. If no signature does, the outcome is the failure of the last signature that names a key of the trust bundle. |
+| `issuer_trust` | yes | The signing key is in the trust bundle. It is valid and not revoked at the key validity time. That time is the earliest `genTime` of a good timestamp token over the signature of that key, or else the evaluation time. A key that only the report supplies is not trusted. The attestation names the issuer that the trust bundle states for the key. `manifest.issuer.identifier` equals that issuer and is not `unspecified`. An accreditation status other than `not accredited` has a reference. The first signature that meets all of these gives `pass`. Otherwise the outcome is the problem of the last signature that verifies and binds. Each detail names the key validity time. |
 | `manual_results` | yes | Each completed step of the check `manual.review` has exactly one `artifact` observation with a JWS. Each record id of that observation has a commitment in the report. The JWS passes tests 2 to 14 of section 8.1 with the trust bundle of the verifier, for the purpose `manual`. The key must be valid at the evaluation time of the verifier. The signed test purpose and SUT identifier equal those of the report. The signed SUT version equals the version in the manifest, or is `null` if that version is `unknown`. The signed digest of the test purpose equals `test_purpose_digest` in the observation. The signed time is not after the evaluation time of the run. It is in the validity period of the key. The signed `kid`, role, time, and outcome equal the observation. The verdict is `pass` only for the outcome `pass`. A time that cannot be read gives `fail`. A report with no completed manual step passes. |
 | `status` | per trust policy | Fresh status or revocation evidence is present and good. |
-| `timestamp` | per trust policy | Trusted timestamp evidence is present and good. |
+| `timestamp` | per trust policy | At least one token in `timestamp_evidence` passes the timestamp checks below, and it binds a signature that verifies and binds. |
 
 `complete` is true only if every mandatory dimension passes. If the trust policy makes
 `status` or `timestamp` mandatory and the evidence is missing or stale, `complete` is false.
@@ -837,6 +870,84 @@ The operator states the issuer with `--issuer-name`, `--issuer-id`, `--accredita
 It does not check `expected_evidence`, because the report does not hold the test pack. The engine checks it at run time (section 8.1).
 For the same reason, it cannot recompute the digest of the test purpose. A party with the test pack can recompute it.
 The rule applies to the steps that name the check `manual.review`.
+
+#### Trusted timestamps
+
+The verifier checks each token in this order (ADR 0015). The first failure gives the reason code.
+
+1. Above the size limit: `TIMESTAMP.TOKEN.TOO_LARGE`. Not base64, or not a DER
+   `TimeStampToken`: `TIMESTAMP.TOKEN.MALFORMED`.
+2. More than five certificates in the token: `TIMESTAMP.TOKEN.TOO_LARGE`.
+3. A critical extension in `TSTInfo`: `TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION`.
+4. Signer count, algorithms, or signed attributes outside the profile: `TIMESTAMP.CMS.UNSUPPORTED`.
+5. No certificate of the token or of `timestamp_anchors` matches the signer: `TIMESTAMP.TSA.UNKNOWN`.
+6. The key of that certificate is outside the profile or cannot be read: `TIMESTAMP.CMS.UNSUPPORTED`.
+7. The signing certificate attribute does not identify that certificate: `TIMESTAMP.CMS.SIGNING_CERT`.
+8. The content type, the message digest, or the signature does not verify:
+   `TIMESTAMP.CMS.SIGNATURE_INVALID`.
+9. The imprint algorithm is not SHA-256: `TIMESTAMP.IMPRINT.ALGORITHM`.
+10. The imprint equals the imprint of no signature that verifies: `TIMESTAMP.IMPRINT.MISMATCH`.
+11. The extended key usage is not as in section 11.3, or the extensions cannot be read:
+    `TIMESTAMP.TSA.EKU`.
+12. A key usage without digital signature or content commitment: `TIMESTAMP.TSA.KEY_USAGE`.
+13. The TSA certificate is no timestamp anchor and has no path to one: `TIMESTAMP.TSA.UNTRUSTED`.
+14. The path has a constraint that the engine does not evaluate: `TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT`.
+15. `genTime` is after the evaluation time: `TIMESTAMP.TIME.FUTURE`.
+16. A certificate of the path is outside its validity at `genTime`: `TIMESTAMP.TSA.EXPIRED`.
+17. A certificate of the path is revoked at `genTime`: `TIMESTAMP.TSA.REVOKED`.
+
+A good token gives `TIMESTAMP.OK`. The detail names the TSA subject, `genTime`, and the key of the
+signature.
+
+- One good token is enough for `pass`. Otherwise the outcome is `fail` with the code of the first
+  token.
+- If no signature verifies and binds, the outcome is `not_checked` with `TIMESTAMP.SIGNATURE.NONE`.
+- More than 16 tokens give `fail` with `TIMESTAMP.EVIDENCE.TOO_MANY`.
+- `genTime` keeps its fraction of a second. Each comparison uses the exact instant.
+- A token that the verifier cannot read gives `fail`, never an error of the verifier.
+- The verifier does not check the accuracy, the nonce, the policy, or the TSA name of a token.
+- The verifier does no network I/O. It reads no CRL, no OCSP response, and no certificate URL.
+- The certificates in a token are untrusted. Only `timestamp_anchors` are trusted for timestamps.
+- A timestamp anchor is a CA certificate at the end of a path, or the TSA certificate itself as
+  identical DER.
+- An entry of `anchors` never ends a TSA path. An entry of `timestamp_anchors` never ends a
+  passport path.
+
+`issuer_trust` checks a key at the earliest `genTime` of a good token over the signature of that
+key. Without one, it uses the evaluation time.
+
+- Each detail states the time used. The pass text for the evaluation time does not change.
+- The verifier does not use `signed_at` of the attestation, because the signer states it.
+- With a good token, a report still verifies after its key expires or after a later revocation.
+- The verifier checks a TSA certificate at `genTime`. A token stays good after that certificate
+  expires.
+- The engine cannot timestamp an archived report again.
+
+#### Trust bundle version 2
+
+`dppce.trust/2` replaces `revoked_serials` and `revoked_kids` of version 1. It adds
+`timestamp_anchors`.
+
+- Each entry of `revoked_certificates` names a serial number, its issuer, and `revoked_at`.
+- The issuer is `issuer_name` or `issuer_key_id`, exactly one.
+- A certificate is revoked only if its serial number and its issuer both match one entry.
+- `issuer_name` is an RFC 4514 name. The verifier compares it with the issuer of the certificate
+  attribute by attribute, without case folding.
+- `issuer_key_id` is hexadecimal. The verifier compares it with the authority key identifier of
+  the certificate. A certificate without that extension never matches a key identifier.
+- Each entry of `revoked_keys` names a `kid` and `revoked_at`.
+- `revoked_at` null means revoked at every time. A time means revoked at that time and later.
+- Passport certificates, authorization keys, and manual keys are compared at the evaluation time.
+- A TSA certificate is compared at `genTime`. A report key is compared at its key validity time.
+- The same rules apply to the check `integrity.jws` (section 8).
+
+`dppce.migrations` upgrades a `dppce.trust/1` bundle. Each revoked kid becomes an entry with
+`revoked_at` null, so its effect does not change. The migration first checks the shape of the
+version 1 fields. A wrong shape stops it with `TRUST.MIGRATION.MALFORMED`. A version 1 bundle that
+lists revoked serial numbers cannot be upgraded, because the issuer of each serial is unknown.
+The migration then stops with `TRUST.MIGRATION.UNSCOPED_SERIAL`. The operator writes each serial
+with its issuer in a version 2 bundle. The command line and `python -m dppce.verifier` upgrade a
+bundle when they load it.
 
 ## 12. Exit codes
 

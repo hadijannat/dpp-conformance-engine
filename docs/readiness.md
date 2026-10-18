@@ -22,7 +22,7 @@ agent ran or read the commands. No human has repeated them.
 | Dimension | What exists | What is missing |
 | --- | --- | --- |
 | Engineering | Typed core (mypy strict), fast test suite, core line and branch coverage gate, mutation testing of the verdict and evidence code, reproducible replays. Continuous integration runs on GitHub (Linux, Python 3.12 and 3.13). A GitHub pre-release with signed build provenance. | No independent rebuild of the release commit by a second party. |
-| Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. No trusted timestamp. Keys are files. |
+| Security | Threat model, policy-enforcing transport, encrypted recordings, signed reports, a standalone verifier. Two agent review rounds (the maximum that the brief permits); every finding is fixed or recorded. | No independent human security audit. The engine verifies RFC 3161 timestamps but obtains none. Keys are files. |
 | Interoperability | JSON Schemas for every contract. Checks for carrier, identifier, API contract, data, access, integrity, persistence, registry, and AAS. | No test against a real DPP system or a second implementation. The optional AAS test engine was not run. |
 | Legal mapping | A source catalogue with 128 records. 36 draft interpretations of Regulation (EU) 2023/1542. 8 placeholders for EN standards. | No interpretation is approved. No human reviewer has read the drafts. No EN, ISO, IEC, or DIN text is in the repository, by design. |
 | Operations | Command line with stable exit codes, retention and purge of recordings, documented how-to guides. | No key management service or hardware security module. No multi-user deployment. |
@@ -97,7 +97,8 @@ These items block a claim that the engine is ready for use on a real system:
 5. A DCO sign-off on each commit that a development agent made. Commit `a6283be` of the owner
    certifies the 87 commits up to `a1522ad` (OQ-018). Later sign-off commits of the owner
    certify the agent commits up to `b80f659`. Each newer agent commit needs one too.
-6. A trusted timestamp on a report (BL-004), and a key management service.
+6. A key management service, and a timestamp authority that the operator selects. The verifier
+   checks RFC 3161 tokens (ADR 0015), but the engine obtains no token itself.
 
 ## 5. Records that can support a laboratory quality system
 

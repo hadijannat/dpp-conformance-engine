@@ -113,8 +113,10 @@ An independent review of 2026-10-13 found 17 more defects. The report is
 | --- | --- |
 | No independent security audit | Open. Needed before any production use. |
 | The trust bundle and the data key are files on the operator's host | By design for development. KMS and PKCS#11 providers are interfaces only. |
-| No trusted timestamp on a report | Open. RFC 3161 validation is not implemented (BL-004). |
-| Revocation uses a static snapshot | By design: verification does no network I/O. A stale snapshot blocks a complete result when the policy needs status. |
+| A timestamp authority states a false time, or its key is compromised | The operator trusts only the TSA certificates and CAs in its `timestamp_anchors` (ADR 0015). A compromised TSA key can backdate a token. Revoke its certificate with `revoked_at` null or the time of the compromise. |
+| No timestamp of an archived report again | Open. A token stays good after its TSA certificate expires, while the operator keeps the anchor and no revocation applies. |
+| Untrusted DER in timestamp tokens | asn1crypto parses each token. A token is at most 64 KiB with five certificates. Each parse or verification error gives `fail`, never an exception. Property tests check this. |
+| Revocation uses a static snapshot | By design: verification does no network I/O. A stale snapshot blocks a complete result when the policy needs status. Since trust bundle version 2, the issuer scopes each revoked serial number. A serial that authority A revokes does not revoke a certificate of authority B (D8-10). A version 1 bundle with revoked serial numbers is refused. |
 | A hostile owner controls the tested system and its declared policy | The access check shows enforcement of the declared policy only. It cannot show that the policy is right. |
 | A hostile owner hides a restricted value on purpose | Open by design. The access check finds a canary in common encodings only. It cannot find an encrypted or privately encoded value. |
 | A signed passport outside the supported profile | The engine supports ES256 with an `x5c` certificate path only. Each other token gives `inconclusive`. Name constraints and policy constraints are not evaluated; a path that has them gives `inconclusive`. |

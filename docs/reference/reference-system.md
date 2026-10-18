@@ -543,8 +543,10 @@ A passport signed with the key of a self-signed anchor itself has the path from 
 the anchor.
 The payload is compared as a JSON value. Key order, white space, and number format do not matter.
 The canonical form of the engine applies to its own decision body only, not to a passport.
-The revocation snapshot lists serial numbers without their issuer. A serial number that is
-revoked under one authority therefore also matches a certificate of a different authority.
+Each revoked serial number in the trust bundle names its issuer, by issuer name or by issuer key
+identifier. A serial number matches a certificate only when the issuer matches too. A serial
+number that is revoked under one authority therefore does not match a certificate of a different
+authority. An entry with `revoked_at` applies from that time.
 An outcome message names the error code, never a value from the token.
 
 Document URLs come from `IXIT.resources`. For the reference fixtures they are: item
