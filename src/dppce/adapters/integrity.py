@@ -70,7 +70,7 @@ def _certificates(header: dict[str, object]) -> list[x509.Certificate] | None:
         raise _TooLongError
     try:
         return [x509.load_der_x509_certificate(base64.b64decode(str(item), validate=True)) for item in chain]
-    except (binascii.Error, ValueError):
+    except (binascii.Error, ValueError, x509.InvalidVersion):  # InvalidVersion is no ValueError
         return None
 
 

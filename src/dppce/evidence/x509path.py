@@ -32,7 +32,8 @@ def extensions(certificate: x509.Certificate) -> x509.Extensions | None:
     """The extensions, or None if they cannot be parsed (malformed or repeated)."""
     try:
         return certificate.extensions
-    except ValueError:
+    # cryptography derives these two from Exception, not from ValueError.
+    except (ValueError, x509.DuplicateExtension, x509.UnsupportedGeneralNameType):
         return None
 
 

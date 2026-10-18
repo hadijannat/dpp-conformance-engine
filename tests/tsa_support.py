@@ -111,6 +111,35 @@ def pem(certificate: x509.Certificate) -> str:
     return certificate.public_bytes(serialization.Encoding.PEM).decode("ascii")
 
 
+def version_offset(raw: bytes, certificate: x509.Certificate) -> int:
+    """The offset in ``raw`` of the X.509 version value of ``certificate`` (2, which means v3)."""
+    assert raw.count(der(certificate)) == 1
+    # [0] EXPLICIT INTEGER 2. The version is the first field of the TBSCertificate.
+    return raw.index(der(certificate)) + der(certificate).index(b"\xa0\x03\x02\x01\x02") + 4
+
+
+def bad_version(raw: bytes, certificate: x509.Certificate) -> bytes:
+    """Set the version of ``certificate`` inside ``raw`` to the undefined value 3.
+
+    cryptography refuses such a certificate with ``x509.InvalidVersion``, which is no ValueError.
+    """
+    at = version_offset(raw, certificate)
+    return raw[:at] + b"\x03" + raw[at + 1 :]
+
+
+def repeat_extension(issuer_key: PrivateKey, certificate: x509.Certificate) -> x509.Certificate:
+    """``certificate`` with its last extension repeated, signed again by ``issuer_key``.
+
+    ``CertificateBuilder`` refuses a repeated extension, so asn1crypto builds it. cryptography
+    loads it, and reading its extensions raises ``x509.DuplicateExtension``, which is no ValueError.
+    """
+    loaded = asn1_x509.Certificate.load(der(certificate))
+    tbs = loaded["tbs_certificate"]
+    tbs["extensions"].append(asn1_x509.Extension.load(tbs["extensions"][-1].dump()))
+    loaded["signature_value"] = _sign(issuer_key, tbs.dump(force=True), "sha256")
+    return x509.load_der_x509_certificate(loaded.dump(force=True))
+
+
 def _sign(key: PrivateKey, data: bytes, digest: str) -> bytes:
     algorithm = _HASHES[digest]()
     if isinstance(key, ec.EllipticCurvePrivateKey):

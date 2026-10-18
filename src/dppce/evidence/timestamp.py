@@ -58,8 +58,10 @@ _SIGNATURES: Final[dict[str, tuple[str, str | None]]] = {
 }
 _MIN_RSA_BITS: Final = 2048
 _CURVES: Final = (ec.SECP256R1, ec.SECP384R1)
-# The exceptions that asn1crypto raises on a malformed or unexpected structure.
+# The exceptions that asn1crypto raises on a malformed or unexpected structure, and the one that
+# cryptography raises on a certificate of an unknown version, which is no ValueError.
 _PARSE_ERRORS: Final = (
+    x509.InvalidVersion,
     ValueError,
     TypeError,
     KeyError,

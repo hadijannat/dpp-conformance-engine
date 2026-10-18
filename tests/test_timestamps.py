@@ -36,9 +36,11 @@ from tests.support import AT, ISSUER, KID, make_envelope
 from tests.tsa_support import (
     Pair,
     b64,
+    bad_version,
     break_time,
     make_token,
     pem,
+    repeat_extension,
     tsa_ca,
     tsa_cert,
 )
@@ -163,6 +165,15 @@ def _unloadable(env: EvidenceEnvelope, trust: TrustBundle, tsa: Tsa) -> Any:
     return [token], stamped(trust, tsa.ca), AT
 
 
+def _bad_version(env: EvidenceEnvelope, trust: TrustBundle, tsa: Tsa) -> Any:
+    return [bad_version(good(env, tsa), tsa.cert[1])], stamped(trust, tsa.ca), AT
+
+
+def _repeated_extension(env: EvidenceEnvelope, trust: TrustBundle, tsa: Tsa) -> Any:
+    signer = (tsa.cert[0], repeat_extension(tsa.ca[0], tsa.cert[1]))
+    return [make_token(imprint(env.signatures[0]), GEN, signer)], stamped(trust, tsa.ca), AT
+
+
 def _sha512(env: EvidenceEnvelope, trust: TrustBundle, tsa: Tsa) -> Any:
     digest = hashlib.sha512(imprint(env.signatures[0])).digest()
     return [make_token(digest, GEN, tsa.cert, imprint_alg="sha512")], stamped(trust, tsa.ca), AT
@@ -230,6 +241,8 @@ FAULTS: dict[str, tuple[Case, str]] = {
         "TIMESTAMP.TOKEN.MALFORMED",
     ),
     "a certificate that does not load": (_unloadable, "TIMESTAMP.TOKEN.MALFORMED"),
+    "a signer certificate with an invalid X.509 version": (_bad_version, "TIMESTAMP.TOKEN.MALFORMED"),
+    "a TSA certificate with a repeated extension": (_repeated_extension, "TIMESTAMP.TSA.EKU"),
     "six certificates": (
         lambda env, trust, tsa: ([good(env, tsa, certs=[tsa.cert[1]] * 6)], stamped(trust, tsa.ca), AT),
         "TIMESTAMP.TOKEN.TOO_LARGE",

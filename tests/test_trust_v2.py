@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
+import ssl
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -20,7 +21,7 @@ from cryptography.x509.oid import NameOID
 from pydantic import ValidationError
 
 from dppce import cli
-from dppce.evidence.x509path import revoked
+from dppce.evidence.x509path import extension_value, extensions, revoked
 from dppce.migrations import CURRENT, MigrationError, migrate
 from dppce.models import (
     EvidenceEnvelope,
@@ -31,6 +32,7 @@ from dppce.models import (
     TrustBundle,
 )
 from dppce.verifier.__main__ import main as verifier_main
+from tests.tsa_support import bad_version, der, repeat_extension
 
 START, END = datetime(2026, 1, 1, tzinfo=UTC), datetime(2036, 1, 1, tzinfo=UTC)
 AT = datetime(2026, 10, 14, tzinfo=UTC)
@@ -133,6 +135,24 @@ def test_an_anchor_with_a_pem_that_does_not_load_is_refused() -> None:
         TrustAnchor(name="TEST-ONLY garbage", certificate_pem="-----BEGIN CERTIFICATE-----\nAAAA\n")
     with pytest.raises(ValidationError, match="PEM"):
         TrustAnchor(name="TEST-ONLY not ascii", certificate_pem="é")
+
+
+def test_an_anchor_with_an_invalid_x509_version_is_refused() -> None:
+    authority = _authority("TEST-ONLY authority A")[1]
+    raw = bad_version(der(authority), authority)
+    with pytest.raises(x509.InvalidVersion):
+        x509.load_der_x509_certificate(raw)  # the premise: this is no ValueError
+    with pytest.raises(ValidationError, match="PEM"):
+        TrustAnchor(name="TEST-ONLY version 4", certificate_pem=ssl.DER_cert_to_PEM_cert(raw))
+
+
+def test_extensions_are_none_when_one_is_repeated() -> None:
+    key, authority = _authority("TEST-ONLY authority A")
+    repeated = repeat_extension(key, authority)
+    with pytest.raises(x509.DuplicateExtension):
+        _ = repeated.extensions  # the premise: this is no ValueError
+    assert extensions(repeated) is None
+    assert extension_value(repeated, x509.BasicConstraints) is None
 
 
 # -- issuer-scoped revocation (D8-10) -------------------------------------------------------------

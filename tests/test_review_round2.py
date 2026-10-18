@@ -376,6 +376,7 @@ from dppce.adapters.integrity import jws_check  # noqa: E402
 from dppce.models import ExecutionStatus, RevokedCertificate  # noqa: E402
 from tests.test_adapters_security import _POLICY, _Canned, _context, bundle  # noqa: E402
 from tests.test_review_findings import Passport, _certificate, _x5c, integrity_context, pki, token  # noqa: E402
+from tests.tsa_support import bad_version, repeat_extension  # noqa: E402
 
 ITEM = b'{"a":1}'
 
@@ -476,6 +477,23 @@ def test_adapters4_a_leaf_key_of_an_unknown_algorithm_is_not_processable(pki: di
     assert (outcome.status, outcome.reason_code) == (
         ExecutionStatus.BLOCKED,
         "INTEGRITY.TOKEN.NOT_PROCESSABLE",
+    )
+
+
+def test_a_leaf_with_an_invalid_x509_version_is_malformed_and_raises_nothing(pki: dict[str, Any]) -> None:
+    key, leaf = _leaf(pki)
+    raw = bad_version(leaf.public_bytes(serialization.Encoding.DER), leaf)
+    outcome = _check({}, key, pki["trust"], [base64.b64encode(raw).decode()])
+    assert (outcome.passed, outcome.reason_code) == (False, "INTEGRITY.TOKEN.MALFORMED")
+
+
+def test_a_leaf_with_a_repeated_extension_is_not_assessed_and_raises_nothing(pki: dict[str, Any]) -> None:
+    key, leaf = _leaf(pki, x509.ExtendedKeyUsage([x509.ObjectIdentifier("1.3.6.1.5.5.7.3.36")]))
+    assert _check({}, key, pki["trust"], _x5c(leaf)).reason_code == "INTEGRITY.OK"
+    outcome = _check({}, key, pki["trust"], _x5c(repeat_extension(pki["root"][0], leaf)))
+    assert (outcome.status, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        "INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT",
     )
 
 

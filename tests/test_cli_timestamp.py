@@ -20,7 +20,7 @@ from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import LocalSigner
 from dppce.models import EvidenceEnvelope, TrustAnchor, TrustBundle
 from tests.support import ISSUER, KID, make_envelope
-from tests.tsa_support import make_response, make_token, pem, tsa_ca, tsa_cert
+from tests.tsa_support import bad_version, make_response, make_token, pem, tsa_ca, tsa_cert
 
 GEN = datetime(2026, 10, 13, 12, 6, tzinfo=UTC)
 AT = "2026-10-14T00:00:00Z"
@@ -128,6 +128,7 @@ def test_attach_with_granted_with_mods_and_json(files: Files, capsys: pytest.Cap
         (lambda f: make_response(None, status=0), "TIMESTAMP.RESPONSE.MALFORMED"),
         (lambda f: b"\x00" * (64 * 1024 + 1), "TIMESTAMP.RESPONSE.TOO_LARGE"),
         (lambda f: make_response(f.token(hashlib.sha256(b"other").digest())), "TIMESTAMP.IMPRINT.MISMATCH"),
+        (lambda f: make_response(bad_version(f.token(), f.tsa[1])), "TIMESTAMP.RESPONSE.MALFORMED"),
     ],
     ids=[
         "rejection",
@@ -136,6 +137,7 @@ def test_attach_with_granted_with_mods_and_json(files: Files, capsys: pytest.Cap
         "granted without a token",
         "too large",
         "other signature",
+        "a certificate of an invalid X.509 version",
     ],
 )
 def test_attach_refuses_a_response_that_cannot_be_used(

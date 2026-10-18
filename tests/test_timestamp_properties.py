@@ -29,7 +29,7 @@ from dppce.models import TrustAnchor, TrustBundle, TrustedKey
 from dppce.verifier import verify
 from tests.support import AT, ISSUER, make_envelope
 from tests.test_properties import SETTINGS
-from tests.tsa_support import b64, make_token, pem, tsa_ca, tsa_cert
+from tests.tsa_support import b64, make_token, pem, tsa_ca, tsa_cert, version_offset
 
 GEN = datetime(2026, 10, 13, 12, 6, tzinfo=UTC)
 SIGNER = LocalSigner.generate("TEST-ONLY-property-report-key")
@@ -69,6 +69,9 @@ def _mutate(raw: bytes, kind: str, position: int, value: int) -> bytes:
 MUTATIONS = st.tuples(
     st.sampled_from(["flip", "delete", "insert"]), st.integers(0, len(GOOD) - 1), st.integers(0, 255)
 )
+# The derandomized run never reaches this byte. The flip sets the version value of the TSA
+# certificate to 3, which no X.509 version uses. cryptography raises InvalidVersion, no ValueError.
+VERSION_FLIP = ("flip", version_offset(GOOD, TSA[1]), 1)
 
 
 def _only_timestamp_error(text: str) -> Stamp | None:
@@ -99,6 +102,7 @@ def test_random_text_raises_only_timestamp_error(text: str) -> None:
 
 @SETTINGS
 @given(MUTATIONS)
+@example(VERSION_FLIP)
 def test_a_mutated_token_passes_only_with_the_original_stamp(mutation: tuple[str, int, int]) -> None:
     stamp = _only_timestamp_error(b64(_mutate(GOOD, *mutation)))
     assert stamp is None or stamp == ORIGINAL
@@ -117,6 +121,7 @@ GOOD_DETAIL = _verify(GOOD)
 
 @SETTINGS
 @given(MUTATIONS)
+@example(VERSION_FLIP)
 def test_verify_never_raises_and_passes_a_mutated_token_only_with_the_original_detail(
     mutation: tuple[str, int, int],
 ) -> None:

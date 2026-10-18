@@ -37,7 +37,8 @@ class TrustAnchor(Model):
     def _one_certificate(cls, value: str) -> str:
         try:
             x509.load_pem_x509_certificate(value.encode("ascii"))
-        except (ValueError, UnicodeEncodeError) as exc:
+        # InvalidVersion is no ValueError, and pydantic re-raises any exception that is not one.
+        except (ValueError, UnicodeEncodeError, x509.InvalidVersion) as exc:
             raise ValueError("certificate_pem is not a PEM X.509 certificate") from exc
         return value
 
