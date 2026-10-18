@@ -27,6 +27,7 @@ from dppce.evidence.envelope import (
     verdict_counts,
 )
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
+from dppce.evidence.manual import MANUAL_CHECK, ManualResultError, verify_manual_result
 from dppce.models import (
     Attestation,
     AuthorityClass,
@@ -56,6 +57,7 @@ _ALWAYS_MANDATORY = (
     "counts",
     "signature",
     "issuer_trust",
+    "manual_results",
 )
 
 
@@ -287,6 +289,59 @@ def _signatures(
     return signature, issuer
 
 
+def _manual_results(decision: DecisionBody, trust: TrustBundle, at: datetime) -> tuple[Outcome, str]:
+    """Bind each completed manual step to a committed record and a performer signature (section 11.4).
+
+    The JWS in the observation is enough: no recording is needed. ``expected_evidence`` is not
+    checked here, because the report does not hold the test pack. The engine checks it.
+    """
+    steps = [
+        t
+        for t in decision.test_results
+        if t.check == MANUAL_CHECK and t.execution_status is ExecutionStatus.COMPLETED
+    ]
+    if not steps:
+        return "pass", "The report holds no completed manual step."
+    try:
+        evaluated = _stamp(decision.manifest.evaluation_time)
+    except ValueError:
+        return "fail", "The evaluation time of the manifest is not a valid time."
+    committed = {c.record_id for c in decision.record_commitments}
+    for t in steps:
+        signed = [o for o in t.observations if isinstance(o.summary.get("jws"), str)]
+        if len(signed) != 1:
+            return "fail", f"{t.test_purpose_id}: the step has no single observation with a signed result."
+        (observation,) = signed
+        if (
+            observation.kind != "artifact"
+            or not observation.record_ids
+            or not set(observation.record_ids) <= committed
+        ):
+            return "fail", f"{t.test_purpose_id}: the signed result references no committed record."
+        try:
+            result, key = verify_manual_result(
+                str(observation.summary["jws"]),
+                trust,
+                test_purpose_id=t.test_purpose_id,
+                sut_identifier=decision.manifest.sut.identifier,
+                evaluation_time=evaluated,
+                key_valid_at=at,
+            )
+        except ManualResultError as exc:
+            return "fail", f"{t.test_purpose_id}: {exc.code}: {exc}"
+        shown = {k: observation.summary.get(k) for k in ("kid", "role", "performed_at", "outcome")}
+        if shown != {
+            "kid": key.kid,
+            "role": result.role,
+            "performed_at": result.performed_at,
+            "outcome": result.outcome,
+        }:
+            return "fail", f"{t.test_purpose_id}: the observation differs from the signed result."
+        if (result.outcome == "pass") != (t.verdict is Verdict.PASS):
+            return "fail", f"{t.test_purpose_id}: the verdict differs from the signed outcome."
+    return "pass", f"{len(steps)} manual results verify for the purpose 'manual' and bind their steps."
+
+
 def _status(trust: TrustBundle, at: datetime) -> tuple[Outcome, str]:
     if trust.status_as_of is None:
         return (
@@ -393,6 +448,7 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
             "counts": _counts(decision),
             "signature": signature,
             "issuer_trust": issuer,
+            "manual_results": _manual_results(decision, trust, at),
             "status": _status(trust, at),
             "timestamp": _timestamp(envelope, trust),
         },
