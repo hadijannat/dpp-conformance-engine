@@ -158,6 +158,15 @@ For each requirement in the selected packs:
 
 1. If the mode does not permit it, record an exclusion. Reason codes: `MODE.NOT_ILLUSTRATIVE`,
    `MODE.ILLUSTRATIVE_NOT_REVIEWABLE`, `MODE.NOT_APPROVED`, `STATUS.SUPERSEDED`, `STATUS.WITHDRAWN`.
+   Before these rules, record an exclusion with `STATUS.SUPERSEDED_BY_SELECTED` in each mode if all of these are true:
+
+   - The status of the requirement is `draft-needs-review`.
+   - An approved requirement in a selected pack names it in `supersedes`. The order of the packs has no effect.
+   - The mode permits that approved requirement.
+   - Both are illustrative, or neither is.
+
+   The reason names each such approved requirement. In any other case, `supersedes` has no effect on the plan.
+   The planner never changes a pack file.
 2. Evaluate `applicability`.
 3. Evaluate `declared_support` when present. If the requirement is applicable and mandatory and
    `declared_support` is `false`, record a conflict. The requirement stays applicable.
