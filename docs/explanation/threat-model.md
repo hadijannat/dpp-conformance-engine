@@ -68,6 +68,7 @@ standalone verifier and the recipient's own trust bundle.
 | A file shows one verdict to the verifier and a different one to a reader | A repeated key is refused. The document must equal the canonical form of the validated model. | `tests/test_evidence.py` |
 | The algorithm in a token header selects a weak algorithm | A fixed allowlist of one algorithm. The header never selects it. | `tests/test_evidence.py` (E-11) |
 | A report is signed with an unknown or expired key | Signature validity and issuer trust are separate dimensions. A key from the report is not trusted. | `tests/test_evidence.py` (E-10, E-12) |
+| A report names an issuer other than the one that signed it | `issuer_trust` compares `manifest.issuer.identifier` with the issuer that the verifier's trust bundle states for the key. The name is marked as declared by the operator. | `tests/test_issuer_binding.py` |
 | The holder of any certificate from a trusted root issues passport certificates | Each issuer must be a certificate authority that can sign certificates, inside its path length. | `tests/test_adapters_security.py` |
 | A revoked certificate passes because of text formatting | Serial numbers compare as integers, for every certificate of the path. | `tests/test_adapters_security.py` |
 | A tested system hides a leak behind a wrong media type | The access check always tries to parse a body as JSON. A partial look never passes. | `tests/test_adapters_security.py` |

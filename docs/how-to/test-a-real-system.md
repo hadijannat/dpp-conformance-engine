@@ -48,10 +48,11 @@ A manual step needs a signed manual result. The engine does not perform the revi
    The payload format is the `manualresult` schema.
 2. Copy the `expected_evidence` items of the test purpose into the result in full and in order.
 3. Put the digest of the test purpose in `test_purpose_digest`.
-   The digest is `sha256:` and the hex SHA-256 of the RFC 8785 JSON of the test purpose.
-   It covers the test purpose as the engine loads it, with every default field filled in.
-   That is `TestPurpose.model_dump(mode="json")`. A hash of the YAML entry gives a different value.
-   No command prints this digest yet.
+   Print it with `dppce manual digest --test-purpose ID`.
+   Give the same `--data-root` and `--import-testpack` options as the run.
+   Add `--json` to get the digest with the identifiers of the test purpose and the test pack.
+   The check `manual.review` computes the digest with the same function.
+   A hash of the YAML entry gives a different value.
 4. Put the SUT version of the ICS in `sut_version`. If the ICS declares no version, put `null`.
 5. Make sure that `performed_at` is in the validity period of the key.
    It must also not be after the evaluation time of the run.
@@ -75,3 +76,7 @@ A result that the check refuses keeps the status `manual_unavailable`, with a `M
 - That personal data in responses are handled as the law requires.
 - That the issuer and the accreditation status in the report are true.
   Set them with `--issuer-name`, `--issuer-id`, and `--accreditation-status`.
+- That `--issuer-id` equals the issuer that the trust bundle of the reader names for your report key.
+  A signed report with the issuer `unspecified` never verifies as complete.
+- That the accreditation status is correct. The engine does not validate it.
+  A status other than `not accredited` needs `--accreditation-reference`.

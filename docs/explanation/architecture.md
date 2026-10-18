@@ -70,6 +70,7 @@ validation/                        fault catalogue and method-validation records
 `catalogue`, `profiles`, and `testpacks` ship in the wheel under `dppce/_bundled/`.
 `dppce.infrastructure.resources.data_root()` returns the bundled directory, or the repository
 root in a source checkout. The CLI option `--data-root` overrides it.
+A replay uses the data root that the run recorded, unless the operator gives `--data-root` (section 10.1).
 
 ## 4. Execution modes and claim levels
 
@@ -333,6 +334,7 @@ A manual result is the signed result of one manual step. The person who performe
 - The payload holds the test purpose, its digest, the SUT identifier, the SUT version, a role, and the time of the review.
 - It also holds the outcome and the evidence items.
 - The digest is `sha256:` and the hex SHA-256 of the RFC 8785 form of the test purpose as loaded.
+- `dppce manual digest --test-purpose ID` prints this digest. It reads the test packs with `--data-root` and `--import-testpack`, as a run does. The check and the command use one function.
 - The SUT version is the version that the ICS declares. It is `null` when the ICS declares none. The engine never invents one.
 - The outcome is `pass` or `fail`. The role is one lowercase word, such as `inspector`.
 - The payload names no person. The key identifier links the result to the performer in the records of the laboratory.
@@ -494,9 +496,12 @@ one in `api.contract` and `access.policy`.
   required. A `dppce.decision/1` body has no `bound_files`. The verifier reads both versions
   as written and rejects any other pairing as a structure error. The JSON Schema lists the two
   versions. The model checks the pairing.
-- A replay reads the bound files again. In version 2, a changed file gives a different decision
-  digest. A replay of a version 1 run compares a version 1 body, so it does not detect a changed
-  bound file.
+- A replay reads the bound files again. The input check of section 10.1 stops a replay with a
+  changed bound file before it evaluates (exit code 2).
+- A record of run inputs migrated from `dppce.runinputs/1` has no input hashes. For such a
+  record, only the decision digest comparison applies.
+- In version 2, a changed bound file gives a different decision digest. A version 1 body has no
+  `bound_files`, so its digest comparison does not detect a changed bound file.
 
 ## 10. Recording
 
@@ -535,6 +540,56 @@ records/<id>.enc   one encrypted record each
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in
 method, URL, or role gives `recording_mismatch`, which is an execution error.
+
+### 10.1 Run inputs
+
+`dppce run` writes `inputs.json` next to the recording. `dppce replay` reads it to rebuild the
+inputs of the evaluation.
+
+- The file is `JCS(RunInputsRecord)` with the schema version `dppce.runinputs/2`. The JSON
+  Schema is `runinputs`.
+- It holds the mode, the profile, the evaluation time, the ICS, the IXIT, the trust bundle, the
+  authorization token, and the issuer statement.
+- It also holds the paths of the imported files, the selected identifiers, and the test purposes
+  with a supplied manual result.
+- `data_root` is the absolute path of the data root of the run.
+- `input_hashes` holds `sha256:<hex>` of the selected profile and of the source catalogue.
+- It also holds the digest of each loaded requirement pack and test pack, shipped or imported,
+  and of each bound file.
+- The profile, the sources, the packs, and the test packs are compared as parsed models
+  (RFC 8785). Bound files are compared as raw bytes.
+- A change in a comment or in white space of a YAML pack therefore does not count as a change.
+  A change in a bound file always counts.
+- One function computes these values for the run manifest, for `inputs.json`, and for the
+  replay check.
+- The run takes the bound-file values of `inputs.json` from its manifest, so both state the
+  same values.
+
+Replay, in this order:
+
+1. With `--data-root`, replay uses that directory. Otherwise it uses `data_root` of the record.
+2. A recorded data root that is not a directory is an input error: `REPLAY.DATA_ROOT.MISSING`.
+   The message names the path and asks for `--data-root`.
+3. Replay loads the profile, the catalogue, and the test packs. It then computes the input
+   hashes again.
+4. Each difference is an input error: `REPLAY.INPUT.CHANGED`. The message names each input that
+   differs, and the data root.
+5. Only then does replay check the ICS, the authorization, and the manual results, and evaluate.
+6. The summary states the data root and `input_check`: `pass`, or `not_run` for a record with no
+   input hashes.
+
+A different data root with the same file contents passes the check. A replay never contacts a
+host, so a changed record cannot make the engine send a request or a secret.
+
+`dppce.migrations` upgrades a `dppce.runinputs/1` record. Version 1 was written by 0.1.0rc1 and
+by later versions before version 2. The step adds empty lists for the test-pack and
+manual-result fields, which 0.1.0rc1 did not write. It sets `data_root` and `input_hashes` to
+`null`. A replay of such a record uses `--data-root` or the default data root. It does not
+compare input hashes: `input_check` is `not_run`, with `REPLAY.INPUT.NOT_RECORDED`. The decision
+digest comparison still applies.
+
+`inputs.json` is not encrypted or signed. It keeps the trust bundle and the authorization token
+in clear text, as before.
 
 ## 11. Evidence
 
@@ -591,7 +646,7 @@ It reports each dimension separately:
 | `records_root` | yes | The recomputed root equals the stated one. |
 | `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed. Each count by authority class, review status, and testability is a known value, not negative, at least the count of the results with it, and the counts sum to the total; the implementation ratio is over the total; the three ratio labels are the published ones; the placeholder count is bounded and agrees with its review status count. Only a completed step has `pass` or `fail`. |
 | `signature` | yes | At least one signature verifies with an allowlisted algorithm and binds the recomputed digest. |
-| `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. |
+| `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. The attestation names the issuer that the trust bundle states for the key. `manifest.issuer.identifier` equals that issuer and is not `unspecified`. An accreditation status other than `not accredited` has a reference. |
 | `manual_results` | yes | Each completed step of the check `manual.review` has exactly one `artifact` observation with a JWS. Each record id of that observation has a commitment in the report. The JWS passes tests 2 to 14 of section 8.1 with the trust bundle of the verifier, for the purpose `manual`. The key must be valid at the evaluation time of the verifier. The signed test purpose and SUT identifier equal those of the report. The signed SUT version equals the version in the manifest, or is `null` if that version is `unknown`. The signed digest of the test purpose equals `test_purpose_digest` in the observation. The signed time is not after the evaluation time of the run. It is in the validity period of the key. The signed `kid`, role, time, and outcome equal the observation. The verdict is `pass` only for the outcome `pass`. A time that cannot be read gives `fail`. A report with no completed manual step passes. |
 | `status` | per trust policy | Fresh status or revocation evidence is present and good. |
 | `timestamp` | per trust policy | Trusted timestamp evidence is present and good. |
@@ -602,6 +657,29 @@ Verification never changes or restates the verdict about the tested system.
 It shows that the report is intact, that a trusted issuer signed it, and that it agrees with
 itself. It does not show that the issuer observed what the report says.
 `dppce report --trust` needs `--at` too: a verification section always states its time.
+
+`issuer_trust` binds the issuer statement of the report to the signing key (ADR 0014). The
+verifier takes the issuer of a key from its own trust bundle only.
+
+- A stated issuer that differs from the issuer of the key fails with `ISSUER.STATEMENT.MISMATCH`.
+  The detail names both values.
+- A signed report that states the issuer `unspecified` fails with `ISSUER.STATEMENT.UNSPECIFIED`.
+  This applies also when a trust bundle names a key with that issuer.
+- An accreditation status other than `not accredited` with an empty reference fails with
+  `ISSUER.ACCREDITATION.NO_REFERENCE`.
+- The verifier binds the identifier only. The trust bundle holds no issuer name, so the verifier
+  does not check `manifest.issuer.name`.
+- On a pass, the detail shows the accreditation status and the reference as the operator
+  declared them.
+- The engine does not validate an accreditation. The HTML report marks the issuer name and the
+  accreditation fields as declared by the operator.
+- The detail shows each value of the report in an escaped form, so a control character cannot
+  reach a terminal.
+
+The operator states the issuer with `--issuer-name`, `--issuer-id`, `--accreditation-status`, and
+`--accreditation-reference`. The engine holds no issuer other than the default `unspecified`.
+`plan` and `run` refuse an accreditation status other than `not accredited` without a reference:
+`ISSUER.ACCREDITATION.NO_REFERENCE`, exit code 2. `replay` reads the recorded statement as written.
 
 `manual_results` reads only the envelope. The JWS in the observation is sufficient, so the verifier needs no recording.
 It does not check `expected_evidence`, because the report does not hold the test pack. The engine checks it at run time (section 8.1).

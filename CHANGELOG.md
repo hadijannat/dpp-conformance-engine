@@ -22,8 +22,25 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   refused with a `MANUAL.*` code. No maximum age applies.
 - The verifier has the mandatory dimension `manual_results`. The fault catalogue version 0.2.0 adds
   the evidence fault `E-13`.
+- `dppce manual digest --test-purpose ID` prints the digest that a manual result must name. The
+  check `manual.review` computes it with the same function.
+- The schema `runinputs` for `inputs.json`, version `dppce.runinputs/2`. It records the data root
+  and the digest of each input of the run.
+- `dppce replay` checks the inputs before it evaluates. A missing data root or a changed input
+  gives exit code 2 with `REPLAY.DATA_ROOT.MISSING` or `REPLAY.INPUT.CHANGED`.
 
 ### Changed
+
+- `issuer_trust` binds the issuer statement to the signing key (ADR 0014). A signed report whose
+  issuer identifier differs from the issuer of the key, or is `unspecified`, does not verify as
+  complete. This includes every signed report from 0.1.0rc1.
+- An accreditation status other than `not accredited` needs a reference. `plan` and `run` refuse
+  one without it (exit code 2). The engine does not validate an accreditation.
+- `inputs.json` is version `dppce.runinputs/2`. `dppce.migrations` upgrades a version 1 record,
+  which still replays with no input check.
+- `dppce replay` uses the recorded data root when `--data-root` is not given. A changed bound
+  file now stops a replay with exit code 2 before it evaluates. Before, it gave exit code 4.
+- The HTML report marks the issuer name and the accreditation fields as declared by the operator.
 
 - `dppce plan`, `dppce run`, and `dppce replay` refuse a selected test pack whose parameters do not
   fit the check. They also refuse an ICS date fact that is not a calendar date. Both give exit code 2.

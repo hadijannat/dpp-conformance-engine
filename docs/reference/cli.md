@@ -58,8 +58,13 @@ options:
                         it; repeat for each
   --at AT               evaluation time, for example 2026-10-13T12:00:00Z; default: now
   --issuer-name ISSUER_NAME
+                        issuer name, declared by the operator; the verifier does not check it
   --issuer-id ISSUER_ID
+                        issuer identifier; it must equal the issuer that the trust bundle names
+                        for the report signing key
   --accreditation-status ACCREDITATION_STATUS
+                        declared by the operator and not validated by the engine; a value other
+                        than 'not accredited' needs --accreditation-reference
   --accreditation-reference ACCREDITATION_REFERENCE
 ```
 
@@ -100,8 +105,13 @@ options:
                         it; repeat for each
   --at AT               evaluation time, for example 2026-10-13T12:00:00Z; default: now
   --issuer-name ISSUER_NAME
+                        issuer name, declared by the operator; the verifier does not check it
   --issuer-id ISSUER_ID
+                        issuer identifier; it must equal the issuer that the trust bundle names
+                        for the report signing key
   --accreditation-status ACCREDITATION_STATUS
+                        declared by the operator and not validated by the engine; a value other
+                        than 'not accredited' needs --accreditation-reference
   --accreditation-reference ACCREDITATION_REFERENCE
   --out OUT             new directory for the run
   --keys KEYS           directory with the data keys; keep it apart
@@ -223,6 +233,27 @@ options:
                         import a requirement pack file
   --import-testpack IMPORT_TESTPACK
                         import a test pack file
+```
+
+### `dppce manual digest`
+
+```text
+usage: dppce manual digest [-h] [--json] [--data-root DATA_ROOT]
+                           [--import-testpack IMPORT_TESTPACK] --test-purpose TEST_PURPOSE
+                           [--testpack TESTPACK]
+
+Print the test_purpose_digest that a signed manual result must name.
+
+options:
+  -h, --help            show this help message and exit
+  --json
+  --data-root DATA_ROOT
+                        directory with catalogue, profiles, and testpacks
+  --import-testpack IMPORT_TESTPACK
+                        import a test pack file
+  --test-purpose TEST_PURPOSE
+                        identifier of the manual test purpose
+  --testpack TESTPACK   look in this test pack only, by identifier
 ```
 
 ### `dppce coverage`

@@ -21,6 +21,7 @@ The Pydantic models in `dppce.models` are the single source of truth. The JSON S
 | pack | `src/dppce/schemas/v1/pack.schema.json` | `urn:dppce:schema:v1:pack` | `RequirementPack` | . |
 | plan | `src/dppce/schemas/v1/plan.schema.json` | `urn:dppce:schema:v1:plan` | `Plan` | Deterministic output of ``dppce plan``. |
 | profile | `src/dppce/schemas/v1/profile.schema.json` | `urn:dppce:schema:v1:profile` | `Profile` | . |
+| runinputs | `src/dppce/schemas/v1/runinputs.schema.json` | `urn:dppce:schema:v1:runinputs` | `RunInputsRecord` | The inputs of one run, written to inputs.json so that a replay can rebuild them. |
 | source | `src/dppce/schemas/v1/source.schema.json` | `urn:dppce:schema:v1:source` | `SourceRecord` | One entry of ``catalogue/sources.yaml``. |
 | testpack | `src/dppce/schemas/v1/testpack.schema.json` | `urn:dppce:schema:v1:testpack` | `TestPack` | . |
 | trust | `src/dppce/schemas/v1/trust.schema.json` | `urn:dppce:schema:v1:trust` | `TrustBundle` | . |

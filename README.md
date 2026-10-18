@@ -58,9 +58,13 @@ uv run dppce run \
   --allow-private-host http://127.0.0.1:8765 \
   --role-secret legitimate_interest=file:TEST-ONLY-legitimate_interest.token \
   --role-secret authority=file:TEST-ONLY-authority.token \
+  --issuer-name "synthetic test laboratory" --issuer-id urn:example:test-lab \
   --at 2026-10-13T12:00:00Z \
   --keys ./runs/keys --out ./runs/ev-1
 ```
+
+The issuer identifier must equal the issuer of the signing key in the trust bundle.
+Otherwise a signed report does not verify as complete.
 
 Replay the recording, sign the report with the test key, and verify it.
 

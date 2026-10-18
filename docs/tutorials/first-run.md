@@ -47,11 +47,14 @@ uv run dppce run \
   --allow-private-host http://127.0.0.1:8765 \
   --role-secret legitimate_interest=file:TEST-ONLY-legitimate_interest.token \
   --role-secret authority=file:TEST-ONLY-authority.token \
+  --issuer-name "synthetic test laboratory" --issuer-id urn:example:test-lab \
   --at 2026-10-13T12:00:00Z \
   --keys ./runs/keys --out ./runs/ev-1
 ```
 
 The command prints the overall outcome and the decision digest. The exit code is `0`.
+The issuer identifier must equal the issuer of the signing key in the trust bundle.
+Otherwise the signed report of step 6 does not verify as complete.
 The options `--allow-private-host`, `--secrets`, and `--role-secret` are confirmations.
 The engine does not let the IXIT file decide these things alone.
 

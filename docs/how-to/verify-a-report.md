@@ -34,7 +34,7 @@ python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10
 | `records_root` | A record commitment was changed. |
 | `counts` | The stated counts or the overall outcome do not match the results. |
 | `signature` | No signature verifies and binds this report. |
-| `issuer_trust` | The signing key is not in your trust bundle, is expired, or is revoked. |
+| `issuer_trust` | The signing key is not in your trust bundle, is expired, or is revoked. Or the stated issuer identifier differs from the issuer of the key, or is `unspecified`. Or an accreditation status other than `not accredited` has no reference. |
 | `manual_results` | A completed manual step has no committed record or no signed result. Or the performer key is not in your trust bundle for the purpose `manual`, or is expired or revoked. Or the signed outcome differs from the report. Or the step states no test purpose digest. Or the signed test purpose digest or SUT version differs from the report. Or the review time is outside the key validity period or after the evaluation time. |
 | `status` | Your policy needs fresh status evidence, and it is missing or stale. |
 | `timestamp` | Your policy needs a trusted timestamp. This version cannot validate one. |
@@ -44,6 +44,8 @@ To check manual steps, your trust bundle must hold the keys of the performers wi
 ## Limits
 
 - The verifier does no network I/O. Revocation comes from the snapshot in your trust bundle.
+- The engine does not validate an accreditation. The verifier shows the stated status and reference.
+- The verifier does not check the issuer name.
 - A report from this version carries no trusted timestamp.
 - You need the encrypted recording and its data key for a replay. The report alone holds
   commitments, not observations.

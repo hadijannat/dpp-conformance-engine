@@ -149,6 +149,7 @@ The run manifest also names each selected test pack by a digest.
 
 `dppce run` writes the paths of the imported files and the selected identifiers to `inputs.json`.
 `dppce replay` reads the files again from these paths. Do not move or change the files after a run.
+A changed file stops the replay with exit code 2 before it evaluates. The message names the file.
 
 ## 5. Test purposes for reviewed mode
 
