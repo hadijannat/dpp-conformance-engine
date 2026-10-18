@@ -584,6 +584,24 @@ def test_a_characteristic_of_the_wrong_type_is_a_problem(name: str, value: str |
     assert name in found[0]
 
 
+FULL_WIDTH_YEAR = "".join(chr(0xFF10 + int(d)) for d in "2027")
+
+
+@pytest.mark.parametrize(
+    "date",
+    ["2027-3-1", "20270301", "2027-W09-1", "2027-02-30", "2027-13-01", f"{FULL_WIDTH_YEAR}-03-01"],
+)
+def test_a_date_fact_must_be_a_calendar_date(date: str) -> None:
+    assert problems(characteristics={**GOOD, "placed_on_market_date": "2027-03-01"}) == []
+    assert problems(characteristics={**GOOD, "placed_on_market_date": "unknown"}) == []
+    found = problems(characteristics={**GOOD, "placed_on_market_date": date})
+    assert len(found) == 1
+    assert "placed_on_market_date" in found[0]
+    assert date not in found[0], "the supplier value is not echoed"
+    other = problems(profile="test/other", characteristics={**GOOD, "placed_on_market_date": date})
+    assert len(other) == 2
+
+
 def test_every_problem_of_an_ics_is_reported() -> None:
     found = problems(
         profile="test/other",

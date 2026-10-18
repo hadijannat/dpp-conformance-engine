@@ -7,8 +7,10 @@ Nothing in a file is evaluated as code or as a template.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Hashable, Sequence
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -138,6 +140,18 @@ def sanitized_ixit(ixit: IXIT) -> dict[str, Any]:
 
 
 _FACT_TYPES: dict[str, type] = {"integer": int, "string": str, "boolean": bool, "date": str}
+# ASCII digits only. date.fromisoformat alone would also accept 20270301 and 2027-W09-1.
+_CALENDAR_DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+
+
+def _is_calendar_date(value: str) -> bool:
+    if not _CALENDAR_DATE.fullmatch(value):
+        return False
+    try:
+        date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
 
 
 def check_ics(ics: ICS, profile: Profile) -> list[str]:
@@ -155,4 +169,7 @@ def check_ics(ics: ICS, profile: Profile) -> list[str]:
             problems.append(f"The characteristic '{name}' is not a fact of profile '{profile.id}'.")
         elif value != "unknown" and type(value) is not _FACT_TYPES[spec.type]:
             problems.append(f"The characteristic '{name}' must be of type {spec.type}.")
+        elif spec.type == "date" and value != "unknown" and not _is_calendar_date(str(value)):
+            # The value is not repeated: the supplier of the system under test wrote it.
+            problems.append(f"The characteristic '{name}' must be a calendar date written YYYY-MM-DD.")
     return problems
