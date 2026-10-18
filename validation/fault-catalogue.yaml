@@ -14,13 +14,19 @@
 #   F-31 and their rig setup, and before the commit that adds the flags of F-32 and F-33.
 # - F-34: the entry commit comes before the commit that adds its rig setup. The QR fixture of
 #   F-34 is older than the entry. An earlier carrier fix added it.
+# Version 0.4.0 changes the expected outcome of F-32 after an owner decision of 2026-10-18.
+# A 5xx answer now counts like a connectivity failure, so F-32 expects inconclusive with
+# TRANSPORT.SERVER_ERROR. F-32 keeps its id and moves to the boundary cases, because the step
+# is no longer a failure of the system under test. Version 0.4.0 also adds F-35. The commit
+# that adds F-35 and changes F-32 comes before the commit that adds the flag resolver_divergent
+# and before the commit that changes the 5xx outcome in the adapters.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.3.0
+version: 0.4.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
@@ -201,12 +207,6 @@ sut_faults:
     description: The QR image encodes the GTIN in Arabic-Indic digits.
     test_purpose: TP-ID-001
     expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
-  - id: F-32
-    class: unresolved_identifier
-    fault: resolver_5xx
-    description: The resolver answers 503 for the carrier identifier.
-    test_purpose: TP-ID-002
-    expected: {verdict: fail, reason_code: IDENTIFIER.RESOLUTION.STATUS}
   - id: F-33
     class: unresolved_identifier
     fault: resolver_html
@@ -219,6 +219,12 @@ sut_faults:
     description: The QR image holds two readable QR symbols.
     test_purpose: TP-CARRIER-001
     expected: {verdict: fail, reason_code: CARRIER.QR.NOT_DECODED}
+  - id: F-35
+    class: binding_divergence
+    fault: resolver_divergent
+    description: The resolver path answers 200 with a passport that has the carrier identifier but differs from the passport at the API item target.
+    test_purpose: TP-ID-003
+    expected: {verdict: fail, reason_code: IDENTIFIER.BINDING.MISMATCH}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -234,6 +240,12 @@ boundary_cases:
     test_purpose: TP-ID-002
     expected: {verdict: inconclusive, reason_code: TRANSPORT.UNREACHABLE}
     rationale: A connectivity failure does not prove that an obligation was breached.
+  - id: F-32
+    fault: resolver_5xx
+    description: The resolver answers 503 for the carrier identifier.
+    test_purpose: TP-ID-002
+    expected: {verdict: inconclusive, reason_code: TRANSPORT.SERVER_ERROR}
+    rationale: A server error is no answer to judge. It counts like a connectivity failure (owner decision of 2026-10-18).
   - id: B-03
     fault: none
     description: The last-update time is exactly at the freshness limit.
