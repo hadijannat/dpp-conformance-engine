@@ -9,6 +9,7 @@ Every command accepts ``--json`` and then writes one JSON document to standard o
 from __future__ import annotations
 
 import argparse
+import base64
 import contextlib
 import json
 import sys
@@ -38,7 +39,7 @@ from dppce.catalogue import (
 from dppce.catalogue.lint import lint, trace
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.envelope import decision_digest, in_layout_of, sign_envelope
-from dppce.evidence.jws import LocalSigner, SignatureError
+from dppce.evidence.jws import LocalSigner, SignatureError, header_of
 from dppce.evidence.manual import (
     MANUAL_CHECK,
     SAMPLE_PREFIX,
@@ -47,6 +48,17 @@ from dppce.evidence.manual import (
     test_purpose_digest,
 )
 from dppce.evidence.recording import RecordingError, purge_expired, read_recording, write_recording
+from dppce.evidence.timestamp import (
+    MAX_TOKEN_BYTES,
+    MAX_TOKENS,
+    TimestampError,
+    format_time,
+    imprint_hex,
+    imprint_of,
+    parse_token,
+    token_from_response,
+)
+from dppce.evidence.timestamp import SHA256 as TIMESTAMP_SHA256
 from dppce.infrastructure.authorization import AuthorizationError, validate_authorization
 from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, utc_stamp
 from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_secret
@@ -689,6 +701,79 @@ def cmd_verify(args: argparse.Namespace) -> int:
     return EXIT_OK if report.complete else EXIT_VERIFY
 
 
+def cmd_timestamp_imprint(args: argparse.Namespace) -> int:
+    """Print the SHA-256 imprint of each signature. The operator makes the request with it."""
+    envelope = EvidenceEnvelope.model_validate(parse_strict(args.envelope.read_bytes()))
+    if not envelope.signatures:
+        raise UsageError("TIMESTAMP.SIGNATURE.NONE: the envelope has no signature to timestamp")
+    rows: list[dict[str, Any]] = []
+    for token in envelope.signatures:
+        try:
+            rows.append({"kid": header_of(token).get("kid"), "imprint": f"sha256:{imprint_hex(token)}"})
+        except SignatureError as exc:
+            raise UsageError(
+                "TIMESTAMP.SIGNATURE.MALFORMED: a signature of the envelope is not a compact JWS"
+            ) from exc
+    _emit(args, {"imprints": rows}, "\n".join(f"{row['kid']!r} {row['imprint']}" for row in rows))
+    return EXIT_OK
+
+
+def _signature_with_imprint(signatures: Sequence[str], imprint: bytes) -> str | None:
+    for token in signatures:
+        with contextlib.suppress(SignatureError):
+            if imprint_of(token) == imprint:
+                return token
+    return None
+
+
+def cmd_timestamp_attach(args: argparse.Namespace) -> int:
+    """Add the token of a TimeStampResp file to a copy of the envelope. It verifies no trust."""
+    if args.out.resolve() == args.envelope.resolve():
+        raise UsageError("--out must name a new file; the input envelope is never overwritten")
+    envelope = EvidenceEnvelope.model_validate(parse_strict(args.envelope.read_bytes()))
+    with args.response.open("rb") as file:
+        response = file.read(MAX_TOKEN_BYTES + 1)
+    if len(response) > MAX_TOKEN_BYTES:
+        raise UsageError(f"TIMESTAMP.RESPONSE.TOO_LARGE: the response is larger than {MAX_TOKEN_BYTES} bytes")
+    try:
+        status, der = token_from_response(response)
+    except TimestampError as exc:
+        raise UsageError(f"TIMESTAMP.RESPONSE.MALFORMED: {exc}") from exc
+    if status not in ("granted", "granted_with_mods"):
+        raise UsageError(f"TIMESTAMP.RESPONSE.REJECTED: the response has the status {status!r}")
+    try:
+        if not der:
+            raise TimestampError("TIMESTAMP.TOKEN.MALFORMED", "the response holds no token")
+        token = parse_token(der)
+    except TimestampError as exc:
+        raise UsageError(f"TIMESTAMP.RESPONSE.MALFORMED: {exc}") from exc
+    if token.imprint_oid != TIMESTAMP_SHA256:
+        raise UsageError("TIMESTAMP.IMPRINT.ALGORITHM: the imprint of the token does not use SHA-256")
+    signature = _signature_with_imprint(envelope.signatures, token.imprint)
+    if signature is None:
+        raise UsageError("TIMESTAMP.IMPRINT.MISMATCH: the token is not over a signature of this envelope")
+    text = base64.b64encode(der).decode("ascii")
+    if text in envelope.timestamp_evidence:
+        raise UsageError("TIMESTAMP.TOKEN.DUPLICATE: the envelope already holds this token")
+    if len(envelope.timestamp_evidence) >= MAX_TOKENS:
+        raise UsageError(f"TIMESTAMP.EVIDENCE.TOO_MANY: the envelope already holds {MAX_TOKENS} tokens")
+    stamped = envelope.model_copy(update={"timestamp_evidence": (*envelope.timestamp_evidence, text)})
+    args.out.write_text(stamped.model_dump_json(by_alias=True) + "\n", encoding="utf-8")
+    kid, gen_time = header_of(signature).get("kid"), format_time(token.gen_time)
+    summary = {
+        "written": str(args.out),
+        "kid": kid,
+        "gen_time": gen_time,
+        "timestamps": len(stamped.timestamp_evidence),
+    }
+    message = (
+        f"attached a timestamp of {gen_time} for the signature of key {kid!r}; "
+        f"not verified: run dppce verify; wrote {args.out}"
+    )
+    _emit(args, summary, message)
+    return EXIT_OK
+
+
 def cmd_catalogue_lint(args: argparse.Namespace) -> int:
     root = data_root(args.data_root)
     findings = lint(
@@ -952,6 +1037,24 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     )
     digest_command.add_argument("--test-purpose", required=True, help="identifier of the manual test purpose")
     digest_command.add_argument("--testpack", help="look in this test pack only, by identifier")
+
+    timestamp = commands.add_parser(
+        "timestamp", help="Timestamp tools. No command contacts a timestamp authority."
+    ).add_subparsers(dest="timestamp_command", required=True)
+    summary = "Print the SHA-256 imprint of each signature of an envelope, for a timestamp request."
+    imprint_command = timestamp.add_parser("imprint", help=summary, description=summary)
+    imprint_command.add_argument("--json", action="store_true")
+    imprint_command.set_defaults(handler=cmd_timestamp_imprint)
+    imprint_command.add_argument("--envelope", type=Path, required=True)
+    summary = "Add the token of a TimeStampResp file to a copy of an envelope. It does not verify the token."
+    attach_command = timestamp.add_parser("attach", help=summary, description=summary)
+    attach_command.add_argument("--json", action="store_true")
+    attach_command.set_defaults(handler=cmd_timestamp_attach)
+    attach_command.add_argument("--envelope", type=Path, required=True)
+    attach_command.add_argument(
+        "--response", type=Path, required=True, help="DER TimeStampResp that the operator obtained"
+    )
+    attach_command.add_argument("--out", type=Path, required=True, help="new envelope file; never the input")
 
     coverage = add("coverage", cmd_coverage, "Show the coverage of the selected catalogue for a run.")
     coverage.add_argument("--envelope", type=Path, required=True)
