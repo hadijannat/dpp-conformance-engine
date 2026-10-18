@@ -221,7 +221,7 @@ channels:
 The policy states what the system owner declares. The check observes whether the system
 enforces that declaration. It does not decide who has a legal entitlement.
 
-Each channel is a path template under the `api` endpoint. It can use `{id}` and the parts that
+Each channel is a URL template under the `api` endpoint. It can use `{id}` and the parts that
 `IXIT.id_parts` declares, for example `{serial}`. A channel outside the template grammar makes
 the policy not valid: the check gives `blocked` with `ACCESS.POLICY.MISSING`. The check builds
 every channel URL before the first request. A placeholder without a value gives `blocked` with
@@ -360,7 +360,7 @@ IXIT conventions for the reference rig:
 - `samples.passport_id`: the `{id}` placeholder value, for example `09506000134352-EV0001`.
 - `samples.aas_file`: path of an Asset Administration Shell JSON file (optional).
 - `resources`: one URL template for each fetched resource: `item`, `model`, `signed`,
-  `versions`, and `registry_record`. Each names an endpoint and a path template.
+  `versions`, and `registry_record`. Each names an endpoint and a URL template.
 - `id_parts`: splits `passport_id` at a fixed separator into named parts. The reference
   fixtures use separator `-` and the names `gtin` and `serial`.
 

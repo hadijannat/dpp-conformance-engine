@@ -351,9 +351,9 @@ does not let those files decide what the test host trusts or discloses:
 The IXIT gives the URL of each fetched passport resource. No adapter holds a URL path for a
 passport resource.
 
-- `IXIT.resources` maps a resource name to an endpoint name and a path template. The names are
+- `IXIT.resources` maps a resource name to an endpoint name and a URL template. The names are
   `item`, `model`, `signed`, `versions`, and `registry_record`.
-- A path template starts with one `/`. It holds URL path and query characters and named
+- A URL template starts with one `/`. It holds URL path and query characters and named
   placeholders, for example `/passports/{gtin}/{serial}/data`. It has no fragment.
 - A URL template is not evaluated. The engine only replaces each named placeholder with a
   percent-encoded value. The template grammar is fixed.
@@ -371,7 +371,7 @@ passport resource.
   that the operator did not confirm.
 - A resource with no template gives `blocked` with `<AREA>.NO_TARGET`. The engine has no default
   path.
-- The access policy names its probe channels as path templates under the `api` endpoint. The
+- The access policy names its probe channels as URL templates under the `api` endpoint. The
   same helper builds them with the same placeholders.
 
 The profile binds the API contract and the access policy. The ICS names the identifier of each
