@@ -59,6 +59,11 @@ def _certificate(
         .not_valid_before(NOW - timedelta(hours=1))
         .not_valid_after(NOW + timedelta(hours=1))
         .add_extension(x509.BasicConstraints(ca=ca, path_length=None), critical=True)
+        # Python 3.13 verifies with X509_STRICT, which requires both key identifiers (RFC 5280).
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(key.public_key()), critical=False)
+        .add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_public_key(signer.public_key()), critical=False
+        )
     )
     if ca:
         builder = builder.add_extension(
@@ -99,6 +104,7 @@ def pki(tmp_path: Path) -> dict[str, Any]:
 @pytest.fixture
 def https(pki: dict[str, Path]) -> Iterator[LoopbackServer]:
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.load_cert_chain(pki["chain"], pki["key"])
     server = LoopbackServer(lambda r: reply(r, body=b'{"id": "x"}'), tls=context)
     yield server
