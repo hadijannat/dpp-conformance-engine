@@ -40,7 +40,8 @@ Copy `fixtures/reference/ev.ixit.yaml` and change it. The schema is `ixit`.
    `model`, `signed`, `versions`, and `registry_record`. Each template names an endpoint and a path.
 4. If a template uses a part of the passport identifier, declare the split in `id_parts`.
    Give a fixed separator and a name for each part.
-5. List the role identities. Give a secret **reference**, never a secret.
+5. List the role identities. Use only a role that the profile declares in `roles`.
+   Another role is an input error (exit code 2). Give a secret **reference**, never a secret.
    A reference is `env:DPPCE_SECRET_<NAME>` or `file:<name>`.
 6. Set the network policy: allowed hosts, request limit, minimum interval, and a contact.
 7. Set the retention period for observations.
