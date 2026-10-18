@@ -598,17 +598,21 @@ def test_the_request_headers_without_a_contact(loopback: Start) -> None:
 
 
 @pytest.mark.parametrize(
-    ("echoed", "kept"),
+    ("head", "kept"),
     [
-        (b"echo:" + TOKEN[:17].encode(), b"echo:<removed>"),
-        (b"echo:" + TOKEN[:8].encode(), b"echo:<removed>"),
-        (b"echo:" + TOKEN[:7].encode(), b"echo:" + TOKEN[:7].encode()),
+        (TOKEN[:17].encode(), b"echo:<removed>"),
+        (TOKEN[:8].encode(), b"echo:<removed>"),
+        (TOKEN[:7].encode(), b"echo:" + TOKEN[:7].encode()),
     ],
 )
 def test_a_credential_cut_by_the_body_end_is_removed_from_its_eighth_character(
-    echoed: bytes, kept: bytes, loopback: Start
+    head: bytes, kept: bytes, loopback: Start
 ) -> None:
-    """A head of a credential at the end of the body is removed if it has 8 characters or more.
+    """A head of a credential at the end of a body that the limit cut is removed from 8 characters.
+
+    Since the adapter review fixes, a complete body keeps its end (architecture section 9). The
+    body limit therefore cuts the full credential here, so that the body ends with ``head``. The
+    mutant names below are those of the red run at db9ad1b, against the ``_scrub`` of dbc88e0.
 
     Kills:
     dppce.infrastructure.transport.xǁPolicyTransportǁ_scrub__mutmut_45
@@ -616,9 +620,12 @@ def test_a_credential_cut_by_the_body_end_is_removed_from_its_eighth_character(
     dppce.infrastructure.transport.xǁPolicyTransportǁ_scrub__mutmut_47
     dppce.infrastructure.transport.xǁPolicyTransportǁ_scrub__mutmut_53
     """
-    server = loopback(lambda r: reply(r, body=echoed))
-    subject = transport(credentials={"auditor": (server.origin, TOKEN)})
-    assert subject.fetch(Request("GET", f"{server.origin}/ok")).body == kept
+    prefix = b"x" * (1024 - len(b"echo:") - len(head))
+    server = loopback(lambda r: reply(r, body=prefix + b"echo:" + TOKEN.encode() + b"-tail"))
+    subject = engine({"max_body_bytes": 1024}, credentials={"auditor": (server.origin, TOKEN)})
+    record = subject.fetch(Request("GET", f"{server.origin}/ok"))
+    assert record.truncated
+    assert record.body == prefix + kept
 
 
 def test_a_credential_inside_a_longer_one_is_removed_as_a_whole(loopback: Start) -> None:
