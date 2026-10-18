@@ -100,6 +100,13 @@ def header_of(token: str) -> dict[str, Any]:
     return header
 
 
+def signature_value(token: str) -> bytes:
+    """Return the base64url-decoded third part WITHOUT verifying anything. A timestamp covers it."""
+    if not _COMPACT.fullmatch(token):
+        raise SignatureError("a compact JWS is three base64url parts")
+    return _unb64(token.split(".")[2])
+
+
 def verify_compact(token: str, public_jwk: Mapping[str, str], *, typ: str) -> bytes:
     """Verify ``token`` with ``public_jwk`` and return the payload.
 

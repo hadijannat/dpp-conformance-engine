@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from itertools import pairwise
 from typing import Any, Literal
@@ -28,6 +29,7 @@ from dppce.evidence.envelope import (
 )
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
 from dppce.evidence.manual import MANUAL_CHECK, ManualResultError, verify_manual_result
+from dppce.evidence.timestamp import MAX_TOKENS, Stamp, TimestampError, format_time, imprint_of, verify_token
 from dppce.models import (
     NOT_ACCREDITED,
     Attestation,
@@ -230,32 +232,38 @@ def _counts(decision: DecisionBody) -> tuple[Outcome, str]:
     return "pass", "Counts, verdicts, coverage totals, and the overall outcome equal the recomputed values."
 
 
-def _key_state(key: TrustedKey, trust: TrustBundle, at: datetime) -> str | None:
-    """Return why the key is not trusted at ``at``, or None if it is trusted."""
+def _key_state(key: TrustedKey, trust: TrustBundle, at: datetime, when: str) -> str | None:
+    """Return why the key is not trusted at ``at``, or None if it is trusted. ``when`` names ``at``."""
     if "report" not in key.purposes:
         return f"Key '{key.kid}' is not trusted for reports."
     if not _stamp(key.not_before) <= at <= _stamp(key.not_after):
-        return f"Key '{key.kid}' is outside its validity period at the evaluation time."
+        return f"Key '{key.kid}' is outside its validity period at {when}."
     if trust.key_revoked(key.kid, at):
-        return f"Key '{key.kid}' is revoked."
+        return f"Key '{key.kid}' is revoked at {when}."
     return None
 
 
-def _signatures(
-    envelope: EvidenceEnvelope, digest: str, trust: TrustBundle, at: datetime
-) -> tuple[tuple[Outcome, str], tuple[Outcome, str]]:
-    """Return the (signature, issuer_trust) outcomes. One good trusted signature is enough."""
+@dataclass(frozen=True)
+class _Signed:
+    """A signature that verifies with a key of the trust bundle and binds the decision body."""
+
+    token: str
+    key: TrustedKey
+    attestation: Attestation
+
+
+def _verified(
+    envelope: EvidenceEnvelope, digest: str, trust: TrustBundle
+) -> tuple[tuple[Outcome, str], list[_Signed]]:
+    """Return the signature outcome and every signature that verifies and binds, in order.
+
+    Key state is not checked here: ``issuer_trust`` checks it at the key validity time.
+    """
     if not envelope.signatures:
-        return ("missing", "The envelope has no signature."), (
-            "not_checked",
-            "There is no signature to attribute.",
-        )
+        return ("missing", "The envelope has no signature."), []
     keys = {k.kid: k for k in trust.keys}
-    signature: tuple[Outcome, str] = ("not_checked", "No signature names a key in the trust bundle.")
-    issuer: tuple[Outcome, str] = (
-        "fail",
-        "No signature names a key in the trust bundle. A key that only the report supplies is not trusted.",
-    )
+    failure: tuple[Outcome, str] | None = None
+    verified: list[_Signed] = []
     for token in envelope.signatures:
         try:
             key = keys.get(str(header_of(token).get("kid")))
@@ -266,7 +274,7 @@ def _signatures(
             if canonical_bytes(attestation) != payload:
                 raise SignatureError("the signed payload is not a canonical attestation")
         except (SignatureError, ValueError) as exc:
-            signature = ("fail", f"A signature does not verify: {exc}")
+            failure = ("fail", f"A signature does not verify: {exc}")
             continue
         bound = (
             attestation.decision_digest == digest
@@ -274,28 +282,105 @@ def _signatures(
             and attestation.records_root == envelope.decision.records_root
         )
         if not bound:
-            signature = ("fail", "A signature verifies but does not bind this decision body.")
+            failure = ("fail", "A signature verifies but does not bind this decision body.")
             continue
-        signature = ("pass", f"Signature by key '{key.kid}' verifies and binds the decision digest.")
-        problem = _key_state(key, trust, at)
-        if problem is None and attestation.issuer != key.issuer:
+        verified.append(_Signed(token, key, attestation))
+    if verified:
+        first = verified[0].key.kid
+        return ("pass", f"Signature by key '{first}' verifies and binds the decision digest."), verified
+    return failure or ("not_checked", "No signature names a key in the trust bundle."), verified
+
+
+def _timestamps(
+    envelope: EvidenceEnvelope, verified: list[_Signed], trust: TrustBundle, at: datetime
+) -> tuple[tuple[Outcome, str], dict[str, datetime]]:
+    """Return the timestamp outcome and the earliest good genTime for each signature (ADR 0015)."""
+    tokens = envelope.timestamp_evidence
+    if not tokens:
+        missing: Outcome = "missing" if trust.require_timestamp else "not_checked"
+        return (missing, "The envelope has no timestamp evidence."), {}
+    if not verified:
+        return (
+            "not_checked",
+            "TIMESTAMP.SIGNATURE.NONE: no signature verifies, so no timestamp can bind one.",
+        ), {}
+    if len(tokens) > MAX_TOKENS:
+        return (
+            "fail",
+            f"TIMESTAMP.EVIDENCE.TOO_MANY: the envelope holds {len(tokens)} tokens; "
+            f"the limit is {MAX_TOKENS}.",
+        ), {}
+    by_imprint: dict[bytes, list[_Signed]] = {}
+    for signed in verified:
+        by_imprint.setdefault(imprint_of(signed.token), []).append(signed)
+    times: dict[str, datetime] = {}
+    good: tuple[Stamp, str] | None = None
+    first_error: str | None = None
+    for index, text in enumerate(tokens):
+        try:
+            stamp = verify_token(text, by_imprint.keys(), trust, at)
+        except TimestampError as exc:
+            # Only TimestampError: any other exception is a defect that the property tests must find.
+            first_error = first_error or f"{exc.code}: token {index}: {exc}"
+            continue
+        for signed in by_imprint[stamp.imprint]:
+            if signed.token not in times or stamp.gen_time < times[signed.token]:
+                times[signed.token] = stamp.gen_time
+        good = good or (stamp, by_imprint[stamp.imprint][0].key.kid)
+    if good is None:
+        return ("fail", first_error or "TIMESTAMP.TOKEN.MALFORMED: no token can be read."), times
+    stamp, kid = good
+    return (
+        "pass",
+        f"TIMESTAMP.OK: A token of the timestamp authority {stamp.tsa_subject!r} states "
+        f"{format_time(stamp.gen_time)} for the signature of key '{kid}'.",
+    ), times
+
+
+def _issuer(
+    envelope: EvidenceEnvelope,
+    verified: list[_Signed],
+    times: dict[str, datetime],
+    trust: TrustBundle,
+    at: datetime,
+) -> tuple[Outcome, str]:
+    """Return the issuer_trust outcome. The first signature with no problem gives pass.
+
+    Each signature is checked at its key validity time: the earliest genTime of a good token over
+    that signature, or else the evaluation time. Each detail names the time used.
+    """
+    if not envelope.signatures:
+        return "not_checked", "There is no signature to attribute."
+    statement = envelope.decision.manifest.issuer
+    problem: str | None = None
+    for signed in verified:
+        key, stamped = signed.key, signed.token in times
+        valid_at = times.get(signed.token, at)
+        when = (
+            f"{format_time(valid_at)}, the genTime of a trusted timestamp over its signature"
+            if stamped
+            else "the evaluation time"
+        )
+        problem = _key_state(key, trust, valid_at, when)
+        if problem is None and signed.attestation.issuer != key.issuer:
             problem = (
-                f"The attestation names issuer '{attestation.issuer}', but the key belongs to '{key.issuer}'."
+                f"The attestation names issuer '{signed.attestation.issuer}', but the key belongs to "
+                f"'{key.issuer}'. Key validity was checked at {when}."
             )
+        if problem is None and (stated := _issuer_problem(statement, key)) is not None:
+            problem = f"{stated} Key validity was checked at {when}."
         if problem is None:
-            problem = _issuer_problem(envelope.decision.manifest.issuer, key)
-        if problem is None:
-            statement = envelope.decision.manifest.issuer
             reference = statement.accreditation_reference
-            return signature, (
+            return (
                 "pass",
-                f"Key '{key.kid}' of issuer '{key.issuer}' is trusted at the evaluation time, and the "
+                f"Key '{key.kid}' of issuer '{key.issuer}' is trusted at {when}, and the "
                 "report states that issuer. The verifier does not check the issuer name. Accreditation "
                 f"status as declared by the operator: {statement.accreditation_status!r}, reference "
                 f"{repr(reference) if reference else 'none'}. The engine does not validate accreditation.",
             )
-        issuer = ("fail", problem)
-    return signature, issuer
+    return "fail", problem or (
+        "No signature names a key in the trust bundle. A key that only the report supplies is not trusted."
+    )
 
 
 def _issuer_problem(statement: IssuerStatement, key: TrustedKey) -> str | None:
@@ -394,15 +479,6 @@ def _status(trust: TrustBundle, at: datetime) -> tuple[Outcome, str]:
     )
 
 
-def _timestamp(envelope: EvidenceEnvelope, trust: TrustBundle) -> tuple[Outcome, str]:
-    if not envelope.timestamp_evidence:
-        return (
-            "missing" if trust.require_timestamp else "not_checked"
-        ), "The envelope has no timestamp evidence."
-    # ponytail: no RFC 3161 validation yet. Present evidence stays unverified. See BL-004.
-    return "not_checked", "Timestamp evidence is present, but this version cannot validate it."
-
-
 def verify_json(raw: bytes | str, trust: TrustBundle, at: datetime) -> VerificationReport:
     """Verify an envelope given as JSON text. This is the entry point for a file.
 
@@ -469,7 +545,8 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
     root_ok = results_root(
         decision.requirement_results, decision.test_results
     ) == decision.results_root and decision.results_count == len(keys)
-    signature, issuer = _signatures(envelope, digest, trust, at)
+    signature, verified = _verified(envelope, digest, trust)
+    timestamp, times = _timestamps(envelope, verified, trust, at)
     return report(
         {
             "structure": ("pass", "The envelope matches the schema."),
@@ -482,10 +559,10 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
             else ("fail", "The recomputed records root differs from the stated one."),
             "counts": _counts(decision),
             "signature": signature,
-            "issuer_trust": issuer,
+            "issuer_trust": _issuer(envelope, verified, times, trust, at),
             "manual_results": _manual_results(decision, trust, at),
             "status": _status(trust, at),
-            "timestamp": _timestamp(envelope, trust),
+            "timestamp": timestamp,
         },
         digest,
     )
