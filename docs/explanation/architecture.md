@@ -32,7 +32,7 @@ deterministic code and versioned data.
 | `dppce.testdefs` | Load YAML test packs. Hold the allowlisted check registry. | `models`, `infrastructure.interfaces` |
 | `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws`, `evidence.manual`, `evidence.x509path` |
 | `dppce.verdicts` | Aggregation truth table and coverage. Pure functions. | `models` |
-| `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing, X.509 paths, RFC 3161 timestamp tokens, and report status lists. | `models`, `infrastructure.interfaces` |
+| `dppce.evidence` | Canonical JSON, Merkle tree and inclusion proofs, commitments and record openings, encryption, signing, X.509 paths, RFC 3161 timestamp tokens, and report status lists. | `models`, `infrastructure.interfaces` |
 | `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence`, `verdicts`, `migrations` |
 | `dppce.migrations` | Upgrade a stored document to the current schema version. | nothing in `dppce` |
 | `dppce.infrastructure` | Transport, recorder, replay, clock, key providers, reference server. | `models`, `evidence` |
@@ -50,8 +50,8 @@ Rules:
    `load_data` parses a JSON file with `parse_strict` (section 11), so a repeated key, `NaN`,
    `Infinity`, and a number outside the float range are rejected. A nesting deeper than the
    parser handles is an input error, not a crash. The envelope, the trust bundle, the recording,
-   the manual result, the authorization, and the JWS header and payload are also parsed with
-   `parse_strict`. Every body that the system under test returns is parsed with `parse_strict`.
+   the manual result, the authorization, the record opening, the inclusion proof, the public JWK
+   file, and the JWS header and payload are also parsed with `parse_strict`. Every body that the system under test returns is parsed with `parse_strict`.
    So is a sample artifact from the IXIT, such as an AAS file. A test proves that a `!!python/object` tag is rejected. No YAML value is
    evaluated as code or as a template. A URL template (section 9.2) is not evaluated either. The
    engine only replaces named placeholders with percent-encoded values under a fixed grammar.
@@ -568,6 +568,9 @@ does not let those files decide what the test host trusts or discloses:
 - An IXIT may not name a secret for the role `anonymous`.
 - The profile declares the closed set of roles. The IXIT cannot add a role. A role outside the set is an input error (section 6).
 - The credential issuer in a report comes from the validated authorization. The IXIT cannot name it.
+- The IXIT cannot name a data key, a signing key, a passphrase, or a key of the trust bundle.
+  `keys generate`, `sign`, `authorize`, `trust-bundle add-key`, `open`, and `prove` read no ICS
+  and no IXIT.
 - A secret reference is `env:DPPCE_SECRET_<NAME>` or `file:<name>` inside the directory that
   the operator gives with `--secrets`. No other environment variable or file can be named.
 - The IXIT declares a secret reference for a role. The operator must repeat exactly that
@@ -687,6 +690,14 @@ records/<id>.enc   one encrypted record each
   with AES-256-GCM. The nonce is 96 random bits. The associated data is the record id and the
   schema version.
 - The data key comes from a `DataKeyProvider`. The key is never stored in the recording directory.
+- `dppce run` uses the key `--data-key-id` in the directory `--keys`. The default identifier is
+  `local-data-key-1`.
+- `run` creates a missing key only with `--create-data-key`. It draws 32 bytes from the operating
+  system and writes the file with mode 0600.
+- Without that option, a missing or unusable key is an input error, `KEYS.DATA_KEY.UNAVAILABLE`,
+  with exit code 2. This check runs before the first request.
+- The index records the key identifier. `replay`, `purge`, and `open` therefore need no key
+  identifier option.
 - The index holds no URL, no header, and no payload. It is clear text, so that a tool can list
   a recording with no key. It is not trusted alone: a reader with the key compares it with
   `recording.sealed` and refuses a recording whose index was changed.
@@ -768,6 +779,38 @@ therefore does not change a decision digest.
 `inputs.json` is not encrypted or signed. It keeps the trust bundle and the authorization token
 in clear text, as before.
 
+### 10.2 Record openings
+
+A record opening discloses one record to a party that is entitled to it (ADR 0009). It holds the
+plaintext of the record. Protect it as you protect the recording.
+
+`dppce open --run RUN_DIR --keys KEYS_DIR --record ID --out FILE` writes `JCS(RecordOpening)`.
+The schema version is `dppce.opening/1`, and the JSON Schema is `opening`.
+
+- `record` holds every field of the record except the salt. `JCS(record)` is the plaintext of
+  the commitment.
+- `salt` is the salt of the record, as standard base64 with padding.
+- `proof` is the inclusion proof of the record commitment in the `records` tree (section 11.2).
+- The command reads the recording with `read_recording`. A recording that does not authenticate
+  is an input error.
+- It reads `RUN_DIR/envelope.json`, or the file that `--envelope` names. The envelope must pass
+  `structure`, `ordering`, `results_root`, `records_root`, and `counts`. Otherwise the reason
+  code is `ENVELOPE.BODY.INVALID`.
+- A record identifier that the recording does not hold gives `OPEN.RECORD.UNKNOWN`.
+- A commitment that is absent from the envelope, or that differs from it, gives
+  `OPEN.RECORD.NOT_IN_REPORT`.
+- `--out` names a new file. The command creates it with mode 0600. An existing file gives
+  `OPEN.OUTPUT.EXISTS`.
+- The command writes a warning to standard error. The warning states that the file holds the
+  plaintext of the record.
+- Request headers are recorded without secrets (section 10). A response body can hold personal
+  data.
+
+This is the first version of the format. The verifier refuses every other version, so no
+migration step exists yet.
+
+The verifier checks an opening with `--opening FILE` (section 11.4).
+
 ## 11. Evidence
 
 ### 11.1 Canonical decision body
@@ -799,6 +842,30 @@ Leaves, in ascending order of key:
 - `records`: `JCS({"record_id", "commitment"})` (key: record id).
 
 The verifier rejects keys that are not strictly ascending. That detects a duplicate and a reorder.
+
+An inclusion proof is `JCS(InclusionProof)`. The schema version is `dppce.proof/1`, and the JSON
+Schema is `proof`.
+
+- `label` is `results` or `records`. `leaf` is a requirement result, a test result, or a record
+  commitment. Its type must fit the label.
+- `key` is the key of the leaf as stated above. It must name the leaf.
+- `index` is the position of the leaf in ascending order of key. `size` is the number of leaves.
+- `path` holds at most 64 hashes in lowercase hexadecimal. `root` is the root of the tree.
+- `decision_digest` names the report.
+- `merkle.verify_inclusion` checks a proof with the algorithm of RFC 9162, section 2.1.3.2.
+- This is the first version of the format. The verifier refuses every other version, so no
+  migration step exists yet.
+
+`dppce prove --envelope FILE --result KEY --out FILE` writes the proof of one result. `KEY` is
+`R:` plus a requirement identifier, or `T:` plus a test purpose identifier.
+
+- The envelope must pass the five dimensions of section 10.2. Otherwise the reason code is
+  `ENVELOPE.BODY.INVALID`.
+- A key that the report does not hold gives `PROVE.RESULT.UNKNOWN`. An existing `--out` file
+  gives `PROVE.OUTPUT.EXISTS`.
+- A proof discloses one result. The verifier checks a proof against the envelope that it names
+  (section 11.4).
+
 The file-backed log in `evidence.devlog` is a development component. It does not implement
 RFC 9162 and gives no protection against equivocation.
 
@@ -812,6 +879,8 @@ The verification key is a public P-256 JWK with `kty`, `crv`, `x`, and `y`. It c
 The protected header holds `alg`, `kid`, and
 `typ: "dppce-attestation+jws"`. Keys in the repository are test keys and say so in their names.
 Production keys come from a `Signer` implementation for a KMS or PKCS#11 device.
+`dppce keys generate` writes a passphrase-encrypted file key for an operator without a KMS or
+PKCS#11 device. Those `Signer` implementations are interfaces only in this version.
 
 A report signature can carry RFC 3161 timestamp tokens (ADR 0015). The timestamp profile:
 
@@ -839,6 +908,75 @@ must equal the imprint of a signature in the envelope. `attach` does not check t
 
 COSE, qualified electronic seals, and UNTP DCC export are separate profiles with their own
 capability states.
+
+#### Signing keys
+
+`dppce keys generate --out FILE --passphrase-ref REFERENCE` writes a new P-256 key. The format is
+PKCS#8 PEM, encrypted with the passphrase.
+
+- The encryption is PBES2: PBKDF2-HMAC-SHA256 with 2048 iterations, and AES-256-CBC. The
+  installed `cryptography` package sets these values. It cannot raise the iteration count for
+  PKCS#8.
+- 2048 iterations make a guess cheap. The passphrase must therefore have high entropy. Generate
+  it, for example with `secrets.token_urlsafe(32)`. Do not use a passphrase that a person chose.
+- A passphrase has 32 to 1023 bytes in UTF-8. Otherwise the reason code is
+  `KEYS.PASSPHRASE.LENGTH`.
+- The command creates the file with mode 0600 and never writes over a file. An existing file
+  gives `KEYS.FILE.EXISTS`.
+- The command prints the public JWK of the key: `kty`, `crv`, `x`, and `y`.
+- The passphrase is a secret reference, as in section 9.1: `env:DPPCE_SECRET_<NAME>`, or
+  `file:<name>` inside `--secrets`. No option takes the passphrase itself.
+- No command prints or records a passphrase or a private key.
+
+`dppce sign` and `dppce authorize` load a key with one set of rules:
+
+- An encrypted key needs `--passphrase-ref`. Without it, the reason code is
+  `KEYS.PASSPHRASE.MISSING`.
+- A key that cannot be decrypted or read gives `KEYS.KEY.UNREADABLE`. The message holds no
+  passphrase.
+- An unencrypted key gives `KEYS.KEY.UNENCRYPTED`. The option `--allow-unencrypted-key` permits
+  it, for test keys only.
+- A key that is not on P-256 gives `KEYS.KEY.NOT_P256`.
+
+`dppce sign` writes its result in one of two ways. The operator gives exactly one:
+
+- `--out FILE` names a new file. The input gives `SIGN.OUTPUT.IS_INPUT`. An existing file gives
+  `SIGN.OUTPUT.EXISTS`.
+- `--in-place` replaces the input. The command writes a temporary file in the same directory and
+  then renames it over the input.
+- The replaced file keeps the mode of the input. An input that is a symbolic link gives
+  `SIGN.INPUT.LINK` with `--in-place`.
+- Before it signs, `sign` checks `structure`, `ordering`, `results_root`, `records_root`, and
+  `counts` (section 11.4). A failure gives `ENVELOPE.BODY.INVALID`, which names each failed
+  dimension. Nothing is written.
+
+`dppce authorize --document FILE --key FILE --kid KID --out FILE` signs a
+`dppce.authorization/1` document. The system owner runs it. The token is a compact JWS with
+`typ: "dppce-authorization+jws"`.
+
+- A document that is not valid gives `AUTHORIZE.DOCUMENT.INVALID`. This includes a document that
+  is not its exact canonical form, for example a number as a string.
+- `not_before` and `not_after` must be times `YYYY-MM-DDTHH:MM:SSZ`, and `not_before` must not
+  be after `not_after`. Otherwise the code is `AUTHORIZE.PERIOD.INVALID`.
+- Each endpoint must be an `http` or `https` origin. Otherwise the code is
+  `AUTHORIZE.ENDPOINT.INVALID`.
+- An existing `--out` file gives `AUTHORIZE.OUTPUT.EXISTS`.
+- The command does not check trust. `run` validates the token against the trust bundle of the
+  tester (section 9.1).
+
+`dppce trust-bundle add-key` writes a `dppce.trust/2` bundle with one more key.
+
+- The input is `--bundle FILE`, or a new empty bundle with `--policy-version`. Give exactly one.
+  Otherwise the code is `TRUST.BUNDLE.OPTION`.
+- A version 1 input is upgraded (section 11.4).
+- `--public-key FILE` is a JWK. A JWK with the private member `d` gives `TRUST.KEY.PRIVATE`.
+- A JWK that is not a public P-256 signing key, or not a point on the curve, gives
+  `TRUST.KEY.NOT_P256`. The bundle stores `kty`, `crv`, `x`, and `y` only.
+- A key identifier that the bundle already holds gives `TRUST.KEY.DUPLICATE_KID`.
+- `--not-before` and `--not-after` must be real times. A time that does not exist, or a reversed
+  period, gives `TRUST.KEY.PERIOD_INVALID`.
+- The model rules of the bundle apply, for example `TRUST.KEY.ROLE_CONFLICT`.
+- `--out` names a new file. An existing file gives `TRUST.OUTPUT.EXISTS`.
 
 #### Attestation versions and signer roles
 
@@ -898,10 +1036,13 @@ It reports each dimension separately:
 | `status` | when the trust policy sets `require_status`, when the operator supplies a status list, or when an issuer signature that passes `issuer_trust` names a status entry | The supplied status list passes the checks of "Report status lists", and the bit of the report is 0. |
 | `validity` | when an issuer signature that passes `issuer_trust` states `valid_until` | The evaluation time is not later than the earliest `valid_until` of these signatures. |
 | `timestamp` | per trust policy | At least one token in `timestamp_evidence` passes the timestamp checks below, and it binds a signature that verifies and binds. |
+| `opening` | when the operator supplies `--opening` | The record opening passes the checks of "Record openings and inclusion proofs". |
+| `proof` | when the operator supplies `--proof` | The inclusion proof passes the checks of "Record openings and inclusion proofs". |
 
 `complete` is true only if every mandatory dimension passes. `timestamp` is mandatory when the
 trust policy sets `require_timestamp`. `status` and `validity` are mandatory under the conditions
 in the table. If mandatory status or timestamp evidence is missing or stale, `complete` is false.
+`opening` and `proof` appear only when the operator supplies the file. Then they are mandatory.
 
 In this section, a "passing issuer signature" is a signature with the role `issuer` that meets
 every condition of `issuer_trust`. There can be more than one.
@@ -1110,6 +1251,49 @@ A bit of 0 gives `pass` with `STATUSLIST.REPORT.ACTIVE`. The detail names the li
   `supersedes`, and status entry, as declared. Only the verification section shows whether a
   signature verifies.
 
+#### Record openings and inclusion proofs
+
+`dppce verify` and `python -m dppce.verifier` take `--opening FILE` and `--proof FILE`. They
+check each file against the envelope. They do not check it against a root that the file states.
+
+The verifier checks an opening in this order. The first failure gives the reason code.
+
+1. The file is larger than 64 MiB: `OPENING.FILE.TOO_LARGE`.
+2. The file is not strict JSON, is not a `dppce.opening/1` document, or is not its exact
+   canonical form: `OPENING.FILE.MALFORMED`.
+3. `HMAC-SHA256(salt, "dppce.record.v1" || 0x00 || JCS(record))` differs from the commitment of
+   the proof leaf: `OPENING.COMMITMENT.MISMATCH`.
+4. The embedded proof fails step 3 or step 4 of the proof checks below. The code is the code of
+   that step.
+
+A good opening gives `pass` with `OPENING.RECORD.OK`. The detail names the record identifier.
+
+The verifier checks a proof in this order:
+
+1. The file is larger than 1 MiB: `PROOF.FILE.TOO_LARGE`.
+2. The file is not strict JSON, is not a `dppce.proof/1` document, or is not its exact canonical
+   form: `PROOF.FILE.MALFORMED`.
+3. `decision_digest`, `root`, or `size` differs from the report: `PROOF.REPORT.MISMATCH`. For the
+   label `results`, the root and size are `results_root` and `results_count`. For `records`,
+   they are `records_root` and the number of record commitments.
+4. `merkle.verify_inclusion` fails with the root and the size of the report: `PROOF.PATH.INVALID`.
+
+A good proof gives `pass` with `PROOF.LEAF.OK`. The detail names the key, and the verdict of a
+result.
+
+- Each failure gives `fail`.
+- If the structure of the envelope fails, the supplied dimensions are `not_checked`.
+- A proof of the label `results` is `not_checked` when the dimension `results_root` does not
+  pass. The same applies to `records` and `records_root`.
+- A stated root that differs from the body proves nothing about the body. The detail then is
+  "Not checked because the root of the report does not match its body."
+- An opening has the label `records`. A file that fails step 1 or step 2 gives `fail` before
+  this rule applies.
+- The detail shows each value of a file in an escaped form.
+- The verifier does no network I/O. It needs no recording and no data key.
+- A proof or an opening shows that a leaf is in a tree of the report. A trusted signature over
+  that report gives the leaf its trust.
+
 #### Trust bundle version 2
 
 `dppce.trust/2` replaces `revoked_serials` and `revoked_kids` of version 1. It adds
@@ -1140,6 +1324,8 @@ lists revoked serial numbers cannot be upgraded, because the issuer of each seri
 The migration then stops with `TRUST.MIGRATION.UNSCOPED_SERIAL`. The operator writes each serial
 with its issuer in a version 2 bundle. The command line and `python -m dppce.verifier` upgrade a
 bundle when they load it.
+
+`dppce trust-bundle add-key` writes a version 2 bundle (section 11.3).
 
 ## 12. Exit codes
 
