@@ -301,6 +301,9 @@ declares the empty model.
 
 - The model refuses an unknown key, a value outside a fixed set, and a value of the wrong type.
 - The default of a model field is the value that the check uses when the parameter is absent.
+- `catalogue lint` reports `CAT023`, an error, if a check with the parameter `role` probes a
+  role that the test purpose does not list in `roles`.
+  An absent `role` counts as the default role of the check.
 - `catalogue lint` reports a test purpose whose parameters do not fit its check with `CAT019`.
   This applies to shipped and imported test packs.
 - `plan`, `run`, and `replay` refuse such a test pack (section 6).
@@ -327,7 +330,7 @@ Initial registry:
 | `carrier.qr_decode` | `carrier.qr` | Decode a QR image artifact with zxing-cpp. Needs the `qr` extra. |
 | `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. |
 | `identifier.resolve` | `identifier.resolve` | Bounded resolution of the identifier to a passport. |
-| `identifier.consistency` | `identifier.consistency` | Same identifier in carrier, resolver, passport, and ICS. With `compare_item`, also the same passport through the resolver and at the API item target. |
+| `identifier.consistency` | `identifier.consistency` | Compares the carrier identifier with the `id` of the resolved passport. With a QR image sample, it also compares the carrier identifier with the declared sample identifier. With `compare_item`, it also compares the resolved passport with the document at the target of the `item` template. It does not read the ICS. |
 | `api.contract` | `api.contract` | Response matches the pinned OpenAPI contract. |
 | `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. |
 | `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. |
