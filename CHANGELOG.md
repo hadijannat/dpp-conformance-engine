@@ -71,6 +71,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- `dppce sign --out`, `authorize`, `trust-bundle add-key`, and `prove` create each new file with
+  mode 0600. Change the mode to share a report, a proof, a token, or a bundle.
 - `dppce sign` needs `--out NEW_FILE` or `--in-place`. It no longer writes over the input by
   default. `--out` refuses the input path and any existing file.
 - `dppce sign --in-place` refuses an input that is a symbolic link (`SIGN.INPUT.LINK`). The

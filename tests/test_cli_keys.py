@@ -343,7 +343,7 @@ def test_sign_never_overwrites_its_input(run: Run, tmp_path: Path) -> None:
     assert len(json.loads(envelope.read_text(encoding="utf-8"))["signatures"]) == 1
 
 
-def test_a_new_output_file_is_never_writable_by_others(run: Run, tmp_path: Path) -> None:
+def test_a_new_output_file_is_readable_only_by_its_owner(run: Run, tmp_path: Path) -> None:
     key = _plain_key(tmp_path)
     envelope = _envelope(tmp_path / "envelope.json")
     out = tmp_path / "signed.json"
@@ -353,15 +353,16 @@ def test_a_new_output_file_is_never_writable_by_others(run: Run, tmp_path: Path)
     finally:
         os.umask(previous)
     assert code == 0, err
-    assert stat.S_IMODE(out.stat().st_mode) == 0o644
+    assert stat.S_IMODE(out.stat().st_mode) == 0o600
 
 
 def test_sign_in_place_keeps_the_mode_and_refuses_a_link(run: Run, tmp_path: Path) -> None:
     key = _plain_key(tmp_path)
     envelope = _envelope(tmp_path / "envelope.json")
-    os.chmod(envelope, 0o640)
+    # Not the 0600 of mkstemp, so a kept mode is seen.
+    os.chmod(envelope, 0o700)
     assert _sign(run, envelope, key, "--allow-unencrypted-key", "--in-place")[0] == 0
-    assert stat.S_IMODE(envelope.stat().st_mode) == 0o640
+    assert stat.S_IMODE(envelope.stat().st_mode) == 0o700
     assert not [p for p in tmp_path.iterdir() if p.name.startswith(".dppce-sign-")]
 
     target = _envelope(tmp_path / "target.json")

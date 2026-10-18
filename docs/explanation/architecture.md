@@ -978,6 +978,9 @@ PKCS#8 PEM, encrypted with the passphrase.
 - The model rules of the bundle apply, for example `TRUST.KEY.ROLE_CONFLICT`.
 - `--out` names a new file. An existing file gives `TRUST.OUTPUT.EXISTS`.
 
+`sign --out`, `authorize`, `trust-bundle add-key`, and `prove` create each new file with mode 0600,
+also under umask 0. The operator changes the mode to share a file.
+
 #### Attestation versions and signer roles
 
 An attestation has the version `dppce.attestation/1` or `dppce.attestation/2`. The verifier reads
