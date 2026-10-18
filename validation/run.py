@@ -29,7 +29,7 @@ from dppce import __version__
 from dppce.evidence.canonical import parse_strict
 from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import LocalSigner
-from dppce.models import EvidenceEnvelope, ExecutionStatus, TrustBundle, Verdict
+from dppce.models import DecisionBody, EvidenceEnvelope, ExecutionStatus, TrustBundle, Verdict
 from dppce.verifier import verify
 from validation import cases
 from validation.evidence_cases import SETUP, TAMPER
@@ -73,6 +73,29 @@ def _environment() -> dict[str, Any]:
     }
 
 
+def _control_findings(decision: DecisionBody) -> dict[str, Any]:
+    """The fields of a control row that judge the run of the unmodified reference system.
+
+    A step that stops completing must not drop out of the metric: it counts against the control.
+    A planned skip (PLAN.SKIPPED) is not a step of the run.
+    """
+    executed = [t for t in decision.test_results if t.execution_status is ExecutionStatus.COMPLETED]
+    not_passed = [t.test_purpose_id for t in executed if t.verdict is not Verdict.PASS]
+    not_completed = [
+        t.test_purpose_id
+        for t in decision.test_results
+        if t.execution_status is not ExecutionStatus.COMPLETED and t.reason_code != "PLAN.SKIPPED"
+    ]
+    overall = decision.overall.value
+    return {
+        "overall": overall,
+        "executed_steps": len(executed),
+        "executed_steps_not_passed": not_passed,
+        "steps_not_completed": not_completed,
+        "as_expected": overall == Verdict.PASS.value and not not_passed and not not_completed,
+    }
+
+
 def _controls(work: Path) -> tuple[list[dict[str, Any]], EvidenceEnvelope | None, Path | None]:
     rows: list[dict[str, Any]] = []
     first: tuple[EvidenceEnvelope, Path] | None = None
@@ -80,21 +103,13 @@ def _controls(work: Path) -> tuple[list[dict[str, Any]], EvidenceEnvelope | None
         # A TEST-ONLY manual result, so that the signed control holds a completed manual step (E-13).
         with ReferenceRig(work / f"control-{profile}", profile, manual={"TP-MANUAL-001": "pass"}) as rig:
             run = rig.run()
-            executed = [
-                t
-                for t in run.envelope.decision.test_results
-                if t.execution_status is ExecutionStatus.COMPLETED
-            ]
-            not_passed = [t.test_purpose_id for t in executed if t.verdict is not Verdict.PASS]
             code, replay = rig.replay(run, times=REPLAYS)
             if first is None:
                 first = (EvidenceEnvelope.model_validate_json(rig.sign(run).read_bytes()), run.run_dir)
         rows.append(
             {
                 "profile": f"battery/{profile}",
-                "overall": run.envelope.decision.overall.value,
-                "executed_steps": len(executed),
-                "executed_steps_not_passed": not_passed,
+                **_control_findings(run.envelope.decision),
                 "replays": REPLAYS,
                 "replay_digests_equal": bool(replay["match"]),
                 "decision_digest": replay["expected_digest"],
@@ -206,6 +221,11 @@ def main() -> int:
         "false_positives_on_controls": _ratio(
             false_positives, control_steps, "executed control steps that did not pass"
         ),
+        "controls": _ratio(
+            sum(1 for c in controls if c["as_expected"]),
+            len(controls),
+            "valid controls that passed with every planned step completed",
+        ),
         "boundary_cases": _ratio(
             sum(1 for b in boundary if b["as_expected"]),
             len(boundary),
@@ -227,6 +247,7 @@ def main() -> int:
     as_expected = (
         metrics["fault_detection"]["numerator"] == metrics["fault_detection"]["denominator"]
         and false_positives == 0
+        and metrics["controls"]["numerator"] == metrics["controls"]["denominator"]
         and metrics["boundary_cases"]["numerator"] == metrics["boundary_cases"]["denominator"]
         and metrics["evidence_faults"]["numerator"] == metrics["evidence_faults"]["denominator"]
         and metrics["replays"]["numerator"] == metrics["replays"]["denominator"]

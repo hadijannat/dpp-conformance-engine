@@ -36,6 +36,7 @@ uv run python -m validation.run
 | --- | --- |
 | `fault_detection` | Seeded fault and profile combinations that were detected for the intended reason |
 | `false_positives_on_controls` | Executed steps of the unmodified reference system that did not pass |
+| `controls` | Valid controls whose run passed with every planned step completed. A step that stops completing counts against its control. A planned skip (`PLAN.SKIPPED`) does not. |
 | `boundary_cases` | Cases that must not be reported as a failure, with the expected outcome |
 | `evidence_faults` | Changed reports that failed verification on the named dimension |
 | `replays` | Replays that gave the same decision digest |
