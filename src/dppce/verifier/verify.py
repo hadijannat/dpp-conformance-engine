@@ -772,13 +772,15 @@ def verify(
     timestamp, times = _timestamps(envelope, verified, trust, at)
     issuer_trust, passing = _issuer(envelope, verified, times, trust, at)
     mandatory = _mandatory(trust, status_list, passing, supplied)
-    # A file is checked against a tree only if the root of that tree matches the body.
+    # A file is checked against a tree only if the root of that tree matches the body, and only if
+    # the body is ordered: the index of a leaf is its position in ascending key order.
     roots_ok = {"results": body["results_root"][0] == "pass", "records": body["records_root"][0] == "pass"}
+    ordered = body["ordering"][0] == "pass"
     disclosed: dict[str, tuple[Outcome, str]] = {}
     if opening is not None:
-        disclosed["opening"] = disclosure.check_opening_file(opening, decision, roots_ok)
+        disclosed["opening"] = disclosure.check_opening_file(opening, decision, roots_ok, ordered=ordered)
     if proof is not None:
-        disclosed["proof"] = disclosure.check_proof_file(proof, decision, roots_ok)
+        disclosed["proof"] = disclosure.check_proof_file(proof, decision, roots_ok, ordered=ordered)
     return report(
         {
             **body,

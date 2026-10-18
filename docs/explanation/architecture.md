@@ -1291,8 +1291,13 @@ result.
   pass. The same applies to `records` and `records_root`.
 - A stated root that differs from the body proves nothing about the body. The detail then is
   "Not checked because the root of the report does not match its body."
+- A proof or an opening is also `not_checked` when the dimension `ordering` does not pass. The
+  index of a leaf is its position in ascending key order. An unordered list gives the index no
+  meaning.
+- The root rule applies first. The detail of the ordering rule is "Not checked because the
+  dimension ordering does not pass: an index is a position in key order."
 - An opening has the label `records`. A file that fails step 1 or step 2 gives `fail` before
-  this rule applies.
+  these rules apply.
 - The detail shows each value of a file in an escaped form.
 - The verifier does no network I/O. It needs no recording and no data key.
 - A proof or an opening shows that a leaf is in a tree of the report. A trusted signature over

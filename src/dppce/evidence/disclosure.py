@@ -32,6 +32,9 @@ Outcome = Literal["pass", "fail", "not_checked"]
 MAX_OPENING_BYTES: Final = 64 * 1024 * 1024
 MAX_PROOF_BYTES: Final = 1024 * 1024
 NOT_CHECKED: Final = "Not checked because the root of the report does not match its body."
+NOT_ORDERED: Final = (
+    "Not checked because the dimension ordering does not pass: an index is a position in key order."
+)
 
 
 class DisclosureError(ValueError):
@@ -146,8 +149,13 @@ def _check_proof(proof: InclusionProof, decision: DecisionBody) -> None:
         )
 
 
-def check_proof_file(raw: bytes, decision: DecisionBody, roots_ok: Mapping[str, bool]) -> tuple[Outcome, str]:
-    """The dimension ``proof``. ``roots_ok`` says, for each tree label, whether its root dimension passed."""
+def check_proof_file(
+    raw: bytes, decision: DecisionBody, roots_ok: Mapping[str, bool], *, ordered: bool
+) -> tuple[Outcome, str]:
+    """The dimension ``proof``. ``roots_ok`` says, for each tree label, whether its root dimension passed.
+
+    ``ordered`` says whether the dimension ``ordering`` passed.
+    """
     try:
         proof = _parse(
             raw,
@@ -158,6 +166,8 @@ def check_proof_file(raw: bytes, decision: DecisionBody, roots_ok: Mapping[str, 
         )
         if not roots_ok[proof.label]:
             return "not_checked", NOT_CHECKED
+        if not ordered:
+            return "not_checked", NOT_ORDERED
         _check_proof(proof, decision)
     except DisclosureError as exc:
         return "fail", f"{exc.code}: {exc}."
@@ -173,7 +183,7 @@ def check_proof_file(raw: bytes, decision: DecisionBody, roots_ok: Mapping[str, 
 
 
 def check_opening_file(
-    raw: bytes, decision: DecisionBody, roots_ok: Mapping[str, bool]
+    raw: bytes, decision: DecisionBody, roots_ok: Mapping[str, bool], *, ordered: bool
 ) -> tuple[Outcome, str]:
     """The dimension ``opening``: the commitment, then the embedded proof against the report."""
     try:
@@ -186,6 +196,8 @@ def check_opening_file(
         )
         if not roots_ok["records"]:
             return "not_checked", NOT_CHECKED
+        if not ordered:
+            return "not_checked", NOT_ORDERED
         leaf = opening.proof.leaf
         salt = base64.b64decode(opening.salt, validate=True)
         computed = commitment_of(salt, canonical_bytes(opening.record))

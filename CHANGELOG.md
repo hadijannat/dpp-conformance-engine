@@ -165,6 +165,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `Observation.acquired_at` uses the shared stamp type. It refuses non-ASCII digits and a moment
   that does not exist, such as `2026-02-30T00:00:00Z`. The schemas `decision`, `envelope`,
   `opening`, and `proof` now give the pattern with `[0-9]`.
+- The verifier gives `not_checked` for a supplied proof or opening when the dimension `ordering`
+  does not pass. Before, a proof against a body with two results in the wrong order gave `pass`
+  if the stated root was computed over that order. The index of a leaf is its position in
+  ascending key order, so such a proof places the leaf where the order does not.
 
 ## [0.1.0rc1] - 2026-10-15
 

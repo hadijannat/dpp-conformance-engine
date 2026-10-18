@@ -23,7 +23,7 @@ from validation.rig import TRUST, ReferenceRig, RunResult
 from dppce import cli
 from dppce.evidence import disclosure, merkle
 from dppce.evidence.canonical import canonical_bytes
-from dppce.evidence.envelope import records_root, result_keys
+from dppce.evidence.envelope import records_root, result_keys, results_root
 from dppce.evidence.recording import commit, commitment_of, read_recording, record_commitments, record_to_json
 from dppce.infrastructure.keys import FileDataKeyProvider
 from dppce.models import EvidenceEnvelope, InclusionProof, OpenedRecord, RecordOpening, TrustBundle
@@ -34,6 +34,7 @@ from tests.test_cli_keys import limited
 
 AT_TEXT = "2026-10-14T00:00:00Z"
 NOT_CHECKED = "Not checked because the root of the report does not match its body."
+NOT_ORDERED = "Not checked because the dimension ordering does not pass: an index is a position in key order."
 DIMENSIONS = [
     "structure",
     "ordering",
@@ -173,7 +174,7 @@ def test_a_single_record_opening_has_an_empty_path_and_verifies() -> None:
     opening = disclosure.open_record(decision, record)
     assert (opening.proof.size, opening.proof.path) == (1, ())
     outcome, detail = disclosure.check_opening_file(
-        canonical_bytes(opening), decision, {"results": True, "records": True}
+        canonical_bytes(opening), decision, {"results": True, "records": True}, ordered=True
     )
     assert (outcome, detail.startswith("OPENING.RECORD.OK")) == ("pass", True), detail
 
@@ -274,6 +275,43 @@ def test_proof_is_not_checked_when_the_results_root_fails(
     assert dims["proof"][0] == "fail"
     assert dims["proof"][1].startswith("PROOF.REPORT.MISMATCH"), dims["proof"]
     assert (code, complete) == (4, False)
+
+
+def _dimensions(decision: Any, trust: TrustBundle, **files: bytes) -> dict[str, tuple[str, str]]:
+    envelope = EvidenceEnvelope(schema_version="dppce.envelope/1", decision=decision)
+    report = verify(json.loads(envelope.model_dump_json(by_alias=True)), trust, AT, **files)
+    return {d.name: (d.outcome, d.detail) for d in report.dimensions}
+
+
+def test_proof_is_not_checked_when_the_ordering_fails(trust: TrustBundle) -> None:
+    # The index of a leaf is its position in ascending key order. A root over an unordered list
+    # can still match, so a proof against it would place a result where the order does not.
+    base = make_envelope().decision
+    swapped = (base.test_results[1], base.test_results[0], *base.test_results[2:])
+    unordered = base.model_copy(
+        update={"test_results": swapped, "results_root": results_root(base.requirement_results, swapped)}
+    )
+    proof = canonical_bytes(disclosure.prove(unordered, "T:TP-001"))
+    dims = _dimensions(unordered, trust, proof=proof)
+    assert (dims["ordering"][0], dims["results_root"][0]) == ("fail", "pass")
+    assert dims["proof"] == ("not_checked", NOT_ORDERED)
+
+
+def test_opening_is_not_checked_when_the_records_are_out_of_order(trust: TrustBundle) -> None:
+    base = make_envelope().decision
+    first, second = make_record(1), make_record(2)
+    commitments = record_commitments([first, second])[::-1]
+    records = base.model_copy(
+        update={"record_commitments": commitments, "records_root": records_root(commitments)}
+    )
+    opening = canonical_bytes(disclosure.open_record(records, first))
+    dims = _dimensions(records, trust, opening=opening)
+    assert (dims["ordering"][0], dims["records_root"][0]) == ("fail", "pass")
+    assert dims["opening"] == ("not_checked", NOT_ORDERED)
+    # A file that is not a document still fails first, as with a root that does not match.
+    dims = _dimensions(records, trust, opening=b"[]")
+    assert dims["opening"][0] == "fail"
+    assert dims["opening"][1].startswith("OPENING.FILE.MALFORMED")
 
 
 def test_prove_refusals(run: Run, tmp_path: Path) -> None:
