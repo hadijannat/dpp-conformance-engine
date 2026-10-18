@@ -97,6 +97,18 @@ Only a human can set `approved`. The loader rejects an `approved` requirement th
 `approval` record with reviewer, date, rationale, source version, and artifact.
 The engine has no command that writes an approval record.
 
+The lint compares the cited version of each requirement that is not illustrative with its source
+record. A version token is an ISO date, a dotted number such as `1.2.0`, or a year from 1900 to
+2099 that stands alone. An eight-digit calendar date counts in its ISO form and as its year.
+
+- `CAT020`, error: `source.version` has no token that also occurs in `edition_or_version` of the
+  source record. The rule applies only if `edition_or_version` has a token.
+- `CAT021`, warning: the source record shows a later version. The lint takes the latest ISO date
+  in `source.version`. It reports each later ISO date in `edition_or_version` and each later
+  amendment date. If `source.version` has no ISO date, the lint does not compare.
+
+These rules compare text only. They do not show that a cited version is the correct one.
+
 ## 5. Applicability
 
 An expression is a data tree with five node shapes: `const`, a comparison, `all`, `any`, `not`.
@@ -110,6 +122,10 @@ Evaluation returns `true`, `false`, or `unknown`, and a human-readable reason.
 - `gt`, `ge`, `lt`, `le` accept two integers or two ISO dates. Any other pair is a catalogue
   defect: evaluation raises `ApplicabilityError` and `catalogue lint` reports it.
 - `in`, `not_in` need a list operand. `contains` tests membership in a list-valued fact.
+- In a requirement with `authority_class: legal_obligation`, each date literal must be a date in
+  `applicable_dates` of its source record. The lint reports any other date literal with
+  `CAT022`. The rule reads the requirement applicability, `declared_support`, and each path
+  applicability.
 
 Missing information never becomes `false` and never becomes `not_applicable`.
 
@@ -117,6 +133,15 @@ Missing information never becomes `false` and never becomes `not_applicable`.
 
 `plan` is a pure function of the mode, profile, packs, test packs, ICS, sanitized IXIT, the
 capability manifest, and the validated authorization. Its output is sorted by identifier.
+
+Before it plans, the engine refuses these inputs with exit code 2. `plan`, `run`, and `replay`
+apply the same rules.
+
+- An ICS that does not fit the profile. Each characteristic must be a fact of the profile and
+  have its type. A `date` fact is a calendar date written `YYYY-MM-DD` with ASCII digits. One
+  message lists every problem of the ICS. A problem with a characteristic names the fact.
+- A selected test pack with a test purpose whose parameters do not fit its registered check
+  (section 8). The message names each such test purpose.
 
 For each requirement in the selected packs:
 
@@ -238,7 +263,24 @@ and shown. No figure may be labeled as coverage of a law or of a standard.
 
 A check is a Python function `(CheckContext) -> CheckOutcome` in `dppce.adapters`.
 It is registered under a dotted name in `dppce.testdefs.registry`. A test purpose can name
-only a registered check. Parameters are validated data.
+only a registered check.
+
+Each check declares a closed parameter model when it is registered. A check with no parameters
+declares the empty model.
+
+- The model refuses an unknown key, a value outside a fixed set, and a value of the wrong type.
+- The default of a model field is the value that the check uses when the parameter is absent.
+- `catalogue lint` reports a test purpose whose parameters do not fit its check with `CAT019`.
+  This applies to shipped and imported test packs.
+- `plan`, `run`, and `replay` refuse such a test pack (section 6).
+- The rule applies to each test purpose whose check is registered, also to a manual one.
+- An automated test purpose that names a check that is not registered is not checked. The lint
+  reports it with `CAT006`, and the planner gives the step `unsupported`. A manual one gets
+  `manual_unavailable`.
+- A check still reads its parameters as written and keeps its own guards, because a
+  `CheckContext` can be built without the planner.
+- The capability reference page lists the parameters of each check. The page is generated from
+  the models.
 
 `CheckContext` gives: the test purpose, its parameters, the ICS, the IXIT, the profile, the
 `Acquirer`, the evaluation time, a loader for pinned local resources, the trust bundle, and the
