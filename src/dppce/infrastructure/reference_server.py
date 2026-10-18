@@ -28,20 +28,33 @@ from dppce.evidence.jws import LocalSigner
 PUBLIC_ORIGIN: Final = "https://id.example.test"
 CANARY: Final = "CANARY-7f3a-supplier"
 NOTES_CANARY: Final = "CANARY-2b9c-dismantling"
+USAGE_CANARY: Final = "CANARY-4d1e-usage"
 FAULTS: Final = frozenset(
     {
         "api_wrong_content_type", "api_schema_violation", "leak_fetch", "leak_export", "leak_search",
         "leak_error", "leak_html", "sig_invalid", "sig_untrusted_issuer", "cert_expired", "id_mismatch",
         "resolver_404", "redirect_out_of_scope", "data_wrong_type", "data_missing_required", "data_stale",
         "data_wrong_unit", "data_relationship", "context_invalid", "registry_inconsistent",
-        "version_undeclared_change",
+        "version_undeclared_change", "over_restrict_legitimate_interest",
+        "leak_supplier_to_legitimate_interest", "leak_usage_log_anonymous", "deny_all",
     }
 )  # fmt: skip
 _RESTRICTED: Final = {
     "dismantling_notes": ("legitimate_interest", "authority"),
     "supplier_reference": ("authority",),
+    "usage_log": ("legitimate_interest", "authority"),
 }
-_RESTRICTED_VALUES: Final = {"dismantling_notes": NOTES_CANARY, "supplier_reference": CANARY}
+_RESTRICTED_VALUES: Final = {
+    "dismantling_notes": NOTES_CANARY,
+    "supplier_reference": CANARY,
+    "usage_log": USAGE_CANARY,
+}
+# Each fault flag: (role, field, served). It serves the field to the role, or withholds it.
+_ROLE_FAULTS: Final = {
+    "over_restrict_legitimate_interest": ("legitimate_interest", "dismantling_notes", False),
+    "leak_supplier_to_legitimate_interest": ("legitimate_interest", "supplier_reference", True),
+    "leak_usage_log_anonymous": ("anonymous", "usage_log", True),
+}
 _ITEM_PATH: Final = re.compile(
     r"^/dpp/(?P<id>[0-9]{14}-[A-Za-z0-9]+)(?P<rest>/model|/signed|/versions|/export|\.html)?$"
 )
@@ -111,9 +124,11 @@ class ReferenceSystem:
             document["remaining_capacity"]["value"] = document["rated_capacity"]["value"] + 1
         if "context_invalid" in faults:
             document["@context"] = ["https://unpinned.example.test/ctx"]
-        restricted = {
-            name: _RESTRICTED_VALUES[name] for name, roles in _RESTRICTED.items() if role in roles or leak
-        }
+        names = {name for name, roles in _RESTRICTED.items() if role in roles or leak}
+        for flag, (target, name, served) in _ROLE_FAULTS.items():
+            if flag in faults and role == target:
+                names = names | {name} if served else names - {name}
+        restricted = {name: _RESTRICTED_VALUES[name] for name in sorted(names)}
         if restricted:
             document["restricted"] = restricted
         return document
@@ -190,6 +205,8 @@ class ReferenceSystem:
     def handle(self, target: str, authorization: str | None) -> Reply:
         parts = urlsplit(target)
         path, role, faults = parts.path, self.role_of(authorization), self.faults
+        if "deny_all" in faults:
+            return _json(403, {"error": "forbidden"})
         if (resolver := _RESOLVER_PATH.match(path)) is not None:
             ident = f"{resolver['gtin']}-{resolver['serial']}"
             if "resolver_404" in faults or ident not in self._items:

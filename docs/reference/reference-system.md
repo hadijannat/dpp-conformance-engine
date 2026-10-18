@@ -111,8 +111,15 @@ values and their names start with `TEST-ONLY-`.
 Numbers are integers. A role that the access policy permits also gets the object `restricted`:
 
 ```json
-{"restricted": {"dismantling_notes": "CANARY-2b9c-dismantling", "supplier_reference": "CANARY-7f3a-supplier"}}
+{"restricted": {"dismantling_notes": "CANARY-2b9c-dismantling", "supplier_reference": "CANARY-7f3a-supplier", "usage_log": "CANARY-4d1e-usage"}}
 ```
+
+The `legitimate_interest` role gets `dismantling_notes` and `usage_log`. The `authority` role
+gets all three fields. The anonymous role gets no `restricted` object.
+
+The reference system models a non-conforming system. Its anonymous view holds synthetic fields,
+such as `state_of_health_percent`, `remaining_capacity`, and `status`. These stand in for
+non-public items. No field of the reference system is mapped to Annex XIII.
 
 ### 4.2 Model-level data (`/dpp/{id}/model`)
 
@@ -202,14 +209,19 @@ The observation summary lists every failed rule id.
 ```yaml
 schema_version: dppce.accesspolicy/1
 policy_id: battery/reference-policy
-version: 0.1.0
+version: 0.2.0
 basis: {class: illustrative}
-restricted:                         # dotted paths in the item-level passport
+restricted:                         # dotted paths in the item-level passport; one entry per path
+  - {path: id, roles: [anonymous, legitimate_interest, authority]}
+  - {path: category, roles: [anonymous, legitimate_interest, authority]}
+  - {path: operator.identifier, roles: [anonymous, legitimate_interest, authority]}
   - {path: restricted.dismantling_notes, roles: [legitimate_interest, authority]}
   - {path: restricted.supplier_reference, roles: [authority]}
+  - {path: restricted.usage_log, roles: [legitimate_interest, authority]}
 canaries:                           # synthetic values; sandboxes only; one for each withheld field
   - {path: restricted.dismantling_notes, value: CANARY-2b9c-dismantling}
   - {path: restricted.supplier_reference, value: CANARY-7f3a-supplier}
+  - {path: restricted.usage_log, value: CANARY-4d1e-usage}
 channels:
   fetch: /dpp/{id}
   export: /dpp/{id}/export
@@ -220,6 +232,17 @@ channels:
 
 The policy states what the system owner declares. The check observes whether the system
 enforces that declaration. It does not decide who has a legal entitlement.
+
+Each entry in `restricted` names a path and the roles that may receive it. The path is
+entitled for those roles and withheld from every other role. An entry that names every
+declared role is a public path. The three public paths above are a synthetic reference list.
+They are not a reading of Annex XIII. A policy that names one path in two entries of
+`restricted`, or of `canaries`, is not valid. The check then gives `blocked` with
+`ACCESS.POLICY.MISSING` and sends nothing.
+
+Each role that the policy names must be in the `roles` list of the profile. Each battery
+profile declares `anonymous`, `legitimate_interest`, and `authority`. A role outside that list
+is an input error with exit code 2.
 
 Each channel is a URL template under the `api` endpoint. It can use `{id}` and the parts that
 `IXIT.id_parts` declares, for example `{serial}`. A channel outside the template grammar makes
@@ -253,12 +276,40 @@ of a redirect or link URL, a canary could sit there: the check is then `blocked`
 `ACCESS.POLICY.NOT_FULLY_CHECKABLE`. The check does not find a value that a system hides on
 purpose, for example with encryption or a private encoding.
 
+For a role with an entitled path, the check also reads the `fetch` body. Each entitled path
+must be at the root of that body, with a value other than `null`. Only `fetch` must give
+content. The check reads the other channels for leaks only. A role with no withheld path reads
+the `fetch` channel only.
+
+- A `401` or `403` answer on `fetch` to a role with an entitled path gives
+  `ACCESS.ENTITLEMENT.REFUSED`. The body of that answer does not change this.
+- A `401` or `403` answer to a role with no entitled path is not a failure. The check still
+  searches its body for leaks.
+- An absent or `null` entitled path in a JSON `fetch` body gives `ACCESS.ENTITLEMENT.MISSING`.
+  The message names the status of the `fetch` answer and the missing paths.
+- A `fetch` body that is not JSON gives `blocked` with `ACCESS.RESPONSE.NOT_JSON`.
+- A policy without a `fetch` channel gives `blocked` with `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL`.
+
+The check reads the channels in the order fetch, export, search, error, html. It stops after a
+transport error. Then it takes the first outcome that applies, in this order:
+
+1. a leak: `ACCESS.LEAK.<CHANNEL>`;
+2. an entitlement failure: `ACCESS.ENTITLEMENT.REFUSED` or `ACCESS.ENTITLEMENT.MISSING`;
+3. the first answer that cannot be judged, in reading order;
+4. no `fetch` channel for a role with an entitled path;
+5. a partial look: `ACCESS.POLICY.NOT_FULLY_CHECKABLE`;
+6. a pass: `ACCESS.POLICY.ENFORCED`.
+
+Section 8.2 of the architecture contract gives the full table.
+
 A role other than `anonymous` needs a credential for the origin of the API. Without one, the
 transport sends no request and the check reports `TRANSPORT.DENIED` with `unreachable: true`.
 It never reports the anonymous view under the name of a role. Reason codes: `ACCESS.LEAK.FETCH`,
 `ACCESS.LEAK.EXPORT`, `ACCESS.LEAK.SEARCH`, `ACCESS.LEAK.ERROR`, `ACCESS.LEAK.HTML`; the first
 leaking channel in that order names the code. A pass gives `ACCESS.POLICY.ENFORCED`.
-The observation summary holds channel names and field paths. It never holds a field value.
+Each outcome names the probed role and the credential issuer. The issuer comes from the
+validated authorization, never from a credential. The observation summary holds the role, the
+issuer, channel names, field paths, and the `fetch` status. It never holds a field value.
 
 ### 5.3 API contract (`profiles/battery/contracts/*.yaml`)
 
@@ -324,6 +375,10 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `context_invalid` | `@context` is `["https://unpinned.example.test/ctx"]` |
 | `registry_inconsistent` | the registry record names operator `urn:example:operator:9999` |
 | `version_undeclared_change` | the last version entry repeats the previous version number with a different digest |
+| `over_restrict_legitimate_interest` | the `legitimate_interest` passport omits `restricted.dismantling_notes` |
+| `leak_supplier_to_legitimate_interest` | the `legitimate_interest` passport includes `restricted.supplier_reference` |
+| `leak_usage_log_anonymous` | the anonymous passport includes `restricted.usage_log` with its canary |
+| `deny_all` | every path answers `403` with `{"error": "forbidden"}` |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. The fault `unreachable` is a rig condition: no server runs.
@@ -494,7 +549,8 @@ Requirement pack `illustrative/core` (file `catalogue/packs/illustrative-core.ya
 | `ILL-DATA-002` | mandatory | always | `TP-DATA-002` (`data.jsonschema`, model) |
 | `ILL-DATA-003` | mandatory | always | `TP-DATA-003` (`data.context`, item) |
 | `ILL-DATA-004` | mandatory | always | `TP-DATA-004` (`data.rules`, item) |
-| `ILL-ACCESS-001` | mandatory | always | `TP-ACCESS-001` (`access.restricted_fields`; `requires_scope: access_probe`) |
+| `ILL-ACCESS-001` | mandatory | always | `TP-ACCESS-001` (`access.restricted_fields`, role `anonymous`; `requires_scope: access_probe`) |
+| `ILL-ACCESS-002` | mandatory | always | `TP-ACCESS-002` and `TP-ACCESS-003` (`access.restricted_fields`, roles `legitimate_interest` and `authority`; `requires_scope: access_probe`) |
 | `ILL-INTEGRITY-001` | mandatory | `ics.signature_format eq jws` | `TP-INTEGRITY-001` (`integrity.jws`) |
 | `ILL-REGISTRY-001` | mandatory | always | `TP-REGISTRY-001` (`registry.consistency`) |
 | `ILL-EV-ONLY-001` | mandatory | `ics.product_category eq ev` | `TP-ID-001` |
@@ -510,7 +566,8 @@ illustrative rule. It makes no legal statement.
 Each profile selects the packs `illustrative/core`, `eu-battery/draft`, and
 `en-jtc24/placeholders`, and the test pack `battery/core`. Each profile declares the facts
 `capacity_wh` (integer, Wh), `placed_on_market_date` (date), `put_into_service_date` (date),
-`mass_g` (integer, g), and `external_storage_only` (boolean).
+`mass_g` (integer, g), and `external_storage_only` (boolean). Each profile declares the roles
+`anonymous`, `legitimate_interest`, and `authority`.
 
 The reference ICS files declare: `carriers: [qr]`, `identifier_scheme: gs1-digital-link`,
 `signature_format: jws`, `granularity: item`, `features: {item_data: true, aas: false}`,

@@ -102,8 +102,9 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "access.policy",
         "access",
         _S,
-        "Compare what each role receives with a declared access policy, "
-        "across fetch, search, export, error, and HTML channels. Uses synthetic canaries.",
+        "Compare what each role receives with a declared access policy: the entitled fields on the "
+        "fetch channel, and the withheld fields on the fetch, search, export, error, and HTML "
+        "channels. Uses synthetic canaries.",
         None,
         "",
     ),

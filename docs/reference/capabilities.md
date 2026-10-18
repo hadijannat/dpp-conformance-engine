@@ -24,7 +24,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `data.context` | data | supported |  | Check JSON-LD context references against a pinned allowlist. No context is fetched. |  |
 | `data.rules` | data | supported |  | Versioned rule packs: completeness, units, ranges, relationships, freshness. |  |
 | `data.shacl` | data | interface_only |  | SHACL validation with pySHACL. | pySHACL is an optional extra. Shapes are pinned local files. Results agree with the JSON Schema path on the shared fixtures, and disagreements are recorded. |
-| `access.policy` | access | supported |  | Compare what each role receives with a declared access policy, across fetch, search, export, error, and HTML channels. Uses synthetic canaries. |  |
+| `access.policy` | access | supported |  | Compare what each role receives with a declared access policy: the entitled fields on the fetch channel, and the withheld fields on the fetch, search, export, error, and HTML channels. Uses synthetic canaries. |  |
 | `integrity.jws` | integrity | supported |  | Verify a JWS on a passport: signature validity, issuer trust, and certificate validity, as separate findings. A valid signature does not prove that the signed attributes are true. |  |
 | `integrity.cose` | integrity | interface_only |  | Verify a COSE signature. | A COSE profile with an algorithm allowlist and its own test vectors. |
 | `integrity.status_list` | integrity | interface_only |  | Bitstring Status List retrieval and check. | Status retrieval behind the transport, with a mock status service and staleness tests. |

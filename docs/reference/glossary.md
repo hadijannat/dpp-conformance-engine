@@ -20,6 +20,7 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | conformance test report | The output of a run. It is not a certificate. |
 | decision body | The canonical statement of one run: scope, versions, all outcomes, exclusions, counts, and commitments. |
 | decision digest | The SHA-256 digest of the canonical decision body. |
+| entitled path | A field path that the declared access policy gives to a role. The access check requires it on the `fetch` channel. |
 | envelope | The decision body together with its signatures. It is the JSON report. |
 | exclusion | Something in the selected catalogue that a run left out, with the reason. |
 | execution mode | Illustrative, exploratory, or reviewed. The mode decides which requirements a run can assess. |

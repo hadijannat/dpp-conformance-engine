@@ -110,7 +110,7 @@ uv run python -m dppce.infrastructure.reference_server --port 8765 --fault leak_
 ```
 
 Run again with a new output directory. Change `--out ./runs/ev-1` to `--out ./runs/ev-2`.
-The exit code is `1`. The report shows `ACCESS.LEAK.EXPORT` for the access test step.
+The exit code is `1`. The report shows `ACCESS.LEAK.EXPORT` for the access test steps TP-ACCESS-001 and TP-ACCESS-002.
 
 ## What you learned
 

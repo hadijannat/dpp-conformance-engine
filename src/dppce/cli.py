@@ -22,6 +22,7 @@ from urllib.parse import urlsplit
 from pydantic import ValidationError
 
 from dppce import __version__
+from dppce.adapters.access import ACCESS_CHECK, policy_roles
 from dppce.adapters.capabilities import manifest as capability_manifest
 from dppce.applicability import ApplicabilityError
 from dppce.catalogue import (
@@ -63,6 +64,7 @@ from dppce.models import (
     ICS,
     IXIT,
     NOT_ACCREDITED,
+    Authorization,
     EvidenceEnvelope,
     ExecutionMode,
     InputHashes,
@@ -193,6 +195,10 @@ def _build_inputs(
         authorization = validate_authorization(
             authorization_token, trust, evaluation_time, ics.sut.identifier
         )
+    if undeclared := _undeclared_roles(loaded.root, profile, ixit, authorization, testpacks):
+        raise UsageError(
+            f"profile '{profile.id}' does not declare a role that the inputs name: " + " ".join(undeclared)
+        )
     manual_steps = {
         p.id
         for name in profile.testpacks
@@ -222,6 +228,36 @@ def _build_inputs(
     if manual_results:
         _refuse_unused_manual_results(inputs)
     return inputs
+
+
+def _undeclared_roles(
+    root: Path,
+    profile: Profile,
+    ixit: IXIT,
+    authorization: Authorization | None,
+    testpacks: dict[str, TestPack],
+) -> list[str]:
+    """Each role that an input names and the profile does not declare, with its source.
+
+    The IXIT and the authorization are untrusted text: ``repr`` makes a control character visible.
+    """
+    sources: dict[str, set[str]] = {
+        "the access policy": set(policy_roles(root, profile)),
+        "the IXIT": {i.role for i in ixit.identities},
+        "the authorization": set(authorization.roles if authorization else ()),
+    }
+    for name in profile.testpacks:
+        for purpose in testpacks[name].test_purposes if name in testpacks else ():
+            named = set(purpose.roles)
+            role = purpose.stimulus.params.get("role")
+            if purpose.stimulus.check == ACCESS_CHECK and isinstance(role, str):
+                named.add(role)
+            sources[f"test purpose {purpose.id}"] = named
+    return [
+        f"{source} names the role {role!r}."
+        for source, roles in sources.items()
+        for role in sorted(roles - set(profile.roles))
+    ]
 
 
 def _refuse_unused_manual_results(inputs: RunInputs) -> None:

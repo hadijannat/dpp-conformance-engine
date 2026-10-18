@@ -13,8 +13,9 @@ from typing import Any
 import pytest
 
 import dppce.adapters  # noqa: F401 - the import registers the checks that the lint looks up
+from dppce.adapters.access import AccessPolicy
 from dppce.applicability import evaluate
-from dppce.catalogue import Catalogue, load_catalogue, load_data, load_profiles, load_testpacks
+from dppce.catalogue import Catalogue, load_catalogue, load_data, load_model, load_profiles, load_testpacks
 from dppce.catalogue.lint import Finding, lint
 from dppce.infrastructure.resources import data_root
 from dppce.models import (
@@ -26,6 +27,7 @@ from dppce.models import (
     Op,
     Requirement,
     ReviewStatus,
+    Scope,
     TestPack,
     TestPurpose,
     Tri,
@@ -316,3 +318,34 @@ def test_each_entry_with_a_date_clause_reads_the_placing_date_as_documented(cata
         for case in "bx":
             facts, _ = _DATE_CASES[case]
             assert evaluate(expression, facts).value is Tri.UNKNOWN, (ident, case)
+
+
+# -- access roles (gaps D5-01, D5-03, D3-06) ------------------------------------------------------
+
+BATTERY_PROFILES = ("battery/ev", "battery/lmt", "battery/industrial")
+REFERENCE_POLICY = "profiles/battery/access/reference-policy.yaml"
+
+
+def test_battery_core_probes_each_declared_credentialed_role_once(testpacks: dict[str, TestPack]) -> None:
+    probes = [
+        p for p in testpacks["battery/core"].test_purposes if p.stimulus.check == "access.restricted_fields"
+    ]
+    profiles = load_profiles(ROOT)
+    for name in BATTERY_PROFILES:
+        for role in (r for r in profiles[name].roles if r != "anonymous"):
+            found = [p for p in probes if p.stimulus.params.get("role") == role]
+            assert len(found) == 1, (name, role)
+            assert found[0].roles == (role,)
+            assert found[0].requires_scope is Scope.ACCESS_PROBE
+
+
+def test_the_reference_policy_names_declared_roles_and_marks_each_withheld_path() -> None:
+    policy = load_model(ROOT / REFERENCE_POLICY, AccessPolicy)  # one entry per path, or this raises
+    profiles = load_profiles(ROOT)
+    for name in BATTERY_PROFILES:
+        declared = set(profiles[name].roles)
+        assert {role for r in policy.restricted for role in r.roles} <= declared, name
+        withheld = {r.path for r in policy.restricted if not declared <= set(r.roles)}
+        assert withheld <= {c.path for c in policy.canaries}, "each withheld path has a canary"
+    usage_log = next(r for r in policy.restricted if r.path == "restricted.usage_log")
+    assert "anonymous" not in usage_log.roles

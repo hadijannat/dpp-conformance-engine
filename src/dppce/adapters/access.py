@@ -11,21 +11,34 @@ from __future__ import annotations
 
 import html
 import re
-from typing import Annotated, Any, Literal, Self
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Annotated, Any, Final, Literal, Self
 from urllib.parse import unquote
 
 from pydantic import Field, ValidationError, model_validator
 
-from dppce.adapters.common import MISSING, blocked, completed, dig, fetch_once, template_url, unusable
+from dppce.adapters.common import (
+    MISSING,
+    blocked,
+    completed,
+    dig,
+    fetch_once,
+    no_answer,
+    template_url,
+    unusable,
+)
 from dppce.catalogue import CatalogueError, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
 from dppce.infrastructure.redaction import REMOVED
-from dppce.models import PATH_TEMPLATE_PATTERN, UNKNOWN, CheckOutcome, Model
+from dppce.models import PATH_TEMPLATE_PATTERN, UNKNOWN, CheckOutcome, Model, Profile
 from dppce.testdefs.registry import CheckContext, register
 
-# The first leaking channel in this order names the reason code.
+ACCESS_CHECK: Final = "access.restricted_fields"
+# The reading order. The first leaking channel in this order names the reason code.
 _CHANNELS = ("fetch", "export", "search", "error", "html")
+_REFUSALS = (401, 403)
 
 
 class Restricted(Model):
@@ -56,6 +69,30 @@ class AccessPolicy(Model):
                 f"unknown channels {unknown}: a channel that is not probed must not look covered"
             )
         return self
+
+    @model_validator(mode="after")
+    def _one_entry_per_path(self) -> Self:
+        # Two entries for one path could withhold it from a role and entitle the same role to it.
+        for name, paths in (
+            ("restricted", [r.path for r in self.restricted]),
+            ("canaries", [c.path for c in self.canaries]),
+        ):
+            repeated = sorted({p for p in paths if paths.count(p) > 1})
+            if repeated:
+                raise ValueError(f"'{name}' names these paths more than once: {repeated}")
+        return self
+
+
+def policy_roles(data_root: Path, profile: Profile) -> tuple[str, ...]:
+    """Every role that the bound policy names. Empty if the profile binds no readable policy:
+    the check then reports the policy itself (ACCESS.POLICY.MISSING)."""
+    if profile.access_policy is None:
+        return ()
+    try:
+        policy = load_model(data_root / profile.access_policy, AccessPolicy)
+    except (CatalogueError, ValidationError):
+        return ()
+    return tuple(role for r in policy.restricted for role in r.roles)
 
 
 def _holds_path(node: Any, dotted: str) -> bool:
@@ -237,69 +274,179 @@ def _bound_policy(ctx: CheckContext) -> AccessPolicy | CheckOutcome:
     return policy
 
 
-def _channel_urls(ctx: CheckContext, policy: AccessPolicy) -> dict[str, str] | CheckOutcome:
+def _channel_urls(ctx: CheckContext, policy: AccessPolicy, read: list[str]) -> dict[str, str] | CheckOutcome:
     """Every channel URL, built before the first request: a channel without a target sends nothing."""
     urls: dict[str, str] = {}
-    for channel in _CHANNELS:
-        if channel in policy.channels:
-            url = template_url(ctx, "api", policy.channels[channel], "ACCESS")
-            if isinstance(url, CheckOutcome):
-                return url
-            urls[channel] = url
+    for channel in read:
+        url = template_url(ctx, "api", policy.channels[channel], "ACCESS")
+        if isinstance(url, CheckOutcome):
+            return url
+        urls[channel] = url
     return urls
+
+
+def _entitlement(
+    record: Record, entitled: list[str], role: str
+) -> tuple[str, str, list[str]] | CheckOutcome | None:
+    """Judge the fetch answer for the entitled paths.
+
+    Returns a failure (code, message, missing paths), an outcome if the body cannot be judged,
+    or None if every entitled path is served.
+    """
+    if record.status in _REFUSALS:
+        # A refusal fails whatever its body: the role gets none of its fields.
+        message = (
+            f"The fetch channel answered {record.status} to the role '{role}', which the policy gives "
+            f"{len(entitled)} fields."
+        )
+        return "ACCESS.ENTITLEMENT.REFUSED", message, []
+    try:
+        document = parse_strict(record.body)
+    except CanonicalizationError:
+        message = (
+            f"The fetch body for the role '{role}' is not JSON, so the entitled paths cannot be checked."
+        )
+        return blocked("ACCESS.RESPONSE.NOT_JSON", message)
+    # At the root on purpose: an entitled path inside an unrelated nested object is not served.
+    missing = sorted(p for p in entitled if (v := dig(document, p)) is MISSING or v is None)
+    if not missing:
+        return None
+    message = (
+        f"The fetch channel answered {record.status}. The role '{role}' does not receive these "
+        f"entitled paths: {', '.join(missing)}."
+    )
+    return "ACCESS.ENTITLEMENT.MISSING", message, missing
+
+
+def credential_issuer(ctx: CheckContext, role: str) -> str | None:
+    """The issuer of the validated authorization that grants the role. Never read from a credential."""
+    grant = ctx.authorization
+    if role == "anonymous" or grant is None or role not in grant.roles:
+        return None
+    return grant.issuer
+
+
+def _named(outcome: CheckOutcome, role: str, issuer: str | None) -> CheckOutcome:
+    """Name the probed role and the credential issuer in the outcome. Never the secret."""
+    observations = tuple(
+        o.model_copy(update={"summary": {**o.summary, "role": role, "credential_issuer": issuer}})
+        for o in outcome.observations
+    )
+    message = f"{outcome.message} Probed role: '{role}'. Credential issuer: {issuer or 'none'}."
+    return outcome.model_copy(update={"message": message, "observations": observations})
 
 
 class RestrictedFieldsParams(Model):
     role: str = Field(default="anonymous", min_length=1, description="Role whose view is probed.")
 
 
-@register("access.restricted_fields", capability="access.policy", params=RestrictedFieldsParams)
+@dataclass
+class _Reading:
+    """What the check saw on the channels that it read, in reading order."""
+
+    records: list[Record] = field(default_factory=list)
+    leaks: dict[str, list[str]] = field(default_factory=dict)
+    canary_only: list[str] = field(default_factory=list)  # not JSON: only a canary can be found there
+    redacted: list[str] = field(default_factory=list)  # a redirect or link URL lost a part to redaction
+    shortfall: tuple[str, str, list[str]] | None = None  # an entitlement failure on fetch
+    problem: CheckOutcome | None = None  # the first answer that cannot be judged
+    fetched: Record | None = None
+
+    def keep(self, problem: CheckOutcome) -> None:
+        self.problem = self.problem or problem
+
+    def look(self, record: Record, channel: str, withheld: list[str], canaries: list[Canary]) -> None:
+        looked = _look(record, channel, withheld, canaries)
+        if isinstance(looked, CheckOutcome):
+            self.keep(looked)
+            return
+        found, is_json = looked
+        if not is_json:
+            self.canary_only.append(channel)
+        if any(REMOVED in text for text in _url_texts(record)):
+            # Redaction removed a part of a URL before the record existed. A canary could sit
+            # there. The search reads the record only, so that a replay gives the same result.
+            self.redacted.append(channel)
+        if found:
+            self.leaks[channel] = sorted(found)
+
+
+def _read_channels(
+    ctx: CheckContext,
+    urls: dict[str, str],
+    role: str,
+    *,
+    entitled: list[str],
+    withheld: list[str],
+    canaries: list[Canary],
+) -> _Reading:
+    """Read each channel. A problem does not stop the reading: a later leak still counts."""
+    seen = _Reading()
+    for channel, url in urls.items():
+        record = fetch_once(ctx, url, role)
+        seen.records.append(record)
+        if record.error is not None:
+            # A denied or unreachable origin gets no further attempt.
+            seen.keep(no_answer(ctx, record))
+            break
+        bad = unusable(ctx, record)
+        if channel == "fetch":
+            seen.fetched = record
+            # A refusal is judged without its body. Any other answer needs a usable body.
+            if entitled and (record.status in _REFUSALS or bad is None):
+                judged = _entitlement(record, entitled, role)
+                if isinstance(judged, CheckOutcome):
+                    seen.keep(judged)
+                else:
+                    seen.shortfall = judged
+        if bad is not None:
+            seen.keep(bad)
+        elif withheld:
+            seen.look(record, channel, withheld, canaries)
+    return seen
+
+
+@register(ACCESS_CHECK, capability="access.policy", params=RestrictedFieldsParams)
 def restricted_fields(ctx: CheckContext) -> CheckOutcome:
     role = str(ctx.params.get("role", "anonymous"))
+    return _named(_probe(ctx, role), role, credential_issuer(ctx, role))
+
+
+def _probe(ctx: CheckContext, role: str) -> CheckOutcome:
     policy = _bound_policy(ctx)
     if isinstance(policy, CheckOutcome):
         return policy
     withheld = [r.path for r in policy.restricted if role not in r.roles]
-    if not withheld or not policy.channels:
+    entitled = [r.path for r in policy.restricted if role in r.roles]
+    if not (withheld or entitled) or not policy.channels:
         # Nothing to look for, or nowhere to look. That is not evidence of enforcement.
-        message = f"The policy withholds no field from the role '{role}', or it names no channel."
+        message = (
+            f"The policy gives no field to the role '{role}' and withholds none, or it names no channel."
+        )
         return blocked("ACCESS.POLICY.NOTHING_TO_PROBE", message)
     canaries = [c for c in policy.canaries if c.path in withheld]
-    urls = _channel_urls(ctx, policy)
+    # Only the fetch channel must give content. A role with nothing withheld has no leak to find.
+    read = [c for c in _CHANNELS if c in policy.channels and (withheld or c == "fetch")]
+    urls = _channel_urls(ctx, policy, read)
     if isinstance(urls, CheckOutcome):
         return urls
-    records: list[Record] = []
-    leaks: dict[str, list[str]] = {}
-    canary_only: list[str] = []  # not JSON: only a canary value can be found there
-    redacted: list[str] = []  # a redirect or link URL lost a part to redaction
-    for channel, url in urls.items():
-        record = fetch_once(ctx, url, role)
-        if (problem := unusable(ctx, record)) is not None:
-            return problem
-        records.append(record)
-        looked = _look(record, channel, withheld, canaries)
-        if isinstance(looked, CheckOutcome):
-            return looked
-        found, is_json = looked
-        if not is_json:
-            canary_only.append(channel)
-        if any(REMOVED in text for text in _url_texts(record)):
-            # Redaction removed a part of a URL before the record existed. A canary could sit
-            # there. The search reads the record only, so that a replay gives the same result.
-            redacted.append(channel)
-        if found:
-            leaks[channel] = sorted(found)
+    seen = _read_channels(ctx, urls, role, entitled=entitled, withheld=withheld, canaries=canaries)
+    leaks, shortfall, fetched = seen.leaks, seen.shortfall, seen.fetched
     summary: dict[str, Any] = {
         "policy": f"{policy.policy_id} {policy.version}",
         "role": role,
-        "channels_probed": [c for c in _CHANNELS if c in policy.channels],
-        "channels_checked_for_canaries_only": canary_only,
-        # Field paths only. A field value is never written to an observation.
+        "channels_probed": list(urls)[: len(seen.records)],
+        "channels_checked_for_canaries_only": seen.canary_only,
+        # Field paths and a status only. A field value is never written to an observation.
         "leaks": {channel: list(paths) for channel, paths in leaks.items()},
+        "entitled": sorted(entitled),
+        "entitlement_missing": shortfall[2] if shortfall else [],
+        "fetch_status": fetched.status if fetched else None,
     }
-    observation = ctx.observation(0, kind="exchange", records=records, summary=summary)
+    observation = ctx.observation(0, kind="exchange", records=seen.records, summary=summary)
     limit = (
         "This shows enforcement of the declared policy. It does not decide a legal entitlement. "
+        "A field that is present can still hold a wrong value. "
         "On a channel that is not JSON the check finds a canary only in plain, entity, or percent "
         "form. It cannot find a value that a system hides on purpose."
     )
@@ -308,11 +455,20 @@ def restricted_fields(ctx: CheckContext) -> CheckOutcome:
         channels = ", ".join(c for c in _CHANNELS if c in leaks)
         message = f"The role '{role}' receives withheld fields on: {channels}. {limit}"
         return completed(False, f"ACCESS.LEAK.{first.upper()}", message, [observation])
-    if (gap := _partial_look(withheld, canaries, canary_only, redacted)) is not None:
+    if shortfall is not None:
+        code, message, _ = shortfall
+        return completed(False, code, f"{message} {limit}", [observation])
+    if seen.problem is not None:
+        return seen.problem
+    if entitled and fetched is None:
+        message = f"The policy gives the role '{role}' fields but names no fetch channel."
+        return blocked("ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL", message)
+    if (gap := _partial_look(withheld, canaries, seen.canary_only, seen.redacted)) is not None:
         return blocked("ACCESS.POLICY.NOT_FULLY_CHECKABLE", gap)
     return completed(
         True,
         "ACCESS.POLICY.ENFORCED",
-        f"No probed channel gives the role '{role}' a withheld field. {limit}",
+        f"The role '{role}' receives each entitled field on fetch, and no probed channel gives it "
+        f"a withheld field. {limit}",
         [observation],
     )

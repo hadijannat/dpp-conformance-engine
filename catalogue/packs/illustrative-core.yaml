@@ -3,7 +3,7 @@
 # This file is project-authored and synthetic. It makes no normative statement.
 schema_version: dppce.pack/1
 pack_id: illustrative/core
-version: 0.1.0
+version: 0.2.0
 title: Illustrative core rules
 description: Synthetic rules for the local reference system.
 scope_statement: Synthetic demonstration rules only. This pack covers no law and no standard.
@@ -194,7 +194,8 @@ requirements:
     source_id: dppce-illustrative
   authority_class: illustrative
   modality: mandatory
-  paraphrase: The anonymous role does not receive a field that the declared policy withholds.
+  paraphrase: The anonymous role receives each field that the declared policy gives it, and no field
+    that the policy withholds from it.
   applicability: *id001
   testability: automated
   review_status: draft-needs-review
@@ -207,6 +208,27 @@ requirements:
   - id: default
     tests:
     - TP-ACCESS-001
+- id: ILL-ACCESS-002
+  title: The declared access policy is enforced for each credentialed role
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: Each credentialed role receives each field that the declared policy gives it, and no
+    field that the policy withholds from it.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-ACCESS-002-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-ACCESS-002
+    - TP-ACCESS-003
 - id: ILL-INTEGRITY-001
   title: The signed passport verifies
   source:

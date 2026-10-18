@@ -1,12 +1,31 @@
 # Audience: contributors and assessors.
 # Purpose: state the access policy that the reference system declares.
 # This file is project-authored and synthetic. It makes no normative statement.
+# The reference system models a non-conforming system. Its anonymous view holds synthetic fields
+# such as state_of_health_percent, remaining_capacity, and status that stand in for non-public
+# items. No field here is mapped to Annex XIII. The public paths below are a synthetic reference
+# list, not a reading of point 1.
 schema_version: dppce.accesspolicy/1
 policy_id: battery/reference-policy
-version: 0.1.0
+version: 0.2.0
 basis:
   class: illustrative
 restricted:
+- path: id
+  roles:
+  - anonymous
+  - legitimate_interest
+  - authority
+- path: category
+  roles:
+  - anonymous
+  - legitimate_interest
+  - authority
+- path: operator.identifier
+  roles:
+  - anonymous
+  - legitimate_interest
+  - authority
 - path: restricted.dismantling_notes
   roles:
   - legitimate_interest
@@ -14,11 +33,17 @@ restricted:
 - path: restricted.supplier_reference
   roles:
   - authority
+- path: restricted.usage_log
+  roles:
+  - legitimate_interest
+  - authority
 canaries:
 - path: restricted.dismantling_notes
   value: CANARY-2b9c-dismantling
 - path: restricted.supplier_reference
   value: CANARY-7f3a-supplier
+- path: restricted.usage_log
+  value: CANARY-4d1e-usage
 channels:
   fetch: /dpp/{id}
   export: /dpp/{id}/export

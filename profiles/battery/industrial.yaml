@@ -20,6 +20,10 @@ packs:
 testpacks:
 - battery/core
 - eu-battery/draft-tests
+roles:
+- anonymous
+- legitimate_interest
+- authority
 facts:
   capacity_wh:
     type: integer

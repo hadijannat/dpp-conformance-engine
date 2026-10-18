@@ -22,7 +22,16 @@ from pydantic import ValidationError
 from dppce.adapters.access import AccessPolicy, restricted_fields
 from dppce.adapters.integrity import revoked, trust_path
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.models import ICS, IXIT, ExecutionStatus, Profile, TestPurpose, TrustAnchor, TrustBundle
+from dppce.models import (
+    ICS,
+    IXIT,
+    Authorization,
+    ExecutionStatus,
+    Profile,
+    TestPurpose,
+    TrustAnchor,
+    TrustBundle,
+)
 from dppce.testdefs.registry import CheckContext
 from tests.support import make_record
 
@@ -166,15 +175,34 @@ def test_a_serial_that_cannot_be_parsed_is_rejected_when_the_bundle_loads(serial
 
 
 class _Canned:
-    """An acquirer that answers every request with one canned body."""
+    """An acquirer that answers every request with one canned body.
 
-    def __init__(self, body: bytes, media_type: str = "application/json") -> None:
+    ``by_url`` gives a status and a body for one URL. ``truncated`` names URLs whose body is cut.
+    """
+
+    def __init__(
+        self,
+        body: bytes = b"{}",
+        media_type: str = "application/json",
+        *,
+        status: int = 200,
+        by_url: dict[str, tuple[int, bytes]] | None = None,
+        truncated: frozenset[str] = frozenset(),
+    ) -> None:
         self._body, self._media_type, self._records = body, media_type, []  # type: ignore[var-annotated]
+        self._status, self._by_url, self._truncated = status, by_url or {}, truncated
 
     def fetch(self, request: Request) -> Record:
-        base = make_record(len(self._records) + 1, self._body, request.url)
+        status, body = self._by_url.get(request.url, (self._status, self._body))
+        base = make_record(len(self._records) + 1, body, request.url)
         record = Record(
-            **{**base.__dict__, "headers": (("Content-Type", self._media_type),), "role": request.role}
+            **{
+                **base.__dict__,
+                "headers": (("Content-Type", self._media_type),),
+                "role": request.role,
+                "status": status,
+                "truncated": request.url in self._truncated,
+            }
         )
         self._records.append(record)
         return record
@@ -186,7 +214,14 @@ class _Canned:
         return tuple(self._records)
 
 
-def _context(tmp_path: Path, policy: dict[str, Any], acquirer: _Canned) -> CheckContext:
+def _context(
+    tmp_path: Path,
+    policy: dict[str, Any],
+    acquirer: _Canned,
+    *,
+    role: str | None = None,
+    authorization: Authorization | None = None,
+) -> CheckContext:
     (tmp_path / "policy.yaml").write_text(yaml.safe_dump(policy), encoding="utf-8")
     purpose = TestPurpose.model_validate(
         {
@@ -195,7 +230,7 @@ def _context(tmp_path: Path, policy: dict[str, Any], acquirer: _Canned) -> Check
             "requirements": ["R"],
             "profiles": ["*"],
             "applicability": {"const": "true"},
-            "stimulus": {"check": "access.restricted_fields"},
+            "stimulus": {"check": "access.restricted_fields", "params": {"role": role} if role else {}},
             "permitted_modes": ["illustrative"],
         }
     )
@@ -235,6 +270,7 @@ def _context(tmp_path: Path, policy: dict[str, Any], acquirer: _Canned) -> Check
         acquirer=acquirer,
         evaluation_time=datetime(2026, 10, 13, tzinfo=UTC),
         data_root=tmp_path,
+        authorization=authorization,
     )
 
 
@@ -264,11 +300,7 @@ def test_a_clean_channel_passes_and_a_leak_fails(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     "changes",
     [
-        {"restricted": [], "canaries": []},  # nothing is withheld from anyone
-        {
-            "restricted": [{"path": "restricted.secret", "roles": ["anonymous"]}],
-            "canaries": [],
-        },  # nothing withheld from this role
+        {"restricted": [], "canaries": []},  # nothing is given to or withheld from anyone
         {"channels": {}},  # nowhere to look
     ],
 )
@@ -276,6 +308,189 @@ def test_a_check_that_probed_nothing_never_passes(changes: dict[str, Any], tmp_p
     outcome = restricted_fields(_context(tmp_path, _POLICY | changes, _Canned(b"{}")))
     assert (outcome.status, outcome.passed) == (ExecutionStatus.BLOCKED, None)
     assert outcome.reason_code == "ACCESS.POLICY.NOTHING_TO_PROBE"
+
+
+# -- positive entitlement (gap D5-02) ----------------------------------------------------------
+
+_FETCH = "http://sut.example/dpp/09506000134352-EV0001"
+_EXPORT = _FETCH + "/export"
+_FORBIDDEN = b'{"error": "forbidden"}'
+# The anonymous role gets the public path `id`. Only the authority role gets the secret.
+_PUBLIC: dict[str, Any] = _POLICY | {
+    "restricted": [
+        {"path": "id", "roles": ["anonymous", "authority"]},
+        {"path": "restricted.secret", "roles": ["authority"]},
+    ]
+}
+_TWO_CHANNELS = {"fetch": "/dpp/{id}", "export": "/dpp/{id}/export"}
+
+
+def _summary(outcome: Any) -> dict[str, Any]:
+    return dict(outcome.observations[0].summary)
+
+
+def test_a_role_with_nothing_withheld_is_probed_for_entitlement(tmp_path: Path) -> None:
+    """Criterion 4 of gap D5-02. This case gave NOTHING_TO_PROBE before."""
+    policy = _POLICY | {"restricted": [{"path": "restricted.secret", "roles": ["anonymous"]}], "canaries": []}
+    empty = _Canned(b"{}")
+    outcome = restricted_fields(_context(tmp_path, policy, empty))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.ENTITLEMENT.MISSING")
+    assert len(empty.records()) == 1, "a role with nothing withheld reads the fetch channel only"
+    withheld = restricted_fields(_context(tmp_path, policy, _Canned(b'{"restricted": {"secret": null}}')))
+    assert (withheld.passed, withheld.reason_code) == (False, "ACCESS.ENTITLEMENT.MISSING")
+    served = restricted_fields(_context(tmp_path, policy, _Canned(b'{"restricted": {"secret": "v"}}')))
+    assert (served.passed, served.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+
+
+def test_a_policy_that_names_a_path_twice_is_not_valid(tmp_path: Path) -> None:
+    twice = [
+        {"path": "restricted.secret", "roles": ["anonymous"]},
+        {"path": "restricted.secret", "roles": ["authority"]},
+    ]
+    with pytest.raises(ValidationError, match="more than once"):
+        AccessPolicy.model_validate(_POLICY | {"restricted": twice})
+    canaries = [
+        {"path": "restricted.secret", "value": "CANARY-a"},
+        {"path": "restricted.secret", "value": "b"},
+    ]
+    with pytest.raises(ValidationError, match="more than once"):
+        AccessPolicy.model_validate(_POLICY | {"canaries": canaries})
+    acquirer = _Canned()
+    outcome = restricted_fields(_context(tmp_path, _POLICY | {"restricted": twice}, acquirer))
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.BLOCKED, "ACCESS.POLICY.MISSING")
+    assert acquirer.records() == ()
+
+
+@pytest.mark.parametrize("status", [401, 403])
+def test_an_entitled_role_refused_with_401_or_403_fails(status: int, tmp_path: Path) -> None:
+    outcome = restricted_fields(
+        _context(tmp_path, _POLICY, _Canned(_FORBIDDEN, status=status), role="authority")
+    )
+    assert (outcome.status, outcome.passed) == (ExecutionStatus.COMPLETED, False)
+    assert outcome.reason_code == "ACCESS.ENTITLEMENT.REFUSED"
+
+
+def test_a_refusal_with_a_body_that_cannot_be_searched_still_fails(tmp_path: Path) -> None:
+    outcome = restricted_fields(_context(tmp_path, _PUBLIC, _Canned(b"", status=403)))
+    assert (outcome.status, outcome.passed) == (ExecutionStatus.COMPLETED, False)
+    assert outcome.reason_code == "ACCESS.ENTITLEMENT.REFUSED", "not blocked NOT_JSON"
+
+
+def test_a_refusal_on_fetch_outranks_a_truncated_body_on_export(tmp_path: Path) -> None:
+    acquirer = _Canned(by_url={_FETCH: (403, _FORBIDDEN)}, truncated=frozenset({_EXPORT}))
+    outcome = restricted_fields(_context(tmp_path, _PUBLIC | {"channels": _TWO_CHANNELS}, acquirer))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.ENTITLEMENT.REFUSED")
+    assert len(acquirer.records()) == 2
+
+
+def test_a_leak_outranks_an_unsearchable_body_on_an_earlier_channel(tmp_path: Path) -> None:
+    acquirer = _Canned(
+        by_url={_FETCH: (200, b"not json"), _EXPORT: (200, b'{"restricted": {"secret": "x"}}')}
+    )
+    outcome = restricted_fields(_context(tmp_path, _POLICY | {"channels": _TWO_CHANNELS}, acquirer))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.EXPORT")
+
+
+@pytest.mark.parametrize("status", [401, 403])
+def test_a_refusal_where_everything_is_withheld_is_acceptable(status: int, tmp_path: Path) -> None:
+    """Criterion 2 of gap D5-02, second half: the anonymous role is entitled to nothing here."""
+    outcome = restricted_fields(_context(tmp_path, _POLICY, _Canned(_FORBIDDEN, status=status)))
+    assert (outcome.passed, outcome.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+    # The stated limit: a body that cannot be searched for leaks is not judged.
+    empty = restricted_fields(_context(tmp_path, _POLICY, _Canned(b"", status=status)))
+    assert (empty.status, empty.reason_code) == (ExecutionStatus.BLOCKED, "ACCESS.RESPONSE.NOT_JSON")
+
+
+def test_a_refusal_on_a_channel_other_than_fetch_is_read_for_leaks_only(tmp_path: Path) -> None:
+    acquirer = _Canned(by_url={_FETCH: (200, b'{"id": "x"}'), _EXPORT: (403, _FORBIDDEN)})
+    outcome = restricted_fields(_context(tmp_path, _PUBLIC | {"channels": _TWO_CHANNELS}, acquirer))
+    assert (outcome.passed, outcome.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+
+
+def test_the_missing_message_names_the_fetch_status(tmp_path: Path) -> None:
+    acquirer = _Canned(b'{"error": "not found"}', status=404)
+    outcome = restricted_fields(_context(tmp_path, _POLICY, acquirer, role="authority"))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.ENTITLEMENT.MISSING")
+    assert "404" in outcome.message
+    assert "restricted.secret" in outcome.message
+    assert _summary(outcome)["fetch_status"] == 404
+    assert _summary(outcome)["entitlement_missing"] == ["restricted.secret"]
+
+
+def test_the_deny_all_system_gives_no_pass_for_any_role(tmp_path: Path) -> None:
+    """Criterion 3 of gap D5-02, on the shipped reference policy."""
+    shipped = Path(__file__).resolve().parent.parent / "profiles/battery/access/reference-policy.yaml"
+    policy = yaml.safe_load(shipped.read_text(encoding="utf-8")) | {"policy_id": "test/policy"}
+    for role in ("anonymous", "legitimate_interest", "authority"):
+        outcome = restricted_fields(_context(tmp_path, policy, _Canned(_FORBIDDEN, status=403), role=role))
+        assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.ENTITLEMENT.REFUSED"), role
+
+
+def test_an_entitled_path_found_only_in_a_nested_object_is_missing(tmp_path: Path) -> None:
+    for body in (b'{"wrap": {"restricted": {"secret": "v"}}}', b"[]"):
+        outcome = restricted_fields(_context(tmp_path, _POLICY, _Canned(body), role="authority"))
+        assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.ENTITLEMENT.MISSING"), body
+
+
+def test_entitlement_without_a_fetch_channel_never_passes(tmp_path: Path) -> None:
+    acquirer = _Canned()
+    policy = _POLICY | {"channels": {"export": "/dpp/{id}/export"}}
+    outcome = restricted_fields(_context(tmp_path, policy, acquirer, role="authority"))
+    assert (outcome.status, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        "ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL",
+    )
+    assert acquirer.records() == ()
+
+
+def test_entitlement_on_a_fetch_body_that_is_not_json_is_blocked(tmp_path: Path) -> None:
+    acquirer = _Canned(b"<p>x</p>", "text/html")
+    outcome = restricted_fields(_context(tmp_path, _POLICY, acquirer, role="authority"))
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.BLOCKED, "ACCESS.RESPONSE.NOT_JSON")
+
+
+def test_a_leak_outranks_a_missing_entitlement(tmp_path: Path) -> None:
+    outcome = restricted_fields(_context(tmp_path, _PUBLIC, _Canned(b'{"restricted": {"secret": "x"}}')))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH")
+
+
+def test_every_outcome_names_the_role_and_the_credential_issuer(tmp_path: Path) -> None:
+    grant = Authorization.model_validate(
+        {
+            "schema_version": "dppce.authorization/1",
+            "authorization_id": "TEST-ONLY-authorization",
+            "issuer": "urn:example:owner",
+            "subject": "urn:example:test-lab",
+            "sut_identifier": "urn:x",
+            "endpoints": ["http://sut.example"],
+            "methods": ["GET"],
+            "roles": ["anonymous", "authority"],
+            "scopes": ["read", "access_probe"],
+            "not_before": "2026-01-01T00:00:00Z",
+            "not_after": "2027-01-01T00:00:00Z",
+            "max_requests": 10,
+        }
+    )
+    body = b'{"restricted": {"secret": "CANARY-test"}}'
+    authority = restricted_fields(
+        _context(tmp_path, _POLICY, _Canned(body), role="authority", authorization=grant)
+    )
+    assert (authority.passed, authority.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+    assert "Probed role: 'authority'" in authority.message
+    assert "urn:example:owner" in authority.message
+    assert (_summary(authority)["role"], _summary(authority)["credential_issuer"]) == (
+        "authority",
+        "urn:example:owner",
+    )
+    assert "CANARY-test" not in authority.model_dump_json(), "a field value never reaches an outcome"
+    anonymous = restricted_fields(_context(tmp_path, _POLICY, _Canned(b"{}"), authorization=grant))
+    assert (_summary(anonymous)["role"], _summary(anonymous)["credential_issuer"]) == ("anonymous", None)
+    context = _context(tmp_path, _POLICY, _Canned(), role="authority", authorization=grant)
+    (tmp_path / "policy.yaml").unlink()
+    missing = restricted_fields(context)
+    assert missing.reason_code == "ACCESS.POLICY.MISSING"
+    assert "Probed role: 'authority'" in missing.message
+    assert "urn:example:owner" in missing.message
 
 
 def test_a_body_that_claims_json_and_cannot_be_read_is_not_clean(tmp_path: Path) -> None:

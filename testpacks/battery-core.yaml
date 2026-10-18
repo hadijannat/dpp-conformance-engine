@@ -3,7 +3,7 @@
 # This file is project-authored and synthetic. It makes no normative statement.
 schema_version: dppce.testpack/1
 testpack_id: battery/core
-version: 0.1.0
+version: 0.2.0
 title: Battery core test purposes
 test_purposes:
 - id: TP-CARRIER-001
@@ -168,6 +168,42 @@ test_purposes:
     check: access.restricted_fields
     params:
       role: anonymous
+  expected_evidence:
+  - Channel names and field paths. Never field values.
+  permitted_modes: *id002
+  requires_scope: access_probe
+  severity: critical
+- id: TP-ACCESS-002
+  title: Probe the channels as the legitimate_interest role
+  requirements:
+  - ILL-ACCESS-002
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - legitimate_interest
+  stimulus:
+    check: access.restricted_fields
+    params:
+      role: legitimate_interest
+  expected_evidence:
+  - Channel names and field paths. Never field values.
+  permitted_modes: *id002
+  requires_scope: access_probe
+  severity: critical
+- id: TP-ACCESS-003
+  title: Probe the channels as the authority role
+  requirements:
+  - ILL-ACCESS-002
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - authority
+  stimulus:
+    check: access.restricted_fields
+    params:
+      role: authority
   expected_evidence:
   - Channel names and field paths. Never field values.
   permitted_modes: *id002

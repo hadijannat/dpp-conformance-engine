@@ -125,6 +125,30 @@ def test_the_recording_holds_no_clear_text_of_what_was_observed(tmp_path: Path) 
     assert b"CANARY-7f3a-supplier" not in envelope, "a report carries commitments, not restricted payloads"
 
 
+def test_credentialed_probes_name_the_role_and_issuer_and_never_the_secret(tmp_path: Path) -> None:
+    """Gap D5-03 and D5-01 criterion 5: one probe per declared role, with the TEST-ONLY credentials."""
+    with ReferenceRig(tmp_path) as rig:
+        run = rig.run()
+    results = {t.test_purpose_id: t for t in run.envelope.decision.test_results}
+    expected = {
+        "TP-ACCESS-001": ("anonymous", None),
+        "TP-ACCESS-002": ("legitimate_interest", "urn:example:operator:0001"),
+        "TP-ACCESS-003": ("authority", "urn:example:operator:0001"),
+    }
+    for ident, (role, issuer) in expected.items():
+        result = results[ident]
+        assert (result.verdict, result.reason_code) == (Verdict.PASS, "ACCESS.POLICY.ENFORCED"), ident
+        summary = result.observations[0].summary
+        assert (summary["role"], summary["credential_issuer"]) == (role, issuer), ident
+        assert f"Probed role: '{role}'" in result.message
+    assert results["TP-ACCESS-003"].observations[0].summary["channels_probed"] == ["fetch"]
+    published = (run.run_dir / "envelope.json").read_bytes() + (run.run_dir / "report.html").read_bytes()
+    tokens = [p.read_text(encoding="utf-8").strip() for p in (FIXTURES / "secrets").glob("*.token")]
+    assert len(tokens) == 2
+    for secret in [*tokens, "CANARY-4d1e-usage", "CANARY-2b9c-dismantling", "CANARY-7f3a-supplier"]:
+        assert secret.encode("utf-8") not in published, "a report holds no secret and no field value"
+
+
 def test_the_manifest_records_the_hash_of_each_bound_file(tmp_path: Path) -> None:
     with ReferenceRig(tmp_path) as rig:
         run = rig.run()
