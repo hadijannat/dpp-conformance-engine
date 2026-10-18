@@ -50,7 +50,8 @@ Rules:
    `Infinity`, and a number outside the float range are rejected. A nesting deeper than the
    parser handles is an input error, not a crash. The envelope, the trust bundle, the recording,
    the manual result, the authorization, and the JWS header and payload are also parsed with
-   `parse_strict`. A test proves that a `!!python/object` tag is rejected. No YAML value is
+   `parse_strict`. Every body that the system under test returns is parsed with `parse_strict`.
+   So is a sample artifact from the IXIT, such as an AAS file. A test proves that a `!!python/object` tag is rejected. No YAML value is
    evaluated as code or as a template. A URL template (section 9.2) is not evaluated either. The
    engine only replaces named placeholders with percent-encoded values under a fixed grammar.
 5. No module fetches a schema, a JSON-LD context, or a `$ref` from the network. Every such

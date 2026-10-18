@@ -10,7 +10,6 @@ Each of these checks states a limit that its verdict must not hide:
 
 from __future__ import annotations
 
-import json
 from itertools import pairwise
 from typing import Any
 
@@ -25,7 +24,7 @@ from dppce.adapters.common import (
     resource_url,
     unusable,
 )
-from dppce.evidence.canonical import CanonicalizationError, digest
+from dppce.evidence.canonical import CanonicalizationError, digest, parse_strict
 from dppce.models import CheckOutcome, ExecutionStatus, Model
 from dppce.testdefs.registry import CheckContext, register
 
@@ -142,10 +141,12 @@ def aas_validate(ctx: CheckContext) -> CheckOutcome:
     if record.error is not None:
         return blocked("AAS.SAMPLE.MISSING", "The Asset Administration Shell sample is not available.")
     try:
-        document = json.loads(record.body)
+        # Strict: two parsers must not read one sample in two ways. CanonicalizationError is a ValueError.
+        document = parse_strict(record.body)
     except ValueError:
         observation = ctx.observation(0, kind="artifact", records=[record], summary={"json": False})
-        return completed(False, "AAS.INVALID", "The sample is not JSON.", [observation])
+        message = "The sample is not JSON, or it has a repeated key, NaN, or Infinity."
+        return completed(False, "AAS.INVALID", message, [observation])
     valid = bool(aas_file.check_json_data(document).ok())
     observation = ctx.observation(
         0, kind="artifact", records=[record], summary={"valid": valid}, transformations=("aas_test_engines",)
