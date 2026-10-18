@@ -499,21 +499,28 @@ def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str,
 
 def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
     """Parse the origins that the operator confirmed. A bare host would confirm every port of it."""
+    # The value is not shown: its userinfo can hold a password.
+    refusal = (
+        f"{flag} takes an origin such as http://127.0.0.1:8765, without userinfo, a query, a fragment, "
+        "a space, or a control character"
+    )
     origins = set()
     for value in values:
         try:
             parts = urlsplit(value)
             origin = origin_of(value)
         except ValueError as exc:
-            raise UsageError(f"{flag} {value!r} is not an origin") from exc
-        # An origin has no userinfo, query, or fragment. urlsplit drops an empty "?" or "#", so test the text.
+            raise UsageError(refusal) from exc
+        # An origin has no userinfo, query, or fragment. urlsplit drops an empty "?" or "#", drops tab,
+        # CR, and LF, and strips edge controls and spaces, so test the text, as the transport does.
         if (
             parts.scheme not in ("http", "https")
             or not parts.hostname
             or parts.path not in ("", "/")
             or any(mark in value for mark in "@?#")
+            or any(c <= " " or c == "\x7f" for c in value)
         ):
-            raise UsageError(f"{flag} takes an origin such as http://127.0.0.1:8765, not {value!r}")
+            raise UsageError(refusal)
         origins.add(origin)
     return frozenset(origins)
 
@@ -577,9 +584,14 @@ def cmd_run(args: argparse.Namespace) -> int:
             keys.create()
         keys.data_key(args.data_key_id)
     except (KeyError_, OSError) as exc:
+        hint = (
+            "--create-data-key could not create it and never replaces an existing key file"
+            if args.create_data_key
+            else "create it with --create-data-key, or name an existing key with --data-key-id"
+        )
         raise UsageError(
             f"KEYS.DATA_KEY.UNAVAILABLE: data key {args.data_key_id!r} is not available in {args.keys}; "
-            "create it with --create-data-key, or name an existing key with --data-key-id"
+            + hint
         ) from exc
     transport = PolicyTransport(
         TransportConfig(

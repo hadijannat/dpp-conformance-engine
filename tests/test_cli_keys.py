@@ -528,9 +528,15 @@ def test_authorize_refusals(run: Run, passphrase: str, tmp_path: Path) -> None:
         "http://127.0.0.1:8765/?",
         "http://127.0.0.1:8765#f",
         "http://127.0.0.1:8765/#",
+        # urlsplit drops tab, CR, and LF and strips edge spaces: the signed text would not be the origin.
+        "http://127.0.0.1:87\t65",
+        "https://dpp.example\n.evil.example",
+        " http://127.0.0.1:8765",
+        "\x01http://127.0.0.1:8765",
     ):
         code, err = authorize(_authorization(endpoints=[endpoint]))
         assert (code, "AUTHORIZE.ENDPOINT.INVALID" in err) == (2, True), err
+        assert "TEST-ONLY-password" not in err
         assert not out.exists()
     # The key rules of section 11.3 apply to the owner key too, not only to the report key.
     encrypted = tmp_path / "TEST-ONLY-owner.key.pem"
@@ -734,6 +740,15 @@ def test_run_creates_a_missing_data_key_only_with_the_flag(
         assert built == []
         assert unusable.read_bytes() == bytes(31)
         unusable.unlink()
+        # A failed write leaves no partial key, and a retry gets past the key check to the transport.
+        done = limited(16, *rig.run_arguments(tmp_path / "limited"), "--create-data-key")
+        assert (done.returncode, "KEYS.DATA_KEY.UNAVAILABLE" in done.stderr) == (2, True), done.stderr
+        assert not unusable.exists(), unusable.stat().st_size
+        assert "create it with --create-data-key" not in done.stderr
+        assert not (tmp_path / "limited").exists()
+        code, _, err = run(*rig.run_arguments(tmp_path / "retry"), "--create-data-key")
+        assert (code, len(built), len(unusable.read_bytes())) == (3, 1, 32), err
+        unusable.unlink()
         monkeypatch.setattr(cli, "PolicyTransport", real)
 
         first = rig.run(extra=["--data-key-id", "TEST-ONLY-data-key-7"])
@@ -762,7 +777,11 @@ def test_run_refuses_a_confirmed_origin_with_userinfo_a_query_or_a_fragment(
         "http://TEST-ONLY-user:TEST-ONLY-password@127.0.0.1:8765",
         "http://127.0.0.1:8765?",
         "http://127.0.0.1:8765/#f",
+        "http://127.0.0.1:87\t65",
+        "http://127.0.0.1:8765\n",
+        " http://127.0.0.1:8765",
     ):
         code, _, err = run(*_run_arguments(FIXTURES, tmp_path, extra=(flag, value, "--create-data-key")))
         assert (code, f"{flag} takes an origin" in err) == (2, True), err
+        assert "TEST-ONLY-password" not in err
         assert not (tmp_path / "run").exists()

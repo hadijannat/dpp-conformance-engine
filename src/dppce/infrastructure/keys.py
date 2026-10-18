@@ -56,9 +56,7 @@ class FileDataKeyProvider:
         path = self._path(self._key_id)
         if not path.exists():
             self._directory.mkdir(parents=True, exist_ok=True)
-            handle = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            with os.fdopen(handle, "wb") as out:
-                out.write(secrets.token_bytes(_KEY_BYTES))
+            write_new_file(path, secrets.token_bytes(_KEY_BYTES), 0o600)
         return path
 
     def data_key(self, key_id: str) -> bytes:

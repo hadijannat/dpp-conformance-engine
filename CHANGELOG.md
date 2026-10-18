@@ -66,6 +66,7 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `--allow-unencrypted-key` on `dppce sign`.
 - `keys generate`, `sign --out`, `authorize`, `trust-bundle add-key`, `open`, and `prove` remove
   their new output file when the write fails, for example on a full disk. A retry then works.
+  `run --create-data-key` removes a partial data key in the same way.
   `dppce open` prints its warning before it writes the file.
 
 ### Changed
@@ -83,8 +84,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `--data-key-id` selects the key; the default is `local-data-key-1`. `compose.yaml`, the README,
   the tutorial, and the validation rig give `--create-data-key`.
 - `--allow-private-host` and `--allow-remote-host` on `dppce run` refuse a value with userinfo, a
-  query, or a fragment. This includes an empty query or fragment, such as `http://127.0.0.1:8765?`.
-  `dppce authorize` refuses such an endpoint with `AUTHORIZE.ENDPOINT.INVALID`.
+  query, a fragment, a space, or a control character. This includes an empty query or fragment,
+  such as `http://127.0.0.1:8765?`. `dppce authorize` refuses such an endpoint with
+  `AUTHORIZE.ENDPOINT.INVALID`. The refusal does not show the value.
 
 - `status` no longer passes on a fresh `status_as_of` date alone. It needs a supplied status list
   with a clear bit. A report with `require_status` and no list is not complete.
