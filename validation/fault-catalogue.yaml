@@ -181,6 +181,36 @@ sut_faults:
     description: The system answers 403 to every request. The authority role does not get its fields.
     test_purpose: TP-ACCESS-003
     expected: {verdict: fail, reason_code: ACCESS.ENTITLEMENT.REFUSED}
+  - id: F-30
+    class: carrier_fault
+    fault: qr_wrong_shape
+    description: The QR image encodes a GS1 Digital Link URI whose GTIN has 13 digits.
+    test_purpose: TP-ID-001
+    expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
+  - id: F-31
+    class: carrier_fault
+    fault: qr_non_ascii_digits
+    description: The QR image encodes the GTIN in Arabic-Indic digits.
+    test_purpose: TP-ID-001
+    expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
+  - id: F-32
+    class: unresolved_identifier
+    fault: resolver_5xx
+    description: The resolver answers 503 for the carrier identifier.
+    test_purpose: TP-ID-002
+    expected: {verdict: fail, reason_code: IDENTIFIER.RESOLUTION.STATUS}
+  - id: F-33
+    class: unresolved_identifier
+    fault: resolver_html
+    description: The resolver answers 200 with an HTML page instead of a passport.
+    test_purpose: TP-ID-002
+    expected: {verdict: fail, reason_code: IDENTIFIER.RESPONSE.NOT_JSON}
+  - id: F-34
+    class: carrier_fault
+    fault: qr_two_symbols
+    description: The QR image holds two readable QR symbols.
+    test_purpose: TP-CARRIER-001
+    expected: {verdict: fail, reason_code: CARRIER.QR.NOT_DECODED}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
