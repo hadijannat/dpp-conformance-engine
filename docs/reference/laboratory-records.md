@@ -22,13 +22,13 @@ lists the differences that affect a laboratory.
 | Run manifest: the versions and the input hashes | `dppce run` | `envelope.json` |
 | Verdicts, exclusions, retained problems, coverage, and limitations | `dppce run` | `envelope.json`, `report.html` |
 | Decision digest | `dppce run` (output); `dppce sign` (attestation) | Output of the run; inside each signature in `envelope.json` after signing |
-| Signatures | `dppce sign` | `envelope.json` |
+| Signatures, each with the role `issuer` or `reviewer` | `dppce sign` | `envelope.json` |
 | Run inputs (`dppce.runinputs/3`), in clear text | `dppce run` | `inputs.json` |
 | Encrypted recording with the delete-after date | `dppce run` | `recording/` |
 | Signature imprints for a timestamp request | `dppce timestamp imprint` | Output only |
 | Report with an attached timestamp token | `dppce timestamp attach` | A new envelope file at `--out` |
 | Replay result | `dppce replay` | Output only |
-| Verification result | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
+| Verification result, with the dimensions `signers`, `status`, and `validity` | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
 | Coverage | `dppce coverage` | Output only |
 | Trace from a source provision to a check | `dppce catalogue trace` | Output only |
 | Lint findings | `dppce catalogue lint` | Output only |
@@ -43,8 +43,10 @@ lists the differences that affect a laboratory.
 | Fault catalogue | Written by hand, `validation/fault-catalogue.yaml` | The method validation reads it. |
 | Authorization token | Issued by the system owner | The engine validates it and copies it into `inputs.json`. |
 | Signed manual result | Signed by the person who performed the step | The engine checks it. Its observation is in the report. |
-| Trust bundle, version `dppce.trust/2` | Chosen by the operator | The engine checks signatures, revoked keys and certificates, and timestamps against it. It copies the bundle into `inputs.json`. |
+| Trust bundle, version `dppce.trust/2` | Chosen by the operator | The engine checks signatures, signer roles, revoked keys and certificates, status lists, and timestamps against it. It copies the bundle into `inputs.json`. |
 | Timestamp token | Issued by a timestamp authority that the operator selects | The verifier checks it against `timestamp_anchors` of the trust bundle. |
+| Status list (`dppce.statuslist/1`) | Signed by the issuer of reports, outside the engine | The operator supplies the file with `--status-list`. The verifier checks it against a key with the purpose `status`. The engine does not copy it. |
+| Reviewer signature | Made by a reviewer with `dppce sign --role reviewer` | `dppce sign` adds it to `envelope.json`. The verifier checks it in the dimension `signers`. |
 
 ## 3. Outputs of the release pipeline
 
@@ -74,8 +76,10 @@ Each item names a limit of the engine:
 - How and from where you got a trusted key, and each change to the trust bundle.
 - The source and the date of each revocation entry and each timestamp anchor in the trust bundle.
 - A timestamp token. The engine never contacts a timestamp authority.
+- A status list, and a copy of the list that a verification used. The engine never fetches a list.
+- The person who holds a reviewer key. A reviewer signature names a key and a role, not a person.
 - The signed human approval record of an interpretation (ADR 0007).
-- The review and signature of a report or of a method-validation record by a person.
+- The review and signature of a method-validation record by a person.
   `human_review_and_signature` is always `null`.
 - The stored results of replay, verification, purge, lint, and coverage.
 - Storage, backup, and access control for run directories, keys, and `inputs.json`.

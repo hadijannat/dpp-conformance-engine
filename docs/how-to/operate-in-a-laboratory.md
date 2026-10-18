@@ -46,6 +46,29 @@ The run directory holds these files:
 Its help text says "development and tests". This version has no key management service.
 Protect the key file. Do not claim more for the signature than this.
 
+`--role` declares the role of a signature: `issuer` (the default) or `reviewer`.
+Only an issuer signature can state the lifecycle of the report:
+
+| Option | Statement |
+| --- | --- |
+| `--valid-until` | The last time at which the report is valid. |
+| `--supersedes` | The decision digest of an earlier report that this report replaces. |
+| `--status-list-id` and `--status-index` | The entry of the report in a status list. Give both or neither. |
+
+The engine has no command that writes a status list. The issuer makes and signs the list with
+other means.
+
+### Add a reviewer signature
+
+1. Sign the envelope as the issuer first.
+2. Give the signed envelope to the reviewer.
+3. The reviewer signs it with `dppce sign --role reviewer` and a key that only the reviewer holds.
+4. For `--issuer`, the reviewer gives the issuer that the trust bundle states for the reviewer key.
+5. Record which person holds the reviewer key. The signature names a key and a role, not a person.
+
+`dppce sign` adds the new signature after the signatures that the envelope already has.
+`run` and `replay` never make a signature.
+
 ## 4. Replay
 
 1. Replay the recording five times.
@@ -72,10 +95,31 @@ dppce replay --run RUN_DIR --keys KEYS_DIR --times 5 --json
 dppce verify --envelope RUN_DIR/envelope.json --trust TRUST.json --at TIME --json
 ```
 
-2. Read the exit code. `0` means complete. `4` means failed or incomplete. `2` means bad input.
-3. Keep the output. The engine does not store a verification result.
+2. If the issuer keeps a status list, add `--status-list LIST_FILE`. Also give the list to
+   `dppce report --trust`.
+3. Read the exit code. `0` means complete. `4` means failed or incomplete. `2` means bad input.
+4. Keep the output. The engine does not store a verification result.
+5. Keep the status list file that you used. The engine does not copy it.
 
 `--at` sets the evaluation time.
+The engine never fetches a status list. You get the file from the issuer.
+Your trust bundle must give the key of the list the purpose `status`.
+
+These dimensions of the output need the most attention:
+
+| Dimension | When it is mandatory | What it checks |
+| --- | --- | --- |
+| `signers` | Always | Each signature that names a key of your trust bundle verifies. The key has the purpose of the declared role. |
+| `status` | When your policy sets `require_status`, you supply a list, or the report names a status entry | The status list is usable, and it does not set the bit of the report. |
+| `validity` | When the issuer states `valid_until` | The evaluation time is not later than `valid_until`. |
+
+- A fresh `status_as_of` date alone does not pass `status`. A report that names a status entry
+  is not complete without a usable list.
+- `signature` and `issuer_trust` consider only signatures with the role `issuer`.
+- A reviewer key needs the purpose `review`. One key cannot have the purposes `review` and
+  `report` (`TRUST.KEY.ROLE_CONFLICT`).
+- A bad reviewer signature makes the verification incomplete. It does not change `signature`.
+
 The verifier checks the signing key at the earliest `genTime` of a good timestamp over its signature.
 Without such a timestamp, it checks the key at the evaluation time.
 The detail of `issuer_trust` names this key validity time.
@@ -121,7 +165,9 @@ After a purge, a replay is not possible. The signed report still verifies.
 | --- | --- | --- |
 | Verdict and claim level | The outcome of each step under the rules of the selected mode. | A legal decision, product safety, or the truth of the data. |
 | Replay | The same recording gives the same decision digest. | A new measurement of the system. |
-| Verification | The report is intact. A key in your trust bundle signed it. The key was valid at the key validity time. | Anything new about the tested system. |
+| Verification | The report is intact. A key in your trust bundle signed it as the issuer. The key was valid at the key validity time. | Anything new about the tested system. |
+| Status | The status list that you supplied does not withdraw the report. | The status in a list that you did not supply. |
+| Reviewer signature | A key with the purpose `review` signed the report. | Which person reviewed it, or what that person checked. |
 | Timestamp | A timestamp authority in your `timestamp_anchors` states that the signature existed at `genTime`. | That the time of the authority is correct. |
 | Method-validation record | Seeded faults on a synthetic system, with numerators and denominators. | A result on a real system. `human_review_and_signature` is always `null`. |
 | Purge | The recording is deleted. | The deletion of other files or of copies. |

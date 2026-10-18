@@ -42,6 +42,13 @@ These changes are not in `v0.1.0rc1`, and they affect a laboratory:
   `dppce timestamp attach`.
 - An answer with a status from 500 to 599 counts as no answer. Most checks then give
   `TRANSPORT.SERVER_ERROR`, and the step is `inconclusive` by default.
+- Signed report status lists ([ADR 0016](../adr/0016-report-status-lists-validity-and-signer-roles-are-stated-in-the-attestation.md)).
+  `dppce verify`, `dppce report`, and `python -m dppce.verifier` read a list with `--status-list`.
+- The attestation version `dppce.attestation/2` with `role`, `status`, `valid_until`, and
+  `supersedes`. The verifier of `v0.1.0rc1` refuses a signature with version 2.
+- Reviewer signatures with `dppce sign --role reviewer`, and the trust purposes `review` and `status`.
+- The verifier dimensions `signers` and `validity`. The dimension `status` passes only with a
+  supplied status list that does not withdraw the report.
 
 If you install the engine from source, keep the commit and the output of `dppce --version`.
 
