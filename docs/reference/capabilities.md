@@ -42,3 +42,27 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `evidence.qualified_seal` | evidence | interface_only |  | Qualified electronic seal. | A separately validated integration with a qualified trust service provider. |
 | `keys.kms` | infrastructure | interface_only |  | Signing and data keys in a cloud KMS. | An implementation of the Signer and DataKeyProvider protocols, tested against a KMS emulator. |
 | `keys.pkcs11` | infrastructure | interface_only |  | Signing keys in a PKCS#11 device. | An implementation of the Signer protocol, tested against a software token. |
+
+## Check parameters
+
+Each check has a closed parameter model. The model refuses an unknown key, a value outside a fixed set, and a value of the wrong type. `dppce catalogue lint` reports such parameters with `CAT019`. `plan`, `run`, and `replay` refuse the test pack. The default is the value that the check uses when the key is absent.
+
+| Check | Capability | Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- | --- | --- |
+| `aas.validate` | `aas.validate` | `artifact` | string | `"aas_file"` | Name of the IXIT sample that holds the AAS file. |
+| `access.restricted_fields` | `access.policy` | `role` | string | `"anonymous"` | Role whose view is probed. |
+| `api.contract` | `api.contract` | `resource` | one of `item`, `model`, `signed`, `versions`, `registry_record` | `"item"` | Passport resource whose marked operation is judged. |
+| `api.contract` | `api.contract` | `path` | string or none | none | Expected IXIT template path. A different template gives blocked. |
+| `api.contract` | `api.contract` | `method` | `get` | `"get"` | HTTP method. Only get is supported. |
+| `carrier.qr_decode` | `carrier.qr` | `artifact` | string | `"qr_image"` | Name of the IXIT sample that holds the QR image. |
+| `data.context` | `data.context` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
+| `data.context` | `data.context` | `allowed_contexts` | list of string | required | Exact context URLs that are allowed. No context is fetched. |
+| `data.jsonschema` | `data.jsonschema` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
+| `data.rules` | `data.rules` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
+| `identifier.consistency` | `identifier.consistency` | (none) | | | |
+| `identifier.parse` | `identifier.parse` | `scheme` | string or none | none | Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS. |
+| `identifier.resolve` | `identifier.resolve` | `accept` | string or none | none | Accept request header. Printable ASCII, 1 to 256 characters. |
+| `identifier.resolve` | `identifier.resolve` | `accepted_media_types` | list of string or none | none | Final media types that count as resolved. Default: a final JSON object only. |
+| `integrity.jws` | `integrity.jws` | (none) | | | |
+| `persistence.versions` | `persistence.versions` | (none) | | | |
+| `registry.consistency` | `registry.mock` | (none) | | | |

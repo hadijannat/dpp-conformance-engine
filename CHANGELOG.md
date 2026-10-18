@@ -6,7 +6,21 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Each registered check declares a closed parameter model. The capability reference lists the
+  parameters of each check.
+- Lint codes `CAT019` to `CAT022`. `CAT019`: the parameters of a test purpose do not fit its check.
+  `CAT020`: the cited version has no version token of the source record. `CAT021`, a warning: the
+  source record shows a later version or amendment. `CAT022`: a date in a legal obligation is not
+  in `applicable_dates` of its source.
+
 ### Changed
+
+- `dppce plan`, `dppce run`, and `dppce replay` refuse a selected test pack whose parameters do not
+  fit the check. They also refuse an ICS date fact that is not a calendar date. Both give exit code 2.
+- A recording with such inputs can no longer be replayed. Replay it with the engine version that
+  made it.
 
 - A new run writes the decision body as `dppce.decision/2`. Version 2 adds the required field
   `manifest.bound_files`, the hash of each file that the profile binds. A verifier of 0.1.0rc1

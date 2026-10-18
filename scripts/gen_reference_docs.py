@@ -7,10 +7,12 @@ Usage: ``uv run python scripts/gen_reference_docs.py`` writes the pages.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from itertools import combinations
 from pathlib import Path
+from typing import Any
 
 os.environ["COLUMNS"] = "100"  # argparse wraps help text to the terminal width
 
@@ -27,6 +29,7 @@ from dppce.models import (
     Verdict,
     VerdictRules,
 )
+from dppce.testdefs import registry
 from dppce.verdicts import claim_level, path_verdict, requirement_verdict, step_verdict
 
 OUT = Path(__file__).resolve().parent.parent / "docs" / "reference"
@@ -96,7 +99,51 @@ def capabilities_page() -> str:
             f"| `{c.id}` | {c.adapter} | {c.state.value} | {needs} | {c.description} "
             f"| {c.acceptance_criteria} |"
         )
+    rows += [
+        "\n## Check parameters\n",
+        "Each check has a closed parameter model. The model refuses an unknown key, a value outside a "
+        "fixed set, and a value of the wrong type. `dppce catalogue lint` reports such parameters with "
+        "`CAT019`. `plan`, `run`, and `replay` refuse the test pack. The default is the value that the "
+        "check uses when the key is absent.\n",
+        "| Check | Capability | Parameter | Type | Default | Meaning |",
+        "| --- | --- | --- | --- | --- | --- |",
+        *_parameter_rows(),
+    ]
     return "\n".join(rows) + "\n"
+
+
+def _parameter_type(prop: dict[str, Any]) -> str:
+    if "const" in prop:
+        return f"`{prop['const']}`"
+    if "enum" in prop:
+        return "one of " + ", ".join(f"`{v}`" for v in prop["enum"])
+    if "anyOf" in prop:
+        return " or ".join("none" if p.get("type") == "null" else _parameter_type(p) for p in prop["anyOf"])
+    if prop.get("type") == "array":
+        return f"list of {_parameter_type(prop.get('items', {}))}"
+    return str(prop.get("type", "any"))
+
+
+def _parameter_rows() -> list[str]:
+    rows = []
+    for name in registry.names():
+        spec = registry.get(name)
+        if spec is None or not spec.fn.__module__.startswith("dppce.adapters"):
+            continue
+        schema = spec.params.model_json_schema()
+        properties: dict[str, dict[str, Any]] = schema.get("properties", {})
+        if not properties:
+            rows.append(f"| `{name}` | `{spec.capability}` | (none) | | | |")
+        for field, prop in properties.items():
+            if field in schema.get("required", []):
+                default = "required"
+            else:
+                default = "none" if prop.get("default") is None else f"`{json.dumps(prop['default'])}`"
+            rows.append(
+                f"| `{name}` | `{spec.capability}` | `{field}` | {_parameter_type(prop)} | {default} "
+                f"| {prop.get('description', '')} |"
+            )
+    return rows
 
 
 def schemas_page() -> str:

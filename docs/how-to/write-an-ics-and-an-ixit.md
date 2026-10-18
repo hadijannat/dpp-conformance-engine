@@ -14,6 +14,7 @@ Copy `fixtures/reference/ev.ics.yaml` and change it. The schema is `ics` in the
 3. Declare the product category, the granularity, the identifier scheme, and the carriers.
 4. Give the product facts in `characteristics`. Use integer units: watt-hours, grams.
    Write a date as `YYYY-MM-DD`.
+   The date must exist in the calendar. Otherwise plan, run, and replay stop with exit code 2.
 5. Write `unknown` for a value that you do not know. Do not guess.
 6. Name the API contract in `api.contract` and the access policy in `access.policy`.
    Use the identifier in the file: `x-dppce-contract-id` for a contract, `policy_id` for a policy.
