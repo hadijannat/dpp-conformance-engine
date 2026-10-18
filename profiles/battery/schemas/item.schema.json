@@ -136,6 +136,9 @@
         },
         "supplier_reference": {
           "type": "string"
+        },
+        "usage_log": {
+          "type": "string"
         }
       }
     }

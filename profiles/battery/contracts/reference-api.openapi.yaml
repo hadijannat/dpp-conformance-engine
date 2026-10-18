@@ -140,6 +140,8 @@ components:
               type: string
             supplier_reference:
               type: string
+            usage_log:
+              type: string
     Model:
       title: Synthetic model-level battery data
       $comment: Project-authored illustrative schema. Not derived from a standard or a law.

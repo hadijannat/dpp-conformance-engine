@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import shutil
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -17,11 +18,15 @@ import yaml
 from validation.rig import FIXTURES, ROOT, TRUST, ReferenceRig
 
 from dppce import cli
+from dppce.catalogue import load_profiles
 from dppce.evidence.canonical import canonical_bytes
 from dppce.evidence.jws import LocalSigner
 from dppce.infrastructure.authorization import issue_authorization
-from dppce.models import Authorization
+from dppce.infrastructure.reference_server import ReferenceSystem
+from dppce.models import ICS, IXIT, Authorization, TestPurpose
+from dppce.testdefs.registry import CheckContext
 from tests.core import builders as b
+from tests.test_url_templates import Canned, run
 
 AT = "2026-10-13T12:00:00Z"
 POLICY = Path("profiles/battery/access/reference-policy.yaml")
@@ -198,3 +203,39 @@ def test_replay_refuses_a_role_that_the_current_profile_does_not_declare(
         assert "names the role 'legitimate_interest'." in err
     else:
         assert "REPLAY.INPUT.CHANGED: these inputs differ from the run: profile;" in err
+
+
+@pytest.mark.parametrize(
+    ("check", "params", "code"),
+    [("data.jsonschema", {"document": "item"}, "DATA.SCHEMA.OK"), ("api.contract", {}, "API.CONTRACT.OK")],
+)
+def test_the_pinned_schema_and_contract_admit_the_legitimate_interest_view(
+    check: str, params: dict[str, Any], code: str
+) -> None:
+    """The reference system gives this role restricted.usage_log. A control that reads that
+    credentialed view must not fail on the bound item schema or the bound API contract."""
+    ixit = IXIT.model_validate(yaml.safe_load((FIXTURES / "ev.ixit.yaml").read_text(encoding="utf-8")))
+    view = ReferenceSystem(FIXTURES).item(ixit.samples["passport_id"], "legitimate_interest")
+    assert "usage_log" in view["restricted"]
+    purpose = TestPurpose.model_validate(
+        {
+            "id": "TP-X",
+            "title": "t",
+            "requirements": ["R"],
+            "profiles": ["*"],
+            "applicability": {"const": "true"},
+            "stimulus": {"check": check, "params": params},
+            "permitted_modes": ["illustrative"],
+        }
+    )
+    ctx = CheckContext(
+        purpose=purpose,
+        ics=ICS.model_validate(yaml.safe_load((FIXTURES / "ev.ics.yaml").read_text(encoding="utf-8"))),
+        ixit=ixit,
+        profile=load_profiles(ROOT)["battery/ev"],
+        acquirer=Canned(json.dumps(view).encode()),
+        evaluation_time=datetime(2026, 10, 13, tzinfo=UTC),
+        data_root=ROOT,
+    )
+    outcome = run(ctx)
+    assert (outcome.passed, outcome.reason_code) == (True, code), outcome.message
