@@ -125,10 +125,10 @@ dppce replay --run RUN_DIR --keys KEYS_DIR --times 5 --json
 
 ## 5. Verify
 
-1. Verify the signed report against your trust bundle.
+1. Verify the signed report against your trust bundle. This is the file that `sign` wrote.
 
 ```bash
-dppce verify --envelope RUN_DIR/envelope.json --trust TRUST.json --at TIME --json
+dppce verify --envelope RUN_DIR/envelope.signed.json --trust TRUST.json --at TIME --json
 ```
 
 2. If the issuer keeps a status list, add `--status-list LIST_FILE`. Also give the list to

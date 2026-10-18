@@ -440,6 +440,7 @@ def test_authorize_refusals(run: Run, tmp_path: Path) -> None:
         _authorization(not_before="2027-01-02T00:00:00Z"),
         _authorization(not_after="2026-02-30T00:00:00Z"),
         _authorization(not_before="tomorrow"),
+        _authorization(not_before="2026-1-1T0:0:0Z"),
     ):
         code, err = authorize(document)
         assert (code, "AUTHORIZE.PERIOD.INVALID" in err) == (2, True), err
@@ -578,6 +579,10 @@ def test_trust_bundle_add_key_refusals(run: Run, tmp_path: Path) -> None:
     refused(
         "TRUST.KEY.PERIOD_INVALID",
         period=["--not-before", "2026-02-30T00:00:00Z", "--not-after", "2027-01-01T00:00:00Z"],
+    )
+    refused(
+        "TRUST.KEY.PERIOD_INVALID",
+        period=["--not-before", "2026-1-1T0:0:0Z", "--not-after", "2027-01-01T00:00:00Z"],
     )
     out.write_text("{}\n", encoding="utf-8")
     refused("TRUST.OUTPUT.EXISTS", jwk_path=_jwk(tmp_path, "third"))

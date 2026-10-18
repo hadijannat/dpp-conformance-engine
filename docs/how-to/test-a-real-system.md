@@ -95,10 +95,10 @@ A record opening gives the salt and the plaintext of one record.
 
 3. Read the warning. The file holds the plaintext of the record, with mode 0600.
 4. Give the file only to a party that is entitled to it. A response body can hold personal data.
-5. The reader checks the opening against the report:
+5. The reader checks the opening against the signed report, the file that `dppce sign` wrote:
 
    ```bash
-   dppce verify --envelope ./runs/r1/envelope.json --trust trust.json \
+   dppce verify --envelope SIGNED_REPORT.json --trust trust.json \
      --at 2026-10-14T00:00:00Z --opening r0001.opening.json
    ```
 

@@ -21,7 +21,7 @@ lists the differences that affect a laboratory.
 | --- | --- | --- |
 | Run manifest: the versions and the input hashes | `dppce run` | `envelope.json` |
 | Verdicts, exclusions, retained problems, coverage, and limitations | `dppce run` | `envelope.json`, `report.html` |
-| Decision digest | `dppce run` (output); `dppce sign` (attestation) | Output of the run; inside each signature in `envelope.json` after signing |
+| Decision digest | `dppce run` (output); `dppce sign` (attestation) | Output of the run; inside each signature of the signed file |
 | Signatures, each with the role `issuer` or `reviewer` | `dppce sign` | The new file at `--out`, or `envelope.json` with `--in-place` |
 | Encrypted signing key and its public JWK | `dppce keys generate` | The key file at `--out`, with mode 0600; the JWK in the output only |
 | Signed test authorization | `dppce authorize`, run by the system owner | The new file at `--out` |
@@ -33,7 +33,8 @@ lists the differences that affect a laboratory.
 | Signature imprints for a timestamp request | `dppce timestamp imprint` | Output only |
 | Report with an attached timestamp token | `dppce timestamp attach` | A new envelope file at `--out` |
 | Replay result | `dppce replay` | Output only |
-| Verification result, with the dimensions `signers`, `status`, `validity`, `opening`, and `proof` | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
+| Verification result, with the dimensions `signers`, `status`, and `validity` | `dppce verify`, `python -m dppce.verifier`, `dppce report --trust` | Output only, or the verification section of the HTML report |
+| Verification result, with the dimensions `opening` and `proof` | `dppce verify`, `python -m dppce.verifier` | Output only |
 | Coverage | `dppce coverage` | Output only |
 | Trace from a source provision to a check | `dppce catalogue trace` | Output only |
 | Lint findings | `dppce catalogue lint` | Output only |
@@ -51,7 +52,7 @@ lists the differences that affect a laboratory.
 | Trust bundle, version `dppce.trust/2` | Chosen by the operator | The engine checks signatures, signer roles, revoked keys and certificates, status lists, and timestamps against it. It copies the bundle into `inputs.json`. |
 | Timestamp token | Issued by a timestamp authority that the operator selects | The verifier checks it against `timestamp_anchors` of the trust bundle. |
 | Status list (`dppce.statuslist/1`) | Signed by the issuer of reports, outside the engine | The operator supplies the file with `--status-list`. The verifier checks it against a key with the purpose `status`. The engine does not copy it. |
-| Reviewer signature | Made by a reviewer with `dppce sign --role reviewer` | `dppce sign` adds it to `envelope.json`. The verifier checks it in the dimension `signers`. |
+| Reviewer signature | Made by a reviewer with `dppce sign --role reviewer` | `dppce sign` adds it to the file at `--out`, or to the input with `--in-place`. The verifier checks it in the dimension `signers`. |
 
 ## 3. Outputs of the release pipeline
 
