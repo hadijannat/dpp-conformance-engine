@@ -105,6 +105,17 @@ def test_each_reason_a_token_is_refused_has_its_own_code(signer: LocalSigner) ->
         assert caught.value.code == code, reason
 
 
+@pytest.mark.parametrize("extra", [{"use": "enc"}, {"alg": "ES384"}, {"alg": "HS256"}])
+def test_a_key_whose_use_or_alg_does_not_permit_es256_is_refused(
+    extra: dict[str, str], signer: LocalSigner
+) -> None:
+    token = _token({"alg": "ES256", "kid": signer.key_id, "typ": TYP}, signer)
+    assert verify_compact(token, signer.public_jwk() | {"use": "sig", "alg": "ES256"}, typ=TYP) == b"payload"
+    with pytest.raises(SignatureError) as caught:
+        verify_compact(token, signer.public_jwk() | extra, typ=TYP)
+    assert caught.value.code == "KEY"
+
+
 def test_a_token_above_the_size_limit_is_too_large_and_not_invalid(signer: LocalSigner) -> None:
     """A limit of the engine must never read as a failed signature."""
     padded = {"alg": "ES256", "kid": "k" * (MAX_HEADER_BYTES + 1), "typ": TYP}

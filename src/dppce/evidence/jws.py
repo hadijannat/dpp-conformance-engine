@@ -103,8 +103,8 @@ def header_of(token: str) -> dict[str, Any]:
 def verify_compact(token: str, public_jwk: Mapping[str, str], *, typ: str) -> bytes:
     """Verify ``token`` with ``public_jwk`` and return the payload.
 
-    Rejects a disallowed algorithm, a wrong ``typ``, an unknown header parameter, and a key
-    that is not a public P-256 key.
+    Rejects a disallowed algorithm, a wrong ``typ``, an unknown header parameter, a key
+    that is not a public P-256 key, and a key whose use or alg does not permit ES256 signatures.
     """
     if len(token) > MAX_HEADER_BYTES + MAX_PAYLOAD_BYTES * 2 + MAX_SIGNATURE_BYTES:
         raise SignatureError("the token is larger than this engine accepts", "TOO_LARGE")
@@ -119,6 +119,8 @@ def verify_compact(token: str, public_jwk: Mapping[str, str], *, typ: str) -> by
     is_public_ec = set(public_jwk) - {"kid", "use", "alg"} == _PUBLIC_JWK_FIELDS
     if not is_public_ec or public_jwk.get("kty") != "EC" or public_jwk.get("crv") != "P-256":
         raise SignatureError("the verification key is not a public P-256 key", "KEY")
+    if public_jwk.get("use", "sig") != "sig" or public_jwk.get("alg", "ES256") not in ALLOWED_ALGORITHMS:
+        raise SignatureError("the verification key is not a public P-256 signing key for ES256", "KEY")
     try:
         key = ECKey.import_key({k: public_jwk[k] for k in _PUBLIC_JWK_FIELDS})
         verified = jws.deserialize_compact(
