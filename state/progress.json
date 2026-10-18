@@ -4,7 +4,7 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 19,
+    "cycle": 23,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
@@ -64,7 +64,7 @@
       "status": "in progress",
       "research_passes": 0,
       "review_rounds": 0,
-      "note": "T1 technical readiness: the agent-buildable T1 packages of docs/research/gap-assessment-2026-10-15.md, section 6.2. Owner decisions of 2026-10-18 in chat: protected T1 contract edits (O1-2 to O1-10) allowed, each protected diff shown to the owner before it lands; issuer Hadi Jannatabadi, 'not accredited' (OQ-003); standing approvals to land reviewed branches, add pinned dependencies, and push main after ci and codeql. Not in scope for an agent: interpretation approval (OQ-002), OQ-016 and other reviewer readings, a real-system run, an independent audit."
+      "note": "T1 technical readiness: the agent-buildable T1 packages of docs/research/gap-assessment-2026-10-15.md, section 6.2. Owner decisions of 2026-10-18 in chat: protected T1 contract edits (O1-2 to O1-10) allowed, each protected diff shown to the owner before it lands; issuer Hadi Jannatabadi, 'not accredited' (OQ-003); standing approvals to land reviewed branches, add pinned dependencies, and push main after ci and codeql. Not in scope for an agent: interpretation approval (OQ-002), OQ-016 and other reviewer readings, a real-system run, an independent audit. Owner decisions of 2026-10-18 after review: reports with issuer 'unspecified' fail issuer_trust; stricter identifier.parse accepted; a resolver 5xx becomes inconclusive like unreachable (wave 4); W3b access defaults confirmed; no maximum age for manual results."
     }
   },
   "repair_attempts": {
@@ -457,6 +457,30 @@
       "kind": "implement-and-check",
       "milestone": "post-M6",
       "summary": "T0 corrections of the assessment (2026-10-18): 982c58e (D4-01), 1a00cfe (D6-09), 34aa95a (D4-02), 6e022b6 (D8-17). uv run just check: 1277 passed. Pushed; ci and codeql passed on 6e022b6. Owner sign-off 1de751d."
+    },
+    {
+      "cycle": 20,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "Wave 1 and D1-05 (2026-10-18): exact decimals in data.rules, degraded QR fixtures, test-pack import. Pushed; ci and codeql passed."
+    },
+    {
+      "cycle": 21,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "Wave 2 (2026-10-18): URL templates and dppce.decision/2 (W2c), check parameter models and lint rules (W2b), signed manual results with freshness binding (W2a). Pushed; ci and codeql passed."
+    },
+    {
+      "cycle": 22,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "W3a (2026-10-18): issuer binding in the verifier, dppce.runinputs/2 with a replay input check, dppce manual digest. Pushed; ci and codeql passed."
+    },
+    {
+      "cycle": 23,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "Wave 3 integration (2026-10-18): access entitlement and declared roles (W3b), vendored GS1, Wycheproof, and RFC 8785 vectors, property tests, mutation scope (W3c). validation.run: 93 of 93 faults, 0 of 48 false positives."
     }
   ],
   "blockers": [
@@ -472,6 +496,7 @@
     "Parallel task limit exceeded one time: a resumed workflow reran two refutation checks that were already complete, so four agents ran for about four minutes against a limit of three. The workflow was stopped and the one missing check was launched alone.",
     "Two delegated tasks failed at launch with an expired credential (HTTP 401) and did no work. They were relaunched after the session resumed.",
     "Review round 2: the repair branch existed in a worktree inside the main checkout while the skeptics worked. Some skeptics judged findings against the already-fixed branch. The review record marks each such vote.",
-    "The gap assessment (cycle 18) ran up to 16 read-only agents in parallel, above max_parallel_tasks 3. No agent edited a file. The Fable synthesis failed on usage credits; at the direction of the owner, Opus wrote the judgment sections."
+    "The gap assessment (cycle 18) ran up to 16 read-only agents in parallel, above max_parallel_tasks 3. No agent edited a file. The Fable synthesis failed on usage credits; at the direction of the owner, Opus wrote the judgment sections.",
+    "Rule 3 incident (W3c, 2026-10-18): before the name-lookup guard existed, the red run of test_the_network_guard_refuses_a_name_lookup made one real getaddrinfo call for dns.example.test from the developer host. It failed with gaierror. tests/conftest.py now guards socket.getaddrinfo."
   ]
 }
