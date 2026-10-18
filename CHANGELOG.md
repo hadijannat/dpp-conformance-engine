@@ -43,8 +43,28 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the token of a `TimeStampResp` file that the operator obtained. No command contacts a timestamp
   authority.
 - The run-time dependency `asn1crypto` (MIT) parses timestamp tokens.
+- Report status lists (ADR 0016, D6-03). The issuer signs a `dppce.statuslist/1` list. Its
+  bitstring uses the W3C Bitstring Status List encoding. The operator supplies the file with
+  `--status-list` on `dppce verify`, `dppce report`, and `python -m dppce.verifier`. Nothing
+  fetches it. The capability `evidence.status_list` is `supported`.
+- Attestation version 2 states `role`, `status`, `valid_until`, and `supersedes`. `dppce sign`
+  takes `--role`, `--valid-until`, `--supersedes`, `--status-list-id`, and `--status-index`. A
+  plain issuer signature is still version 1.
+- A second signature with a declared role, for example `reviewer` (D8-14, report part). The
+  trust purposes `review` and `status`. One public key cannot hold `review` and `report`:
+  `TRUST.KEY.ROLE_CONFLICT`.
+- The verifier has the mandatory dimension `signers` and the dimension `validity`. The HTML report
+  lists each signature as declared. The fault catalogue version 0.5.0 adds `E-14` and `E-15`.
 
 ### Changed
+
+- `status` no longer passes on a fresh `status_as_of` date alone. It needs a supplied status list
+  with a clear bit. A report with `require_status` and no list is not complete.
+- `signature` and `issuer_trust` consider only signatures with the role `issuer`. An extra
+  signature that names a trusted key and does not verify, or whose key lacks the purpose of its
+  role, now makes verification incomplete.
+- An invalid trust bundle shows its first problem on the command line, for example
+  `TRUST.KEY.ROLE_CONFLICT`, in place of a count of validation errors.
 
 - The trust bundle is version `dppce.trust/2`. `revoked_certificates` scopes each revoked serial
   number by its issuer name or issuer key identifier (D8-10). `revoked_keys` and

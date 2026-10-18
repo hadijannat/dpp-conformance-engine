@@ -39,7 +39,10 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | recording | The encrypted records of one run. A replay evaluates a recording again. |
 | reference system | The synthetic local DPP system in this repository. It is an example, not an authority. |
 | requirement | One testable statement with a source, an authority class, a modality, and a review status. |
+| reviewer signature | A second signature over a report with the declared role `reviewer`. A person makes it with a key that has the purpose `review`. It names a key and no person. |
 | run | One execution of a plan against one system at one evaluation time. |
+| signer role | The role that an attestation declares: `issuer` or `reviewer`. |
+| status list | A list that the issuer of reports signs. One bit per report shows whether the issuer revoked or suspended it. |
 | system under test | The DPP system that a run examines. |
 | test purpose | A declarative description of one test step: what it checks, for which requirements, and how a result maps to a verdict. |
 | trust bundle | The explicit list of keys and anchors that the operator trusts. |

@@ -33,15 +33,41 @@ python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10
 | `results_root` | A result was added, removed, or changed. |
 | `records_root` | A record commitment was changed. |
 | `counts` | The stated counts or the overall outcome do not match the results. |
-| `signature` | No signature verifies with a key of your trust bundle and binds this report. |
+| `signature` | No signature with the role `issuer` verifies with a key of your trust bundle and binds this report. |
 | `issuer_trust` | The signing key is not in your trust bundle, or it is expired or revoked at the key validity time. Or the stated issuer identifier differs from the issuer of the key, or is `unspecified`. Or an accreditation status other than `not accredited` has no reference. The detail names the key validity time: the `genTime` of a trusted timestamp over the signature, or else the evaluation time. |
 | `manual_results` | A completed manual step has no committed record or no signed result. Or the performer key is not in your trust bundle for the purpose `manual`, or is expired or revoked. Or the signed outcome differs from the report. Or the step states no test purpose digest. Or the signed test purpose digest or SUT version differs from the report. Or the review time is outside the key validity period or after the evaluation time. |
-| `status` | Your policy needs fresh status evidence, and it is missing or stale. |
+| `signers` | A signature names a key of your trust bundle but does not verify. Or your trust bundle does not give its key the purpose of its declared role. Or a reviewer key is expired, revoked, or of a different issuer. Or the issuer signatures state different lifecycle values. |
+| `status` | The status list sets the bit of the report, or the list is not usable. Or the report names a status entry, a list is supplied, or your policy needs status, and no usable list is supplied. |
+| `validity` | The issuer states a `valid_until` time that is before the evaluation time. |
 | `timestamp` | No token is good, or your policy needs a trusted timestamp and the report has none. The detail names the reason code of the first token. |
 
 To check manual steps, your trust bundle must hold the keys of the performers with the purpose `manual`.
 To check timestamps, list the certificate of each timestamp authority that you trust in
 `timestamp_anchors`. Use the certificate of its CA, or the authority certificate itself.
+
+## Check the status of a report
+
+The issuer can withdraw a report after signing it. It then sets the bit of the report in a signed
+status list.
+
+1. Get the status list file from the issuer. The engine never fetches it.
+2. Add the status key of the issuer to your trust bundle with the purpose `status`.
+3. Run the verifier with the list.
+
+```bash
+python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10-14T00:00:00Z \
+  --status-list status-list.jws
+```
+
+4. Read the dimension `status`. `STATUSLIST.REPORT.ACTIVE` means that the bit of the report is 0.
+
+A report that names a status entry is not complete without a usable list.
+
+## Check a reviewer signature
+
+A reviewer signs a report after the issuer. Give the key of the reviewer the purpose `review` in
+your trust bundle. Never give one key the purposes `review` and `report`. The dimension `signers`
+lists each signature with its key and its declared role.
 
 ## Add a trusted timestamp to a report
 
@@ -71,7 +97,8 @@ dppce timestamp attach --envelope envelope.json --response response.tsr --out st
 
 ## Limits
 
-- The verifier does no network I/O. Revocation comes from the snapshot in your trust bundle.
+- The verifier does no network I/O. Key revocation comes from your trust bundle. Report status
+  comes from the status list file that you supply.
 - The engine does not validate an accreditation. The verifier shows the stated status and reference.
 - The verifier does not check the issuer name.
 - A report carries a trusted timestamp only if the operator attaches one. The engine cannot

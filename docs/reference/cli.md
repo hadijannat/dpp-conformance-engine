@@ -150,7 +150,7 @@ options:
 
 ```text
 usage: dppce report [-h] [--json] --envelope ENVELOPE [--format {html,json}] [--out OUT]
-                    [--trust TRUST] [--at AT]
+                    [--trust TRUST] [--at AT] [--status-list STATUS_LIST]
 
 Render a report as HTML or JSON.
 
@@ -162,39 +162,57 @@ options:
   --out OUT
   --trust TRUST         include a verification section (HTML only)
   --at AT
+  --status-list STATUS_LIST
+                        signed status list file of the report issuer; nothing is fetched
 ```
 
 ### `dppce sign`
 
 ```text
 usage: dppce sign [-h] [--json] --envelope ENVELOPE --key KEY --kid KID --issuer ISSUER
-                  [--out OUT]
+                  [--out OUT] [--role {issuer,reviewer}] [--valid-until VALID_UNTIL]
+                  [--supersedes SUPERSEDES] [--status-list-id STATUS_LIST_ID]
+                  [--status-index STATUS_INDEX]
 
 Sign an envelope with a local key (development and tests).
 
 options:
-  -h, --help           show this help message and exit
-  --json               write one JSON document to standard output
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
   --envelope ENVELOPE
-  --key KEY            PEM private key, P-256
+  --key KEY             PEM private key, P-256
   --kid KID
-  --issuer ISSUER      issuer identifier that the trust bundle names
+  --issuer ISSUER       issuer identifier that the trust bundle names
   --out OUT
+  --role {issuer,reviewer}
+                        declared role; reviewer: a person signs with a key that only that person
+                        holds
+  --valid-until VALID_UNTIL
+                        issuer only: last time at which the report is valid
+  --supersedes SUPERSEDES
+                        issuer only: decision digest of the earlier report that this replaces
+  --status-list-id STATUS_LIST_ID
+                        issuer only: identifier of the status list of the report
+  --status-index STATUS_INDEX
+                        issuer only: index of the report in that status list
 ```
 
 ### `dppce verify`
 
 ```text
 usage: dppce verify [-h] [--json] --envelope ENVELOPE --trust TRUST --at AT
+                    [--status-list STATUS_LIST]
 
 Verify a signed envelope against an explicit trust bundle.
 
 options:
-  -h, --help           show this help message and exit
-  --json               write one JSON document to standard output
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
   --envelope ENVELOPE
   --trust TRUST
-  --at AT              explicit evaluation time
+  --at AT               explicit evaluation time
+  --status-list STATUS_LIST
+                        signed status list file of the report issuer; nothing is fetched
 ```
 
 ### `dppce catalogue lint`

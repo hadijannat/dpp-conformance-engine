@@ -7,7 +7,7 @@ Prerequisites: none.
 The records use the MADR style. A number is never reused. A changed decision gets a new record.
 
 Status of all records: **proposed**. Decisions 0001 to 0012 are implemented in version 0.1.0rc1.
-Decisions 0013 to 0015 are implemented after that version.
+Decisions 0013 to 0016 are implemented after that version.
 No human maintainer has ratified them yet. See the open question OQ-002.
 
 | Record | Decision |
@@ -27,3 +27,4 @@ No human maintainer has ratified them yet. See the open question OQ-002.
 | [0013](0013-manual-results-are-signed-by-the-performer-under-a-separate-trust-purpose.md) | Manual results are signed by the performer under a separate trust purpose |
 | [0014](0014-the-issuer-statement-of-a-report-is-bound-to-the-signing-key.md) | The issuer statement of a report is bound to the signing key |
 | [0015](0015-trusted-timestamps-are-rfc-3161-tokens-over-the-report-signature-value.md) | Trusted timestamps are RFC 3161 tokens over the report signature value |
+| [0016](0016-report-status-lists-validity-and-signer-roles-are-stated-in-the-attestation.md) | Report status lists, validity, and signer roles are stated in the attestation |

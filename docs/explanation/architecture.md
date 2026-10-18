@@ -32,7 +32,7 @@ deterministic code and versioned data.
 | `dppce.testdefs` | Load YAML test packs. Hold the allowlisted check registry. | `models`, `infrastructure.interfaces` |
 | `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws`, `evidence.manual`, `evidence.x509path` |
 | `dppce.verdicts` | Aggregation truth table and coverage. Pure functions. | `models` |
-| `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing, X.509 paths, and RFC 3161 timestamp tokens. | `models`, `infrastructure.interfaces` |
+| `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing, X.509 paths, RFC 3161 timestamp tokens, and report status lists. | `models`, `infrastructure.interfaces` |
 | `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence`, `verdicts`, `migrations` |
 | `dppce.migrations` | Upgrade a stored document to the current schema version. | nothing in `dppce` |
 | `dppce.infrastructure` | Transport, recorder, replay, clock, key providers, reference server. | `models`, `evidence` |
@@ -828,8 +828,47 @@ an envelope. `attach` accepts only the status `granted` or `grantedWithMods`. Th
 must equal the imprint of a signature in the envelope. `attach` does not check trust.
 `dppce verify` does. The engine never contacts a timestamp authority.
 
-COSE, Bitstring Status List, qualified electronic seals, and UNTP DCC export are separate profiles
-with their own capability states.
+COSE, qualified electronic seals, and UNTP DCC export are separate profiles with their own
+capability states.
+
+#### Attestation versions and signer roles
+
+An attestation has the version `dppce.attestation/1` or `dppce.attestation/2`. The verifier reads
+both as written. An attestation is signed, so no migration rewrites it.
+
+Version 2 adds four fields. Each field is present. A field without a value is `null`.
+
+- `role`: `issuer` or `reviewer`. A version 1 attestation has the role `issuer`.
+- `status`: the entry of the report in a status list, as `list_id` and `index`.
+- `valid_until`: the last time at which the issuer states that the report is valid.
+- `supersedes`: the decision digest of an earlier report that this report replaces. It differs
+  from `decision_digest`.
+
+A `reviewer` attestation has `null` for `status`, `valid_until`, and `supersedes`. Only the issuer
+states the lifecycle of a report.
+
+`dppce sign` writes version 1 when the role is `issuer` and no other version 2 field has a value.
+Otherwise it writes version 2. A verifier from before this version refuses a version 2
+attestation as a signature that does not verify.
+
+Each role needs one purpose of its key in the trust bundle:
+
+| Role | Purpose of the key |
+| --- | --- |
+| `issuer` | `report` |
+| `reviewer` | `review` |
+
+- The verifier reads the role from the verified payload only. It never reads the role from the
+  header.
+- `run` and `replay` never make a signature. A person makes a reviewer signature with
+  `dppce sign --role reviewer` and a key that only that person holds.
+- One public key cannot have the purpose `review` and the purpose `report`. The rule compares the
+  key material, not the key identifier. Such a trust bundle is invalid: `TRUST.KEY.ROLE_CONFLICT`.
+- An attestation names a key and a role, not a person. The laboratory maps the key identifier to
+  a person.
+- The list of signatures is not signed. A holder can remove or reorder signatures. An issuer that
+  states `status` or `valid_until` states the same values in each of its signatures over the
+  report.
 
 ### 11.4 Verification
 
@@ -843,14 +882,21 @@ It reports each dimension separately:
 | `results_root` | yes | The recomputed root and count equal the stated ones. |
 | `records_root` | yes | The recomputed root equals the stated one. |
 | `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed. Each count by authority class, review status, and testability is a known value, not negative, at least the count of the results with it, and the counts sum to the total; the implementation ratio is over the total; the three ratio labels are the published ones; the placeholder count is bounded and agrees with its review status count. Only a completed step has `pass` or `fail`. |
-| `signature` | yes | At least one signature verifies with a key of the trust bundle and binds the decision body. The detail names the first such key. If no signature does, the outcome is the failure of the last signature that names a key of the trust bundle. |
-| `issuer_trust` | yes | The signing key is in the trust bundle. It is valid and not revoked at the key validity time. That time is the earliest `genTime` of a good timestamp token over the signature of that key, or else the evaluation time. A key that only the report supplies is not trusted. The attestation names the issuer that the trust bundle states for the key. `manifest.issuer.identifier` equals that issuer and is not `unspecified`. An accreditation status other than `not accredited` has a reference. The first signature that meets all of these gives `pass`. Otherwise the outcome is the problem of the last signature that verifies and binds. Each detail names the key validity time. |
+| `signature` | yes | At least one signature with the role `issuer` verifies with a key of the trust bundle and binds the decision body. The detail names the first such key. Otherwise, the outcome is the failure of the last signature that names a key of the trust bundle. If only signatures with a different role verify, the outcome is `missing` with `SIGNATURE.ISSUER.NONE`. |
+| `issuer_trust` | yes | The signing key is in the trust bundle. It is valid and not revoked at the key validity time. That time is the earliest `genTime` of a good timestamp token over the signature of that key, or else the evaluation time. A key that only the report supplies is not trusted. The attestation names the issuer that the trust bundle states for the key. `manifest.issuer.identifier` equals that issuer and is not `unspecified`. An accreditation status other than `not accredited` has a reference. The first signature with the role `issuer` that meets all of these gives `pass`. Otherwise the outcome is the problem of the last signature that verifies and binds. Each detail names the key validity time. |
+| `signers` | yes | Each signature that names a key of the trust bundle verifies and binds the decision body. The trust bundle grants the purpose of its role to its key. The rules are in "Signer roles". The detail lists each signature with its key, issuer, and role. |
 | `manual_results` | yes | Each completed step of the check `manual.review` has exactly one `artifact` observation with a JWS. Each record id of that observation has a commitment in the report. The JWS passes tests 2 to 14 of section 8.1 with the trust bundle of the verifier, for the purpose `manual`. The key must be valid at the evaluation time of the verifier. The signed test purpose and SUT identifier equal those of the report. The signed SUT version equals the version in the manifest, or is `null` if that version is `unknown`. The signed digest of the test purpose equals `test_purpose_digest` in the observation. The signed time is not after the evaluation time of the run. It is in the validity period of the key. The signed `kid`, role, time, and outcome equal the observation. The verdict is `pass` only for the outcome `pass`. A time that cannot be read gives `fail`. A report with no completed manual step passes. |
-| `status` | per trust policy | Fresh status or revocation evidence is present and good. |
+| `status` | when the trust policy sets `require_status`, when the operator supplies a status list, or when an issuer signature that passes `issuer_trust` names a status entry | The supplied status list passes the checks of "Report status lists", and the bit of the report is 0. |
+| `validity` | when an issuer signature that passes `issuer_trust` states `valid_until` | The evaluation time is not later than the earliest `valid_until` of these signatures. |
 | `timestamp` | per trust policy | At least one token in `timestamp_evidence` passes the timestamp checks below, and it binds a signature that verifies and binds. |
 
-`complete` is true only if every mandatory dimension passes. If the trust policy makes
-`status` or `timestamp` mandatory and the evidence is missing or stale, `complete` is false.
+`complete` is true only if every mandatory dimension passes. `timestamp` is mandatory when the
+trust policy sets `require_timestamp`. `status` and `validity` are mandatory under the conditions
+in the table. If mandatory status or timestamp evidence is missing or stale, `complete` is false.
+
+In this section, a "passing issuer signature" is a signature with the role `issuer` that meets
+every condition of `issuer_trust`. There can be more than one.
+
 Verification never changes or restates the verdict about the tested system.
 It shows that the report is intact, that a trusted issuer signed it, and that it agrees with
 itself. It does not show that the issuer observed what the report says.
@@ -936,6 +982,124 @@ key. Without one, it uses the evaluation time.
   expires.
 - The engine cannot timestamp an archived report again.
 
+#### Signer roles
+
+The dimension `signers` checks each signature in the order of the envelope. The first problem of
+a signature gives its reason code.
+
+1. The key is not in the trust bundle: `SIGNER.KEY.UNKNOWN`. The signature is listed and not
+   checked.
+2. The signature does not verify, does not bind the decision body, or is not a compact JWS:
+   `SIGNER.SIGNATURE.INVALID`.
+3. The trust bundle does not grant the purpose of the declared role to the key:
+   `SIGNER.ROLE.NOT_GRANTED`.
+4. The key is outside its validity or revoked at its key validity time: `SIGNER.KEY.NOT_TRUSTED`.
+5. The attestation names an issuer other than the issuer of the key: `SIGNER.ISSUER.MISMATCH`.
+
+A signature with none of these problems gives `SIGNER.ROLE.OK`.
+
+Then the verifier compares `status`, `valid_until`, and `supersedes` of all passing issuer
+signatures. If they differ, the outcome is `fail` with `SIGNER.LIFECYCLE.CONFLICT`.
+
+- A problem 2 or 3 gives `fail`.
+- A problem 4 or 5 of a `reviewer` signature gives `fail`.
+- A problem 4 or 5 of an `issuer` signature gives `fail` only when no passing issuer signature
+  exists. `issuer_trust` owns that decision.
+- Otherwise the outcome is `pass` if at least one signature is `SIGNER.ROLE.OK`.
+- The outcome is `missing` for an envelope without signatures, and `not_checked` if no signature
+  names a key of the trust bundle.
+- The key validity time follows `issuer_trust`. It is the earliest good `genTime` over the
+  signature, or else the evaluation time.
+- For an issuer signature, the detail also shows `valid_until`, `supersedes`, and the status entry.
+- The detail shows each value of the report in an escaped form.
+- A bad reviewer signature does not change `signature` or `issuer_trust`. It makes `complete`
+  false.
+
+#### Report status lists
+
+The issuer of reports can withdraw a report after signing it. It keeps a status list and signs
+it. The operator gives the list file to the verifier with `--status-list`. The verifier does no
+network I/O and never fetches a list. `run` and `replay` never read a list, and the IXIT cannot
+name one.
+
+A status list is a compact JWS with `ES256` and `typ: "dppce-status-list+jws"`. Its payload is
+the RFC 8785 form of `dppce.statuslist/1`:
+
+- `id`: the identifier of the list.
+- `status_purpose`: `revocation` or `suspension`. A revocation is final. A later list can end a
+  suspension.
+- `issued_at`: the time at which the issuer made the list.
+- `encoded_list`: the bitstring of the list.
+
+`encoded_list` uses the bitstring encoding of the W3C Bitstring Status List v1.0, a
+Recommendation of 15 May 2025:
+
+- The bitstring is compressed with GZIP.
+- The result is base64url without padding, after the multibase prefix `u`.
+- Index 0 is the most significant bit of the first byte.
+- Bit 1 means revoked or suspended, by the purpose of the list. Bit 0 means neither.
+- `dppce` writes at least 131072 bits. The verifier reads a shorter list.
+
+A status list is not a W3C verifiable credential. The engine implements the bitstring encoding
+only.
+
+The verifier checks in this order. The first failure gives the reason code.
+
+1. `status_as_of` is set, and it is stale or later than the evaluation time: `fail`,
+   `TRUST.SNAPSHOT.STALE`.
+2. No passing issuer signature exists: `not_checked`, `STATUSLIST.REPORT.UNSIGNED`.
+3. No passing issuer signature names a status entry: `STATUSLIST.REFERENCE.NONE`. The outcome is
+   `missing` when `status` is mandatory, else `not_checked`.
+4. The operator supplied no list: `STATUSLIST.FILE.MISSING`. The outcome is `missing`, because a
+   stated entry makes `status` mandatory.
+5. The file is larger than 2 MiB: `STATUSLIST.FILE.TOO_LARGE`. It is not ASCII, or after trimming
+   of leading and trailing white space it is not a compact JWS: `STATUSLIST.FILE.MALFORMED`.
+6. The key of the list is not in the trust bundle: `STATUSLIST.KEY.UNKNOWN`.
+7. The key does not have the purpose `status`: `STATUSLIST.KEY.PURPOSE`.
+8. The key is outside its validity or revoked at the evaluation time: `STATUSLIST.KEY.NOT_TRUSTED`.
+9. The signature does not verify: `STATUSLIST.SIGNATURE.INVALID`.
+10. The payload is not the canonical form of `dppce.statuslist/1`: `STATUSLIST.FILE.MALFORMED`.
+11. The issuer of the list key differs from the issuer of the report key:
+    `STATUSLIST.ISSUER.MISMATCH`.
+12. `id` differs from `list_id` of the status entry: `STATUSLIST.ID.MISMATCH`.
+13. `issued_at` is later than the evaluation time, or older than `status_max_age_days`:
+    `STATUSLIST.TIME.STALE`.
+14. The bitstring cannot be decoded: `STATUSLIST.FILE.MALFORMED`. It expands to more than 16 MiB:
+    `STATUSLIST.FILE.TOO_LARGE`.
+15. The index is not less than the number of bits: `STATUSLIST.INDEX.OUT_OF_RANGE`.
+16. The bit is 1: `STATUSLIST.REPORT.REVOKED` or `STATUSLIST.REPORT.SUSPENDED`.
+
+A bit of 0 gives `pass` with `STATUSLIST.REPORT.ACTIVE`. The detail names the list, its purpose,
+`issued_at`, and the index.
+
+- Steps 5 to 16 give `fail`.
+- The status entry is the entry of the first passing issuer signature that names one. If the
+  passing issuer signatures differ, `signers` fails with `SIGNER.LIFECYCLE.CONFLICT`.
+- `status_as_of` alone never gives `pass`. Integrity checks still use it for passport
+  certificates at run time.
+- One status entry and one list per report. A report has either a revocation entry or a
+  suspension entry, not both.
+
+#### Validity and supersession
+
+- `validity` compares the evaluation time with the earliest `valid_until` of the passing issuer
+  signatures. An equal time passes.
+- A later evaluation time gives `fail` with `VALIDITY.PERIOD.EXPIRED`. Otherwise the outcome is
+  `pass` with `VALIDITY.PERIOD.OK`.
+- Without `valid_until`, the outcome is `not_checked` with `VALIDITY.PERIOD.NOT_STATED`, and the
+  dimension is not mandatory.
+- If no passing issuer signature exists, the outcome is `not_checked` with
+  `VALIDITY.REPORT.UNSIGNED`.
+- `valid_until` and `issued_at` must name a time that exists. A month 13 makes the attestation or
+  the list invalid.
+- `supersedes` names the decision digest of an earlier report. The `signers` detail and the HTML
+  report show it.
+- The verifier does not read the earlier report. To withdraw that report, the issuer sets its bit
+  in a status list.
+- The HTML report lists each signature with its key, role, `signed_at`, `valid_until`,
+  `supersedes`, and status entry, as declared. Only the verification section shows whether a
+  signature verifies.
+
 #### Trust bundle version 2
 
 `dppce.trust/2` replaces `revoked_serials` and `revoked_kids` of version 1. It adds
@@ -953,6 +1117,11 @@ key. Without one, it uses the evaluation time.
 - Passport certificates, authorization keys, and manual keys are compared at the evaluation time.
 - A TSA certificate is compared at `genTime`. A report key is compared at its key validity time.
 - The same rules apply to the check `integrity.jws` (section 8).
+- The purpose `review` signs reviewer attestations. A reviewer key is checked at its key validity
+  time.
+- The purpose `status` signs status lists. A status key is checked at the evaluation time.
+- An invalid trust bundle gives exit status 2. The error message starts with the first problem of
+  the bundle. For the role rule, that is the reason code `TRUST.KEY.ROLE_CONFLICT`.
 
 `dppce.migrations` upgrades a `dppce.trust/1` bundle. Each revoked kid becomes an entry with
 `revoked_at` null, so its effect does not change. The migration first checks the shape of the
