@@ -1,9 +1,11 @@
 # Fault catalogue for method validation.
 #
 # Audience: assessors and contributors.
-# Purpose: state, before the checks exist, which seeded fault each check must detect and how.
+# Purpose: state which seeded fault each check must detect and how.
 #
-# Expected outcomes were written on 2026-10-13, before the checks were implemented.
+# The expected outcomes of version 0.1.0 were written on 2026-10-13, before the checks were
+# implemented. Version 0.2.0 adds E-13. Its commit follows the commits that add the check
+# manual.review and the verifier dimension manual_results.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #

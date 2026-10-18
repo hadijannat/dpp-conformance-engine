@@ -49,6 +49,9 @@ A manual step needs a signed manual result. The engine does not perform the revi
 2. Copy the `expected_evidence` items of the test purpose into the result in full and in order.
 3. Put the digest of the test purpose in `test_purpose_digest`.
    The digest is `sha256:` and the hex SHA-256 of the RFC 8785 JSON of the test purpose.
+   It covers the test purpose as the engine loads it, with every default field filled in.
+   That is `TestPurpose.model_dump(mode="json")`. A hash of the YAML entry gives a different value.
+   No command prints this digest yet.
 4. Put the SUT version of the ICS in `sut_version`. If the ICS declares no version, put `null`.
 5. Make sure that `performed_at` is in the validity period of the key.
    It must also not be after the evaluation time of the run.
