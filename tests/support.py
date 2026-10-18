@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import http.server
+import ssl
 import threading
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -210,7 +211,7 @@ Handler = Callable[[http.server.BaseHTTPRequestHandler], None]
 class LoopbackServer:
     """A loopback HTTP server whose behavior a test sets with one function. No external network."""
 
-    def __init__(self, handler: Handler) -> None:
+    def __init__(self, handler: Handler, tls: ssl.SSLContext | None = None) -> None:
         seen: list[dict[str, str]] = []
 
         class _Handler(http.server.BaseHTTPRequestHandler):
@@ -225,8 +226,11 @@ class LoopbackServer:
 
         self.seen = seen
         self._server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+        if tls is not None:
+            # A failed handshake ends in accept(); socketserver drops that connection and serves on.
+            self._server.socket = tls.wrap_socket(self._server.socket, server_side=True)
         self.port = self._server.server_address[1]
-        self.origin = f"http://127.0.0.1:{self.port}"
+        self.origin = f"{'https' if tls else 'http'}://127.0.0.1:{self.port}"
         threading.Thread(target=self._server.serve_forever, daemon=True).start()
 
     def close(self) -> None:
