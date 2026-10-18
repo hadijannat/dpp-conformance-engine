@@ -47,9 +47,14 @@ A manual step needs a signed manual result. The engine does not perform the revi
 1. Have the person who performed the step sign the result with their own key.
    The payload format is the `manualresult` schema.
 2. Copy the `expected_evidence` items of the test purpose into the result in full and in order.
-3. Use a role such as `inspector`. Do not put a name in the result or in the key identifier.
-4. Add the public key of that person to **your** trust bundle, with the purpose `manual`.
-5. Give each result with `--manual-result PATH` on `dppce plan` and `dppce run`. Give `--trust` too.
+3. Put the digest of the test purpose in `test_purpose_digest`.
+   The digest is `sha256:` and the hex SHA-256 of the RFC 8785 JSON of the test purpose.
+4. Put the SUT version of the ICS in `sut_version`. If the ICS declares no version, put `null`.
+5. Make sure that `performed_at` is in the validity period of the key.
+   It must also not be after the evaluation time of the run.
+6. Use a role such as `inspector`. Do not put a name in the result or in the key identifier.
+7. Add the public key of that person to **your** trust bundle, with the purpose `manual`.
+8. Give each result with `--manual-result PATH` on `dppce plan` and `dppce run`. Give `--trust` too.
 
 A result for a step that the plan does not execute is an input error.
 A result that the check refuses keeps the status `manual_unavailable`, with a `MANUAL.*` reason code.

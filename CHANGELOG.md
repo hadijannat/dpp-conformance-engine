@@ -14,6 +14,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `CAT020`: the cited version has no version token of the source record. `CAT021`, a warning: the
   source record shows a later version or amendment. `CAT022`: a date in a legal obligation is not
   in `applicable_dates` of its source.
+- Signed manual-step results (ADR 0013). The operator supplies one with `--manual-result PATH` on
+  `dppce plan` and `dppce run`. The check `manual.review` verifies it with a key of the trust
+  purpose `manual`. The payload schema is `manualresult`.
+- A manual result names the digest of its test purpose and the SUT version that the ICS declares.
+  The time of the review must be in the validity period of the key. Otherwise the result is
+  refused with a `MANUAL.*` code. No maximum age applies.
+- The verifier has the mandatory dimension `manual_results`. The fault catalogue version 0.2.0 adds
+  the evidence fault `E-13`.
 
 ### Changed
 

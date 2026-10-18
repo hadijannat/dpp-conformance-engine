@@ -330,7 +330,10 @@ A manual result is the signed result of one manual step. The person who performe
 - Format: JWS Compact Serialization with `ES256`, as in section 11.3.
 - The protected header holds exactly `alg`, `kid`, and `typ: "dppce-manual-result+jws"`. Any other parameter, such as `x5c`, is refused.
 - Payload: `JCS(ManualResult)` with the schema version `dppce.manualresult/1`.
-- The payload holds the test purpose, the SUT identifier, a role, the time of the review, the outcome, and the evidence items.
+- The payload holds the test purpose, its digest, the SUT identifier, the SUT version, a role, and the time of the review.
+- It also holds the outcome and the evidence items.
+- The digest is `sha256:` and the hex SHA-256 of the RFC 8785 form of the test purpose as loaded.
+- The SUT version is the version that the ICS declares. It is `null` when the ICS declares none. The engine never invents one.
 - The outcome is `pass` or `fail`. The role is one lowercase word, such as `inspector`.
 - The payload names no person. The key identifier links the result to the performer in the records of the laboratory.
 
@@ -346,14 +349,21 @@ The check tests the result in this order. The first test that fails gives `manua
 7. The token is not above the token limit: `MANUAL.RESULT.TOO_LARGE`. The signature verifies: `MANUAL.SIGNATURE.INVALID`.
 8. The payload is a canonical `ManualResult` with a valid time: `MANUAL.RESULT.MALFORMED`.
 9. The payload names this test purpose: `MANUAL.PURPOSE.MISMATCH`.
-10. The payload names the SUT identifier of the ICS: `MANUAL.SUT.MISMATCH`.
-11. The time of the review is not after the evaluation time: `MANUAL.TIME.AFTER_EVALUATION`.
-12. The evidence items equal the `expected_evidence` items of the test purpose. The text, the order, and the number must match: `MANUAL.EVIDENCE.MISMATCH`.
+10. The payload holds the digest of this test purpose: `MANUAL.PURPOSE.DIGEST_MISMATCH`.
+11. The payload names the SUT identifier of the ICS: `MANUAL.SUT.MISMATCH`.
+12. The payload names the SUT version of the ICS, or `null` if the ICS declares none: `MANUAL.SUT.VERSION_MISMATCH`.
+13. The time of the review is not after the evaluation time: `MANUAL.TIME.AFTER_EVALUATION`.
+14. The time of the review is in the validity period of the key, `not_before` to `not_after`: `MANUAL.TIME.OUTSIDE_KEY_VALIDITY`.
+15. The evidence items equal the `expected_evidence` items of the test purpose. The text, the order, and the number must match: `MANUAL.EVIDENCE.MISMATCH`.
+
+Tests 10 and 12 bind the result to the method and to the system version that it answers.
+Test 14 refuses a result with a review time outside the validity period of its key.
+No maximum age applies to a manual result. ADR 0013 records this as a policy decision for the owner.
 
 With no trust bundle, the check gives `error` with `MANUAL.TRUST.MISSING`. The command line refuses that case before the run.
 A result that passes every test gives `completed`. The outcome `pass` is a check that passed (`MANUAL.REVIEW.OK`).
 The outcome `fail` is a check that did not pass (`MANUAL.REVIEW.FAILED`). Section 7.1 applies unchanged.
-The step then holds one observation of kind `artifact`. It references the record. Its summary holds `jws`, `kid`, `role`, `performed_at`, and `outcome`.
+The step then holds one observation of kind `artifact`. It references the record. Its summary holds `jws`, `kid`, `role`, `performed_at`, `outcome`, and `test_purpose_digest`.
 A refused result puts no content of the file in the report. Its observation holds the record identifier only.
 The engine does not perform the review. A valid signature shows who signed the result. It does not show that the review was correct.
 
@@ -582,7 +592,7 @@ It reports each dimension separately:
 | `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed. Each count by authority class, review status, and testability is a known value, not negative, at least the count of the results with it, and the counts sum to the total; the implementation ratio is over the total; the three ratio labels are the published ones; the placeholder count is bounded and agrees with its review status count. Only a completed step has `pass` or `fail`. |
 | `signature` | yes | At least one signature verifies with an allowlisted algorithm and binds the recomputed digest. |
 | `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. |
-| `manual_results` | yes | Each completed step of the check `manual.review` has exactly one `artifact` observation with a JWS. Each record id of that observation has a commitment in the report. The JWS passes tests 2 to 11 of section 8.1 with the trust bundle of the verifier, for the purpose `manual`. The key must be valid at the evaluation time of the verifier. The signed test purpose and SUT identifier equal those of the report. The signed time is not after the evaluation time of the run. The signed `kid`, role, time, and outcome equal the observation. The verdict is `pass` only for the outcome `pass`. A time that cannot be read gives `fail`. A report with no completed manual step passes. |
+| `manual_results` | yes | Each completed step of the check `manual.review` has exactly one `artifact` observation with a JWS. Each record id of that observation has a commitment in the report. The JWS passes tests 2 to 14 of section 8.1 with the trust bundle of the verifier, for the purpose `manual`. The key must be valid at the evaluation time of the verifier. The signed test purpose and SUT identifier equal those of the report. The signed SUT version equals the version in the manifest, or is `null` if the manifest has none. The signed digest of the test purpose equals `test_purpose_digest` in the observation. The signed time is not after the evaluation time of the run. It is in the validity period of the key. The signed `kid`, role, time, and outcome equal the observation. The verdict is `pass` only for the outcome `pass`. A time that cannot be read gives `fail`. A report with no completed manual step passes. |
 | `status` | per trust policy | Fresh status or revocation evidence is present and good. |
 | `timestamp` | per trust policy | Trusted timestamp evidence is present and good. |
 
@@ -595,6 +605,7 @@ itself. It does not show that the issuer observed what the report says.
 
 `manual_results` reads only the envelope. The JWS in the observation is sufficient, so the verifier needs no recording.
 It does not check `expected_evidence`, because the report does not hold the test pack. The engine checks it at run time (section 8.1).
+For the same reason, it cannot recompute the digest of the test purpose. A party with the test pack can recompute it.
 The rule applies to the steps that name the check `manual.review`.
 
 ## 12. Exit codes

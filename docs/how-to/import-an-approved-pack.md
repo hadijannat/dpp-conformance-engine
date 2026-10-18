@@ -108,7 +108,7 @@ The lint rejects an interpretation with `author_kind: agent` and `status: approv
 | `CAT010` | `supersedes` names a requirement that does not exist, or one that is still `approved`. An entry with `superseded_by` does not have the status `superseded`. | Correct the identifier, or set the old entry to `superseded`. |
 | `CAT016` | Two test packs define the same test purpose identifier. | Give your test purpose a new identifier. |
 | `CAT017` | A test purpose sets `on_unreachable: fail`, and a requirement that it names is not approved. | Remove the rule, or use it only for approved requirements. |
-| `CAT018` | Warning: a manual step has an applicability that reads a fact. | Use a constant, or accept that the step can leave its path. |
+| `CAT018` | Warning: a step has an applicability that reads a fact, and its path holds other steps. The step can leave its path, and the other steps can then pass alone. | Use a constant, or accept that the step can leave its path. |
 | `CAT019` | The parameters of a test purpose do not fit its check. | Use the parameters in the [capability reference](../reference/capabilities.md). |
 | `CAT020` | The cited version has no version token of the source record. | Cite the edition that `sources.yaml` records. |
 | `CAT021` | Warning: the source record shows a later version or amendment. | Check if the cited version is still the correct one. |
