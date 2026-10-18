@@ -423,7 +423,10 @@ def test_verify_sixteen_timestamp_tokens_are_within_the_limit(
 def test_verify_status_snapshot_age_includes_both_ends(
     status_as_of: str, signed: EvidenceEnvelope, trust: TrustBundle
 ) -> None:
-    """A snapshot of age zero and one of exactly the maximum age are both fresh.
+    """A snapshot of age zero and one of exactly the maximum age are both fresh, so neither is stale.
+
+    Since ADR 0016 a fresh snapshot alone gives not_checked (no status entry), and a stale one gives
+    fail with TRUST.SNAPSHOT.STALE. The mutants below judge a boundary age as stale.
 
     Kills:
     dppce.verifier.verify.x__status__mutmut_15 (age zero)
@@ -431,7 +434,9 @@ def test_verify_status_snapshot_age_includes_both_ends(
     dppce.verifier.verify.x__status__mutmut_18 (age of exactly seven days, the maximum)
     """
     snapshot = trust.model_copy(update={"status_as_of": status_as_of, "status_max_age_days": 7})
-    assert outcomes(as_document(signed), snapshot)["status"] == "pass"
+    document = as_document(signed)
+    assert outcomes(document, snapshot)["status"] == "not_checked"
+    assert details(document, snapshot)["status"].startswith("STATUSLIST.REFERENCE.NONE:")
 
 
 def test_verify_states_no_digest_for_an_invalid_structure(trust: TrustBundle) -> None:
