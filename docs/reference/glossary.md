@@ -26,6 +26,7 @@ Use one term for one concept. Do not use a synonym for a term in this list.
 | ICS | Implementation Conformance Statement. What the owner declares about the system. |
 | interpretation | A statement of what a source provision requires. Agent-authored interpretations are drafts. |
 | IXIT | Implementation eXtra Information for Testing. What the tester needs to run the tests. |
+| manual result | The signed result of one manual step. The person who performed the step signs it. It names a role and no person. |
 | observation | A minimized record of what one check saw. It holds no restricted payload value. |
 | operator | The person who runs the engine. The operator supplies the trust bundle and confirms sensitive inputs. |
 | pack | A versioned set of requirements with a scope statement. |

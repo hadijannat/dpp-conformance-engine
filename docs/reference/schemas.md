@@ -17,6 +17,7 @@ The Pydantic models in `dppce.models` are the single source of truth. The JSON S
 | envelope | `src/dppce/schemas/v1/envelope.schema.json` | `urn:dppce:schema:v1:envelope` | `EvidenceEnvelope` | A conformance test report with its signatures. |
 | ics | `src/dppce/schemas/v1/ics.schema.json` | `urn:dppce:schema:v1:ics` | `ICS` | Implementation Conformance Statement. |
 | ixit | `src/dppce/schemas/v1/ixit.schema.json` | `urn:dppce:schema:v1:ixit` | `IXIT` | Implementation eXtra Information for Testing. |
+| manualresult | `src/dppce/schemas/v1/manualresult.schema.json` | `urn:dppce:schema:v1:manualresult` | `ManualResult` | Payload of a signed manual-step result. |
 | pack | `src/dppce/schemas/v1/pack.schema.json` | `urn:dppce:schema:v1:pack` | `RequirementPack` | . |
 | plan | `src/dppce/schemas/v1/plan.schema.json` | `urn:dppce:schema:v1:plan` | `Plan` | Deterministic output of ``dppce plan``. |
 | profile | `src/dppce/schemas/v1/profile.schema.json` | `urn:dppce:schema:v1:profile` | `Profile` | . |

@@ -35,8 +35,11 @@ python -m dppce.verifier envelope.json --trust my-trust-bundle.json --at 2026-10
 | `counts` | The stated counts or the overall outcome do not match the results. |
 | `signature` | No signature verifies and binds this report. |
 | `issuer_trust` | The signing key is not in your trust bundle, is expired, or is revoked. |
+| `manual_results` | A completed manual step has no committed record or no signed result. Or the performer key is not in your trust bundle for the purpose `manual`, or is expired or revoked. Or the signed outcome differs from the report. |
 | `status` | Your policy needs fresh status evidence, and it is missing or stale. |
 | `timestamp` | Your policy needs a trusted timestamp. This version cannot validate one. |
+
+To check manual steps, your trust bundle must hold the keys of the performers with the purpose `manual`.
 
 ## Limits
 

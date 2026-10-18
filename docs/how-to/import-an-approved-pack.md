@@ -196,9 +196,10 @@ Each shipped profile selects each shipped test pack.
 
 A human must approve the test method too. The review record states which steps the reviewer accepted.
 
-The engine has no input for the result of a manual step in this version.
-A step with `manual: true` has the status `manual_unavailable`, and its path gives `inconclusive`.
-An approved requirement can get a `pass` only from a path whose steps are all automated checks.
+A step with `manual: true` and the check `manual.review` needs a signed manual result.
+The operator supplies it with `--manual-result`. The check verifies it (architecture, section 8.1).
+Without a result, the step has the status `manual_unavailable`, and its path gives `inconclusive`.
+A manual step with a different check always has the status `manual_unavailable`.
 
 ## 6. What `supersedes` does
 

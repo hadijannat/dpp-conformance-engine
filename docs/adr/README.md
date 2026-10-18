@@ -6,7 +6,8 @@ Prerequisites: none.
 
 The records use the MADR style. A number is never reused. A changed decision gets a new record.
 
-Status of all records: **proposed**. Each decision is implemented in version 0.1.0rc1.
+Status of all records: **proposed**. Decisions 0001 to 0012 are implemented in version 0.1.0rc1.
+Decision 0013 is implemented after that version.
 No human maintainer has ratified them yet. See the open question OQ-002.
 
 | Record | Decision |
@@ -23,3 +24,4 @@ No human maintainer has ratified them yet. See the open question OQ-002.
 | [0010](0010-verdict-precedence-is-fail-then-error-then-inconclusive-then-pass.md) | Verdict precedence is fail, then error, then inconclusive, then pass |
 | [0011](0011-the-ics-and-the-ixit-are-untrusted-input.md) | The ICS and the IXIT are untrusted input |
 | [0012](0012-one-policy-enforcing-transport-on-the-standard-library.md) | One policy-enforcing transport on the standard library |
+| [0013](0013-manual-results-are-signed-by-the-performer-under-a-separate-trust-purpose.md) | Manual results are signed by the performer under a separate trust purpose |

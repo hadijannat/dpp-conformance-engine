@@ -30,7 +30,7 @@ deterministic code and versioned data.
 | `dppce.catalogue` | Load sources and packs, lifecycle rules, lint, import of approved packs. | `models`, `applicability` |
 | `dppce.profiles` | Load profiles and the resources that they name. | `models` |
 | `dppce.testdefs` | Load YAML test packs. Hold the allowlisted check registry. | `models`, `infrastructure.interfaces` |
-| `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws` |
+| `dppce.adapters` | Implement and register checks. Publish the capability manifest. | `models`, `testdefs`, `infrastructure.interfaces`, `evidence.jws`, `evidence.manual` |
 | `dppce.verdicts` | Aggregation truth table and coverage. Pure functions. | `models` |
 | `dppce.evidence` | Canonical JSON, Merkle tree, commitments, encryption, signing. | `models`, `infrastructure.interfaces` |
 | `dppce.verifier` | Standalone verification of an envelope. | `models`, `evidence`, `verdicts` |
@@ -131,8 +131,9 @@ Missing information never becomes `false` and never becomes `not_applicable`.
 
 ## 6. Planning
 
-`plan` is a pure function of the mode, profile, packs, test packs, ICS, sanitized IXIT, the
-capability manifest, and the validated authorization. Its output is sorted by identifier.
+`plan` is a pure function of its inputs. Its output is sorted by identifier.
+The inputs are the mode, the profile, the packs, the test packs, the ICS, the sanitized IXIT, and the capability manifest.
+The validated authorization and the set of test purposes with a supplied manual result are inputs too.
 
 Before it plans, the engine refuses these inputs with exit code 2. `plan`, `run`, and `replay`
 apply the same rules.
@@ -160,12 +161,16 @@ For each test purpose that a selected requirement names, in a permitted mode and
 | Step applicability is `false` | none; the step is left out of its path with a reason, and the requirement result names it in `retained` with the reason code of its exclusion |
 | Parent requirement applicability is not `true` | `skipped` |
 | Step applicability is `unknown` | `skipped` |
-| `manual: true` | `manual_unavailable` |
+| `manual: true`, and no manual result is supplied for the step or its check is not `manual.review` | `manual_unavailable` |
 | Check is not in the registry, or its capability is `interface_only` or `unsupported`, or its optional dependency is not installed | `unsupported` |
 | `requires_scope` is above `read` and no valid authorization grants it | `blocked` |
 | Otherwise | none; the step is executed |
 
 An unavailable adapter never produces `pass`.
+
+The operator supplies a manual result with `--manual-result` (section 9.1). The planner reads only the test purpose that the file names.
+A step with a supplied result goes on to the next rows of the table. The check `manual.review` verifies the result (section 8.1).
+A supplied result must belong to a step that the plan executes. A result for an excluded or skipped step is an input error.
 
 ## 7. Verdicts
 
@@ -258,6 +263,7 @@ numerator, its denominator, and the label `of`.
 
 Placeholders, unknown applicability, exclusions, and missing manual assessments are counted
 and shown. No figure may be labeled as coverage of a law or of a standard.
+A step with the check `manual.review` is not executable by a capability. It does not count for implementation coverage, also when a manual result is supplied.
 
 ## 8. Checks
 
@@ -306,6 +312,7 @@ Initial registry:
 | `persistence.versions` | `persistence.versions` | Version history obeys the declared update rule. |
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
 | `aas.validate` | `aas.validate` | Wrap aas-test-engines. Needs the `aas` extra. |
+| `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
 
 `identifier.resolve` takes two optional parameters. `accept` sets the `Accept` request header.
 `accepted_media_types` lists the final media types that count as resolved. Without
@@ -315,6 +322,40 @@ always means a final JSON object. A pass on another listed media type gives
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.
+
+### 8.1 Manual results
+
+A manual result is the signed result of one manual step. The person who performed the step signs it with a key of their own. See ADR 0013.
+
+- Format: JWS Compact Serialization with `ES256`, as in section 11.3.
+- The protected header holds exactly `alg`, `kid`, and `typ: "dppce-manual-result+jws"`. Any other parameter, such as `x5c`, is refused.
+- Payload: `JCS(ManualResult)` with the schema version `dppce.manualresult/1`.
+- The payload holds the test purpose, the SUT identifier, a role, the time of the review, the outcome, and the evidence items.
+- The outcome is `pass` or `fail`. The role is one lowercase word, such as `inspector`.
+- The payload names no person. The key identifier links the result to the performer in the records of the laboratory.
+
+`manual.review` reads the result as the input artifact `manual/<test purpose id>`. The recording holds, commits, and replays it like any other artifact.
+The check tests the result in this order. The first test that fails gives `manual_unavailable` with its reason code.
+
+1. The artifact is present: `MANUAL.RESULT.MISSING`. It is not above the size limit: `MANUAL.RESULT.TOO_LARGE`.
+2. The text is a compact JWS with a JSON header: `MANUAL.RESULT.MALFORMED`.
+3. The header holds only `alg`, `kid`, and `typ`, and `typ` is the manual result type: `MANUAL.RESULT.MALFORMED`.
+4. The algorithm is on the allowlist: `MANUAL.SIGNATURE.INVALID`.
+5. The trust bundle names the key for the purpose `manual`: `MANUAL.KEY.UNTRUSTED`.
+6. The key is not revoked and is valid at the evaluation time: `MANUAL.KEY.NOT_VALID`.
+7. The token is not above the token limit: `MANUAL.RESULT.TOO_LARGE`. The signature verifies: `MANUAL.SIGNATURE.INVALID`.
+8. The payload is a canonical `ManualResult` with a valid time: `MANUAL.RESULT.MALFORMED`.
+9. The payload names this test purpose: `MANUAL.PURPOSE.MISMATCH`.
+10. The payload names the SUT identifier of the ICS: `MANUAL.SUT.MISMATCH`.
+11. The time of the review is not after the evaluation time: `MANUAL.TIME.AFTER_EVALUATION`.
+12. The evidence items equal the `expected_evidence` items of the test purpose. The text, the order, and the number must match: `MANUAL.EVIDENCE.MISMATCH`.
+
+With no trust bundle, the check gives `error` with `MANUAL.TRUST.MISSING`. The command line refuses that case before the run.
+A result that passes every test gives `completed`. The outcome `pass` is a check that passed (`MANUAL.REVIEW.OK`).
+The outcome `fail` is a check that did not pass (`MANUAL.REVIEW.FAILED`). Section 7.1 applies unchanged.
+The step then holds one observation of kind `artifact`. It references the record. Its summary holds `jws`, `kid`, `role`, `performed_at`, and `outcome`.
+A refused result puts no content of the file in the report. Its observation holds the record identifier only.
+The engine does not perform the review. A valid signature shows who signed the result. It does not show that the review was correct.
 
 ## 9. Transport policy
 
@@ -365,6 +406,13 @@ does not let those files decide what the test host trusts or discloses:
 
 - The trust bundle comes only from the operator (`--trust`). A bundle that the IXIT names is
   never loaded. Otherwise a supplier could name its own key as a trusted authorization issuer.
+- A manual result comes only from the operator, with `--manual-result PATH` on `plan` and `run`. The IXIT cannot supply or select one.
+- An IXIT sample name that starts with `manual/` is an input error. The engine reserves that namespace for manual results.
+- The trust bundle names each key of a performer with the purpose `manual`. A key with only a different purpose is not trusted for a manual result.
+- The command line reads a manual result only to find the test purpose that it names. It trusts nothing in the file before the check verifies it.
+- A file that names no test purpose is an input error. So is a test purpose that is not a manual step with the check `manual.review`.
+- A result for a step that the plan excludes or skips is an input error. The message gives the reason.
+- Two files for one test purpose are an input error. So is a manual result without `--trust`.
 - Each non-public host in `IXIT.network.allow_private_hosts` must be confirmed by the operator
   with `--allow-private-host ORIGIN` for the origin to reach on it. A public origin needs an
   authorization, or `--allow-remote-host ORIGIN`. A bare host is refused: it would confirm
@@ -534,6 +582,7 @@ It reports each dimension separately:
 | `counts` | yes | Verdict counts and coverage totals equal the recomputed ones. Each path verdict, requirement verdict and its reason, the overall outcome and its reason, and each claim level follow from the report (sections 4 and 7). The coverage figures that the report holds data for are recomputed. Each count by authority class, review status, and testability is a known value, not negative, at least the count of the results with it, and the counts sum to the total; the implementation ratio is over the total; the three ratio labels are the published ones; the placeholder count is bounded and agrees with its review status count. Only a completed step has `pass` or `fail`. |
 | `signature` | yes | At least one signature verifies with an allowlisted algorithm and binds the recomputed digest. |
 | `issuer_trust` | yes | The signing key is in the trust bundle and is valid at the evaluation time. A key that only the report supplies is not trusted. |
+| `manual_results` | yes | Each completed step of the check `manual.review` has exactly one `artifact` observation with a JWS. Each record id of that observation has a commitment in the report. The JWS passes tests 2 to 11 of section 8.1 with the trust bundle of the verifier, for the purpose `manual`, with key validity at the evaluation time of the verifier. The signed test purpose and SUT identifier equal those of the report. The signed time is not after the evaluation time of the run. The signed `kid`, role, time, and outcome equal the observation. The verdict is `pass` only for the outcome `pass`. A time that cannot be read gives `fail`. A report with no completed manual step passes. |
 | `status` | per trust policy | Fresh status or revocation evidence is present and good. |
 | `timestamp` | per trust policy | Trusted timestamp evidence is present and good. |
 
@@ -543,6 +592,10 @@ Verification never changes or restates the verdict about the tested system.
 It shows that the report is intact, that a trusted issuer signed it, and that it agrees with
 itself. It does not show that the issuer observed what the report says.
 `dppce report --trust` needs `--at` too: a verification section always states its time.
+
+`manual_results` reads only the envelope. The JWS in the observation is sufficient, so the verifier needs no recording.
+It does not check `expected_evidence`, because the report does not hold the test pack. The engine checks it at run time (section 8.1).
+The rule applies to the steps that name the check `manual.review`.
 
 ## 12. Exit codes
 

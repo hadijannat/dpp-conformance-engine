@@ -341,12 +341,15 @@ fixtures/reference/
   {ev,lmt,industrial}.ics.yaml       declarations for each profile
   {ev,lmt,industrial}.ixit.yaml      test information; the rig replaces `origin_override`
   trust/TEST-ONLY-trust-bundle.json  anchors and keys for the reference system
+  trust/TEST-ONLY-manual-signing.key.pem  private key that signs TEST-ONLY manual results (purpose `manual`)
   authorization/                     TEST-ONLY owner key and a signed test authorization
 ```
 
 `scripts/gen_fixtures.py` writes the PKI, the QR images, the trust bundle, and the
 authorization. Keys are random, so the generated files are committed. The script is rerun only
 to rotate them. QR images are generated with zxing-cpp and Pillow (the `qr` extra).
+`scripts/gen_fixtures.py --add-manual-key` adds only the manual signing key to the trust bundle.
+The rig signs manual results with it for the synthetic reference system only.
 
 ## 8. Check parameters and outcomes
 

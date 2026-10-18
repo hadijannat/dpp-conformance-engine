@@ -33,6 +33,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `registry.mock` | registry | supported |  | Passive lookup against a configurable mock registry. |  |
 | `registry.official` | registry | interface_only |  | Checks against an official registry environment. | A separately authorized official environment is available. Passive checks are separate from registration and update operations. |
 | `aas.validate` | aas | experimental | `aas_test_engines` | Wrap a pinned aas-test-engines release. A valid Asset Administration Shell is not a complete DPP conformance statement. |  |
+| `manual.review` | manual | supported |  | Verify the signed result of a manual step: signature, key trust for the purpose 'manual', and binding to the step and the system. The engine does not perform the review. |  |
 | `evidence.jws_es256` | evidence | supported |  | Sign and verify reports with JWS ES256. |  |
 | `evidence.devlog` | evidence | interface_only |  | File-backed Merkle log for development. | A log implementation exists in dppce.evidence, with append, inclusion-proof, and consistency-proof tests on local fixtures. Its documentation states whether it implements RFC 9162 and what protection it gives against equivocation. |
 | `evidence.cose` | evidence | interface_only |  | COSE report signatures. | A separately tested COSE profile. |

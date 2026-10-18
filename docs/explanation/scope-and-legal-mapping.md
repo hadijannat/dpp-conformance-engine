@@ -39,11 +39,14 @@ The output of a run is a conformance test report.
 The shipped catalogue has no approved interpretation.
 A result from the pack `eu-battery/draft` has the claim level `diagnostic`. A person must review it before any use.
 
-No verdict from the pack `eu-battery/draft` is `pass` or `fail`, in any mode.
-Each verdict is `inconclusive` or `not_applicable`. The one exception is `error`, for a check that raises an exception.
+Without a signed manual result, no verdict from the pack `eu-battery/draft` is `pass` or `fail`, in any mode.
+Each verdict is then `inconclusive` or `not_applicable`. The one exception is `error`, for a check that raises an exception.
 
-- Each assessment path holds a manual step. The engine has no input for the result of a manual step.
-- A manual step gives `inconclusive`, and one `inconclusive` step makes its path `inconclusive`. No path can give `pass`.
+- Each assessment path holds a manual step. Without a manual result, a manual step gives `inconclusive`.
+- One `inconclusive` step makes its path `inconclusive`. Such a path cannot give `pass`.
+- In exploratory mode, the operator can supply a signed manual result with `--manual-result`. See ADR 0013.
+- A manual result with the outcome `pass` lets its path give `pass` if every other step passes. The outcome `fail` gives `fail`.
+- The engine does not perform the review. A valid signature shows who signed the result. It does not show that the review was correct.
 - Each automated step gives `inconclusive` when its check does not pass. No step can give `fail`.
 - No entry has a `declared_support` expression. A declaration of the owner cannot give `fail`.
 - The modes `illustrative` and `reviewed` do not assess these entries. The engine lists each entry as an exclusion.

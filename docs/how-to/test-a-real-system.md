@@ -40,6 +40,20 @@ refuses them without a matching authorization.
 11. List the recordings past the retention period with `dppce purge --runs DIR --keys DIR`.
 12. Check the list. Then delete those recordings with the same command and `--yes`.
 
+## Manual steps
+
+A manual step needs a signed manual result. The engine does not perform the review.
+
+1. Have the person who performed the step sign the result with their own key.
+   The payload format is the `manualresult` schema.
+2. Copy the `expected_evidence` items of the test purpose into the result in full and in order.
+3. Use a role such as `inspector`. Do not put a name in the result or in the key identifier.
+4. Add the public key of that person to **your** trust bundle, with the purpose `manual`.
+5. Give each result with `--manual-result PATH` on `dppce plan` and `dppce run`. Give `--trust` too.
+
+A result for a step that the plan does not execute is an input error.
+A result that the check refuses keeps the status `manual_unavailable`, with a `MANUAL.*` reason code.
+
 ## What the engine enforces
 
 - It refuses a host that is not in the allowlist, and a redirect that leaves the scope.

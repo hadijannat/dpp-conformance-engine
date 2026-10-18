@@ -29,7 +29,7 @@ Each command accepts `--json` and then writes one JSON document to standard outp
 usage: dppce plan [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK]
                   [--import-testpack IMPORT_TESTPACK] --profile PROFILE --ics ICS --ixit IXIT
                   [--mode {illustrative,exploratory,reviewed}] [--pack PACK] [--testpack TESTPACK]
-                  [--trust TRUST] [--authorization AUTHORIZATION] [--at AT]
+                  [--trust TRUST] [--authorization AUTHORIZATION] [--manual-result PATH] [--at AT]
                   [--issuer-name ISSUER_NAME] [--issuer-id ISSUER_ID]
                   [--accreditation-status ACCREDITATION_STATUS]
                   [--accreditation-reference ACCREDITATION_REFERENCE]
@@ -54,6 +54,8 @@ options:
   --trust TRUST         trust bundle (JSON); only the operator supplies it
   --authorization AUTHORIZATION
                         signed test authorization (compact JWS)
+  --manual-result PATH  signed result of one manual step (compact JWS); only the operator supplies
+                        it; repeat for each
   --at AT               evaluation time, for example 2026-10-13T12:00:00Z; default: now
   --issuer-name ISSUER_NAME
   --issuer-id ISSUER_ID
@@ -67,7 +69,7 @@ options:
 usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PACK]
                  [--import-testpack IMPORT_TESTPACK] --profile PROFILE --ics ICS --ixit IXIT
                  [--mode {illustrative,exploratory,reviewed}] [--pack PACK] [--testpack TESTPACK]
-                 [--trust TRUST] [--authorization AUTHORIZATION] [--at AT]
+                 [--trust TRUST] [--authorization AUTHORIZATION] [--manual-result PATH] [--at AT]
                  [--issuer-name ISSUER_NAME] [--issuer-id ISSUER_ID]
                  [--accreditation-status ACCREDITATION_STATUS]
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
@@ -94,6 +96,8 @@ options:
   --trust TRUST         trust bundle (JSON); only the operator supplies it
   --authorization AUTHORIZATION
                         signed test authorization (compact JWS)
+  --manual-result PATH  signed result of one manual step (compact JWS); only the operator supplies
+                        it; repeat for each
   --at AT               evaluation time, for example 2026-10-13T12:00:00Z; default: now
   --issuer-name ISSUER_NAME
   --issuer-id ISSUER_ID
