@@ -2,7 +2,9 @@
 
 The run is ``uv run just mutation`` (mutmut 3.8.0) at commit 6602f8c. These three modules are the
 same at dbc88e0. Each test names, in its docstring, the surviving mutants that it kills. The
-record is ``validation/records/mutation-2026-10-18.md``, section "Round 3".
+record is ``validation/records/mutation-2026-10-18.md``, section "Round 3". Since the rebase onto
+d012334, transport.py differs, and the mutant names in the Kills lists refer to dbc88e0, not to the
+current source.
 
 Every server is a loopback server that the test starts. A test gives the system resolver only the
 numeric loopback addresses 127.0.0.1 and 127.0.0.2, which send no DNS query. A table resolver
