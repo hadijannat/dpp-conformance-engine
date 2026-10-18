@@ -6,7 +6,8 @@
 # build provenance. A gate job checks the tag, the version, the ci result, and the protection of
 # the `release` environment. The attest and image jobs run in the `release` environment. Before
 # the push, a scan job with read permission only scans a build of the same commit with Trivy
-# 0.75.0. The pushed image is a separate build of that commit. See GOVERNANCE.md.
+# 0.75.0. The pushed image is a separate build of that commit. The attest and image jobs wait
+# for the scan job. See GOVERNANCE.md.
 # The gate job, the scan job, and the environment were added on 2026-10-18. They have not run.
 #
 # The build job has read permission only, and every tool that it runs is pinned with hashes in
@@ -128,7 +129,8 @@ jobs:
 
   attest:
     name: Signed build provenance for the packages
-    needs: build
+    # The scan gates the package provenance too, so a failed scan never asks for an approval.
+    needs: [build, scan]
     environment: release
     runs-on: ubuntu-24.04
     timeout-minutes: 10
