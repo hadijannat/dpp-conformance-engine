@@ -14,7 +14,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from itertools import pairwise
-from typing import Any, Literal
+from typing import Any, Final, Literal
 
 from pydantic import ValidationError
 
@@ -29,6 +29,7 @@ from dppce.evidence.envelope import (
 )
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
 from dppce.evidence.manual import MANUAL_CHECK, ManualResultError, verify_manual_result
+from dppce.evidence.status import StatusError, bit_is_set, decode_list, read_status_list
 from dppce.evidence.timestamp import MAX_TOKENS, Stamp, TimestampError, format_time, imprint_of, verify_token
 from dppce.models import (
     NOT_ACCREDITED,
@@ -61,6 +62,7 @@ _ALWAYS_MANDATORY = (
     "counts",
     "signature",
     "issuer_trust",
+    "signers",
     "manual_results",
 )
 
@@ -232,10 +234,14 @@ def _counts(decision: DecisionBody) -> tuple[Outcome, str]:
     return "pass", "Counts, verdicts, coverage totals, and the overall outcome equal the recomputed values."
 
 
-def _key_state(key: TrustedKey, trust: TrustBundle, at: datetime, when: str) -> str | None:
+def _key_state(
+    key: TrustedKey, trust: TrustBundle, at: datetime, when: str, purpose: str = "report"
+) -> str | None:
     """Return why the key is not trusted at ``at``, or None if it is trusted. ``when`` names ``at``."""
-    if "report" not in key.purposes:
-        return f"Key '{key.kid}' is not trusted for reports."
+    if purpose not in key.purposes:
+        if purpose == "report":
+            return f"Key '{key.kid}' is not trusted for reports."
+        return f"Key '{key.kid}' is not trusted for the purpose '{purpose}'."
     if not _stamp(key.not_before) <= at <= _stamp(key.not_after):
         return f"Key '{key.kid}' is outside its validity period at {when}."
     if trust.key_revoked(key.kid, at):
@@ -247,9 +253,17 @@ def _key_state(key: TrustedKey, trust: TrustBundle, at: datetime, when: str) -> 
 class _Signed:
     """A signature that verifies with a key of the trust bundle and binds the decision body."""
 
+    index: int
     token: str
     key: TrustedKey
     attestation: Attestation
+
+    @property
+    def is_issuer(self) -> bool:
+        return self.attestation.signer_role == "issuer"
+
+
+_NO_ISSUER: Final = "SIGNATURE.ISSUER.NONE: no signature that verifies declares the role issuer."
 
 
 def _verified(
@@ -257,14 +271,15 @@ def _verified(
 ) -> tuple[tuple[Outcome, str], list[_Signed]]:
     """Return the signature outcome and every signature that verifies and binds, in order.
 
-    Key state is not checked here: ``issuer_trust`` checks it at the key validity time.
+    The outcome considers signatures with the role ``issuer`` only. Key state is not checked
+    here: ``issuer_trust`` and ``signers`` check it at the key validity time.
     """
     if not envelope.signatures:
         return ("missing", "The envelope has no signature."), []
     keys = {k.kid: k for k in trust.keys}
     failure: tuple[Outcome, str] | None = None
     verified: list[_Signed] = []
-    for token in envelope.signatures:
+    for index, token in enumerate(envelope.signatures):
         try:
             key = keys.get(str(header_of(token).get("kid")))
             if key is None:
@@ -284,11 +299,22 @@ def _verified(
         if not bound:
             failure = ("fail", "A signature verifies but does not bind this decision body.")
             continue
-        verified.append(_Signed(token, key, attestation))
-    if verified:
-        first = verified[0].key.kid
+        verified.append(_Signed(index, token, key, attestation))
+    issuers = [s for s in verified if s.is_issuer]
+    if issuers:
+        first = issuers[0].key.kid
         return ("pass", f"Signature by key '{first}' verifies and binds the decision digest."), verified
+    if failure is None and verified:
+        failure = ("missing", _NO_ISSUER)
     return failure or ("not_checked", "No signature names a key in the trust bundle."), verified
+
+
+def _key_validity_time(signed: _Signed, times: dict[str, datetime], at: datetime) -> tuple[datetime, str]:
+    """The earliest good genTime over the signature, or else the evaluation time, and its name."""
+    if signed.token in times:
+        stamped = times[signed.token]
+        return stamped, f"{format_time(stamped)}, the genTime of a trusted timestamp over its signature"
+    return at, "the evaluation time"
 
 
 def _timestamps(
@@ -343,24 +369,24 @@ def _issuer(
     times: dict[str, datetime],
     trust: TrustBundle,
     at: datetime,
-) -> tuple[Outcome, str]:
-    """Return the issuer_trust outcome. The first signature with no problem gives pass.
+) -> tuple[tuple[Outcome, str], list[_Signed]]:
+    """Return the issuer_trust outcome and every passing issuer signature, in envelope order.
 
-    Each signature is checked at its key validity time: the earliest genTime of a good token over
-    that signature, or else the evaluation time. Each detail names the time used.
+    Only signatures with the role ``issuer`` count. The first one with no problem gives the
+    outcome. Each signature is checked at its key validity time: the earliest genTime of a good
+    token over that signature, or else the evaluation time. Each detail names the time used.
     """
     if not envelope.signatures:
-        return "not_checked", "There is no signature to attribute."
+        return ("not_checked", "There is no signature to attribute."), []
+    if verified and not any(s.is_issuer for s in verified):
+        return ("fail", _NO_ISSUER), []
     statement = envelope.decision.manifest.issuer
     problem: str | None = None
-    for signed in verified:
-        key, stamped = signed.key, signed.token in times
-        valid_at = times.get(signed.token, at)
-        when = (
-            f"{format_time(valid_at)}, the genTime of a trusted timestamp over its signature"
-            if stamped
-            else "the evaluation time"
-        )
+    outcome: tuple[Outcome, str] | None = None
+    passing: list[_Signed] = []
+    for signed in (s for s in verified if s.is_issuer):
+        key = signed.key
+        valid_at, when = _key_validity_time(signed, times, at)
         problem = _key_state(key, trust, valid_at, when)
         if problem is None and signed.attestation.issuer != key.issuer:
             problem = (
@@ -370,17 +396,103 @@ def _issuer(
         if problem is None and (stated := _issuer_problem(statement, key)) is not None:
             problem = f"{stated} Key validity was checked at {when}."
         if problem is None:
+            passing.append(signed)
             reference = statement.accreditation_reference
-            return (
+            outcome = outcome or (
                 "pass",
                 f"Key '{key.kid}' of issuer '{key.issuer}' is trusted at {when}, and the "
                 "report states that issuer. The verifier does not check the issuer name. Accreditation "
                 f"status as declared by the operator: {statement.accreditation_status!r}, reference "
                 f"{repr(reference) if reference else 'none'}. The engine does not validate accreditation.",
             )
-    return "fail", problem or (
+    if outcome is not None:
+        return outcome, passing
+    unknown = (
         "No signature names a key in the trust bundle. A key that only the report supplies is not trusted."
     )
+    return ("fail", problem or unknown), passing
+
+
+def _signer_code(signed: _Signed, trust: TrustBundle, times: dict[str, datetime], at: datetime) -> str:
+    """The first problem of a verified signature in the order of "Signer roles", or SIGNER.ROLE.OK."""
+    key, attestation = signed.key, signed.attestation
+    purpose = "report" if signed.is_issuer else "review"
+    valid_at, when = _key_validity_time(signed, times, at)
+    if purpose not in key.purposes:
+        return "SIGNER.ROLE.NOT_GRANTED"
+    if _key_state(key, trust, valid_at, when, purpose) is not None:
+        return "SIGNER.KEY.NOT_TRUSTED"
+    if attestation.issuer != key.issuer:
+        return "SIGNER.ISSUER.MISMATCH"
+    return "SIGNER.ROLE.OK"
+
+
+def _lifecycle(signed: _Signed) -> str:
+    """What an issuer signature states about the lifecycle of the report. ``repr`` escapes the list id."""
+    attestation, text = signed.attestation, ""
+    if attestation.valid_until is not None:
+        text += f", valid until {attestation.valid_until}"
+    if attestation.supersedes is not None:
+        text += f", supersedes {attestation.supersedes}"
+    if attestation.status is not None:
+        text += f", status list {attestation.status.list_id!r} index {attestation.status.index}"
+    return text
+
+
+def _signers(
+    envelope: EvidenceEnvelope,
+    verified: list[_Signed],
+    *,
+    passing: list[_Signed],
+    times: dict[str, datetime],
+    trust: TrustBundle,
+    at: datetime,
+) -> tuple[Outcome, str]:
+    """List each signature with its key, issuer, and role (section 11.4, "Signer roles")."""
+    if not envelope.signatures:
+        return "missing", "The envelope has no signature."
+    keys = {k.kid: k for k in trust.keys}
+    by_index = {s.index: s for s in verified}
+    rows: list[str] = []
+    failed = checked = ok = False
+    for index, token in enumerate(envelope.signatures):
+        position = f"signature {index + 1}"
+        try:
+            kid = str(header_of(token).get("kid"))
+        except SignatureError:
+            rows.append(f"{position}: SIGNER.SIGNATURE.INVALID, the header cannot be read")
+            failed = checked = True
+            continue
+        key = keys.get(kid)
+        if key is None:
+            rows.append(f"{position}: key {kid!r}: SIGNER.KEY.UNKNOWN, not checked")
+            continue
+        checked = True
+        signed = by_index.get(index)
+        if signed is None:
+            # The signature dimension names the reason. It can hold text of the report that is not escaped.
+            rows.append(f"{position}: key {kid!r} of issuer {key.issuer!r}: SIGNER.SIGNATURE.INVALID")
+            failed = True
+            continue
+        code = _signer_code(signed, trust, times, at)
+        ok = ok or code == "SIGNER.ROLE.OK"
+        # issuer_trust owns the key state of an extra issuer signature when another one passes it.
+        failed = failed or code == "SIGNER.ROLE.NOT_GRANTED"
+        failed = failed or (
+            code in ("SIGNER.KEY.NOT_TRUSTED", "SIGNER.ISSUER.MISMATCH")
+            and not (signed.is_issuer and passing)
+        )
+        role = signed.attestation.signer_role
+        rows.append(f"{position}: key {kid!r} of issuer {key.issuer!r} as {role}: {code}{_lifecycle(signed)}")
+    detail = "; ".join(rows) + "."
+    if len({s.attestation.lifecycle for s in passing}) > 1:
+        return "fail", (
+            "SIGNER.LIFECYCLE.CONFLICT: the issuer signatures that pass issuer_trust state different "
+            f"status, valid_until, or supersedes values. {detail}"
+        )
+    if ok and not failed:
+        return "pass", detail
+    return ("fail" if checked else "not_checked"), detail
 
 
 def _issuer_problem(statement: IssuerStatement, key: TrustedKey) -> str | None:
@@ -462,24 +574,90 @@ def _manual_results(decision: DecisionBody, trust: TrustBundle, at: datetime) ->
     return "pass", f"{len(steps)} manual results verify for the purpose 'manual' and bind their steps."
 
 
-def _status(trust: TrustBundle, at: datetime) -> tuple[Outcome, str]:
-    if trust.status_as_of is None:
-        return (
-            "missing" if trust.require_status else "not_checked"
-        ), "No status snapshot is in the trust bundle."
-    age = at - _stamp(trust.status_as_of)
-    if age < timedelta(0) or age > timedelta(days=trust.status_max_age_days):
+def _fresh(stamp: str, trust: TrustBundle, at: datetime) -> bool:
+    age = at - _stamp(stamp)
+    return timedelta(0) <= age <= timedelta(days=trust.status_max_age_days)
+
+
+def _status(
+    trust: TrustBundle, at: datetime, passing: list[_Signed], status_list: bytes | None, mandatory: bool
+) -> tuple[Outcome, str]:
+    """Check the status of the report in a supplied status list (section 11.4, steps 1 to 16)."""
+    if trust.status_as_of is not None and not _fresh(trust.status_as_of, trust, at):
         return (
             "fail",
-            f"The status snapshot of {trust.status_as_of} is stale or is later than the evaluation time.",
+            f"TRUST.SNAPSHOT.STALE: The status snapshot of {trust.status_as_of} is stale or is later "
+            "than the evaluation time.",
         )
-    return (
-        "pass",
-        f"The status snapshot of {trust.status_as_of} is fresh. Revocation is applied under issuer_trust.",
+    if not passing:
+        return "not_checked", "STATUSLIST.REPORT.UNSIGNED: no issuer signature passes issuer_trust."
+    found = next(((r, s) for s in passing if (r := s.attestation.status) is not None), None)
+    if found is None:
+        return ("missing" if mandatory else "not_checked"), (
+            "STATUSLIST.REFERENCE.NONE: no issuer signature that passes issuer_trust names a status entry."
+        )
+    entry, signed = found
+    named = f"index {entry.index} of the list {entry.list_id!r}"
+    if status_list is None:
+        return "missing", f"STATUSLIST.FILE.MISSING: the report names {named}, and no list is supplied."
+    try:
+        listed, key = read_status_list(status_list, trust, at)
+        if key.issuer != signed.key.issuer:
+            raise StatusError(
+                "STATUSLIST.ISSUER.MISMATCH",
+                f"the list key belongs to {key.issuer!r}, the report key to {signed.key.issuer!r}",
+            )
+        if listed.id != entry.list_id:
+            raise StatusError(
+                "STATUSLIST.ID.MISMATCH", f"the list is {listed.id!r}; the report names {named}"
+            )
+        if not _fresh(listed.issued_at, trust, at):
+            raise StatusError(
+                "STATUSLIST.TIME.STALE",
+                f"the list of {listed.issued_at} is older than {trust.status_max_age_days} days "
+                "or later than the evaluation time",
+            )
+        withdrawn = bit_is_set(decode_list(listed.encoded_list), entry.index)
+    except StatusError as exc:
+        return "fail", f"{exc.code}: {exc}."
+    shown = f"{named} ({listed.status_purpose}, issued at {listed.issued_at})"
+    if withdrawn:
+        word = "revoked" if listed.status_purpose == "revocation" else "suspended"
+        return "fail", f"STATUSLIST.REPORT.{word.upper()}: {shown} marks the report as {word}."
+    return "pass", f"STATUSLIST.REPORT.ACTIVE: the bit of {shown} is 0."
+
+
+def _validity(passing: list[_Signed], at: datetime) -> tuple[Outcome, str]:
+    if not passing:
+        return "not_checked", "VALIDITY.REPORT.UNSIGNED: no issuer signature passes issuer_trust."
+    stated = [s.attestation.valid_until for s in passing if s.attestation.valid_until is not None]
+    if not stated:
+        return "not_checked", "VALIDITY.PERIOD.NOT_STATED: no issuer signature states valid_until."
+    earliest = min(stated)  # the STAMP form sorts in time order
+    if at > _stamp(earliest):
+        return "fail", (
+            f"VALIDITY.PERIOD.EXPIRED: the issuer states that the report is valid until {earliest}, "
+            f"before the evaluation time {format_time(at)}."
+        )
+    return "pass", f"VALIDITY.PERIOD.OK: the issuer states that the report is valid until {earliest}."
+
+
+def _mandatory(trust: TrustBundle, status_list: bytes | None, passing: list[_Signed]) -> list[str]:
+    # A stated status entry makes status mandatory, so a holder cannot hide a revocation.
+    needs_status = (
+        trust.require_status or status_list is not None or any(s.attestation.status for s in passing)
     )
+    return [
+        *_ALWAYS_MANDATORY,
+        *(["status"] if needs_status else []),
+        *(["validity"] if any(s.attestation.valid_until for s in passing) else []),
+        *(["timestamp"] if trust.require_timestamp else []),
+    ]
 
 
-def verify_json(raw: bytes | str, trust: TrustBundle, at: datetime) -> VerificationReport:
+def verify_json(
+    raw: bytes | str, trust: TrustBundle, at: datetime, *, status_list: bytes | None = None
+) -> VerificationReport:
     """Verify an envelope given as JSON text. This is the entry point for a file.
 
     The text is parsed strictly: a repeated object key makes the structure check fail.
@@ -488,7 +666,7 @@ def verify_json(raw: bytes | str, trust: TrustBundle, at: datetime) -> Verificat
         document = parse_strict(raw)
     except CanonicalizationError as exc:
         document = _Unparseable(str(exc))
-    return verify(document, trust, at)
+    return verify(document, trust, at, status_list=status_list)
 
 
 class _Unparseable:
@@ -496,19 +674,19 @@ class _Unparseable:
         self.reason = reason
 
 
-def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationReport:
+def verify(
+    document: Any, trust: TrustBundle, at: datetime, *, status_list: bytes | None = None
+) -> VerificationReport:
     """Verify an envelope given as parsed JSON. ``at`` is the explicit evaluation time.
 
+    ``status_list`` is the content of a status list file that the operator supplies.
     Prefer ``verify_json`` for a file: only a strict parse can detect a repeated object key.
     """
     at_text = at.astimezone(UTC).strftime(_STAMP)
 
-    def report(dimensions: dict[str, tuple[Outcome, str]], digest: str) -> VerificationReport:
-        mandatory = [
-            *_ALWAYS_MANDATORY,
-            *(["status"] if trust.require_status else []),
-            *(["timestamp"] if trust.require_timestamp else []),
-        ]
+    def report(
+        dimensions: dict[str, tuple[Outcome, str]], digest: str, mandatory: list[str]
+    ) -> VerificationReport:
         return VerificationReport(
             schema_version="dppce.verification/1",
             evaluation_time=at_text,
@@ -521,7 +699,7 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
         )
 
     skipped: tuple[Outcome, str] = ("not_checked", "Not checked because the structure is not valid.")
-    names = (*_ALWAYS_MANDATORY[1:], "status", "timestamp")
+    names = (*_ALWAYS_MANDATORY[1:], "status", "validity", "timestamp")
     try:
         if isinstance(document, _Unparseable):
             raise CanonicalizationError(document.reason)
@@ -538,7 +716,9 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
         failed: dict[str, tuple[Outcome, str]] = {
             "structure": ("fail", f"The envelope is not valid: {first}")
         }
-        return report(failed | dict.fromkeys(names, skipped), "unavailable")
+        return report(
+            failed | dict.fromkeys(names, skipped), "unavailable", _mandatory(trust, status_list, [])
+        )
 
     decision = envelope.decision
     keys = result_keys(decision.requirement_results, decision.test_results)
@@ -547,6 +727,8 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
     ) == decision.results_root and decision.results_count == len(keys)
     signature, verified = _verified(envelope, digest, trust)
     timestamp, times = _timestamps(envelope, verified, trust, at)
+    issuer_trust, passing = _issuer(envelope, verified, times, trust, at)
+    mandatory = _mandatory(trust, status_list, passing)
     return report(
         {
             "structure": ("pass", "The envelope matches the schema."),
@@ -559,10 +741,13 @@ def verify(document: Any, trust: TrustBundle, at: datetime) -> VerificationRepor
             else ("fail", "The recomputed records root differs from the stated one."),
             "counts": _counts(decision),
             "signature": signature,
-            "issuer_trust": _issuer(envelope, verified, times, trust, at),
+            "issuer_trust": issuer_trust,
+            "signers": _signers(envelope, verified, passing=passing, times=times, trust=trust, at=at),
             "manual_results": _manual_results(decision, trust, at),
-            "status": _status(trust, at),
+            "status": _status(trust, at, passing, status_list, "status" in mandatory),
+            "validity": _validity(passing, at),
             "timestamp": timestamp,
         },
         digest,
+        mandatory,
     )

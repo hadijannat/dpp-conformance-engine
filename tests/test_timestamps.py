@@ -118,7 +118,10 @@ def test_require_timestamp_with_a_good_token_is_complete(
     assert not check(with_tokens(signed), bundle).complete, "missing evidence is not complete"
     report = check(with_tokens(signed, good(signed, tsa)), bundle)
     assert report.complete
-    assert all(d.outcome == "pass" for d in report.dimensions if d.name != "status")
+    # D6-03: a report that states no status entry and no valid_until leaves both not checked.
+    optional = {d.name: d.outcome for d in report.dimensions if d.name in ("status", "validity")}
+    assert optional == {"status": "not_checked", "validity": "not_checked"}
+    assert all(d.outcome == "pass" for d in report.dimensions if d.name not in optional)
 
 
 Case = Callable[[EvidenceEnvelope, TrustBundle, Tsa], tuple[list[bytes | str], TrustBundle, datetime]]
