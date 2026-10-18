@@ -15,7 +15,7 @@ from typing import Final
 from dppce.evidence.canonical import canonical_bytes, parse_strict
 from dppce.evidence.jws import ALLOWED_ALGORITHMS, SignatureError, header_of, sign_compact, verify_compact
 from dppce.infrastructure.interfaces import Signer
-from dppce.models import ManualResult, TrustBundle, TrustedKey
+from dppce.models import ManualResult, SutIdentity, TrustBundle, TrustedKey
 
 MANUAL_RESULT_TYP: Final = "dppce-manual-result+jws"
 MANUAL_CHECK: Final = "manual.review"
@@ -43,6 +43,11 @@ class ManualResultError(ValueError):
 
 def _time(value: str) -> datetime:
     return datetime.strptime(value, _STAMP).replace(tzinfo=UTC)
+
+
+def declared_sut_version(sut: SutIdentity) -> str | None:
+    """The SUT version that a manual result must name: the declared one, or None. Never invented."""
+    return None if sut.version == "unknown" else sut.version
 
 
 def issue_manual_result(result: ManualResult, signer: Signer) -> str:
@@ -87,7 +92,8 @@ def verify_manual_result(
     trust: TrustBundle,
     *,
     test_purpose_id: str,
-    sut_identifier: str,
+    test_purpose_digest: str,
+    sut: SutIdentity,
     evaluation_time: datetime,
     key_valid_at: datetime,
 ) -> tuple[ManualResult, TrustedKey]:
@@ -122,7 +128,7 @@ def verify_manual_result(
         ) from exc
     if result.test_purpose_id != test_purpose_id:
         raise ManualResultError("MANUAL.PURPOSE.MISMATCH", "The result names a different test purpose.")
-    if result.sut_identifier != sut_identifier:
+    if result.sut_identifier != sut.identifier:
         raise ManualResultError("MANUAL.SUT.MISMATCH", "The result names a different system under test.")
     if performed > evaluation_time:
         raise ManualResultError(

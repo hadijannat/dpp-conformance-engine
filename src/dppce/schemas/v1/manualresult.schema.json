@@ -43,6 +43,25 @@
       "title": "Sut Identifier",
       "type": "string"
     },
+    "sut_version": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sut Version"
+    },
+    "test_purpose_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Test Purpose Digest",
+      "type": "string"
+    },
     "test_purpose_id": {
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
       "title": "Test Purpose Id",
@@ -52,6 +71,7 @@
   "required": [
     "schema_version",
     "test_purpose_id",
+    "test_purpose_digest",
     "sut_identifier",
     "role",
     "performed_at",

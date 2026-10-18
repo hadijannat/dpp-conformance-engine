@@ -6,6 +6,7 @@ Contract: docs/explanation/architecture.md, section 8.1.
 from __future__ import annotations
 
 from dppce.adapters.common import completed
+from dppce.evidence.canonical import digest
 from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX, ManualResultError, verify_manual_result
 from dppce.models import CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -44,12 +45,14 @@ def review(ctx: CheckContext) -> CheckOutcome:
         token = record.body.decode("ascii").strip()
     except UnicodeDecodeError:
         return unavailable("MANUAL.RESULT.MALFORMED", "The manual result is not a compact JWS.")
+    purpose_digest = digest(ctx.purpose)
     try:
         result, key = verify_manual_result(
             token,
             ctx.trust,
             test_purpose_id=ctx.purpose.id,
-            sut_identifier=ctx.ics.sut.identifier,
+            test_purpose_digest=purpose_digest,
+            sut=ctx.ics.sut,
             evaluation_time=ctx.evaluation_time,
             key_valid_at=ctx.evaluation_time,
         )
@@ -69,6 +72,8 @@ def review(ctx: CheckContext) -> CheckOutcome:
         "role": result.role,
         "performed_at": result.performed_at,
         "outcome": result.outcome,
+        # The verifier has no test pack. It compares the signed digest with this one (section 11.4).
+        "test_purpose_digest": purpose_digest,
     }
     observation = ctx.observation(
         0, kind="artifact", records=[record], summary=summary, transformations=("jws_verify",)

@@ -23,10 +23,11 @@ import yaml
 from dppce.catalogue import load_testpacks
 from dppce.cli import main
 from dppce.evidence.jws import LocalSigner
-from dppce.evidence.manual import issue_manual_result
+from dppce.evidence.canonical import digest
+from dppce.evidence.manual import declared_sut_version, issue_manual_result
 from dppce.infrastructure.authorization import issue_authorization
 from dppce.infrastructure.reference_server import ReferenceServer, ReferenceSystem, Reply
-from dppce.models import Authorization, EvidenceEnvelope, ManualResult
+from dppce.models import Authorization, EvidenceEnvelope, ManualResult, SutIdentity
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "fixtures" / "reference"
@@ -244,10 +245,10 @@ class ReferenceRig:
         token = issue_authorization(authorization, owner)
         (rig / "authorization" / "TEST-ONLY-authorization.jws").write_text(token + "\n", encoding="ascii")
         self._rig = rig
-        self._write_manual_results(rig, ics["sut"]["identifier"])
+        self._write_manual_results(rig, SutIdentity.model_validate(ics["sut"]))
         return self
 
-    def _write_manual_results(self, rig: Path, sut_identifier: str) -> None:
+    def _write_manual_results(self, rig: Path, sut: SutIdentity) -> None:
         """Sign a TEST-ONLY manual result for each named step of the synthetic reference system."""
         if not self._manual:
             return
@@ -258,7 +259,9 @@ class ReferenceRig:
             result = ManualResult(
                 schema_version="dppce.manualresult/1",
                 test_purpose_id=ident,
-                sut_identifier=sut_identifier,
+                test_purpose_digest=digest(purposes[ident]),
+                sut_identifier=sut.identifier,
+                sut_version=declared_sut_version(sut),
                 role="inspector",
                 performed_at=MANUAL_PERFORMED_AT,
                 outcome=outcome,

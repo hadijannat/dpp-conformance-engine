@@ -226,7 +226,11 @@ class ManualResult(Model):
 
     schema_version: Literal["dppce.manualresult/1"]
     test_purpose_id: str = Field(pattern=ID_PATTERN)
+    # sha256 of the RFC 8785 form of the test purpose as loaded: the method that the result answers.
+    test_purpose_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     sut_identifier: str = Field(min_length=1, max_length=512)
+    # The SUT version that the ICS declares. Null when the ICS declares none: never invented.
+    sut_version: str | None = Field(default=None, min_length=1, max_length=512)
     # One lowercase token, such as "inspector". A token cannot carry a name or free text.
     role: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,63}$")
     # Regex only, like RunManifest.evaluation_time; verify_manual_result parses it and refuses

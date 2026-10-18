@@ -318,12 +318,17 @@ def _manual_results(decision: DecisionBody, trust: TrustBundle, at: datetime) ->
             or not set(observation.record_ids) <= committed
         ):
             return "fail", f"{t.test_purpose_id}: the signed result references no committed record."
+        stated_digest = observation.summary.get("test_purpose_digest")
+        if not isinstance(stated_digest, str):
+            return "fail", f"{t.test_purpose_id}: the step states no digest of its test purpose."
         try:
+            # The report holds no test pack, so the signed digest is compared with the stated one.
             result, key = verify_manual_result(
                 str(observation.summary["jws"]),
                 trust,
                 test_purpose_id=t.test_purpose_id,
-                sut_identifier=decision.manifest.sut.identifier,
+                test_purpose_digest=stated_digest,
+                sut=decision.manifest.sut,
                 evaluation_time=evaluated,
                 key_valid_at=at,
             )
