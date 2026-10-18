@@ -4,10 +4,10 @@ The run is ``uv run just mutation`` (mutmut 3.8.0) at commit 6602f8c. These thre
 same at dbc88e0. Each test names, in its docstring, the surviving mutants that it kills. The
 record is ``validation/records/mutation-2026-10-18.md``, section "Round 3".
 
-Every server is a loopback server that the test starts. A table resolver answers every name that
-a test resolves. The exception is the system resolver test, which resolves the numeric loopback
-address 127.0.0.2. A name that is not a loopback name ends in ``.test``. The exception is the host
-``xxxx`` in the hostless-URL test, which the test never resolves.
+Every server is a loopback server that the test starts. A test gives the system resolver only the
+numeric loopback addresses 127.0.0.1 and 127.0.0.2, which send no DNS query. A table resolver
+answers every other name. A name that is not a loopback name ends in ``.test``. The exception is
+the host ``xxxx`` in the hostless-URL test, which the test never resolves.
 """
 
 from __future__ import annotations
