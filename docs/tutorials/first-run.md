@@ -54,7 +54,7 @@ uv run dppce run \
 
 The command prints the overall outcome and the decision digest. The exit code is `0`.
 The issuer identifier must equal the issuer of the signing key in the trust bundle.
-Otherwise the signed report of step 6 does not verify as complete.
+Otherwise the signed report of step 7 does not verify as complete.
 The options `--allow-private-host`, `--secrets`, and `--role-secret` are confirmations.
 The engine does not let the IXIT file decide these things alone.
 

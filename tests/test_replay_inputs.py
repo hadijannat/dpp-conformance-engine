@@ -232,3 +232,45 @@ def test_a_version_1_record_from_main_and_from_rc1_still_replays(
     assert (code, summary["match"], summary["input_check"]) == (run.code, True, "not_run")
     assert run.replay("--data-root", str(run.root)) == run.code
     assert "REPLAY.INPUT.NOT_RECORDED" in capsys.readouterr().out
+
+
+def test_a_migrated_record_still_detects_a_changed_bound_file_by_digest(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Section 9.2: with no input hashes, only the decision digest comparison applies."""
+    run = Run(tmp_path, "none")
+    _as_version_1(run, rc1=False)
+    _change_bound_file(run)
+    capsys.readouterr()
+    code = run.replay("--json", "--data-root", str(run.root))
+    summary = _json(capsys)
+    assert (code, summary["match"], summary["input_check"]) == (4, False, "not_run")
+
+
+def _v1_with_data_root(raw: bytes) -> bytes:
+    document = json.loads(raw)
+    del document["input_hashes"]
+    document["schema_version"] = "dppce.runinputs/1"
+    return canonical_bytes(document) + b"\n"
+
+
+def _v2_without_mode(raw: bytes) -> bytes:
+    document = json.loads(raw)
+    del document["mode"]
+    return canonical_bytes(document) + b"\n"
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [lambda _: b"[1]", lambda _: b"{not json", _v1_with_data_root, _v2_without_mode],
+    ids=["not-an-object", "malformed", "migration-refused", "validation-failed"],
+)
+def test_a_damaged_record_of_run_inputs_is_an_input_error(
+    damage: Any, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    run = Run(tmp_path, "none")
+    path = run.dir / "inputs.json"
+    path.write_bytes(damage(path.read_bytes()))
+    capsys.readouterr()
+    assert run.replay("--data-root", str(run.root)) == 2
+    assert "is not a valid record of run inputs" in capsys.readouterr().err
