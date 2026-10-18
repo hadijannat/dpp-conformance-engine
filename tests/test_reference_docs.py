@@ -71,6 +71,25 @@ def test_a_code_chosen_through_a_variable_has_no_effect() -> None:
     assert [s.effect for s in sites] == [None, None]
 
 
+def test_a_local_assigned_only_literals_carries_the_effect_of_its_call() -> None:
+    source = (
+        "def f(ctx, e):\n"
+        "    if e:\n"
+        '        code, text = "A.GONE", "m"\n'
+        "    else:\n"
+        '        code, text = ("A.DOWN", f"m {e}")\n'
+        "    return completed(False, code, text, no_answer=True)\n"
+    )
+    sites = _sites(source)
+    assert sorted(_codes(sites)) == ["A.DOWN", "A.GONE"]
+    assert {s.effect for s in sites} == {"inconclusive; fail under a non-default verdict rule"}
+
+
+def test_a_local_with_a_non_literal_assignment_has_no_effect() -> None:
+    source = 'def f(ctx, e):\n    code = "A.GONE"\n    code = e\n    return completed(False, code, "m")\n'
+    assert [s.effect for s in _sites(source)] == [None]
+
+
 def test_an_area_parameter_expands_at_each_call_site() -> None:
     sources = {
         "pkg.common": (
@@ -131,6 +150,14 @@ def test_the_shipped_catalogue() -> None:
         assert expected in codes, expected
     assert "API.CONTRACT" not in codes
     assert {s.effect for s in sites if s.code == "DATA.SCHEMA.OK"} == {"pass"}
+    for code in (
+        "TRANSPORT.SERVER_ERROR",
+        "TRANSPORT.UNREACHABLE",
+        "TRANSPORT.DENIED",
+        "TRANSPORT.REDIRECT_OUT_OF_SCOPE",
+    ):
+        found = {(s.function, s.effect) for s in sites if s.code == code}
+        assert ("no_answer", "inconclusive; fail under a non-default verdict rule") in found, code
 
 
 def test_the_code_families_are_pinned() -> None:
@@ -143,3 +170,7 @@ def test_the_code_families_are_pinned() -> None:
 def test_the_reason_code_page_is_current() -> None:
     page = (ROOT / "docs" / "reference" / "reason-codes.md").read_text(encoding="utf-8")
     assert page == gen.reason_codes_page(), "run `uv run just reference`"
+    assert (
+        "| `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | "
+        "inconclusive; fail under a non-default verdict rule |"
+    ) in page.splitlines()

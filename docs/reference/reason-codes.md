@@ -10,7 +10,7 @@ Engine version: `0.1.0rc1`. This page describes the source that generated it. Th
 
 The page is built from the string literals in `src/dppce`. Docstrings and comments are not read.
 
-The step verdict applies under the default verdict rules, where the call that produces the code fixes the execution status. "not fixed here" means that the place that writes the code does not fix a step verdict.
+The step verdict applies under the default verdict rules, where the call that produces the code fixes the execution status. "not fixed here" means that the generator cannot tie the code to a call that fixes the verdict. It does not mean that no verdict is fixed.
 
 Some codes are not step reason codes. They are messages of the command line, the verifier, the timestamp commands, the migrations, and the authorization check.
 
@@ -207,10 +207,10 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `TIMESTAMP.TSA.UNTRUSTED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
 | `TRANSPORT.BODY_ENCODED` | TRANSPORT |  | `dppce.adapters.common.unusable` | inconclusive |
 | `TRANSPORT.BODY_TRUNCATED` | TRANSPORT |  | `dppce.adapters.common.unusable` | inconclusive |
-| `TRANSPORT.DENIED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | not fixed here |
-| `TRANSPORT.REDIRECT_OUT_OF_SCOPE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | not fixed here |
-| `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | not fixed here |
-| `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | not fixed here |
+| `TRANSPORT.DENIED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
+| `TRANSPORT.REDIRECT_OUT_OF_SCOPE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
+| `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
+| `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRUST.BUNDLE.NOT_OBJECT` | TRUST |  | `dppce.cli._trust`, `dppce.verifier.__main__.main` | not fixed here |
 | `TRUST.MIGRATION.MALFORMED` | TRUST |  | `dppce.migrations._runinputs_2_to_3`, `dppce.migrations._trust_1_to_2` | not fixed here |
 | `TRUST.MIGRATION.UNSCOPED_SERIAL` | TRUST |  | `dppce.migrations._trust_1_to_2` | not fixed here |

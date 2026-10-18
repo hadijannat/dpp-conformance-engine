@@ -302,7 +302,7 @@ class CodeSite(NamedTuple):
     module: str  # dotted, e.g. "dppce.adapters.data"
     function: str  # qualified name inside the module, or "(module level)"
     check: str | None  # first argument of @register(...) on the enclosing top-level function
-    effect: str | None  # None: the call that produces the code does not fix the verdict
+    effect: str | None  # None: no call that fixes the verdict was found for the code
 
 
 class _Param(NamedTuple):
@@ -506,6 +506,61 @@ class _Module:
         )
 
     def effect(self, node: ast.AST) -> str | None:
+        """The step verdict fixed by the call that takes ``node``, directly or through a local name."""
+        direct = self._direct_effect(node)
+        name = self._literal_target(node)
+        if direct is not None or name is None:
+            return direct
+        function = self.parents.get(node)
+        while function is not None and not isinstance(function, _FUNCTIONS):
+            function = self.parents.get(function)
+        if function is None or name in self.scope(node).params:
+            return None
+        own = list(_own_nodes(function))
+        stores = [n for n in own if isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, ast.Store)]
+        if not all(self._literal_value(n) for n in stores):
+            return None
+        # ponytail: one agreed effect over all uses; uses that disagree give None, as before.
+        effects = {
+            self._direct_effect(n)
+            for n in own
+            if isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, ast.Load)
+        } - {None}
+        return effects.pop() if len(effects) == 1 else None
+
+    def _literal_target(self, node: ast.AST) -> str | None:
+        """The local name that a str literal is assigned to, alone or as one element of a tuple."""
+        if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
+            return None
+        parent = self.parents.get(node)
+        if isinstance(parent, ast.Assign) and len(parent.targets) == 1:
+            target = parent.targets[0]
+            return target.id if isinstance(target, ast.Name) else None
+        if not isinstance(parent, ast.Tuple):
+            return None
+        assign = self.parents.get(parent)
+        if isinstance(assign, ast.Assign) and len(assign.targets) == 1 and assign.value is parent:
+            target = assign.targets[0]
+            index = next(i for i, e in enumerate(parent.elts) if e is node)
+            if isinstance(target, ast.Tuple) and len(target.elts) == len(parent.elts):
+                element = target.elts[index]
+                return element.id if isinstance(element, ast.Name) else None
+        return None
+
+    def _literal_value(self, store: ast.Name) -> bool:
+        """True if the store gives the name a str literal."""
+        parent = self.parents.get(store)
+        if isinstance(parent, ast.Assign):
+            value = parent.value
+        elif isinstance(parent, ast.Tuple) and isinstance(assign := self.parents.get(parent), ast.Assign):
+            if not (isinstance(assign.value, ast.Tuple) and len(assign.value.elts) == len(parent.elts)):
+                return False
+            value = assign.value.elts[next(i for i, e in enumerate(parent.elts) if e is store)]
+        else:
+            return False
+        return isinstance(value, ast.Constant) and isinstance(value.value, str)
+
+    def _direct_effect(self, node: ast.AST) -> str | None:
         parent = self.parents.get(node)
         key: int | str
         call: ast.AST | None
@@ -689,8 +744,8 @@ def reason_codes_page() -> str:
         VERSION,
         "The page is built from the string literals in `src/dppce`. Docstrings and comments are not read.\n",
         "The step verdict applies under the default verdict rules, where the call that produces the code "
-        'fixes the execution status. "not fixed here" means that the place that writes the code does not '
-        "fix a step verdict.\n",
+        'fixes the execution status. "not fixed here" means that the generator cannot tie the code to a '
+        "call that fixes the verdict. It does not mean that no verdict is fixed.\n",
         "Some codes are not step reason codes. They are messages of the command line, the verifier, "
         "the timestamp commands, the migrations, and the authorization check.\n",
         "Plan exclusions and retained problems also use codes that are not step reason codes.\n",
