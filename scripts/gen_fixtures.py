@@ -11,6 +11,9 @@ Needs the ``qr`` extra (zxing-cpp and Pillow) for the QR images.
 ``--degraded-qr-only`` writes only the degraded QR images in ``qr/degraded``. They have no
 randomness, so this option rotates no key.
 
+``--fault-qr-only`` writes only the QR images of faults F-30 and F-31 in ``qr``. They have no
+randomness, so this option rotates no key.
+
 ``--add-manual-key`` adds the key ``TEST-ONLY-manual-key-1`` (trust purpose ``manual``) to the
 existing trust bundle and writes its private key. It rotates no other key.
 """
@@ -191,6 +194,14 @@ def _qr_image(
 def _qr(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _qr_image(text).save(path, format="PNG", optimize=True)
+
+
+def _fault_qr() -> None:
+    """Write the QR images of faults F-30 and F-31. No randomness, so no key rotates."""
+    serial = ITEMS["ev"][0]
+    _qr(OUT / "qr" / "TEST-ONLY-wrong-shape.png", f"{PUBLIC_ORIGIN}/01/9506000134352/21/{serial}")
+    arabic_indic = GTIN.translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩"))
+    _qr(OUT / "qr" / "TEST-ONLY-non-ascii-digits.png", f"{PUBLIC_ORIGIN}/01/{arabic_indic}/21/{serial}")
 
 
 def _blot(image: Image.Image, box: tuple[int, int, int, int], fill: int) -> Image.Image:
@@ -405,6 +416,10 @@ def main() -> None:
     if sys.argv[1:] == ["--add-manual-key"]:
         _add_manual_key()
         print(f"added {MANUAL_KID} to {OUT / 'trust' / 'TEST-ONLY-trust-bundle.json'}")
+        return
+    _fault_qr()
+    if sys.argv[1:] == ["--fault-qr-only"]:
+        print(f"wrote fault QR images to {OUT / 'qr'}")
         return
     _degraded_qr()
     if sys.argv[1:] == ["--degraded-qr-only"]:

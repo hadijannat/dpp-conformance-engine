@@ -17,6 +17,9 @@ CATALOGUE = Path(__file__).resolve().parent / "fault-catalogue.yaml"
 # How the rig is set up for the cases that a fault flag alone does not describe.
 _SETUP: dict[str, dict[str, Any]] = {
     "F-20": {"qr": "invalid"},
+    "F-30": {"qr": "TEST-ONLY-wrong-shape"},
+    "F-31": {"qr": "TEST-ONLY-non-ascii-digits"},
+    "F-34": {"qr": "degraded/TEST-ONLY-two-symbols"},
     "B-02": {"serve": False},
     "B-03": {"at": "2026-11-09T08:00:00Z"},  # exactly 30 days after the fixture update time
     "B-04": {"ics_changes": {"characteristics": {"capacity_wh": 2000}}},
@@ -24,7 +27,14 @@ _SETUP: dict[str, dict[str, Any]] = {
     "B-06": {"profile": "lmt"},
     "B-08": {"ics_changes": {"features": {"item_data": False}}},
 }
-_NOT_A_FLAG = ("none", "unreachable", "qr_payload_invalid")
+_NOT_A_FLAG = (
+    "none",
+    "unreachable",
+    "qr_payload_invalid",
+    "qr_wrong_shape",
+    "qr_non_ascii_digits",
+    "qr_two_symbols",
+)
 
 
 @dataclass(frozen=True)
