@@ -161,14 +161,6 @@ def _time(text: str | None) -> datetime:
         raise UsageError(f"'{text}' is not a time such as 2026-10-13T12:00:00Z") from exc
 
 
-def _exact_time(text: str) -> datetime:
-    """Parse a time that must be in canonical form. strptime alone accepts 2026-1-1T0:0:0Z."""
-    moment = datetime.strptime(text, STAMP_FORMAT)
-    if moment.strftime(STAMP_FORMAT) != text:
-        raise ValueError(f"{text!r} is not in canonical form")
-    return moment
-
-
 def _trust(path: Path | None) -> TrustBundle | None:
     """Load a trust bundle. A ``dppce.trust/1`` bundle is migrated (architecture section 11.4)."""
     if path is None:
@@ -852,6 +844,17 @@ def cmd_authorize(args: argparse.Namespace) -> int:
     except CanonicalizationError as exc:
         raise UsageError(f"{invalid}: the document is not strict JSON") from exc
     except ValidationError as exc:
+        # The model refuses a stamp that is not canonical or names no real moment. Section 11.3
+        # gives that its own code when the period is the only fault. A non-string stays a document fault.
+        if all(
+            error["loc"][:1] in (("not_before",), ("not_after",))
+            and error["type"] in ("string_pattern_mismatch", "value_error")
+            for error in exc.errors()
+        ):
+            raise UsageError(
+                "AUTHORIZE.PERIOD.INVALID: not_before and not_after must be times such as "
+                "2026-10-13T12:00:00Z"
+            ) from exc
         raise UsageError(f"{invalid}: {_first_message(exc)}") from exc
     if not is_exact(document, authorization):
         # The owner signs what the owner wrote. A coerced value, such as "10" for 10, is refused.
@@ -859,12 +862,7 @@ def cmd_authorize(args: argparse.Namespace) -> int:
             f"{invalid}: the document is not in the exact canonical form of the schema "
             "(a field is missing, a type differs, or a number is not an integer)"
         )
-    try:
-        start, end = (_exact_time(value) for value in (authorization.not_before, authorization.not_after))
-    except ValueError as exc:
-        raise UsageError(
-            "AUTHORIZE.PERIOD.INVALID: not_before and not_after must be times such as 2026-10-13T12:00:00Z"
-        ) from exc
+    start, end = (parse_stamp(value) for value in (authorization.not_before, authorization.not_after))
     if start > end:
         raise UsageError("AUTHORIZE.PERIOD.INVALID: not_before is after not_after")
     try:
@@ -911,7 +909,7 @@ def cmd_trust_add_key(args: argparse.Namespace) -> int:
     times = []
     for value in (args.not_before, args.not_after):
         try:
-            times.append(_exact_time(value))
+            times.append(parse_stamp(value))
         except ValueError as exc:
             raise UsageError(
                 f"TRUST.KEY.PERIOD_INVALID: '{value}' is not a time such as 2026-10-13T12:00:00Z"
