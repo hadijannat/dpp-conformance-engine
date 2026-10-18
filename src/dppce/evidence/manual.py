@@ -76,7 +76,9 @@ def _trusted_key(header: dict[str, object], trust: TrustBundle, key_valid_at: da
     except ValueError:
         valid = False
     if key.kid in trust.revoked_kids or not valid:
-        raise ManualResultError("MANUAL.KEY.NOT_VALID", "The key is revoked or not valid at the evaluation time.")
+        raise ManualResultError(
+            "MANUAL.KEY.NOT_VALID", "The key is revoked or not valid at the evaluation time."
+        )
     return key
 
 
@@ -115,11 +117,15 @@ def verify_manual_result(
             raise ValueError("the payload is not canonical")
         performed = _time(result.performed_at)
     except (ValueError, RecursionError) as exc:
-        raise ManualResultError("MANUAL.RESULT.MALFORMED", "The payload is not a canonical manual result.") from exc
+        raise ManualResultError(
+            "MANUAL.RESULT.MALFORMED", "The payload is not a canonical manual result."
+        ) from exc
     if result.test_purpose_id != test_purpose_id:
         raise ManualResultError("MANUAL.PURPOSE.MISMATCH", "The result names a different test purpose.")
     if result.sut_identifier != sut_identifier:
         raise ManualResultError("MANUAL.SUT.MISMATCH", "The result names a different system under test.")
     if performed > evaluation_time:
-        raise ManualResultError("MANUAL.TIME.AFTER_EVALUATION", "The review is later than the evaluation time.")
+        raise ManualResultError(
+            "MANUAL.TIME.AFTER_EVALUATION", "The review is later than the evaluation time."
+        )
     return result, key
