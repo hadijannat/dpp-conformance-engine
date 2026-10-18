@@ -387,7 +387,7 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
             # The ICS decides such an expression, and the supplier of the system writes the ICS.
             message = (
                 "A step with an applicability that reads a fact can leave its path, and the "
-                "automated steps that remain can then pass alone."
+                "steps that remain can then pass alone."
             )
             out.append(Finding("CAT018", "warning", test_id, message))
 
@@ -421,17 +421,17 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
 def _can_leave_a_passable_path(
     test_id: str, requirements: Mapping[str, Requirement], purposes: Mapping[str, TestPurpose]
 ) -> bool:
-    """True if some path lists ``test_id`` next to automated steps only.
+    """True if some path lists ``test_id`` next to other defined steps.
 
-    Without the step, such a path can still pass. A path that keeps a manual step cannot pass
-    in this version, so the step leaving it changes no verdict.
+    Without the step, such a path can still pass. A manual step counts too: it can pass with a
+    signed manual result (section 8.1).
     """
     for requirement in requirements.values():
         for path in requirement.assessment_paths:
             if test_id not in path.tests:
                 continue
             others = [purposes.get(t) for t in path.tests if t != test_id]
-            if others and all(p is not None and not p.manual for p in others):
+            if others and all(p is not None for p in others):
                 return True
     return False
 
