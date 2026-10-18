@@ -24,7 +24,7 @@ project does not relabel any of them. A license name here is the one that the pa
 declares in its metadata. It is not a legal review.
 
 Run-time dependencies of the core: pydantic, pyyaml, jsonschema, referencing, rfc8785,
-cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas-test-engines (`aas`).
+cryptography, joserfc, and asn1crypto. Optional extras: zxing-cpp and pillow (`qr`), and aas-test-engines (`aas`).
 
 """
 

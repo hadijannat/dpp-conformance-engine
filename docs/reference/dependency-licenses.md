@@ -11,7 +11,7 @@ project does not relabel any of them. A license name here is the one that the pa
 declares in its metadata. It is not a legal review.
 
 Run-time dependencies of the core: pydantic, pyyaml, jsonschema, referencing, rfc8785,
-cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas-test-engines (`aas`).
+cryptography, joserfc, and asn1crypto. Optional extras: zxing-cpp and pillow (`qr`), and aas-test-engines (`aas`).
 
 | Name                       | Version         | License                                              | URL                                                                   |
 |----------------------------|-----------------|------------------------------------------------------|-----------------------------------------------------------------------|
@@ -23,6 +23,7 @@ cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas
 | aas_test_engines           | 1.0.3           | UNKNOWN                                              | https://github.com/admin-shell-io/aas-test-engines                    |
 | annotated-types            | 0.8.0           | MIT                                                  | https://github.com/annotated-types/annotated-types                    |
 | arrow                      | 1.4.0           | Apache Software License                              | https://github.com/arrow-py/arrow                                     |
+| asn1crypto                 | 1.5.1           | MIT License                                          | https://github.com/wbond/asn1crypto                                   |
 | ast_serialize              | 0.13.0          | MIT                                                  | https://github.com/mypyc/ast_serialize                                |
 | attrs                      | 26.1.0          | MIT                                                  | https://www.attrs.org/en/stable/changelog.html                        |
 | babel                      | 2.18.0          | BSD License                                          | https://babel.pocoo.org/                                              |
@@ -50,6 +51,7 @@ cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas
 | identify                   | 2.6.20          | MIT                                                  | https://github.com/pre-commit/identify                                |
 | idna                       | 3.20            | BSD-3-Clause                                         | https://github.com/kjd/idna                                           |
 | iniconfig                  | 2.3.1           | MIT                                                  | https://github.com/pytest-dev/iniconfig                               |
+| inversion                  | 1.0.0           | BSD-3-Clause OR Apache-2.0                           | UNKNOWN                                                               |
 | isoduration                | 20.11.0         | ISC License (ISCL)                                   | https://github.com/bolsote/isoduration                                |
 | joserfc                    | 1.7.5           | BSD License                                          | https://github.com/authlib/joserfc                                    |
 | json_schema_tool           | 0.4.0           | MIT License                                          | https://github.com/ifak/json_schema_tool                              |
@@ -58,14 +60,21 @@ cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas
 | jsonschema                 | 4.26.0          | MIT                                                  | https://github.com/python-jsonschema/jsonschema                       |
 | jsonschema-specifications  | 2025.9.1        | MIT                                                  | https://github.com/python-jsonschema/jsonschema-specifications        |
 | lark                       | 1.3.1           | MIT License                                          | https://github.com/lark-parser/lark                                   |
+| libcst                     | 1.9.0           | MIT License                                          | https://github.com/Instagram/LibCST/blob/main/CHANGELOG.md            |
 | librt                      | 0.16.0          | MIT                                                  | https://github.com/mypyc/librt                                        |
 | license-expression         | 30.4.4          | Apache-2.0                                           | https://github.com/aboutcode-org/license-expression                   |
+| linkify-it-py              | 2.2.0           | MIT License                                          | https://github.com/tsutsu3/linkify-it-py                              |
 | lxml                       | 6.1.3           | BSD-3-Clause                                         | https://lxml.de/                                                      |
+| markdown-it-py             | 4.2.0           | MIT License                                          | https://github.com/executablebooks/markdown-it-py                     |
+| mdit-py-plugins            | 0.6.1           | MIT License                                          | https://github.com/executablebooks/mdit-py-plugins                    |
+| mdurl                      | 0.1.2           | MIT License                                          | https://github.com/executablebooks/mdurl                              |
 | mergedeep                  | 1.3.4           | MIT License                                          | https://github.com/clarketm/mergedeep                                 |
+| mike                       | 2.2.0           | BSD-3-Clause                                         | https://github.com/jimporter/mike                                     |
 | mkdocs                     | 1.6.1           | BSD-2-Clause                                         | https://github.com/mkdocs/mkdocs                                      |
 | mkdocs-get-deps            | 0.2.2           | MIT                                                  | https://github.com/mkdocs/get-deps                                    |
 | mkdocs-material            | 9.7.7           | MIT                                                  | https://github.com/squidfunk/mkdocs-material                          |
 | mkdocs-material-extensions | 1.3.1           | MIT                                                  | https://github.com/facelessuser/mkdocs-material-extensions            |
+| mutmut                     | 3.8.0           | BSD-3-Clause                                         | https://github.com/boxed/mutmut                                       |
 | mypy                       | 2.4.0           | MIT                                                  | https://www.mypy-lang.org/                                            |
 | mypy_extensions            | 1.1.0           | MIT                                                  | https://github.com/python/mypy_extensions                             |
 | nodeenv                    | 1.11.0          | BSD License                                          | https://github.com/ekalinin/nodeenv                                   |
@@ -95,11 +104,14 @@ cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas
 | rfc3986-validator          | 0.1.1           | MIT License                                          | https://github.com/naimetti/rfc3986-validator                         |
 | rfc3987-syntax             | 1.1.0           | MIT                                                  | https://github.com/willynilly/rfc3987-syntax                          |
 | rfc8785                    | 0.1.4           | Apache Software License                              | https://pypi.org/project/rfc8785                                      |
+| rich                       | 15.0.0          | MIT License                                          | https://github.com/Textualize/rich                                    |
 | rpds-py                    | 2026.9.1        | MIT                                                  | https://github.com/crate-py/rpds                                      |
 | ruff                       | 0.17.0          | MIT                                                  | https://docs.astral.sh/ruff                                           |
 | rust-just                  | 1.58.0          | CC0 1.0 Universal (CC0 1.0) Public Domain Dedication | https://github.com/casey/just                                         |
+| setproctitle               | 1.3.8           | BSD-3-Clause                                         | https://github.com/dvarrazzo/py-setproctitle                          |
 | six                        | 1.17.0          | MIT License                                          | https://github.com/benjaminp/six                                      |
 | sortedcontainers           | 2.4.0           | Apache Software License                              | http://www.grantjenks.com/docs/sortedcontainers/                      |
+| textual                    | 8.2.8           | MIT License                                          | https://github.com/Textualize/textual                                 |
 | types-PyYAML               | 6.0.12.20260906 | Apache-2.0                                           | https://github.com/python/typeshed                                    |
 | types-jsonschema           | 4.26.0.20261006 | Apache-2.0                                           | https://github.com/python/typeshed                                    |
 | typing-inspection          | 0.4.4           | MIT                                                  | https://github.com/pydantic/typing-inspection                         |
@@ -107,6 +119,7 @@ cryptography, and joserfc. Optional extras: zxing-cpp and pillow (`qr`), and aas
 | tzdata                     | 2026.5          | Apache-2.0                                           | https://github.com/python/tzdata                                      |
 | uri-template               | 1.3.0           | MIT License                                          | https://gitlab.linss.com/open-source/python/uri-template              |
 | urllib3                    | 2.8.0           | MIT                                                  | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst              |
+| verspec                    | 0.2.0           | BSD-3-Clause OR Apache-2.0                           | UNKNOWN                                                               |
 | virtualenv                 | 21.14.7         | MIT                                                  | https://github.com/pypa/virtualenv                                    |
 | watchdog                   | 6.0.0           | Apache Software License                              | https://github.com/gorakhargosh/watchdog                              |
 | webcolors                  | 25.10.0         | BSD License                                          | https://webcolors.readthedocs.io                                      |
