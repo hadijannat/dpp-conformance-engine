@@ -54,7 +54,9 @@ Protect the key file. Do not claim more for the signature than this.
 dppce replay --run RUN_DIR --keys KEYS_DIR --times 5 --json
 ```
 
-2. Read the exit code. `4` means that a decision digest differs.
+2. Read the exit code. `4` means that a decision digest differs, or that the replay did not use
+   every recorded record. A request that does not match its record also gives `4`. The output
+   field `every_record_replayed` tells which cause applies.
 3. Exit code `2` with `REPLAY.INPUT.CHANGED` means that an input differs from the run.
 4. Exit code `2` with `REPLAY.DATA_ROOT.MISSING` means that the recorded data root is missing.
 5. Exit code `2` with `TRUST.MIGRATION.UNSCOPED_SERIAL` or `TRUST.MIGRATION.MALFORMED` means
