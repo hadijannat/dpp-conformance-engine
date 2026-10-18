@@ -10,6 +10,8 @@ from __future__ import annotations
 import dataclasses
 import http.server
 import json
+import struct
+import zlib
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -17,14 +19,19 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from dppce.adapters.common import resource_url, schema_errors, validator
+from dppce.adapters.carrier import qr_decode
+from dppce.adapters.common import effective_url, resource_url, schema_errors, validator
 from dppce.adapters.data import Rule, rule_holds
+from dppce.adapters.identifier import consistency, parse_gs1_digital_link, resolve
 from dppce.evidence.canonical import digest
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.models import CheckOutcome, ExecutionStatus, Verdict, VerdictRules
+from dppce.testdefs.registry import CheckContext
 from dppce.verdicts import step_verdict
 from tests.support import make_record, reply
+from tests.test_adapters_identifier import Resolver, _with_identifier, live
+from tests.test_adapters_security import _POLICY, _Canned, _context
 from tests.test_resolved_target import (
     ITEM_PATH,
     PASSPORT,
@@ -36,6 +43,7 @@ from tests.test_resolved_target import (
     served,
     template_mode,
 )
+from tests.test_review_findings import transport as review_transport
 from tests.test_server_errors import Status
 from tests.test_url_templates import API, CONTRACT, REFERENCE, Canned, context, ixit, run, sent, write_data
 
@@ -733,3 +741,183 @@ def test_server_clock_fixes_5_the_pinned_item_schema_refuses_a_non_ascii_stamp()
     assert "\\d" not in (root / "profiles/battery/contracts/reference-api.openapi.yaml").read_text(
         encoding="utf-8"
     )
+
+
+# -- identifier-carrier-1, -3, -4: a carrier text that is not a usable URL ----------------------------
+
+GS1 = "/01/09506000134352/21/EV0001"
+NOT_USABLE = [
+    "http://[::1/01/09520123456788/21/12345",
+    "https:" + GS1,
+    "https://" + GS1,
+    "http://127.0.0.1:abc" + GS1,
+    "http://127.0.0.1:99999" + GS1,
+]
+
+
+def _carrier(tmp_path: Path, loopback: Any, text: str) -> tuple[CheckContext, Resolver]:
+    resolver = Resolver(loopback, b'{"id": "x"}', "application/json")
+    return _with_identifier(live(tmp_path, resolver, {}), text), resolver
+
+
+@pytest.mark.parametrize(
+    "text", NOT_USABLE, ids=["bad-ipv6", "no-host", "empty-host", "port-abc", "port-range"]
+)
+def test_identifier_carrier_1_and_3_resolve_of_a_url_without_a_usable_host_or_port_is_unresolved(
+    text: str, tmp_path: Path, loopback: Any
+) -> None:
+    ctx, resolver = _carrier(tmp_path, loopback, text)
+    outcome = resolve(ctx)
+    assert (outcome.status, outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        False,
+        "IDENTIFIER.UNRESOLVED",
+    )
+    assert resolver.server.seen == []
+
+
+@pytest.mark.parametrize(
+    "text", NOT_USABLE, ids=["bad-ipv6", "no-host", "empty-host", "port-abc", "port-range"]
+)
+def test_identifier_carrier_1_and_3_consistency_of_a_url_without_a_usable_host_or_port_is_blocked(
+    text: str, tmp_path: Path, loopback: Any
+) -> None:
+    ctx, resolver = _carrier(tmp_path, loopback, text)
+    outcome = consistency(ctx)
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.NOT_RESOLVABLE",
+    )
+    assert resolver.server.seen == []
+
+
+@pytest.mark.parametrize("bad", ["EV\n00\t01", "EV\r0001", "EV00\t01", "EV0001 "])
+def test_identifier_carrier_4_resolve_refuses_a_carrier_that_the_transport_would_rewrite(
+    bad: str, tmp_path: Path, loopback: Any
+) -> None:
+    resolver = Resolver(loopback, b'{"id": "x"}', "application/json")
+    ctx = _with_identifier(
+        live(tmp_path, resolver, {}), f"{resolver.server.origin}/01/09506000134352/21/{bad}"
+    )
+    outcome = resolve(ctx)
+    assert outcome.passed is not True
+    assert resolver.server.seen == [], "no request for a text that the transport would rewrite"
+    assert ctx.acquirer.records() == ()
+
+
+@pytest.mark.parametrize("bad", ["/a\tb", "/a\nb", "/a\rb", "/a\x00b", "/a\x7fb", "/ab "])
+def test_identifier_carrier_4_the_transport_refuses_a_url_with_a_control_character(
+    bad: str, loopback: Any
+) -> None:
+    server = loopback(reply)
+    record = review_transport().fetch(Request("GET", server.origin + bad))
+    assert record.error == "policy_denied"
+    assert server.seen == []
+
+
+# -- identifier-carrier-5: every spelling of the public origin ----------------------------------------
+
+OVERRIDE = "http://127.0.0.1:8443"
+
+
+def _override(tmp_path: Path) -> CheckContext:
+    base = _context(tmp_path, _POLICY, _Canned(b"{}"))
+    endpoints = dict(base.ixit.endpoints) | {
+        "public_origin": "https://id.example",
+        "origin_override": OVERRIDE,
+    }
+    return dataclasses.replace(base, ixit=base.ixit.model_copy(update={"endpoints": endpoints}))
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        f"https://id.example{GS1}",
+        f"HTTPS://id.example{GS1}",
+        f"https://ID.EXAMPLE{GS1}",
+        f"https://id.example:443{GS1}",
+    ],
+)
+def test_identifier_carrier_5_every_spelling_of_the_public_origin_goes_to_the_override(
+    url: str, tmp_path: Path
+) -> None:
+    assert effective_url(_override(tmp_path), url) == (OVERRIDE + GS1, ("origin_override",))
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        f"https://id.example.evil{GS1}",
+        f"https://id.example:8443{GS1}",
+        f"http://id.example{GS1}",
+        "https://[bad",
+    ],
+)
+def test_identifier_carrier_5_another_origin_is_not_overridden(url: str, tmp_path: Path) -> None:
+    assert effective_url(_override(tmp_path), url) == (url, ())
+
+
+def test_identifier_carrier_5_the_override_keeps_the_query(tmp_path: Path) -> None:
+    url = f"https://ID.example{GS1}?linkType=all"
+    assert effective_url(_override(tmp_path), url) == (f"{OVERRIDE}{GS1}?linkType=all", ("origin_override",))
+
+
+# -- identifier-carrier-6: a port is digits only -------------------------------------------------------
+
+
+@pytest.mark.parametrize("authority", ["a:abc", "a:80:90", "a::1", "a:8a0", "a:99999"])
+def test_identifier_carrier_6_a_port_that_is_not_a_number_is_refused(authority: str) -> None:
+    assert parse_gs1_digital_link(f"https://{authority}/01/09520123456788/21/12345") is not None
+
+
+@pytest.mark.parametrize("authority", ["a", "a:8080", "[::1]:8080", "[::1]"])
+def test_identifier_carrier_6_a_numeric_port_or_no_port_is_accepted(authority: str) -> None:
+    assert parse_gs1_digital_link(f"https://{authority}/01/09520123456788/21/12345") is None
+
+
+# -- identifier-carrier-2: a hostile carrier image ------------------------------------------------------
+
+
+def _chunk(kind: bytes, data: bytes) -> bytes:
+    return (
+        struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+    )
+
+
+def _png(width: int, height: int) -> bytes:
+    header = struct.pack(">IIBBBBB", width, height, 8, 0, 0, 0, 0)
+    idat = _chunk(b"IDAT", zlib.compress(b"\x00"))
+    return b"\x89PNG\r\n\x1a\n" + _chunk(b"IHDR", header) + idat + _chunk(b"IEND", b"")
+
+
+class _Image(_Canned):
+    def artifact(self, name: str) -> Record:
+        return make_record(1, self._body)
+
+
+@pytest.mark.qr
+@pytest.mark.parametrize(
+    ("body", "code"),
+    [
+        (
+            _png(20000, 20000),
+            "CARRIER.SAMPLE.TOO_LARGE",
+        ),  # above the Pillow error limit: DecompressionBombError
+        (_png(10000, 10000), "CARRIER.SAMPLE.TOO_LARGE"),  # between the warning and the error limit
+        (
+            bytes.fromhex(
+                "89504e470d0a1a0a0000000d4948445200000028000000280800000000a995e7b10000002b49444154789c"
+                "edcab11100300cc240ccfe83652c97743af7e15b699e6e7cfcd41199737444e61c1d91394747649dfa7c5c"
+                "077a0118d878ec450000000049454e44ae426082"
+            ),
+            "CARRIER.SAMPLE.UNREADABLE",  # a wrong IDAT length: SyntaxError("broken PNG file")
+        ),
+    ],
+    ids=["bomb-error", "bomb-warning", "broken-chunk"],
+)
+def test_identifier_carrier_2_a_hostile_image_is_blocked(body: bytes, code: str, tmp_path: Path) -> None:
+    pytest.importorskip("zxingcpp", reason="needs the optional 'qr' extra")
+    outcome = qr_decode(_context(tmp_path, _POLICY, _Image(body, "image/png")))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (ExecutionStatus.BLOCKED, None, code)

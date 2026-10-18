@@ -7,10 +7,11 @@ from __future__ import annotations
 
 import io
 import re
+import warnings
 from collections.abc import Mapping, Sequence
 from decimal import Decimal
 from typing import Any, Final
-from urllib.parse import quote, unquote, urlsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import jsonschema
 from jsonschema.protocols import Validator
@@ -19,6 +20,7 @@ from referencing import Registry
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.infrastructure.redaction import REMOVED, redact_url
+from dppce.infrastructure.transport import origin_of
 from dppce.models import (
     PATH_TEMPLATE_PATTERN,
     PLACEHOLDER_PATTERN,
@@ -64,12 +66,24 @@ def blocked(code: str, message: str) -> CheckOutcome:
 
 
 def effective_url(ctx: CheckContext, url: str) -> tuple[str, tuple[str, ...]]:
-    """Apply the origin override of the test rig. Returns the URL and the transformations used."""
+    """Apply the origin override of the test rig. Returns the URL and the transformations used.
+
+    The origin selects the override, not the spelling: HTTPS://ID.EXAMPLE:443 is https://id.example.
+    """
     public = ctx.ixit.endpoints.get("public_origin")
     override = ctx.ixit.endpoints.get("origin_override")
-    if public and override and (url == public or url.startswith(public + "/")):
-        return override + url[len(public) :], ("origin_override",)
-    return url, ()
+    if not (public and override):
+        return url, ()
+    try:
+        parts = urlsplit(url)
+        same = origin_of(url) == origin_of(public) and not (parts.username or parts.password)
+    except ValueError:
+        return url, ()
+    if not same:
+        return url, ()
+    return override.rstrip("/") + urlunsplit(("", "", parts.path, parts.query, parts.fragment)), (
+        "origin_override",
+    )
 
 
 def _accept_of(record: Record) -> str:
@@ -240,9 +254,18 @@ def resource_url(ctx: CheckContext, resource: ResourceName, area: str) -> str | 
     return template_url(ctx, template.endpoint, template.path, area)
 
 
-def _is_http_url(text: str) -> bool:
+def is_http_url(text: str) -> bool:
+    """True for an http or https URL with a host and a valid port that the transport sends as written.
+
+    urlsplit drops tab, CR, and LF, and strips leading and trailing controls and spaces. The
+    record would then name a request that was never sent, so such a text is not a URL here.
+    """
+    if any(c <= " " or c == "\x7f" for c in text):
+        return False
     try:
-        return urlsplit(text).scheme in ("http", "https")
+        parts = urlsplit(text)
+        _ = parts.port  # ValueError for a port that is not a number from 0 to 65535
+        return parts.scheme in ("http", "https") and bool(parts.hostname)
     except ValueError:
         return False
 
@@ -259,7 +282,7 @@ def item_url(ctx: CheckContext, area: str) -> str | CheckOutcome:
     text, _, _, problem = carrier_identifier(ctx)
     if problem is not None and problem.status is not ExecutionStatus.COMPLETED:
         return problem
-    if problem is not None or text is None or not _is_http_url(text):
+    if problem is not None or text is None or not is_http_url(text):
         # A carrier that fails its own check is a finding of that check, not of this one.
         message = "The IXIT asks for the resolved item target, and the carrier gives no URL to resolve."
         return blocked(f"{area}.NO_TARGET", message)
@@ -433,17 +456,23 @@ def decode_qr(
     if record.error is not None:
         return None, record, blocked("CARRIER.SAMPLE.MISSING", f"The sample '{artifact}' is not available.")
     try:
-        with Image.open(io.BytesIO(record.body)) as image:
-            if image.width * image.height > _MAX_QR_PIXELS:
-                return (
-                    None,
-                    record,
-                    blocked("CARRIER.SAMPLE.TOO_LARGE", "The image is larger than the limit."),
-                )
-            # With errors returned, a damaged second symbol is still counted. Without them, an
-            # image with one clean and one damaged symbol looked like one symbol and passed.
-            found = zxingcpp.read_barcodes(image.convert("L"), return_errors=True)
-    except (UnidentifiedImageError, OSError, ValueError):
+        # Pillow warns about a large image and raises above twice that size. Both are too large.
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(record.body)) as image:
+                if image.width * image.height > _MAX_QR_PIXELS:
+                    return (
+                        None,
+                        record,
+                        blocked("CARRIER.SAMPLE.TOO_LARGE", "The image is larger than the limit."),
+                    )
+                # With errors returned, a damaged second symbol is still counted. Without them, an
+                # image with one clean and one damaged symbol looked like one symbol and passed.
+                found = zxingcpp.read_barcodes(image.convert("L"), return_errors=True)
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning):
+        return None, record, blocked("CARRIER.SAMPLE.TOO_LARGE", "The image is larger than the limit.")
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
+        # Pillow's PNG reader raises SyntaxError for a broken chunk.
         return None, record, blocked("CARRIER.SAMPLE.UNREADABLE", "The sample is not a readable image.")
     symbols = [s for s in found if s.valid and s.format == zxingcpp.BarcodeFormat.QRCode]
     # Every other detection counts, readable or not, in any format. zxing-cpp can report a damaged

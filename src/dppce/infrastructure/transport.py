@@ -224,7 +224,10 @@ class PolicyTransport:
         except ValueError as exc:
             # A URL that cannot be parsed is outside every policy. It is never raised.
             raise _DeniedError("policy_denied") from exc
-        if parts.scheme not in ("http", "https") or not host or parts.username or parts.password:
+        # urlsplit drops tab, CR, and LF and strips edge controls and spaces. The record would
+        # then name a request that was never sent, so such a URL is refused, never rewritten.
+        controls = any(c <= " " or c == "\x7f" for c in url)
+        if controls or parts.scheme not in ("http", "https") or not host or parts.username or parts.password:
             raise _DeniedError("policy_denied")
         if host not in {h.lower() for h in policy.allowed_hosts}:
             raise _DeniedError("policy_denied")

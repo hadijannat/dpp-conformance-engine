@@ -366,7 +366,9 @@ default `false`. With `true`, the check also fetches the target of the `item` te
 compares that document with the resolved passport as JSON values, as `integrity.jws` compares a
 payload. The check takes the first row that applies:
 
-1. The carrier identifier is not a URL: `blocked`, `IDENTIFIER.NOT_RESOLVABLE`.
+1. The carrier identifier is not a URL: `blocked`, `IDENTIFIER.NOT_RESOLVABLE`. A URL here is
+   an `http` or `https` URL with a host, a valid port, and no control character or space.
+   `identifier.resolve` uses the same test and gives `IDENTIFIER.UNRESOLVED` for any other text.
 2. The resolver answer is not a JSON object with status 200: `blocked`, `IDENTIFIER.NOT_RESOLVED`.
 3. An identifier differs: `IDENTIFIER.MISMATCH`. The check does not fetch the item target.
 4. With `compare_item`, the `item` template gives no URL: `blocked`, `IDENTIFIER.NO_TARGET`. The
@@ -381,7 +383,7 @@ the `item` template, also with `item_target: resolved`, because it compares the 
 `identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. The host part is not empty and holds only `A-Z`,
 `a-z`, `0-9`, `.`, `-`, `:`, `[`, and `]`. So user information and an IPv6 zone identifier are
-refused. The path is `/01/<GTIN>/21/<serial>`. The GTIN is 14 ASCII digits with a correct check
+refused. A port after the host is ASCII digits only, from 0 to 65535. The path is `/01/<GTIN>/21/<serial>`. The GTIN is 14 ASCII digits with a correct check
 digit. The serial is 1 to 20 characters from `A-Z`, `a-z`, `0-9`, `.`, `_`, and `-`. The whole
 URL holds only the characters that RFC 3986 permits in a URI, including `%`. Every other text
 gives `IDENTIFIER.SYNTAX.INVALID`. This includes forms that GS1 permits, such as a GTIN without
@@ -499,6 +501,8 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
   An out-of-scope hop ends the request with `redirect_out_of_scope`. So does a `Location` that
   is not a URL. A URL that cannot be parsed is never raised: it is `policy_denied`.
+- A URL with a control character or a space is `policy_denied`. The URL parser would drop or
+  strip such a character, and the record would name a request that was never sent.
 - A non-public origin is reached only if the operator confirmed that origin
   (`--allow-private-host ORIGIN`), not only its host. A public origin without an authorization
   needs `--allow-remote-host ORIGIN`. The IXIT therefore cannot choose a different port or

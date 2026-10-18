@@ -17,6 +17,7 @@ from dppce.adapters.common import (
     carrier_identifier,
     completed,
     fetch_once,
+    is_http_url,
     json_object,
     media_type,
     not_done,
@@ -100,6 +101,10 @@ def parse_gs1_digital_link(text: str) -> str | None:
     # netloc, not hostname, so that user information is refused too.
     if not _HOST.fullmatch(parts.netloc):
         return "the host has a character that GS1 Digital Link does not permit"
+    try:
+        _ = parts.port  # RFC 3986: a port is digits only
+    except ValueError:
+        return "the port is not a number from 0 to 65535"
     match = _GS1_PATH.match(parts.path)
     if match is None:
         return "the path does not have the form /01/<14 digits>/21/<serial>"
@@ -168,7 +173,7 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
     text, _, transformations, problem = carrier_identifier(ctx)
     if problem is not None or text is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
-    if urlsplit(text).scheme not in ("http", "https"):
+    if not is_http_url(text):
         observation = ctx.observation(
             0, kind="derived", summary={"resolvable": False}, transformations=transformations
         )
@@ -240,7 +245,7 @@ def consistency(ctx: CheckContext) -> CheckOutcome:
     carrier, records, transformations, problem = carrier_identifier(ctx)
     if problem is not None or carrier is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
-    if urlsplit(carrier).scheme not in ("http", "https"):
+    if not is_http_url(carrier):
         return blocked(
             "IDENTIFIER.NOT_RESOLVABLE",
             "The carrier identifier is not a URL. There is no passport to compare.",

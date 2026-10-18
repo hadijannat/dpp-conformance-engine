@@ -43,6 +43,7 @@ and never resolves. A test rig maps it to the local server:
 - `IXIT.endpoints["origin_override"]` is the local origin, for example `http://127.0.0.1:49152`.
 
 A check sends a URL whose origin equals `public_origin` to `origin_override` in its place.
+The origin is compared in its normal form, so `HTTPS://ID.EXAMPLE.TEST:443` counts too.
 The helper `dppce.adapters.common.effective_url(ctx, url)` does this in one place. Each
 observation that used it lists the transformation `origin_override`.
 Identifier comparison always uses the public form.
@@ -532,7 +533,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
-| `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING` |
+| `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING`; an image above the pixel limit, also one that Pillow reports as a decompression bomb: `blocked`, `CARRIER.SAMPLE.TOO_LARGE`; an image that cannot be read: `blocked`, `CARRIER.SAMPLE.UNREADABLE` |
 | `identifier.parse` | `scheme` (default: `ics.identifier_scheme`) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail); `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN` |
 | `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
