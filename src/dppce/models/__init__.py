@@ -59,11 +59,13 @@ from dppce.models.results import (
     CoverageSummary,
     DecisionBody,
     EvidenceEnvelope,
+    InputHashes,
     IssuerStatement,
     PathResult,
     Ratio,
     RecordCommitment,
     RequirementResult,
+    RunInputsRecord,
     RunManifest,
     VerificationDimension,
     VerificationReport,
@@ -105,6 +107,7 @@ SCHEMA_MODELS: dict[str, type[Model]] = {
     "verification": VerificationReport,
     "trust": TrustBundle,
     "manualresult": ManualResult,
+    "runinputs": RunInputsRecord,
 }
 
 __all__ = [
@@ -146,6 +149,7 @@ __all__ = [
     "Expr",
     "FactSpec",
     "IdParts",
+    "InputHashes",
     "Interpretation",
     "IssuerStatement",
     "JsonScalar",
@@ -174,6 +178,7 @@ __all__ = [
     "ResourceTemplate",
     "ReviewStatus",
     "RoleIdentity",
+    "RunInputsRecord",
     "RunManifest",
     "Scope",
     "Severity",

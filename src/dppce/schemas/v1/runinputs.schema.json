@@ -1,0 +1,961 @@
+{
+  "$defs": {
+    "AccessDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "description": "Identifier of the declared access policy.",
+          "title": "Policy"
+        },
+        "tiers": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Tiers"
+        }
+      },
+      "title": "AccessDeclaration",
+      "type": "object"
+    },
+    "ApiDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "description": "Identifier of the pinned API contract.",
+          "title": "Contract"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Version"
+        }
+      },
+      "title": "ApiDeclaration",
+      "type": "object"
+    },
+    "ExecutionMode": {
+      "enum": [
+        "illustrative",
+        "exploratory",
+        "reviewed"
+      ],
+      "title": "ExecutionMode",
+      "type": "string"
+    },
+    "ICS": {
+      "additionalProperties": false,
+      "description": "Implementation Conformance Statement.\n\nThe core is product-agnostic. Product facts such as a capacity or a market date go in\n``characteristics``. The profile says which facts it reads. Any value may be ``\"unknown\"``.\nAn ICS declaration cannot waive a mandatory requirement.",
+      "properties": {
+        "access": {
+          "$ref": "#/$defs/AccessDeclaration",
+          "default": {
+            "policy": "unknown",
+            "tiers": "unknown"
+          }
+        },
+        "api": {
+          "$ref": "#/$defs/ApiDeclaration",
+          "default": {
+            "contract": "unknown",
+            "version": "unknown"
+          }
+        },
+        "carriers": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Carriers"
+        },
+        "characteristics": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Characteristics",
+          "type": "object"
+        },
+        "features": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "const": "unknown",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Features",
+          "type": "object"
+        },
+        "granularity": {
+          "anyOf": [
+            {
+              "enum": [
+                "item",
+                "model",
+                "batch"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Granularity"
+        },
+        "identifier_scheme": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Identifier Scheme"
+        },
+        "product_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Product Category"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "dppce.ics/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "signature_format": {
+          "anyOf": [
+            {
+              "enum": [
+                "jws",
+                "cose",
+                "none"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Signature Format"
+        },
+        "sut": {
+          "$ref": "#/$defs/SutIdentity"
+        }
+      },
+      "required": [
+        "schema_version",
+        "sut",
+        "profile"
+      ],
+      "title": "ICS",
+      "type": "object"
+    },
+    "IXIT": {
+      "additionalProperties": false,
+      "description": "Implementation eXtra Information for Testing.",
+      "properties": {
+        "authorization_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authorization Ref"
+        },
+        "endpoints": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Endpoints",
+          "type": "object"
+        },
+        "id_parts": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdParts"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "identities": {
+          "default": [
+            {
+              "description": "",
+              "role": "anonymous",
+              "secret_ref": null
+            }
+          ],
+          "items": {
+            "$ref": "#/$defs/RoleIdentity"
+          },
+          "title": "Identities",
+          "type": "array"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkPolicy",
+          "default": {
+            "allow_private_hosts": [],
+            "allowed_hosts": [],
+            "contact": "",
+            "max_body_bytes": 1048576,
+            "max_redirects": 3,
+            "max_requests": 200,
+            "min_interval_ms": 0,
+            "retries": 0,
+            "timeout_ms": 5000,
+            "total_timeout_ms": 30000
+          }
+        },
+        "observation": {
+          "$ref": "#/$defs/ObservationPolicy",
+          "default": {
+            "retention_days": 30,
+            "store_bodies": true
+          }
+        },
+        "resources": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ResourceTemplate"
+          },
+          "propertyNames": {
+            "enum": [
+              "item",
+              "model",
+              "signed",
+              "versions",
+              "registry_record"
+            ]
+          },
+          "title": "Resources",
+          "type": "object"
+        },
+        "samples": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Samples",
+          "type": "object"
+        },
+        "schema_version": {
+          "const": "dppce.ixit/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "trust": {
+          "$ref": "#/$defs/TrustConfig",
+          "default": {
+            "bundle": null,
+            "policy_version": "unset"
+          }
+        }
+      },
+      "required": [
+        "schema_version"
+      ],
+      "title": "IXIT",
+      "type": "object"
+    },
+    "IdParts": {
+      "additionalProperties": false,
+      "description": "Splits samples.passport_id at the first n-1 occurrences of the separator.\n\nThe last part keeps any further separator. No part can be empty.",
+      "properties": {
+        "names": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Names",
+          "type": "array"
+        },
+        "separator": {
+          "maxLength": 8,
+          "minLength": 1,
+          "title": "Separator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "separator",
+        "names"
+      ],
+      "title": "IdParts",
+      "type": "object"
+    },
+    "InputHashes": {
+      "additionalProperties": false,
+      "description": "Digests of the inputs that a replay reads again: the profile, the sources, every loaded pack\nand test pack, and the bound files.",
+      "properties": {
+        "bound_files": {
+          "additionalProperties": {
+            "pattern": "^(sha256:[0-9a-f]{64}|unavailable)$",
+            "type": "string"
+          },
+          "title": "Bound Files",
+          "type": "object"
+        },
+        "packs": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Packs",
+          "type": "object"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "sources": {
+          "title": "Sources",
+          "type": "string"
+        },
+        "testpacks": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Testpacks",
+          "type": "object"
+        }
+      },
+      "required": [
+        "profile",
+        "sources",
+        "packs",
+        "testpacks",
+        "bound_files"
+      ],
+      "title": "InputHashes",
+      "type": "object"
+    },
+    "IssuerStatement": {
+      "additionalProperties": false,
+      "description": "Who issues the report. The default states that the issuer is not accredited.",
+      "properties": {
+        "accreditation_reference": {
+          "default": "",
+          "title": "Accreditation Reference",
+          "type": "string"
+        },
+        "accreditation_status": {
+          "default": "not accredited",
+          "title": "Accreditation Status",
+          "type": "string"
+        },
+        "identifier": {
+          "default": "unspecified",
+          "title": "Identifier",
+          "type": "string"
+        },
+        "name": {
+          "default": "unspecified",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "IssuerStatement",
+      "type": "object"
+    },
+    "NetworkPolicy": {
+      "additionalProperties": false,
+      "description": "Destinations the transport may reach. Loopback and private ranges need an explicit entry.",
+      "properties": {
+        "allow_private_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allow Private Hosts",
+          "type": "array"
+        },
+        "allowed_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Hosts",
+          "type": "array"
+        },
+        "contact": {
+          "default": "",
+          "description": "Contact shown in the User-Agent header.",
+          "title": "Contact",
+          "type": "string"
+        },
+        "max_body_bytes": {
+          "default": 1048576,
+          "maximum": 16777216,
+          "minimum": 1024,
+          "title": "Max Body Bytes",
+          "type": "integer"
+        },
+        "max_redirects": {
+          "default": 3,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Max Redirects",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 200,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "min_interval_ms": {
+          "default": 0,
+          "maximum": 60000,
+          "minimum": 0,
+          "title": "Min Interval Ms",
+          "type": "integer"
+        },
+        "retries": {
+          "default": 0,
+          "description": "Extra attempts for an idempotent read.",
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "default": 5000,
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Timeout Ms",
+          "type": "integer"
+        },
+        "total_timeout_ms": {
+          "default": 30000,
+          "description": "Limit for one complete request, not for one read.",
+          "maximum": 600000,
+          "minimum": 100,
+          "title": "Total Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "title": "NetworkPolicy",
+      "type": "object"
+    },
+    "ObservationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "retention_days": {
+          "default": 30,
+          "maximum": 3650,
+          "minimum": 0,
+          "title": "Retention Days",
+          "type": "integer"
+        },
+        "store_bodies": {
+          "default": true,
+          "title": "Store Bodies",
+          "type": "boolean"
+        }
+      },
+      "title": "ObservationPolicy",
+      "type": "object"
+    },
+    "ResourceTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "description": "Key of IXIT.endpoints.",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path template under the endpoint. It cannot change the scheme, the host, or the port.",
+          "maxLength": 512,
+          "pattern": "^/(?:(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@%?]|\\{[a-z][a-z0-9_]{0,31}\\})(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@%/?]|\\{[a-z][a-z0-9_]{0,31}\\})*)?$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "endpoint",
+        "path"
+      ],
+      "title": "ResourceTemplate",
+      "type": "object"
+    },
+    "RoleIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "secret_ref": {
+          "anyOf": [
+            {
+              "pattern": "^(env|file):.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Secret Ref"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "RoleIdentity",
+      "type": "object"
+    },
+    "SutIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "description": "Stable URI or URN of the system under test.",
+          "title": "Identifier",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Operator"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Version"
+        }
+      },
+      "required": [
+        "name",
+        "identifier"
+      ],
+      "title": "SutIdentity",
+      "type": "object"
+    },
+    "TrustAnchor": {
+      "additionalProperties": false,
+      "description": "An X.509 certificate that ends a passport signature chain.",
+      "properties": {
+        "certificate_pem": {
+          "title": "Certificate Pem",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "certificate_pem"
+      ],
+      "title": "TrustAnchor",
+      "type": "object"
+    },
+    "TrustBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "anchors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TrustAnchor"
+          },
+          "title": "Anchors",
+          "type": "array"
+        },
+        "keys": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TrustedKey"
+          },
+          "title": "Keys",
+          "type": "array"
+        },
+        "policy_version": {
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "require_status": {
+          "default": false,
+          "title": "Require Status",
+          "type": "boolean"
+        },
+        "require_timestamp": {
+          "default": false,
+          "title": "Require Timestamp",
+          "type": "boolean"
+        },
+        "revoked_kids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Revoked Kids",
+          "type": "array"
+        },
+        "revoked_serials": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$",
+            "type": "string"
+          },
+          "title": "Revoked Serials",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "dppce.trust/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status_as_of": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status As Of"
+        },
+        "status_max_age_days": {
+          "default": 7,
+          "maximum": 3650,
+          "minimum": 0,
+          "title": "Status Max Age Days",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "policy_version"
+      ],
+      "title": "TrustBundle",
+      "type": "object"
+    },
+    "TrustConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "bundle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bundle"
+        },
+        "policy_version": {
+          "default": "unset",
+          "title": "Policy Version",
+          "type": "string"
+        }
+      },
+      "title": "TrustConfig",
+      "type": "object"
+    },
+    "TrustedKey": {
+      "additionalProperties": false,
+      "description": "A public key that the verifier accepts for the listed purposes, inside its validity window.",
+      "properties": {
+        "issuer": {
+          "title": "Issuer",
+          "type": "string"
+        },
+        "kid": {
+          "title": "Kid",
+          "type": "string"
+        },
+        "not_after": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Not After",
+          "type": "string"
+        },
+        "not_before": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Not Before",
+          "type": "string"
+        },
+        "public_jwk": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Public Jwk",
+          "type": "object"
+        },
+        "purposes": {
+          "items": {
+            "enum": [
+              "report",
+              "authorization",
+              "passport",
+              "manual"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Purposes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kid",
+        "issuer",
+        "purposes",
+        "public_jwk",
+        "not_before",
+        "not_after"
+      ],
+      "title": "TrustedKey",
+      "type": "object"
+    }
+  },
+  "$id": "urn:dppce:schema:v1:runinputs",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The inputs of one run, written to inputs.json so that a replay can rebuild them.\n\nIt is not signed or encrypted. No field has a default: a writer states each value, and\n``null`` is written explicitly.",
+  "properties": {
+    "authorization_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Authorization Token"
+    },
+    "data_root": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Absolute path of the data root of the run. null only in a record migrated from dppce.runinputs/1.",
+      "title": "Data Root"
+    },
+    "evaluation_time": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "title": "Evaluation Time",
+      "type": "string"
+    },
+    "extra_packs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Extra Packs",
+      "type": "array"
+    },
+    "extra_testpacks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Extra Testpacks",
+      "type": "array"
+    },
+    "ics": {
+      "$ref": "#/$defs/ICS"
+    },
+    "import_packs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Import Packs",
+      "type": "array"
+    },
+    "import_testpacks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Import Testpacks",
+      "type": "array"
+    },
+    "input_hashes": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InputHashes"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "null only in a record migrated from dppce.runinputs/1."
+    },
+    "issuer": {
+      "$ref": "#/$defs/IssuerStatement"
+    },
+    "ixit": {
+      "$ref": "#/$defs/IXIT"
+    },
+    "manual_results": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Manual Results",
+      "type": "array"
+    },
+    "mode": {
+      "$ref": "#/$defs/ExecutionMode"
+    },
+    "profile": {
+      "title": "Profile",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "dppce.runinputs/2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "trust": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TrustBundle"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "mode",
+    "profile",
+    "evaluation_time",
+    "ics",
+    "ixit",
+    "import_packs",
+    "extra_packs",
+    "import_testpacks",
+    "extra_testpacks",
+    "trust",
+    "authorization_token",
+    "issuer",
+    "manual_results",
+    "data_root",
+    "input_hashes"
+  ],
+  "title": "RunInputsRecord",
+  "type": "object"
+}

@@ -37,6 +37,7 @@ from dppce.models import (
     DecisionBody,
     ExecutionMode,
     ExecutionStatus,
+    InputHashes,
     IssuerStatement,
     Plan,
     Profile,
@@ -244,34 +245,49 @@ def _dependency_versions() -> dict[str, str]:
     return dict(sorted(versions.items()))
 
 
-def _bound_files(inputs: RunInputs) -> dict[str, str]:
+def bound_files(profile: Profile, data_root: Path) -> dict[str, str]:
     """sha256 of the raw bytes of each file that the profile binds, keyed by its path."""
-    profile = inputs.profile
     named = (profile.api_contract, profile.access_policy, profile.item_schema, profile.model_schema)
     bound: dict[str, str] = {}
     for path in sorted({p for p in (*named, *profile.rule_packs) if p}):
         try:
-            bound[path] = "sha256:" + hashlib.sha256((inputs.data_root / path).read_bytes()).hexdigest()
+            bound[path] = "sha256:" + hashlib.sha256((data_root / path).read_bytes()).hexdigest()
         except OSError:
             # The check that needs the file is blocked anyway. The manifest says so honestly.
             bound[path] = "unavailable"
     return bound
 
 
+def input_hashes(
+    profile: Profile, catalogue: Catalogue, testpacks: Mapping[str, TestPack], bound: Mapping[str, str]
+) -> InputHashes:
+    """The digests that the manifest, inputs.json, and the replay input check share (section 10.1)."""
+    return InputHashes(
+        profile=digest(profile),
+        sources=catalogue.sources_hash(),
+        packs=catalogue.pack_hashes(),
+        testpacks={name: digest(pack) for name, pack in sorted(testpacks.items())},
+        bound_files=dict(bound),
+    )
+
+
 def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
     acquired = sorted(r.acquired_at for r in acquirer.records())
-    packs = inputs.catalogue.pack_hashes()
+    hashes = input_hashes(
+        inputs.profile, inputs.catalogue, inputs.testpacks, bound_files(inputs.profile, inputs.data_root)
+    )
     return RunManifest(
         engine_version=__version__,
         dependency_versions=_dependency_versions(),
         image_digest=inputs.image_digest,
         mode=inputs.mode,
         profile_id=inputs.profile.id,
-        profile_hash=digest(inputs.profile),
+        profile_hash=hashes.profile,
         catalogue_hash=inputs.catalogue.hash(),
-        pack_hashes={name: packs[name] for name in sorted(inputs.profile.packs)},
-        testpack_hashes={name: digest(inputs.testpacks[name]) for name in sorted(inputs.profile.testpacks)},
-        sources_hash=inputs.catalogue.sources_hash(),
+        # The selected subsets. The planner refuses a selected pack or test pack that is not loaded.
+        pack_hashes={name: hashes.packs[name] for name in sorted(inputs.profile.packs)},
+        testpack_hashes={name: hashes.testpacks[name] for name in sorted(inputs.profile.testpacks)},
+        sources_hash=hashes.sources,
         ics_hash=digest(inputs.ics),
         ixit_sanitized_hash=digest(sanitized_ixit(inputs.ixit)),
         authorization_ref=inputs.ixit.authorization_ref,
@@ -287,7 +303,7 @@ def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
         else inputs.ixit.trust.policy_version,
         issuer=inputs.issuer,
         limitations=(*_LIMITATIONS, _MODE_LIMITATIONS[inputs.mode]),
-        bound_files=_bound_files(inputs),
+        bound_files=hashes.bound_files,
     )
 
 

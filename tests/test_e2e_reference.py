@@ -20,6 +20,7 @@ import yaml
 from validation import cases
 from validation.rig import FIXTURES, ROOT, AlternateLayout, ReferenceRig
 
+from dppce import cli
 from dppce.evidence.envelope import decision_digest
 from dppce.models import EvidenceEnvelope, ExecutionStatus, Modality, Tri, Verdict
 
@@ -143,14 +144,26 @@ def _data_copy(target: Path) -> Path:
     return target
 
 
-def test_a_changed_bound_file_gives_a_replay_mismatch(tmp_path: Path) -> None:
+def test_a_changed_bound_file_stops_the_replay_before_it_evaluates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Architecture section 10.1: the input check runs before the evaluation (exit code 2)."""
     data = _data_copy(tmp_path / "data")
     with ReferenceRig(tmp_path, data_root=data) as rig:
         run = rig.run()
     contract = data / "profiles" / "battery" / "contracts" / "reference-api.openapi.yaml"
     contract.write_text(contract.read_text(encoding="utf-8") + "# changed after the run\n", encoding="utf-8")
+
+    def never(*_: object) -> None:
+        raise AssertionError("the replay evaluated a changed input")
+
+    monkeypatch.setattr(cli, "evaluate", never)
+    capsys.readouterr()
     code, summary = rig.replay(run)
-    assert (code, summary["match"]) == (4, False), "a changed bound file changes the decision digest"
+    assert (code, summary) == (2, None)
+    error = capsys.readouterr().err
+    assert "REPLAY.INPUT.CHANGED" in error
+    assert "bound file profiles/battery/contracts/reference-api.openapi.yaml" in error
 
 
 def test_a_version_1_run_replays_with_its_own_digest(tmp_path: Path) -> None:

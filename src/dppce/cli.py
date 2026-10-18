@@ -12,8 +12,8 @@ import argparse
 import contextlib
 import json
 import sys
-from collections.abc import Callable
-from dataclasses import asdict
+from collections.abc import Callable, Sequence
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
@@ -25,6 +25,7 @@ from dppce import __version__
 from dppce.adapters.capabilities import manifest as capability_manifest
 from dppce.applicability import ApplicabilityError
 from dppce.catalogue import (
+    Catalogue,
     CatalogueError,
     check_ics,
     load_catalogue,
@@ -51,18 +52,23 @@ from dppce.infrastructure.transport import (
     TransportConfig,
     origin_of,
 )
+from dppce.migrations import MigrationError, migrate
 from dppce.models import (
     ICS,
     IXIT,
     NOT_ACCREDITED,
     EvidenceEnvelope,
     ExecutionMode,
+    InputHashes,
     IssuerStatement,
+    Profile,
+    RunInputsRecord,
+    TestPack,
     TrustBundle,
     Verdict,
 )
 from dppce.orchestrator.plan import PlanError
-from dppce.orchestrator.run import RunInputs, evaluate, make_plan
+from dppce.orchestrator.run import RunInputs, bound_files, evaluate, input_hashes, make_plan
 from dppce.report import render
 from dppce.testdefs import registry
 from dppce.verifier import verify_json
@@ -121,23 +127,25 @@ def _trust(path: Path | None) -> TrustBundle | None:
     return TrustBundle.model_validate(parse_strict(path.read_bytes())) if path else None
 
 
-def _build_inputs(
+@dataclass(frozen=True)
+class LoadedInputs:
+    """The data that a run reads from the data root and the imported files, before any check."""
+
+    root: Path
+    profile: Profile
+    catalogue: Catalogue
+    testpacks: dict[str, TestPack]
+
+
+def _load_inputs(
     *,
     root: Path,
-    mode: ExecutionMode,
     profile_id: str,
-    ics: ICS,
-    ixit: IXIT,
-    evaluation_time: datetime,
-    import_packs: list[Path],
-    extra_packs: list[str],
-    import_testpacks: list[Path],
-    extra_testpacks: list[str],
-    trust: TrustBundle | None,
-    authorization_token: str | None,
-    issuer: IssuerStatement,
-    manual_results: frozenset[str] = frozenset(),
-) -> RunInputs:
+    extra_packs: Sequence[str],
+    extra_testpacks: Sequence[str],
+    import_packs: Sequence[Path],
+    import_testpacks: Sequence[Path],
+) -> LoadedInputs:
     profiles = load_profiles(root)
     if profile_id not in profiles:
         raise UsageError(f"profile '{profile_id}' is not found; available: {', '.join(sorted(profiles))}")
@@ -146,6 +154,27 @@ def _build_inputs(
         profile = profile.model_copy(update={"packs": (*profile.packs, *extra_packs)})
     if extra_testpacks:
         profile = profile.model_copy(update={"testpacks": (*profile.testpacks, *extra_testpacks)})
+    return LoadedInputs(
+        root=root,
+        profile=profile,
+        catalogue=load_catalogue(root, extra_packs=import_packs),
+        testpacks=load_testpacks(root, extra_testpacks=import_testpacks),
+    )
+
+
+def _build_inputs(
+    *,
+    loaded: LoadedInputs,
+    mode: ExecutionMode,
+    ics: ICS,
+    ixit: IXIT,
+    evaluation_time: datetime,
+    trust: TrustBundle | None,
+    authorization_token: str | None,
+    issuer: IssuerStatement,
+    manual_results: frozenset[str] = frozenset(),
+) -> RunInputs:
+    profile, testpacks = loaded.profile, loaded.testpacks
     problems = check_ics(ics, profile)
     if problems:
         raise UsageError("the ICS does not fit the profile: " + " ".join(problems))
@@ -158,7 +187,6 @@ def _build_inputs(
         authorization = validate_authorization(
             authorization_token, trust, evaluation_time, ics.sut.identifier
         )
-    testpacks = load_testpacks(root, extra_testpacks=import_testpacks)
     manual_steps = {
         p.id
         for name in profile.testpacks
@@ -174,11 +202,11 @@ def _build_inputs(
     inputs = RunInputs(
         mode=mode,
         profile=profile,
-        catalogue=load_catalogue(root, extra_packs=import_packs),
+        catalogue=loaded.catalogue,
         testpacks=testpacks,
         ics=ics,
         ixit=ixit,
-        data_root=root,
+        data_root=loaded.root,
         evaluation_time=evaluation_time,
         trust=trust,
         authorization=authorization,
@@ -252,17 +280,20 @@ def _inputs_from_args(
         accreditation_status=args.accreditation_status,
         accreditation_reference=args.accreditation_reference,
     )
-    inputs = _build_inputs(
+    loaded = _load_inputs(
         root=data_root(args.data_root),
-        mode=ExecutionMode(args.mode),
         profile_id=args.profile,
+        extra_packs=args.pack,
+        extra_testpacks=args.testpack,
+        import_packs=args.import_pack,
+        import_testpacks=args.import_testpack,
+    )
+    inputs = _build_inputs(
+        loaded=loaded,
+        mode=ExecutionMode(args.mode),
         ics=load_ics(args.ics),
         ixit=ixit,
         evaluation_time=_time(args.at),
-        import_packs=args.import_pack,
-        extra_packs=args.pack,
-        import_testpacks=args.import_testpack,
-        extra_testpacks=args.testpack,
         trust=trust,
         authorization_token=token,
         issuer=issuer,
@@ -419,24 +450,30 @@ def cmd_run(args: argparse.Namespace) -> int:
         if args.retention_days is None
         else args.retention_days,
     )
-    stored = {
-        "schema_version": "dppce.runinputs/1",
-        "mode": inputs.mode.value,
-        "profile": args.profile,
-        "evaluation_time": utc_stamp(inputs.evaluation_time),
-        "ics": inputs.ics.model_dump(mode="json"),
-        "ixit": ixit.model_dump(mode="json"),
-        "import_packs": [str(p.resolve()) for p in args.import_pack],
-        "extra_packs": list(args.pack),
-        "import_testpacks": [str(p.resolve()) for p in args.import_testpack],
-        "extra_testpacks": list(args.testpack),
-        "trust": trust.model_dump(mode="json") if trust else None,
-        "authorization_token": token,
-        "issuer": inputs.issuer.model_dump(mode="json"),
+    bound = decision.manifest.bound_files
+    if bound is None:  # a new run writes dppce.decision/2, which always holds bound_files
+        raise RuntimeError("the decision body of a new run has no bound_files")
+    record = RunInputsRecord(
+        schema_version="dppce.runinputs/2",
+        mode=inputs.mode,
+        profile=args.profile,
+        evaluation_time=utc_stamp(inputs.evaluation_time),
+        ics=inputs.ics,
+        ixit=ixit,
+        import_packs=tuple(str(p.resolve()) for p in args.import_pack),
+        extra_packs=tuple(args.pack),
+        import_testpacks=tuple(str(p.resolve()) for p in args.import_testpack),
+        extra_testpacks=tuple(args.testpack),
+        trust=trust,
+        authorization_token=token,
+        issuer=inputs.issuer,
         # The test purposes only. The signed results are in the encrypted recording.
-        "manual_results": sorted(inputs.manual_results),
-    }
-    (out / "inputs.json").write_bytes(canonical_bytes(stored) + b"\n")
+        manual_results=tuple(sorted(inputs.manual_results)),
+        data_root=str(inputs.data_root.resolve()),
+        # The models that the run used and the bound-file values of the manifest: no file is read twice.
+        input_hashes=input_hashes(inputs.profile, inputs.catalogue, inputs.testpacks, bound),
+    )
+    (out / "inputs.json").write_bytes(canonical_bytes(record) + b"\n")
     (out / "envelope.json").write_text(envelope.model_dump_json(by_alias=True) + "\n", encoding="utf-8")
     (out / "report.html").write_text(render(envelope), encoding="utf-8")
     digest = decision_digest(decision)
@@ -454,33 +491,51 @@ def cmd_replay(args: argparse.Namespace) -> int:
         # Zero replays would report "match" for an evaluation that never took place.
         raise UsageError("--times must be 1 or more")
     run: Path = args.run
-    stored = parse_strict((run / "inputs.json").read_bytes())
+    record = _run_inputs_record(run / "inputs.json")
     original = EvidenceEnvelope.model_validate(parse_strict((run / "envelope.json").read_bytes()))
     records = read_recording(run / "recording", FileDataKeyProvider(args.keys))
-    try:
-        # Only the reading of the stored fields is guarded: a damaged file is an input error.
-        fields: dict[str, Any] = {
-            "mode": ExecutionMode(stored["mode"]),
-            "profile_id": str(stored["profile"]),
-            "ics": ICS.model_validate(stored["ics"]),
-            "ixit": IXIT.model_validate(stored["ixit"]),
-            "evaluation_time": parse_stamp(stored["evaluation_time"]),
-            "import_packs": [Path(p) for p in stored["import_packs"]],
-            "extra_packs": list(stored["extra_packs"]),
-            # A run recorded before the test-pack import existed imported no test pack.
-            "import_testpacks": [Path(p) for p in stored.get("import_testpacks", [])],
-            "extra_testpacks": list(stored.get("extra_testpacks", [])),
-            "trust": TrustBundle.model_validate(stored["trust"]) if stored["trust"] else None,
-            "authorization_token": stored["authorization_token"],
-            "issuer": IssuerStatement.model_validate(stored["issuer"]),
-            # A run recorded before manual results existed supplied none.
-            "manual_results": frozenset(str(t) for t in stored.get("manual_results", [])),
-        }
-    except (KeyError, TypeError, ValueError) as exc:
-        raise UsageError(
-            f"{run / 'inputs.json'} is not a valid record of run inputs: {type(exc).__name__}"
-        ) from exc
-    inputs = _build_inputs(root=data_root(args.data_root), **fields)
+    if args.data_root is not None:
+        root = data_root(args.data_root)
+    elif record.data_root is not None:
+        root = Path(record.data_root)
+        if not root.is_dir():
+            raise UsageError(
+                f"REPLAY.DATA_ROOT.MISSING: the run recorded the data root {root}, which is not a "
+                "directory; give the data root with --data-root"
+            )
+    else:
+        root = data_root(None)
+    loaded = _load_inputs(
+        root=root,
+        profile_id=record.profile,
+        extra_packs=record.extra_packs,
+        extra_testpacks=record.extra_testpacks,
+        import_packs=[Path(p) for p in record.import_packs],
+        import_testpacks=[Path(p) for p in record.import_testpacks],
+    )
+    # The input check runs before the ICS, the authorization, or the manual results are checked.
+    input_check = "not_run"
+    if record.input_hashes is not None:
+        now = input_hashes(
+            loaded.profile, loaded.catalogue, loaded.testpacks, bound_files(loaded.profile, root)
+        )
+        if changed := _changed_inputs(record.input_hashes, now):
+            raise UsageError(
+                f"REPLAY.INPUT.CHANGED: these inputs differ from the run: {', '.join(changed)}; "
+                f"data root {root}"
+            )
+        input_check = "pass"
+    inputs = _build_inputs(
+        loaded=loaded,
+        mode=record.mode,
+        ics=record.ics,
+        ixit=record.ixit,
+        evaluation_time=parse_stamp(record.evaluation_time),
+        trust=record.trust,
+        authorization_token=record.authorization_token,
+        issuer=record.issuer,
+        manual_results=frozenset(record.manual_results),
+    )
     expected = decision_digest(original.decision)
     digests: list[str] = []
     complete = True
@@ -498,10 +553,46 @@ def cmd_replay(args: argparse.Namespace) -> int:
         "match": match,
         "every_record_replayed": complete,
         "overall": overall.value,
+        "data_root": str(root),
+        "input_check": input_check,
     }
     state = "match" if match else "MISMATCH"
-    _emit(args, summary, f"{args.times} replays: {state}\nexpected {expected}\noverall {overall.value}")
+    checked = (
+        f"inputs: compared with the run (data root {root})"
+        if input_check == "pass"
+        else "inputs: not compared: REPLAY.INPUT.NOT_RECORDED: the record holds no input hashes"
+    )
+    text = f"{checked}\n{args.times} replays: {state}\nexpected {expected}\noverall {overall.value}"
+    _emit(args, summary, text)
     return _VERDICT_EXIT[overall] if match else EXIT_VERIFY
+
+
+def _run_inputs_record(path: Path) -> RunInputsRecord:
+    """Read inputs.json. A version 1 record is migrated. A damaged file is an input error."""
+    try:
+        document = parse_strict(path.read_bytes())
+        if not isinstance(document, dict):
+            raise MigrationError("the document is not a JSON object")
+        return RunInputsRecord.model_validate(migrate("runinputs", document))
+    except (MigrationError, ValidationError, CanonicalizationError) as exc:
+        first = str(exc).splitlines()[0]
+        raise UsageError(f"{path} is not a valid record of run inputs: {first}") from exc
+
+
+def _labelled(hashes: InputHashes) -> dict[str, str]:
+    return {
+        "profile": hashes.profile,
+        "source catalogue": hashes.sources,
+        **{f"requirement pack {name}": value for name, value in hashes.packs.items()},
+        **{f"test pack {name}": value for name, value in hashes.testpacks.items()},
+        **{f"bound file {path}": value for path, value in hashes.bound_files.items()},
+    }
+
+
+def _changed_inputs(recorded: InputHashes, current: InputHashes) -> list[str]:
+    """Each input whose digest differs, or that exists on one side only."""
+    before, after = _labelled(recorded), _labelled(current)
+    return sorted(label for label in before.keys() | after.keys() if before.get(label) != after.get(label))
 
 
 def cmd_report(args: argparse.Namespace) -> int:

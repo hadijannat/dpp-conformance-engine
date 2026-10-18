@@ -7,9 +7,10 @@ check carries a result), and section 11.1 (integers only, one time format).
 
 from __future__ import annotations
 
+import copy
 import inspect
 import itertools
-from typing import Any
+from typing import Any, cast
 
 import jsonschema
 import pytest
@@ -31,6 +32,8 @@ from dppce.models import (
     Const,
     ExecutionMode,
     ExecutionStatus,
+    InputHashes,
+    IssuerStatement,
     Modality,
     Model,
     Not,
@@ -40,6 +43,7 @@ from dppce.models import (
     Requirement,
     ReviewStatus,
     RoleIdentity,
+    RunInputsRecord,
     Scope,
     Stimulus,
     Tri,
@@ -545,6 +549,30 @@ SCHEMA_DOCUMENTS = {
     "plan": INSTANCES["plan"],
     "trust": INSTANCES["trust"],
     "authorization": Authorization.model_validate(AUTHORIZATION),
+    "runinputs": RunInputsRecord(
+        schema_version="dppce.runinputs/2",
+        mode=ExecutionMode.ILLUSTRATIVE,
+        profile=b.PROFILE_ID,
+        evaluation_time="2026-10-13T12:00:00Z",
+        ics=cast(ICS, INSTANCES["ics"]),
+        ixit=cast(IXIT, INSTANCES["ixit"]),
+        import_packs=(),
+        extra_packs=(),
+        import_testpacks=(),
+        extra_testpacks=(),
+        trust=None,
+        authorization_token=None,
+        issuer=IssuerStatement(),
+        manual_results=(),
+        data_root="/synthetic/data-root",
+        input_hashes=InputHashes(
+            profile="sha256:" + "0" * 64,
+            sources="sha256:" + "1" * 64,
+            packs={"pack/a": "sha256:" + "2" * 64},
+            testpacks={"tp/a": "sha256:" + "3" * 64},
+            bound_files={"rules.yaml": "unavailable"},
+        ),
+    ),
 }
 
 
@@ -666,3 +694,53 @@ def test_a_migration_step_that_does_not_advance_the_version_ends_in_an_error(
     monkeypatch.setitem(migrations._STEPS, ("ics", "dppce.ics/0"), dict)
     with pytest.raises(MigrationError, match="does not reach"):
         migrate("ics", OLD)
+
+
+# A dppce.runinputs/1 record as the writer at 6a3ea6c wrote it. 0.1.0rc1 left out the last three keys.
+RUNINPUTS_1: dict[str, Any] = {
+    "schema_version": "dppce.runinputs/1",
+    "mode": "illustrative",
+    "profile": b.PROFILE_ID,
+    "evaluation_time": "2026-10-13T12:00:00Z",
+    "ics": INSTANCES["ics"].model_dump(mode="json"),
+    "ixit": INSTANCES["ixit"].model_dump(mode="json"),
+    "import_packs": [],
+    "extra_packs": [],
+    "trust": None,
+    "authorization_token": None,
+    "issuer": IssuerStatement().model_dump(mode="json"),
+}
+
+
+@pytest.mark.parametrize("rc1", [True, False], ids=["rc1", "main"])
+def test_a_version_1_record_of_run_inputs_gets_null_hashes_and_empty_lists(rc1: bool) -> None:
+    lists = {"import_testpacks": ["/x/tp.yaml"], "extra_testpacks": ["tp/a"], "manual_results": ["T-1"]}
+    old = RUNINPUTS_1 if rc1 else {**RUNINPUTS_1, **lists}
+    before = copy.deepcopy(old)
+    new = migrate("runinputs", old)
+    assert old == before, "the input is not changed"
+    expected = {key: [] for key in lists} if rc1 else lists
+    assert new == {
+        **old,
+        **expected,
+        "schema_version": "dppce.runinputs/2",
+        "data_root": None,
+        "input_hashes": None,
+    }
+    record = RunInputsRecord.model_validate(new)
+    assert (record.data_root, record.input_hashes) == (None, None)
+    assert migrations.CURRENT["runinputs"] == "dppce.runinputs/2"
+
+
+def test_a_version_1_record_that_holds_a_version_2_field_is_refused() -> None:
+    with pytest.raises(MigrationError, match="data_root"):
+        migrate("runinputs", {**RUNINPUTS_1, "data_root": "/x"})
+    with pytest.raises(MigrationError, match="no migration"):
+        migrate("runinputs", {**RUNINPUTS_1, "schema_version": "dppce.runinputs/9"})
+
+
+def test_a_version_2_record_of_run_inputs_has_no_default() -> None:
+    document = SCHEMA_DOCUMENTS["runinputs"].model_dump(mode="json")
+    for name in document:
+        with pytest.raises(ValidationError, match=name):
+            RunInputsRecord.model_validate({k: v for k, v in document.items() if k != name})

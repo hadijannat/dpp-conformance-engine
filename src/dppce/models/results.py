@@ -18,8 +18,11 @@ from dppce.models.base import (
     Tri,
     Verdict,
 )
-from dppce.models.declarations import SutIdentity
+from dppce.models.declarations import ICS, IXIT, SutIdentity
 from dppce.models.testing import Conflict, Exclusion, TestResult
+from dppce.models.trust import TrustBundle
+
+BoundFileHash = Annotated[str, Field(pattern=r"^(sha256:[0-9a-f]{64}|unavailable)$")]
 
 
 class PathResult(Model):
@@ -113,12 +116,10 @@ class RunManifest(Model):
     trust_policy_version: str
     issuer: IssuerStatement = IssuerStatement()
     limitations: tuple[str, ...]
-    bound_files: dict[str, Annotated[str, Field(pattern=r"^(sha256:[0-9a-f]{64}|unavailable)$")]] | None = (
-        Field(
-            default=None,
-            description="sha256 of the raw bytes of each file that the profile binds, keyed by its path "
-            "under the data root. Required in dppce.decision/2. Absent in dppce.decision/1.",
-        )
+    bound_files: dict[str, BoundFileHash] | None = Field(
+        default=None,
+        description="sha256 of the raw bytes of each file that the profile binds, keyed by its path "
+        "under the data root. Required in dppce.decision/2. Absent in dppce.decision/1.",
     )
 
     @model_serializer(mode="wrap")
@@ -195,6 +196,49 @@ class EvidenceEnvelope(Model):
     # Optional status and timestamp evidence, added by separately tested profiles.
     status_evidence: tuple[str, ...] = ()
     timestamp_evidence: tuple[str, ...] = ()
+
+
+class InputHashes(Model):
+    """Digests of the inputs that a replay reads again: the profile, the sources, every loaded pack
+    and test pack, and the bound files.
+    """
+
+    profile: str
+    sources: str
+    # Every loaded pack and test pack, shipped or imported, selected or not.
+    packs: dict[str, str]
+    testpacks: dict[str, str]
+    bound_files: dict[str, BoundFileHash]
+
+
+class RunInputsRecord(Model):
+    """The inputs of one run, written to inputs.json so that a replay can rebuild them.
+
+    It is not signed or encrypted. No field has a default: a writer states each value, and
+    ``null`` is written explicitly.
+    """
+
+    schema_version: Literal["dppce.runinputs/2"]
+    mode: ExecutionMode
+    profile: str
+    evaluation_time: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+    ics: ICS
+    ixit: IXIT
+    import_packs: tuple[str, ...]
+    extra_packs: tuple[str, ...]
+    import_testpacks: tuple[str, ...]
+    extra_testpacks: tuple[str, ...]
+    trust: TrustBundle | None
+    authorization_token: str | None
+    issuer: IssuerStatement
+    manual_results: tuple[str, ...]
+    data_root: str | None = Field(
+        description="Absolute path of the data root of the run. null only in a record migrated from "
+        "dppce.runinputs/1."
+    )
+    input_hashes: InputHashes | None = Field(
+        description="null only in a record migrated from dppce.runinputs/1."
+    )
 
 
 class Capability(Model):

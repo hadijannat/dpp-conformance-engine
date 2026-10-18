@@ -6,6 +6,8 @@ never guesses how to read it.
 
 A decision body has no step. It is signed, so it is never rewritten: the verifier reads
 ``dppce.decision/1`` and ``dppce.decision/2`` as written, and a new run writes version 2.
+
+The record of run inputs (``inputs.json``) has one step, from ``dppce.runinputs/1`` to version 2.
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from copy import deepcopy
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-CURRENT: dict[str, str] = {"ics": "dppce.ics/1"}
+CURRENT: dict[str, str] = {"ics": "dppce.ics/1", "runinputs": "dppce.runinputs/2"}
 
 Document = dict[str, Any]
 
@@ -49,7 +51,27 @@ def _ics_0_to_1(document: Document) -> Document:
     return out
 
 
-_STEPS: dict[tuple[str, str], Callable[[Document], Document]] = {("ics", "dppce.ics/0"): _ics_0_to_1}
+def _runinputs_1_to_2(document: Document) -> Document:
+    """Version 1 has no data root and no input hashes.
+
+    0.1.0rc1 also wrote no test-pack and no manual-result fields, because it imported, selected,
+    and supplied none. A replay of the result compares no input hashes (architecture section 10.1).
+    """
+    if "data_root" in document or "input_hashes" in document:
+        raise MigrationError("a dppce.runinputs/1 record holds no data_root and no input_hashes")
+    out = deepcopy(document)
+    for name in ("import_testpacks", "extra_testpacks", "manual_results"):
+        out.setdefault(name, [])
+    out["data_root"] = None
+    out["input_hashes"] = None
+    out["schema_version"] = "dppce.runinputs/2"
+    return out
+
+
+_STEPS: dict[tuple[str, str], Callable[[Document], Document]] = {
+    ("ics", "dppce.ics/0"): _ics_0_to_1,
+    ("runinputs", "dppce.runinputs/1"): _runinputs_1_to_2,
+}
 
 
 def migrate(kind: str, document: Document) -> Document:
