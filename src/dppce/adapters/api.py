@@ -13,6 +13,7 @@ import unicodedata
 from typing import Any, Literal, cast, get_args
 from urllib.parse import unquote, urlsplit
 
+from jsonschema import SchemaError
 from pydantic import Field
 
 from dppce.adapters.common import (
@@ -107,7 +108,8 @@ def _responses(responses: Any) -> dict[str, dict[str, Any]] | CheckOutcome:
         status = str(key) if type(key) is int else key
         if not (isinstance(status, str) and _STATUS.fullmatch(status)) or status in found:
             return outside
-        if not isinstance(declared, dict):
+        # A reference response holds no content key, so it would read as "declares no body".
+        if not isinstance(declared, dict) or "$ref" in declared:
             return outside
         content = declared.get("content", {})
         if not isinstance(content, dict):
@@ -255,7 +257,8 @@ def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch p
     declared = responses.get(str(record.status))
     if declared is None:
         return result(False, "API.CONTRACT.STATUS", f"The contract does not declare status {record.status}.")
-    if "content" not in declared:
+    # An empty content map declares no body, like an absent one.
+    if not declared.get("content"):
         if summary["media_type"] or record.body:
             return _unsupported(
                 f"The contract declares no content for status {record.status}, and the response has one."
@@ -275,7 +278,11 @@ def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch p
             "API.CONTRACT.OK",
             "The status and the media type match the contract. It declares no schema.",
         )
-    check = validator({**schema, "components": document.get("components", {})})
+    malformed = "The contract schema is not a valid JSON Schema, or a local reference does not resolve."
+    try:
+        check = validator({**schema, "components": document.get("components", {})})
+    except SchemaError:
+        return _unsupported(malformed)
     if check is None:
         return _unsupported("The contract uses a reference that is not local to the document.")
     try:
@@ -283,7 +290,10 @@ def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch p
         body = parse_strict(record.body, decimals=True)
     except CanonicalizationError:
         return result(False, "API.RESPONSE.NOT_JSON", "The response body is not JSON.")
-    errors = schema_errors(check, body)
+    try:
+        errors = schema_errors(check, body)
+    except SchemaError:
+        return _unsupported(malformed)
     if errors is None:
         return blocked(
             "API.RESPONSE.TOO_DEEP", "The response body is nested too deeply to validate. It is not judged."

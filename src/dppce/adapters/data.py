@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Literal, Self
 
+from jsonschema import SchemaError
 from pydantic import Field, ValidationError, model_validator
 
 from dppce.adapters.common import (
@@ -138,7 +139,14 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
         schema = load_data(ctx.data_root / path)
     except CatalogueError:
         return blocked("DATA.SCHEMA.MISSING", f"The pinned {kind}-level schema cannot be read.")
-    check = validator(schema)
+    malformed = blocked(
+        "DATA.SCHEMA.MALFORMED",
+        "The pinned schema is not a valid JSON Schema, or a local reference does not resolve.",
+    )
+    try:
+        check = validator(schema)
+    except SchemaError:
+        return malformed
     if check is None:
         return blocked(
             "DATA.SCHEMA.NOT_LOCAL", "The schema uses a reference that is not local. Nothing is fetched."
@@ -150,7 +158,10 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
     document, record, problem = _fetch_document(ctx, kind, decimals=True)
     if problem is not None or document is None or record is None:
         return problem or blocked("DATA.NO_TARGET", "No document is available.")
-    errors = schema_errors(check, document)
+    try:
+        errors = schema_errors(check, document)
+    except SchemaError:
+        return malformed
     if errors is None:
         return blocked(
             "DATA.RESPONSE.TOO_DEEP", "The document is nested too deeply to validate. It is not judged."

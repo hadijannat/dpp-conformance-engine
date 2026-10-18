@@ -8,8 +8,10 @@ from datetime import UTC, datetime
 STAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 # Explicit ASCII digits: strptime reads any Unicode digit and accepts unpadded fields.
 _STAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+# RFC 3339 section 5.6 lets T and Z be lower case. IGNORECASE affects nothing else here.
 _RFC3339 = re.compile(
-    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})"
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})",
+    re.IGNORECASE,
 )
 
 
@@ -34,7 +36,7 @@ def parse_instant(text: str) -> datetime:
     """
     if not _RFC3339.fullmatch(text):
         raise ValueError("not an RFC 3339 date-time with an offset")
-    return datetime.fromisoformat(text)
+    return datetime.fromisoformat(text.upper())
 
 
 class SystemClock:

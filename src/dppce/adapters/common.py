@@ -8,14 +8,16 @@ from __future__ import annotations
 import io
 import re
 import warnings
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from decimal import Decimal
 from typing import Any, Final
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import jsonschema
+from jsonschema.exceptions import SchemaError, ValidationError
 from jsonschema.protocols import Validator
 from referencing import Registry
+from referencing.exceptions import Unresolvable
 
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record, Request
@@ -364,9 +366,39 @@ def _is_integer(_: object, value: object) -> bool:
     return isinstance(value, int) or (isinstance(value, float) and value.is_integer())
 
 
+def _scaled(number: int | float | Decimal) -> tuple[int, int]:
+    """(coefficient, exponent) with abs(number) == coefficient * 10**exponent, exactly."""
+    if isinstance(number, int):
+        return abs(number), 0
+    _, digits, exponent = Decimal(repr(number) if isinstance(number, float) else number).as_tuple()
+    # A Decimal with exponent 0 converts to int without the digit limit of int(str).
+    return int(Decimal((0, digits, 0))), int(exponent)
+
+
+def _multiple_of(validator: Validator, divisor: Any, instance: Any, schema: Any) -> Iterator[ValidationError]:
+    """multipleOf in integer arithmetic. The jsonschema default divides a Decimal under a
+    28-digit context and raises for 1e30, and a Fraction of 1e999999999 takes seconds."""
+    if not validator.is_type(instance, "number"):
+        return
+    value, shift = _scaled(instance)
+    step, divisor_shift = _scaled(divisor)
+    shift -= divisor_shift
+    if value == 0:
+        return
+    if shift >= 0:
+        # value * 10**shift / step is an integer: the power stays modulo step.
+        multiple = value * pow(10, shift, step) % step == 0
+    else:
+        # value / (step * 10**-shift): a denominator above the value leaves a fraction.
+        multiple = -shift < value.bit_length() and value % (step * 10**-shift) == 0
+    if not multiple:
+        yield ValidationError(f"The value is not a multiple of {divisor}.")
+
+
 # Documents are parsed with exact decimals, so a value just above a bound cannot round onto it.
 _Validator: Final[type[Validator]] = jsonschema.validators.extend(  # type: ignore[no-untyped-call]  # jsonschema ships extend() without annotations
     jsonschema.Draft202012Validator,
+    validators={"multipleOf": _multiple_of},
     type_checker=jsonschema.Draft202012Validator.TYPE_CHECKER.redefine_many(
         {"number": _is_number, "integer": _is_integer}
     ),
@@ -403,6 +435,8 @@ def unassertable_formats(schema: Any) -> list[str]:
 def validator(schema: Mapping[str, Any]) -> Validator | None:
     """Build a validator that never fetches anything. Returns None if the schema has a non-local ``$ref``.
 
+    Raises SchemaError for a schema that is not valid JSON Schema 2020-12, also in
+    ``components.schemas``: such a schema would raise or blame the document for its own defect.
     The validator asserts ``format``. Give it documents parsed with exact decimals.
     """
 
@@ -418,6 +452,11 @@ def validator(schema: Mapping[str, Any]) -> Validator | None:
 
     if not local(schema):
         return None
+    # check_schema does not read the OpenAPI "components" keyword, so each component is checked.
+    components = schema.get("components")
+    parts = components.get("schemas") if isinstance(components, Mapping) else None
+    for part in [schema, *(parts.values() if isinstance(parts, Mapping) else ())]:
+        _Validator.check_schema(part)
     # An empty registry has no retrieval function, so no reference can leave the document.
     return _Validator(_exact(dict(schema)), registry=Registry(), format_checker=_FORMATS)
 
@@ -426,7 +465,8 @@ def schema_errors(check: Validator, document: Any) -> list[JsonValue] | None:
     """Error locations and keywords. Values are left out on purpose.
 
     None if the validator cannot judge the document: a recursive schema follows a deep body
-    with Python recursion. A body that the engine cannot judge never passes.
+    with Python recursion. A body that the engine cannot judge never passes. A local reference
+    that does not resolve is a defect of the schema: SchemaError.
     """
     try:
         errors = sorted(
@@ -434,6 +474,8 @@ def schema_errors(check: Validator, document: Any) -> list[JsonValue] | None:
         )
     except RecursionError:
         return None
+    except Unresolvable as exc:
+        raise SchemaError(f"a local reference does not resolve: {exc}") from exc
     return [
         {"path": "/" + "/".join(map(str, e.absolute_path)), "keyword": str(e.validator)} for e in errors[:50]
     ]

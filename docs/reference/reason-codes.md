@@ -90,6 +90,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `DATA.RULES.NONE_APPLIED` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
 | `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass |
 | `DATA.SCHEMA.INVALID` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | fail; inconclusive under a non-default verdict rule |
+| `DATA.SCHEMA.MALFORMED` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.SCHEMA.MISSING` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.SCHEMA.NOT_LOCAL` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.SCHEMA.OK` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | pass |

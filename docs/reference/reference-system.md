@@ -152,10 +152,10 @@ Item-level data and model-level data are separate documents with separate schema
 that version. Declared update rule of the reference system: a change of content needs a higher
 version number and a later or equal `updated_at`. The last entry describes the current document.
 The check compares `updated_at` values as instants. Each value must be an RFC 3339 date-time with
-an offset. A missing or other value breaks the rule. If the current passport has no canonical
-form, for example because it holds a decimal number, the digest cannot be compared. The check
-then gives `blocked` with `PERSISTENCE.DIGEST.NOT_COMPARABLE`, unless another part of the rule
-already fails.
+an offset. `T` and `Z` may be lower case. A missing or other value breaks the rule. If the
+current passport has no canonical form, for example because it holds a decimal number, the
+digest cannot be compared. The check then gives `blocked` with
+`PERSISTENCE.DIGEST.NOT_COMPARABLE`, unless another part of the rule already fails.
 
 ### 4.4 Registry record (`/registry/{id}`)
 
@@ -362,6 +362,7 @@ for these features:
 - a response key that is not a three-digit status, for example `default` or `2XX`;
 - a media type key with a range, a parameter, or an upper-case letter;
 - a `responses`, response, `content`, or media entry that is not a mapping, and a boolean schema;
+- a response object with `$ref`;
 - a `format` value that the engine cannot assert. The engine asserts `uri`, `date`, `email`,
   `idn-email`, `ipv4`, `ipv6`, and `uuid`. The set is fixed, so an installed package cannot change it.
 
@@ -372,8 +373,10 @@ After the fetch:
 - The judged fetch must not follow a redirect. A redirect gives `blocked` with
   `API.CONTRACT.PATH_MISMATCH`: the transport does not record the status of a redirect hop, and
   the body belongs to another URL.
-- A declared status without `content` passes only if the response has no media type and no body.
-  Otherwise the check gives `unsupported`.
+- A declared status without `content`, or with an empty `content` map, passes only if the
+  response has no media type and no body. Otherwise the check gives `unsupported`.
+- A schema that is not valid JSON Schema 2020-12, also in `components.schemas`, or a local
+  reference that does not resolve, gives `unsupported`.
 - The body may be any JSON value. A body that is not strict JSON gives `API.RESPONSE.NOT_JSON`.
   Numbers are exact decimals, so a value cannot round onto a schema bound.
 - A body that is nested too deeply for the validator gives `blocked` with `API.RESPONSE.TOO_DEEP`.
@@ -538,7 +541,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
-| `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP` |
+| `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP`. A schema that is not valid JSON Schema 2020-12, or a local reference that does not resolve: `blocked`, `DATA.SCHEMA.MALFORMED` |
 | `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |

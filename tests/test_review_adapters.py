@@ -221,14 +221,24 @@ def test_api_common_3_an_unquoted_status_key_is_the_same_status(tmp_path: Path) 
     assert (outcome.passed, outcome.reason_code) == (True, "API.CONTRACT.OK")
 
 
-def test_api_common_3_a_status_without_content_needs_no_media_type(tmp_path: Path) -> None:
-    write_data(tmp_path, contract=_item_get({"responses": {"204": {"description": "none"}}}))
+# fix-check-3: an empty content map declares no body, like an absent one.
+NO_CONTENT = [{"description": "none"}, {"description": "none", "content": {}}]
+
+
+@pytest.mark.parametrize("declared", NO_CONTENT, ids=["absent", "empty"])
+def test_api_common_3_a_status_without_content_needs_no_media_type(
+    declared: dict[str, Any], tmp_path: Path
+) -> None:
+    write_data(tmp_path, contract=_item_get({"responses": {"204": declared}}))
     outcome = run(context(tmp_path, "api.contract", acquirer=Answer(204, None, b"")))  # type: ignore[arg-type]  # an acquirer double
     assert (outcome.passed, outcome.reason_code) == (True, "API.CONTRACT.OK")
 
 
-def test_api_common_3_a_status_without_content_and_a_body_is_not_judged(tmp_path: Path) -> None:
-    write_data(tmp_path, contract=_item_get({"responses": {"204": {"description": "none"}}}))
+@pytest.mark.parametrize("declared", NO_CONTENT, ids=["absent", "empty"])
+def test_api_common_3_a_status_without_content_and_a_body_is_not_judged(
+    declared: dict[str, Any], tmp_path: Path
+) -> None:
+    write_data(tmp_path, contract=_item_get({"responses": {"204": declared}}))
     outcome = run(context(tmp_path, "api.contract", acquirer=Answer(204, "application/json", b"{}")))  # type: ignore[arg-type]  # an acquirer double
     assert outcome.passed is not True
 
@@ -499,8 +509,11 @@ def test_data_lifecycle_7_a_200_body_that_is_not_json_is_still_not_json(tmp_path
         ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00Z"),
         ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00+01:00"),
         ("2026-01-01T10:00:00Z", "2026-01-01T10:00:00.123456789Z"),
+        # fix-check-5: RFC 3339 section 5.6 allows a lower-case t and z.
+        ("2026-10-18T08:00:00Z", "2026-10-18T08:00:00z"),
+        ("2026-10-18T08:00:00Z", "2026-10-18t08:00:01Z"),
     ],
-    ids=["forward", "fractional-forward", "equal", "offset-equal", "nanoseconds"],
+    ids=["forward", "fractional-forward", "equal", "offset-equal", "nanoseconds", "lower-z", "lower-t"],
 )
 def test_data_lifecycle_2_a_later_or_equal_update_time_passes(
     stamps: tuple[str, str], tmp_path: Path
@@ -974,3 +987,114 @@ def test_server_clock_fixes_2_a_complete_body_ending_in_a_credential_head_is_kep
     record = engine.fetch(Request("GET", f"{server.origin}/ok"))
     assert record.truncated is False
     assert record.body == body, "only a body that the limit cut may lose a credential head"
+
+
+# -- fix-check: the check of the fixes of 2026-10-18 -------------------------------------------------
+
+
+def test_fix_check_1_a_response_reference_is_unsupported(tmp_path: Path) -> None:
+    # A reference response has no content key. It must not read as "declares no body".
+    contract = _item_get(
+        {"responses": {"200": {"$ref": "#/components/responses/Item"}}},
+        components={
+            "responses": {
+                "Item": {"content": {"application/json": {"schema": {"type": "object", "required": ["id"]}}}}
+            }
+        },
+    )
+    write_data(tmp_path, contract=contract)
+    for acquirer in (Answer(200, None, b""), Answer(200, "application/json", b"{}")):
+        ctx = context(tmp_path, "api.contract", acquirer=acquirer)  # type: ignore[arg-type]  # an acquirer double
+        outcome = run(ctx)
+        assert (outcome.status, outcome.passed, outcome.reason_code) == (
+            ExecutionStatus.UNSUPPORTED,
+            None,
+            "API.CONTRACT.UNSUPPORTED_FEATURE",
+        )
+        assert sent(ctx) == 0, "the contract is checked before anything is fetched"
+
+
+MULTIPLE_OF = [
+    (2, b'{"x": 1e30}', True),
+    (0.01, b'{"x": 1e30}', True),
+    (0.5, b'{"x": 12345678901234567890123456789.5}', True),
+    (0.1, b'{"x": 0.3}', True),
+    (2, b'{"x": 1e999999999}', True),
+    (7, b'{"x": 1e30}', False),
+    (0.1, b'{"x": 0.35}', False),
+    (2, b'{"x": 1e-999999999}', False),
+    (0.01, b'{"x": 12345678901234567890123456789.001}', False),
+]
+
+
+@pytest.mark.parametrize(("divisor", "body", "multiple"), MULTIPLE_OF)
+def test_fix_check_2_api_contract_judges_multiple_of_exactly(
+    divisor: Any, body: bytes, multiple: bool, tmp_path: Path
+) -> None:
+    schema = {"properties": {"x": {"type": "number", "multipleOf": divisor}}}
+    write_data(tmp_path, contract=_with_schema(schema))
+    outcome = run(context(tmp_path, "api.contract", acquirer=Canned(body)))
+    assert (outcome.passed, outcome.reason_code) == (
+        (True, "API.CONTRACT.OK") if multiple else (False, "API.CONTRACT.SCHEMA")
+    )
+
+
+@pytest.mark.parametrize(("divisor", "body", "multiple"), MULTIPLE_OF)
+def test_fix_check_2_data_jsonschema_judges_multiple_of_exactly(
+    divisor: Any, body: bytes, multiple: bool, tmp_path: Path
+) -> None:
+    write_data(tmp_path)
+    schema = {"properties": {"x": {"type": "number", "multipleOf": divisor}}}
+    (tmp_path / "schema.json").write_text(json.dumps(schema), encoding="utf-8")
+    outcome = run(context(tmp_path, "data.jsonschema", acquirer=Canned(body)))
+    assert (outcome.passed, outcome.reason_code) == (
+        (True, "DATA.SCHEMA.OK") if multiple else (False, "DATA.SCHEMA.INVALID")
+    )
+
+
+MALFORMED = [
+    {"type": 5},
+    {"type": "string", "pattern": "["},
+    {"type": "object", "properties": []},
+]
+
+
+@pytest.mark.parametrize("schema", [*MALFORMED, {"$ref": "#/components/schemas/Nope"}])
+def test_fix_check_4_api_contract_with_a_malformed_schema_is_unsupported(schema: Any, tmp_path: Path) -> None:
+    write_data(tmp_path, contract=_with_schema(schema))
+    outcome = run(context(tmp_path, "api.contract", acquirer=Canned(b'"x"')))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.UNSUPPORTED,
+        None,
+        "API.CONTRACT.UNSUPPORTED_FEATURE",
+    )
+
+
+def test_fix_check_4_a_malformed_component_schema_is_unsupported(tmp_path: Path) -> None:
+    # check_schema does not descend into components, so each component schema is checked too.
+    contract = _item_get(
+        {
+            "responses": {
+                "200": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/A"}}}}
+            }
+        },
+        components={"schemas": {"A": {"type": "object", "properties": []}}},
+    )
+    write_data(tmp_path, contract=contract)
+    outcome = run(context(tmp_path, "api.contract", acquirer=Canned(b'"x"')))
+    assert (outcome.status, outcome.reason_code) == (
+        ExecutionStatus.UNSUPPORTED,
+        "API.CONTRACT.UNSUPPORTED_FEATURE",
+    )
+
+
+@pytest.mark.parametrize("schema", [*MALFORMED, {"$ref": "#/$defs/Nope"}])
+def test_fix_check_4_data_jsonschema_with_a_malformed_schema_is_blocked(schema: Any, tmp_path: Path) -> None:
+    write_data(tmp_path)
+    (tmp_path / "schema.json").write_text(json.dumps(schema), encoding="utf-8")
+    outcome = run(context(tmp_path, "data.jsonschema", acquirer=Canned(b'{"id": "x"}')))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "DATA.SCHEMA.MALFORMED",
+    )

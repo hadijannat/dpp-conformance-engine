@@ -12,7 +12,7 @@ Prerequisites: read `docs/explanation/architecture.md` sections 8 and 9, and
 | --- | --- |
 | Date | 2026-10-18 |
 | Commit reviewed | `5aaca24`. The skeptics ran on the local `main` at `6cbd042`. |
-| Fixes | `58f15d7..2da2f4b` on branch `worktree-wf_46368434-d41-36` |
+| Fixes | `58f15d7..2da2f4b` on branch `worktree-wf_46368434-d41-36`, and the commit "fix: apply adapter review check findings" that follows them (see "Check of the fixes") |
 | Reviewers | AI agents. Finders, reproduce skeptics, and the fixer are AI agents. None of them wrote the code under review. |
 | Nature | **An agent review. It is not an audit. No person has reviewed this record.** |
 
@@ -65,9 +65,10 @@ code before a fix already held the fixes of the earlier rows.
 | `742f0e0` | credential scrub | 7 failed, 1 passed |
 | `28eb959` | validation controls | 4 failed |
 | `2da2f4b` | fixed format set, nanosecond fraction | 2 failed, 4 passed |
+| "fix: apply adapter review check findings" | check of the fixes: fix-check-1 to fix-check-5 | 27 failed, 12 passed |
 
 The passed tests are controls. They fix behavior that must stay, for example a real status
-mismatch that still fails. In the last row, three unit tests failed because the new helper did
+mismatch that still fails. In the `28eb959` row, three unit tests failed because the new helper did
 not exist yet. The fourth test reproduces the defect: `validation.run.main()` returned 0 with a
 control step that stopped completing.
 
@@ -109,7 +110,7 @@ control step that stopped completing.
 
 Some findings overlap. data-lifecycle-9 is api-common-8 for `data.jsonschema`.
 server-clock-fixes-4 is data-lifecycle-2, and server-clock-fixes-6 is data-lifecycle-10.
-identifier-carrier-1 and identifier-carrier-3 share one fix. Each finding has a test case.
+identifier-carrier-1 and identifier-carrier-3 share one fix. Each confirmed finding has a test case.
 Overlapping findings share one test.
 
 ## Evidence and handling
@@ -192,6 +193,46 @@ Overlapping findings share one test.
   contract defines `AAS.VALID` as "the wrapped validator accepts the file". The message states
   the limit. The code was not changed. A stricter rule needs a contract decision of the owner.
 
+## Check of the fixes
+
+An agent check of the fixes `58f15d7..2da2f4b` found six more defects. The check is an agent
+review too. It is not an audit. The fixer added a reproducing test for each code finding first
+and ran it against `c9bcbf4` (red: see the last row of "Red runs"). The test names start with the
+finding identifier, or the case carries it in a comment.
+
+| Id | Severity | File | Outcome | Handled |
+| --- | --- | --- | --- | --- |
+| fix-check-1 | must fix | `api.py` | confirmed | fixed |
+| fix-check-2 | should fix | `common.py` | confirmed | fixed |
+| fix-check-3 | should fix | `api.py` | confirmed | fixed |
+| fix-check-4 | should fix | `common.py` | confirmed | fixed |
+| fix-check-5 | should fix | `clock.py` | confirmed | fixed in part |
+| fix-check-6 | should fix | this record, `docs/readiness.md` | confirmed by command | fixed |
+
+- **fix-check-1.** A response object with `$ref` has no `content` key, so the fix of api-common-3
+  read it as "declares no body". An empty answer then passed. Now a response with `$ref` is
+  `unsupported` before the fetch.
+- **fix-check-2.** With exact decimals, the `multipleOf` of jsonschema raised
+  `decimal.InvalidOperation` for a body value such as `1e30`. Now `multipleOf` uses integer
+  arithmetic. It never raises, and a large exponent costs no more than a short one.
+- **fix-check-3.** A status with an empty `content` map gave a false fail on an empty answer.
+  Now an empty map counts as no content.
+- **fix-check-4.** A schema that is not valid JSON Schema raised an exception or blamed the
+  document. Now the validator checks the schema and each schema in `components.schemas`. A local
+  reference that does not resolve counts the same. `api.contract` gives `unsupported`.
+  `data.jsonschema` gives `blocked` with the new code `DATA.SCHEMA.MALFORMED`.
+- **fix-check-5.** A lower-case `t` or `z` gave a false fail. Now both are accepted. A leap
+  second (`:60`) still fails the declared rule: `datetime` cannot hold it. Mapping it to `:59`
+  can hide a step back. A `blocked` outcome needs a change of `lifecycle.py`. See the open
+  questions.
+- **fix-check-6.** The "Red runs" text named the last row for the `28eb959` row. "Each finding
+  has a test case" was not true for the refuted data-lifecycle-11. `docs/readiness.md` still
+  stated two review rounds. A `grep` and `git diff` confirmed each statement. The text is now
+  corrected.
+
+The extra `ArithmeticError` guard in `schema_errors` that the check proposed was not added.
+After the fix of fix-check-2, no other keyword of the validator does arithmetic on a Decimal.
+
 ## Contract changes in this round
 
 The owner authorized T1 contract edits on 2026-10-18. These edits were made:
@@ -208,6 +249,11 @@ The owner authorized T1 contract edits on 2026-10-18. These edits were made:
 - `profiles/battery/schemas/item.schema.json` and
   `profiles/battery/contracts/reference-api.openapi.yaml`: `\d` became `[0-9]`.
 
+The check of the fixes added these edits to `docs/reference/reference-system.md`: a response
+with `$ref`, an empty `content` map, a malformed schema, `DATA.SCHEMA.MALFORMED`, and a
+lower-case `T` and `Z`. `docs/reference/reason-codes.md` was regenerated with
+`uv run just reference`. The owner has not reviewed these edits.
+
 ## Open questions for the owner
 
 - A 404 on the version history now gives `blocked`. A missing history could instead be a fail.
@@ -215,6 +261,10 @@ The owner authorized T1 contract edits on 2026-10-18. These edits were made:
 - JSON Schema `pattern` uses Python `re`, not ECMA-262. `$` also matches before a final line
   feed. Only the pinned patterns were changed.
 - A credential echoed in base64 or in a mix of forms is still not recognized.
+- A leap second (`:60`) in `updated_at` fails the declared rule. The owner can accept that as
+  the declared profile in section 4.3, or ask for a `blocked` outcome in `lifecycle.py`.
+- The brief permits two agent review rounds. This review and its check came after those two.
+  The owner has not stated how they relate to that limit.
 
 ## Transport over TLS
 
