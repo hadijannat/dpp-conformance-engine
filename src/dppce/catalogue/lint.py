@@ -170,8 +170,6 @@ _YEAR_TOKEN = re.compile(r"(?<![0-9])(?:19|20)[0-9]{2}(?![0-9])")
 _EIGHT_DIGITS = re.compile(r"(?<![0-9])[0-9]{8}(?![0-9])")
 _DAY_MONTH_YEAR = re.compile(r"(?<![0-9])[0-9]{1,2}\.[0-9]{1,2}\.((?:19|20)[0-9]{2})(?![0-9])")
 _ISO_FORM = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
-# The same digit class as _ISO_DATE and the evaluator, so a full-width-digit literal is selected.
-_DATE_LITERAL = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def _version_tokens(text: str) -> set[str]:
@@ -226,7 +224,9 @@ def _date_literals(expr: Expr) -> list[str]:
     operands = [
         o for c in _comparisons(expr) for o in (c.value if isinstance(c.value, tuple) else (c.value,))
     ]
-    return [o for o in operands if isinstance(o, str) and _DATE_LITERAL.fullmatch(o)]
+    # The CAT013 selector: any literal that the evaluator treats as a date, including full-width
+    # digits and a trailing newline, so each one must be a recorded date.
+    return [o for o in operands if isinstance(o, str) and _ISO_DATE.match(o)]
 
 
 def _legal_date_findings(requirement: Requirement, source: SourceRecord, where: str) -> list[Finding]:

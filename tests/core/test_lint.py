@@ -451,6 +451,7 @@ def test_CAT022_a_legal_date_literal_is_a_recorded_applicable_date() -> None:
     assert brief(legal_dates("2027-02-19", where="declared_support")) == [("CAT022", "error", "pack/a/R-1")]
     assert brief(legal_dates(["2027-02-18", "2027-02-19"], op="in")) == [("CAT022", "error", "pack/a/R-1")]
     assert brief(legal_dates("2027-02-30")) == [("CAT022", "error", "pack/a/R-1")]
+    assert brief(legal_dates("2027-02-19\n")) == [("CAT022", "error", "pack/a/R-1")]
     full_width_year = "".join(chr(0xFF10 + int(d)) for d in "2027")
     assert "CAT022" in codes(legal_dates(f"{full_width_year}-02-19")), "full-width digits"
     assert legal_dates("2027-02-19", authority_class="illustrative") == []
