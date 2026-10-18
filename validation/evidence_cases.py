@@ -9,7 +9,14 @@ from __future__ import annotations
 import base64
 import json
 from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any
+
+from dppce.evidence.envelope import sign_envelope
+from dppce.evidence.jws import LocalSigner
+from dppce.evidence.status import encode_list, sign_status_list
+from dppce.models import EvidenceEnvelope, StatusList, StatusReference, TrustBundle, TrustedKey
 
 Tamper = Callable[[dict[str, Any]], None]
 
@@ -83,3 +90,59 @@ TAMPER: dict[str, Tamper] = {
 }
 # These two need a different key or a different evaluation time, not a changed document.
 NEEDS_SETUP = ("untrusted_key", "expired_key")
+
+
+@dataclass(frozen=True)
+class Subject:
+    """What the verifier gets for one evidence fault."""
+
+    document: dict[str, Any]
+    trust: TrustBundle
+    status_list: bytes | None = None
+
+
+Setup = Callable[[EvidenceEnvelope, LocalSigner, TrustBundle, datetime], Subject]
+_SIGNED_AT = "2026-10-13T12:05:00Z"
+
+
+def _report_key(trust: TrustBundle, signer: LocalSigner) -> TrustedKey:
+    return next(k for k in trust.keys if k.kid == signer.key_id)
+
+
+def _revoked_bit(signed: EvidenceEnvelope, signer: LocalSigner, trust: TrustBundle, at: datetime) -> Subject:
+    """The issuer names a status entry, and its signed status list sets that bit to revoked."""
+    key = _report_key(trust, signer)
+    status_signer = LocalSigner.generate("TEST-ONLY-status-key-1")
+    status_key = key.model_copy(
+        update={
+            "kid": status_signer.key_id,
+            "purposes": ("status",),
+            "public_jwk": status_signer.public_jwk(),
+        }
+    )
+    entry = StatusReference(list_id="urn:example:TEST-ONLY-status-list-1", index=42)
+    unsigned = signed.model_copy(update={"signatures": ()})
+    resigned = sign_envelope(unsigned, signer, issuer=key.issuer, signed_at=_SIGNED_AT, status=entry)
+    status_list = StatusList(
+        schema_version="dppce.statuslist/1",
+        id=entry.list_id,
+        status_purpose="revocation",
+        issued_at=(at - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        encoded_list=encode_list({entry.index}),
+    )
+    return Subject(
+        json.loads(resigned.model_dump_json(by_alias=True)),
+        trust.model_copy(update={"keys": (*trust.keys, status_key)}),
+        sign_status_list(status_list, status_signer).encode("ascii"),
+    )
+
+
+def _role_swap(signed: EvidenceEnvelope, signer: LocalSigner, trust: TrustBundle, at: datetime) -> Subject:
+    """The report key adds a second signature that declares the role reviewer."""
+    issuer = _report_key(trust, signer).issuer
+    swapped = sign_envelope(signed, signer, issuer=issuer, signed_at=_SIGNED_AT, role="reviewer")
+    return Subject(json.loads(swapped.model_dump_json(by_alias=True)), trust)
+
+
+# These need a new signature, a new key, or a status list, not only a changed document.
+SETUP: dict[str, Setup] = {"revoked_bit": _revoked_bit, "role_swap": _role_swap}

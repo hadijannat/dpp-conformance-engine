@@ -32,8 +32,8 @@ from dppce.evidence.jws import LocalSigner
 from dppce.models import EvidenceEnvelope, ExecutionStatus, TrustBundle, Verdict
 from dppce.verifier import verify
 from validation import cases
-from validation.evidence_cases import TAMPER
-from validation.rig import LAB, TRUST, ReferenceRig
+from validation.evidence_cases import SETUP, TAMPER
+from validation.rig import LAB, REPORT_KEY, REPORT_KID, TRUST, ReferenceRig
 
 RECORDS = Path(__file__).resolve().parent / "records"
 VERIFY_AT = datetime(2026, 10, 14, tzinfo=UTC)
@@ -136,8 +136,12 @@ def _evidence(signed: EvidenceEnvelope, trust: TrustBundle) -> list[dict[str, An
     for entry in cases.load()["evidence_faults"]:
         name, dimension = entry["tamper"], entry["dimension"]
         at, subject = VERIFY_AT, copy.deepcopy(document)
+        bundle, status_list = trust, None
         try:
-            if name == "untrusted_key":
+            if name in SETUP:
+                prepared = SETUP[name](signed, LocalSigner.from_pem(REPORT_KEY, REPORT_KID), trust, at)
+                subject, bundle, status_list = prepared.document, prepared.trust, prepared.status_list
+            elif name == "untrusted_key":
                 stranger = LocalSigner.generate("TEST-ONLY-untrusted-report-key")
                 unsigned = signed.model_copy(update={"signatures": ()})
                 resigned = sign_envelope(unsigned, stranger, issuer=LAB, signed_at="2026-10-13T12:05:00Z")
@@ -157,7 +161,7 @@ def _evidence(signed: EvidenceEnvelope, trust: TrustBundle) -> list[dict[str, An
                 }
             )
             continue
-        report = verify(subject, trust, at)
+        report = verify(subject, bundle, at, status_list=status_list)
         outcome = next(d.outcome for d in report.dimensions if d.name == dimension)
         rows.append(
             {
