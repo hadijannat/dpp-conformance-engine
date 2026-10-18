@@ -17,7 +17,7 @@ The engine gives no accreditation. A report is a conformance test report, not a 
 | --- | --- | --- |
 | Run manifest: the versions and the input hashes | `dppce run` | `envelope.json` |
 | Verdicts, exclusions, retained problems, coverage, and limitations | `dppce run` | `envelope.json`, `report.html` |
-| Decision digest | `dppce run` | Output of the run, `envelope.json` |
+| Decision digest | `dppce run` (output); `dppce sign` (attestation) | Output of the run; inside each signature in `envelope.json` after signing |
 | Signatures | `dppce sign` | `envelope.json` |
 | Run inputs, in clear text | `dppce run` | `inputs.json` |
 | Encrypted recording with the delete-after date | `dppce run` | `recording/` |

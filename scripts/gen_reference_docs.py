@@ -499,6 +499,8 @@ class _Module:
 
     def effect(self, node: ast.AST) -> str | None:
         parent = self.parents.get(node)
+        key: int | str
+        call: ast.AST | None
         if isinstance(parent, ast.keyword) and parent.arg:
             call, key = self.parents.get(parent), parent.arg
         elif isinstance(parent, ast.Call) and any(a is node for a in parent.args):
@@ -509,15 +511,20 @@ class _Module:
 
     def parts(self, node: ast.JoinedStr) -> list[str | _Param | None]:
         """Literal text, a local constant's text, a parameter, or None for any other value."""
-        scope, found = self.scope(node), []
+        scope = self.scope(node)
+        found: list[str | _Param | None] = []
         for value in node.values:
             if isinstance(value, ast.Constant):
                 found.append(str(value.value))
                 continue
-            plain = (
-                isinstance(value, ast.FormattedValue) and value.conversion == -1 and value.format_spec is None
-            )
-            name = value.value.id if plain and isinstance(value.value, ast.Name) else None
+            name = None
+            if (
+                isinstance(value, ast.FormattedValue)
+                and value.conversion == -1
+                and value.format_spec is None
+                and isinstance(value.value, ast.Name)
+            ):
+                name = value.value.id
             if name in scope.constants:
                 found.append(str(scope.constants[name].value))
             elif name in scope.params:

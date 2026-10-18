@@ -20,6 +20,19 @@ section 2, records for `v0.1.0rc1`. This documentation change did not run them a
 The workflow `release.yml` signed build provenance for each item. The format is SLSA provenance v1.
 The package is not published on PyPI.
 
+### The release and the current source
+
+The [operate page](operate-in-a-laboratory.md) and the [laboratory records](../reference/laboratory-records.md)
+page describe the current source.
+The current source is later than `v0.1.0rc1`. It reports the same version string, `0.1.0rc1`.
+These functions are not in `v0.1.0rc1`:
+
+- The replay input check and the data-root check (`REPLAY.INPUT.CHANGED`, `REPLAY.DATA_ROOT.MISSING`).
+- The issuer binding of [ADR 0014](../adr/0014-the-issuer-statement-of-a-report-is-bound-to-the-signing-key.md).
+  With the current source, give `--issuer-id` to `dppce run`.
+
+If you install the engine from source, keep the commit and the output of `dppce --version`.
+
 ## 2. Verify and install the wheel
 
 1. Download the wheel from the release.
@@ -42,7 +55,13 @@ uv venv
 uv pip install '<wheel file>[qr,aas]'
 ```
 
-5. Check the installation.
+5. Activate the virtual environment.
+
+```bash
+source .venv/bin/activate
+```
+
+6. Check the installation.
 
 ```bash
 dppce --version

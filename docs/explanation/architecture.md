@@ -325,8 +325,9 @@ in upper case. Existing codes with two segments, for example `AAS.INVALID`, stay
 because codes are stable.
 Codes such as `DATA.SCHEMA.OK` mark a pass.
 A code can take one segment from a closed set at run time, for example `ACCESS.LEAK.EXPORT`.
-The [reason-code catalogue](../reference/reason-codes.md) lists each code, each value of such a
-set, the module and the check that produce it, and its step verdict where that call fixes it.
+The [reason-code catalogue](../reference/reason-codes.md) lists each code and each value of such
+a set. It names the module and the check that produce a code, and the step verdict where that
+call fixes it.
 `scripts/gen_reference_docs.py` generates the catalogue from the string literals in `src/dppce`.
 `--check` and a test fail when the page and the source disagree.
 A reason code is part of the decision body. A changed code changes the decision digest of a

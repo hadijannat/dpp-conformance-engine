@@ -10,6 +10,9 @@ The engine produces conformance test reports. A report is not a certificate.
 The engine gives no accreditation. Your laboratory procedures decide which records you keep.
 See [laboratory records](../reference/laboratory-records.md).
 
+This page describes the current source. The release `v0.1.0rc1` does not have all of its functions.
+See [the release and the current source](install-and-verify-a-release.md#the-release-and-the-current-source).
+
 ## 1. Before a run
 
 1. Keep the output of `dppce --version`.
