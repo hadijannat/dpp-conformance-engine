@@ -65,5 +65,6 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `identifier.resolve` | `identifier.resolve` | `accept` | string or none | none | Accept request header. Printable ASCII, 1 to 256 characters. |
 | `identifier.resolve` | `identifier.resolve` | `accepted_media_types` | list of string or none | none | Final media types that count as resolved. Default: a final JSON object only. |
 | `integrity.jws` | `integrity.jws` | (none) | | | |
+| `manual.review` | `manual.review` | (none) | | | |
 | `persistence.versions` | `persistence.versions` | (none) | | | |
 | `registry.consistency` | `registry.mock` | (none) | | | |

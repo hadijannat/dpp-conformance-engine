@@ -47,6 +47,7 @@ from dppce.models import (
 )
 from dppce.orchestrator.run import RunInputs, execute, make_plan  # noqa: TID251 - the run core runs the check
 from dppce.report import render
+from dppce.testdefs.registry import NoParams
 from dppce.verifier import verify, verify_json
 from dppce.verifier.__main__ import main as verifier_main
 from tests.core import builders as b
@@ -394,7 +395,9 @@ def test_cat018_counts_a_manual_step_as_passable() -> None:
     manual = b.purpose("T-MANUAL", manual=True, stimulus={"check": "manual.review"})
     requirement = b.requirement("R-1", assessment_paths=[b.path("p1", "T-FACT", "T-MANUAL")])
     testpacks = {"tp/a": b.purposes_pack(fact, manual)}
-    findings = lint(b.catalogue(b.pack(requirement)), {b.PROFILE_ID: b.profile()}, testpacks, ("probe.ok",))
+    findings = lint(
+        b.catalogue(b.pack(requirement)), {b.PROFILE_ID: b.profile()}, testpacks, {"probe.ok": NoParams}
+    )
     assert [f.location for f in findings if f.code == "CAT018"] == ["T-FACT"]
 
 

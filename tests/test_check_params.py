@@ -16,7 +16,7 @@ import pytest
 import dppce.adapters  # noqa: F401 - the import registers every check
 from dppce import cli
 from dppce.catalogue import load_data, load_testpacks
-from dppce.catalogue.lint import params_problem
+from dppce.catalogue.lint import lint, params_problem
 from dppce.infrastructure.resources import data_root
 from dppce.models import Model
 from dppce.testdefs import registry
@@ -45,10 +45,17 @@ CONTRACT_CHECKS = (
     "identifier.parse",
     "identifier.resolve",
     "integrity.jws",
+    "manual.review",
     "persistence.versions",
     "registry.consistency",
 )
-NO_PARAMETERS = ("identifier.consistency", "integrity.jws", "persistence.versions", "registry.consistency")
+NO_PARAMETERS = (
+    "identifier.consistency",
+    "integrity.jws",
+    "manual.review",
+    "persistence.versions",
+    "registry.consistency",
+)
 ALLOWLIST: dict[str, Any] = {"allowed_contexts": ["https://example.test/c"]}
 
 # Each check with a misspelled key, and the key that the problem must name.
@@ -96,7 +103,7 @@ def _problem(check: str, params: dict[str, Any]) -> str | None:
     return params_problem(_models()[check], params)
 
 
-def test_the_adapter_checks_are_the_thirteen_of_the_contract() -> None:
+def test_the_adapter_checks_are_those_of_the_contract() -> None:
     adapters = {
         name: spec.params
         for name in registry.names()
@@ -105,7 +112,20 @@ def test_the_adapter_checks_are_the_thirteen_of_the_contract() -> None:
     assert tuple(sorted(adapters)) == CONTRACT_CHECKS
     for name, model in adapters.items():
         assert model.model_config.get("extra") == "forbid", name
-    assert "manual.review" not in registry.names(), "a manual step names no registered check"
+    # Section 8 lists manual.review in the registry, and CAT019 applies to a manual step too.
+    assert registry.param_models()["manual.review"] is NoParams
+
+
+def test_a_manual_step_with_a_parameter_is_refused_by_the_lint() -> None:
+    manual = b.purpose("T-MANUAL", manual=True, stimulus={"check": "manual.review", "params": {"role": "x"}})
+    requirement = b.requirement("R-1", assessment_paths=[b.path("p1", "T-MANUAL")])
+    findings = lint(
+        b.catalogue(b.pack(requirement)),
+        {b.PROFILE_ID: b.profile()},
+        {"tp/a": b.purposes_pack(manual)},
+        registry.param_models(),
+    )
+    assert [(f.code, f.location) for f in findings if f.code == "CAT019"] == [("CAT019", "T-MANUAL")]
 
 
 @pytest.mark.parametrize("check", sorted(MISSPELLED))

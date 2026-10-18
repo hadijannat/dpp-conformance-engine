@@ -8,7 +8,7 @@ from __future__ import annotations
 from dppce.adapters.common import completed
 from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX, ManualResultError, verify_manual_result
 from dppce.models import CheckOutcome, ExecutionStatus
-from dppce.testdefs.registry import CheckContext, register
+from dppce.testdefs.registry import CheckContext, NoParams, register
 
 _ACCEPTED = (
     "A person signed this result. The engine verified the signature, the key, and the binding to "
@@ -16,7 +16,8 @@ _ACCEPTED = (
 )
 
 
-@register(MANUAL_CHECK, capability="manual.review")
+# Explicit: a manual step takes no parameters, and CAT019 refuses any key (section 8).
+@register(MANUAL_CHECK, capability="manual.review", params=NoParams)
 def review(ctx: CheckContext) -> CheckOutcome:
     record = ctx.acquirer.artifact(SAMPLE_PREFIX + ctx.purpose.id)
     # A refused file puts none of its content in the report: the observation holds the record id only.
