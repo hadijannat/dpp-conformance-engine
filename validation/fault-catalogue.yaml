@@ -6,13 +6,21 @@
 # The expected outcomes of version 0.1.0 were written on 2026-10-13, before the checks were
 # implemented. Version 0.2.0 adds E-13. Its commit follows the commits that add the check
 # manual.review and the verifier dimension manual_results.
+# Version 0.3.0 adds F-21 to F-26 and F-30 to F-34. In the git history, each entry commit comes
+# before the commit that seeds its fault, with one exception:
+# - F-21 to F-26: the entry commit comes before the commit that adds the four fault flags to the
+#   reference system.
+# - F-30 to F-33: the entry commit comes before the commit that adds the QR fixtures of F-30 and
+#   F-31 and their rig setup, and before the commit that adds the flags of F-32 and F-33.
+# - F-34: the entry commit comes before the commit that adds its rig setup. The QR fixture of
+#   F-34 is older than the entry. An earlier carrier fix added it.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.2.0
+version: 0.3.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
