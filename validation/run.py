@@ -9,7 +9,7 @@ cases, the evidence faults, and five replays for each profile.
 
 Every figure in the record has a numerator and a denominator. The record describes this
 software against a synthetic reference system. It is not evidence about a real DPP system,
-and no person has reviewed it unless the ``reviewer`` field says so.
+and no person has reviewed or signed it: the engine never fills ``human_review_and_signature``.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ import tempfile
 from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from dppce import __version__
 from dppce.evidence.canonical import parse_strict
@@ -39,6 +39,15 @@ RECORDS = Path(__file__).resolve().parent / "records"
 VERIFY_AT = datetime(2026, 10, 14, tzinfo=UTC)
 AFTER_KEY_EXPIRY = datetime(2037, 1, 1, tzinfo=UTC)
 REPLAYS = 5
+# ponytail: the engine never fills these; a person signs the record outside the engine (D8-14).
+HUMAN_REVIEW: Final[dict[str, Any]] = {
+    "human_review_and_signature": None,
+    "human_review_and_signature_note": (
+        "The engine never fills this field. A person who reviews this record signs it outside "
+        "the engine and keeps the signature in the records of the laboratory. "
+        "The value null means that this file holds no such review or signature."
+    ),
+}
 
 
 def _git() -> dict[str, Any]:
@@ -230,6 +239,7 @@ def main() -> int:
         "environment": _environment(),
         "reviewer": None,
         "reviewer_note": "No person has reviewed this record. It is the output of an automated run.",
+        **HUMAN_REVIEW,
         "limitations": [
             "The reference system is synthetic and was written by the same project as the engine.",
             "A detection here shows that a check finds a fault of a known kind. "
