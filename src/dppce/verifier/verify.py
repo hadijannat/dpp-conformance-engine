@@ -18,6 +18,7 @@ from typing import Any, Final, Literal
 
 from pydantic import ValidationError
 
+from dppce.evidence import disclosure
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, is_exact, parse_strict
 from dppce.evidence.envelope import (
     ATTESTATION_TYP,
@@ -644,7 +645,9 @@ def _validity(passing: list[_Signed], at: datetime) -> tuple[Outcome, str]:
     return "pass", f"VALIDITY.PERIOD.OK: the issuer states that the report is valid until {earliest}."
 
 
-def _mandatory(trust: TrustBundle, status_list: bytes | None, passing: list[_Signed]) -> list[str]:
+def _mandatory(
+    trust: TrustBundle, status_list: bytes | None, passing: list[_Signed], supplied: list[str]
+) -> list[str]:
     # A stated status entry makes status mandatory, so a holder cannot hide a revocation.
     needs_status = (
         trust.require_status or status_list is not None or any(s.attestation.status for s in passing)
@@ -654,11 +657,19 @@ def _mandatory(trust: TrustBundle, status_list: bytes | None, passing: list[_Sig
         *(["status"] if needs_status else []),
         *(["validity"] if any(s.attestation.valid_until for s in passing) else []),
         *(["timestamp"] if trust.require_timestamp else []),
+        # A supplied opening or proof is mandatory: the operator asked for that check.
+        *supplied,
     ]
 
 
 def verify_json(
-    raw: bytes | str, trust: TrustBundle, at: datetime, *, status_list: bytes | None = None
+    raw: bytes | str,
+    trust: TrustBundle,
+    at: datetime,
+    *,
+    status_list: bytes | None = None,
+    opening: bytes | None = None,
+    proof: bytes | None = None,
 ) -> VerificationReport:
     """Verify an envelope given as JSON text. This is the entry point for a file.
 
@@ -668,7 +679,7 @@ def verify_json(
         document = parse_strict(raw)
     except CanonicalizationError as exc:
         document = _Unparseable(str(exc))
-    return verify(document, trust, at, status_list=status_list)
+    return verify(document, trust, at, status_list=status_list, opening=opening, proof=proof)
 
 
 class _Unparseable:
@@ -676,15 +687,60 @@ class _Unparseable:
         self.reason = reason
 
 
+def body_dimensions(document: Any) -> tuple[EvidenceEnvelope | None, dict[str, tuple[Outcome, str]]]:
+    """The dimensions that need no trust: structure, ordering, both roots, and counts.
+
+    Returns no envelope if the structure fails. Then the structure dimension is the only one.
+    ``dppce sign``, ``dppce prove``, and ``dppce open`` refuse an envelope that fails one of them.
+    """
+    try:
+        if isinstance(document, _Unparseable):
+            raise CanonicalizationError(document.reason)
+        envelope = EvidenceEnvelope.model_validate(document)
+        # The verified model must be exactly the document. No default, no coerced value.
+        if not is_exact(document, envelope):
+            raise CanonicalizationError(
+                "the document is not in the exact canonical form of the schema "
+                "(a field is missing, a type differs, or a number is not an integer)"
+            )
+    except (ValidationError, CanonicalizationError) as exc:
+        first = str(exc).splitlines()[0]
+        return None, {"structure": ("fail", f"The envelope is not valid: {first}")}
+    decision = envelope.decision
+    keys = result_keys(decision.requirement_results, decision.test_results)
+    root_ok = results_root(
+        decision.requirement_results, decision.test_results
+    ) == decision.results_root and decision.results_count == len(keys)
+    return envelope, {
+        "structure": ("pass", "The envelope matches the schema."),
+        "ordering": _ordering(decision),
+        "results_root": ("pass", f"The root over {len(keys)} results equals the stated root.")
+        if root_ok
+        else ("fail", "The recomputed results root or count differs from the stated one."),
+        "records_root": ("pass", "The root over the record commitments equals the stated root.")
+        if records_root(decision.record_commitments) == decision.records_root
+        else ("fail", "The recomputed records root differs from the stated one."),
+        "counts": _counts(decision),
+    }
+
+
 def verify(
-    document: Any, trust: TrustBundle, at: datetime, *, status_list: bytes | None = None
+    document: Any,
+    trust: TrustBundle,
+    at: datetime,
+    *,
+    status_list: bytes | None = None,
+    opening: bytes | None = None,
+    proof: bytes | None = None,
 ) -> VerificationReport:
     """Verify an envelope given as parsed JSON. ``at`` is the explicit evaluation time.
 
-    ``status_list`` is the content of a status list file that the operator supplies.
+    ``status_list``, ``opening``, and ``proof`` are the contents of files that the operator
+    supplies. A supplied opening or proof adds a mandatory dimension (section 11.4).
     Prefer ``verify_json`` for a file: only a strict parse can detect a repeated object key.
     """
     at_text = at.astimezone(UTC).strftime(_STAMP)
+    supplied = [name for name, value in (("opening", opening), ("proof", proof)) if value is not None]
 
     def report(
         dimensions: dict[str, tuple[Outcome, str]], digest: str, mandatory: list[str]
@@ -701,47 +757,31 @@ def verify(
         )
 
     skipped: tuple[Outcome, str] = ("not_checked", "Not checked because the structure is not valid.")
-    names = (*_ALWAYS_MANDATORY[1:], "status", "validity", "timestamp")
-    try:
-        if isinstance(document, _Unparseable):
-            raise CanonicalizationError(document.reason)
-        envelope = EvidenceEnvelope.model_validate(document)
-        # The verified model must be exactly the document. No default, no coerced value.
-        if not is_exact(document, envelope):
-            raise CanonicalizationError(
-                "the document is not in the exact canonical form of the schema "
-                "(a field is missing, a type differs, or a number is not an integer)"
-            )
-        digest = decision_digest(envelope.decision)
-    except (ValidationError, CanonicalizationError) as exc:
-        first = str(exc).splitlines()[0]
-        failed: dict[str, tuple[Outcome, str]] = {
-            "structure": ("fail", f"The envelope is not valid: {first}")
-        }
+    names = (*_ALWAYS_MANDATORY[1:], "status", "validity", "timestamp", *supplied)
+    envelope, body = body_dimensions(document)
+    if envelope is None:
         return report(
-            failed | dict.fromkeys(names, skipped), "unavailable", _mandatory(trust, status_list, [])
+            body | dict.fromkeys(names, skipped),
+            "unavailable",
+            _mandatory(trust, status_list, [], supplied),
         )
 
     decision = envelope.decision
-    keys = result_keys(decision.requirement_results, decision.test_results)
-    root_ok = results_root(
-        decision.requirement_results, decision.test_results
-    ) == decision.results_root and decision.results_count == len(keys)
+    digest = decision_digest(decision)
     signature, verified = _verified(envelope, digest, trust)
     timestamp, times = _timestamps(envelope, verified, trust, at)
     issuer_trust, passing = _issuer(envelope, verified, times, trust, at)
-    mandatory = _mandatory(trust, status_list, passing)
+    mandatory = _mandatory(trust, status_list, passing, supplied)
+    # A file is checked against a tree only if the root of that tree matches the body.
+    roots_ok = {"results": body["results_root"][0] == "pass", "records": body["records_root"][0] == "pass"}
+    disclosed: dict[str, tuple[Outcome, str]] = {}
+    if opening is not None:
+        disclosed["opening"] = disclosure.check_opening_file(opening, decision, roots_ok)
+    if proof is not None:
+        disclosed["proof"] = disclosure.check_proof_file(proof, decision, roots_ok)
     return report(
         {
-            "structure": ("pass", "The envelope matches the schema."),
-            "ordering": _ordering(decision),
-            "results_root": ("pass", f"The root over {len(keys)} results equals the stated root.")
-            if root_ok
-            else ("fail", "The recomputed results root or count differs from the stated one."),
-            "records_root": ("pass", "The root over the record commitments equals the stated root.")
-            if records_root(decision.record_commitments) == decision.records_root
-            else ("fail", "The recomputed records root differs from the stated one."),
-            "counts": _counts(decision),
+            **body,
             "signature": signature,
             "issuer_trust": issuer_trust,
             "signers": _signers(envelope, verified, passing=passing, times=times, trust=trust, at=at),
@@ -749,6 +789,7 @@ def verify(
             "status": _status(trust, at, passing, status_list, "status" in mandatory),
             "validity": _validity(passing, at),
             "timestamp": timestamp,
+            **disclosed,
         },
         digest,
         mandatory,

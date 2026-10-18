@@ -111,12 +111,16 @@ def record_from_json(data: dict[str, Any]) -> Record:
         raise RecordingError(f"a record is malformed: {exc}") from exc
 
 
+def commitment_of(salt: bytes, plaintext: bytes) -> str:
+    """``HMAC-SHA256(salt, tag || plaintext)``. The one formula: the verifier of an opening uses it too."""
+    return hmac.new(salt, _COMMIT_TAG + plaintext, hashlib.sha256).hexdigest()
+
+
 def commit(record: Record) -> str:
     """Salted commitment to everything in the record except the salt."""
     if len(record.salt) != _SALT_BYTES:
         raise RecordingError(f"{record.record_id}: the salt must be {_SALT_BYTES} random bytes")
-    plaintext = canonical_bytes(record_to_json(record, with_salt=False))
-    return hmac.new(record.salt, _COMMIT_TAG + plaintext, hashlib.sha256).hexdigest()
+    return commitment_of(record.salt, canonical_bytes(record_to_json(record, with_salt=False)))
 
 
 def record_commitments(records: Sequence[Record]) -> tuple[RecordCommitment, ...]:

@@ -11,9 +11,22 @@ import re
 import secrets
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Final
+
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+
+from dppce.evidence.jws import LocalSigner, public_jwk_of
 
 _KEY_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _KEY_BYTES = 32
+# PKCS#8 encryption in the installed cryptography package uses PBKDF2 with 2048 iterations, and
+# the count cannot be raised. The passphrase must therefore carry the entropy (section 11.3).
+MIN_PASSPHRASE_BYTES: Final = 32
+MAX_PASSPHRASE_BYTES: Final = 1023
+_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+_NEW_FILE: Final = os.O_WRONLY | os.O_CREAT | os.O_EXCL | _NOFOLLOW
 
 
 class KeyError_(ValueError):  # noqa: N801, N818 - "KeyError" is a builtin with a different meaning
@@ -55,6 +68,65 @@ class FileDataKeyProvider:
         if len(key) != _KEY_BYTES:
             raise KeyError_(f"data key '{key_id}' is not {_KEY_BYTES} bytes")
         return key
+
+
+def write_new_file(path: Path, data: bytes, mode: int = 0o666) -> None:
+    """Create ``path`` with ``data``. Never replaces a file and never follows a link."""
+    handle = os.open(path, _NEW_FILE, mode)
+    with os.fdopen(handle, "wb") as out:
+        out.write(data)
+
+
+def generate_signing_key(path: Path, passphrase: str) -> dict[str, str]:
+    """Write a new P-256 key as PKCS#8 PEM encrypted with ``passphrase``. Return its public JWK."""
+    secret = passphrase.encode("utf-8")
+    if not MIN_PASSPHRASE_BYTES <= len(secret) <= MAX_PASSPHRASE_BYTES:
+        raise KeyError_(
+            f"KEYS.PASSPHRASE.LENGTH: a passphrase has {MIN_PASSPHRASE_BYTES} to {MAX_PASSPHRASE_BYTES} "
+            "bytes in UTF-8; generate it, for example with secrets.token_urlsafe(32)"
+        )
+    key = ec.generate_private_key(ec.SECP256R1())
+    pem = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.BestAvailableEncryption(secret),
+    )
+    try:
+        write_new_file(path, pem, 0o600)
+    except FileExistsError as exc:
+        raise KeyError_(f"KEYS.FILE.EXISTS: {path} exists; a key file is never replaced") from exc
+    return public_jwk_of(key.public_key())
+
+
+def load_signing_key(
+    path: Path, key_id: str, passphrase: str | None, *, allow_unencrypted: bool = False
+) -> LocalSigner:
+    """Load a P-256 signing key. An unencrypted key needs ``allow_unencrypted`` (TEST-ONLY keys).
+
+    No message holds the passphrase or text of the cryptography library.
+    """
+    data = path.read_bytes()
+    unreadable = f"KEYS.KEY.UNREADABLE: {path} is not a private key that this passphrase decrypts"
+    try:
+        key = serialization.load_pem_private_key(data, password=None)
+    except TypeError:
+        if passphrase is None:
+            raise KeyError_(f"KEYS.PASSPHRASE.MISSING: {path} is encrypted; give --passphrase-ref") from None
+        try:
+            key = serialization.load_pem_private_key(data, password=passphrase.encode("utf-8"))
+        except (ValueError, TypeError, UnsupportedAlgorithm):
+            raise KeyError_(unreadable) from None
+    except (ValueError, UnsupportedAlgorithm):
+        raise KeyError_(unreadable) from None
+    else:
+        if not allow_unencrypted:
+            raise KeyError_(
+                f"KEYS.KEY.UNENCRYPTED: {path} is not encrypted; encrypt it with dppce keys generate, "
+                "or give --allow-unencrypted-key for a TEST-ONLY key"
+            )
+    if not isinstance(key, ec.EllipticCurvePrivateKey) or not isinstance(key.curve, ec.SECP256R1):
+        raise KeyError_(f"KEYS.KEY.NOT_P256: {path} is not a P-256 private key")
+    return LocalSigner(key_id, key)
 
 
 SECRET_ENV_PREFIX = "DPPCE_SECRET_"  # noqa: S105 - the name prefix of a variable, not a secret

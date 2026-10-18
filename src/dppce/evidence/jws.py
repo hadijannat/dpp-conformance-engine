@@ -169,6 +169,35 @@ def public_jwk_of(key: ec.EllipticCurvePublicKey) -> dict[str, str]:
     }
 
 
+def public_jwk_from(document: object) -> dict[str, str]:
+    """Return the public JWK of a P-256 signing key: ``kty``, ``crv``, ``x``, and ``y`` only.
+
+    ``document`` is untrusted JSON. A private member gives the code ``PRIVATE``. Anything else
+    outside the one profile, a point that is not on the curve included, gives ``KEY``.
+    """
+    if not isinstance(document, dict) or not all(isinstance(v, str) for v in document.values()):
+        raise SignatureError("a public key is a JSON object of strings", "KEY")
+    if "d" in document:
+        raise SignatureError("the JWK holds the private member 'd'; give the public key only", "PRIVATE")
+    if set(document) - {"kid", "use", "alg"} != _PUBLIC_JWK_FIELDS:
+        raise SignatureError("the JWK is not an EC public key with kty, crv, x, and y", "KEY")
+    if document["kty"] != "EC" or document["crv"] != "P-256":
+        raise SignatureError("the JWK is not a P-256 key", "KEY")
+    if document.get("use", "sig") != "sig" or document.get("alg", "ES256") not in ALLOWED_ALGORITHMS:
+        raise SignatureError("the JWK is not a signing key for ES256", "KEY")
+    try:
+        x, y = (_unb64(document[name]) for name in ("x", "y"))
+        if len(x) != 32 or len(y) != 32:  # a P-256 coordinate has 32 bytes
+            raise ValueError("a coordinate is not 32 bytes")
+        numbers = ec.EllipticCurvePublicNumbers(
+            int.from_bytes(x, "big"), int.from_bytes(y, "big"), ec.SECP256R1()
+        )
+        key = numbers.public_key()
+    except ValueError as exc:  # SignatureError is a ValueError too
+        raise SignatureError("the JWK is not a point on P-256", "KEY") from exc
+    return public_jwk_of(key)
+
+
 class LocalSigner:
     """A signer that holds a private key in memory. For tests and development only.
 
