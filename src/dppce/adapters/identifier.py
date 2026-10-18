@@ -26,6 +26,10 @@ from dppce.models import CheckOutcome, ExecutionStatus, Model
 from dppce.testdefs.registry import CheckContext, register
 
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
+# The scheme spellings, the host characters, and the URI characters that GS1 Digital Link permits.
+_SCHEMES = ("http://", "https://", "HTTP://", "HTTPS://")
+_HOST = re.compile(r"[A-Za-z0-9.:\[\]-]+")
+_URI_CHARACTERS = re.compile(r"[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+")
 # Test-purpose parameters of identifier.resolve. Printable ASCII only: no CR, no LF.
 _ACCEPT = re.compile(r"[\x20-\x7e]{1,256}")
 _MEDIA_TYPE = re.compile(r"[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*")
@@ -88,13 +92,20 @@ def parse_gs1_digital_link(text: str) -> str | None:
         parts = urlsplit(text)
     except ValueError:
         return "it is not a URL"
-    if parts.scheme not in ("http", "https") or not parts.hostname:
+    # The raw prefix, because urlsplit lower-cases the scheme and GS1 refuses a mixed case.
+    if not text.startswith(_SCHEMES) or not parts.hostname:
         return "it is not an HTTP or HTTPS URL"
+    # netloc, not hostname, so that user information is refused too.
+    if not _HOST.fullmatch(parts.netloc):
+        return "the host has a character that GS1 Digital Link does not permit"
     match = _GS1_PATH.match(parts.path)
     if match is None:
         return "the path does not have the form /01/<14 digits>/21/<serial>"
     if not gtin_check_digit_ok(match["gtin"]):
         return "the GTIN check digit is wrong"
+    # Last, so that a path in non-ASCII digits keeps the path reason.
+    if not _URI_CHARACTERS.fullmatch(text):
+        return "the URL has a character that a URI does not permit"
     return None
 
 

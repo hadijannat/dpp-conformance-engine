@@ -6,6 +6,7 @@ to them. The engine does not grade print quality; these cases only fix what the 
 
 from __future__ import annotations
 
+import io
 import json
 from pathlib import Path
 from typing import Any
@@ -55,3 +56,16 @@ def test_a_degraded_image_gives_the_expected_outcome(name: str, tmp_path: Path) 
     if "two-symbols" in name:
         # Rule 7, independent of the data file: an image with two symbols never passes.
         assert outcome.passed is not True
+
+
+def test_qr_decode_of_an_image_above_the_pixel_limit_is_blocked(tmp_path: Path) -> None:
+    from PIL import Image  # noqa: PLC0415 - optional dependency, skipped above when missing
+
+    image = io.BytesIO()
+    Image.new("1", (4097, 4097), 1).save(image, format="PNG")
+    outcome = qr_decode(_context(tmp_path, _POLICY, _Sample(image.getvalue(), "image/png")))
+    assert (outcome.status.value, outcome.passed, outcome.reason_code) == (
+        "blocked",
+        None,
+        "CARRIER.SAMPLE.TOO_LARGE",
+    )

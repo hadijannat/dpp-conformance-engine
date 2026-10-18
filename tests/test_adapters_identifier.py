@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import http.server
+import json
+import re
+import sys
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 import pytest
 
+from dppce.adapters.carrier import qr_decode
 from dppce.adapters.identifier import consistency, parse, resolve
-from dppce.models import ICS, IXIT, ExecutionStatus
+from dppce.models import ICS, IXIT, CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext
 from tests.support import reply
 from tests.test_adapters_security import _POLICY, _Canned, _context
@@ -55,18 +59,104 @@ def test_a_gtin_in_non_ascii_digits_is_invalid_syntax(tmp_path: Path) -> None:
     assert outcome.observations[0].summary.get("reason") == reason
 
 
+def _parse(tmp_path: Path, samples: dict[str, str], scheme: str = "gs1-digital-link") -> CheckOutcome:
+    base = _context(tmp_path, _POLICY, _Canned(b"{}"))
+    ics = ICS.model_validate(base.ics.model_dump(mode="json") | {"identifier_scheme": scheme})
+    ixit = IXIT.model_validate(base.ixit.model_dump(mode="json") | {"samples": samples})
+    return parse(replace(base, ics=ics, ixit=ixit))
+
+
+GS1_PATH = "/01/09520123456788/21/12345"
+HOST = "the host has a character that GS1 Digital Link does not permit"
+CHARACTER = "the URL has a character that a URI does not permit"
+
+
+@pytest.mark.parametrize(
+    ("identifier", "reason"),
+    [
+        (f"HtTp://a{GS1_PATH}", "it is not an HTTP or HTTPS URL"),
+        (f"https://$a{GS1_PATH}", HOST),
+        (f"https://a_b{GS1_PATH}", HOST),
+        (f"https://u@a{GS1_PATH}", HOST),
+        (f"https://[fe80::1%25lo]{GS1_PATH}", HOST),
+        (f"https://ü.example{GS1_PATH}", HOST),
+        (f"https://a{GS1_PATH}?q=<bad", CHARACTER),
+        (f"https://a{GS1_PATH}#f g", CHARACTER),
+    ],
+)
+def test_parse_refuses_a_scheme_host_or_character_that_gs1_refuses(
+    identifier: str, reason: str, tmp_path: Path
+) -> None:
+    # Engine inputs built from the categories of the GS1 unit tests, not vendored vectors.
+    outcome = _parse(tmp_path, {"identifier": identifier})
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "IDENTIFIER.SYNTAX.INVALID",
+    )
+    assert outcome.observations[0].summary.get("reason") == reason
+
+
+@pytest.mark.parametrize(
+    "origin", ["HTTPS://A", "https://a:65535", "https://[2001:db8::1]", "https://a.", "http://127.0.0.1:8443"]
+)
+def test_parse_accepts_the_scheme_and_host_forms_that_gs1_accepts(origin: str, tmp_path: Path) -> None:
+    outcome = _parse(tmp_path, {"identifier": f"{origin}{GS1_PATH}"})
+    assert (outcome.passed, outcome.reason_code) == (True, "IDENTIFIER.SYNTAX.OK")
+
+
+def test_parse_without_a_declared_scheme_is_blocked(tmp_path: Path) -> None:
+    outcome = _parse(tmp_path, {"identifier": f"https://a{GS1_PATH}"}, scheme="unknown")
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.SCHEME.UNKNOWN",
+    )
+
+
+def test_parse_of_a_scheme_without_a_parser_is_unsupported(tmp_path: Path) -> None:
+    outcome = _parse(tmp_path, {"identifier": f"https://a{GS1_PATH}"}, scheme="epc-tds")
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.UNSUPPORTED,
+        None,
+        "IDENTIFIER.SCHEME.UNSUPPORTED",
+    )
+
+
+def test_an_ixit_without_a_carrier_sample_is_blocked(tmp_path: Path) -> None:
+    outcome = _parse(tmp_path, {"passport_id": "09506000134352-EV0001"})
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "CARRIER.SAMPLE.MISSING",
+    )
+
+
+def test_qr_decode_without_the_decoder_is_unsupported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setitem(sys.modules, "zxingcpp", None)  # the import now raises ImportError
+    outcome = qr_decode(_context(tmp_path, _POLICY, _Canned(b"{}")))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.UNSUPPORTED,
+        None,
+        "CARRIER.QR.DEPENDENCY_MISSING",
+    )
+
+
 # -- identifier.resolve with test-purpose media types (gap D4-04) ------------------------------
 
 
 class Resolver:
     """A loopback resolver that answers with one body. It keeps every Accept header line it gets."""
 
-    def __init__(self, loopback: Any, body: bytes, media_type: str) -> None:
+    def __init__(self, loopback: Any, body: bytes, media_type: str, status: int = 200) -> None:
         self.accepts: list[list[str]] = []
+        self.body = body
 
         def handle(request: http.server.BaseHTTPRequestHandler) -> None:
             self.accepts.append(request.headers.get_all("Accept") or [])
-            reply(request, 200, body, {"Content-Type": media_type})
+            reply(request, status, self.body, {"Content-Type": media_type})
 
         self.server = loopback(handle)
 
@@ -173,3 +263,158 @@ def test_a_custom_accept_replaces_the_default_header(tmp_path: Path, loopback: A
     resolver = Resolver(loopback, HTML, "text/html")
     resolve(live(tmp_path, resolver, HTML_PARAMS))
     assert resolver.accepts == [["text/html"]], "exactly one Accept header line"
+
+
+# -- one named producing test for each identifier and carrier reason code (gap D4-13) ----------
+
+
+def _with_identifier(ctx: CheckContext, identifier: str) -> CheckContext:
+    samples = {"identifier": identifier}
+    return replace(ctx, ixit=IXIT.model_validate(ctx.ixit.model_dump(mode="json") | {"samples": samples}))
+
+
+def test_resolve_of_a_text_that_is_not_a_url_is_unresolved(tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json")
+    outcome = resolve(_with_identifier(live(tmp_path, resolver, {}), "not a url"))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "IDENTIFIER.UNRESOLVED",
+    )
+    assert resolver.server.seen == []
+
+
+@pytest.mark.parametrize("status", [404, 410])
+def test_resolve_of_a_404_or_410_answer_is_unresolved(status: int, tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json", status)
+    outcome = resolve(live(tmp_path, resolver, {}))
+    assert (outcome.passed, outcome.reason_code) == (False, "IDENTIFIER.UNRESOLVED")
+
+
+@pytest.mark.parametrize("status", [500, 503])
+def test_resolve_of_a_5xx_answer_is_a_status_failure(status: int, tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json", status)
+    outcome = resolve(live(tmp_path, resolver, {}))
+    assert (outcome.passed, outcome.reason_code) == (False, "IDENTIFIER.RESOLUTION.STATUS")
+    assert len(resolver.server.seen) == 1, "a 5xx answer is not retried"
+
+
+def test_consistency_of_a_text_that_is_not_a_url_is_blocked(tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json")
+    outcome = consistency(_with_identifier(live(tmp_path, resolver, {}), "not a url"))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.NOT_RESOLVABLE",
+    )
+    assert resolver.server.seen == []
+
+
+@pytest.mark.parametrize(
+    ("status", "body", "media_type"), [(200, HTML, "text/html"), (503, b"{}", "application/json")]
+)
+def test_consistency_without_a_json_passport_is_blocked(
+    status: int, body: bytes, media_type: str, tmp_path: Path, loopback: Any
+) -> None:
+    resolver = Resolver(loopback, body, media_type, status)
+    outcome = consistency(live(tmp_path, resolver, {}))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "IDENTIFIER.NOT_RESOLVED",
+    )
+
+
+def test_consistency_of_the_same_identifier_is_consistent(tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json")
+    ctx = live(tmp_path, resolver, {})
+    resolver.body = json.dumps({"id": ctx.ixit.samples["identifier"]}).encode()
+    outcome = consistency(ctx)
+    assert (outcome.passed, outcome.reason_code) == (True, "IDENTIFIER.CONSISTENT")
+
+
+@pytest.mark.parametrize("passport_id", ["https://id.example.test/01/09506000134352/21/OTHER0001", 7])
+def test_consistency_of_a_different_passport_id_is_a_mismatch(
+    passport_id: object, tmp_path: Path, loopback: Any
+) -> None:
+    resolver = Resolver(loopback, json.dumps({"id": passport_id}).encode(), "application/json")
+    outcome = consistency(live(tmp_path, resolver, {}))
+    assert (outcome.passed, outcome.reason_code) == (False, "IDENTIFIER.MISMATCH")
+    assert outcome.observations[0].summary["different"] == ["passport"]
+
+
+ROOT = Path(__file__).resolve().parent.parent
+ADAPTERS = ROOT / "src" / "dppce" / "adapters"
+DEGRADED_EXPECTED = ROOT / "fixtures" / "reference" / "qr" / "degraded" / "expected.json"
+DEGRADED_TEST = "tests/test_adapters_carrier.py::test_a_degraded_image_gives_the_expected_outcome"
+_HERE = "tests/test_adapters_identifier.py::"
+# Seeded faults F-20, F-30, F-31, F-32, F-33, and F-34 also produce identifier and carrier codes
+# in tests/test_e2e_reference.py. Their codes come from the fault catalogue, so they are not listed.
+PRODUCERS: dict[str, list[str]] = {
+    "IDENTIFIER.SCHEME.UNKNOWN": [_HERE + "test_parse_without_a_declared_scheme_is_blocked"],
+    "IDENTIFIER.SCHEME.UNSUPPORTED": [_HERE + "test_parse_of_a_scheme_without_a_parser_is_unsupported"],
+    "IDENTIFIER.SYNTAX.OK": [
+        _HERE + "test_a_gtin_with_a_wrong_check_digit_is_invalid_syntax",
+        _HERE + "test_parse_accepts_the_scheme_and_host_forms_that_gs1_accepts",
+    ],
+    "IDENTIFIER.SYNTAX.INVALID": [
+        _HERE + "test_a_gtin_with_a_wrong_check_digit_is_invalid_syntax",
+        _HERE + "test_a_gtin_in_non_ascii_digits_is_invalid_syntax",
+        _HERE + "test_parse_refuses_a_scheme_host_or_character_that_gs1_refuses",
+    ],
+    "IDENTIFIER.PARAMS.INVALID": [_HERE + "test_resolve_refuses_malformed_parameters_before_any_request"],
+    "IDENTIFIER.UNRESOLVED": [
+        _HERE + "test_resolve_of_a_text_that_is_not_a_url_is_unresolved",
+        _HERE + "test_resolve_of_a_404_or_410_answer_is_unresolved",
+    ],
+    "IDENTIFIER.RESOLUTION.STATUS": [_HERE + "test_resolve_of_a_5xx_answer_is_a_status_failure"],
+    "IDENTIFIER.RESPONSE.MEDIA_TYPE": [_HERE + "test_resolve_refuses_a_media_type_outside_the_accepted_list"],
+    "IDENTIFIER.RESOLVED.MEDIA_TYPE": [
+        _HERE + "test_resolve_with_accepted_media_types_accepts_an_html_resolver"
+    ],
+    "IDENTIFIER.RESPONSE.NOT_JSON": [
+        _HERE + "test_resolve_by_default_still_needs_a_json_object_and_records_the_media_type"
+    ],
+    "IDENTIFIER.RESOLVED": [
+        _HERE + "test_resolve_with_an_accepted_json_type_and_a_json_object_keeps_the_resolved_code"
+    ],
+    "IDENTIFIER.NOT_RESOLVABLE": [_HERE + "test_consistency_of_a_text_that_is_not_a_url_is_blocked"],
+    "IDENTIFIER.NOT_RESOLVED": [_HERE + "test_consistency_without_a_json_passport_is_blocked"],
+    "IDENTIFIER.CONSISTENT": [_HERE + "test_consistency_of_the_same_identifier_is_consistent"],
+    "IDENTIFIER.MISMATCH": [_HERE + "test_consistency_of_a_different_passport_id_is_a_mismatch"],
+    "CARRIER.SAMPLE.MISSING": [_HERE + "test_an_ixit_without_a_carrier_sample_is_blocked"],
+    "CARRIER.QR.DEPENDENCY_MISSING": [_HERE + "test_qr_decode_without_the_decoder_is_unsupported"],
+    "CARRIER.SAMPLE.TOO_LARGE": [
+        "tests/test_adapters_carrier.py::test_qr_decode_of_an_image_above_the_pixel_limit_is_blocked"
+    ],
+    "CARRIER.SAMPLE.UNREADABLE": [DEGRADED_TEST],
+    "CARRIER.QR.NOT_DECODED": [DEGRADED_TEST],
+    "CARRIER.QR.OK": [DEGRADED_TEST],
+}
+
+
+def _test_source(file: str, name: str) -> str:
+    """The source of one top-level test: its decorators, its signature, and its body."""
+    text = (ROOT / file).read_text(encoding="utf-8")
+    start = text.find(f"\ndef {name}(")
+    assert start >= 0, f"{file} does not define {name}"
+    start = text.rfind("\n\n", 0, start) + 2  # the decorators directly above the def
+    end = re.compile(r"\n(?:def |@|class )").search(text, text.index(f"def {name}(", start) + 1)
+    return text[start : end.start() if end else len(text)]
+
+
+def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -> None:
+    sources = "".join(
+        (ADAPTERS / name).read_text(encoding="utf-8") for name in ("identifier.py", "carrier.py", "common.py")
+    )
+    codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
+    assert len(codes) == 21
+    assert codes == set(PRODUCERS)
+    degraded = {case["reason_code"] for case in json.loads(DEGRADED_EXPECTED.read_text())["cases"].values()}
+    for code, tests in PRODUCERS.items():
+        for test in tests:
+            file, name = test.split("::")
+            if test == DEGRADED_TEST:
+                assert code in degraded, f"{code}: no degraded image expects it"
+            else:
+                assert f'"{code}"' in _test_source(file, name), f"{code}: {test} does not name it"
