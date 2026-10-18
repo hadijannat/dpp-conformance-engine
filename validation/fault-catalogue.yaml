@@ -145,6 +145,42 @@ sut_faults:
     description: The QR image decodes to text that is not an HTTPS or HTTP URL.
     test_purpose: TP-ID-001
     expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
+  - id: F-21
+    class: over_restriction
+    fault: over_restrict_legitimate_interest
+    description: The passport for the legitimate_interest role omits a field that the declared policy gives to that role.
+    test_purpose: TP-ACCESS-002
+    expected: {verdict: fail, reason_code: ACCESS.ENTITLEMENT.MISSING}
+  - id: F-22
+    class: restricted_field_leakage
+    fault: leak_supplier_to_legitimate_interest
+    description: The passport for the legitimate_interest role holds a field that the declared policy gives to the authority role only.
+    test_purpose: TP-ACCESS-002
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.FETCH}
+  - id: F-23
+    class: restricted_field_leakage
+    fault: leak_usage_log_anonymous
+    description: The anonymous passport holds a synthetic withheld field that stands in for a non-public item.
+    test_purpose: TP-ACCESS-001
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.FETCH}
+  - id: F-24
+    class: over_restriction
+    fault: deny_all
+    description: The system answers 403 to every request. The anonymous role does not get the public fields of the declared policy.
+    test_purpose: TP-ACCESS-001
+    expected: {verdict: fail, reason_code: ACCESS.ENTITLEMENT.REFUSED}
+  - id: F-25
+    class: over_restriction
+    fault: deny_all
+    description: The system answers 403 to every request. The legitimate_interest role does not get its fields.
+    test_purpose: TP-ACCESS-002
+    expected: {verdict: fail, reason_code: ACCESS.ENTITLEMENT.REFUSED}
+  - id: F-26
+    class: over_restriction
+    fault: deny_all
+    description: The system answers 403 to every request. The authority role does not get its fields.
+    test_purpose: TP-ACCESS-003
+    expected: {verdict: fail, reason_code: ACCESS.ENTITLEMENT.REFUSED}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
