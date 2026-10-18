@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from html import escape
 
-from dppce.evidence.envelope import decision_digest
+from dppce.evidence.envelope import decision_digest, declared_attestation
 from dppce.evidence.manual import MANUAL_CHECK
 from dppce.models import EvidenceEnvelope, ExecutionStatus, Ratio, TestResult, VerificationReport
 
@@ -277,6 +277,23 @@ def _results(envelope: EvidenceEnvelope) -> str:
     )
 
 
+def _declared_row(position: int, token: str) -> tuple[str, ...]:
+    """One signature as it declares itself. Nothing here is verified."""
+    kid, attestation = declared_attestation(token)
+    if kid is None or attestation is None:
+        return (str(position), *["cannot be read"] * 6)
+    status = attestation.status
+    values = (
+        kid,
+        attestation.signer_role,
+        attestation.signed_at,
+        attestation.valid_until,
+        attestation.supersedes,
+        None if status is None else f"{status.list_id} index {status.index}",
+    )
+    return (str(position), *("none" if v is None else _e(v) for v in values))
+
+
 def _evidence(envelope: EvidenceEnvelope, verification: VerificationReport | None) -> str:
     d = envelope.decision
     rows = [
@@ -289,6 +306,23 @@ def _evidence(envelope: EvidenceEnvelope, verification: VerificationReport | Non
         ("Signatures", str(len(envelope.signatures))),
     ]
     items = "".join(f"<dt>{_e(k)}</dt><dd>{v}</dd>" for k, v in rows)
+    declared = _table(
+        "Signatures as declared",
+        (
+            "Position",
+            "Key id",
+            "Declared role",
+            "Signed at",
+            "Valid until",
+            "Supersedes",
+            "Status list entry",
+        ),
+        (_declared_row(i, token) for i, token in enumerate(envelope.signatures, start=1)),
+    )
+    declared += (
+        "<p>These values are as declared in each signature. "
+        "Only the verification section shows whether a signature verifies.</p>"
+    )
     if verification is None:
         checked = (
             "<p>This page does not verify the report. Run <code>dppce verify</code> with an explicit trust "
@@ -310,7 +344,8 @@ def _evidence(envelope: EvidenceEnvelope, verification: VerificationReport | Non
             )
         )
     return (
-        f'<section aria-labelledby="evidence"><h2 id="evidence">Evidence</h2><dl>{items}</dl>{checked}'
+        '<section aria-labelledby="evidence"><h2 id="evidence">Evidence</h2>'
+        f"<dl>{items}</dl>{declared}{checked}"
         "<p>The report holds commitments to the raw observations, not the observations.</p></section>"
     )
 
