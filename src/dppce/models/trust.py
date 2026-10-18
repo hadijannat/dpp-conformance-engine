@@ -5,15 +5,25 @@ from __future__ import annotations
 import base64
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
 from cryptography import x509
-from pydantic import Field, field_validator, model_validator
+from pydantic import AfterValidator, Field, field_validator, model_validator
 
 from dppce.models.base import Model
 
 # Explicit ASCII digits: pydantic reads \d as any Unicode digit, and parse_stamp refuses those.
 STAMP = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+
+
+def _real_moment(text: str) -> str:
+    # The pattern fixes the form. strptime refuses a moment that does not exist, as parse_stamp does.
+    datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ")
+    return text
+
+
+Stamp = Annotated[str, Field(pattern=STAMP), AfterValidator(_real_moment)]
+
 # Hexadecimal, colons permitted. Compared as an integer.
 SERIAL = r"^[0-9A-Fa-f]+(:[0-9A-Fa-f]+)*$"
 
@@ -27,8 +37,8 @@ class TrustedKey(Model):
         Field(min_length=1)
     )
     public_jwk: dict[str, str]
-    not_before: str = Field(pattern=STAMP)
-    not_after: str = Field(pattern=STAMP)
+    not_before: Stamp
+    not_after: Stamp
 
 
 class TrustAnchor(Model):
@@ -53,7 +63,7 @@ class RevokedKey(Model):
 
     kid: str = Field(min_length=1)
     # null: revoked at every time. A time: revoked at that time and later. No default: write null.
-    revoked_at: str | None = Field(pattern=STAMP)
+    revoked_at: Stamp | None
 
 
 class RevokedCertificate(Model):
@@ -70,7 +80,7 @@ class RevokedCertificate(Model):
         pattern=r"^([0-9A-Fa-f]{2})+$",
         description="Hex key identifier, compared with the authority key identifier of the certificate.",
     )
-    revoked_at: str | None = Field(pattern=STAMP)
+    revoked_at: Stamp | None
 
     @field_validator("issuer_name")
     @classmethod
@@ -116,7 +126,7 @@ class TrustBundle(Model):
     # A static snapshot of revocation status. The engine never fetches status at verification time.
     revoked_certificates: tuple[RevokedCertificate, ...] = ()
     revoked_keys: tuple[RevokedKey, ...] = ()
-    status_as_of: str | None = Field(default=None, pattern=STAMP)
+    status_as_of: Stamp | None = None
     # Maximum age of the status snapshot and of a supplied status list.
     status_max_age_days: int = Field(default=7, ge=0, le=3650)
 

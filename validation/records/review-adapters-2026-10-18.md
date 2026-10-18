@@ -261,6 +261,9 @@ lower-case `T` and `Z`. `docs/reference/reason-codes.md` was regenerated with
 
 ## Open questions for the owner
 
+The owner answered these questions in the agent session on 2026-10-18. The decisions follow the
+list.
+
 - A 404 on the version history now gives `blocked`. A missing history could instead be a fail.
 - A future update time fails freshness with no tolerance for clock skew.
 - JSON Schema `pattern` uses Python `re`, not ECMA-262. `$` also matches before a final line
@@ -269,9 +272,22 @@ lower-case `T` and `Z`. `docs/reference/reason-codes.md` was regenerated with
 - A leap second (`:60`) in `updated_at` fails the declared rule. The owner can accept that as
   the declared profile in section 4.3, or ask for a `blocked` outcome in `lifecycle.py`.
 - A stamp with a date that does not exist, such as month 13, passes the `STAMP` pattern.
-  `parse_stamp` then raises `ValueError`. This was so before the fixes too.
+  `parse_stamp` then raises `ValueError`. This was so before the fixes too. Closed: see the owner
+  decisions below.
 - The brief permits two agent review rounds. This review and its check came after those two.
   The owner has not stated how they relate to that limit.
+
+### Owner decisions of 2026-10-18
+
+- The owner accepts these as stated: a 404 on the version history gives `blocked`, and a future
+  update time fails with no skew tolerance. A leap second fails the declared rule. JSON Schema
+  `pattern` uses Python `re`. A credential echoed in base64 or in a mix of forms is not removed.
+- The owner asked for the stamp of a moment that does not exist to be refused before this
+  package lands. The models now use one `Stamp` type: the pattern and a check that the moment
+  exists. A signed authorization with such a stamp gives `AUTHZ.MALFORMED`. The tests are
+  `test_integration_2_*` in `tests/test_review_adapters.py`. They failed against the models
+  before the change, 40 of 40, and pass after it.
+- The owner did not state how this review relates to the limit of two review rounds.
 
 ## Transport over TLS
 

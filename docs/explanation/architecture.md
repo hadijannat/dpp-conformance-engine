@@ -774,7 +774,8 @@ in clear text, as before.
 
 The decision body is serialized with RFC 8785 (JCS). Numeric constraint: every number is an
 integer in the range -(2^53 - 1) to 2^53 - 1. Floats are rejected. Quantities use integer units.
-Times are UTC strings `YYYY-MM-DDTHH:MM:SSZ`.
+Times are UTC strings `YYYY-MM-DDTHH:MM:SSZ` with ASCII digits. A time must name a moment that
+exists. The models refuse a date such as `2026-02-30` and a second `60`.
 `decision_digest = "sha256:" + hex(SHA-256(JCS(decision body)))`.
 
 JCS is the canonical form of the engine's own decision body only. It does not replace the

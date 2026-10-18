@@ -21,7 +21,7 @@ from dppce.models.base import (
 )
 from dppce.models.declarations import ICS, IXIT, SutIdentity
 from dppce.models.testing import Conflict, Exclusion, TestResult
-from dppce.models.trust import STAMP, TrustBundle
+from dppce.models.trust import Stamp, TrustBundle
 
 BoundFileHash = Annotated[str, Field(pattern=r"^(sha256:[0-9a-f]{64}|unavailable)$")]
 
@@ -212,7 +212,7 @@ class Attestation(Model):
     # Version 2 only. Each is written explicitly, null when it has no value.
     role: SignerRole | None = None
     status: StatusReference | None = None
-    valid_until: str | None = Field(default=None, pattern=STAMP)
+    valid_until: Stamp | None = None
     supersedes: str | None = Field(default=None, pattern=DIGEST)
 
     @field_validator("valid_until")
@@ -257,7 +257,7 @@ class StatusList(Model):
     schema_version: Literal["dppce.statuslist/1"]
     id: str = Field(min_length=1, max_length=512)
     status_purpose: Literal["revocation", "suspension"]
-    issued_at: str = Field(pattern=STAMP)
+    issued_at: Stamp
     encoded_list: str = Field(pattern=r"^u[A-Za-z0-9_-]+$")
 
     @field_validator("issued_at")

@@ -14,10 +14,10 @@ import struct
 import zlib
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from dppce.adapters.carrier import qr_decode
 from dppce.adapters.common import effective_url, resource_url, schema_errors, validator
@@ -28,7 +28,19 @@ from dppce.evidence.jws import LocalSigner, sign_compact
 from dppce.infrastructure.authorization import AUTHORIZATION_TYP, AuthorizationError, validate_authorization
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.models import CheckOutcome, ExecutionStatus, TrustBundle, Verdict, VerdictRules
+from dppce.models import (
+    Attestation,
+    Authorization,
+    CheckOutcome,
+    ExecutionStatus,
+    RevokedCertificate,
+    RevokedKey,
+    StatusList,
+    TrustBundle,
+    TrustedKey,
+    Verdict,
+    VerdictRules,
+)
 from dppce.testdefs.registry import CheckContext
 from dppce.verdicts import step_verdict
 from tests.support import AT, make_record, reply
@@ -796,6 +808,46 @@ def test_integration_1_a_status_snapshot_with_a_non_canonical_stamp_is_refused(
 ) -> None:
     with pytest.raises(ValidationError):
         TrustBundle.model_validate(trust.model_dump() | {"status_as_of": text})
+
+
+# The canonical form, but no such moment. parse_stamp raises on these too (owner decision, 2026-10-18).
+IMPOSSIBLE = ["2026-13-45T00:00:00Z", "2026-02-30T00:00:00Z", "2026-10-10T24:00:00Z", "2026-12-31T23:59:60Z"]
+STAMP_FIELDS = [
+    (TrustedKey, "not_before"),
+    (TrustedKey, "not_after"),
+    (RevokedKey, "revoked_at"),
+    (RevokedCertificate, "revoked_at"),
+    (TrustBundle, "status_as_of"),
+    (Authorization, "not_before"),
+    (Authorization, "not_after"),
+    (Attestation, "valid_until"),
+    (StatusList, "issued_at"),
+]
+
+
+@pytest.mark.parametrize("text", IMPOSSIBLE)
+@pytest.mark.parametrize(("model", "name"), STAMP_FIELDS)
+def test_integration_2_every_stamp_field_refuses_a_moment_that_does_not_exist(
+    model: type[Any], name: str, text: str
+) -> None:
+    field = model.model_fields[name]
+    # A field without its own constraints carries them in its annotation (Stamp | None).
+    kind = Annotated[field.annotation, *field.metadata] if field.metadata else field.annotation
+    check: TypeAdapter[Any] = TypeAdapter(kind)
+    assert check.validate_python("2026-10-10T08:00:00Z") == "2026-10-10T08:00:00Z"
+    with pytest.raises(ValidationError):
+        check.validate_python(text)
+
+
+@pytest.mark.parametrize("text", IMPOSSIBLE)
+def test_integration_2_a_signed_authorization_with_an_impossible_stamp_is_malformed(
+    signer: LocalSigner, trust: TrustBundle, text: str
+) -> None:
+    payload = authorization().model_dump(mode="json") | {"not_after": text}
+    token = sign_compact(canonical_bytes(payload), signer, typ=AUTHORIZATION_TYP)
+    with pytest.raises(AuthorizationError) as caught:
+        validate_authorization(token, trust, AT, "urn:example:sut")
+    assert caught.value.code == "AUTHZ.MALFORMED"
 
 
 # -- identifier-carrier-1, -3, -4: a carrier text that is not a usable URL ----------------------------
