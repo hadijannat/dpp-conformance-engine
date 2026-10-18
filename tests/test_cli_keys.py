@@ -485,7 +485,7 @@ def test_authorize_signs_an_authorization_that_validate_authorization_accepts(
     assert validate_authorization(token, trust, at, SUT) == Authorization.model_validate(_authorization())
 
 
-def test_authorize_refusals(run: Run, tmp_path: Path) -> None:
+def test_authorize_refusals(run: Run, passphrase: str, tmp_path: Path) -> None:
     key = _plain_key(tmp_path)
     out = tmp_path / "authorization.jws"
 
@@ -531,6 +531,16 @@ def test_authorize_refusals(run: Run, tmp_path: Path) -> None:
     ):
         code, err = authorize(_authorization(endpoints=[endpoint]))
         assert (code, "AUTHORIZE.ENDPOINT.INVALID" in err) == (2, True), err
+        assert not out.exists()
+    # The key rules of section 11.3 apply to the owner key too, not only to the report key.
+    encrypted = tmp_path / "TEST-ONLY-owner.key.pem"
+    _generate(run, encrypted)
+    valid = tmp_path / "valid.json"
+    valid.write_text(json.dumps(_authorization()), encoding="utf-8")
+    common = ["authorize", "--document", str(valid), "--kid", "k", "--out", str(out)]
+    for owner_key, code_text in ((key, "KEYS.KEY.UNENCRYPTED"), (encrypted, "KEYS.PASSPHRASE.MISSING")):
+        code, _, err = run(*common, "--key", str(owner_key))
+        assert (code, code_text in err) == (2, True), err
         assert not out.exists()
     assert authorize(_authorization()) == (0, "")
     out_bytes = out.read_bytes()
@@ -714,6 +724,16 @@ def test_run_creates_a_missing_data_key_only_with_the_flag(
             )
             assert (code, "KEYS.DATA_KEY.UNAVAILABLE" in err) == (2, True), err
             assert not (tmp_path / "bad-id").exists()
+        # An unusable key: 31 bytes, not 32. Without --create-data-key it is never replaced.
+        unusable = tmp_path / "keys" / "local-data-key-1.key"
+        unusable.parent.mkdir(exist_ok=True)
+        unusable.write_bytes(bytes(31))
+        code, _, err = run(*rig.run_arguments(tmp_path / "unusable"))
+        assert (code, "KEYS.DATA_KEY.UNAVAILABLE" in err) == (2, True), err
+        assert not (tmp_path / "unusable").exists()
+        assert built == []
+        assert unusable.read_bytes() == bytes(31)
+        unusable.unlink()
         monkeypatch.setattr(cli, "PolicyTransport", real)
 
         first = rig.run(extra=["--data-key-id", "TEST-ONLY-data-key-7"])

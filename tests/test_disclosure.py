@@ -222,10 +222,7 @@ def test_the_standalone_verifier_checks_a_proof(
         return _canonical(tmp_path / f"{name}.json", document)
 
     cases: list[tuple[Path, tuple[str, ...]]] = [
-        (
-            changed("verdict", lambda d: d["leaf"].update(verdict="fail")),
-            ("PROOF.PATH.INVALID", "PROOF.FILE.MALFORMED"),
-        ),
+        (changed("verdict", lambda d: d["leaf"].update(verdict="fail")), ("PROOF.PATH.INVALID",)),
         (changed("root", lambda d: d.update(root="1" * 64)), ("PROOF.REPORT.MISMATCH",)),
         (
             changed("digest", lambda d: d.update(decision_digest="sha256:" + "2" * 64)),
@@ -269,6 +266,13 @@ def test_proof_is_not_checked_when_the_results_root_fails(
     unstructured = _edited(envelope, tmp_path / "unstructured.json", _extra_member)
     code, dims, complete = _verify(run, unstructured, bundle, "--proof", str(proof))
     assert dims["proof"][0] == "not_checked"
+    assert (code, complete) == (4, False)
+    # Only the root of its own tree gates a proof. The changed records root changes the digest.
+    other_root = _edited(envelope, tmp_path / "other-root.json", _wrong_records_root)
+    code, dims, complete = _verify(run, other_root, bundle, "--proof", str(proof))
+    assert (dims["results_root"][0], dims["records_root"][0]) == ("pass", "fail")
+    assert dims["proof"][0] == "fail"
+    assert dims["proof"][1].startswith("PROOF.REPORT.MISMATCH"), dims["proof"]
     assert (code, complete) == (4, False)
 
 
@@ -393,8 +397,17 @@ def test_the_verifier_checks_an_opening(
         body[0] ^= 1
         document["record"]["body"] = base64.b64encode(bytes(body)).decode("ascii")
 
+    def forge(document: dict[str, Any]) -> None:
+        # A consistent forgery: a changed body, and a leaf commitment made with the disclosed salt.
+        flip_body(document)
+        disclosed = base64.b64decode(document["salt"])
+        document["proof"]["leaf"]["commitment"] = commitment_of(
+            disclosed, canonical_bytes(document["record"])
+        )
+
     salt = base64.b64encode(secrets.token_bytes(32)).decode("ascii")
     cases = [
+        (changed("forged", forge), "PROOF.PATH.INVALID"),
         (changed("body", flip_body), "OPENING.COMMITMENT.MISMATCH"),
         (changed("salt", lambda d: d.update(salt=salt)), "OPENING.COMMITMENT.MISMATCH"),
         (changed("path", lambda d: d["proof"]["path"].__setitem__(0, "0" * 64)), "PROOF.PATH.INVALID"),
