@@ -7,6 +7,7 @@ key and token here is TEST-ONLY. Only the loopback reference system answers a re
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ import yaml
 from validation.rig import FIXTURES, ROOT, TRUST, ReferenceRig
 
 from dppce import cli
+from dppce.evidence.canonical import canonical_bytes
 from dppce.evidence.jws import LocalSigner
 from dppce.infrastructure.authorization import issue_authorization
 from dppce.models import Authorization
@@ -171,11 +173,20 @@ def test_a_policy_that_is_not_valid_is_reported_by_the_check_not_as_an_input_err
 
 
 @pytest.mark.qr
+@pytest.mark.parametrize("version", [1, 2])
 def test_replay_refuses_a_role_that_the_current_profile_does_not_declare(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    version: int, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """A version 2 record holds input hashes, so the replay input check refuses the changed
+    profile first. A version 1 record has no hashes, so the role check refuses it."""
     with ReferenceRig(tmp_path / "rig") as rig:
         run = rig.run()
+    if version == 1:
+        record = run.run_dir / "inputs.json"
+        document = json.loads(record.read_bytes())
+        del document["data_root"], document["input_hashes"]
+        document["schema_version"] = "dppce.runinputs/1"
+        record.write_bytes(canonical_bytes(document) + b"\n")
     data = _data_copy(tmp_path / "data")
     profile = data / "profiles" / "battery" / "ev.yaml"
     _edit(profile, lambda p: p.update(roles=[r for r in p["roles"] if r != "legitimate_interest"]))
@@ -183,4 +194,7 @@ def test_replay_refuses_a_role_that_the_current_profile_does_not_declare(
     arguments = ["replay", "--run", str(run.run_dir), "--keys", str(tmp_path / "rig" / "keys")]
     code, err = _error([*arguments, "--data-root", str(data)], capsys)
     assert code == 2
-    assert "names the role 'legitimate_interest'." in err
+    if version == 1:
+        assert "names the role 'legitimate_interest'." in err
+    else:
+        assert "REPLAY.INPUT.CHANGED: these inputs differ from the run: profile;" in err
