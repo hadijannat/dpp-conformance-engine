@@ -32,14 +32,17 @@ from dppce.models import (
     Const,
     ExecutionMode,
     ExecutionStatus,
+    InclusionProof,
     InputHashes,
     IssuerStatement,
     Modality,
     Model,
     Not,
     Observation,
+    OpenedRecord,
     Plan,
     Ratio,
+    RecordOpening,
     Requirement,
     ReviewStatus,
     RoleIdentity,
@@ -550,7 +553,44 @@ def test_the_generator_publishes_one_schema_for_each_contract() -> None:
     }
 
 
+PROOF: dict[str, Any] = {
+    "schema_version": "dppce.proof/1",
+    "decision_digest": "sha256:" + "a" * 64,
+    "label": "records",
+    "key": "r0001",
+    "index": 0,
+    "size": 2,
+    "leaf": {"record_id": "r0001", "commitment": "b" * 64},
+    "path": ["c" * 64],
+    "root": "d" * 64,
+}
+OPENED: dict[str, Any] = {
+    "record_id": "r0001",
+    "kind": "http",
+    "acquired_at": "2026-10-13T12:00:00Z",
+    "method": "GET",
+    "url": "http://127.0.0.1/dpp/1",
+    "role": "anonymous",
+    "request_headers": [["User-Agent", "dppce/test"]],
+    "status": 200,
+    "headers": [["Content-Type", "application/json"]],
+    "body": "e30=",
+    "truncated": False,
+    "error": None,
+    "redirects": [],
+    "attempts": 1,
+}
+OPENING: dict[str, Any] = {
+    "schema_version": "dppce.opening/1",
+    "record": OPENED,
+    "salt": "A" * 43 + "=",
+    "proof": PROOF,
+}
+
+
 SCHEMA_DOCUMENTS = {
+    "opening": RecordOpening.model_validate(OPENING),
+    "proof": InclusionProof.model_validate(PROOF),
     "pack": INSTANCES["pack"],
     "testpack": INSTANCES["testpack"],
     "profile": INSTANCES["profile"],
@@ -778,6 +818,71 @@ def test_a_version_1_record_that_holds_a_version_2_field_is_refused() -> None:
         migrate("runinputs", {**RUNINPUTS_1, "data_root": "/x"})
     with pytest.raises(MigrationError, match="no migration"):
         migrate("runinputs", {**RUNINPUTS_1, "schema_version": "dppce.runinputs/9"})
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"label": "results"},
+        {"key": "r0002"},
+        {"index": 2},
+        {"index": -1},
+        {"size": 0},
+        {"path": ["C" * 64]},
+        {"path": ["c" * 64] * 65},
+        {"root": "d" * 63},
+        {"leaf": {"record_id": "r0001"}},
+    ],
+    ids=str,
+)
+def test_a_proof_whose_label_key_or_position_does_not_fit_is_refused(changes: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        InclusionProof.model_validate(PROOF | changes)
+
+
+def test_an_opening_and_a_proof_have_no_default() -> None:
+    for contract, document in ((InclusionProof, PROOF), (RecordOpening, OPENING), (OpenedRecord, OPENED)):
+        for name in document:
+            with pytest.raises(ValidationError, match=name):
+                contract.model_validate({k: v for k, v in document.items() if k != name})
+
+
+def test_a_proof_names_its_leaf_by_the_key_of_section_11_2() -> None:
+    leaf = {
+        "requirement_id": "R-1",
+        "pack_id": "pack/a",
+        "authority_class": "illustrative",
+        "modality": "mandatory",
+        "review_status": "draft-needs-review",
+        "testability": "automated",
+        "applicability": "true",
+        "applicability_reason": "always",
+        "verdict": "pass",
+        "verdict_reason": "test",
+        "claim_level": "illustrative",
+    }
+    proof = InclusionProof.model_validate(PROOF | {"label": "results", "key": "R:R-1", "leaf": leaf})
+    assert proof.key == "R:R-1"
+    for wrong in ({"key": "T:R-1"}, {"key": "R-1"}, {"label": "records", "key": "R:R-1"}):
+        with pytest.raises(ValidationError, match="label and key must fit the leaf"):
+            InclusionProof.model_validate(PROOF | {"label": "results", "key": "R:R-1", "leaf": leaf} | wrong)
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"proof": PROOF | {"key": "r0002", "leaf": {"record_id": "r0002", "commitment": "b" * 64}}},
+        {"salt": "A" * 42 + "=="},
+        {"salt": "A" * 44},
+        {"salt": "A" * 43 + "-"},
+        {"record": OPENED | {"record_id": "x1"}},
+        {"record": {k: v for k, v in OPENED.items() if k != "error"}},
+    ],
+    ids=str,
+)
+def test_an_opening_of_a_different_record_or_with_a_bad_salt_is_refused(changes: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        RecordOpening.model_validate(OPENING | changes)
 
 
 def test_a_version_2_record_of_run_inputs_has_no_default() -> None:
