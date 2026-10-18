@@ -47,6 +47,7 @@ from dppce.models import (
     ExecutionStatus,
     NetworkPolicy,
     Profile,
+    Severity,
     TestPurpose,
     TrustBundle,
 )
@@ -800,15 +801,21 @@ DEFAULT_SEVERITY = "<br><small>Default: the test purpose is not available.</smal
 def test_the_html_step_table_shows_the_severity() -> None:
     """D1-11: the severity of each step is visible. A fallback value is labeled as a default."""
     base = make_envelope()
+    # Values other than "major" show that the cell holds the stored severity, not a literal.
+    steps = tuple(
+        t.model_copy(update={"severity": Severity.MINOR}) if t.test_purpose_id == "TP-002" else t
+        for t in base.decision.test_results
+    )
     fallback = make_test_result(9, "inconclusive").model_copy(
         update={
             "test_purpose_id": "TP-GONE",
             "requirement_ids": (),
             "check": "unavailable",
             "execution_status": ExecutionStatus.NOT_RUN,
+            "severity": Severity.CRITICAL,
         }
     )
-    decision = base.decision.model_copy(update={"test_results": (*base.decision.test_results, fallback)})
+    decision = base.decision.model_copy(update={"test_results": (*steps, fallback)})
     page = render(base.model_copy(update={"decision": decision}))
     table = page.split("<caption>Test step results</caption>", 1)[1].split("</table>", 1)[0]
     assert (
@@ -822,9 +829,9 @@ def test_the_html_step_table_shows_the_severity() -> None:
     for test_id, cells in rows.items():
         assert 'class="verdict"' in cells[3]
         if test_id == "TP-GONE":
-            assert cells[4] == "major" + DEFAULT_SEVERITY
+            assert cells[4] == "critical" + DEFAULT_SEVERITY
         else:
-            assert cells[4] == "major"
+            assert cells[4] == ("minor" if test_id == "TP-002" else "major")
             assert DEFAULT_SEVERITY not in "".join(cells)
 
 
