@@ -9,6 +9,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from dppce.applicability import Outcome, evaluate, facts_from
+from dppce.evidence.manual import MANUAL_CHECK
 from dppce.models import (
     ICS,
     AuthorityClass,
@@ -85,13 +86,15 @@ def _planned_status(
     has_applicable_parent: bool,
     checks: Mapping[str, CheckInfo],
     granted: frozenset[Scope],
+    manual_results: frozenset[str],
 ) -> tuple[ExecutionStatus | None, str]:
     """Section 6, second table. The order of the conditions is part of the contract."""
     if not has_applicable_parent:
         return ExecutionStatus.SKIPPED, "No applicable requirement needs this step."
     if outcome.value is Tri.UNKNOWN:
         return ExecutionStatus.SKIPPED, f"The step applicability is unknown: {outcome.reason}"
-    if purpose.manual:
+    if purpose.manual and (purpose.id not in manual_results or purpose.stimulus.check != MANUAL_CHECK):
+        # The text stays byte-identical, so that an old recording replays to the same digest.
         return (
             ExecutionStatus.MANUAL_UNAVAILABLE,
             "The step is a manual review. No manual result is available.",
@@ -120,8 +123,12 @@ def build_plan(  # noqa: PLR0912 - one linear pass over the catalogue; splitting
     ics: ICS,
     checks: Mapping[str, CheckInfo],
     granted_scopes: frozenset[Scope] = frozenset(),
+    manual_results: frozenset[str] = frozenset(),
 ) -> Plan:
-    """Select requirements and test steps for one run. The output is sorted by identifier."""
+    """Select requirements and test steps for one run. The output is sorted by identifier.
+
+    ``manual_results`` holds the test purposes for which the operator supplied a manual result.
+    """
     facts = facts_from(ics, profile)
     exclusions: dict[tuple[str, str], Exclusion] = {}
 
@@ -226,7 +233,9 @@ def build_plan(  # noqa: PLR0912 - one linear pass over the catalogue; splitting
         outcome = step_outcomes[tid]
         if outcome.value is Tri.FALSE:
             continue
-        status, reason = _planned_status(purpose, outcome, tid in needed, checks, granted_scopes)
+        status, reason = _planned_status(
+            purpose, outcome, tid in needed, checks, granted_scopes, manual_results
+        )
         steps.append(
             PlannedStep(
                 test_purpose_id=tid,

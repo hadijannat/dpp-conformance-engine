@@ -169,6 +169,15 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "aas_test_engines",
         "",
     ),
+    (
+        "manual.review",
+        "manual",
+        _S,
+        "Verify the signed result of a manual step: signature, key trust for the purpose 'manual', "
+        "and binding to the step and the system. The engine does not perform the review.",
+        None,
+        "",
+    ),
     ("evidence.jws_es256", "evidence", _S, "Sign and verify reports with JWS ES256.", None, ""),
     (
         "evidence.devlog",

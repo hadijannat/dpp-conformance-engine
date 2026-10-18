@@ -22,6 +22,7 @@ from dppce.catalogue import Catalogue, sanitized_ixit
 from dppce.catalogue.lint import params_problem
 from dppce.evidence.canonical import digest
 from dppce.evidence.envelope import build_decision
+from dppce.evidence.manual import MANUAL_CHECK
 from dppce.evidence.recording import record_commitments
 from dppce.infrastructure.clock import utc_stamp
 from dppce.infrastructure.interfaces import Acquirer
@@ -89,6 +90,8 @@ class RunInputs:
     authorization: Authorization | None = None
     issuer: IssuerStatement = field(default_factory=IssuerStatement)
     image_digest: str | None = None
+    # Test purposes with a manual result that the operator supplied (--manual-result).
+    manual_results: frozenset[str] = frozenset()
 
 
 def check_infos() -> dict[str, CheckInfo]:
@@ -133,6 +136,7 @@ def make_plan(inputs: RunInputs) -> Plan:
         ics=inputs.ics,
         checks=check_infos(),
         granted_scopes=granted,
+        manual_results=inputs.manual_results,
     )
 
 
@@ -297,7 +301,9 @@ def evaluate(inputs: RunInputs, acquirer: Acquirer) -> DecisionBody:
     executable = frozenset(
         purpose.id
         for purpose in _purposes(inputs).values()
+        # A manual review is never executable by a capability, also with a supplied result.
         if not purpose.manual
+        and purpose.stimulus.check != MANUAL_CHECK
         and (info := infos.get(purpose.stimulus.check)) is not None
         and info.available
         and info.state in (CapabilityState.SUPPORTED, CapabilityState.EXPERIMENTAL)
