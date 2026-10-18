@@ -35,7 +35,7 @@ from dppce.catalogue import (
 )
 from dppce.catalogue.lint import lint, trace
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
-from dppce.evidence.envelope import decision_digest, sign_envelope
+from dppce.evidence.envelope import decision_digest, in_layout_of, sign_envelope
 from dppce.evidence.jws import LocalSigner, SignatureError
 from dppce.evidence.recording import RecordingError, purge_expired, read_recording, write_recording
 from dppce.infrastructure.authorization import AuthorizationError, validate_authorization
@@ -413,7 +413,7 @@ def cmd_replay(args: argparse.Namespace) -> int:
     for _ in range(args.times):
         acquirer = ReplayAcquirer(records)
         decision = evaluate(inputs, acquirer)
-        digests.append(decision_digest(decision))
+        digests.append(decision_digest(in_layout_of(decision, original.decision.schema_version)))
         complete = complete and acquirer.complete()
         overall = decision.overall
     match = complete and all(d == expected for d in digests)

@@ -11,6 +11,7 @@ The fast suite runs every case on one profile. `just validate` runs the full mat
 from __future__ import annotations
 
 import hashlib
+import json
 import shutil
 from pathlib import Path
 
@@ -19,7 +20,8 @@ import yaml
 from validation import cases
 from validation.rig import FIXTURES, ROOT, AlternateLayout, ReferenceRig
 
-from dppce.models import ExecutionStatus, Modality, Tri, Verdict
+from dppce.evidence.envelope import decision_digest
+from dppce.models import EvidenceEnvelope, ExecutionStatus, Modality, Tri, Verdict
 
 pytestmark = pytest.mark.qr  # the reference rig reads QR images
 
@@ -149,6 +151,25 @@ def test_a_changed_bound_file_gives_a_replay_mismatch(tmp_path: Path) -> None:
     contract.write_text(contract.read_text(encoding="utf-8") + "# changed after the run\n", encoding="utf-8")
     code, summary = rig.replay(run)
     assert (code, summary["match"]) == (4, False), "a changed bound file changes the decision digest"
+
+
+def test_a_version_1_run_replays_with_its_own_digest(tmp_path: Path) -> None:
+    """A run written as dppce.decision/1, as 0.1.0rc1 wrote it: no bound_files in the manifest.
+
+    The fixture is this run with its envelope put in the /1 layout. It equals an rc1 envelope
+    only where nothing else in the manifest changed since rc1.
+    """
+    with ReferenceRig(tmp_path) as rig:
+        run = rig.run()
+    path = run.run_dir / "envelope.json"
+    document = json.loads(path.read_bytes())
+    document["decision"]["schema_version"] = "dppce.decision/1"
+    del document["decision"]["manifest"]["bound_files"]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    expected = decision_digest(EvidenceEnvelope.model_validate(document).decision)
+    code, summary = rig.replay(run, times=2)
+    assert summary["expected_digest"] == expected
+    assert (code, summary["match"], summary["replay_digests"]) == (0, True, [expected] * 2)
 
 
 def test_an_ics_that_names_a_different_contract_blocks_the_contract_step(tmp_path: Path) -> None:

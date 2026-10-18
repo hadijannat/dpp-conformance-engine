@@ -173,7 +173,7 @@
     },
     "DecisionBody": {
       "additionalProperties": false,
-      "description": "The canonical statement of one run. Its RFC 8785 form is what gets hashed and signed.\n\nLists are sorted by identifier. The verifier rejects a body whose lists are out of order\nor hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.",
+      "description": "The canonical statement of one run. Its RFC 8785 form is what gets hashed and signed.\n\nLists are sorted by identifier. The verifier rejects a body whose lists are out of order\nor hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.\n\nVersion 2 adds ``manifest.bound_files``. A version 1 body is still read and verified as written.",
       "properties": {
         "conflicts": {
           "items": {
@@ -232,7 +232,10 @@
           "type": "string"
         },
         "schema_version": {
-          "const": "dppce.decision/1",
+          "enum": [
+            "dppce.decision/1",
+            "dppce.decision/2"
+          ],
           "title": "Schema Version",
           "type": "string"
         },
@@ -663,7 +666,7 @@
             }
           ],
           "default": null,
-          "description": "sha256 of the raw bytes of each file that the profile binds, keyed by its path under the data root. Absent in a body from an earlier version.",
+          "description": "sha256 of the raw bytes of each file that the profile binds, keyed by its path under the data root. Required in dppce.decision/2. Absent in dppce.decision/1.",
           "title": "Bound Files"
         },
         "catalogue_hash": {

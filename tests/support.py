@@ -92,7 +92,9 @@ def make_test_result(index: int, verdict: str) -> TestResult:
     )
 
 
-def make_manifest() -> RunManifest:
+def make_manifest(**changes: Any) -> RunManifest:
+    """A manifest for a dppce.decision/2 body. ``bound_files=None`` gives one for a /1 body."""
+    fields: dict[str, Any] = {"bound_files": {}} | changes
     return RunManifest(
         engine_version="0.0.0-test",
         dependency_versions={},
@@ -109,6 +111,7 @@ def make_manifest() -> RunManifest:
         evaluation_time="2026-10-13T12:00:00Z",
         trust_policy_version="test-1",
         limitations=("test",),
+        **fields,
     )
 
 

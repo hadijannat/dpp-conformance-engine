@@ -389,7 +389,14 @@ one in `api.contract` and `access.policy`.
   `API.CONTRACT.PATH_MISMATCH`. Nothing is fetched.
 - The run manifest records `sha256:<hex>` of the raw bytes of each bound file in `bound_files`.
   These files are the contract, the policy, the schemas, and the rule packs.
-- A replay reads the bound files again. A changed file gives a different decision digest.
+  An unreadable file is recorded as `unavailable`.
+- The decision body schema version is `dppce.decision/2`. In version 2, `bound_files` is
+  required. A `dppce.decision/1` body has no `bound_files`. The verifier reads both versions
+  as written and rejects any other pairing as a structure error. The JSON Schema lists the two
+  versions. The model checks the pairing.
+- A replay reads the bound files again. In version 2, a changed file gives a different decision
+  digest. A replay of a version 1 run compares a version 1 body, so it does not detect a changed
+  bound file.
 
 ## 10. Recording
 

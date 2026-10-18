@@ -72,7 +72,7 @@ def build_decision(
     tests = tuple(sorted(test_results, key=lambda t: t.test_purpose_id))
     commitments = tuple(sorted(record_commitments, key=lambda c: c.record_id))
     return DecisionBody(
-        schema_version="dppce.decision/1",
+        schema_version="dppce.decision/2",
         manifest=manifest,
         overall=overall,
         overall_reason=overall_reason,
@@ -91,6 +91,18 @@ def build_decision(
 
 def decision_digest(decision: DecisionBody) -> str:
     return digest(decision)
+
+
+def in_layout_of(decision: DecisionBody, version: str) -> DecisionBody:
+    """Return a new body in the layout of ``version``, so that a replay compares like with like.
+
+    A dppce.decision/1 body has no bound_files. A replay of a version 1 run therefore does not
+    detect a changed bound file, exactly as version 1 did not.
+    """
+    if version == "dppce.decision/1" and decision.schema_version != version:
+        manifest = decision.manifest.model_copy(update={"bound_files": None})
+        return decision.model_copy(update={"schema_version": version, "manifest": manifest})
+    return decision
 
 
 def sign_envelope(

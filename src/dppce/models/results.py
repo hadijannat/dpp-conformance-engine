@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, SerializerFunctionWrapHandler, model_serializer
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
 
 from dppce.models.base import (
     AuthorityClass,
@@ -114,7 +114,7 @@ class RunManifest(Model):
         Field(
             default=None,
             description="sha256 of the raw bytes of each file that the profile binds, keyed by its path "
-            "under the data root. Absent in a body from an earlier version.",
+            "under the data root. Required in dppce.decision/2. Absent in dppce.decision/1.",
         )
     )
 
@@ -140,9 +140,11 @@ class DecisionBody(Model):
 
     Lists are sorted by identifier. The verifier rejects a body whose lists are out of order
     or hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.
+
+    Version 2 adds ``manifest.bound_files``. A version 1 body is still read and verified as written.
     """
 
-    schema_version: Literal["dppce.decision/1"]
+    schema_version: Literal["dppce.decision/1", "dppce.decision/2"]
     manifest: RunManifest
     overall: Verdict
     overall_reason: str
@@ -156,6 +158,17 @@ class DecisionBody(Model):
     results_count: int = Field(ge=0)
     record_commitments: tuple[RecordCommitment, ...]
     records_root: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def _bound_files_match_the_version(self) -> Self:
+        # A verifier of 0.1.0rc1 rejects a body with bound_files, so the field needs version 2.
+        # ponytail: the JSON Schema states only the two versions, not this pairing. An if/then
+        # sub-schema would be an open object, which the closed-schema test forbids.
+        if (self.manifest.bound_files is not None) != (self.schema_version == "dppce.decision/2"):
+            raise ValueError(
+                "manifest.bound_files is required in dppce.decision/2 and absent in dppce.decision/1"
+            )
+        return self
 
 
 class Attestation(Model):

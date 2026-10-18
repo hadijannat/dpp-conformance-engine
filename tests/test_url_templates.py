@@ -503,7 +503,7 @@ def test_the_ics_must_name_the_bound_access_policy(declared: str, code: str, tmp
 
 
 def test_a_manifest_without_bound_files_keeps_its_canonical_form() -> None:
-    manifest = make_manifest()
+    manifest = make_manifest(bound_files=None)
     assert manifest.bound_files is None
     assert b"bound_files" not in canonical_bytes(manifest)
     assert b'"bound_files":{}' in canonical_bytes(manifest.model_copy(update={"bound_files": {}}))

@@ -6,6 +6,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- A new run writes the decision body as `dppce.decision/2`. Version 2 adds the required field
+  `manifest.bound_files`, the hash of each file that the profile binds. A verifier of 0.1.0rc1
+  rejects a version 2 body.
+- The verifier and `dppce replay` still read a `dppce.decision/1` body as written, with the same
+  decision digest. A version 1 body with `bound_files`, or a version 2 body without it, is a
+  structure error.
+
 ## [0.1.0rc1] - 2026-10-15
 
 This is a release candidate. Tag `v0.1.0rc1` marks it. It is not published on PyPI.

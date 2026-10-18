@@ -3,6 +3,9 @@
 Each contract carries a ``schema_version`` such as ``dppce.ics/1``. A breaking change adds a
 new version and one step here. A document with an unknown version is rejected: the engine
 never guesses how to read it.
+
+A decision body has no step. It is signed, so it is never rewritten: the verifier reads
+``dppce.decision/1`` and ``dppce.decision/2`` as written, and a new run writes version 2.
 """
 
 from __future__ import annotations
