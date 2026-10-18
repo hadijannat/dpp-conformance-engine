@@ -328,6 +328,13 @@ def test_only_a_trusted_issuer_can_authorize(signer: LocalSigner, trust: TrustBu
         ),
         ("AUTHZ.ISSUER.UNTRUSTED", trust.model_copy(update={"keys": ()}), NOW, "urn:example:sut"),
     ]
+    # The key must have the kid of the token and the purpose "authorization", not only one of them.
+    key = trust.keys[0]
+    for changed in ({"purposes": ("report",)}, {"kid": "TEST-ONLY-other-key"}):
+        keys = (key.model_copy(update=changed),)
+        cases.append(
+            ("AUTHZ.ISSUER.UNTRUSTED", trust.model_copy(update={"keys": keys}), NOW, "urn:example:sut")
+        )
     # A dppce.trust/1 bundle that revoked the kid keeps that effect after migration.
     version_1 = json.loads(trust.model_dump_json(exclude={"revoked_certificates", "revoked_keys"}))
     del version_1["timestamp_anchors"]

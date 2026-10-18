@@ -49,8 +49,8 @@ python -m dppce.verifier envelope.signed.json --trust my-trust-bundle.json --at 
 | `status` | The status list sets the bit of the report, or the list is not usable. Or the report names a status entry, a list is supplied, or your policy needs status, and no usable list is supplied. |
 | `validity` | The issuer states a `valid_until` time that is before the evaluation time. |
 | `timestamp` | No token is good, or your policy needs a trusted timestamp and the report has none. The detail names the reason code of the first token. |
-| `opening` | The record opening that you supplied does not match its commitment, or the report does not hold that commitment. `not_checked` means that `records_root` failed. |
-| `proof` | The inclusion proof that you supplied names a different report, or its path does not lead to the root. `not_checked` means that the root of its tree failed. |
+| `opening` | The record opening that you supplied does not match its commitment, or the report does not hold that commitment. `not_checked` means that `records_root` or `ordering` failed. |
+| `proof` | The inclusion proof that you supplied names a different report, or its path does not lead to the root. `not_checked` means that the root of its tree or `ordering` failed. |
 
 To check manual steps, your trust bundle must hold the keys of the performers with the purpose `manual`.
 To check timestamps, list the certificate of each timestamp authority that you trust in

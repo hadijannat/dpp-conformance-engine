@@ -157,7 +157,8 @@ These dimensions of the output need the most attention:
 - A reviewer key needs the purpose `review`. One key cannot have the purposes `review` and
   `report` (`TRUST.KEY.ROLE_CONFLICT`).
 - A bad reviewer signature makes the verification incomplete. It does not change `signature`.
-- `opening` or `proof` is `not_checked` when the root of its tree does not match the body.
+- `opening` or `proof` is `not_checked` when the root of its tree does not match the body, or
+  when `ordering` does not pass.
 
 `dppce open` writes the opening of one record. `dppce prove` writes the proof of one result.
 An opening holds the plaintext of a record. Give it only to a party that is entitled to it.

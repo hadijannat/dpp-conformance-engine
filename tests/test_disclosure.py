@@ -295,6 +295,14 @@ def test_proof_is_not_checked_when_the_ordering_fails(trust: TrustBundle) -> Non
     dims = _dimensions(unordered, trust, proof=proof)
     assert (dims["ordering"][0], dims["results_root"][0]) == ("fail", "pass")
     assert dims["proof"] == ("not_checked", NOT_ORDERED)
+    # The root rule applies first.
+    dims = _dimensions(unordered.model_copy(update={"results_root": "0" * 64}), trust, proof=proof)
+    assert (dims["ordering"][0], dims["results_root"][0]) == ("fail", "fail")
+    assert dims["proof"] == ("not_checked", NOT_CHECKED)
+    # A file that is not a document fails before the ordering rule applies.
+    dims = _dimensions(unordered, trust, proof=b"[]")
+    assert dims["proof"][0] == "fail"
+    assert dims["proof"][1].startswith("PROOF.FILE.MALFORMED")
 
 
 def test_opening_is_not_checked_when_the_records_are_out_of_order(trust: TrustBundle) -> None:
@@ -308,6 +316,9 @@ def test_opening_is_not_checked_when_the_records_are_out_of_order(trust: TrustBu
     dims = _dimensions(records, trust, opening=opening)
     assert (dims["ordering"][0], dims["records_root"][0]) == ("fail", "pass")
     assert dims["opening"] == ("not_checked", NOT_ORDERED)
+    dims = _dimensions(records.model_copy(update={"records_root": "0" * 64}), trust, opening=opening)
+    assert (dims["ordering"][0], dims["records_root"][0]) == ("fail", "fail")
+    assert dims["opening"] == ("not_checked", NOT_CHECKED)
     # A file that is not a document still fails first, as with a root that does not match.
     dims = _dimensions(records, trust, opening=b"[]")
     assert dims["opening"][0] == "fail"
