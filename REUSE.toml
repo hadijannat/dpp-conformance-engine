@@ -3,7 +3,7 @@ SPDX-PackageName = "dpp-conformance-engine"
 SPDX-PackageSupplier = "Hadi Jannatabadi"
 
 [[annotations]]
-path = ["src/**", "tests/**", "scripts/**", "validation/**", "catalogue/**", "profiles/**", "testpacks/**", "fixtures/**", "styles/**", ".github/**", "pyproject.toml", "uv.lock", "justfile", "Dockerfile", "compose.yaml", ".dockerignore", ".gitignore", ".gitleaks.toml", ".pre-commit-config.yaml", ".python-version", ".vale.ini", "mkdocs.yml", "REUSE.toml", "CITATION.cff", "state/**"]
+path = ["src/**", "tests/**", "scripts/**", "validation/**", "catalogue/**", "profiles/**", "testpacks/**", "fixtures/**", "styles/**", ".github/**", "pyproject.toml", "uv.lock", "justfile", "Dockerfile", "compose.yaml", ".dockerignore", ".gitignore", ".gitattributes", ".gitleaks.toml", ".pre-commit-config.yaml", ".python-version", ".vale.ini", "mkdocs.yml", "REUSE.toml", "CITATION.cff", "state/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Hadi Jannatabadi"
 SPDX-License-Identifier = "Apache-2.0"
@@ -13,3 +13,22 @@ path = ["docs/**", "README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "GOVERN
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Hadi Jannatabadi"
 SPDX-License-Identifier = "CC-BY-4.0"
+
+# Unchanged third-party test data. Each directory README names the source and the license.
+[[annotations]]
+path = ["tests/vectors/jcs/input/*.json", "tests/vectors/jcs/output/*.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2018 Anders Rundgren"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "tests/vectors/wycheproof/TEST-ONLY-json_web_signature_test.json"
+precedence = "override"
+SPDX-FileCopyrightText = "2016-2026 The Wycheproof Authors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "tests/vectors/gs1-syntax-engine/dl.c"
+precedence = "override"
+SPDX-FileCopyrightText = "2021-2026 GS1 AISBL"
+SPDX-License-Identifier = "Apache-2.0"

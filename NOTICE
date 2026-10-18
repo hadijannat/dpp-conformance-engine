@@ -9,5 +9,9 @@ unless a file states a different license.
 This product does not contain the text of any EN, ISO, IEC, or DIN
 standard. It refers to such documents by public bibliographic metadata only.
 
+The tests/vectors directory holds unchanged third-party test files.
+Each subdirectory README names the source, the copyright holder, and
+the license.
+
 Third-party software is used as separately installed dependencies.
 Each dependency keeps its own license. See docs/reference/dependency-licenses.md.

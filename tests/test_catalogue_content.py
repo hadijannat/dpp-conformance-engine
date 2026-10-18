@@ -7,6 +7,7 @@ two-way trace. They do not test the engine.
 
 from __future__ import annotations
 
+import hashlib
 from collections import Counter
 from typing import Any
 
@@ -118,9 +119,16 @@ def test_each_source_id_is_unique() -> None:
     assert "dppce-illustrative" in counts
 
 
-def test_no_source_claims_a_hash_and_none_has_more_than_three_evidence_entries(catalogue: Catalogue) -> None:
+def test_only_vendored_vector_records_carry_a_hash_and_none_has_more_than_three_evidence_entries(
+    catalogue: Catalogue,
+) -> None:
     for source in catalogue.sources:
-        assert source.sha256 is None, f"{source.id}: no artifact was hashed in the audit"
+        if source.source_type == "test_vector":
+            # A vendored file under tests/vectors is hashed from the bytes in this checkout.
+            data = (ROOT / source.id).read_bytes()
+            assert source.sha256 == hashlib.sha256(data).hexdigest(), source.id
+        else:
+            assert source.sha256 is None, f"{source.id}: no artifact was hashed in the audit"
         assert len(source.evidence) <= 3, source.id
 
 

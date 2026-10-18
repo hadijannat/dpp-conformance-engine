@@ -2,7 +2,9 @@
 # Purpose: record each source of the source audit with its verification level.
 # Built from docs/research/raw/*.json with the corrections of the refutation files applied.
 # 'Published' and 'cited in the Official Journal' are separate facts for each standard.
-# No artifact was hashed (BL-001). Page text was read through a summarizing fetch tool.
+# No audit artifact was hashed (BL-001). Page text was read through a summarizing fetch tool.
+# Records with source_type test_vector are not audit results. Each one names one vendored file
+# under tests/vectors/ by its path and holds the SHA-256 of its bytes.
 schema_version: dppce.sources/1
 legal_as_of: '2026-10-13'
 sources:
@@ -6862,3 +6864,355 @@ sources:
     official: true
   uncertainties:
   - The latest version is one day old; version currency may change quickly.
+- id: tests/vectors/jcs/input/arrays.json
+  title: 'JCS test data: testdata/input/arrays.json'
+  identifier: cyberphone/json-canonicalization testdata/input/arrays.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/arrays.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: e503b6d71d1afa595b1c74b1016445c944cd89f90418066b23de1aeda7d17563
+  hash_note: SHA-256 of the vendored bytes. Git blob 20e62263c430a205944284778973c7633d5879b1, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/arrays.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/input/french.json
+  title: 'JCS test data: testdata/input/french.json'
+  identifier: cyberphone/json-canonicalization testdata/input/french.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/french.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 03676a951cd8753ac62589f72eb2105cc782c33425418cfe1d517c111f6e5d5a
+  hash_note: SHA-256 of the vendored bytes. Git blob 4ff6d3de24ce8a488a205ac97f04c480cbc38ab8, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/french.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/input/structures.json
+  title: 'JCS test data: testdata/input/structures.json'
+  identifier: cyberphone/json-canonicalization testdata/input/structures.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/structures.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: d66893805be1784116af50af3110d08766c70a6b4aad93374723f72346e7aaa6
+  hash_note: SHA-256 of the vendored bytes. Git blob eb71efb84cf0bb9a022d0c3cbe1e286f0000f824, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/structures.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/input/unicode.json
+  title: 'JCS test data: testdata/input/unicode.json'
+  identifier: cyberphone/json-canonicalization testdata/input/unicode.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/unicode.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 4621864e014d4a805a563f55b9ea20aba4a2d2dc09c7394f625496998c00702c
+  hash_note: SHA-256 of the vendored bytes. Git blob 4b5bc7699670c930aab223a46114c2c5c3e612cd, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/unicode.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/input/values.json
+  title: 'JCS test data: testdata/input/values.json'
+  identifier: cyberphone/json-canonicalization testdata/input/values.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/values.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: c4a041b503d6bc236036ef44db4dac499272f60fc22c40dc3b7a54870ba6f1c3
+  hash_note: SHA-256 of the vendored bytes. Git blob f7712c2fbb73d7afd30e14a15d8c5a2791ce1cd9, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/values.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/input/weird.json
+  title: 'JCS test data: testdata/input/weird.json'
+  identifier: cyberphone/json-canonicalization testdata/input/weird.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/weird.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: a3a905266bd4a49a969274ea69baa14ee0c4af0ead926d6fa2b7612b4af75387
+  hash_note: SHA-256 of the vendored bytes. Git blob 53fabe67bc60bb1897a91c9387caf4b8abb5ef29, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/weird.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/output/arrays.json
+  title: 'JCS test data: testdata/output/arrays.json'
+  identifier: cyberphone/json-canonicalization testdata/output/arrays.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/arrays.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 099601b171cafed97c333f8878d68e7f8c8f795412adb34b2fdcf0e7c7beac42
+  hash_note: SHA-256 of the vendored bytes. Git blob 5efb93db77cb8aaeffcda0c9bf7c474d5183360b, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/arrays.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/output/french.json
+  title: 'JCS test data: testdata/output/french.json'
+  identifier: cyberphone/json-canonicalization testdata/output/french.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/french.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: d99d0ebdcb0033cb858cfa830ae46bc0fb3309413b271f1da828c89901a27ed5
+  hash_note: SHA-256 of the vendored bytes. Git blob 2e15cd1b22fe2723596e4ba513e0e269a56939c6, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/french.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/output/structures.json
+  title: 'JCS test data: testdata/output/structures.json'
+  identifier: cyberphone/json-canonicalization testdata/output/structures.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/structures.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 605f65004ec2db7692522a0852c22f1c989e036d547e88963d1a3143cf3195d5
+  hash_note: SHA-256 of the vendored bytes. Git blob dc21e2424e9cc4c84e4cc1114826f3d146bd6156, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/structures.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/output/unicode.json
+  title: 'JCS test data: testdata/output/unicode.json'
+  identifier: cyberphone/json-canonicalization testdata/output/unicode.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/unicode.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 0d99aad92a125196ff887876643fd3206786a84ddce2cee52ba4ad256d2381d3
+  hash_note: SHA-256 of the vendored bytes. Git blob ee60fd121be2f97943e77eb16294c211a915faa7, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/unicode.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/output/values.json
+  title: 'JCS test data: testdata/output/values.json'
+  identifier: cyberphone/json-canonicalization testdata/output/values.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/values.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 2d5e01a318d0f0879ab568c4be289c8b1f64ef8921a53c6277d5e069978baacb
+  hash_note: SHA-256 of the vendored bytes. Git blob 29b720b6e754a0dd9c4dbddac69bdc5cd3ab8792, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/values.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/jcs/output/weird.json
+  title: 'JCS test data: testdata/output/weird.json'
+  identifier: cyberphone/json-canonicalization testdata/output/weird.json
+  issuing_body: Anders Rundgren (GitHub repository cyberphone/json-canonicalization)
+  source_type: test_vector
+  official_url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/weird.json
+  edition_or_version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 32a48195b9b20fe67b1795e39e4509f14d860b45.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/jcs/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 6af595a9aa80110b964b4de3f82a05fa6ae7423005019bacfa2620dddc4e94d1
+  hash_note: SHA-256 of the vendored bytes. Git blob 62c83a333e3141f9e16767a7829debbd34bfa913, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/weird.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository host reports the license as NOASSERTION. The LICENSE file at the commit holds the Apache-2.0 notice 'Copyright 2018 Anders Rundgren'.
+- id: tests/vectors/wycheproof/TEST-ONLY-json_web_signature_test.json
+  title: 'Wycheproof test data: testvectors_v1/json_web_signature_test.json'
+  identifier: C2SP/wycheproof testvectors_v1/json_web_signature_test.json
+  issuing_body: The Wycheproof Authors (GitHub repository C2SP/wycheproof)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/wycheproof/blob/7a325932231bd7a724c791c8b0d65ea4d6d2f435/testvectors_v1/json_web_signature_test.json
+  edition_or_version: commit 7a325932231bd7a724c791c8b0d65ea4d6d2f435
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 7a325932231bd7a724c791c8b0d65ea4d6d2f435.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/wycheproof/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 8e687a06fe8359f4ec51480f1a9f73c8faebd6f4c01b818b843b44eee54fd5d9
+  hash_note: SHA-256 of the vendored bytes. Git blob cdb1c77a770b72e340d6c1e2ed502b86628e9438, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/wycheproof/blob/7a325932231bd7a724c791c8b0d65ea4d6d2f435/testvectors_v1/json_web_signature_test.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/wycheproof/blob/7a325932231bd7a724c791c8b0d65ea4d6d2f435/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - Only the groups with an ES256 P-256 key test the signing profile of the engine.
+  - The vendored name adds the prefix TEST-ONLY- because the file holds published test keys. The bytes are unchanged.
+- id: tests/vectors/gs1-syntax-engine/dl.c
+  title: 'GS1 Digital Link test data: src/c-lib/dl.c'
+  identifier: gs1/gs1-syntax-engine src/c-lib/dl.c
+  issuing_body: GS1 AISBL (GitHub repository gs1/gs1-syntax-engine)
+  source_type: test_vector
+  official_url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/dl.c
+  edition_or_version: commit 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72
+  publication_date: null
+  retrieval_date: '2026-10-18'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/gs1-syntax-engine/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: c351912e15f52b95de3efabf071c0753b0fe615bf0b6ff41651dd52096595d7f
+  hash_note: SHA-256 of the vendored bytes. Git blob 23d632bd860c2a3fcf605903e8735cccd70445e6, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/dl.c
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The cases are in C unit tests. Project test code extracts them from the text.
+  - The release of the GS1 Digital Link URI syntax standard that the library follows was not determined.

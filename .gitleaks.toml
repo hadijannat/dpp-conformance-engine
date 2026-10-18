@@ -10,4 +10,5 @@ description = "Synthetic test keys, certificates, and tokens of the reference sy
 paths = [
   '''^fixtures/reference/.*TEST-ONLY-.*''',
   '''^fixtures/reference/roles\.json$''',
+  '''^tests/vectors/.*TEST-ONLY-.*''',
 ]
