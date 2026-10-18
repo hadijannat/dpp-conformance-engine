@@ -343,12 +343,25 @@ def test_sign_never_overwrites_its_input(run: Run, tmp_path: Path) -> None:
     assert len(json.loads(envelope.read_text(encoding="utf-8"))["signatures"]) == 1
 
 
+def test_a_new_output_file_is_never_writable_by_others(run: Run, tmp_path: Path) -> None:
+    key = _plain_key(tmp_path)
+    envelope = _envelope(tmp_path / "envelope.json")
+    out = tmp_path / "signed.json"
+    previous = os.umask(0)
+    try:
+        code, _, err = _sign(run, envelope, key, "--allow-unencrypted-key", "--out", str(out))
+    finally:
+        os.umask(previous)
+    assert code == 0, err
+    assert stat.S_IMODE(out.stat().st_mode) == 0o644
+
+
 def test_sign_in_place_keeps_the_mode_and_refuses_a_link(run: Run, tmp_path: Path) -> None:
     key = _plain_key(tmp_path)
     envelope = _envelope(tmp_path / "envelope.json")
-    os.chmod(envelope, 0o644)
+    os.chmod(envelope, 0o640)
     assert _sign(run, envelope, key, "--allow-unencrypted-key", "--in-place")[0] == 0
-    assert stat.S_IMODE(envelope.stat().st_mode) == 0o644
+    assert stat.S_IMODE(envelope.stat().st_mode) == 0o640
     assert not [p for p in tmp_path.iterdir() if p.name.startswith(".dppce-sign-")]
 
     target = _envelope(tmp_path / "target.json")

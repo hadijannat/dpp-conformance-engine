@@ -69,10 +69,11 @@ class FileDataKeyProvider:
         return key
 
 
-def write_new_file(path: Path, data: bytes, mode: int = 0o666) -> None:
+def write_new_file(path: Path, data: bytes, mode: int = 0o644) -> None:
     """Create ``path`` with ``data``. Never replaces a file and never follows a link.
 
     A failed write removes the file again: a partial key or opening never stays, and a retry works.
+    The default mode keeps a report, a proof, or a token writable only by its owner, also under umask 0.
     """
     handle = os.open(path, _NEW_FILE, mode)  # outside the try: a file that exists is not ours to remove
     try:
