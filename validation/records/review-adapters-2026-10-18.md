@@ -11,10 +11,13 @@ Prerequisites: read `docs/explanation/architecture.md` sections 8 and 9, and
 | Field | Value |
 | --- | --- |
 | Date | 2026-10-18 |
-| Commit reviewed | `5aaca24` and the main branch at `6cbd042`. The adapter code is the same in both. |
-| Fixes | `58f15d7..075b0a6` on branch `worktree-wf_46368434-d41-36` |
+| Commit reviewed | `5aaca24`. The skeptics ran on the local `main` at `6cbd042`. |
+| Fixes | `58f15d7..2da2f4b` on branch `worktree-wf_46368434-d41-36` |
 | Reviewers | AI agents. Finders, reproduce skeptics, and the fixer are AI agents. None of them wrote the code under review. |
 | Nature | **An agent review. It is not an audit. No person has reviewed this record.** |
+
+`git diff --stat 5aaca24 6cbd042 -- src validation/run.py` shows one changed file in scope:
+`validation/run.py`. That change is a human-review field, not the control logic.
 
 No review status of a catalogue entry was changed. No approval, reviewer name, or validation
 result is stated here that a command did not produce.
@@ -37,8 +40,8 @@ result is stated here that a command did not produce.
    under review (red). Then the fixer changed the code until the test passed (green).
 
 The tests are in `tests/test_review_adapters.py`, `tests/test_validation_controls.py`, and
-`tests/test_transport_tls.py`. Each test name starts with the finding identifier where one
-applies.
+`tests/test_transport_tls.py`. The name of each test for a finding starts with a finding
+identifier. The TLS tests are not for a finding: see the last section.
 
 ## Summary
 
@@ -49,7 +52,8 @@ applies.
 
 ## Red runs
 
-Each count comes from a pytest run of the new tests against the code before the fix.
+Each count comes from a pytest run of the new tests against the code before the fix. The
+code before a fix already held the fixes of the earlier rows.
 
 | Fix commit | Tests | Result on the code before the fix |
 | --- | --- | --- |
@@ -60,6 +64,7 @@ Each count comes from a pytest run of the new tests against the code before the 
 | `a6e7d04` | identifier, carrier, control characters | 32 failed, 9 passed |
 | `742f0e0` | credential scrub | 7 failed, 1 passed |
 | `28eb959` | validation controls | 4 failed |
+| `2da2f4b` | fixed format set, nanosecond fraction | 2 failed, 4 passed |
 
 The passed tests are controls. They fix behavior that must stay, for example a real status
 mismatch that still fails. In the last row, three unit tests failed because the new helper did
@@ -77,16 +82,16 @@ control step that stopped completing.
 | api-common-5 | low | `common.py` | confirmed | fixed (`58f15d7`) |
 | api-common-6 | low | `api.py` | confirmed | fixed (`58f15d7`) |
 | api-common-7 | low | `api.py` | confirmed | fixed (`58f15d7`) |
-| api-common-8 | low | `common.py` | confirmed | fixed (`58f15d7`) |
+| api-common-8 | low | `common.py` | confirmed | fixed (`58f15d7`, `2da2f4b`) |
 | data-lifecycle-1 | high | `lifecycle.py` | confirmed | fixed (`641252f`) |
-| data-lifecycle-2 | medium | `lifecycle.py` | confirmed | fixed (`641252f`) |
+| data-lifecycle-2 | medium | `lifecycle.py` | confirmed | fixed (`641252f`, `2da2f4b`) |
 | data-lifecycle-3 | medium | `lifecycle.py` | confirmed | fixed (`641252f`) |
 | data-lifecycle-4 | medium | `lifecycle.py` | confirmed | fixed (`641252f`) |
 | data-lifecycle-5 | medium | `data.py` | confirmed | fixed (`641252f`) |
 | data-lifecycle-6 | medium | `data.py` | confirmed | fixed (`58f15d7`) |
 | data-lifecycle-7 | low | `data.py` | confirmed | fixed (`641252f`) |
 | data-lifecycle-8 | low | `data.py` | confirmed | fixed (`641252f`) |
-| data-lifecycle-9 | low | `common.py` | confirmed | fixed (`58f15d7`) |
+| data-lifecycle-9 | low | `common.py` | confirmed | fixed (`58f15d7`, `2da2f4b`) |
 | data-lifecycle-10 | low | `data.py` | confirmed | fixed (`641252f`) |
 | data-lifecycle-11 | low | `lifecycle.py` | refuted | not changed |
 | identifier-carrier-1 | medium | `identifier.py` | confirmed | fixed (`a6e7d04`) |
@@ -104,7 +109,8 @@ control step that stopped completing.
 
 Some findings overlap. data-lifecycle-9 is api-common-8 for `data.jsonschema`.
 server-clock-fixes-4 is data-lifecycle-2, and server-clock-fixes-6 is data-lifecycle-10.
-identifier-carrier-1 and identifier-carrier-3 share one fix. Each finding has its own test.
+identifier-carrier-1 and identifier-carrier-3 share one fix. Each finding has a test case.
+Overlapping findings share one test.
 
 ## Evidence and handling
 
@@ -127,8 +133,9 @@ identifier-carrier-1 and identifier-carrier-3 share one fix. Each finding has it
 - **api-common-7.** A resolved URL with a query passed. Now `_within` refuses a query and a
   fragment.
 - **api-common-8.** `format: uri` was not asserted, because no optional package was installed.
-  Now the validator has a standard-library `uri` checker. A format that the engine cannot
-  assert gives `unsupported` or `blocked`, never a pass.
+  Now the validator has a standard-library `uri` checker. The asserted formats are a fixed set,
+  so an installed package cannot change a run. A format outside the set gives `unsupported` or
+  `blocked`, never a pass.
 
 ### Data, persistence, and registry
 
