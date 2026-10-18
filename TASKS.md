@@ -17,6 +17,7 @@ A check that was not executed is marked **not run**. It is never marked passed.
 | M4 | Evidence: encryption, canonical body, signing, scope binding, standalone verifier | complete |
 | M5 | Method validation: faults, controls, replays, property and mutation tests, readiness | complete |
 | M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | complete: GitHub pre-release `v0.1.0rc1` on 2026-10-15 with the approval of the owner; release workflow green; not on PyPI |
+| M7 | T1 technical readiness: the agent-buildable T1 packages of `docs/research/gap-assessment-2026-10-15.md`, section 6.2 | in progress: the work of 2026-10-18 is on `main` up to `8b3bfff`; see "State after the T1 program (2026-10-18)" |
 
 "Complete" means that the local gates ran and passed for the milestone. It does not mean that
 a human reviewed the work. The evidence for each figure is in `docs/readiness.md`.
@@ -24,7 +25,7 @@ a human reviewed the work. The evidence for each figure is in `docs/readiness.md
 ## M0 work log
 
 _Historical log, closed. It shows the state at the time it was written. The current state is in
-"State at the end of the session" below. Do not resume work from this section._
+"State after the T1 program (2026-10-18)" below. Do not resume work from this section._
 
 - [x] Workspace inventory. Result: empty apart from `.remember/` (session tooling, ignored by git).
 - [x] Toolchain probe. Result: see `docs/research/tool-model-routing.md`.
@@ -37,7 +38,7 @@ _Historical log, closed. It shows the state at the time it was written. The curr
 ## Implementation work log (cycle 3, coordinator)
 
 _Historical log, closed. It shows the state at the time it was written. The current state is in
-"State at the end of the session" below. Do not resume work from this section._
+"State after the T1 program (2026-10-18)" below. Do not resume work from this section._
 
 Written and committed. Gates on this code: `uv run just check` exit 0.
 
@@ -66,7 +67,7 @@ Security findings from the automated commit review, all fixed in the cycle they 
 ## Commands executed
 
 _Historical log, closed. It shows the state at the time it was written. The current state is in
-"State at the end of the session" below. Do not resume work from this section._
+"State after the T1 program (2026-10-18)" below. Do not resume work from this section._
 
 | Command | Exit status | Note |
 | --- | --- | --- |
@@ -85,6 +86,9 @@ _Historical log, closed. It shows the state at the time it was written. The curr
 | `uv run just check` | 0 | ruff format, ruff check, mypy --strict (46 files), pytest: 162 passed |
 
 ## State at the end of the session (2026-10-15)
+
+_Historical log, closed. It shows the state at the time it was written. The current state is in
+"State after the T1 program (2026-10-18)" below. Do not resume work from this section._
 
 All fast gates pass. Both review rounds that the brief permits are complete. Every finding is
 fixed or filed as an open question. The figures below come from commands that ran in this
@@ -134,6 +138,86 @@ Reviews (agent reviews, not human approvals):
 - [ ] Mutation survivors "not tested: the exact size limit of a token" (3). Commit `31ac1e8` adds a test for the
       exact limit. Mutation testing was not run again, so the record still lists them.
 
+## State after the T1 program (2026-10-18)
+
+A development agent wrote this section from the git history and the records in
+`validation/records/`. No person has reviewed it.
+
+The remote-tracking branch `origin/main` is at `8b3bfff`. The branch `final/2026-10-18` adds two
+records and this update. It is not pushed.
+
+### What landed
+
+All work is of 2026-10-18. Each row is on `main`, except where the row states otherwise.
+
+| Work | Commits | Content |
+| --- | --- | --- |
+| T0 corrections and waves 1 to 3 | up to `f1ee709` | See `state/progress.json`, cycles 19 to 23. |
+| Wave 4 | `f7b66c9` to `6602f8c` | A server error counts as no answer. The resolved passport binds to the API item target (D4-05). A selected approved entry excludes the draft that it supersedes. Lint rule CAT023. A severity column in the HTML report. RFC 3161 timestamps and trust bundle version 2 (D6-01, D6-02, D8-10). |
+| W5-docs | `c87e52c` to `5aaca24` | A reason-code catalogue from the source literals. A human review field of the validation record, which the engine never fills. Operator, laboratory, and contributor guides. |
+| W5-evidence | `4ad5625` to `f8ac8f5` | Report status lists, signer roles, and attestation version 2 (D6-03, the report part of D8-14, ADR 0016). Evidence faults E-14 and E-15. |
+| W5-mut | `f3191b3` to `dbc88e0` | The mutation record of 2026-10-18 and tests for the survivors in the verifier and the verdicts. |
+| D8-05 adapter review | `4e48f6b` to `ec2a1ad`, and `dae6117` | The fixes of `validation/records/review-adapters-2026-10-18.md`. `dae6117` refuses a stamp of a moment that does not exist. |
+| D6-08 key tooling | `0403e5f` to `5f22f66` | `dppce keys generate`, `authorize`, `trust-bundle add-key`, `open`, and `prove`. The contracts `dppce.opening/1` and `dppce.proof/1`. The review fixes. |
+| W6-mut2 | `b7c0410` to `5037d12`, merge commit `dfd03b1` | Mutation tests of round 3 for the transport, redaction, and authorization code. |
+| CI and CodeQL fixes | `d012334`, `12f57c8`, `b7b744c` | A TEST-ONLY PKI that Python 3.13 accepts, and a TLS 1.2 minimum (CodeQL alert 13). New output files get mode 0600 (CodeQL alerts 14 to 16). |
+| Follow-ups | `83a08a4`, `7077837`, `1019a8d`, `5fe675d`, `2311513`, `8b3bfff` | Port 0 is never the default port. `Observation.acquired_at` uses `Stamp`. The mutmut configuration deselects the reason-code page test. A proof or an opening is `not_checked` when ordering fails. |
+| Records | `a7ef327`, `8394f36`, on `final/2026-10-18` only | The method validation record at `8b3bfff`. The review record of the key tooling. |
+| W5-CI (PR #2) | `c71169c` to `b2eb10e`, on branch `ci/scans-and-release-gates` only | Scan, documentation, and DCO jobs, and release gates. |
+
+### Checks at `8b3bfff`
+
+A development agent ran these commands. The full table with evidence is in
+`docs/readiness.md`, section 2.
+
+| Check | Result | Commit |
+| --- | --- | --- |
+| `uv run just check` | format, lint, mypy strict clean; 2540 passed, 97 deselected | `8b3bfff` |
+| `uv run pytest -m validation` | 97 passed | `8b3bfff` |
+| `uv run just cov` | core packages 99 percent (gate 90); all modules 97 percent | `8b3bfff` |
+| `uv run just mutation` | 5731 mutants: 4886 killed, 22 timed out, 823 survived; survivors not classified | `8b3bfff` |
+| `uv run python -m validation.run` | 93/93 faults, 0/48 false positives, 3/3 controls, 9/9 boundary, 15/15 evidence faults, 15/15 replays | `8b3bfff` (clean tree) |
+| `uv run dppce catalogue lint` | 0 errors, 2 warnings, 36 info | `8b3bfff` |
+| `uv run just docs` | strict build passes | `8b3bfff` |
+
+Records of 2026-10-18. They are agent records, not human approvals.
+
+- `validation/records/review-adapters-2026-10-18.md`
+- `validation/records/review-key-tooling-2026-10-18.md`
+- `validation/records/mutation-2026-10-18.md`
+- `validation/records/method-validation-20261018T125030Z.json` (at `715fdb5`)
+- `validation/records/method-validation-20261018T212047Z.json` (at `8b3bfff`)
+
+The owner decisions of 2026-10-18 are in `state/progress.json`, milestone M7, and in the two
+review records.
+
+### Not done, and why
+
+- [ ] Approval of the draft interpretations (OQ-002). Only a person can approve. An agent must
+      not approve.
+- [ ] OQ-016 and the other readings of a reviewer. A person must decide which observation
+      contradicts a provision.
+- [ ] A test against a real system. It needs a signed authorization of its owner and the
+      approval of the user.
+- [ ] An independent audit. An agent review is not an audit.
+- [ ] Commission acts that are not adopted (OQ-006, OQ-007, OQ-013). The affected entries stay
+      `inconclusive` until the acts exist.
+- [ ] Content of EN, ISO, IEC, and DIN standards. CLAUDE.md rule 5 keeps it out of the
+      repository. The EN entries stay placeholders.
+- [ ] KMS and PKCS#11 providers (D6-07). The gap assessment puts D6-07 in tier T3. The
+      capabilities `keys.kms` and `keys.pkcs11` stay `interface_only`.
+- [ ] The open mutation survivors. The run at `8b3bfff` left 823 survivors, and nobody has
+      classified them. The open lists of `validation/records/mutation-2026-10-18.md` stay open.
+- [ ] PR #2 (branch `ci/scans-and-release-gates`, head `b2eb10e`). It waits for the DCO sign-off
+      of the owner.
+- [ ] DCO sign-off of the agent commits after `91a6629`. An agent must not sign off for a person.
+- [ ] Push of `final/2026-10-18` (`a7ef327`, `8394f36`, and this update). It is not pushed.
+- [ ] The open items of `validation/records/review-key-tooling-2026-10-18.md`: docs1-DOC-2, the
+      rest of INT-4 (protected files), `not_checked` after `structure`, and the notes SR-N2,
+      SR-N5, SR-N6, and SR-N7.
+- [ ] The limit of two review rounds. No record states how the agent reviews of 2026-10-18
+      relate to it.
+
 ### Resume commands
 
 ```bash
@@ -148,5 +232,7 @@ uv run just docs
 ## Resume instructions
 
 1. Read `state/progress.json`. Do not exceed `session.max_cycles`.
-2. Read `docs/open-questions.md` and `docs/backlog.md`.
-3. Continue with the list "Not done, and why" in "State at the end of the session".
+2. Read `docs/open-questions.md`, `docs/backlog.md`, and `docs/readiness.md`.
+3. Run the resume commands on a clean working tree.
+4. Continue with the list "Not done, and why" in "State after the T1 program (2026-10-18)".
+5. Do not do an item that needs a person. Report it to the owner.

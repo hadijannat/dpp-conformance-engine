@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 23,
+    "cycle": 33,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues.",
-    "state_at_end": "2026-10-15: pre-release v0.1.0rc1 published on GitHub; CI green; repository public. See TASKS.md.",
+    "state_at_end": "2026-10-18: the T1 work is on main up to 8b3bfff (origin/main). Branch final/2026-10-18 adds the records a7ef327 and 8394f36 and this status update; it is not pushed. PR #2 (ci/scans-and-release-gates) is not merged. See TASKS.md, section 'State after the T1 program (2026-10-18)'. Before: 2026-10-15, pre-release v0.1.0rc1 published on GitHub; CI green; repository public.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -63,8 +63,8 @@
     "M7": {
       "status": "in progress",
       "research_passes": 0,
-      "review_rounds": 0,
-      "note": "T1 technical readiness: the agent-buildable T1 packages of docs/research/gap-assessment-2026-10-15.md, section 6.2. Owner decisions of 2026-10-18 in chat: protected T1 contract edits (O1-2 to O1-10) allowed, each protected diff shown to the owner before it lands; issuer Hadi Jannatabadi, 'not accredited' (OQ-003); standing approvals to land reviewed branches, add pinned dependencies, and push main after ci and codeql. Not in scope for an agent: interpretation approval (OQ-002), OQ-016 and other reviewer readings, a real-system run, an independent audit. Owner decisions of 2026-10-18 after review: reports with issuer 'unspecified' fail issuer_trust; stricter identifier.parse accepted; a resolver 5xx becomes inconclusive like unreachable (wave 4); W3b access defaults confirmed; no maximum age for manual results."
+      "review_rounds": 2,
+      "note": "T1 technical readiness: the agent-buildable T1 packages of docs/research/gap-assessment-2026-10-15.md, section 6.2. Owner decisions of 2026-10-18 in chat: protected T1 contract edits (O1-2 to O1-10) allowed, each protected diff shown to the owner before it lands; issuer Hadi Jannatabadi, 'not accredited' (OQ-003); standing approvals to land reviewed branches, add pinned dependencies, and push main after ci and codeql. Not in scope for an agent: interpretation approval (OQ-002), OQ-016 and other reviewer readings, a real-system run, an independent audit. Owner decisions of 2026-10-18 after review: reports with issuer 'unspecified' fail issuer_trust; stricter identifier.parse accepted; a resolver 5xx becomes inconclusive like unreachable (wave 4); W3b access defaults confirmed; no maximum age for manual results. Later owner decisions of 2026-10-18, given in the agent session: (1) D8-05 adapter review: may land; first add a check that refuses a stamp of a moment that does not exist (done in dae6117); the recorded defaults are accepted: a 404 on the version history gives blocked, a future update time fails with no clock-skew tolerance, a leap second fails the declared rule, JSON Schema pattern uses Python re, a credential echoed in base64 or a mix of forms is not removed. (2) D6-08 key tooling: may land; the key defaults are accepted: the shipped TEST-ONLY report key stays unencrypted and the tutorial, README, and rig pass --allow-unencrypted-key; key files use the fixed PKCS#8 parameters of the installed cryptography package (PBKDF2-HMAC-SHA256, 2048 iterations, AES-256-CBC) and a generated 32-byte passphrase compensates; sign without --out or --in-place gives the argparse usage error, exit 2, with no reason code; the 32-byte rule applies to keys generate only, and reading still accepts shorter passphrases and the traditional OpenSSL encrypted PEM. (3) Follow-ups to do and land: an explicit port 0 is never the default port and the origin options refuse it (83a08a4); Observation.acquired_at uses the shared Stamp type (7077837); the mutmut configuration deselects the reason-code page test (1019a8d); a proof or an opening is not_checked when ordering fails (5fe675d). (4) New output files of sign --out, authorize, trust-bundle add-key, and prove have mode 0600 (b7b744c). Not an owner decision: the coordinating agent landed W6-mut2 as merge commit dfd03b1 so that the hashes that the mutation record cites stay on a branch. Counting rule for review_rounds: the two agent review records of M7, validation/records/review-adapters-2026-10-18.md (D8-05) and validation/records/review-key-tooling-2026-10-18.md (D6-08 and the follow-ups). Each record holds several stages. The per-package reviews of the waves (the 'apply review findings' commits) are not counted. Both reviews came after the two review rounds that the brief permits; no record states an owner decision on that limit."
     }
   },
   "repair_attempts": {
@@ -481,14 +481,75 @@
       "kind": "implement-and-check",
       "milestone": "M7",
       "summary": "Wave 3 integration (2026-10-18): access entitlement and declared roles (W3b), vendored GS1, Wycheproof, and RFC 8785 vectors, property tests, mutation scope (W3c). validation.run: 93 of 93 faults, 0 of 48 false positives."
+    },
+    {
+      "cycle": 24,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "Wave 4 (2026-10-18), f7b66c9 to 6602f8c: a server error counts as no answer; the resolved passport binds to the API item target (D4-05); a selected approved entry excludes the draft that it supersedes; lint rule CAT023; a severity column in the HTML report; RFC 3161 timestamps and trust bundle version 2 (D6-01, D6-02, D8-10), with the new dependency asn1crypto (49b7dac). Integration review fixes in 6602f8c."
+    },
+    {
+      "cycle": 25,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "W5-docs (2026-10-18), c87e52c to 5aaca24: a reason-code catalogue generated from the source literals, a human review field of the validation record that the engine never fills, and operator, laboratory, and contributor guides. A method-validation record at 00e1e67 was added (4769704) and removed (415e925), because review fixes followed. 5aaca24 adds the record at 715fdb5."
+    },
+    {
+      "cycle": 26,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "W5-evidence (2026-10-18), 4ad5625 to f8ac8f5: report status lists, signer roles, and attestation version 2 (D6-03, the report part of D8-14, ADR 0016 proposed); evidence faults E-14 and E-15; fault catalogue version 0.5.0."
+    },
+    {
+      "cycle": 27,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "W5-mut (2026-10-18), f3191b3 to dbc88e0: validation/records/mutation-2026-10-18.md. Baseline at 6602f8c: 4464 mutants, 3609 killed, 7 timeouts, 11 with no tests, 837 survived; an agent classified each survivor. Re-run after the new tests of f3191b3: 3672 killed, 774 survived."
+    },
+    {
+      "cycle": 28,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "W5-CI (2026-10-18), c71169c to b2eb10e on branch ci/scans-and-release-gates, based on 6602f8c: a DCO check of pull request commits, scan, docs, and DCO jobs, and release gates. Opened as PR #2. Not merged into main; it waits for the DCO sign-off of the owner."
+    },
+    {
+      "cycle": 29,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "D8-05 agent review of the adapters (2026-10-18): record ae7e0fc, fixes 4e48f6b to ec2a1ad. 31 findings: 30 confirmed and fixed, 1 refuted. An agent check of the fixes found 6 more: 5 fixed, 1 fixed in part. dae6117 refuses a stamp of a moment that does not exist, as the owner asked before the package landed."
+    },
+    {
+      "cycle": 30,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "D6-08 operator key tooling (2026-10-18), 0403e5f to 5f22f66: keys generate, authorize, trust-bundle add-key, open, and prove; the contracts dppce.opening/1 and dppce.proof/1. Review fixes 98c7d64, f73dd3b, a2352dc, 03a61d8, ee01901, b450905, and 5f22f66. Record: validation/records/review-key-tooling-2026-10-18.md (8394f36)."
+    },
+    {
+      "cycle": 31,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "W6-mut2 (2026-10-18), b7c0410 to 5037d12, landed as merge commit dfd03b1: mutation tests of round 3 for transport, redaction, and authorization. The run after the adapter review at 2d3eab1 checked 1118 mutants: 1035 killed, 64 survived, 19 timeouts."
+    },
+    {
+      "cycle": 32,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "CI and CodeQL fixes (2026-10-18): d012334 gives the TEST-ONLY PKI both key identifiers for Python 3.13 and a TLS 1.2 minimum (CodeQL alert 13). 12f57c8 sets mode 0644 for new output files (CodeQL alerts 14 and 15). b7b744c sets mode 0600, as the owner decided (CodeQL alerts 14 and 16)."
+    },
+    {
+      "cycle": 33,
+      "kind": "implement-and-check",
+      "milestone": "M7",
+      "summary": "Follow-ups (2026-10-18): 83a08a4 (port 0 is never the default port), 7077837 (Observation.acquired_at uses Stamp), 1019a8d (mutmut deselects the reason-code page test), 5fe675d (a proof or an opening is not_checked when ordering fails), 2311513 (review tests), 8b3bfff (port wording of section 9.1). Measured at 8b3bfff: just check 2540 passed, 97 deselected; validation.run 93 of 93 faults, 0 of 48 false positives; mutation 5731 mutants, 823 survived, not classified. Records a7ef327 and 8394f36 on branch final/2026-10-18."
     }
   ],
   "blockers": [
     "No human reviewer is appointed: no requirement can become approved, and reviewed mode has no pack. OQ-002.",
-    "Commit a6283be of the copyright holder certifies the 87 commits before it (OQ-018, closed). A later commit of an agent has no sign-off until the person who submits it signs off.",
+    "Commit a6283be of the copyright holder certifies the 87 commits before it (OQ-018, closed). Later sign-off commits of the owner certify the agent commits up to f1ee709; the last of them on main is 91a6629. The 95 agent commits and the merge commit dfd03b1 after it, up to 8b3bfff, and the commits of final/2026-10-18 have no sign-off until the person who submits them signs off.",
+    "PR #2 (branch ci/scans-and-release-gates, head b2eb10e) is not merged. It waits for the DCO sign-off of the owner.",
     "No real system under test was contacted: that needs a signed authorization of its owner and the approval of the user."
   ],
-  "resume": "See TASKS.md, section 'Resume instructions'.",
+  "resume": "See TASKS.md, sections 'State after the T1 program (2026-10-18)' and 'Resume instructions'.",
   "process_deviations": [
     "The coordinating session runs on Opus 5.5, not on Fable as the brief asks. Fable is used for independent refutation and review tasks.",
     "The coordinator wrote most of the engine code directly, because the source audit held all three parallel task slots for about one hour. Independent tests and an independent review are delegated to compensate.",
@@ -497,6 +558,11 @@
     "Two delegated tasks failed at launch with an expired credential (HTTP 401) and did no work. They were relaunched after the session resumed.",
     "Review round 2: the repair branch existed in a worktree inside the main checkout while the skeptics worked. Some skeptics judged findings against the already-fixed branch. The review record marks each such vote.",
     "The gap assessment (cycle 18) ran up to 16 read-only agents in parallel, above max_parallel_tasks 3. No agent edited a file. The Fable synthesis failed on usage credits; at the direction of the owner, Opus wrote the judgment sections.",
-    "Rule 3 incident (W3c, 2026-10-18): before the name-lookup guard existed, the red run of test_the_network_guard_refuses_a_name_lookup made one real getaddrinfo call for dns.example.test from the developer host. It failed with gaierror. tests/conftest.py now guards socket.getaddrinfo."
+    "Rule 3 incident (W3c, 2026-10-18): before the name-lookup guard existed, the red run of test_the_network_guard_refuses_a_name_lookup made one real getaddrinfo call for dns.example.test from the developer host. It failed with gaierror. tests/conftest.py now guards socket.getaddrinfo.",
+    "D6-08 and the follow-ups (2026-10-18): four agents edited files with a script, not with the Edit tool. Each one reported it, and the edits are in the commits (validation/records/review-key-tooling-2026-10-18.md, section Method).",
+    "Adversarial review of D6-08 (2026-10-18): the first contract skeptics and the first tests finder ended as failed. The resumed workflow ran them again, and the docs finder too. A confirmed finding of the first docs run (docs1-DOC-2) never reached the fixer (validation/records/review-key-tooling-2026-10-18.md, sections Method and Findings).",
+    "Agent probes of the D6-08 review left TEST-ONLY keys in the system temporary directory of the development host, outside the worktrees (validation/records/review-key-tooling-2026-10-18.md, section Open items).",
+    "Mutation round 3 after the adapter review (2026-10-18): an agent moved the mutants/ directory of round 3 out of the worktree, and no log records the move (validation/records/mutation-2026-10-18.md, section 'Run after the adapter review').",
+    "The agent reviews of 2026-10-18 (the adapters; the key tooling and the follow-ups) came after the two review rounds that the brief permits. No record states an owner decision on that limit (validation/records/review-adapters-2026-10-18.md, section 'Open questions for the owner')."
   ]
 }
