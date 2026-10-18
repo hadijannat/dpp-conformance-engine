@@ -593,7 +593,7 @@ passport resource.
 - One helper, `dppce.adapters.common.item_url`, gives this URL. A transport error or a server
   error at the resolver gives `unreachable`.
 - A missing or unreadable carrier sample keeps its own outcome. These cases give `blocked` with
-  `<AREA>.NO_TARGET`: a carrier that fails its own check, a carrier that is not an HTTP or HTTPS
+  `<AREA>.NO_TARGET`. They are a failed carrier check, a carrier that is not an HTTP or HTTPS
   URL, and a resolver status other than 200.
 - Redaction can change the URL. The engine does not fetch a URL that holds `<removed>`, also in
   percent-encoded form. The check gives `blocked` with `<AREA>.NO_TARGET`.

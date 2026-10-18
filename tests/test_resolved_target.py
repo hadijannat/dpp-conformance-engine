@@ -226,16 +226,35 @@ def test_api_contract_in_template_mode_keeps_its_summary(tmp_path: Path, loopbac
     assert sorted(outcome.observations[0].summary) == ["media_type", "path", "resource", "status"]
 
 
-@pytest.mark.parametrize("where", ["same origin, other path", "other origin, same path"])
+@pytest.mark.parametrize(
+    "where",
+    [
+        "same origin, other path",
+        "other origin, same path",
+        "empty segment",
+        "dot segment",
+        "encoded dot segment",
+    ],
+)
 def test_api_contract_refuses_a_resolved_url_off_the_marked_operation(
     where: str, tmp_path: Path, loopback: Any
 ) -> None:
     other = Origin(loopback, {ITEM_PATH: served()})
-    api = Origin(loopback, {"/static/passport.json": served(), ITEM_PATH: served()})
-    target = f"{api.origin}/static/passport.json" if where.startswith("same") else other.origin + ITEM_PATH
+    off_paths = ["/static/passport.json", f"/static/dpp/{ID}", "/dpp/..", "/dpp/%2e%2e"]
+    api = Origin(loopback, {ITEM_PATH: served(), **{path: served() for path in off_paths}})
+    target = {
+        "same origin, other path": f"{api.origin}/static/passport.json",
+        "other origin, same path": other.origin + ITEM_PATH,
+        # The remainder //static/dpp/{ID} must not parse as the host "static" with the path /dpp/{ID}.
+        "empty segment": f"/.//static/dpp/{ID}",
+        # A real server normalizes these paths to /, which is not the marked operation.
+        "dot segment": f"{api.origin}/dpp/..",
+        "encoded dot segment": f"{api.origin}/dpp/%2e%2e",
+    }[where]
     api.routes[RESOLVER_PATH] = moved(target)
     _blocked(run(resolved_context(tmp_path, "api.contract", api.origin)), "API.CONTRACT.PATH_MISMATCH")
-    assert api.hits("/static/passport.json") + other.hits(ITEM_PATH) == 1, "only the resolver exchange"
+    requests = len(api.server.seen) + len(other.server.seen)
+    assert requests == 2, "only the resolver exchange: the resolver and its redirect target"
     assert api.hits(ITEM_PATH) == 0
 
 

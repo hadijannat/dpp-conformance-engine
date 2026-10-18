@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 from typing import Any, Literal, cast, get_args
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from pydantic import Field
 
@@ -126,15 +126,24 @@ def _within(ctx: CheckContext, template: ResourceTemplate, url: str) -> bool:
     The template already matches the marked operation, so each placeholder matches one segment.
     """
     base, _ = effective_url(ctx, ctx.ixit.endpoints.get(template.endpoint, "").rstrip("/"))
-    # ponytail: a string prefix; another spelling of the same origin gives blocked, never pass.
-    if not base or not url.startswith(base + "/"):
+    if not base:
         return False
-    path = urlsplit(url[len(base) :]).path
+    # Parse the full URL once. A parsed remainder such as //static/dpp/X reads as a host.
+    parts, origin = urlsplit(url), urlsplit(base)
+    # ponytail: an exact scheme and netloc; another spelling of the same origin gives blocked, never pass.
+    if (parts.scheme, parts.netloc) != (origin.scheme, origin.netloc):
+        return False
+    if not parts.path.startswith(origin.path + "/"):
+        return False
+    rest = parts.path[len(origin.path) :]
+    # A server collapses an empty segment and resolves a dot segment, so the path would name another resource.
+    if "//" in rest or any(unquote(segment) in {".", ".."} for segment in rest.split("/")):
+        return False
     pattern = "".join(
         "[^/]+" if part.startswith("{") else re.escape(part)
         for part in re.split(r"(\{[^{}/]*\})", template.path.split("?", 1)[0])
     )
-    return re.fullmatch(pattern, path) is not None
+    return re.fullmatch(pattern, rest) is not None
 
 
 def _target(
