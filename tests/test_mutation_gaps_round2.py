@@ -114,8 +114,31 @@ def test_aggregate_requirement_reason_text_is_stable(
 ) -> None:
     """The verdict and the exact ``verdict_reason`` of each branch (aggregate.py stores it).
 
-    Kills dppce.verdicts.aggregate.x_requirement_verdict__mutmut_2, _3, _4, _6, _7, _8, _9, _10,
-    _11, _13, _14, _15, _19, _20, _21, _30, _31, _32, _37, _38, _39, _40, _41, and _42.
+    Kills:
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_2
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_3
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_4
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_6
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_7
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_8
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_9
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_10
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_11
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_13
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_14
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_15
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_19
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_20
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_21
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_30
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_31
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_32
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_37
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_38
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_39
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_40
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_41
+    dppce.verdicts.aggregate.x_requirement_verdict__mutmut_42
     """
     assert requirement_verdict(*inputs) == expected
 
@@ -144,8 +167,19 @@ def test_aggregate_overall_reason_text_is_stable(
 ) -> None:
     """The overall verdict and the exact ``overall_reason`` of each branch.
 
-    Kills dppce.verdicts.aggregate.x_overall_verdict__mutmut_6, _7, _8, _12, _13, _14, _15, _16,
-    _17, _19, _20, and _21.
+    Kills:
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_6
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_7
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_8
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_12
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_13
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_14
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_15
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_16
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_17
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_19
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_20
+    dppce.verdicts.aggregate.x_overall_verdict__mutmut_21
     """
     results = [make_requirement_result(i, v) for i, v in enumerate(verdicts, start=1)]
     assert overall_verdict(results) == expected
@@ -269,10 +303,14 @@ def consistent(case: str) -> dict[str, Any]:
 def test_verify_counts_accept_a_consistent_report(case: str, trust: TrustBundle) -> None:
     """A report whose values follow from its results passes the counts dimension.
 
-    Kills dppce.verifier.verify.x__verdicts_follow__mutmut_8 (a path that does not apply),
-    x__verdicts_follow__mutmut_16 (a declared conflict), x__verdicts_follow__mutmut_18 (reviewed
-    mode), and x__coverage_follows__mutmut_28 and _29 (a bucket with a zero count). The excluded
-    placeholder is the control of the placeholder case of the next test.
+    Kills:
+    dppce.verifier.verify.x__verdicts_follow__mutmut_8 (a path that does not apply)
+    dppce.verifier.verify.x__verdicts_follow__mutmut_16 (a declared conflict)
+    dppce.verifier.verify.x__verdicts_follow__mutmut_18 (reviewed mode)
+    dppce.verifier.verify.x__coverage_follows__mutmut_28 (a bucket with a zero count)
+    dppce.verifier.verify.x__coverage_follows__mutmut_29 (a bucket with a zero count)
+
+    The excluded placeholder is the control of the placeholder case of the next test.
     """
     assert outcomes(consistent(case), trust)["counts"] == "pass"
 
@@ -303,9 +341,11 @@ def inconsistent(case: str) -> dict[str, Any]:
 def test_verify_counts_refuse_an_inconsistent_report(case: str, trust: TrustBundle) -> None:
     """One stated value that does not follow from the results fails the counts dimension.
 
-    Kills dppce.verifier.verify.x__coverage_follows__mutmut_62 (placeholder count),
-    x__coverage_follows__mutmut_75 (authority classes), x__coverage_follows__mutmut_91
-    (testabilities), and x__counts__mutmut_36 (passing numerator).
+    Kills:
+    dppce.verifier.verify.x__coverage_follows__mutmut_62 (placeholder count)
+    dppce.verifier.verify.x__coverage_follows__mutmut_75 (authority classes)
+    dppce.verifier.verify.x__coverage_follows__mutmut_91 (testabilities)
+    dppce.verifier.verify.x__counts__mutmut_36 (passing numerator)
     """
     assert outcomes(inconsistent(case), trust)["counts"] == "fail"
 
@@ -319,8 +359,9 @@ def test_verify_key_validity_includes_both_ends(
 ) -> None:
     """A key is trusted at the first and at the last instant of its validity period.
 
-    Kills dppce.verifier.verify.x__key_state__mutmut_6 (not_before) and
-    x__key_state__mutmut_7 (not_after).
+    Kills:
+    dppce.verifier.verify.x__key_state__mutmut_6 (not_before)
+    dppce.verifier.verify.x__key_state__mutmut_7 (not_after)
     """
     key = trust.keys[0].model_copy(update={end: AT_TEXT})
     bounded = trust.model_copy(update={"keys": (key,)})
@@ -384,8 +425,10 @@ def test_verify_status_snapshot_age_includes_both_ends(
 ) -> None:
     """A snapshot of age zero and one of exactly the maximum age are both fresh.
 
-    Kills dppce.verifier.verify.x__status__mutmut_15 and _17 (age zero), and
-    x__status__mutmut_18 (age of exactly seven days, the maximum).
+    Kills:
+    dppce.verifier.verify.x__status__mutmut_15 (age zero)
+    dppce.verifier.verify.x__status__mutmut_17 (age zero)
+    dppce.verifier.verify.x__status__mutmut_18 (age of exactly seven days, the maximum)
     """
     snapshot = trust.model_copy(update={"status_as_of": status_as_of, "status_max_age_days": 7})
     assert outcomes(as_document(signed), snapshot)["status"] == "pass"
@@ -394,7 +437,9 @@ def test_verify_status_snapshot_age_includes_both_ends(
 def test_verify_states_no_digest_for_an_invalid_structure(trust: TrustBundle) -> None:
     """The report of a document that is not an envelope states the digest as unavailable.
 
-    Kills dppce.verifier.verify.x_verify__mutmut_81 and _82.
+    Kills:
+    dppce.verifier.verify.x_verify__mutmut_81
+    dppce.verifier.verify.x_verify__mutmut_82
     """
     assert verify({}, trust, AT).decision_digest == "unavailable"
 
@@ -460,8 +505,13 @@ def test_verifier_main_requires_the_trust_bundle_and_the_time(
 ) -> None:
     """Without --trust or --at the verifier stops with exit status 2.
 
-    Kills dppce.verifier.__main__.x_main__mutmut_21, _25, and _29 (--trust), and
-    x_main__mutmut_34, _37, and _41 (--at).
+    Kills:
+    dppce.verifier.__main__.x_main__mutmut_21 (--trust)
+    dppce.verifier.__main__.x_main__mutmut_25 (--trust)
+    dppce.verifier.__main__.x_main__mutmut_29 (--trust)
+    dppce.verifier.__main__.x_main__mutmut_34 (--at)
+    dppce.verifier.__main__.x_main__mutmut_37 (--at)
+    dppce.verifier.__main__.x_main__mutmut_41 (--at)
     """
     envelope = tmp_path / "envelope.json"
     envelope.write_text(signed.model_dump_json(by_alias=True), encoding="utf-8")
