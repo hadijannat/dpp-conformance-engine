@@ -73,6 +73,32 @@ def mode_exclusion(mode: ExecutionMode, requirement: Requirement) -> tuple[str, 
     return None
 
 
+def superseded_by_selected(
+    mode: ExecutionMode, selected: Sequence[RequirementPack]
+) -> dict[str, tuple[str, ...]]:
+    """Map each selected draft to the selected approved requirements that supersede it. Section 6, step 1.
+
+    It reads no ICS fact, so the supplier of the system cannot switch the exclusion (ADR 0011).
+    """
+    by_id = {r.id: r for p in selected for r in p.requirements}
+    found: dict[str, set[str]] = {}
+    for p in selected:
+        for r in p.requirements:
+            if r.review_status is not ReviewStatus.APPROVED or mode_exclusion(mode, r) is not None:
+                continue
+            synthetic = r.authority_class is AuthorityClass.ILLUSTRATIVE
+            for old_id in r.supersedes:
+                old = by_id.get(old_id)
+                # A synthetic rule never decides what a normative draft contributes, and back.
+                if (
+                    old is not None
+                    and old.review_status is ReviewStatus.DRAFT
+                    and (old.authority_class is AuthorityClass.ILLUSTRATIVE) == synthetic
+                ):
+                    found.setdefault(old_id, set()).add(r.id)
+    return {old: tuple(sorted(new)) for old, new in found.items()}
+
+
 def _select[T](available: Mapping[str, T], wanted: Sequence[str], kind: str, profile: Profile) -> list[T]:
     missing = sorted(set(wanted) - set(available))
     if missing:
@@ -115,7 +141,7 @@ def _planned_status(
     return None, ""
 
 
-def build_plan(  # noqa: PLR0912 - one linear pass over the catalogue; splitting it hides the order
+def build_plan(  # noqa: PLR0912, PLR0915 - one linear pass over the catalogue; splitting it hides the order
     *,
     mode: ExecutionMode,
     profile: Profile,
@@ -170,11 +196,18 @@ def build_plan(  # noqa: PLR0912 - one linear pass over the catalogue; splitting
     needed: set[str] = set()  # steps that at least one applicable requirement path needs
     referenced: dict[str, str] = {}  # step id -> first reason it cannot run, for unknown ids
 
-    for pack in _select(packs, profile.packs, "requirement pack", profile):
+    selected = _select(packs, profile.packs, "requirement pack", profile)
+    successors = superseded_by_selected(mode, selected)
+    for pack in selected:
         for requirement in pack.requirements:
             if requirement.id in seen:
                 raise PlanError(f"requirement {requirement.id} is defined in more than one selected pack")
             seen.add(requirement.id)
+            # Before the mode gate: exclude() keeps the first code, and a reviewed plan must show this one.
+            if (newer := successors.get(requirement.id)) is not None:
+                reason = f"Superseded by {', '.join(newer)}: selected and approved."
+                exclude("requirement", requirement.id, "STATUS.SUPERSEDED_BY_SELECTED", reason)
+                continue
             if (gate := mode_exclusion(mode, requirement)) is not None:
                 exclude("requirement", requirement.id, *gate)
                 continue

@@ -343,6 +343,164 @@ def test_a_placeholder_requirement_without_tests_is_inconclusive_in_exploratory_
         assert assess(plan, [placeholder], passing=[])["R-1"].verdict is Verdict.INCONCLUSIVE
 
 
+# --- Section 6, step 1: a selected approved successor --------------------------------------
+
+BY_SELECTED = "STATUS.SUPERSEDED_BY_SELECTED"
+APPROVAL: dict[str, Any] = {"review_status": "approved", "approval": b.TEST_ONLY_APPROVAL}
+CLASS: dict[str, dict[str, Any]] = {
+    "normative": NORMATIVE,
+    "illustrative": {"authority_class": "illustrative"},
+}
+
+
+def draft(cls: str = "normative", requirement_id: str = "R-OLD", **changes: Any) -> Requirement:
+    fields = {"assessment_paths": [b.path("p1", "T-OLD")]} | CLASS[cls] | changes
+    return b.requirement(requirement_id, **fields)
+
+
+def successor(
+    cls: str = "normative",
+    requirement_id: str = "R-NEW",
+    supersedes: Sequence[str] = ("R-OLD",),
+    **changes: Any,
+) -> Requirement:
+    fields = CLASS[cls] | APPROVAL | changes
+    return b.requirement(
+        requirement_id, supersedes=list(supersedes), assessment_paths=[b.path("p1", "T-NEW")], **fields
+    )
+
+
+def supersession_plan(
+    old: Sequence[Requirement],
+    new: Sequence[Requirement],
+    *,
+    mode: str = "exploratory",
+    selected: Sequence[str] = ("pack/a", "pack/b"),
+    features: Mapping[str, bool | str] | None = None,
+) -> Plan:
+    """The draft is in pack/a and the successor in pack/b. ``selected`` sets the pack order."""
+    return build_plan(
+        mode=ExecutionMode(mode),
+        profile=b.profile(packs=list(selected)),
+        packs={"pack/a": b.pack(*old), "pack/b": b.pack(*new, pack_id="pack/b")},
+        testpacks={"tp/a": b.purposes_pack(b.purpose("T-OLD", requirements=["R-OLD"]), b.purpose("T-NEW"))},
+        ics=b.ics(features=dict(features or {})),
+        checks=CHECKS,
+    )
+
+
+def assert_superseded(plan: Plan, *successors: str) -> None:
+    (exclusion,) = [e for e in plan.exclusions if (e.kind, e.id) == ("requirement", "R-OLD")]
+    assert exclusion.reason_code == BY_SELECTED
+    assert REASON_CODE.match(exclusion.reason_code)
+    assert all(s in exclusion.reason for s in successors)
+    assert "R-OLD" not in [r.requirement_id for r in plan.requirements]
+    old_step = step_of(plan, "T-OLD")
+    assert old_step is not None
+    assert old_step.planned_status is SKIPPED, "no applicable requirement needs the step of the draft"
+
+
+@pytest.mark.parametrize(
+    ("mode", "cls"),
+    [
+        ("exploratory", "normative"),
+        ("reviewed", "normative"),
+        ("illustrative", "illustrative"),
+        ("exploratory", "illustrative"),
+    ],
+)
+def test_an_approved_selected_successor_excludes_its_draft_in_each_mode(mode: str, cls: str) -> None:
+    plan = supersession_plan([draft(cls)], [successor(cls)], mode=mode)
+    assert_superseded(plan, "R-NEW")
+    assert [r.requirement_id for r in plan.requirements] == ["R-NEW"]
+    assert executed(plan) == ["T-NEW"]
+
+
+@pytest.mark.parametrize("selected", [("pack/a", "pack/b"), ("pack/b", "pack/a")])
+def test_a_successor_in_a_later_pack_still_excludes_the_draft(selected: tuple[str, str]) -> None:
+    plan = supersession_plan([draft()], [successor()], selected=selected)
+    assert_superseded(plan, "R-NEW")
+
+
+class Case(NamedTuple):
+    mode: str
+    new_cls: str
+    new_changes: dict[str, Any]
+    new_selected: bool
+    old_cls: str
+    expected: str  # 'planned' or the exclusion code of the draft
+
+
+UNAPPROVED: dict[str, Any] = {"review_status": "draft-needs-review", "approval": None}
+NOT_QUALIFYING = [
+    Case("exploratory", "normative", {}, False, "normative", "planned"),
+    Case("exploratory", "normative", UNAPPROVED, True, "normative", "planned"),
+    Case("reviewed", "illustrative", {}, True, "illustrative", "MODE.NOT_APPROVED"),
+    Case("exploratory", "illustrative", {}, True, "normative", "planned"),
+    Case("reviewed", "normative", {}, True, "illustrative", "MODE.NOT_APPROVED"),
+    Case("exploratory", "normative", {}, True, "illustrative", "planned"),
+]
+
+
+@pytest.mark.parametrize("case", NOT_QUALIFYING)
+def test_the_draft_keeps_its_outcome_when_the_successor_does_not_qualify(case: Case) -> None:
+    mode, expected = case.mode, case.expected
+    selected = ("pack/a", "pack/b") if case.new_selected else ("pack/a",)
+    new = successor(case.new_cls, **case.new_changes)
+    plan = supersession_plan([draft(case.old_cls)], [new], mode=mode, selected=selected)
+    codes = exclusion_codes(plan, "requirement")
+    if expected == "planned":
+        assert "R-OLD" not in codes
+        assert "R-OLD" in [r.requirement_id for r in plan.requirements]
+    else:
+        assert codes["R-OLD"] == expected
+    assert all(e.reason_code != BY_SELECTED for e in plan.exclusions)
+
+
+OLD_ENTRIES: dict[str, dict[str, Any]] = {
+    "placeholder": {"review_status": "placeholder", "assessment_paths": []},
+    "withdrawn": {"review_status": "withdrawn"},
+    "superseded": {"review_status": "superseded", "superseded_by": "R-NEW"},
+    "approved": APPROVAL,
+}
+
+
+@pytest.mark.parametrize("status", sorted(OLD_ENTRIES))
+def test_only_a_draft_is_superseded_by_a_selected_successor(status: str) -> None:
+    old = draft(**OLD_ENTRIES[status])
+    alone = supersession_plan([old], [])
+    plan = supersession_plan([old], [successor()])
+    before, after = exclusion_codes(alone, "requirement"), exclusion_codes(plan, "requirement")
+    assert after.get("R-OLD") == before.get("R-OLD")
+    planned = [r.requirement_id for r in plan.requirements]
+    assert ("R-OLD" in planned) == ("R-OLD" in [r.requirement_id for r in alone.requirements])
+    if status == "approved":
+        assert "R-OLD" in planned, "an approved entry stays planned; the lint reports CAT010"
+
+
+@pytest.mark.parametrize("selected", [("pack/a", "pack/b"), ("pack/b", "pack/a")])
+def test_two_successors_give_one_exclusion_with_a_sorted_reason(selected: tuple[str, str]) -> None:
+    plan = supersession_plan(
+        [draft(), successor(requirement_id="R-B")], [successor(requirement_id="R-A")], selected=selected
+    )
+    assert [e.id for e in plan.exclusions if e.kind == "requirement"] == ["R-OLD"]
+    assert_superseded(plan, "R-A, R-B")
+
+
+def test_a_supersedes_id_outside_the_selection_adds_no_exclusion() -> None:
+    plan = supersession_plan([draft()], [successor(supersedes=["R-404"])])
+    alone = supersession_plan([draft()], [successor(supersedes=[])])
+    assert "R-404" not in [e.id for e in plan.exclusions]
+    assert exclusion_codes(plan, "requirement") == exclusion_codes(alone, "requirement") == {}
+
+
+@pytest.mark.parametrize("value", [True, False, "unknown"])
+def test_supersession_ignores_the_ics(value: bool | str) -> None:
+    """ADR 0011: the supplier writes the ICS, so it cannot switch the exclusion of a draft."""
+    plan = supersession_plan([draft()], [successor(applicability=b.feature("x"))], features={"x": value})
+    assert_superseded(plan, "R-NEW")
+
+
 # --- Section 6, step 3: conflicts ----------------------------------------------------------
 
 
