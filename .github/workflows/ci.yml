@@ -1,4 +1,5 @@
 # Status: runs on GitHub since 2026-10-15; the first green run is 38708494167. See docs/readiness.md.
+# The jobs scans, docs, and dco were added on 2026-10-18. They have not run on GitHub yet.
 # Every action is pinned to a commit. The comment gives the release that the commit belongs to.
 name: ci
 
@@ -99,3 +100,89 @@ jobs:
         with:
           name: method-validation-record
           path: validation/records/
+
+  # Each binary is a release tarball pinned by version and checked against its published SHA-256.
+  # pip-audit and reuse run through uvx with an exact version and a date bound.
+  scans:
+    name: Dependency audit, secret scan, and license lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.9.24"
+      # --no-emit-project drops the `-e .` line, which the hashed-requirements mode rejects.
+      - name: Export the locked set
+        run: uv export --frozen --all-extras --all-groups --no-emit-project --format requirements-txt --output-file "$RUNNER_TEMP/requirements-audit.txt"
+      # Sends package names and versions to the vulnerability service. --strict fails on a package
+      # that pip-audit cannot collect.
+      - name: pip-audit 2.10.1 over the locked set
+        run: uvx --exclude-newer 2026-10-18T00:00:00Z --from pip-audit==2.10.1 pip-audit --strict --disable-pip --progress-spinner off --requirement "$RUNNER_TEMP/requirements-audit.txt"
+      - name: Install gitleaks 8.30.1
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tgz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tgz" | sha256sum --check --strict -
+          tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
+      # Every commit reachable from HEAD. On a pull request, HEAD is the merge commit.
+      - name: Secret scan of the git history
+        run: '"$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --redact --no-banner --exit-code 1 .'
+      - name: reuse 6.2.0 lint
+        run: uvx --exclude-newer 2026-10-18T00:00:00Z --from reuse==6.2.0 reuse lint
+
+  docs:
+    name: Reference pages, strict docs build, and Vale
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.9.24"
+      # All extras: the capabilities page reflects the installed extras.
+      - name: Install from the lockfile
+        run: uv sync --frozen --all-extras --group docs
+      # Not `just docs`: that recipe regenerates the pages first.
+      - name: Reference pages are in step with the code
+        run: uv run --no-sync python scripts/gen_reference_docs.py --check
+      - name: Strict docs build
+        run: uv run --no-sync mkdocs build --strict
+      - name: Install Vale 3.22.0
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/vale.tgz" https://github.com/errata-ai/vale/releases/download/v3.22.0/vale_3.22.0_Linux_64-bit.tar.gz
+          echo "52f5cd0314a1b7384cac6aa102a68193977312f6ba9c9f3ae001b5deec8e3a10  $RUNNER_TEMP/vale.tgz" | sha256sum --check --strict -
+          tar -xzf "$RUNNER_TEMP/vale.tgz" -C "$RUNNER_TEMP" vale
+      # Vale exits 0 on warnings, so the step fails on any alert line. A Vale error or crash
+      # still fails the step through `bash -e`.
+      - name: Vale at warning level
+        run: |
+          out=$("$RUNNER_TEMP/vale" --minAlertLevel=warning --output=line docs README.md)
+          if [ -n "$out" ]; then printf '%s\n' "$out"; exit 1; fi
+
+  # Not on pushes to main: the owner signs agent commits there later. See DCO.md.
+  dco:
+    name: DCO sign-off of each pull request commit
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # The head commit, not the merge commit that GitHub makes, which has no sign-off.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Check each commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 scripts/check_dco.py "$BASE_SHA" "$HEAD_SHA"
