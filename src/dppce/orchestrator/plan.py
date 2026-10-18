@@ -86,6 +86,7 @@ def _planned_status(
     has_applicable_parent: bool,
     checks: Mapping[str, CheckInfo],
     granted: frozenset[Scope],
+    *,
     manual_results: frozenset[str],
 ) -> tuple[ExecutionStatus | None, str]:
     """Section 6, second table. The order of the conditions is part of the contract."""
@@ -234,7 +235,7 @@ def build_plan(  # noqa: PLR0912 - one linear pass over the catalogue; splitting
         if outcome.value is Tri.FALSE:
             continue
         status, reason = _planned_status(
-            purpose, outcome, tid in needed, checks, granted_scopes, manual_results
+            purpose, outcome, tid in needed, checks, granted_scopes, manual_results=manual_results
         )
         steps.append(
             PlannedStep(

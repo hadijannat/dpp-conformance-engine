@@ -37,6 +37,7 @@ from dppce.catalogue.lint import lint, trace
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.envelope import decision_digest, in_layout_of, sign_envelope
 from dppce.evidence.jws import LocalSigner, SignatureError
+from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX, ManualResultError, claimed_test_purpose
 from dppce.evidence.recording import RecordingError, purge_expired, read_recording, write_recording
 from dppce.infrastructure.authorization import AuthorizationError, validate_authorization
 from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, utc_stamp
@@ -134,6 +135,7 @@ def _build_inputs(
     trust: TrustBundle | None,
     authorization_token: str | None,
     issuer: IssuerStatement,
+    manual_results: frozenset[str] = frozenset(),
 ) -> RunInputs:
     profiles = load_profiles(root)
     if profile_id not in profiles:
@@ -146,6 +148,8 @@ def _build_inputs(
     problems = check_ics(ics, profile)
     if problems:
         raise UsageError("the ICS does not fit the profile: " + " ".join(problems))
+    if manual_results and trust is None:
+        raise UsageError("a manual result needs a trust bundle that names the key of its performer")
     authorization = None
     if authorization_token is not None:
         if trust is None:
@@ -153,11 +157,24 @@ def _build_inputs(
         authorization = validate_authorization(
             authorization_token, trust, evaluation_time, ics.sut.identifier
         )
-    return RunInputs(
+    testpacks = load_testpacks(root, extra_testpacks=import_testpacks)
+    manual_steps = {
+        p.id
+        for name in profile.testpacks
+        if name in testpacks
+        for p in testpacks[name].test_purposes
+        if p.manual and p.stimulus.check == MANUAL_CHECK
+    }
+    if unknown := sorted(manual_results - manual_steps):
+        raise UsageError(
+            "a manual result names a test purpose that is not a manual step with the check "
+            f"{MANUAL_CHECK} in the selected test packs: {', '.join(unknown)}"
+        )
+    inputs = RunInputs(
         mode=mode,
         profile=profile,
         catalogue=load_catalogue(root, extra_packs=import_packs),
-        testpacks=load_testpacks(root, extra_testpacks=import_testpacks),
+        testpacks=testpacks,
         ics=ics,
         ixit=ixit,
         data_root=root,
@@ -165,11 +182,56 @@ def _build_inputs(
         trust=trust,
         authorization=authorization,
         issuer=issuer,
+        manual_results=manual_results,
     )
+    if manual_results:
+        _refuse_unused_manual_results(inputs)
+    return inputs
 
 
-def _inputs_from_args(args: argparse.Namespace) -> tuple[RunInputs, str | None, TrustBundle | None]:
+def _refuse_unused_manual_results(inputs: RunInputs) -> None:
+    """A supplied manual result must belong to a step that the plan executes. None is ignored silently."""
+    plan = make_plan(inputs)
+    steps = {s.test_purpose_id: s for s in plan.steps}
+    exclusions = {e.id: e for e in plan.exclusions if e.kind == "test_purpose"}
+    reasons = []
+    for ident in sorted(inputs.manual_results):
+        step, exclusion = steps.get(ident), exclusions.get(ident)
+        if exclusion is not None:
+            reasons.append(f"{ident}: excluded, {exclusion.reason_code}: {exclusion.reason}")
+        elif step is None:
+            reasons.append(f"{ident}: no selected requirement names it")
+        elif step.planned_status is not None:
+            reasons.append(f"{ident}: {step.planned_status.value}: {step.planned_reason}")
+    if reasons:
+        raise UsageError("a manual result names a step that the plan does not execute: " + "; ".join(reasons))
+
+
+def _manual_results(paths: list[Path]) -> dict[str, Path]:
+    """Map each supplied manual result to the test purpose that it names. Nothing is verified here."""
+    found: dict[str, Path] = {}
+    for path in paths:
+        try:
+            named = claimed_test_purpose(path.read_text(encoding="ascii").strip())
+        except (OSError, UnicodeDecodeError, ManualResultError) as exc:
+            raise UsageError(f"{path}: not a manual result that names a test purpose") from exc
+        if named in found:
+            raise UsageError(f"more than one manual result names the test purpose {named}")
+        found[named] = path
+    return found
+
+
+def _inputs_from_args(
+    args: argparse.Namespace,
+) -> tuple[RunInputs, str | None, TrustBundle | None, dict[str, Path]]:
     ixit = load_ixit(args.ixit)
+    reserved = sorted(name for name in ixit.samples if name.startswith(SAMPLE_PREFIX))
+    if reserved:
+        # Only the operator supplies a manual result. The IXIT cannot supply or select one.
+        raise UsageError(
+            f"the IXIT names samples in the reserved namespace '{SAMPLE_PREFIX}': {', '.join(reserved)}"
+        )
+    manual = _manual_results(args.manual_result)
     base = args.ixit.resolve().parent
     # Trust comes from the operator only. A trust bundle that the IXIT names is never loaded:
     # the supplier of the system under test could otherwise name its own key as trusted.
@@ -198,8 +260,9 @@ def _inputs_from_args(args: argparse.Namespace) -> tuple[RunInputs, str | None, 
         trust=trust,
         authorization_token=token,
         issuer=issuer,
+        manual_results=frozenset(manual),
     )
-    return inputs, token, trust
+    return inputs, token, trust, manual
 
 
 def _confined(base: Path, value: str, what: str) -> Path | None:
@@ -272,7 +335,7 @@ def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
 
 
 def cmd_plan(args: argparse.Namespace) -> int:
-    inputs, _, _ = _inputs_from_args(args)
+    inputs, _, _, _ = _inputs_from_args(args)
     plan = make_plan(inputs)
     executed = sum(1 for s in plan.steps if s.planned_status is None)
     text = (
@@ -285,7 +348,7 @@ def cmd_plan(args: argparse.Namespace) -> int:
 
 
 def cmd_run(args: argparse.Namespace) -> int:
-    inputs, token, trust = _inputs_from_args(args)
+    inputs, token, trust, manual = _inputs_from_args(args)
     out: Path = args.out
     if out.exists() and any(out.iterdir()):
         raise UsageError(f"{out} is not empty; a run never overwrites an earlier run")
@@ -321,6 +384,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         for name, value in ixit.samples.items()
         if (path := _confined(base, value, f"sample '{name}'")) is not None
     }
+    # The transport pins each file as it pins any sample. The check reads it as an artifact.
+    samples |= {SAMPLE_PREFIX + ident: path.resolve() for ident, path in manual.items()}
     keys = FileDataKeyProvider(args.keys)
     keys.create()
     transport = PolicyTransport(
@@ -362,6 +427,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         "trust": trust.model_dump(mode="json") if trust else None,
         "authorization_token": token,
         "issuer": inputs.issuer.model_dump(mode="json"),
+        # The test purposes only. The signed results are in the encrypted recording.
+        "manual_results": sorted(inputs.manual_results),
     }
     (out / "inputs.json").write_bytes(canonical_bytes(stored) + b"\n")
     (out / "envelope.json").write_text(envelope.model_dump_json(by_alias=True) + "\n", encoding="utf-8")
@@ -400,6 +467,8 @@ def cmd_replay(args: argparse.Namespace) -> int:
             "trust": TrustBundle.model_validate(stored["trust"]) if stored["trust"] else None,
             "authorization_token": stored["authorization_token"],
             "issuer": IssuerStatement.model_validate(stored["issuer"]),
+            # A run recorded before manual results existed supplied none.
+            "manual_results": frozenset(str(t) for t in stored.get("manual_results", [])),
         }
     except (KeyError, TypeError, ValueError) as exc:
         raise UsageError(
@@ -589,6 +658,15 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         )
         sub.add_argument("--trust", type=Path, help="trust bundle (JSON); only the operator supplies it")
         sub.add_argument("--authorization", type=Path, help="signed test authorization (compact JWS)")
+        sub.add_argument(
+            "--manual-result",
+            type=Path,
+            action="append",
+            default=[],
+            metavar="PATH",
+            help="signed result of one manual step (compact JWS); only the operator supplies it; "
+            "repeat for each",
+        )
         sub.add_argument("--at", help="evaluation time, for example 2026-10-13T12:00:00Z; default: now")
         sub.add_argument("--issuer-name", default="unspecified")
         sub.add_argument("--issuer-id", default="unspecified")
