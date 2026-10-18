@@ -335,6 +335,18 @@ def test_a_non_canonical_payload_fails(signer: LocalSigner, bundle: TrustBundle)
     assert _status_code(report) == ("fail", "STATUSLIST.FILE.MALFORMED")
 
 
+def test_a_list_issued_at_a_time_that_does_not_exist_fails(signer: LocalSigner, bundle: TrustBundle) -> None:
+    payload = {
+        "schema_version": "dppce.statuslist/1",
+        "id": LIST_ID,
+        "status_purpose": "revocation",
+        "issued_at": "2026-10-32T00:00:00Z",
+        "encoded_list": encode_list(set()),
+    }
+    token = sign_compact(canonical_bytes(payload), STATUS_SIGNER, typ=STATUS_LIST_TYP).encode("ascii")
+    assert _status_code(_verify(_report(signer), bundle, token)) == ("fail", "STATUSLIST.FILE.MALFORMED")
+
+
 def test_a_report_attestation_cannot_pass_as_a_status_list(signer: LocalSigner, bundle: TrustBundle) -> None:
     token = sign_compact(b"{}", STATUS_SIGNER, typ=ATTESTATION_TYP).encode("ascii")
     assert _status_code(_verify(_report(signer), bundle, token)) == ("fail", "STATUSLIST.SIGNATURE.INVALID")
@@ -509,6 +521,8 @@ _BASE: dict[str, Any] = {
         {"schema_version": "dppce.attestation/2", "role": "reviewer", "supersedes": "sha256:" + "1" * 64},
         {"schema_version": "dppce.attestation/2", "role": "issuer", "supersedes": _BASE["decision_digest"]},
         {"schema_version": "dppce.attestation/2", "role": "issuer", "valid_until": "2026-12-01"},
+        # The pattern admits month 13. The verifier compares the time, so it must exist.
+        {"schema_version": "dppce.attestation/2", "role": "issuer", "valid_until": "2026-13-01T00:00:00Z"},
         {"schema_version": "dppce.attestation/2", "role": "issuer", "supersedes": "sha256:short"},
         {"schema_version": "dppce.attestation/2", "role": "issuer", "status": {"list_id": "x", "index": -1}},
         {"schema_version": "dppce.attestation/2", "role": "admin"},

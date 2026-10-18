@@ -11,8 +11,8 @@ from collections.abc import Sequence
 from typing import Final
 
 from dppce.evidence import merkle
-from dppce.evidence.canonical import canonical_bytes, digest
-from dppce.evidence.jws import sign_compact
+from dppce.evidence.canonical import canonical_bytes, digest, parse_strict
+from dppce.evidence.jws import header_of, payload_of, sign_compact
 from dppce.infrastructure.interfaces import Signer
 from dppce.models import (
     Attestation,
@@ -24,6 +24,8 @@ from dppce.models import (
     RecordCommitment,
     RequirementResult,
     RunManifest,
+    SignerRole,
+    StatusReference,
     TestResult,
     Verdict,
 )
@@ -106,16 +108,44 @@ def in_layout_of(decision: DecisionBody, version: str) -> DecisionBody:
 
 
 def sign_envelope(
-    envelope: EvidenceEnvelope, signer: Signer, *, issuer: str, signed_at: str
+    envelope: EvidenceEnvelope,
+    signer: Signer,
+    *,
+    issuer: str,
+    signed_at: str,
+    role: SignerRole = "issuer",
+    status: StatusReference | None = None,
+    valid_until: str | None = None,
+    supersedes: str | None = None,
 ) -> EvidenceEnvelope:
-    """Return a copy of the envelope with one more signature over the decision digest."""
+    """Return a copy of the envelope with one more signature over the decision digest.
+
+    It writes ``dppce.attestation/1`` for a plain issuer signature, so that its bytes do not
+    change, and ``dppce.attestation/2`` otherwise (section 11.3).
+    """
+    plain = role == "issuer" and status is None and valid_until is None and supersedes is None
     attestation = Attestation(
-        schema_version="dppce.attestation/1",
+        schema_version="dppce.attestation/1" if plain else "dppce.attestation/2",
         decision_digest=decision_digest(envelope.decision),
         results_root=envelope.decision.results_root,
         records_root=envelope.decision.records_root,
         issuer=issuer,
         signed_at=signed_at,
+        role=None if plain else role,
+        status=status,
+        valid_until=valid_until,
+        supersedes=supersedes,
     )
     token = sign_compact(canonical_bytes(attestation), signer, typ=ATTESTATION_TYP)
     return envelope.model_copy(update={"signatures": (*envelope.signatures, token)})
+
+
+def declared_attestation(token: str) -> tuple[str | None, Attestation | None]:
+    """Return the key identifier and the attestation that ``token`` declares. NOT verified.
+
+    For display only. ``(None, None)`` if the token cannot be read.
+    """
+    try:
+        return str(header_of(token).get("kid")), Attestation.model_validate(parse_strict(payload_of(token)))
+    except (ValueError, RecursionError):
+        return None, None

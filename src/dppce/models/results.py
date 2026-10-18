@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Any, Final, Literal, Self
 
-from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
+from pydantic import Field, SerializerFunctionWrapHandler, field_validator, model_serializer, model_validator
 
 from dppce.models.base import (
     AuthorityClass,
@@ -181,6 +182,13 @@ DIGEST: Final = r"^sha256:[0-9a-f]{64}$"
 MAX_STATUS_INDEX: Final = 16 * 1024 * 1024 * 8 - 1
 
 
+def _real_time(value: str | None) -> str | None:
+    # The pattern admits a month 13. The verifier compares these times, so each must exist.
+    if value is not None:
+        datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    return value
+
+
 class StatusReference(Model):
     """The entry of a report in a status list of its issuer: one bit of one list (section 11.4)."""
 
@@ -206,6 +214,11 @@ class Attestation(Model):
     status: StatusReference | None = None
     valid_until: str | None = Field(default=None, pattern=STAMP)
     supersedes: str | None = Field(default=None, pattern=DIGEST)
+
+    @field_validator("valid_until")
+    @classmethod
+    def _valid_until_exists(cls, value: str | None) -> str | None:
+        return _real_time(value)
 
     @property
     def signer_role(self) -> SignerRole:
@@ -246,6 +259,12 @@ class StatusList(Model):
     status_purpose: Literal["revocation", "suspension"]
     issued_at: str = Field(pattern=STAMP)
     encoded_list: str = Field(pattern=r"^u[A-Za-z0-9_-]+$")
+
+    @field_validator("issued_at")
+    @classmethod
+    def _issued_at_exists(cls, value: str) -> str:
+        _real_time(value)
+        return value
 
 
 class EvidenceEnvelope(Model):
