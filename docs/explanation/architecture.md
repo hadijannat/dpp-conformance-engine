@@ -320,8 +320,17 @@ declares the empty model.
 `Acquirer`, the evaluation time, a loader for pinned local resources, the trust bundle, and the
 validated authorization. A check reads the clock from the context only.
 
-Reason codes are stable and machine-readable. Format: `AREA.TOPIC.DETAIL` in upper case.
-`AREA.OK` style codes mark a pass, for example `DATA.SCHEMA.OK`.
+Reason codes are stable and machine-readable. A new code has the format `AREA.TOPIC.DETAIL`
+in upper case. Existing codes with two segments, for example `AAS.INVALID`, stay unchanged,
+because codes are stable.
+Codes such as `DATA.SCHEMA.OK` mark a pass.
+A code can take one segment from a closed set at run time, for example `ACCESS.LEAK.EXPORT`.
+The [reason-code catalogue](../reference/reason-codes.md) lists each code, each value of such a
+set, the module and the check that produce it, and its step verdict where that call fixes it.
+`scripts/gen_reference_docs.py` generates the catalogue from the string literals in `src/dppce`.
+`--check` and a test fail when the page and the source disagree.
+A reason code is part of the decision body. A changed code changes the decision digest of a
+replayed recording.
 
 Initial registry:
 
