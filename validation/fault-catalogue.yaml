@@ -10,7 +10,7 @@
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.1.0
+version: 0.2.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
@@ -209,3 +209,5 @@ evidence_faults:
   - {id: E-10, tamper: untrusted_key, description: The envelope is signed with a key that is not in the trust bundle., dimension: issuer_trust}
   - {id: E-11, tamper: alg_none, description: The signature header names the algorithm "none"., dimension: signature}
   - {id: E-12, tamper: expired_key, description: The trusted key is past its validity at the evaluation time., dimension: issuer_trust}
+  # E-13 was written on 2026-10-18, before the check existed.
+  - {id: E-13, tamper: flip_manual_outcome, description: The outcome of a completed manual step is changed., dimension: manual_results}

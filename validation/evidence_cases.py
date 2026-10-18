@@ -50,6 +50,23 @@ def _change_counts(document: dict[str, Any]) -> None:
     counts["pass"], counts["fail"] = counts["pass"] + 1, max(counts["fail"] - 1, 0)
 
 
+def _flip_manual_outcome(document: dict[str, Any]) -> None:
+    """Change the outcome of a completed manual step. The signed result in the step still disagrees."""
+    target = next(
+        (
+            t
+            for t in _decision(document)["test_results"]
+            if t["check"] == "manual.review" and t["verdict"] in ("pass", "fail")
+        ),
+        None,
+    )
+    if target is None:
+        raise LookupError("the envelope has no completed manual step")
+    flipped = "fail" if target["verdict"] == "pass" else "pass"
+    target["verdict"] = flipped
+    target["observations"][0]["summary"]["outcome"] = flipped
+
+
 # Keyed by the `tamper` name in validation/fault-catalogue.yaml.
 TAMPER: dict[str, Tamper] = {
     "flip_verdict": _flip_verdict,
@@ -62,6 +79,7 @@ TAMPER: dict[str, Tamper] = {
     "change_counts": _change_counts,
     "substitute_commitment": lambda d: _decision(d)["record_commitments"][0].update(commitment="0" * 64),
     "alg_none": lambda d: _set_algorithm(d, "none", keep_signature=False),
+    "flip_manual_outcome": _flip_manual_outcome,
 }
 # These two need a different key or a different evaluation time, not a changed document.
 NEEDS_SETUP = ("untrusted_key", "expired_key")

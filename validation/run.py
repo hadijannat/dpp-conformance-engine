@@ -68,7 +68,8 @@ def _controls(work: Path) -> tuple[list[dict[str, Any]], EvidenceEnvelope | None
     rows: list[dict[str, Any]] = []
     first: tuple[EvidenceEnvelope, Path] | None = None
     for profile in cases.profiles():
-        with ReferenceRig(work / f"control-{profile}", profile) as rig:
+        # A TEST-ONLY manual result, so that the signed control holds a completed manual step (E-13).
+        with ReferenceRig(work / f"control-{profile}", profile, manual={"TP-MANUAL-001": "pass"}) as rig:
             run = rig.run()
             executed = [
                 t

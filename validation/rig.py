@@ -12,6 +12,7 @@ import io
 import json
 import re
 import shutil
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Literal
@@ -19,17 +20,23 @@ from urllib.parse import urlsplit
 
 import yaml
 
+from dppce.catalogue import load_testpacks
 from dppce.cli import main
 from dppce.evidence.jws import LocalSigner
+from dppce.evidence.manual import issue_manual_result
 from dppce.infrastructure.authorization import issue_authorization
 from dppce.infrastructure.reference_server import ReferenceServer, ReferenceSystem, Reply
-from dppce.models import Authorization, EvidenceEnvelope
+from dppce.models import Authorization, EvidenceEnvelope, ManualResult
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "fixtures" / "reference"
 TRUST = FIXTURES / "trust" / "TEST-ONLY-trust-bundle.json"
 REPORT_KEY = FIXTURES / "trust" / "TEST-ONLY-report-signing.key.pem"
 REPORT_KID = "TEST-ONLY-report-key-1"
+MANUAL_KEY = FIXTURES / "trust" / "TEST-ONLY-manual-signing.key.pem"
+MANUAL_KID = "TEST-ONLY-manual-key-1"
+# Before DEFAULT_AT. A manual result here describes the synthetic reference system only.
+MANUAL_PERFORMED_AT = "2026-10-13T08:00:00Z"
 LAB = "urn:example:test-lab"
 DEFAULT_AT = "2026-10-13T12:00:00Z"
 # Nothing listens here, so a connection is refused at once.
@@ -173,9 +180,12 @@ class ReferenceRig:
         serve: bool = True,
         layout: Literal["reference", "alternate"] = "reference",
         data_root: Path | None = None,
+        manual: Mapping[str, Literal["pass", "fail"]] | None = None,
     ) -> None:
         self.work = work
         self.profile = profile
+        self._manual = dict(manual or {})
+        self._manual_files: list[Path] = []
         self._ics_changes = ics_changes or {}
         self._qr = qr or profile
         self._alternate = layout == "alternate"
@@ -234,13 +244,35 @@ class ReferenceRig:
         token = issue_authorization(authorization, owner)
         (rig / "authorization" / "TEST-ONLY-authorization.jws").write_text(token + "\n", encoding="ascii")
         self._rig = rig
+        self._write_manual_results(rig, ics["sut"]["identifier"])
         return self
+
+    def _write_manual_results(self, rig: Path, sut_identifier: str) -> None:
+        """Sign a TEST-ONLY manual result for each named step of the synthetic reference system."""
+        if not self._manual:
+            return
+        purposes = {p.id: p for pack in load_testpacks(self.data_root).values() for p in pack.test_purposes}
+        signer = LocalSigner.from_pem(MANUAL_KEY, MANUAL_KID)
+        (rig / "manual").mkdir()
+        for number, (ident, outcome) in enumerate(sorted(self._manual.items()), start=1):
+            result = ManualResult(
+                schema_version="dppce.manualresult/1",
+                test_purpose_id=ident,
+                sut_identifier=sut_identifier,
+                role="inspector",
+                performed_at=MANUAL_PERFORMED_AT,
+                outcome=outcome,
+                evidence=purposes[ident].expected_evidence,
+            )
+            path = rig / "manual" / f"TEST-ONLY-manual-{number}.jws"
+            path.write_text(issue_manual_result(result, signer) + "\n", encoding="ascii")
+            self._manual_files.append(path)
 
     def __exit__(self, *exc: object) -> None:
         if self._server is not None:
             self._server.stop()
 
-    def run(self, mode: str = "illustrative", at: str = DEFAULT_AT) -> RunResult:
+    def run(self, mode: str = "illustrative", at: str = DEFAULT_AT, extra: Sequence[str] = ()) -> RunResult:
         self._runs += 1
         out = self.work / f"run-{self._runs}"
         arguments = [
@@ -261,7 +293,9 @@ class ReferenceRig:
         ]  # fmt: skip
         for role in _ROLES:
             arguments += ["--role-secret", f"{role}=file:TEST-ONLY-{role}.token"]
-        code, summary = _cli(arguments)
+        for path in self._manual_files:
+            arguments += ["--manual-result", str(path)]
+        code, summary = _cli([*arguments, *extra])
         envelope = EvidenceEnvelope.model_validate_json((out / "envelope.json").read_bytes())
         return RunResult(code, summary, out, envelope)
 
