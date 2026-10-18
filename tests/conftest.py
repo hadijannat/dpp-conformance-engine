@@ -5,6 +5,7 @@ from __future__ import annotations
 import ipaddress
 import socket
 from collections.abc import Callable, Iterator
+from typing import Any
 
 import pytest
 
@@ -52,6 +53,18 @@ def loopback() -> Iterator[Callable[[Handler], LoopbackServer]]:
 
 
 _real_connect = socket.socket.connect
+_real_getaddrinfo = socket.getaddrinfo
+
+
+def _is_loopback_name(host: object) -> bool:
+    if isinstance(host, bytes):
+        host = host.decode("ascii", "replace")
+    if host is None or host == "" or str(host).lower() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(str(host).split("%")[0]).is_loopback
+    except ValueError:
+        return False
 
 
 def _is_loopback(address: object) -> bool:
@@ -65,10 +78,12 @@ def _is_loopback(address: object) -> bool:
 
 @pytest.fixture(autouse=True, scope="session")
 def _no_external_network() -> Iterator[None]:
-    """Fail any test that opens a connection to a host other than loopback.
+    """Fail any test that opens a connection to, or looks up the name of, a host other than loopback.
 
     The suite must never contact a real DPP system, registry, or third-party service. CI also
     removes network access at the operating-system level; this guard works on every machine.
+    A name lookup is guarded too: SystemResolver calls getaddrinfo, so a mutant of transport.py
+    could otherwise send a real DNS query.
     """
 
     def guarded(self: socket.socket, address: object) -> None:
@@ -76,8 +91,15 @@ def _no_external_network() -> Iterator[None]:
             raise AssertionError(f"a test tried to connect to {address!r}; tests use loopback only")
         _real_connect(self, address)  # type: ignore[arg-type]
 
+    def guarded_getaddrinfo(host: object, *args: Any, **kwargs: Any) -> Any:
+        if not _is_loopback_name(host):
+            raise AssertionError(f"a test tried to resolve {host!r}; tests use loopback only")
+        return _real_getaddrinfo(host, *args, **kwargs)  # type: ignore[arg-type]
+
     socket.socket.connect = guarded  # type: ignore[method-assign, assignment]
+    socket.getaddrinfo = guarded_getaddrinfo
     try:
         yield
     finally:
         socket.socket.connect = _real_connect  # type: ignore[method-assign]
+        socket.getaddrinfo = _real_getaddrinfo

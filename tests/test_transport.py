@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import http.server
 import os
+import socket
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -425,3 +426,11 @@ def test_data_keys_are_created_private_and_checked(tmp_path: Path) -> None:
     for key_id in (provider.default_key_id(), "absent", "../escape"):
         with pytest.raises(KeyError_):
             provider.data_key(key_id)
+
+
+def test_the_network_guard_refuses_a_name_lookup() -> None:
+    # Rule 3: a mutant of transport.py must not send a real DNS query from the developer host.
+    with pytest.raises(AssertionError, match="tests use loopback only"):
+        socket.getaddrinfo("dns.example.test", 80)
+    assert socket.getaddrinfo("127.0.0.1", 80)
+    assert socket.getaddrinfo("LocalHost", 80)
