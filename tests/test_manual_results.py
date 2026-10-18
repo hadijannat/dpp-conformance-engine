@@ -678,7 +678,9 @@ def test_input_errors_exit_2(
     elif case == "two-files-for-one-step":
         supplied, expected = [signed_file(files, EU_STEP), signed_file(files, EU_STEP)], EU_STEP
     elif case == "no-trust":
-        supplied, trust, expected = [signed_file(files, EU_STEP)], False, "trust bundle"
+        # The authorization guard also names a trust bundle; assert the manual-result message.
+        supplied, trust = [signed_file(files, EU_STEP)], False
+        expected = "a manual result needs a trust bundle"
     elif case == "excluded-by-the-mode":
         supplied, mode, expected = [signed_file(files, EU_STEP)], "illustrative", "MODE.NOT_PERMITTED"
     else:

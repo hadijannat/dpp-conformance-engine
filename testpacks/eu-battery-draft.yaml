@@ -2,7 +2,8 @@
 # Purpose: define the test purposes for the draft pack eu-battery/draft. Exploratory mode only.
 # An automated step gives partial evidence. If its check fails, the step is inconclusive, because
 # the checks compare with declarations and synthetic resources, not with the Regulation.
-# A manual step has no result in the engine. No path can pass without its manual step.
+# A manual step has a result only from a signed manual result (ADR 0013). No path can pass
+# without its manual step.
 schema_version: dppce.testpack/1
 testpack_id: eu-battery/draft-tests
 version: 0.1.0

@@ -47,7 +47,7 @@ Each verdict is then `inconclusive` or `not_applicable`. The one exception is `e
 - In exploratory mode, the operator can supply a signed manual result with `--manual-result`. See ADR 0013.
 - A manual result with the outcome `pass` lets its path give `pass` if every other step passes. The outcome `fail` gives `fail`.
 - The engine does not perform the review. A valid signature shows who signed the result. It does not show that the review was correct.
-- Each automated step gives `inconclusive` when its check does not pass. No step can give `fail`.
+- Each automated step gives `inconclusive` when its check does not pass. No automated step can give `fail`.
 - No entry has a `declared_support` expression. A declaration of the owner cannot give `fail`.
 - The modes `illustrative` and `reviewed` do not assess these entries. The engine lists each entry as an exclusion.
 
