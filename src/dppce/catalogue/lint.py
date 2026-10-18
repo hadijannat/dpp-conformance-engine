@@ -368,6 +368,14 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
         if model is not None and (problem := params_problem(model, purpose.stimulus.params)) is not None:
             message = f"The parameters do not fit the check '{purpose.stimulus.check}': {problem}"
             out.append(Finding("CAT019", "error", test_id, message))
+        if model is not None and "role" in model.model_fields:
+            # Without the parameter the check probes its default role, so that one counts too.
+            role = purpose.stimulus.params.get("role", model.model_fields["role"].default)
+            if isinstance(role, str) and role not in purpose.roles:
+                message = (
+                    f"The check probes the role {role!r}, which the test purpose does not list in 'roles'."
+                )
+                out.append(Finding("CAT023", "error", test_id, message))
         out.extend(_fact_findings(purpose.applicability, test_id, list(profiles.values())))
         if purpose.verdict_rules.on_unreachable == "fail":
             named = [requirements[r] for r in purpose.requirements if r in requirements]

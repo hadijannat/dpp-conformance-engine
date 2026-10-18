@@ -16,6 +16,7 @@ import pytest
 from dppce.catalogue import Catalogue
 from dppce.catalogue.lint import Finding, TraceRow, lint, trace
 from dppce.models import Model, Profile, Requirement, SourceRecord, TestPurpose
+from dppce.testdefs import registry
 from dppce.testdefs.registry import NoParams
 from tests.core import builders as b
 
@@ -383,6 +384,55 @@ def test_CAT019_params_that_do_not_fit_a_registered_check() -> None:
     absent = run_lint(purposes=[b.purpose("T-1", stimulus={"check": "probe.absent", "params": {"x": 1}})])
     assert brief(absent) == [("CAT006", "warning", "T-1")], "an unregistered check is not checked"
     assert run_lint(purposes=[b.purpose("T-1", stimulus={"check": "probe.ok", "params": {}})]) == []
+
+
+# --- CAT023: the probed role is a role of the test purpose ---------------------------------
+
+
+class RoleParams(Model):
+    role: str = "anonymous"
+
+
+class DepthParams(Model):
+    depth: int = 1
+
+
+def lint_purpose(purpose: TestPurpose, checks: Mapping[str, type[Model]]) -> list[Finding]:
+    return lint(b.catalogue(b.pack(covered())), {}, {"tp/a": b.purposes_pack(purpose)}, checks)
+
+
+ROLE_CASES = [
+    # (check, params, roles, expected codes)
+    ("probe.role", {"role": "authority"}, ["anonymous"], ["CAT023"]),
+    ("probe.role", {}, ["authority"], ["CAT023"]),
+    ("probe.role", {"role": "authority"}, ["authority"], []),
+    ("probe.role", {}, ["anonymous"], []),
+    ("probe.role", {"role": 5}, ["anonymous"], ["CAT019"]),
+    ("probe.absent", {"role": "authority"}, ["anonymous"], ["CAT006"]),
+    ("probe.depth", {}, ["authority"], []),
+]
+
+
+@pytest.mark.parametrize(("check", "params", "roles", "expected"), ROLE_CASES)
+def test_cat023_reports_a_probed_role_that_the_purpose_does_not_list(
+    check: str, params: dict[str, Any], roles: list[str], expected: list[str]
+) -> None:
+    checks = {**KNOWN_CHECKS, "probe.role": RoleParams, "probe.depth": DepthParams}
+    purpose = b.purpose("T-1", roles=roles, stimulus={"check": check, "params": params})
+    found = lint_purpose(purpose, checks)
+    assert codes(found) == expected
+    for finding in found:
+        if finding.code == "CAT023":
+            assert (finding.severity, finding.location) == ("error", "T-1")
+            assert "'authority'" in finding.message or "'anonymous'" in finding.message
+
+
+def test_cat023_uses_the_registered_access_model() -> None:
+    stimulus = {"check": "access.restricted_fields", "params": {"role": "authority"}}
+    found = lint_purpose(b.purpose("T-1", roles=["anonymous"], stimulus=stimulus), registry.param_models())
+    assert [(f.code, f.severity, f.location) for f in found if f.code == "CAT023"] == [
+        ("CAT023", "error", "T-1")
+    ]
 
 
 # --- CAT020 and CAT021: the cited version and the source record ----------------------------
