@@ -78,7 +78,8 @@ usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PAC
                  [--issuer-name ISSUER_NAME] [--issuer-id ISSUER_ID]
                  [--accreditation-status ACCREDITATION_STATUS]
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
-                 [--secrets SECRETS] [--role-secret ROLE=REFERENCE] [--allow-private-host ORIGIN]
+                 [--data-key-id DATA_KEY_ID] [--create-data-key] [--secrets SECRETS]
+                 [--role-secret ROLE=REFERENCE] [--allow-private-host ORIGIN]
                  [--allow-remote-host ORIGIN] [--retention-days RETENTION_DAYS]
 
 Execute the plan, record the observations, and write the report.
@@ -115,6 +116,9 @@ options:
   --accreditation-reference ACCREDITATION_REFERENCE
   --out OUT             new directory for the run
   --keys KEYS           directory with the data keys; keep it apart
+  --data-key-id DATA_KEY_ID
+                        identifier of the data key in --keys; default: local-data-key-1
+  --create-data-key     create the data key from operating-system randomness if it does not exist
   --secrets SECRETS     directory that holds the file secrets of the roles
   --role-secret ROLE=REFERENCE
                         confirm the secret reference that the IXIT declares for one role; repeat
@@ -169,21 +173,29 @@ options:
 ### `dppce sign`
 
 ```text
-usage: dppce sign [-h] [--json] --envelope ENVELOPE --key KEY --kid KID --issuer ISSUER
-                  [--out OUT] [--role {issuer,reviewer}] [--valid-until VALID_UNTIL]
-                  [--supersedes SUPERSEDES] [--status-list-id STATUS_LIST_ID]
-                  [--status-index STATUS_INDEX]
+usage: dppce sign [-h] [--json] --envelope ENVELOPE --key KEY --kid KID
+                  [--passphrase-ref REFERENCE] [--secrets SECRETS] [--allow-unencrypted-key]
+                  --issuer ISSUER (--out OUT | --in-place) [--role {issuer,reviewer}]
+                  [--valid-until VALID_UNTIL] [--supersedes SUPERSEDES]
+                  [--status-list-id STATUS_LIST_ID] [--status-index STATUS_INDEX]
 
-Sign an envelope with a local key (development and tests).
+Sign an envelope with a local key file.
 
 options:
   -h, --help            show this help message and exit
   --json                write one JSON document to standard output
   --envelope ENVELOPE
-  --key KEY             PEM private key, P-256
-  --kid KID
+  --key KEY             PEM private key, P-256, encrypted
+  --kid KID             key identifier that the trust bundle names
+  --passphrase-ref REFERENCE
+                        secret reference of the key passphrase: env:DPPCE_SECRET_<NAME> or
+                        file:<name>
+  --secrets SECRETS     directory that holds the file secrets
+  --allow-unencrypted-key
+                        accept a key that is not encrypted; for TEST-ONLY keys
   --issuer ISSUER       issuer identifier that the trust bundle names
-  --out OUT
+  --out OUT             new file for the signed envelope
+  --in-place            replace the input envelope
   --role {issuer,reviewer}
                         declared role; reviewer: a person signs with a key that only that person
                         holds
@@ -201,7 +213,7 @@ options:
 
 ```text
 usage: dppce verify [-h] [--json] --envelope ENVELOPE --trust TRUST --at AT
-                    [--status-list STATUS_LIST]
+                    [--status-list STATUS_LIST] [--opening OPENING] [--proof PROOF]
 
 Verify a signed envelope against an explicit trust bundle.
 
@@ -213,6 +225,113 @@ options:
   --at AT               explicit evaluation time
   --status-list STATUS_LIST
                         signed status list file of the report issuer; nothing is fetched
+  --opening OPENING     record opening to check against the report
+  --proof PROOF         inclusion proof to check against the report
+```
+
+### `dppce authorize`
+
+```text
+usage: dppce authorize [-h] [--json] --document DOCUMENT --key KEY --kid KID
+                       [--passphrase-ref REFERENCE] [--secrets SECRETS] [--allow-unencrypted-key]
+                       --out OUT
+
+Sign a test authorization with the key of the system owner.
+
+options:
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
+  --document DOCUMENT   dppce.authorization/1 document (JSON)
+  --key KEY             PEM private key, P-256, encrypted
+  --kid KID             key identifier that the trust bundle names
+  --passphrase-ref REFERENCE
+                        secret reference of the key passphrase: env:DPPCE_SECRET_<NAME> or
+                        file:<name>
+  --secrets SECRETS     directory that holds the file secrets
+  --allow-unencrypted-key
+                        accept a key that is not encrypted; for TEST-ONLY keys
+  --out OUT             new file for the compact JWS
+```
+
+### `dppce open`
+
+```text
+usage: dppce open [-h] [--json] --run RUN --keys KEYS --record RECORD [--envelope ENVELOPE] --out
+                  OUT
+
+Write the salt and the plaintext of one record for a disclosure.
+
+options:
+  -h, --help           show this help message and exit
+  --json               write one JSON document to standard output
+  --run RUN            run directory
+  --keys KEYS          directory with the data keys
+  --record RECORD      record identifier, for example r0001
+  --envelope ENVELOPE  envelope of the run; default: RUN/envelope.json
+  --out OUT            new file; it holds the plaintext of the record
+```
+
+### `dppce prove`
+
+```text
+usage: dppce prove [-h] [--json] --envelope ENVELOPE --result RESULT --out OUT
+
+Write the inclusion proof of one result of a report.
+
+options:
+  -h, --help           show this help message and exit
+  --json               write one JSON document to standard output
+  --envelope ENVELOPE
+  --result RESULT      R: plus a requirement identifier, or T: plus a test purpose identifier
+  --out OUT            new file for the proof
+```
+
+### `dppce keys generate`
+
+```text
+usage: dppce keys generate [-h] [--json] --out OUT --passphrase-ref REFERENCE [--secrets SECRETS]
+
+Write a new P-256 signing key, encrypted with a passphrase, and print its public JWK.
+
+options:
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
+  --out OUT             new key file; mode 0600
+  --passphrase-ref REFERENCE
+                        secret reference: env:DPPCE_SECRET_<NAME> or file:<name>; use a generated
+                        passphrase of at least 32 bytes, for example from
+                        secrets.token_urlsafe(32)
+  --secrets SECRETS     directory that holds the file secrets
+```
+
+### `dppce trust-bundle add-key`
+
+```text
+usage: dppce trust-bundle add-key [-h] [--json] [--bundle BUNDLE]
+                                  [--policy-version POLICY_VERSION] --kid KID --issuer ISSUER
+                                  --purpose {report,authorization,passport,manual,review,status}
+                                  --public-key PUBLIC_KEY --not-before NOT_BEFORE --not-after
+                                  NOT_AFTER --out OUT
+
+Write a dppce.trust/2 bundle with one more public key.
+
+options:
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
+  --bundle BUNDLE       bundle to extend; a version 1 bundle is upgraded
+  --policy-version POLICY_VERSION
+                        start a new empty bundle with this policy version
+  --kid KID             key identifier
+  --issuer ISSUER       issuer identifier of the key
+  --purpose {report,authorization,passport,manual,review,status}
+                        purpose of the key; repeat for each
+  --public-key PUBLIC_KEY
+                        public JWK file of a P-256 key
+  --not-before NOT_BEFORE
+                        start of validity, for example 2026-01-01T00:00:00Z
+  --not-after NOT_AFTER
+                        end of validity, for example 2027-01-01T00:00:00Z
+  --out OUT             new bundle file
 ```
 
 ### `dppce catalogue lint`

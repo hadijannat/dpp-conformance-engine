@@ -12,12 +12,15 @@ import argparse
 import base64
 import contextlib
 import json
+import os
+import stat
 import sys
+import tempfile
 from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, get_args
 from urllib.parse import urlsplit
 
 from pydantic import ValidationError
@@ -37,10 +40,11 @@ from dppce.catalogue import (
     load_testpacks,
 )
 from dppce.catalogue.lint import lint, trace
+from dppce.evidence import disclosure
 from dppce.evidence import status as status_lists
-from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
+from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, is_exact, parse_strict
 from dppce.evidence.envelope import decision_digest, in_layout_of, sign_envelope
-from dppce.evidence.jws import LocalSigner, SignatureError, header_of
+from dppce.evidence.jws import SignatureError, header_of, public_jwk_from
 from dppce.evidence.manual import (
     MANUAL_CHECK,
     SAMPLE_PREFIX,
@@ -60,9 +64,16 @@ from dppce.evidence.timestamp import (
     token_from_response,
 )
 from dppce.evidence.timestamp import SHA256 as TIMESTAMP_SHA256
-from dppce.infrastructure.authorization import AuthorizationError, validate_authorization
+from dppce.infrastructure.authorization import AuthorizationError, issue_authorization, validate_authorization
 from dppce.infrastructure.clock import STAMP_FORMAT, SystemClock, parse_stamp, utc_stamp
-from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_secret
+from dppce.infrastructure.keys import (
+    FileDataKeyProvider,
+    KeyError_,
+    generate_signing_key,
+    load_signing_key,
+    resolve_secret,
+    write_new_file,
+)
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.resources import data_root
 from dppce.infrastructure.transport import (
@@ -87,6 +98,7 @@ from dppce.models import (
     StatusReference,
     TestPack,
     TrustBundle,
+    TrustedKey,
     Verdict,
 )
 from dppce.orchestrator.plan import PlanError
@@ -94,6 +106,7 @@ from dppce.orchestrator.run import RunInputs, bound_files, evaluate, input_hashe
 from dppce.report import render
 from dppce.testdefs import registry
 from dppce.verifier import verify_json
+from dppce.verifier.verify import body_dimensions
 
 EXIT_OK: Final = 0
 EXIT_SUT_FAIL: Final = 1
@@ -168,12 +181,52 @@ def _first_message(exc: ValidationError) -> str:
     return str(exc.errors()[0]["msg"]).removeprefix("Value error, ")
 
 
-def _status_list(path: Path | None) -> bytes | None:
-    """Read a status list file. One byte over the limit is enough for the verifier to refuse it."""
+def _read_capped(path: Path | None, limit: int) -> bytes | None:
+    """Read a file for the verifier. One byte over the limit is enough for the verifier to refuse it."""
     if path is None:
         return None
     with path.open("rb") as handle:
-        return handle.read(status_lists.MAX_TOKEN_BYTES + 1)
+        return handle.read(limit + 1)
+
+
+def _checked_envelope(path: Path) -> EvidenceEnvelope:
+    """Read an envelope whose body passes the checks that need no trust (section 11.4)."""
+    envelope, dimensions = body_dimensions(parse_strict(path.read_bytes()))
+    failed = [name for name, (outcome, _) in dimensions.items() if outcome == "fail"]
+    if envelope is None or failed:
+        raise UsageError(f"ENVELOPE.BODY.INVALID: the envelope fails these checks: {', '.join(failed)}")
+    return envelope
+
+
+def _new_path(path: Path, code: str) -> None:
+    """Refuse an output path that exists. ``code`` is the literal reason code of the command."""
+    if path.exists() or path.is_symlink():
+        raise UsageError(f"{code}: {path} exists; --out names a new file")
+
+
+def _passphrase(args: argparse.Namespace) -> str | None:
+    """Resolve the passphrase reference. A message never holds the passphrase."""
+    if args.passphrase_ref is None:
+        return None
+    return resolve_secret(args.passphrase_ref, secrets_dir=args.secrets)
+
+
+def _replace(path: Path, data: bytes) -> None:
+    """Replace ``path`` through a temporary file in its directory. The file keeps its mode."""
+    mode = stat.S_IMODE(path.stat().st_mode)
+    handle, temporary = tempfile.mkstemp(dir=path.parent, prefix=".dppce-sign-")
+    try:
+        os.fchmod(handle, mode)
+        with os.fdopen(handle, "wb") as out:
+            out.write(data)
+            out.flush()
+            os.fsync(out.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        # The input stays as it was. Only the temporary file is removed.
+        with contextlib.suppress(FileNotFoundError):
+            os.unlink(temporary)
+        raise
 
 
 @dataclass(frozen=True)
@@ -506,8 +559,17 @@ def cmd_run(args: argparse.Namespace) -> int:
     }
     # The transport pins each file as it pins any sample. The check reads it as an artifact.
     samples |= {SAMPLE_PREFIX + ident: path.resolve() for ident, path in manual.items()}
-    keys = FileDataKeyProvider(args.keys)
-    keys.create()
+    keys = FileDataKeyProvider(args.keys, args.data_key_id)
+    if args.create_data_key:
+        keys.create()
+    try:
+        # Checked before the first request: a run whose recording cannot be written sends nothing.
+        keys.data_key(args.data_key_id)
+    except KeyError_ as exc:
+        raise UsageError(
+            f"KEYS.DATA_KEY.UNAVAILABLE: data key {args.data_key_id!r} is not available in {args.keys}; "
+            "create it with --create-data-key, or name an existing key with --data-key-id"
+        ) from exc
     transport = PolicyTransport(
         TransportConfig(
             policy=ixit.network,
@@ -691,7 +753,12 @@ def cmd_report(args: argparse.Namespace) -> int:
             # Verification needs an explicit evaluation time. "Now" is never assumed.
             raise UsageError("a report with a verification section needs an explicit time: --at")
         verification = (
-            verify_json(raw, trust, _time(args.at), status_list=_status_list(args.status_list))
+            verify_json(
+                raw,
+                trust,
+                _time(args.at),
+                status_list=_read_capped(args.status_list, status_lists.MAX_TOKEN_BYTES),
+            )
             if trust
             else None
         )
@@ -705,8 +772,20 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 
 def cmd_sign(args: argparse.Namespace) -> int:
-    envelope = EvidenceEnvelope.model_validate(parse_strict(args.envelope.read_bytes()))
-    signer = LocalSigner.from_pem(args.key, args.kid)
+    source: Path = args.envelope
+    if args.in_place and source.is_symlink():
+        # os.replace would put a regular file in place of the link.
+        raise UsageError(f"SIGN.INPUT.LINK: {source} is a symbolic link; sign the target file, or use --out")
+    envelope = _checked_envelope(source)
+    if args.out is not None:
+        if args.out.resolve() == source.resolve():
+            raise UsageError(
+                "SIGN.OUTPUT.IS_INPUT: --out names the input envelope; use --in-place to replace it"
+            )
+        _new_path(args.out, "SIGN.OUTPUT.EXISTS")
+    signer = load_signing_key(
+        args.key, args.kid, _passphrase(args), allow_unencrypted=args.allow_unencrypted_key
+    )
     if (args.status_list_id is None) != (args.status_index is None):
         raise UsageError("SIGN.OPTION.INVALID: --status-list-id and --status-index go together")
     try:
@@ -727,10 +806,174 @@ def cmd_sign(args: argparse.Namespace) -> int:
         )
     except ValidationError as exc:
         raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
-    out: Path = args.out or args.envelope
-    out.write_text(signed.model_dump_json(by_alias=True) + "\n", encoding="utf-8")
+    data = (signed.model_dump_json(by_alias=True) + "\n").encode("utf-8")
+    out: Path = source if args.in_place else args.out
+    if args.in_place:
+        _replace(source, data)
+    else:
+        write_new_file(out, data)
     summary = {"written": str(out), "signatures": len(signed.signatures), "kid": args.kid, "role": args.role}
     _emit(args, summary, f"signed with key '{args.kid}'; wrote {out}")
+    return EXIT_OK
+
+
+def cmd_keys_generate(args: argparse.Namespace) -> int:
+    """Write a new encrypted P-256 key file and print its public JWK (section 11.3)."""
+    passphrase = resolve_secret(args.passphrase_ref, secrets_dir=args.secrets)
+    jwk = generate_signing_key(args.out, passphrase)
+    if args.json:
+        _emit(args, {"written": str(args.out), "public_jwk": jwk}, "")
+    else:
+        # Standard output holds the JWK only, so that the operator can redirect it to a file.
+        print(json.dumps(jwk, sort_keys=True))
+        print(
+            f"wrote {args.out}: a P-256 private key, encrypted with the passphrase; mode 0600",
+            file=sys.stderr,
+        )
+    return EXIT_OK
+
+
+def cmd_authorize(args: argparse.Namespace) -> int:
+    """Sign a dppce.authorization/1 document with the key of the system owner (section 11.3)."""
+    invalid = "AUTHORIZE.DOCUMENT.INVALID"
+    try:
+        document = parse_strict(args.document.read_bytes())
+        if not isinstance(document, dict):
+            raise UsageError(f"{invalid}: the document is not a JSON object")
+        authorization = Authorization.model_validate(document)
+    except CanonicalizationError as exc:
+        raise UsageError(f"{invalid}: the document is not strict JSON") from exc
+    except ValidationError as exc:
+        raise UsageError(f"{invalid}: {_first_message(exc)}") from exc
+    if not is_exact(document, authorization):
+        # The owner signs what the owner wrote. A coerced value, such as "10" for 10, is refused.
+        raise UsageError(
+            f"{invalid}: the document is not in the exact canonical form of the schema "
+            "(a field is missing, a type differs, or a number is not an integer)"
+        )
+    try:
+        start, end = (
+            datetime.strptime(value, STAMP_FORMAT)
+            for value in (authorization.not_before, authorization.not_after)
+        )
+    except ValueError as exc:
+        raise UsageError(
+            "AUTHORIZE.PERIOD.INVALID: not_before and not_after must be times such as 2026-10-13T12:00:00Z"
+        ) from exc
+    if start > end:
+        raise UsageError("AUTHORIZE.PERIOD.INVALID: not_before is after not_after")
+    try:
+        _confirmed_origins(list(authorization.endpoints), "endpoint")
+    except UsageError as exc:
+        raise UsageError(f"AUTHORIZE.ENDPOINT.INVALID: {exc}") from exc
+    _new_path(args.out, "AUTHORIZE.OUTPUT.EXISTS")
+    signer = load_signing_key(
+        args.key, args.kid, _passphrase(args), allow_unencrypted=args.allow_unencrypted_key
+    )
+    write_new_file(args.out, (issue_authorization(authorization, signer) + "\n").encode("ascii"))
+    summary = {
+        "written": str(args.out),
+        "authorization_id": authorization.authorization_id,
+        "kid": args.kid,
+        "issuer": authorization.issuer,
+    }
+    _emit(
+        args,
+        summary,
+        f"signed authorization {authorization.authorization_id!r} with key '{args.kid}'; wrote {args.out}",
+    )
+    return EXIT_OK
+
+
+def cmd_trust_add_key(args: argparse.Namespace) -> int:
+    """Write a dppce.trust/2 bundle with one more key. Nothing is trusted that the operator did not add."""
+    if (args.bundle is None) == (args.policy_version is None):
+        raise UsageError("TRUST.BUNDLE.OPTION: give exactly one of --bundle and --policy-version")
+    bundle = _trust(args.bundle) or TrustBundle(
+        schema_version="dppce.trust/2", policy_version=args.policy_version
+    )
+    _new_path(args.out, "TRUST.OUTPUT.EXISTS")
+    try:
+        jwk = public_jwk_from(parse_strict(args.public_key.read_bytes()))
+    except SignatureError as exc:
+        if exc.code == "PRIVATE":
+            raise UsageError(f"TRUST.KEY.PRIVATE: {exc}") from exc
+        raise UsageError(f"TRUST.KEY.NOT_P256: {exc}") from exc
+    except CanonicalizationError as exc:
+        raise UsageError("TRUST.KEY.NOT_P256: the public key file is not strict JSON") from exc
+    if any(key.kid == args.kid for key in bundle.keys):
+        raise UsageError(f"TRUST.KEY.DUPLICATE_KID: the bundle already holds the key {args.kid!r}")
+    try:
+        start, end = _time(args.not_before), _time(args.not_after)
+    except UsageError as exc:
+        raise UsageError(f"TRUST.KEY.PERIOD_INVALID: {exc}") from exc
+    if start > end:
+        raise UsageError("TRUST.KEY.PERIOD_INVALID: --not-before is after --not-after")
+    purposes = tuple(dict.fromkeys(args.purpose))
+    try:
+        added = TrustedKey(
+            kid=args.kid,
+            issuer=args.issuer,
+            purposes=purposes,
+            public_jwk=jwk,
+            not_before=args.not_before,
+            not_after=args.not_after,
+        )
+        written = TrustBundle.model_validate({**bundle.model_dump(), "keys": [*bundle.keys, added]})
+    except ValidationError as exc:
+        # The first message carries the reason code, for example TRUST.KEY.ROLE_CONFLICT.
+        raise UsageError(_first_message(exc)) from exc
+    write_new_file(args.out, (written.model_dump_json(indent=2) + "\n").encode("utf-8"))
+    summary = {
+        "written": str(args.out),
+        "kid": args.kid,
+        "purposes": list(purposes),
+        "keys": len(written.keys),
+    }
+    _emit(args, summary, f"added key {args.kid!r} for {', '.join(purposes)}; wrote {args.out}")
+    return EXIT_OK
+
+
+def cmd_open(args: argparse.Namespace) -> int:
+    """Write the salt and the plaintext of one record for a disclosure (section 10.2)."""
+    _new_path(args.out, "OPEN.OUTPUT.EXISTS")
+    envelope = _checked_envelope(args.envelope or args.run / "envelope.json")
+    records = read_recording(args.run / "recording", FileDataKeyProvider(args.keys))
+    record = next((r for r in records if r.record_id == args.record), None)
+    if record is None:
+        raise UsageError(f"OPEN.RECORD.UNKNOWN: the recording holds no record {args.record!r}")
+    try:
+        opening = disclosure.open_record(envelope.decision, record)
+    except disclosure.DisclosureError as exc:
+        raise UsageError(f"{exc.code}: {exc}") from exc
+    write_new_file(args.out, canonical_bytes(opening) + b"\n", 0o600)
+    warning = (
+        f"WARNING: {args.out} holds the plaintext of record {record.record_id}: the request without "
+        "secrets, the response headers, and the response body. Give it only to a party that is "
+        "entitled to it."
+    )
+    print(warning, file=sys.stderr)
+    _emit(
+        args,
+        {"written": str(args.out), "record_id": record.record_id, "warning": warning},
+        f"wrote {args.out}",
+    )
+    return EXIT_OK
+
+
+def cmd_prove(args: argparse.Namespace) -> int:
+    """Write the inclusion proof of one result (section 11.2)."""
+    _new_path(args.out, "PROVE.OUTPUT.EXISTS")
+    envelope = _checked_envelope(args.envelope)
+    try:
+        proof = disclosure.prove(envelope.decision, args.result)
+    except disclosure.DisclosureError as exc:
+        raise UsageError(f"{exc.code}: {exc}") from exc
+    write_new_file(args.out, canonical_bytes(proof) + b"\n")
+    summary = {"written": str(args.out), "key": proof.key, "index": proof.index, "size": proof.size}
+    _emit(
+        args, summary, f"wrote the proof of {proof.key!r}, leaf {proof.index} of {proof.size}, to {args.out}"
+    )
     return EXIT_OK
 
 
@@ -739,7 +982,12 @@ def cmd_verify(args: argparse.Namespace) -> int:
     if trust is None:
         raise UsageError("verification needs an explicit trust bundle")
     report = verify_json(
-        args.envelope.read_bytes(), trust, _time(args.at), status_list=_status_list(args.status_list)
+        args.envelope.read_bytes(),
+        trust,
+        _time(args.at),
+        status_list=_read_capped(args.status_list, status_lists.MAX_TOKEN_BYTES),
+        opening=_read_capped(args.opening, disclosure.MAX_OPENING_BYTES),
+        proof=_read_capped(args.proof, disclosure.MAX_PROOF_BYTES),
     )
     lines = [f"{d.name:14} {d.outcome:12} {d.detail}" for d in report.dimensions]
     state = "complete" if report.complete else "NOT complete"
@@ -1004,6 +1252,16 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     run_options(run)
     run.add_argument("--out", type=Path, required=True, help="new directory for the run")
     run.add_argument("--keys", type=Path, required=True, help="directory with the data keys; keep it apart")
+    run.add_argument(
+        "--data-key-id",
+        default="local-data-key-1",
+        help="identifier of the data key in --keys; default: local-data-key-1",
+    )
+    run.add_argument(
+        "--create-data-key",
+        action="store_true",
+        help="create the data key from operating-system randomness if it does not exist",
+    )
     run.add_argument("--secrets", type=Path, help="directory that holds the file secrets of the roles")
     run.add_argument(
         "--role-secret",
@@ -1046,12 +1304,28 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     report.add_argument("--at")
     report.add_argument("--status-list", type=Path, help=_STATUS_LIST_HELP)
 
-    sign = add("sign", cmd_sign, "Sign an envelope with a local key (development and tests).")
+    def key_options(sub: argparse.ArgumentParser) -> None:
+        sub.add_argument("--key", type=Path, required=True, help="PEM private key, P-256, encrypted")
+        sub.add_argument("--kid", required=True, help="key identifier that the trust bundle names")
+        sub.add_argument(
+            "--passphrase-ref",
+            metavar="REFERENCE",
+            help="secret reference of the key passphrase: env:DPPCE_SECRET_<NAME> or file:<name>",
+        )
+        sub.add_argument("--secrets", type=Path, help="directory that holds the file secrets")
+        sub.add_argument(
+            "--allow-unencrypted-key",
+            action="store_true",
+            help="accept a key that is not encrypted; for TEST-ONLY keys",
+        )
+
+    sign = add("sign", cmd_sign, "Sign an envelope with a local key file.")
     sign.add_argument("--envelope", type=Path, required=True)
-    sign.add_argument("--key", type=Path, required=True, help="PEM private key, P-256")
-    sign.add_argument("--kid", required=True)
+    key_options(sign)
     sign.add_argument("--issuer", required=True, help="issuer identifier that the trust bundle names")
-    sign.add_argument("--out", type=Path)
+    target = sign.add_mutually_exclusive_group(required=True)
+    target.add_argument("--out", type=Path, help="new file for the signed envelope")
+    target.add_argument("--in-place", action="store_true", help="replace the input envelope")
     sign.add_argument(
         "--role",
         choices=["issuer", "reviewer"],
@@ -1070,6 +1344,78 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     verify.add_argument("--trust", type=Path, required=True)
     verify.add_argument("--at", required=True, help="explicit evaluation time")
     verify.add_argument("--status-list", type=Path, help=_STATUS_LIST_HELP)
+    verify.add_argument("--opening", type=Path, help="record opening to check against the report")
+    verify.add_argument("--proof", type=Path, help="inclusion proof to check against the report")
+
+    authorize = add("authorize", cmd_authorize, "Sign a test authorization with the key of the system owner.")
+    authorize.add_argument(
+        "--document", type=Path, required=True, help="dppce.authorization/1 document (JSON)"
+    )
+    key_options(authorize)
+    authorize.add_argument("--out", type=Path, required=True, help="new file for the compact JWS")
+
+    opening = add("open", cmd_open, "Write the salt and the plaintext of one record for a disclosure.")
+    opening.add_argument("--run", type=Path, required=True, help="run directory")
+    opening.add_argument("--keys", type=Path, required=True, help="directory with the data keys")
+    opening.add_argument("--record", required=True, help="record identifier, for example r0001")
+    opening.add_argument("--envelope", type=Path, help="envelope of the run; default: RUN/envelope.json")
+    opening.add_argument(
+        "--out", type=Path, required=True, help="new file; it holds the plaintext of the record"
+    )
+
+    prove = add("prove", cmd_prove, "Write the inclusion proof of one result of a report.")
+    prove.add_argument("--envelope", type=Path, required=True)
+    prove.add_argument(
+        "--result",
+        required=True,
+        help="R: plus a requirement identifier, or T: plus a test purpose identifier",
+    )
+    prove.add_argument("--out", type=Path, required=True, help="new file for the proof")
+
+    keys = commands.add_parser("keys", help="Signing key tools.").add_subparsers(
+        dest="keys_command", required=True
+    )
+    summary = "Write a new P-256 signing key, encrypted with a passphrase, and print its public JWK."
+    generate = keys.add_parser("generate", help=summary, description=summary)
+    generate.add_argument("--json", action="store_true", help="write one JSON document to standard output")
+    generate.set_defaults(handler=cmd_keys_generate)
+    generate.add_argument("--out", type=Path, required=True, help="new key file; mode 0600")
+    generate.add_argument(
+        "--passphrase-ref",
+        required=True,
+        metavar="REFERENCE",
+        help="secret reference: env:DPPCE_SECRET_<NAME> or file:<name>; use a generated passphrase of "
+        "at least 32 bytes, for example from secrets.token_urlsafe(32)",
+    )
+    generate.add_argument("--secrets", type=Path, help="directory that holds the file secrets")
+
+    trust_bundle = commands.add_parser("trust-bundle", help="Trust bundle tools.").add_subparsers(
+        dest="trust_bundle_command", required=True
+    )
+    summary = "Write a dppce.trust/2 bundle with one more public key."
+    add_key = trust_bundle.add_parser("add-key", help=summary, description=summary)
+    add_key.add_argument("--json", action="store_true", help="write one JSON document to standard output")
+    add_key.set_defaults(handler=cmd_trust_add_key)
+    add_key.add_argument("--bundle", type=Path, help="bundle to extend; a version 1 bundle is upgraded")
+    add_key.add_argument("--policy-version", help="start a new empty bundle with this policy version")
+    add_key.add_argument("--kid", required=True, help="key identifier")
+    add_key.add_argument("--issuer", required=True, help="issuer identifier of the key")
+    add_key.add_argument(
+        "--purpose",
+        required=True,
+        action="append",
+        # The Literal inside tuple[Literal[...], ...]: the model stays the one source of the purposes.
+        choices=get_args(get_args(TrustedKey.model_fields["purposes"].annotation)[0]),
+        help="purpose of the key; repeat for each",
+    )
+    add_key.add_argument("--public-key", type=Path, required=True, help="public JWK file of a P-256 key")
+    add_key.add_argument(
+        "--not-before", required=True, help="start of validity, for example 2026-01-01T00:00:00Z"
+    )
+    add_key.add_argument(
+        "--not-after", required=True, help="end of validity, for example 2027-01-01T00:00:00Z"
+    )
+    add_key.add_argument("--out", type=Path, required=True, help="new bundle file")
 
     catalogue = commands.add_parser("catalogue", help="Catalogue tools.").add_subparsers(
         dest="catalogue_command", required=True

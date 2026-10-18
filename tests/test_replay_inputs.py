@@ -78,7 +78,7 @@ class Run:
         arguments = [
             "run", "--mode", "reviewed", "--profile", "battery/ev", "--ics", str(ICS),
             "--ixit", str(ixit), "--at", "2026-10-13T12:00:00Z", "--data-root", str(self.root),
-            "--out", str(self.dir), "--keys", str(self.keys),
+            "--out", str(self.dir), "--keys", str(self.keys), "--create-data-key",
         ]  # fmt: skip
         if imports != "none":
             arguments += ["--import-pack", str(self.pack), "--import-testpack", str(self.testpack)]

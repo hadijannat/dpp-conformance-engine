@@ -104,7 +104,15 @@ def test_a_purpose_id_that_a_shipped_test_pack_defines_is_refused(
     findings = json.loads(capsys.readouterr().out)
     assert [f["code"] for f in findings if f["location"] == f"{TESTPACK}/TP-CARRIER-001"] == ["CAT016"]
     assert code == 2
-    for command in (["plan"], ["run", "--out", str(tmp_path / "run"), "--keys", str(tmp_path / "keys")]):
+    run_command = [
+        "run",
+        "--out",
+        str(tmp_path / "run"),
+        "--keys",
+        str(tmp_path / "keys"),
+        "--create-data-key",
+    ]
+    for command in (["plan"], run_command):
         assert cli.main([*command, *_plan_arguments(tmp_path, pack, testpack)]) == 2
         assert "TP-CARRIER-001 is defined more than once" in capsys.readouterr().err
     assert not (tmp_path / "run").exists()
@@ -117,7 +125,15 @@ def test_a_run_records_the_imported_test_pack_and_replay_rebuilds_the_plan(
     pack, testpack = _fixture_pair(tmp_path)
     run, keys = tmp_path / "run", tmp_path / "keys"
     code = cli.main(
-        ["run", *_plan_arguments(tmp_path, pack, testpack), "--out", str(run), "--keys", str(keys)]
+        [
+            "run",
+            *_plan_arguments(tmp_path, pack, testpack),
+            "--out",
+            str(run),
+            "--keys",
+            str(keys),
+            "--create-data-key",
+        ]
     )
     capsys.readouterr()
     envelope = json.loads((run / "envelope.json").read_text(encoding="utf-8"))

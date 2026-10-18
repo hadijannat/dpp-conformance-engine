@@ -278,9 +278,26 @@ class ReferenceRig:
         if self._server is not None:
             self._server.stop()
 
-    def run(self, mode: str = "illustrative", at: str = DEFAULT_AT, extra: Sequence[str] = ()) -> RunResult:
+    def run(
+        self,
+        mode: str = "illustrative",
+        at: str = DEFAULT_AT,
+        extra: Sequence[str] = (),
+        *,
+        create_data_key: bool = True,
+    ) -> RunResult:
+        """Run the engine. It reads the envelope, so use it only for a run that writes one."""
         self._runs += 1
         out = self.work / f"run-{self._runs}"
+        arguments = self.run_arguments(out, mode, at)
+        if create_data_key:
+            arguments.append("--create-data-key")
+        code, summary = _cli([*arguments, *extra])
+        envelope = EvidenceEnvelope.model_validate_json((out / "envelope.json").read_bytes())
+        return RunResult(code, summary, out, envelope)
+
+    def run_arguments(self, out: Path, mode: str = "illustrative", at: str = DEFAULT_AT) -> list[str]:
+        """The arguments of ``dppce run`` for this rig, without --create-data-key."""
         arguments = [
             "run",
             "--profile", f"battery/{self.profile}",
@@ -301,9 +318,7 @@ class ReferenceRig:
             arguments += ["--role-secret", f"{role}=file:TEST-ONLY-{role}.token"]
         for path in self._manual_files:
             arguments += ["--manual-result", str(path)]
-        code, summary = _cli([*arguments, *extra])
-        envelope = EvidenceEnvelope.model_validate_json((out / "envelope.json").read_bytes())
-        return RunResult(code, summary, out, envelope)
+        return arguments
 
     def replay(self, run: RunResult, times: int = 1) -> tuple[int, dict[str, Any]]:
         arguments = [
@@ -328,6 +343,9 @@ class ReferenceRig:
                 REPORT_KID,
                 "--issuer",
                 LAB,
+                # The fixture key is a TEST-ONLY key and is not encrypted.
+                "--allow-unencrypted-key",
+                "--in-place",
             ]
         )
         if code != 0:

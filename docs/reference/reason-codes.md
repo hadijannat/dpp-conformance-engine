@@ -59,6 +59,10 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `API.CONTRACT.UNSUPPORTED_FEATURE` | API |  | `dppce.adapters.api._unsupported` | inconclusive |
 | `API.RESPONSE.NOT_JSON` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
 | `API.RESPONSE.TOO_DEEP` | API | `api.contract` | `dppce.adapters.api.contract` | inconclusive |
+| `AUTHORIZE.DOCUMENT.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
+| `AUTHORIZE.ENDPOINT.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
+| `AUTHORIZE.OUTPUT.EXISTS` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
+| `AUTHORIZE.PERIOD.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
 | `AUTHZ.EXPIRED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
 | `AUTHZ.ISSUER.KEY_NOT_VALID` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
 | `AUTHZ.ISSUER.MISMATCH` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
@@ -97,6 +101,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.UNIT.INVALID` | DATA |  | `dppce.adapters.data` | not fixed here |
 | `ENGINE.CHECK_EXCEPTION` | ENGINE |  | `dppce.orchestrator.run.execute` | error |
+| `ENVELOPE.BODY.INVALID` | ENVELOPE |  | `dppce.cli._checked_envelope` | not fixed here |
 | `IDENTIFIER.BINDING.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.BINDING.NOT_COMPARABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
 | `IDENTIFIER.CONSISTENT` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | pass |
@@ -137,6 +142,13 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `ISSUER.ACCREDITATION.NO_REFERENCE` | ISSUER |  | `dppce.cli._inputs_from_args`, `dppce.verifier.verify._issuer_problem` | not fixed here |
 | `ISSUER.STATEMENT.MISMATCH` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
 | `ISSUER.STATEMENT.UNSPECIFIED` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
+| `KEYS.DATA_KEY.UNAVAILABLE` | KEYS |  | `dppce.cli.cmd_run` | not fixed here |
+| `KEYS.FILE.EXISTS` | KEYS |  | `dppce.infrastructure.keys.generate_signing_key` | not fixed here |
+| `KEYS.KEY.NOT_P256` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
+| `KEYS.KEY.UNENCRYPTED` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
+| `KEYS.KEY.UNREADABLE` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
+| `KEYS.PASSPHRASE.LENGTH` | KEYS |  | `dppce.infrastructure.keys.generate_signing_key` | not fixed here |
+| `KEYS.PASSPHRASE.MISSING` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
 | `MANUAL.DIGEST.NOT_MANUAL` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here |
 | `MANUAL.DIGEST.PURPOSE_AMBIGUOUS` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here |
 | `MANUAL.DIGEST.PURPOSE_UNKNOWN` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here |
@@ -160,6 +172,13 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `MODE.NOT_APPROVED` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
 | `MODE.NOT_ILLUSTRATIVE` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
 | `MODE.NOT_PERMITTED` | MODE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
+| `OPEN.OUTPUT.EXISTS` | OPEN |  | `dppce.cli.cmd_open` | not fixed here |
+| `OPEN.RECORD.NOT_IN_REPORT` | OPEN |  | `dppce.evidence.disclosure.open_record` | not fixed here |
+| `OPEN.RECORD.UNKNOWN` | OPEN |  | `dppce.cli.cmd_open` | not fixed here |
+| `OPENING.COMMITMENT.MISMATCH` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
+| `OPENING.FILE.MALFORMED` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
+| `OPENING.FILE.TOO_LARGE` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
+| `OPENING.RECORD.OK` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
 | `PATH.APPLICABILITY_UNKNOWN` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `PATH.NO_STEP` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `PERSISTENCE.DIGEST.NOT_COMPARABLE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
@@ -176,6 +195,13 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `PLAN.STEP_MISSING` | PLAN |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `PLAN.UNSUPPORTED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
 | `PROFILE.NOT_SELECTED` | PROFILE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
+| `PROOF.FILE.MALFORMED` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here |
+| `PROOF.FILE.TOO_LARGE` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here |
+| `PROOF.LEAF.OK` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here |
+| `PROOF.PATH.INVALID` | PROOF |  | `dppce.evidence.disclosure._check_proof` | not fixed here |
+| `PROOF.REPORT.MISMATCH` | PROOF |  | `dppce.evidence.disclosure._check_proof` | not fixed here |
+| `PROVE.OUTPUT.EXISTS` | PROVE |  | `dppce.cli.cmd_prove` | not fixed here |
+| `PROVE.RESULT.UNKNOWN` | PROVE |  | `dppce.evidence.disclosure.prove` | not fixed here |
 | `REGISTRY.FIELD.MISSING` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
 | `REGISTRY.INCONSISTENT` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
 | `REGISTRY.LOOKUP.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive; fail under a non-default verdict rule |
@@ -190,7 +216,10 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `REPLAY.RECORDING_MISMATCH` | REPLAY |  | `dppce.orchestrator.run.execute` | error |
 | `RESULT.MISSING` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `RESULT.NOT_PLANNED` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
+| `SIGN.INPUT.LINK` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
 | `SIGN.OPTION.INVALID` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
+| `SIGN.OUTPUT.EXISTS` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
+| `SIGN.OUTPUT.IS_INPUT` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
 | `SIGNATURE.ISSUER.NONE` | SIGNATURE |  | `dppce.verifier.verify` | not fixed here |
 | `SIGNER.ISSUER.MISMATCH` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
 | `SIGNER.KEY.NOT_TRUSTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
@@ -251,9 +280,15 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRUST.BUNDLE.NOT_OBJECT` | TRUST |  | `dppce.cli._trust`, `dppce.verifier.__main__.main` | not fixed here |
+| `TRUST.BUNDLE.OPTION` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
+| `TRUST.KEY.DUPLICATE_KID` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
+| `TRUST.KEY.NOT_P256` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
+| `TRUST.KEY.PERIOD_INVALID` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
+| `TRUST.KEY.PRIVATE` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
 | `TRUST.KEY.ROLE_CONFLICT` | TRUST |  | `dppce.models.trust.TrustBundle._review_keys_are_personal` | not fixed here |
 | `TRUST.MIGRATION.MALFORMED` | TRUST |  | `dppce.migrations._runinputs_2_to_3`, `dppce.migrations._trust_1_to_2` | not fixed here |
 | `TRUST.MIGRATION.UNSCOPED_SERIAL` | TRUST |  | `dppce.migrations._trust_1_to_2` | not fixed here |
+| `TRUST.OUTPUT.EXISTS` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
 | `TRUST.SNAPSHOT.STALE` | TRUST |  | `dppce.verifier.verify._status` | not fixed here |
 | `VALIDITY.PERIOD.EXPIRED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
 | `VALIDITY.PERIOD.NOT_STATED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |

@@ -18,9 +18,11 @@ The Pydantic models in `dppce.models` are the single source of truth. The JSON S
 | ics | `src/dppce/schemas/v1/ics.schema.json` | `urn:dppce:schema:v1:ics` | `ICS` | Implementation Conformance Statement. |
 | ixit | `src/dppce/schemas/v1/ixit.schema.json` | `urn:dppce:schema:v1:ixit` | `IXIT` | Implementation eXtra Information for Testing. |
 | manualresult | `src/dppce/schemas/v1/manualresult.schema.json` | `urn:dppce:schema:v1:manualresult` | `ManualResult` | Payload of a signed manual-step result. |
+| opening | `src/dppce/schemas/v1/opening.schema.json` | `urn:dppce:schema:v1:opening` | `RecordOpening` | The salt and the plaintext of one record, for a disclosure to an entitled party (ADR 0009). |
 | pack | `src/dppce/schemas/v1/pack.schema.json` | `urn:dppce:schema:v1:pack` | `RequirementPack` | . |
 | plan | `src/dppce/schemas/v1/plan.schema.json` | `urn:dppce:schema:v1:plan` | `Plan` | Deterministic output of ``dppce plan``. |
 | profile | `src/dppce/schemas/v1/profile.schema.json` | `urn:dppce:schema:v1:profile` | `Profile` | . |
+| proof | `src/dppce/schemas/v1/proof.schema.json` | `urn:dppce:schema:v1:proof` | `InclusionProof` | An audit path of one leaf of a tree of a decision body (architecture section 11.2). |
 | runinputs | `src/dppce/schemas/v1/runinputs.schema.json` | `urn:dppce:schema:v1:runinputs` | `RunInputsRecord` | The inputs of one run, written to inputs.json so that a replay can rebuild them. |
 | source | `src/dppce/schemas/v1/source.schema.json` | `urn:dppce:schema:v1:source` | `SourceRecord` | One entry of ``catalogue/sources.yaml``. |
 | statuslist | `src/dppce/schemas/v1/statuslist.schema.json` | `urn:dppce:schema:v1:statuslist` | `StatusList` | Payload of a signed status list. |

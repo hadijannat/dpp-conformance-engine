@@ -337,7 +337,7 @@ def test_cli_sign_role_reviewer_and_option_errors(
     key_path.write_bytes(REVIEW_SIGNER.to_pem())
     envelope_path.write_text(signed.model_dump_json(by_alias=True), encoding="utf-8")
     common = ["sign", "--envelope", str(envelope_path), "--key", str(key_path), "--kid", REVIEW_KID]
-    common += ["--issuer", ISSUER]
+    common += ["--issuer", ISSUER, "--allow-unencrypted-key"]
 
     out = tmp_path / "reviewed.json"
     assert cli.main([*common, "--role", "reviewer", "--out", str(out), "--json"]) == 0

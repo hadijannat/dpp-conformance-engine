@@ -247,7 +247,7 @@ def test_plan_and_run_refuse_a_test_pack_with_invalid_parameters(
 ) -> None:
     arguments = _plan_arguments(tmp_path, *_fixture_pair(tmp_path, BAD))
     run, keys = tmp_path / "run", tmp_path / "keys"
-    for command in (["plan"], ["run", "--out", str(run), "--keys", str(keys)]):
+    for command in (["plan"], ["run", "--out", str(run), "--keys", str(keys), "--create-data-key"]):
         assert cli.main([*command, *arguments]) == 2
         err = capsys.readouterr().err
         assert err.count("\n") == 1, err

@@ -120,7 +120,17 @@ def test_a_reviewed_run_counts_the_draft_and_leaves_the_shipped_pack_unchanged(
     shipped = data_root() / SHIPPED
     digest, before = hashlib.sha256(shipped.read_bytes()).hexdigest(), _snapshot(data_root())
     run, keys = tmp_path / "run", tmp_path / "keys"
-    code = cli.main(["run", *_arguments(tmp_path, "reviewed"), "--out", str(run), "--keys", str(keys)])
+    code = cli.main(
+        [
+            "run",
+            *_arguments(tmp_path, "reviewed"),
+            "--out",
+            str(run),
+            "--keys",
+            str(keys),
+            "--create-data-key",
+        ]
+    )
     capsys.readouterr()
     envelope = json.loads((run / "envelope.json").read_text(encoding="utf-8"))
     decision = envelope["decision"]
