@@ -53,11 +53,12 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `API.CONTRACT.NOT_DECLARED` | API |  | `dppce.adapters.api._bound_contract` | inconclusive |
 | `API.CONTRACT.NO_TARGET` | API |  | `dppce.adapters.api._operation`, `dppce.adapters.api._target` | inconclusive |
 | `API.CONTRACT.OK` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
-| `API.CONTRACT.PATH_MISMATCH` | API |  | `dppce.adapters.api._operation`, `dppce.adapters.api._target` | inconclusive |
+| `API.CONTRACT.PATH_MISMATCH` | API | `api.contract` | `dppce.adapters.api._operation`, `dppce.adapters.api._target`, `dppce.adapters.api.contract` | inconclusive |
 | `API.CONTRACT.SCHEMA` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
 | `API.CONTRACT.STATUS` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
 | `API.CONTRACT.UNSUPPORTED_FEATURE` | API |  | `dppce.adapters.api._unsupported` | inconclusive |
 | `API.RESPONSE.NOT_JSON` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
+| `API.RESPONSE.TOO_DEEP` | API | `api.contract` | `dppce.adapters.api.contract` | inconclusive |
 | `AUTHZ.EXPIRED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
 | `AUTHZ.ISSUER.KEY_NOT_VALID` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
 | `AUTHZ.ISSUER.MISMATCH` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
@@ -81,6 +82,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `DATA.RANGE.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here |
 | `DATA.RELATIONSHIP.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here |
 | `DATA.RESPONSE.NOT_JSON` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule |
+| `DATA.RESPONSE.TOO_DEEP` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.RULES.APPLICABILITY_UNKNOWN` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
 | `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
 | `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass |
@@ -88,6 +90,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `DATA.SCHEMA.MISSING` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.SCHEMA.NOT_LOCAL` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.SCHEMA.OK` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | pass |
+| `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
 | `DATA.UNIT.INVALID` | DATA |  | `dppce.adapters.data` | not fixed here |
 | `ENGINE.CHECK_EXCEPTION` | ENGINE |  | `dppce.orchestrator.run.execute` | error |
 | `IDENTIFIER.BINDING.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |

@@ -23,6 +23,7 @@ from dppce.adapters.common import (
     json_object,
     resource_url,
     schema_errors,
+    unassertable_formats,
     unusable,
     validator,
 )
@@ -119,17 +120,26 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
     if path is None:
         return blocked("DATA.SCHEMA.MISSING", f"The profile names no {kind}-level schema.")
     try:
-        check = validator(load_data(ctx.data_root / path))
+        schema = load_data(ctx.data_root / path)
     except CatalogueError:
         return blocked("DATA.SCHEMA.MISSING", f"The pinned {kind}-level schema cannot be read.")
+    check = validator(schema)
     if check is None:
         return blocked(
             "DATA.SCHEMA.NOT_LOCAL", "The schema uses a reference that is not local. Nothing is fetched."
         )
-    document, record, problem = _fetch_document(ctx, kind)
+    if formats := unassertable_formats(schema):
+        message = f"The schema uses formats that the engine cannot assert: {', '.join(formats)}."
+        return blocked("DATA.SCHEMA.UNSUPPORTED_FORMAT", message)
+    # Exact decimals, like data.rules: a binary float can round a value onto a schema bound.
+    document, record, problem = _fetch_document(ctx, kind, decimals=True)
     if problem is not None or document is None or record is None:
         return problem or blocked("DATA.NO_TARGET", "No document is available.")
     errors = schema_errors(check, document)
+    if errors is None:
+        return blocked(
+            "DATA.RESPONSE.TOO_DEEP", "The document is nested too deeply to validate. It is not judged."
+        )
     summary = {"document": kind, "schema": path, "schema_errors": errors}
     observation = ctx.observation(0, kind="exchange", records=[record], summary=summary)
     if errors:

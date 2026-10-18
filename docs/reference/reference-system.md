@@ -344,6 +344,28 @@ that applies:
 Path parameter names do not count in the last comparison: `{passportId}` matches `{id}`.
 None of these rows sends a request.
 
+The check compares the response keys exactly, so it also gives `unsupported` before it fetches
+for these features:
+
+- a response key that is not a three-digit status, for example `default` or `2XX`;
+- a media type key with a range, a parameter, or an upper-case letter;
+- a `responses`, response, `content`, or media entry that is not a mapping, and a boolean schema;
+- a `format` value that the engine cannot assert. The engine asserts `uri` and the formats that
+  `jsonschema` asserts without an optional package.
+
+An unquoted status key such as `200` in YAML names the same status as `'200'`.
+
+After the fetch:
+
+- The judged fetch must not follow a redirect. A redirect gives `blocked` with
+  `API.CONTRACT.PATH_MISMATCH`: the transport does not record the status of a redirect hop, and
+  the body belongs to another URL.
+- A declared status without `content` passes only if the response has no media type and no body.
+  Otherwise the check gives `unsupported`.
+- The body may be any JSON value. A body that is not strict JSON gives `API.RESPONSE.NOT_JSON`.
+  Numbers are exact decimals, so a value cannot round onto a schema bound.
+- A body that is nested too deeply for the validator gives `blocked` with `API.RESPONSE.TOO_DEEP`.
+
 ### 5.4 Context allowlist
 
 A profile constant `allowed_contexts` is not expressive enough, so the test purpose passes
@@ -470,7 +492,8 @@ Shared helpers in `dppce.adapters.common`:
   the replay stable. The default `Accept` value is `*/*`.
 - `resource_url(ctx, resource, area)` and `template_url(ctx, endpoint, template, area)`: build a
   URL from an IXIT template. A missing template, endpoint, or placeholder value gives `blocked`
-  with `<AREA>.NO_TARGET`.
+  with `<AREA>.NO_TARGET`. So does a placeholder value that is `.` or `..`: a server resolves such
+  a dot segment to another resource.
 - `no_answer(ctx, record)`: builds the outcome for a record with a transport error or a server
   error: status `completed`, `passed: false`, `unreachable: true`. Reason code
   `TRANSPORT.REDIRECT_OUT_OF_SCOPE` for that error, `TRANSPORT.DENIED` for `policy_denied`,
@@ -497,7 +520,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
-| `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values |
+| `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP` |
 | `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |

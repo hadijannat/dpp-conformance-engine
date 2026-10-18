@@ -21,19 +21,23 @@ from dppce.adapters.common import (
     effective_url,
     fetch_once,
     item_url,
-    json_object,
     media_type,
     not_done,
     resource_url,
     schema_errors,
+    unassertable_formats,
     unusable,
     validator,
 )
 from dppce.catalogue import CatalogueError, load_data
+from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.models import UNKNOWN, CheckOutcome, ExecutionStatus, Model, ResourceName, ResourceTemplate
 from dppce.testdefs.registry import CheckContext, register
 
 _RESOURCES: frozenset[str] = frozenset(get_args(ResourceName))
+_STATUS = re.compile(r"[1-5][0-9]{2}")
+# A media type without a range, a parameter, or an upper-case letter: the key is compared exactly.
+_MEDIA_TYPE = re.compile(r"[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*")
 
 
 class ContractParams(Model):
@@ -88,9 +92,38 @@ def _bound_contract(ctx: CheckContext) -> dict[str, Any] | CheckOutcome:
     return document
 
 
+def _responses(responses: Any) -> dict[str, dict[str, Any]] | CheckOutcome:
+    """The responses of the marked operation, keyed by status text, if the subset covers them.
+
+    The check compares keys exactly. A range such as 2XX, ``default``, a media range, or a
+    structure of another type would give a false fail or an exception, so each is unsupported.
+    """
+    outside = _unsupported("The marked operation declares a response outside the supported subset.")
+    if not isinstance(responses, dict):
+        return outside
+    found: dict[str, dict[str, Any]] = {}
+    for key, declared in responses.items():
+        # YAML reads an unquoted 200 as an integer. It names the same status.
+        status = str(key) if type(key) is int else key
+        if not (isinstance(status, str) and _STATUS.fullmatch(status)) or status in found:
+            return outside
+        if not isinstance(declared, dict):
+            return outside
+        content = declared.get("content", {})
+        if not isinstance(content, dict):
+            return outside
+        for name, media in content.items():
+            if not (isinstance(name, str) and _MEDIA_TYPE.fullmatch(name) and isinstance(media, dict)):
+                return outside
+            if not isinstance(media.get("schema", {}), dict):
+                return outside
+        found[status] = declared
+    return found
+
+
 def _operation(
     ctx: CheckContext, document: dict[str, Any], method: str
-) -> tuple[ResourceName, ResourceTemplate, Any] | CheckOutcome:
+) -> tuple[ResourceName, ResourceTemplate, dict[str, dict[str, Any]]] | CheckOutcome:
     """The resource, its IXIT template, and the responses of the operation that the contract marks.
 
     The contract, not the IXIT, selects the operation. The IXIT template must match its path, so
@@ -118,7 +151,12 @@ def _operation(
         responses = document["paths"][keys[0]][method]["responses"]
     except (KeyError, TypeError):
         return _unsupported(f"The contract has no '{method}' operation for '{keys[0]}'.")
-    return resource, template, responses
+    found = _responses(responses)
+    if isinstance(found, CheckOutcome):
+        return found
+    if formats := unassertable_formats([found, document.get("components")]):
+        return _unsupported(f"The contract uses formats that the engine cannot assert: {', '.join(formats)}.")
+    return resource, template, found
 
 
 def _unsafe(segment: str) -> bool:
@@ -138,6 +176,9 @@ def _within(ctx: CheckContext, template: ResourceTemplate, url: str) -> bool:
     parts, origin = urlsplit(url), urlsplit(base)
     # ponytail: an exact scheme and netloc; another spelling of the same origin gives blocked, never pass.
     if (parts.scheme, parts.netloc) != (origin.scheme, origin.netloc):
+        return False
+    # The supported subset has no query parameters: a query would select an undeclared variant.
+    if parts.query or parts.fragment:
         return False
     if not parts.path.startswith(origin.path + "/"):
         return False
@@ -175,7 +216,7 @@ def _target(
 
 
 @register("api.contract", capability="api.contract", params=ContractParams)
-def contract(ctx: CheckContext) -> CheckOutcome:
+def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch per documented outcome; the reason-code page reads them here
     method = str(ctx.params.get("method", "get")).lower()
     document = _bound_contract(ctx)
     if isinstance(document, CheckOutcome):
@@ -193,6 +234,11 @@ def contract(ctx: CheckContext) -> CheckOutcome:
     record = fetch_once(ctx, url)
     if (problem := unusable(ctx, record)) is not None:
         return problem
+    if record.redirects:
+        # The transport followed a redirect. Its status is not recorded, and the body belongs to
+        # another URL, so the answer of the marked operation is not available to judge.
+        message = "The marked operation answered with a redirect. The engine judges no answer of another URL."
+        return blocked("API.CONTRACT.PATH_MISMATCH", message)
     summary: dict[str, Any] = {
         "path": template.path,
         "resource": resource,
@@ -207,9 +253,15 @@ def contract(ctx: CheckContext) -> CheckOutcome:
         return completed(passed, code, message, [observation])
 
     declared = responses.get(str(record.status))
-    if not isinstance(declared, dict):
+    if declared is None:
         return result(False, "API.CONTRACT.STATUS", f"The contract does not declare status {record.status}.")
-    content = declared.get("content", {})
+    if "content" not in declared:
+        if summary["media_type"] or record.body:
+            return _unsupported(
+                f"The contract declares no content for status {record.status}, and the response has one."
+            )
+        return result(True, "API.CONTRACT.OK", "The status matches the contract. Neither declares a body.")
+    content = declared["content"]
     if summary["media_type"] not in content:
         return result(
             False,
@@ -226,10 +278,16 @@ def contract(ctx: CheckContext) -> CheckOutcome:
     check = validator({**schema, "components": document.get("components", {})})
     if check is None:
         return _unsupported("The contract uses a reference that is not local to the document.")
-    body = json_object(record)
-    if body is None:
-        return result(False, "API.RESPONSE.NOT_JSON", "The response body is not a JSON object.")
+    try:
+        # Any JSON value: a schema can declare an array or a scalar. Exact decimals for the bounds.
+        body = parse_strict(record.body, decimals=True)
+    except CanonicalizationError:
+        return result(False, "API.RESPONSE.NOT_JSON", "The response body is not JSON.")
     errors = schema_errors(check, body)
+    if errors is None:
+        return blocked(
+            "API.RESPONSE.TOO_DEEP", "The response body is nested too deeply to validate. It is not judged."
+        )
     summary["schema_errors"] = errors
     if errors:
         return result(

@@ -119,7 +119,7 @@ def test_a_non_finite_decimal_never_satisfies_a_rule() -> None:
 
 
 def test_the_default_parser_of_other_checks_is_unchanged() -> None:
-    """data.jsonschema and the other checks keep the float parser; only data.rules opts in."""
+    """json_object keeps the float parser by default. data.rules, data.jsonschema, and api.contract opt in."""
     document = json_object(make_record(1, b'{"state_of_health_percent": 97.5}'))
     assert document is not None
     assert type(document["state_of_health_percent"]) is float

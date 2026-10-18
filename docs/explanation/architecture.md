@@ -580,8 +580,10 @@ does not let those files decide what the test host trusts or discloses:
 - The IXIT cannot select the contract operation that `api.contract` judges. The bound contract
   marks it. The IXIT template must match that path.
 - With `item_target: resolved`, the resolved URL must also match that path, under the endpoint of
-  the `item` template. Otherwise `api.contract` gives `blocked` with `API.CONTRACT.PATH_MISMATCH`.
-  Nothing is fetched.
+  the `item` template, with no query and no fragment. Otherwise `api.contract` gives `blocked`
+  with `API.CONTRACT.PATH_MISMATCH`. Nothing is fetched.
+- The fetch that `api.contract` judges must not follow a redirect, in either mode. A redirect
+  gives `blocked` with `API.CONTRACT.PATH_MISMATCH`, because the body belongs to another URL.
 - The IXIT can ask for the resolved item target (section 9.2). The system under test then selects
   that URL with a redirect. The transport checks each redirect hop. It checks the URL again when a
   check fetches it. A redirect therefore cannot add an origin that the operator did not confirm.

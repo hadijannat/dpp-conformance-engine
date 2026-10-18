@@ -13,6 +13,7 @@ from typing import Any, Final
 from urllib.parse import quote, unquote, urlsplit
 
 import jsonschema
+from jsonschema.protocols import Validator
 from referencing import Registry
 
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
@@ -203,6 +204,9 @@ def template_url(ctx: CheckContext, endpoint: str, template: str, area: str) -> 
         else:
             message = "The passport identifier does not split into the declared parts."
         return blocked(f"{area}.NO_TARGET", message)
+    # quote() keeps '.', and a server resolves a dot segment to another resource (ADR 0011).
+    if any(values[name] in (".", "..") for name in re.findall(PLACEHOLDER_PATTERN, template)):
+        return blocked(f"{area}.NO_TARGET", "A placeholder value of the IXIT is a dot segment.")
     path = re.sub(PLACEHOLDER_PATTERN, lambda m: quote(values[m[1]], safe=""), template)
     return base.rstrip("/") + path
 
@@ -292,8 +296,71 @@ def dig(document: Any, dotted: str) -> Any:
     return node
 
 
-def validator(schema: Mapping[str, Any]) -> jsonschema.Draft202012Validator | None:
-    """Build a validator that never fetches anything. Returns None if the schema has a non-local ``$ref``."""
+_URI: Final = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]*")
+# The default checkers of jsonschema, plus "uri": without an optional package jsonschema skips it.
+_FORMATS: Final = jsonschema.FormatChecker()
+
+
+@_FORMATS.checks("uri")
+def _is_uri(value: object) -> bool:
+    # ponytail: an RFC 3986 scheme and URI characters only; the parts after the scheme are not parsed.
+    return not isinstance(value, str) or _URI.fullmatch(value) is not None
+
+
+def _is_number(_: object, value: object) -> bool:
+    return isinstance(value, int | float | Decimal) and not isinstance(value, bool)
+
+
+def _is_integer(_: object, value: object) -> bool:
+    # JSON Schema 2020-12: a number with a zero fractional part is an integer, also 1.0.
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, Decimal):
+        return value.is_finite() and value == value.to_integral_value()
+    return isinstance(value, int) or (isinstance(value, float) and value.is_integer())
+
+
+# Documents are parsed with exact decimals, so a value just above a bound cannot round onto it.
+_Validator: Final[type[Validator]] = jsonschema.validators.extend(  # type: ignore[no-untyped-call]  # jsonschema ships extend() without annotations
+    jsonschema.Draft202012Validator,
+    type_checker=jsonschema.Draft202012Validator.TYPE_CHECKER.redefine_many(
+        {"number": _is_number, "integer": _is_integer}
+    ),
+)
+
+
+def _exact(node: Any) -> Any:
+    """The schema with each float as a Decimal: a float bound and a Decimal value do not mix."""
+    if isinstance(node, float):
+        return Decimal(repr(node))
+    if isinstance(node, Mapping):
+        return {key: _exact(value) for key, value in node.items()}
+    if isinstance(node, list):
+        return [_exact(value) for value in node]
+    return node
+
+
+def unassertable_formats(schema: Any) -> list[str]:
+    """The ``format`` values in a schema that the engine cannot assert. A pass must not hide them."""
+    found: set[str] = set()
+    pending = [schema]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, Mapping):
+            value = node.get("format")
+            if isinstance(value, str) and value not in _FORMATS.checkers:
+                found.add(value)
+            pending.extend(node.values())
+        elif isinstance(node, list):
+            pending.extend(node)
+    return sorted(found)
+
+
+def validator(schema: Mapping[str, Any]) -> Validator | None:
+    """Build a validator that never fetches anything. Returns None if the schema has a non-local ``$ref``.
+
+    The validator asserts ``format``. Give it documents parsed with exact decimals.
+    """
 
     def local(node: Any) -> bool:
         if isinstance(node, Mapping):
@@ -308,14 +375,21 @@ def validator(schema: Mapping[str, Any]) -> jsonschema.Draft202012Validator | No
     if not local(schema):
         return None
     # An empty registry has no retrieval function, so no reference can leave the document.
-    return jsonschema.Draft202012Validator(dict(schema), registry=Registry())
+    return _Validator(_exact(dict(schema)), registry=Registry(), format_checker=_FORMATS)
 
 
-def schema_errors(check: jsonschema.Draft202012Validator, document: Any) -> list[JsonValue]:
-    """Error locations and keywords. Values are left out on purpose."""
-    errors = sorted(
-        check.iter_errors(document), key=lambda e: (list(map(str, e.absolute_path)), str(e.validator))
-    )
+def schema_errors(check: Validator, document: Any) -> list[JsonValue] | None:
+    """Error locations and keywords. Values are left out on purpose.
+
+    None if the validator cannot judge the document: a recursive schema follows a deep body
+    with Python recursion. A body that the engine cannot judge never passes.
+    """
+    try:
+        errors = sorted(
+            check.iter_errors(document), key=lambda e: (list(map(str, e.absolute_path)), str(e.validator))
+        )
+    except RecursionError:
+        return None
     return [
         {"path": "/" + "/".join(map(str, e.absolute_path)), "keyword": str(e.validator)} for e in errors[:50]
     ]
