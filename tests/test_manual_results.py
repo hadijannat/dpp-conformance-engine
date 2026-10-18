@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import copy
+import hashlib
 import json
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
@@ -18,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import rfc8785
 import yaml
 from pydantic import ValidationError
 from validation.evidence_cases import TAMPER
@@ -27,12 +29,18 @@ from dppce import cli
 from dppce.adapters.capabilities import manifest
 from dppce.catalogue import load_testpacks
 from dppce.catalogue.lint import lint
-from dppce.evidence.canonical import canonical_bytes, parse_strict
+from dppce.evidence.canonical import canonical_bytes, digest, parse_strict
 from dppce.evidence.envelope import records_root, sign_envelope
 from dppce.evidence.jws import LocalSigner, header_of, sign_compact, verify_compact
-from dppce.evidence.manual import MANUAL_RESULT_TYP, issue_manual_result
+from dppce.evidence.manual import (
+    MANUAL_RESULT_TYP,
+    ManualResultError,
+    issue_manual_result,
+    verify_manual_result,
+)
 from dppce.infrastructure.interfaces import TransportError
 from dppce.models import (
+    ICS,
     IXIT,
     CapabilityState,
     EvidenceEnvelope,
@@ -60,11 +68,15 @@ EVIDENCE = ("A photograph of the marking.", "The reader that was used.")
 PURPOSE = b.purpose(
     "T-MAN", manual=True, stimulus={"check": "manual.review"}, expected_evidence=list(EVIDENCE)
 )
-FIELDS = ("jws", "kid", "role", "performed_at", "outcome")
+PURPOSE_DIGEST = digest(PURPOSE)
+# Same id and evidence, another method: the title changed after the result was signed.
+CHANGED_PURPOSE = PURPOSE.model_copy(update={"title": "A changed method"})
+FIELDS = ("jws", "kid", "role", "performed_at", "outcome", "test_purpose_digest")
 EU_STEP = "TP-EU-13-6-MANUAL"
 FIXTURE_MANUAL_KEY = FIXTURES / "trust" / "TEST-ONLY-manual-signing.key.pem"
 FIXTURE_MANUAL_KID = "TEST-ONLY-manual-key-1"
 REFERENCE_SUT = "urn:example:sut:reference-dpp"
+REFERENCE_SUT_VERSION = "1"  # fixtures/reference/ev.ics.yaml declares sut.version '1'
 RUN_AT = "2026-10-13T12:00:00Z"
 VERIFY_AT = datetime(2026, 10, 14, tzinfo=UTC)
 
@@ -92,6 +104,7 @@ def result(**changes: Any) -> ManualResult:
     fields: dict[str, Any] = {
         "schema_version": "dppce.manualresult/1",
         "test_purpose_id": "T-MAN",
+        "test_purpose_digest": PURPOSE_DIGEST,
         "sut_identifier": "urn:example:sut",
         "role": "inspector",
         "performed_at": "2026-10-13T08:00:00Z",
@@ -122,6 +135,7 @@ def run_check(
     error: TransportError | None = None,
     trust: TrustBundle | None = UNIT_TRUST,
     purpose: TestPurpose = PURPOSE,
+    ics: ICS | None = None,
 ) -> TestResult:
     requirement = b.requirement("R-1", assessment_paths=[b.path("p1", purpose.id)])
     inputs = RunInputs(
@@ -129,7 +143,7 @@ def run_check(
         profile=b.profile(),
         catalogue=b.catalogue(b.pack(requirement)),
         testpacks={"tp/a": b.purposes_pack(purpose)},
-        ics=b.ics(),
+        ics=ics or b.ics(),
         ixit=IXIT(schema_version="dppce.ixit/1"),
         data_root=Path(),
         evaluation_time=AT,
@@ -152,8 +166,20 @@ def run_check(
         {"role": "Inspector"},
         {"role": 1.0},
         {"performed_at": "2026-10-13 08:00:00"},
+        {"test_purpose_digest": "T-MAN"},
+        {"test_purpose_digest": None},
+        {"sut_version": ""},
     ],
-    ids=["extra-field", "role-with-space", "role-with-capitals", "float", "bad-stamp"],
+    ids=[
+        "extra-field",
+        "role-with-space",
+        "role-with-capitals",
+        "float",
+        "bad-stamp",
+        "digest-not-sha256",
+        "no-digest",
+        "empty-version",
+    ],
 )
 def test_manualresult_is_closed_and_refuses_a_name_like_role(changes: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
@@ -195,6 +221,7 @@ def test_check_accepts_a_pass_and_a_fail_record() -> None:
         "role": "inspector",
         "performed_at": "2026-10-13T08:00:00Z",
         "outcome": "pass",
+        "test_purpose_digest": PURPOSE_DIGEST,
     }
     assert "did not perform the review" in passed.message
 
@@ -262,6 +289,27 @@ REFUSALS: list[tuple[str, Callable[[], bytes], TransportError | None, TrustBundl
     ),
     ("expired-key", _token, None, _EXPIRED, "MANUAL.KEY.NOT_VALID"),
     ("revoked-kid", _token, None, _REVOKED, "MANUAL.KEY.NOT_VALID"),
+    (
+        "performed-before-the-key-was-valid",
+        lambda: _token(performed_at="2025-12-31T23:59:59Z"),
+        None,
+        UNIT_TRUST,
+        "MANUAL.TIME.OUTSIDE_KEY_VALIDITY",
+    ),
+    (
+        "digest-of-another-method",
+        lambda: _token(test_purpose_digest=digest(CHANGED_PURPOSE)),
+        None,
+        UNIT_TRUST,
+        "MANUAL.PURPOSE.DIGEST_MISMATCH",
+    ),
+    (
+        "version-that-the-ics-does-not-declare",
+        lambda: _token(sut_version="1"),
+        None,
+        UNIT_TRUST,
+        "MANUAL.SUT.VERSION_MISMATCH",
+    ),
     (
         "performed-after-evaluation",
         lambda: _token(performed_at="2026-10-15T00:00:00Z"),
@@ -378,6 +426,59 @@ def test_check_refuses_and_never_passes(
         assert text not in refused.message
 
 
+def test_the_purpose_digest_is_sha256_of_the_rfc8785_form_of_the_loaded_purpose() -> None:
+    computed = digest(PURPOSE)
+    assert computed == "sha256:" + hashlib.sha256(rfc8785.dumps(PURPOSE.model_dump(mode="json"))).hexdigest()
+    assert digest(CHANGED_PURPOSE) != PURPOSE_DIGEST
+
+
+def test_a_result_for_a_changed_test_purpose_is_refused() -> None:
+    refused = run_check(_token(), purpose=CHANGED_PURPOSE)
+    assert (refused.execution_status, refused.reason_code) == (
+        ExecutionStatus.MANUAL_UNAVAILABLE,
+        "MANUAL.PURPOSE.DIGEST_MISMATCH",
+    )
+    assert refused.verdict is Verdict.INCONCLUSIVE
+
+
+@pytest.mark.parametrize(
+    ("declared", "signed", "code"),
+    [
+        ("2", "2", "MANUAL.REVIEW.OK"),
+        ("2", "1", "MANUAL.SUT.VERSION_MISMATCH"),
+        ("2", None, "MANUAL.SUT.VERSION_MISMATCH"),
+        ("unknown", None, "MANUAL.REVIEW.OK"),
+        ("unknown", "unknown", "MANUAL.SUT.VERSION_MISMATCH"),
+    ],
+)
+def test_the_sut_version_is_bound_only_when_the_ics_declares_one(
+    declared: str, signed: str | None, code: str
+) -> None:
+    ics = b.ics(sut={"name": "Synthetic system", "identifier": "urn:example:sut", "version": declared})
+    checked = run_check(_token(sut_version=signed), ics=ics)
+    assert checked.reason_code == code
+    assert (checked.verdict is Verdict.PASS) is (code == "MANUAL.REVIEW.OK")
+
+
+def test_a_review_after_the_key_expired_is_refused_when_the_key_is_valid_at_the_check_time() -> None:
+    # Only the verifier can reach this branch: it tests the key at its own time, not at the run time.
+    trust = UNIT_TRUST.model_copy(
+        update={"keys": (_key(MANUAL, ("manual",), not_after="2026-10-13T09:00:00Z"),)}
+    )
+    token = issue_manual_result(result(performed_at="2026-10-13T10:00:00Z"), MANUAL)
+    with pytest.raises(ManualResultError) as raised:
+        verify_manual_result(
+            token,
+            trust,
+            test_purpose_id="T-MAN",
+            test_purpose_digest=PURPOSE_DIGEST,
+            sut=b.ics().sut,
+            evaluation_time=datetime(2026, 10, 14, tzinfo=UTC),
+            key_valid_at=datetime(2026, 10, 13, 8, 30, tzinfo=UTC),
+        )
+    assert raised.value.code == "MANUAL.TIME.OUTSIDE_KEY_VALIDITY"
+
+
 def test_check_without_trust_is_an_error() -> None:
     errored = run_check(_token(), trust=None)
     assert (errored.execution_status, errored.reason_code) == (ExecutionStatus.ERROR, "MANUAL.TRUST.MISSING")
@@ -404,9 +505,13 @@ def test_cat018_counts_a_manual_step_as_passable() -> None:
 # -- end to end on the reference system --------------------------------------------------------
 
 
-def _expected_evidence(purpose_id: str) -> list[str]:
+def _binding(purpose_id: str) -> dict[str, Any]:
+    """The evidence and the digest of the shipped test purpose, as the engine loads it."""
     purposes = {p.id: p for pack in load_testpacks(ROOT).values() for p in pack.test_purposes}
-    return list(purposes[purpose_id].expected_evidence) if purpose_id in purposes else []
+    if purpose_id not in purposes:  # an input error names a step that does not exist
+        return {"evidence": [], "test_purpose_digest": PURPOSE_DIGEST}
+    purpose = purposes[purpose_id]
+    return {"evidence": list(purpose.expected_evidence), "test_purpose_digest": digest(purpose)}
 
 
 def signed_file(directory: Path, purpose_id: str, signer: LocalSigner | None = None, **changes: Any) -> Path:
@@ -414,7 +519,8 @@ def signed_file(directory: Path, purpose_id: str, signer: LocalSigner | None = N
     fields: dict[str, Any] = {
         "test_purpose_id": purpose_id,
         "sut_identifier": REFERENCE_SUT,
-        "evidence": _expected_evidence(purpose_id),
+        "sut_version": REFERENCE_SUT_VERSION,
+        **_binding(purpose_id),
     }
     key = signer or LocalSigner.from_pem(FIXTURE_MANUAL_KEY, FIXTURE_MANUAL_KID)
     token = issue_manual_result(result(**(fields | changes)), key)
@@ -551,6 +657,10 @@ def test_html_shows_role_date_key_outcome_and_record_id(passed: tuple[ReferenceR
         "no-manual-key",
         "manual-key-expired",
         "manual-key-revoked",
+        "performed-before-the-manual-key-was-valid",
+        "purpose-digest-changed",
+        "purpose-digest-missing",
+        "sut-version-changed",
     ],
 )
 def test_verifier_manual_results_dimension(
@@ -580,6 +690,19 @@ def test_verifier_manual_results_dimension(
             for k in trust.keys
         )
         trust = trust.model_copy(update={"keys": keys})
+    elif mode == "performed-before-the-manual-key-was-valid":
+        # The key is valid at VERIFY_AT, but not yet at the signed time 2026-10-13T08:00:00Z.
+        keys = tuple(
+            k.model_copy(update={"not_before": "2026-10-13T09:00:00Z"}) if k.kid == manual_kid else k
+            for k in trust.keys
+        )
+        trust = trust.model_copy(update={"keys": keys})
+    elif mode == "purpose-digest-changed":
+        observation["summary"]["test_purpose_digest"] = "sha256:" + "0" * 64
+    elif mode == "purpose-digest-missing":
+        del observation["summary"]["test_purpose_digest"]
+    elif mode == "sut-version-changed":
+        document["decision"]["manifest"]["sut"]["version"] = "2"
     else:
         trust = trust.model_copy(update={"revoked_kids": (manual_kid,)})
     report = verify(document, trust, VERIFY_AT)
