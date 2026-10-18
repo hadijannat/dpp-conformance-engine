@@ -1,12 +1,12 @@
 """Load sources, requirement packs, profiles, test packs, and declarations from local files.
 
 YAML is data. It is parsed with a safe loader, has a size limit, and may not repeat a key.
+JSON is parsed with ``parse_strict``.
 Nothing in a file is evaluated as code or as a template.
 """
 
 from __future__ import annotations
 
-import json
 import re
 from collections.abc import Hashable, Sequence
 from dataclasses import dataclass
@@ -17,7 +17,7 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
-from dppce.evidence.canonical import digest
+from dppce.evidence.canonical import digest, parse_strict
 from dppce.models import ICS, IXIT, Model, Profile, RequirementPack, SourceRecord, TestPack
 
 MAX_FILE_BYTES = 5 * 1024 * 1024
@@ -35,6 +35,12 @@ class _UniqueKeyLoader(yaml.SafeLoader):
         seen: set[Hashable] = set()
         for key_node, _ in node.value:
             key = self.construct_object(key_node, deep=deep)
+            try:
+                hash(key)
+            except TypeError:
+                raise yaml.constructor.ConstructorError(
+                    None, None, "a mapping key must be a scalar", key_node.start_mark
+                ) from None
             if key in seen:
                 raise yaml.constructor.ConstructorError(
                     None, None, f"duplicate key {key!r}", key_node.start_mark
@@ -53,9 +59,11 @@ def load_data(path: Path) -> Any:
         raise CatalogueError(f"{path}: larger than {MAX_FILE_BYTES} bytes")
     try:
         if path.suffix == ".json":
-            return json.loads(raw)
+            # Strict: a repeated key, NaN, or Infinity is refused, as in every verified document.
+            return parse_strict(raw)
         return yaml.load(raw, Loader=_UniqueKeyLoader)  # noqa: S506 - _UniqueKeyLoader extends SafeLoader
-    except (yaml.YAMLError, ValueError) as exc:
+    # A nesting deeper than the parser handles is an input error, not a crash.
+    except (yaml.YAMLError, ValueError, RecursionError) as exc:
         raise CatalogueError(f"{path}: not valid YAML or JSON: {exc}") from exc
 
 
