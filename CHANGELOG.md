@@ -17,7 +17,7 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Lint code `CAT023`: the check of a test purpose probes a role that the test purpose does not
   list in `roles`. An absent parameter `role` counts as the default role of the check.
 - Reason code `STATUS.SUPERSEDED_BY_SELECTED`. The planner excludes a draft in each mode if an
-  approved entry in a selected pack names it in `supersedes` and the mode permits that entry.
+  approved entry in a selected pack names it in `supersedes`. The mode must permit that entry.
   Both entries must be illustrative, or neither. The planner does not change a pack file.
 - The HTML report shows the severity of each test step. A step whose test purpose is not
   available shows the stored value with the label "Default".

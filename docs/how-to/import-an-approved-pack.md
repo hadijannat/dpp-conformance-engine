@@ -216,7 +216,7 @@ A manual step with a different check always has the status `manual_unavailable`.
   - The mode permits the approved entry.
   - The status of the named entry is `draft-needs-review`.
   - Both entries are illustrative, or neither is.
-- This exclusion applies in each mode. The reason names the approved entry. The plan assesses the approved entry only.
+- This exclusion applies in each mode. The reason names the approved entry. The plan assesses the approved entry, not the draft.
 - The planner does not read the ICS for this rule. It does not change the shipped pack.
 - If one condition is false, `supersedes` has no effect on the plan.
 
