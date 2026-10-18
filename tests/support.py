@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import http.server
 import threading
 from collections.abc import Callable
@@ -10,7 +11,7 @@ from typing import Any
 
 from dppce.evidence.envelope import build_decision
 from dppce.evidence.recording import new_salt, record_commitments
-from dppce.infrastructure.interfaces import Record
+from dppce.infrastructure.interfaces import Record, Request, TransportError
 from dppce.models import (
     CoverageSummary,
     EvidenceEnvelope,
@@ -50,6 +51,47 @@ def make_record(index: int, body: bytes = b"{}", url: str | None = None) -> Reco
         attempts=1,
         salt=new_salt(),
     )
+
+
+def make_artifact(name: str, body: bytes = b"", error: TransportError | None = None, index: int = 1) -> Record:
+    """A local input artifact as the transport records it."""
+    return Record(
+        record_id=f"r{index:04d}",
+        kind="artifact",
+        acquired_at="2026-10-13T12:00:00Z",
+        method="READ",
+        url=f"artifact:{name}",
+        role="local",
+        request_headers=(),
+        status=None,
+        headers=(),
+        body=body,
+        truncated=False,
+        error=error,
+        redirects=(),
+        attempts=1,
+        salt=new_salt(),
+    )
+
+
+class ArtifactAcquirer:
+    """Serves prepared input artifacts by name. An unknown name is ``artifact_unavailable``. No transport."""
+
+    def __init__(self, artifacts: dict[str, Record] | None = None) -> None:
+        self._artifacts = dict(artifacts or {})
+        self._served: list[Record] = []
+
+    def fetch(self, request: Request) -> Record:
+        raise AssertionError(f"no network in this test: {request.url}")
+
+    def artifact(self, name: str) -> Record:
+        record = self._artifacts.get(name) or make_artifact(name, error="artifact_unavailable")
+        record = dataclasses.replace(record, record_id=f"r{len(self._served) + 1:04d}")
+        self._served.append(record)
+        return record
+
+    def records(self) -> tuple[Record, ...]:
+        return tuple(self._served)
 
 
 def make_requirement_result(index: int, verdict: str, **changes: Any) -> RequirementResult:
