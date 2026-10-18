@@ -143,7 +143,9 @@ def _within(ctx: CheckContext, template: ResourceTemplate, url: str) -> bool:
         return False
     rest = parts.path[len(origin.path) :]
     # A server collapses an empty segment and resolves a dot segment, so the path would name another resource.
-    if "//" in rest or any(unquote(segment) in {".", ".."} for segment in rest.split("/")):
+    # Tomcat and Jetty drop ";params" from a segment before they route, so "..;x" is a dot segment too.
+    dots = {".", ".."}
+    if "//" in rest or any(unquote(segment).partition(";")[0] in dots for segment in rest.split("/")):
         return False
     # A server may decode a segment before it routes, so an encoded separator or control would
     # name another resource. ponytail: every segment is checked, so a literal %2F in a template blocks too.

@@ -234,6 +234,9 @@ def test_api_contract_in_template_mode_keeps_its_summary(tmp_path: Path, loopbac
         "empty segment",
         "dot segment",
         "encoded dot segment",
+        "dot segment with a parameter",
+        "encoded dot segment with a parameter",
+        "single dot with a parameter",
         "encoded slash",
         "encoded lower-case slash",
         "encoded backslash",
@@ -253,7 +256,20 @@ def test_api_contract_refuses_a_resolved_url_off_the_marked_operation(
         "encoded line feed": "/dpp/abc%0Aadmin",
         "encoded null": "/dpp/abc%00admin",
     }
-    off_paths = ["/static/passport.json", f"/static/dpp/{ID}", "/dpp/..", "/dpp/%2e%2e", *encoded.values()]
+    # Tomcat and Jetty drop ";params" from a segment before they route, so "..;" resolves as "..".
+    dotted = {
+        "dot segment with a parameter": "/dpp/..;",
+        "encoded dot segment with a parameter": "/dpp/%2e%2e%3b",
+        "single dot with a parameter": "/dpp/.;x",
+    }
+    off_paths = [
+        "/static/passport.json",
+        f"/static/dpp/{ID}",
+        "/dpp/..",
+        "/dpp/%2e%2e",
+        *encoded.values(),
+        *dotted.values(),
+    ]
     api = Origin(loopback, {ITEM_PATH: served(), **{path: served() for path in off_paths}})
     target = {
         "same origin, other path": f"{api.origin}/static/passport.json",
@@ -263,7 +279,7 @@ def test_api_contract_refuses_a_resolved_url_off_the_marked_operation(
         # A real server normalizes these paths to /, which is not the marked operation.
         "dot segment": f"{api.origin}/dpp/..",
         "encoded dot segment": f"{api.origin}/dpp/%2e%2e",
-        **{name: api.origin + path for name, path in encoded.items()},
+        **{name: api.origin + path for name, path in {**encoded, **dotted}.items()},
     }[where]
     api.routes[RESOLVER_PATH] = moved(target)
     _blocked(run(resolved_context(tmp_path, "api.contract", api.origin)), "API.CONTRACT.PATH_MISMATCH")

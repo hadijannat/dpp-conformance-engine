@@ -745,6 +745,34 @@ def test_a_version_1_record_of_run_inputs_gets_null_hashes_and_empty_lists(rc1: 
     assert migrations.CURRENT["trust"] == "dppce.trust/2"
 
 
+def _rc1_with_trust(**trust: Any) -> dict[str, Any]:
+    """An rc1 record: a dppce.trust/1 bundle and an IXIT written before item_target existed."""
+    bundle = INSTANCES["trust"].model_dump(mode="json")
+    for name in ("revoked_certificates", "revoked_keys", "timestamp_anchors"):
+        del bundle[name]
+    bundle.update(
+        {"schema_version": "dppce.trust/1", "revoked_serials": [], "revoked_kids": ["k1", "k1"], **trust}
+    )
+    ixit = {k: v for k, v in RUNINPUTS_1["ixit"].items() if k != "item_target"}
+    return {**RUNINPUTS_1, "trust": bundle, "ixit": ixit}
+
+
+def test_a_version_1_record_with_a_version_1_trust_bundle_migrates_to_version_3() -> None:
+    old = _rc1_with_trust()
+    before = copy.deepcopy(old)
+    new = migrate("runinputs", old)
+    assert old == before, "the input is not changed"
+    assert new["schema_version"] == "dppce.runinputs/3"
+    assert new["trust"]["schema_version"] == "dppce.trust/2"
+    assert new["trust"]["revoked_keys"] == [{"kid": "k1", "revoked_at": None}]
+    assert RunInputsRecord.model_validate(new).ixit.item_target == "template"
+
+
+def test_a_version_1_record_with_an_unscoped_revoked_serial_is_refused() -> None:
+    with pytest.raises(MigrationError, match=r"TRUST\.MIGRATION\.UNSCOPED_SERIAL"):
+        migrate("runinputs", _rc1_with_trust(revoked_serials=["01"]))
+
+
 def test_a_version_1_record_that_holds_a_version_2_field_is_refused() -> None:
     with pytest.raises(MigrationError, match="data_root"):
         migrate("runinputs", {**RUNINPUTS_1, "data_root": "/x"})
