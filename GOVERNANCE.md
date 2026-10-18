@@ -22,6 +22,29 @@ Prerequisites: none.
 
 A development agent can prepare each of these. It cannot make the decision.
 
+## Release approval
+
+The `release` workflow publishes from jobs that use the GitHub environment `release`. The owner
+creates this environment and its required reviewers in the repository settings. This page does
+not state that the environment exists.
+
+A gate job stops the release when one of these conditions is true:
+
+- The environment has no required reviewer (`RELEASE.ENVIRONMENT.UNPROTECTED`).
+- The tag is not `v` followed by the version in `pyproject.toml` (`RELEASE.TAG.VERSION_MISMATCH`).
+- The `ci` workflow did not pass for the tagged commit on `main` (`RELEASE.CI.NOT_PASSED`).
+
+A scan job then scans a build of the tagged commit with Trivy. A high or critical finding with a
+fix stops the release before the approval.
+
+To make a release:
+
+1. Push the commit to `main` first.
+2. Wait until the `ci` run for that commit passes. Then push the tag.
+3. Tag only a commit that has its own `ci` run on `main`.
+4. If the gate stops with `RELEASE.CI.NOT_PASSED`, rerun the `ci` run for that commit. Then rerun
+   the `release` workflow.
+
 ## Normative content
 
 Requirement interpretations follow the lifecycle in the
@@ -32,7 +55,7 @@ Agreement between agents is not a human approval. A human approval is not accred
 ## Changes to the engine contract
 
 A change to the verdict rules, the evidence format, or the transport policy needs a new
-architecture decision record and an update of the contract in the same change.
+architecture decision record. The same change also updates the contract.
 
 ## Reports
 
