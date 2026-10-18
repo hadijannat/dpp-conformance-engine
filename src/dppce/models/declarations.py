@@ -19,6 +19,7 @@ PATH_TEMPLATE_PATTERN = (
 )
 
 ResourceName = Literal["item", "model", "signed", "versions", "registry_record"]
+ItemTarget = Literal["template", "resolved"]
 
 
 class SutIdentity(Model):
@@ -129,6 +130,14 @@ class IXIT(Model):
     # No default template and no default split: either would be a hidden layout assumption.
     resources: dict[ResourceName, ResourceTemplate] = Field(default_factory=dict)
     id_parts: IdParts | None = None
+    item_target: ItemTarget = Field(
+        default="template",
+        description=(
+            "Where api.contract, the data checks, and integrity.jws fetch the item-level passport: "
+            "the 'item' template, or the final URL of the carrier resolution. "
+            "The transport policy applies to that URL as to any other."
+        ),
+    )
     identities: tuple[RoleIdentity, ...] = (RoleIdentity(role="anonymous"),)
     authorization_ref: str | None = None
     network: NetworkPolicy = NetworkPolicy()

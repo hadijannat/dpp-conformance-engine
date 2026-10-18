@@ -277,6 +277,16 @@
           "title": "Identities",
           "type": "array"
         },
+        "item_target": {
+          "default": "template",
+          "description": "Where api.contract, the data checks, and integrity.jws fetch the item-level passport: the 'item' template, or the final URL of the carrier resolution. The transport policy applies to that URL as to any other.",
+          "enum": [
+            "template",
+            "resolved"
+          ],
+          "title": "Item Target",
+          "type": "string"
+        },
         "network": {
           "$ref": "#/$defs/NetworkPolicy",
           "default": {

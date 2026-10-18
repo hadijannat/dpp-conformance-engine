@@ -437,7 +437,7 @@ def test_consistency_compares_the_resolved_and_api_passports(tmp_path: Path, loo
     assert summary["compared"] == ["carrier", "passport", "api_item"]
     assert summary["different"] == []
     assert site.item_requests() == 1
-    assert len(outcome.observations[0].records) == 2
+    assert len(outcome.observations[0].record_ids) == 2, "the resolver record and the item record"
 
 
 def test_consistency_of_a_divergent_api_passport_is_a_binding_mismatch(tmp_path: Path, loopback: Any) -> None:

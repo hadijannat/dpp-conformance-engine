@@ -10,13 +10,16 @@ from __future__ import annotations
 
 import re
 from typing import Any, Literal, cast, get_args
+from urllib.parse import urlsplit
 
 from pydantic import Field
 
 from dppce.adapters.common import (
     blocked,
     completed,
+    effective_url,
     fetch_once,
+    item_url,
     json_object,
     media_type,
     not_done,
@@ -117,6 +120,39 @@ def _operation(
     return resource, template, responses
 
 
+def _within(ctx: CheckContext, template: ResourceTemplate, url: str) -> bool:
+    """True if a resolved URL is the marked operation under the endpoint of the item template.
+
+    The template already matches the marked operation, so each placeholder matches one segment.
+    """
+    base, _ = effective_url(ctx, ctx.ixit.endpoints.get(template.endpoint, "").rstrip("/"))
+    # ponytail: a string prefix; another spelling of the same origin gives blocked, never pass.
+    if not base or not url.startswith(base + "/"):
+        return False
+    path = urlsplit(url[len(base) :]).path
+    pattern = "".join(
+        "[^/]+" if part.startswith("{") else re.escape(part)
+        for part in re.split(r"(\{[^{}/]*\})", template.path.split("?", 1)[0])
+    )
+    return re.fullmatch(pattern, path) is not None
+
+
+def _target(
+    ctx: CheckContext, resource: ResourceName, template: ResourceTemplate, *, resolved: bool
+) -> str | CheckOutcome:
+    """The URL to judge: from the template, or the resolved item URL if it is the marked operation."""
+    if not resolved:
+        return resource_url(ctx, resource, "API.CONTRACT")
+    url = item_url(ctx, "API.CONTRACT")
+    if isinstance(url, str) and not _within(ctx, template, url):
+        message = (
+            "The resolved URL is not the operation that the contract marks, under the endpoint "
+            "of the 'item' template."
+        )
+        return blocked("API.CONTRACT.PATH_MISMATCH", message)
+    return url
+
+
 @register("api.contract", capability="api.contract", params=ContractParams)
 def contract(ctx: CheckContext) -> CheckOutcome:
     method = str(ctx.params.get("method", "get")).lower()
@@ -129,7 +165,8 @@ def contract(ctx: CheckContext) -> CheckOutcome:
     if isinstance(operation, CheckOutcome):
         return operation
     resource, template, responses = operation
-    url = resource_url(ctx, resource, "API.CONTRACT")
+    resolved = resource == "item" and ctx.ixit.item_target == "resolved"
+    url = _target(ctx, resource, template, resolved=resolved)
     if isinstance(url, CheckOutcome):
         return url
     record = fetch_once(ctx, url)
@@ -141,6 +178,8 @@ def contract(ctx: CheckContext) -> CheckOutcome:
         "status": record.status,
         "media_type": media_type(record),
     }
+    if resolved:
+        summary |= {"item_target": "resolved", "fetched_path": urlsplit(url).path}
 
     def result(passed: bool, code: str, message: str) -> CheckOutcome:
         observation = ctx.observation(0, kind="exchange", records=[record], summary=summary)

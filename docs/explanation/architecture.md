@@ -317,7 +317,7 @@ Initial registry:
 | `carrier.qr_decode` | `carrier.qr` | Decode a QR image artifact with zxing-cpp. Needs the `qr` extra. |
 | `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. |
 | `identifier.resolve` | `identifier.resolve` | Bounded resolution of the identifier to a passport. |
-| `identifier.consistency` | `identifier.consistency` | Same identifier in carrier, resolver, passport, and ICS. |
+| `identifier.consistency` | `identifier.consistency` | Same identifier in carrier, resolver, passport, and ICS. With `compare_item`, also the same passport through the resolver and at the API item target. |
 | `api.contract` | `api.contract` | Response matches the pinned OpenAPI contract. |
 | `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. |
 | `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. |
@@ -337,6 +337,23 @@ always means a final JSON object. A pass on another listed media type gives
 
 `identifier.resolve` reports an answer with a status from 500 to 599 as `unreachable` (section 9).
 Any other status except 200, 404, and 410 gives `IDENTIFIER.RESOLUTION.STATUS`.
+
+`identifier.consistency` takes one optional parameter, `compare_item`. It is a boolean with the
+default `false`. With `true`, the check also fetches the target of the `item` template. It
+compares that document with the resolved passport as JSON values, as `integrity.jws` compares a
+payload. The check takes the first row that applies:
+
+1. The carrier identifier is not a URL: `blocked`, `IDENTIFIER.NOT_RESOLVABLE`.
+2. The resolver answer is not a JSON object with status 200: `blocked`, `IDENTIFIER.NOT_RESOLVED`.
+3. An identifier differs: `IDENTIFIER.MISMATCH`. The check does not fetch the item target.
+4. With `compare_item`, the `item` template gives no URL: `blocked`, `IDENTIFIER.NO_TARGET`. The
+   item target is not fetched.
+5. The item target is not a JSON object with status 200: `blocked`,
+   `IDENTIFIER.BINDING.NOT_COMPARABLE`.
+6. The two documents are different JSON values: `IDENTIFIER.BINDING.MISMATCH`.
+
+A transport error or a server error on either fetch gives `unreachable`. The check always uses
+the `item` template, also with `item_target: resolved`, because it compares the two routes.
 
 `identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. The host part is not empty and holds only `A-Z`,
@@ -539,6 +556,13 @@ does not let those files decide what the test host trusts or discloses:
   expects. A different bound file gives `blocked`.
 - The IXIT cannot select the contract operation that `api.contract` judges. The bound contract
   marks it. The IXIT template must match that path.
+- With `item_target: resolved`, the resolved URL must also match that path, under the endpoint of
+  the `item` template. Otherwise `api.contract` gives `blocked` with `API.CONTRACT.PATH_MISMATCH`.
+  Nothing is fetched.
+- The IXIT can ask for the resolved item target (section 9.2). The system under test then selects
+  that URL with a redirect. The transport checks each redirect hop. It checks the URL again when a
+  check fetches it. A redirect therefore cannot add an origin that the operator did not confirm.
+  The checks fetch the URL as `anonymous`, so no credential goes with it.
 
 ### 9.2 Resource templates and bound files
 
@@ -559,6 +583,29 @@ passport resource.
 - One helper, `dppce.adapters.common.template_url`, builds the URL of every passport resource and
   access channel. It percent-encodes each placeholder value and appends the path to the endpoint.
 - The resolver checks fetch the carrier identifier itself. That URL does not come from a template.
+- `IXIT.item_target` is `template`, the default, or `resolved`. With `resolved`, `api.contract`,
+  `data.jsonschema`, `data.context`, `data.rules`, and `integrity.jws` do not use the `item`
+  template. They use the URL that the carrier resolves to.
+- That URL is the last redirect target of the resolver exchange. If the resolver answers 200 with
+  no redirect, it is the carrier URL.
+- The engine reuses a resolver exchange that it fetched with the same `Accept` value. Each check
+  reads the carrier sample again.
+- One helper, `dppce.adapters.common.item_url`, gives this URL. A transport error or a server
+  error at the resolver gives `unreachable`.
+- A missing or unreadable carrier sample keeps its own outcome. These cases give `blocked` with
+  `<AREA>.NO_TARGET`: a carrier that fails its own check, a carrier that is not an HTTP or HTTPS
+  URL, and a resolver status other than 200.
+- Redaction can change the URL. The engine does not fetch a URL that holds `<removed>`, also in
+  percent-encoded form. The check gives `blocked` with `<AREA>.NO_TARGET`.
+- `integrity.jws` resolves the URL after it judges the signed passport. A resolver failure
+  therefore cannot hide a signature finding.
+- `api.contract` still needs the `item` template, because the engine matches the contract
+  operation with it (section 9.1).
+- The `model`, `signed`, `versions`, and `registry_record` resources and the access channels
+  always use their templates. So do `identifier.consistency`, `persistence.versions`, and
+  `registry.consistency`.
+- `ixit_sanitized_hash` leaves out `item_target` when it has the default value. An IXIT without
+  the field therefore keeps its hash.
 - The endpoint must be an `http` or `https` URL with a host and with no query or fragment. A
   template therefore cannot change the scheme, the host, or the port.
 - The transport policy (section 9) applies as before. A template cannot add a host or an origin

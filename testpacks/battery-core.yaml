@@ -3,7 +3,7 @@
 # This file is project-authored and synthetic. It makes no normative statement.
 schema_version: dppce.testpack/1
 testpack_id: battery/core
-version: 0.2.0
+version: 0.3.0
 title: Battery core test purposes
 test_purposes:
 - id: TP-CARRIER-001
@@ -58,7 +58,8 @@ test_purposes:
   - The resolver exchange with its redirect chain.
   permitted_modes: *id002
 - id: TP-ID-003
-  title: Compare the identifier across carrier, declaration, and passport
+  title: Compare the identifier across carrier, declaration, and passport, and the passport across
+    resolver and API
   requirements:
   - ILL-ID-003
   profiles:
@@ -68,8 +69,11 @@ test_purposes:
   - anonymous
   stimulus:
     check: identifier.consistency
+    params:
+      compare_item: true
   expected_evidence:
   - The compared identifier sources.
+  - The resolved passport and the API item passport, compared as JSON values.
   permitted_modes: *id002
 - id: TP-API-001
   title: Check the passport response against the API contract

@@ -141,6 +141,9 @@ def load_ixit(path: Path) -> IXIT:
 def sanitized_ixit(ixit: IXIT) -> dict[str, Any]:
     """Return the IXIT with every secret reference removed. This form is what gets hashed."""
     data = ixit.model_dump(mode="json")
+    # The default is left out, so an IXIT written before the field existed keeps its hash.
+    if data["item_target"] == "template":
+        del data["item_target"]
     for identity in data["identities"]:
         if identity["secret_ref"] is not None:
             identity["secret_ref"] = REDACTED

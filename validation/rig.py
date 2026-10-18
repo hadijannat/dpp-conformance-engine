@@ -177,6 +177,7 @@ class ReferenceRig:
         *,
         faults: frozenset[str] = frozenset(),
         ics_changes: dict[str, Any] | None = None,
+        ixit_changes: dict[str, Any] | None = None,
         qr: str | None = None,
         serve: bool = True,
         layout: Literal["reference", "alternate"] = "reference",
@@ -188,6 +189,7 @@ class ReferenceRig:
         self._manual = dict(manual or {})
         self._manual_files: list[Path] = []
         self._ics_changes = ics_changes or {}
+        self._ixit_changes = ixit_changes or {}
         self._qr = qr or profile
         self._alternate = layout == "alternate"
         system = AlternateLayout(FIXTURES, faults) if self._alternate else None
@@ -222,6 +224,7 @@ class ReferenceRig:
             }
             ics = _merge(ics, alternate_ids)
         ics = _merge(ics, self._ics_changes)
+        ixit = _merge(ixit, self._ixit_changes)
         (rig / "ixit.yaml").write_text(yaml.safe_dump(ixit, sort_keys=False), encoding="utf-8")
         (rig / "ics.yaml").write_text(yaml.safe_dump(ics, sort_keys=False), encoding="utf-8")
         owner = LocalSigner.from_pem(

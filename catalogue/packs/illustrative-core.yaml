@@ -71,12 +71,13 @@ requirements:
     tests:
     - TP-ID-002
 - id: ILL-ID-003
-  title: The identifier is consistent
+  title: The identifier and the passport are consistent
   source:
     source_id: dppce-illustrative
   authority_class: illustrative
   modality: mandatory
-  paraphrase: The carrier, the declaration, and the passport give the same identifier.
+  paraphrase: The carrier, the declaration, and the passport give the same identifier. The resolver
+    and the API give the same passport.
   applicability: *id001
   testability: automated
   review_status: draft-needs-review

@@ -19,6 +19,7 @@ from dppce.adapters.common import (
     completed,
     dig,
     fetch_once,
+    item_url,
     json_object,
     resource_url,
     schema_errors,
@@ -97,7 +98,7 @@ def _fetch_document(
 ) -> tuple[dict[str, Any] | None, Record | None, CheckOutcome | None]:
     """Fetch the item-level passport or the model-level data: (document, record, outcome if not usable)."""
     area = "DATA"
-    url = resource_url(ctx, "model" if kind == "model" else "item", area)
+    url = resource_url(ctx, "model", area) if kind == "model" else item_url(ctx, area)
     if isinstance(url, CheckOutcome):
         return None, None, url
     record = fetch_once(ctx, url)

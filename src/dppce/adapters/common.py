@@ -8,15 +8,16 @@ from __future__ import annotations
 import io
 import re
 from collections.abc import Mapping, Sequence
+from decimal import Decimal
 from typing import Any, Final
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, unquote, urlsplit
 
 import jsonschema
 from referencing import Registry
 
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.infrastructure.redaction import redact_url
+from dppce.infrastructure.redaction import REMOVED, redact_url
 from dppce.models import (
     PATH_TEMPLATE_PATTERN,
     PLACEHOLDER_PATTERN,
@@ -213,6 +214,72 @@ def resource_url(ctx: CheckContext, resource: ResourceName, area: str) -> str | 
         message = f"The IXIT declares no URL template for the resource '{resource}'."
         return blocked(f"{area}.NO_TARGET", message + " The engine has no default path.")
     return template_url(ctx, template.endpoint, template.path, area)
+
+
+def _is_http_url(text: str) -> bool:
+    try:
+        return urlsplit(text).scheme in ("http", "https")
+    except ValueError:
+        return False
+
+
+def item_url(ctx: CheckContext, area: str) -> str | CheckOutcome:
+    """The URL of the item-level passport: from its template, or where the carrier resolves to.
+
+    With ``IXIT.item_target: resolved`` the URL is the last redirect target of the resolver
+    exchange. The transport checks it again when a check fetches it, so the system under test
+    cannot add an origin that the operator did not confirm.
+    """
+    if ctx.ixit.item_target == "template":
+        return resource_url(ctx, "item", area)
+    text, _, _, problem = carrier_identifier(ctx)
+    if problem is not None and problem.status is not ExecutionStatus.COMPLETED:
+        return problem
+    if problem is not None or text is None or not _is_http_url(text):
+        # A carrier that fails its own check is a finding of that check, not of this one.
+        message = "The IXIT asks for the resolved item target, and the carrier gives no URL to resolve."
+        return blocked(f"{area}.NO_TARGET", message)
+    record = fetch_once(ctx, text)
+    if record.error is not None or record.status in SERVER_ERRORS:
+        return no_answer(ctx, record)
+    if record.status != 200:
+        message = f"The IXIT asks for the resolved item target, and the resolver answers {record.status}."
+        return blocked(f"{area}.NO_TARGET", message)
+    final = record.redirects[-1] if record.redirects else record.url
+    # Redaction writes the marker percent-encoded in a query and plain elsewhere.
+    if REMOVED in unquote(final):
+        message = "Redaction changed the resolved URL. The engine does not fetch a changed URL."
+        return blocked(f"{area}.NO_TARGET", message)
+    return final
+
+
+def same_json(a: Any, b: Any) -> bool:
+    """Equality of two JSON values that were parsed with exact numbers.
+
+    Python calls ``True`` and ``1`` equal. JSON does not: a passport that signs ``true`` and
+    publishes ``1`` shows two different documents. The numbers 1 and 1.0 are one JSON number.
+    """
+    # A work list, not recursion: a deeply nested passport must not stop the check.
+    pending = [(a, b)]
+    while pending:
+        x, y = pending.pop()
+        if isinstance(x, bool) or isinstance(y, bool):
+            same = x is y
+        elif isinstance(x, dict) and isinstance(y, dict):
+            same = x.keys() == y.keys()
+            if same:
+                pending.extend((value, y[key]) for key, value in x.items())
+        elif isinstance(x, list) and isinstance(y, list):
+            same = len(x) == len(y)
+            if same:
+                pending.extend(zip(x, y, strict=True))
+        elif isinstance(x, int | Decimal) and isinstance(y, int | Decimal):
+            same = x == y
+        else:
+            same = type(x) is type(y) and bool(x == y)
+        if not same:
+            return False
+    return True
 
 
 def dig(document: Any, dotted: str) -> Any:

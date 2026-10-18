@@ -12,15 +12,23 @@ from __future__ import annotations
 import base64
 import binascii
 from datetime import datetime, timedelta
-from decimal import Decimal
-from typing import Any, Final
+from typing import Final
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature, UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import ExtendedKeyUsageOID
 
-from dppce.adapters.common import blocked, completed, fetch_once, json_object, resource_url, unusable
+from dppce.adapters.common import (
+    blocked,
+    completed,
+    fetch_once,
+    item_url,
+    json_object,
+    resource_url,
+    same_json,
+    unusable,
+)
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, public_jwk_of, verify_compact
 from dppce.infrastructure.clock import parse_stamp
@@ -209,35 +217,6 @@ def _purpose(leaf: x509.Certificate) -> tuple[bool | None, str]:
     )
 
 
-def _same_json(a: Any, b: Any) -> bool:
-    """Equality of two JSON values that were parsed with exact numbers.
-
-    Python calls ``True`` and ``1`` equal. JSON does not: a passport that signs ``true`` and
-    publishes ``1`` shows two different documents. The numbers 1 and 1.0 are one JSON number.
-    """
-    # A work list, not recursion: a deeply nested passport must not stop the check.
-    pending = [(a, b)]
-    while pending:
-        x, y = pending.pop()
-        if isinstance(x, bool) or isinstance(y, bool):
-            same = x is y
-        elif isinstance(x, dict) and isinstance(y, dict):
-            same = x.keys() == y.keys()
-            if same:
-                pending.extend((value, y[key]) for key, value in x.items())
-        elif isinstance(x, list) and isinstance(y, list):
-            same = len(x) == len(y)
-            if same:
-                pending.extend(zip(x, y, strict=True))
-        elif isinstance(x, int | Decimal) and isinstance(y, int | Decimal):
-            same = x == y
-        else:
-            same = type(x) is type(y) and bool(x == y)
-        if not same:
-            return False
-    return True
-
-
 @register("integrity.jws", capability="integrity.jws")
 def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - the ordered findings of the contract
     if ctx.trust is None:
@@ -247,9 +226,12 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     signed_url = resource_url(ctx, "signed", "INTEGRITY")
     if isinstance(signed_url, CheckOutcome):
         return signed_url
-    item_url = resource_url(ctx, "item", "INTEGRITY")
-    if isinstance(item_url, CheckOutcome):
-        return item_url
+    # A request-free guard. The resolved target is asked for after every signature finding, so a
+    # resolver fault cannot hide one.
+    if ctx.ixit.item_target == "template" and isinstance(
+        guard := resource_url(ctx, "item", "INTEGRITY"), CheckOutcome
+    ):
+        return guard
     record = fetch_once(ctx, signed_url)
     # The signed passport keeps its own code for a status of 500 or higher (INTEGRITY.TOKEN.NO_ANSWER).
     if (problem := unusable(ctx, record, server_error_is_no_answer=False)) is not None:
@@ -354,7 +336,10 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
         "not revoked in the snapshot" if ctx.trust.status_as_of else "no snapshot; not required"
     )
 
-    item = fetch_once(ctx, item_url)
+    published_url = item_url(ctx, "INTEGRITY")
+    if isinstance(published_url, CheckOutcome):
+        return published_url
+    item = fetch_once(ctx, published_url)
     if (problem := unusable(ctx, item)) is not None:
         return problem
     more.append(item)
@@ -368,7 +353,7 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     # for the bodies of this engine (ADR 0006). It is not a rule for a passport of a third party:
     # a different key order, white space, or a decimal number is not a mismatch.
     try:
-        same = _same_json(parse_strict(payload, decimals=True), parse_strict(item.body, decimals=True))
+        same = same_json(parse_strict(payload, decimals=True), parse_strict(item.body, decimals=True))
     except CanonicalizationError:
         same = False
     if not same:

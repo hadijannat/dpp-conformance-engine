@@ -371,6 +371,7 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `resolver_5xx` | `/01/...` answers `503` with a JSON error body |
 | `resolver_html` | `/01/...` answers `200` with an HTML page |
 | `redirect_out_of_scope` | `/01/...` answers `302` to `http://out-of-scope.example.test/` |
+| `resolver_divergent` | `/01/...` answers `200` with the anonymous passport, with `version` one higher than at `/dpp/{id}` |
 | `data_wrong_type` | `state_of_health_percent` is the string `"99"` |
 | `data_missing_required` | `rated_capacity` is absent |
 | `data_stale` | `updated_at` is `2025-01-01T00:00:00Z` |
@@ -435,6 +436,9 @@ IXIT conventions for the reference rig:
   `versions`, and `registry_record`. Each names an endpoint and a URL template.
 - `id_parts`: splits `passport_id` at a fixed separator into named parts. The reference
   fixtures use separator `-` and the names `gtin` and `serial`.
+- `item_target`: `template` (the default) or `resolved`. With `resolved`, `api.contract`, the
+  data checks, and `integrity.jws` fetch the item from the URL that the carrier resolves to. The
+  reference fixtures do not set it. See the architecture contract, section 9.2.
 
 The reference fixtures declare the reference layout of section 3:
 
@@ -491,7 +495,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING` |
 | `identifier.parse` | `scheme` (default: `ics.identifier_scheme`) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail); `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN` |
 | `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case); both optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
-| `identifier.consistency` | none | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport |
+| `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values: different values give `IDENTIFIER.BINDING.MISMATCH` (fail); an item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
 | `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values |
 | `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
@@ -510,7 +514,7 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | Order | Condition | Status | Reason code |
 | --- | --- | --- | --- |
 | 1 | No trust bundle is configured | `blocked` | `INTEGRITY.TRUST.MISSING` |
-| 2 | The IXIT gives no URL template for `signed` or `item`, or such a URL cannot be built | `blocked` | `INTEGRITY.NO_TARGET` |
+| 2 | The IXIT gives no URL template for `signed` or `item`, or such a URL cannot be built. With `item_target: resolved`, the `item` URL is found at row 18 instead | `blocked` | `INTEGRITY.NO_TARGET` |
 | 3 | The system answers with status 500 or higher | fail, `unreachable: true` | `INTEGRITY.TOKEN.NO_ANSWER` |
 | 4 | The system answers with another status that is not 200 | fail | `INTEGRITY.TOKEN.NOT_AVAILABLE` |
 | 5 | The body is not a compact JWS, a part of it cannot be decoded, or `x5c` does not hold certificates | fail | `INTEGRITY.TOKEN.MALFORMED` |
@@ -526,9 +530,10 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | 15 | A certificate below the anchor is outside its validity period | fail | `INTEGRITY.CERT.EXPIRED` |
 | 16 | A mandatory status snapshot is missing or stale | `blocked` | `INTEGRITY.STATUS.MISSING` |
 | 17 | A certificate below the anchor is in the revocation snapshot | fail | `INTEGRITY.CERT.REVOKED` |
-| 18 | The published passport answers with a status from 500 to 599 | fail, `unreachable: true` | `TRANSPORT.SERVER_ERROR` |
-| 19 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
-| 20 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
+| 18 | With `item_target: resolved`, the carrier gives no resolved URL. A transport error or a server error at the resolver gives `unreachable` | `blocked` | `INTEGRITY.NO_TARGET` |
+| 19 | The published passport answers with a status from 500 to 599 | fail, `unreachable: true` | `TRANSPORT.SERVER_ERROR` |
+| 20 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
+| 21 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
 
 The supported profile is ES256 on curve P-256, with the key in the first `x5c` certificate.
 The leaf may sign a document if its key usage permits a digital signature and its extended key

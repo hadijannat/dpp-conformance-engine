@@ -50,6 +50,7 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         _S,
         "Compare the carrier identifier, as exact text, with the id of the resolved passport. "
         "With a QR image, also compare it with the declared sample identifier. "
+        "With compare_item, also compare the resolved passport with the API item document as JSON values. "
         "Digital consistency does not prove physical authenticity.",
         None,
         "",

@@ -10,7 +10,7 @@ import re
 from typing import Literal
 from urllib.parse import urlsplit
 
-from pydantic import Field, field_validator
+from pydantic import Field, StrictBool, field_validator
 
 from dppce.adapters.common import (
     blocked,
@@ -20,9 +20,11 @@ from dppce.adapters.common import (
     json_object,
     media_type,
     not_done,
+    resource_url,
+    same_json,
     unusable,
 )
-from dppce.models import CheckOutcome, ExecutionStatus, Model
+from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, register
 
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
@@ -218,8 +220,23 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
     )
 
 
-@register("identifier.consistency", capability="identifier.consistency")
+class ConsistencyParams(Model):
+    compare_item: StrictBool = Field(
+        default=False,
+        description=(
+            "Also compare the resolved passport with the document at the IXIT 'item' template, "
+            "as JSON values."
+        ),
+    )
+
+
+@register("identifier.consistency", capability="identifier.consistency", params=ConsistencyParams)
 def consistency(ctx: CheckContext) -> CheckOutcome:
+    compare_item = ctx.params.get("compare_item", False)
+    if not isinstance(compare_item, bool):
+        return blocked(
+            "IDENTIFIER.PARAMS.INVALID", "The parameter 'compare_item' is not a boolean. Nothing is fetched."
+        )
     carrier, records, transformations, problem = carrier_identifier(ctx)
     if problem is not None or carrier is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
@@ -246,19 +263,46 @@ def consistency(ctx: CheckContext) -> CheckOutcome:
     ]
     if not isinstance(passport, str):
         differences = sorted({*differences, "passport"})
-    summary = {
-        "compared": ["carrier", "passport", *(["declared"] if declared else [])],
-        "different": differences,
-    }
-    observation = ctx.observation(
-        0, kind="exchange", records=[*records, record], summary=summary, transformations=transformations
-    )
+    compared = ["carrier", "passport", *(["declared"] if declared else [])]
+    observed = [*records, record]
+
+    def observation() -> Observation:
+        summary = {"compared": compared, "different": differences}
+        return ctx.observation(
+            0, kind="exchange", records=observed, summary=summary, transformations=transformations
+        )
+
     if differences:
         message = f"The carrier identifier differs from: {', '.join(differences)}. {_LIMIT}"
-        return completed(False, "IDENTIFIER.MISMATCH", message, [observation])
+        return completed(False, "IDENTIFIER.MISMATCH", message, [observation()])
+    if compare_item:
+        # Always the template: the check compares the two routes, whatever item_target says.
+        target = resource_url(ctx, "item", "IDENTIFIER")
+        if isinstance(target, CheckOutcome):
+            return target
+        item = fetch_once(ctx, target)
+        if (problem := unusable(ctx, item)) is not None:
+            return problem
+        left = json_object(record, decimals=True)
+        right = json_object(item, decimals=True) if item.status == 200 else None
+        if left is None or right is None:
+            message = (
+                "The API item target is not a JSON object with status 200, so the resolved passport "
+                "has nothing to compare with."
+            )
+            return blocked("IDENTIFIER.BINDING.NOT_COMPARABLE", message)
+        compared.append("api_item")
+        observed.append(item)
+        if not same_json(left, right):
+            differences = sorted([*differences, "api_item"])
+            message = (
+                "The passport that the carrier resolves to differs from the passport at the API "
+                f"item target. {_LIMIT}"
+            )
+            return completed(False, "IDENTIFIER.BINDING.MISMATCH", message, [observation()])
     return completed(
         True,
         "IDENTIFIER.CONSISTENT",
         f"The compared sources give the same identifier. {_LIMIT}",
-        [observation],
+        [observation()],
     )

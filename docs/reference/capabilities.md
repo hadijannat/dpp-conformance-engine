@@ -17,7 +17,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `carrier.rfid` | carrier | interface_only |  | Read an RFID tag. | A reader integration exists and is tested against physical tags in a recorded test campaign. |
 | `identifier.parse` | identifier | supported |  | Scheme-aware syntax check of the carrier payload. |  |
 | `identifier.resolve` | identifier | supported |  | Bounded resolution of an identifier to a passport. |  |
-| `identifier.consistency` | identifier | supported |  | Compare the carrier identifier, as exact text, with the id of the resolved passport. With a QR image, also compare it with the declared sample identifier. Digital consistency does not prove physical authenticity. |  |
+| `identifier.consistency` | identifier | supported |  | Compare the carrier identifier, as exact text, with the id of the resolved passport. With a QR image, also compare it with the declared sample identifier. With compare_item, also compare the resolved passport with the API item document as JSON values. Digital consistency does not prove physical authenticity. |  |
 | `api.contract` | api | supported |  | Check a response against a pinned, maintainer-supplied OpenAPI contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. |  |
 | `api.fuzz` | api | interface_only |  | Schemathesis fuzzing of the API. | Runs only with a signed authorization that grants the scope 'fuzz'. Tested against the reference system with a request budget. |
 | `data.jsonschema` | data | supported |  | Validate a document against a pinned JSON Schema. |  |
@@ -60,7 +60,7 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `data.context` | `data.context` | `allowed_contexts` | list of string | required | Exact context URLs that are allowed. No context is fetched. |
 | `data.jsonschema` | `data.jsonschema` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
 | `data.rules` | `data.rules` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
-| `identifier.consistency` | `identifier.consistency` | (none) | | | |
+| `identifier.consistency` | `identifier.consistency` | `compare_item` | boolean | `false` | Also compare the resolved passport with the document at the IXIT 'item' template, as JSON values. |
 | `identifier.parse` | `identifier.parse` | `scheme` | string or none | none | Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS. |
 | `identifier.resolve` | `identifier.resolve` | `accept` | string or none | none | Accept request header. Printable ASCII, 1 to 256 characters. |
 | `identifier.resolve` | `identifier.resolve` | `accepted_media_types` | list of string or none | none | Final media types that count as resolved. Default: a final JSON object only. |

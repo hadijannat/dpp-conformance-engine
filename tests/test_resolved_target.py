@@ -20,9 +20,12 @@ from dppce.adapters.common import item_url
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.models import CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext
+from tests import test_review_findings
 from tests.support import make_artifact, reply
 from tests.test_review_findings import b64u, token, transport
 from tests.test_url_templates import REFERENCE, Canned, context, ixit, run
+
+pki = test_review_findings.pki  # the module fixture of the integrity tests
 
 ID = "09506000134352-EV0001"
 RESOLVER_PATH = "/01/09506000134352/21/EV0001"

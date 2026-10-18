@@ -37,7 +37,7 @@ FAULTS: Final = frozenset(
         "data_wrong_unit", "data_relationship", "context_invalid", "registry_inconsistent",
         "version_undeclared_change", "over_restrict_legitimate_interest",
         "leak_supplier_to_legitimate_interest", "leak_usage_log_anonymous", "deny_all",
-        "resolver_5xx", "resolver_html",
+        "resolver_5xx", "resolver_html", "resolver_divergent",
     }
 )  # fmt: skip
 _RESTRICTED: Final = {
@@ -213,6 +213,10 @@ class ReferenceSystem:
             return 200, "text/html; charset=utf-8", b"<!doctype html><title>passport</title>", {}
         if "redirect_out_of_scope" in faults:
             return 302, "text/plain", b"", {"Location": "http://out-of-scope.example.test/"}
+        if "resolver_divergent" in faults:
+            # The same identifier with other content: the resolver and the API disagree.
+            document = self.item(ident, "anonymous")
+            return _json(200, {**document, "version": document["version"] + 1})
         return 303, "text/plain", b"", {"Location": f"/dpp/{ident}"}
 
     def handle(self, target: str, authorization: str | None) -> Reply:
