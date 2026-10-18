@@ -135,15 +135,15 @@ skip_covered = true
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "@overload"]
 
 [tool.mutmut]
-# Mutation testing of the verdict and evidence code. Run with `uv run just mutation`.
+# Mutation testing of the verdict, evidence, and verifier code, and of the transport, redaction,
+# and authorization modules. Run with `uv run just mutation`.
 # mutmut copies the source paths into mutants/. It needs all of src/ to import the package, so
-# everything outside the verdict and evidence code is listed as not to mutate.
+# only_mutate names the modules that it mutates.
 source_paths = ["src/"]
-do_not_mutate = [
-    "src/dppce/__init__.py", "src/dppce/__main__.py", "src/dppce/adapters/*", "src/dppce/applicability.py",
-    "src/dppce/catalogue/*", "src/dppce/cli.py", "src/dppce/infrastructure/*", "src/dppce/migrations.py",
-    "src/dppce/models/*", "src/dppce/orchestrator/*", "src/dppce/report/*", "src/dppce/schemas/*",
-    "src/dppce/testdefs/*", "src/dppce/verifier/*",
+only_mutate = [
+    "src/dppce/verdicts/*", "src/dppce/evidence/*", "src/dppce/verifier/*",
+    "src/dppce/infrastructure/transport.py", "src/dppce/infrastructure/redaction.py",
+    "src/dppce/infrastructure/authorization.py",
 ]
 pytest_add_cli_args_test_selection = ["tests/"]
 also_copy = ["catalogue", "profiles", "testpacks", "fixtures", "validation", "scripts"]

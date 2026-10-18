@@ -1,0 +1,46 @@
+# Status: has not run yet.
+# Every action is pinned to a commit. The comment gives the release that the commit belongs to.
+# Weekly mutation testing. It gates nothing. Scheduled runs happen on the default branch only.
+name: mutation
+
+on:
+  schedule:
+    - cron: "41 2 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation
+  cancel-in-progress: false
+
+jobs:
+  mutation:
+    name: Mutation testing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.9.24"
+      # The only step that needs the network: fetch the dependencies that uv.lock pins.
+      - name: Prefetch pinned dependencies
+        run: uv sync --frozen --all-extras
+      # No mutant may reach a real DPP system or any third-party service.
+      - name: Mutation testing with no network except loopback
+        run: |
+          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync just mutation"
+      - name: Mutation results
+        if: always()
+        run: uv run --no-sync mutmut results | tee mutmut-results.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: mutation-results
+          path: |
+            mutmut-results.txt
+            mutants/mutmut-stats.json

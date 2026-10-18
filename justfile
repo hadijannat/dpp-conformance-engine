@@ -46,7 +46,7 @@ validate: check cov
     uv run pytest -m validation
     uv run python -m validation.run
 
-# Mutation testing of the verdict and evidence code. Slow. Results: `uv run mutmut results`.
+# Mutation testing of the verdict, evidence, verifier, transport, redaction, and authorization code. Slow. Results: `uv run mutmut results`.
 mutation:
     uv run mutmut run
 
