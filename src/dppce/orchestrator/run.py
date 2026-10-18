@@ -19,6 +19,7 @@ import dppce.adapters  # noqa: F401 - importing the package registers every chec
 from dppce import __version__
 from dppce.adapters.capabilities import manifest as capability_manifest
 from dppce.catalogue import Catalogue, sanitized_ixit
+from dppce.catalogue.lint import params_problem
 from dppce.evidence.canonical import digest
 from dppce.evidence.envelope import build_decision
 from dppce.evidence.recording import record_commitments
@@ -48,7 +49,7 @@ from dppce.models import (
     TrustBundle,
     VerdictRules,
 )
-from dppce.orchestrator.plan import CheckInfo, build_plan
+from dppce.orchestrator.plan import CheckInfo, PlanError, build_plan
 from dppce.testdefs import registry
 from dppce.verdicts import aggregate, overall_verdict, step_verdict
 from dppce.verdicts.coverage import summarize
@@ -104,7 +105,25 @@ def check_infos() -> dict[str, CheckInfo]:
     return infos
 
 
+def _params_problems(inputs: RunInputs) -> list[str]:
+    """Each selected test purpose whose parameters do not fit its registered check (section 8)."""
+    models = registry.param_models()
+    problems: list[str] = []
+    for name in inputs.profile.testpacks:
+        if name not in inputs.testpacks:
+            continue  # build_plan reports a missing test pack
+        for purpose in sorted(inputs.testpacks[name].test_purposes, key=lambda p: p.id):
+            check = purpose.stimulus.check
+            if check in models and (problem := params_problem(models[check], purpose.stimulus.params)):
+                problems.append(
+                    f"test purpose {purpose.id}: the parameters do not fit the check '{check}': {problem}"
+                )
+    return problems
+
+
 def make_plan(inputs: RunInputs) -> Plan:
+    if problems := _params_problems(inputs):
+        raise PlanError("; ".join(problems))
     granted = frozenset(inputs.authorization.scopes) if inputs.authorization else frozenset()
     return build_plan(
         mode=inputs.mode,

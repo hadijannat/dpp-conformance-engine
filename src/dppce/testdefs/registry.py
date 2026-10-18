@@ -19,6 +19,7 @@ from dppce.models import (
     Authorization,
     CheckOutcome,
     JsonValue,
+    Model,
     Observation,
     Profile,
     TestPurpose,
@@ -76,26 +77,37 @@ class CheckContext:
 CheckFn = Callable[[CheckContext], CheckOutcome]
 
 
+class NoParams(Model):
+    """A check that takes no parameters. Any key is refused."""
+
+
 @dataclass(frozen=True)
 class CheckSpec:
     name: str
     capability: str
     fn: CheckFn
+    # The lint and the planner validate the parameters with this model. The check still reads
+    # the raw parameters, so an accepted input gives the same plan and the same digest.
+    params: type[Model] = NoParams
 
 
 _REGISTRY: dict[str, CheckSpec] = {}
 
 
-def register(name: str, *, capability: str) -> Callable[[CheckFn], CheckFn]:
-    """Decorator that adds a check to the registry under a dotted name."""
+def register(name: str, *, capability: str, params: type[Model] = NoParams) -> Callable[[CheckFn], CheckFn]:
+    """Decorator that adds a check and its closed parameter model to the registry."""
 
     def decorator(fn: CheckFn) -> CheckFn:
         if name in _REGISTRY:
             raise ValueError(f"check '{name}' is registered twice")
-        _REGISTRY[name] = CheckSpec(name=name, capability=capability, fn=fn)
+        _REGISTRY[name] = CheckSpec(name=name, capability=capability, fn=fn, params=params)
         return fn
 
     return decorator
+
+
+def param_models() -> dict[str, type[Model]]:
+    return {name: spec.params for name, spec in sorted(_REGISTRY.items())}
 
 
 def get(name: str) -> CheckSpec | None:

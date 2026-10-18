@@ -14,6 +14,8 @@ import json
 from itertools import pairwise
 from typing import Any
 
+from pydantic import Field
+
 from dppce.adapters.common import (
     blocked,
     completed,
@@ -24,7 +26,7 @@ from dppce.adapters.common import (
     unusable,
 )
 from dppce.evidence.canonical import CanonicalizationError, digest
-from dppce.models import CheckOutcome, ExecutionStatus
+from dppce.models import CheckOutcome, ExecutionStatus, Model
 from dppce.testdefs.registry import CheckContext, register
 
 
@@ -123,7 +125,13 @@ def registry_consistency(ctx: CheckContext) -> CheckOutcome:
     )
 
 
-@register("aas.validate", capability="aas.validate")
+class AasParams(Model):
+    artifact: str = Field(
+        default="aas_file", min_length=1, description="Name of the IXIT sample that holds the AAS file."
+    )
+
+
+@register("aas.validate", capability="aas.validate", params=AasParams)
 def aas_validate(ctx: CheckContext) -> CheckOutcome:
     try:
         from aas_test_engines import file as aas_file  # noqa: PLC0415 - optional dependency of the `aas` extra

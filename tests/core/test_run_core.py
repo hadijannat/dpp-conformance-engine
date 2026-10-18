@@ -28,6 +28,7 @@ from dppce.models import (
     DecisionBody,
     ExecutionMode,
     ExecutionStatus,
+    Model,
     Requirement,
     Scope,
     TestPurpose,
@@ -88,7 +89,16 @@ def _raises(context: registry.CheckContext) -> CheckOutcome:
     raise RuntimeError(f"the payload held {SENTINEL}")
 
 
-@registry.register("tests_core.fetches", capability=CAPABILITY)
+class _FetchParams(Model):
+    """The planner validates parameters. Its defaults equal the ones that ``_fetches`` reads."""
+
+    method: str = "GET"
+    url: str = URL
+    role: str = "anonymous"
+    artifact: bool = False
+
+
+@registry.register("tests_core.fetches", capability=CAPABILITY, params=_FetchParams)
 def _fetches(context: registry.CheckContext) -> CheckOutcome:
     """Ask for one record, then report a pass whatever came back."""
     params = context.params

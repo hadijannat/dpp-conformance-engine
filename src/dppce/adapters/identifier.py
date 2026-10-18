@@ -10,6 +10,8 @@ import re
 from typing import Literal
 from urllib.parse import urlsplit
 
+from pydantic import Field, field_validator
+
 from dppce.adapters.common import (
     blocked,
     carrier_identifier,
@@ -20,7 +22,7 @@ from dppce.adapters.common import (
     not_done,
     unusable,
 )
-from dppce.models import CheckOutcome, ExecutionStatus
+from dppce.models import CheckOutcome, ExecutionStatus, Model
 from dppce.testdefs.registry import CheckContext, register
 
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
@@ -29,6 +31,49 @@ _ACCEPT = re.compile(r"[\x20-\x7e]{1,256}")
 _MEDIA_TYPE = re.compile(r"[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*")
 _MAX_MEDIA_TYPES = 16
 _LIMIT = "Digital consistency does not prove physical authenticity."
+
+
+class ParseParams(Model):
+    scheme: str | None = Field(
+        default=None,
+        min_length=1,
+        description="Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS.",
+    )
+
+    @field_validator("scheme", mode="before")
+    @classmethod
+    def _not_null(cls, value: object) -> object:
+        # A validator does not run on the default, so only an explicit null comes here. The
+        # check would turn it into the scheme 'None'.
+        if value is None:
+            raise ValueError("must be a scheme name; omit the key to use the ICS scheme")
+        return value
+
+
+class ResolveParams(Model):
+    accept: str | None = Field(
+        default=None, description="Accept request header. Printable ASCII, 1 to 256 characters."
+    )
+    accepted_media_types: tuple[str, ...] | None = Field(
+        default=None,
+        min_length=1,
+        max_length=_MAX_MEDIA_TYPES,
+        description="Final media types that count as resolved. Default: a final JSON object only.",
+    )
+
+    @field_validator("accept")
+    @classmethod
+    def _accept(cls, value: str | None) -> str | None:
+        if value is not None and not _ACCEPT.fullmatch(value):
+            raise ValueError("must be printable ASCII of 1 to 256 characters")
+        return value
+
+    @field_validator("accepted_media_types")
+    @classmethod
+    def _media_types(cls, value: tuple[str, ...] | None) -> tuple[str, ...] | None:
+        if value is not None and not all(_MEDIA_TYPE.fullmatch(t) for t in value):
+            raise ValueError("each entry must be a lower-case media type such as text/html")
+        return value
 
 
 def gtin_check_digit_ok(gtin: str) -> bool:
@@ -53,7 +98,7 @@ def parse_gs1_digital_link(text: str) -> str | None:
     return None
 
 
-@register("identifier.parse", capability="identifier.parse")
+@register("identifier.parse", capability="identifier.parse", params=ParseParams)
 def parse(ctx: CheckContext) -> CheckOutcome:
     scheme = str(ctx.params.get("scheme", ctx.ics.identifier_scheme))
     if scheme == "unknown":
@@ -100,7 +145,7 @@ def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None] | 
     return accept, [str(t) for t in accepted] if accepted is not None else None
 
 
-@register("identifier.resolve", capability="identifier.resolve")
+@register("identifier.resolve", capability="identifier.resolve", params=ResolveParams)
 def resolve(ctx: CheckContext) -> CheckOutcome:
     params = _resolve_params(ctx)
     if params is None:

@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+from pydantic import Field
+
 from dppce.adapters.common import completed, decode_qr
-from dppce.models import CheckOutcome
+from dppce.models import CheckOutcome, Model
 from dppce.testdefs.registry import CheckContext, register
 
 
-@register("carrier.qr_decode", capability="carrier.qr")
+class QrDecodeParams(Model):
+    artifact: str = Field(
+        default="qr_image", min_length=1, description="Name of the IXIT sample that holds the QR image."
+    )
+
+
+@register("carrier.qr_decode", capability="carrier.qr", params=QrDecodeParams)
 def qr_decode(ctx: CheckContext) -> CheckOutcome:
     artifact = str(ctx.params.get("artifact", "qr_image"))
     text, record, problem = decode_qr(ctx, artifact)

@@ -249,7 +249,11 @@ def _channel_urls(ctx: CheckContext, policy: AccessPolicy) -> dict[str, str] | C
     return urls
 
 
-@register("access.restricted_fields", capability="access.policy")
+class RestrictedFieldsParams(Model):
+    role: str = Field(default="anonymous", min_length=1, description="Role whose view is probed.")
+
+
+@register("access.restricted_fields", capability="access.policy", params=RestrictedFieldsParams)
 def restricted_fields(ctx: CheckContext) -> CheckOutcome:
     role = str(ctx.params.get("role", "anonymous"))
     policy = _bound_policy(ctx)

@@ -55,7 +55,7 @@ def testpacks() -> dict[str, TestPack]:
 @pytest.fixture(scope="module")
 def findings(catalogue: Catalogue, testpacks: dict[str, TestPack]) -> list[Finding]:
     # The same call as `dppce catalogue lint`.
-    return lint(catalogue, load_profiles(ROOT), testpacks, registry.names(), ROOT)
+    return lint(catalogue, load_profiles(ROOT), testpacks, registry.param_models(), ROOT)
 
 
 def _requirements(catalogue: Catalogue) -> list[Requirement]:
@@ -79,6 +79,33 @@ def test_the_data_root_loads(catalogue: Catalogue, testpacks: dict[str, TestPack
 def test_the_lint_has_no_error_and_no_one_way_trace(findings: list[Finding]) -> None:
     assert [f for f in findings if f.severity == "error"] == []
     assert [f for f in findings if f.code == "CAT005"] == [], "the trace is two-way"
+
+
+# This pins consistency only: every entry compares the capacity with the same number. It does not
+# decide how the 2 kWh limit is read. OQ-011 and OQ-023 are open decisions for a human.
+CAPACITY_LITERAL_WH = 2000
+
+
+def _capacity_literals(node: object) -> list[object]:
+    if isinstance(node, list):
+        return [v for item in node for v in _capacity_literals(item)]
+    if not isinstance(node, dict):
+        return []
+    if node.get("fact") == "ics.characteristics.capacity_wh":
+        value = node.get("value")
+        return list(value) if isinstance(value, list) else [value]
+    return [v for item in node.values() for v in _capacity_literals(item)]
+
+
+def test_every_capacity_literal_of_the_eu_pack_is_one_constant(catalogue: Catalogue) -> None:
+    literals = [
+        v
+        for r in catalogue.packs[EU_PACK].requirements
+        for v in _capacity_literals(r.model_dump(mode="json"))
+    ]
+    assert literals, "the EU pack compares the capacity"
+    assert all(type(v) is int for v in literals), literals
+    assert set(literals) == {CAPACITY_LITERAL_WH}
 
 
 def test_each_source_id_is_unique() -> None:

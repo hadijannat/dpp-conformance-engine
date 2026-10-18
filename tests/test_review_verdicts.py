@@ -24,12 +24,13 @@ from dppce.orchestrator.run import (  # noqa: TID251 - the run core is the unit 
     execute,
     make_plan,
 )
+from dppce.testdefs.registry import NoParams
 from dppce.verdicts import aggregate, overall_verdict, step_verdict
 from dppce.verdicts.aggregate import VerdictRules
 from tests.core import builders as b
 from tests.support import AT
 
-CHECKS = {"tests_core.passes", "tests_core.fails", "tests_core.unreachable"}
+CHECKS = dict.fromkeys(("tests_core.passes", "tests_core.fails", "tests_core.unreachable"), NoParams)
 
 
 def inputs(requirements: list[Any], testpacks: dict[str, Any], tmp_path: Path, **changes: Any) -> RunInputs:

@@ -9,7 +9,9 @@ signed authorization.
 from __future__ import annotations
 
 import re
-from typing import Any, cast, get_args
+from typing import Any, Literal, cast, get_args
+
+from pydantic import Field
 
 from dppce.adapters.common import (
     blocked,
@@ -24,10 +26,22 @@ from dppce.adapters.common import (
     validator,
 )
 from dppce.catalogue import CatalogueError, load_data
-from dppce.models import UNKNOWN, CheckOutcome, ExecutionStatus, ResourceName, ResourceTemplate
+from dppce.models import UNKNOWN, CheckOutcome, ExecutionStatus, Model, ResourceName, ResourceTemplate
 from dppce.testdefs.registry import CheckContext, register
 
 _RESOURCES: frozenset[str] = frozenset(get_args(ResourceName))
+
+
+class ContractParams(Model):
+    resource: ResourceName = Field(
+        default="item", description="Passport resource whose marked operation is judged."
+    )
+    path: str | None = Field(
+        default=None,
+        min_length=1,
+        description="Expected IXIT template path. A different template gives blocked.",
+    )
+    method: Literal["get"] = Field(default="get", description="HTTP method. Only get is supported.")
 
 
 def _unsupported(message: str) -> CheckOutcome:
@@ -103,7 +117,7 @@ def _operation(
     return resource, template, responses
 
 
-@register("api.contract", capability="api.contract")
+@register("api.contract", capability="api.contract", params=ContractParams)
 def contract(ctx: CheckContext) -> CheckOutcome:
     method = str(ctx.params.get("method", "get")).lower()
     document = _bound_contract(ctx)

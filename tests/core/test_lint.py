@@ -15,10 +15,11 @@ import pytest
 
 from dppce.catalogue import Catalogue
 from dppce.catalogue.lint import Finding, TraceRow, lint, trace
-from dppce.models import Profile, Requirement, SourceRecord, TestPurpose
+from dppce.models import Model, Profile, Requirement, SourceRecord, TestPurpose
+from dppce.testdefs.registry import NoParams
 from tests.core import builders as b
 
-KNOWN_CHECKS = ("probe.ok",)
+KNOWN_CHECKS: dict[str, type[Model]] = {"probe.ok": NoParams}
 FACTS = {
     "capacity_wh": {"type": "integer", "description": "Synthetic capacity."},
     "placed_on_market_date": {"type": "date", "description": "Synthetic date."},
@@ -67,7 +68,7 @@ def test_the_baseline_catalogue_is_clean() -> None:
 
 
 def test_an_empty_catalogue_is_clean() -> None:
-    assert lint(Catalogue(legal_as_of="", sources=(), packs={}), {}, {}, ()) == []
+    assert lint(Catalogue(legal_as_of="", sources=(), packs={}), {}, {}, {}) == []
 
 
 # --- CAT001 to CAT006: the trace in both directions ----------------------------------------
@@ -366,6 +367,93 @@ def test_CAT015_an_interpreted_requirement_has_no_test(status: dict[str, Any]) -
 def test_CAT015_does_not_fire_for_a_requirement_with_no_interpretation() -> None:
     for status in ({"review_status": "placeholder"}, {"review_status": "withdrawn"}):
         assert run_lint([b.requirement("R-1", **status)], []) == []
+
+
+# --- CAT019: check parameters --------------------------------------------------------------
+
+
+def test_CAT019_params_that_do_not_fit_a_registered_check() -> None:
+    stimulus = {"check": "probe.ok", "params": {"x": 1}}
+    found = run_lint(purposes=[b.purpose("T-1", stimulus=stimulus)])
+    assert brief(found) == [("CAT019", "error", "T-1")]
+    assert "probe.ok" in found[0].message
+    assert "'x'" in found[0].message
+    manual = run_lint(purposes=[b.purpose("T-1", stimulus=stimulus, manual=True)])
+    assert brief(manual) == [("CAT019", "error", "T-1")], "a manual step with a registered check is checked"
+    absent = run_lint(purposes=[b.purpose("T-1", stimulus={"check": "probe.absent", "params": {"x": 1}})])
+    assert brief(absent) == [("CAT006", "warning", "T-1")], "an unregistered check is not checked"
+    assert run_lint(purposes=[b.purpose("T-1", stimulus={"check": "probe.ok", "params": {}})]) == []
+
+
+# --- CAT020 and CAT021: the cited version and the source record ----------------------------
+
+
+def versions(version: str, record: str, *, authority_class: str = "guidance", **source: Any) -> list[Finding]:
+    cited = covered(authority_class=authority_class, source={**b.CITED, "version": version})
+    return run_lint([cited], sources=[b.source(edition_or_version=record, **source)])
+
+
+def test_CAT020_the_cited_version_shares_a_token_with_the_source_record() -> None:
+    assert brief(versions("TEST-ONLY 1.2.0", "TEST-ONLY 1.3.0")) == [("CAT020", "error", "pack/a/R-1")]
+    assert versions("TEST-ONLY 1.2.0", "TEST-ONLY 1.2.0 and 1.3.0") == []
+    assert versions("TEST-ONLY 1.2.0", "TEST-ONLY edition") == [], "a record without a token is not compared"
+    assert versions("TEST-ONLY 1.2.0", "TEST-ONLY 1.3.0", authority_class="illustrative") == []
+    assert versions("TEST-ONLY 20260813", "TEST-ONLY 2026-08-13") == []
+    found = versions("TEST-ONLY 15459-1:1999", "TEST-ONLY 15459-1:2014")
+    assert brief(found) == [("CAT020", "error", "pack/a/R-1")], "a document number is not a version"
+    assert "SRC-TEST" in found[0].message
+    placeholder = b.requirement("R-1", authority_class="guidance", review_status="placeholder")
+    empty = run_lint([placeholder], [], sources=[b.source(edition_or_version="TEST-ONLY 2026")])
+    assert brief(empty) == [("CAT020", "error", "pack/a/R-1")]
+
+
+def test_CAT021_a_later_version_or_amendment_is_a_warning() -> None:
+    later = versions("TEST-ONLY 2026-01-01", "TEST-ONLY 2026-01-01, 2026-06-01")
+    assert brief(later) == [("CAT021", "warning", "pack/a/R-1")]
+    assert "2026-06-01" in later[0].message
+    amended = versions(
+        "TEST-ONLY 2026-01-01",
+        "TEST-ONLY 2026-01-01",
+        amendment_history=[{"identifier": "TEST-ONLY M1", "date": "2026-03-01"}],
+    )
+    assert brief(amended) == [("CAT021", "warning", "pack/a/R-1")]
+    assert "TEST-ONLY M1" in amended[0].message
+    assert versions("TEST-ONLY 2026-01-01", "TEST-ONLY 2025-01-01, 2026-01-01") == []
+    assert versions("TEST-ONLY 2026", "TEST-ONLY 2026-01-01, 2026-06-01") == [], "no ISO date is cited"
+
+
+# --- CAT022: a date literal of a legal obligation ------------------------------------------
+
+EU_SOURCE = b.source(
+    source_type="eu_regulation", applicable_dates=[{"date": "2027-02-18", "what": "TEST-ONLY"}]
+)
+
+
+def legal_dates(
+    literal: Any, *, op: str = "ge", where: str = "applicability", **changes: Any
+) -> list[Finding]:
+    expression = fact("ics.characteristics.placed_on_market_date", op, literal)
+    fields: dict[str, Any] = {"authority_class": "legal_obligation", "source": b.CITED, **changes}
+    if where == "path":
+        requirement = b.requirement(
+            "R-1", assessment_paths=[b.path("p1", "T-1", applicability=expression)], **fields
+        )
+    else:
+        requirement = covered(**{where: expression}, **fields)
+    return run_lint([requirement], sources=[EU_SOURCE])
+
+
+def test_CAT022_a_legal_date_literal_is_a_recorded_applicable_date() -> None:
+    assert brief(legal_dates("2027-02-19")) == [("CAT022", "error", "pack/a/R-1")]
+    assert "2027-02-19" in legal_dates("2027-02-19")[0].message
+    assert legal_dates("2027-02-18") == []
+    assert brief(legal_dates("2027-02-19", where="path")) == [("CAT022", "error", "pack/a/R-1")]
+    assert brief(legal_dates("2027-02-19", where="declared_support")) == [("CAT022", "error", "pack/a/R-1")]
+    assert brief(legal_dates(["2027-02-18", "2027-02-19"], op="in")) == [("CAT022", "error", "pack/a/R-1")]
+    assert brief(legal_dates("2027-02-30")) == [("CAT022", "error", "pack/a/R-1")]
+    full_width_year = "".join(chr(0xFF10 + int(d)) for d in "2027")
+    assert "CAT022" in codes(legal_dates(f"{full_width_year}-02-19")), "full-width digits"
+    assert legal_dates("2027-02-19", authority_class="illustrative") == []
 
 
 # --- Order of the findings -----------------------------------------------------------------

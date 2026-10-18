@@ -8,10 +8,13 @@ and every requirement traces to a source and to its tests in both directions.
 from __future__ import annotations
 
 import re
-from collections.abc import Collection, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Literal
+
+from pydantic import ValidationError
 
 from dppce.applicability import fact_paths
 from dppce.catalogue.loader import Catalogue
@@ -19,10 +22,13 @@ from dppce.models import (
     AuthorityClass,
     Compare,
     Expr,
+    JsonValue,
+    Model,
     Op,
     Profile,
     Requirement,
     ReviewStatus,
+    SourceRecord,
     TestPack,
     TestPurpose,
 )
@@ -140,11 +146,111 @@ def _fact_findings(expr: Expr, where: str, profiles: list[Profile]) -> list[Find
     return found
 
 
+def params_problem(model: type[Model], params: Mapping[str, JsonValue]) -> str | None:
+    """Return why the parameters do not fit the model of a check, on one line, or None if they fit.
+
+    A key name can come from a third-party test pack, so ascii() escapes it: a key with a line
+    break cannot forge a line of output. The pydantic message does not repeat the input value.
+    """
+    try:
+        model.model_validate(params)
+    except ValidationError as exc:
+        return "; ".join(
+            f"{'.'.join(ascii(p) if isinstance(p, str) else str(p) for p in e['loc']) or 'value'}: {e['msg']}"
+            for e in exc.errors()
+        )
+    return None
+
+
+# Version tokens. The lookarounds keep a match from starting or ending inside a longer digit run,
+# so a document number such as 15459 or 1781 is not a token.
+_ISO_TOKEN = re.compile(r"(?<![0-9])[0-9]{4}-[0-9]{2}-[0-9]{2}(?![0-9])")
+_DOTTED_TOKEN = re.compile(r"(?<![0-9.])[0-9]+(?:\.[0-9]+)+(?![0-9])")
+_YEAR_TOKEN = re.compile(r"(?<![0-9])(?:19|20)[0-9]{2}(?![0-9])")
+_EIGHT_DIGITS = re.compile(r"(?<![0-9])[0-9]{8}(?![0-9])")
+_DAY_MONTH_YEAR = re.compile(r"(?<![0-9])[0-9]{1,2}\.[0-9]{1,2}\.((?:19|20)[0-9]{2})(?![0-9])")
+_ISO_FORM = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+# The same digit class as _ISO_DATE and the evaluator, so a full-width-digit literal is selected.
+_DATE_LITERAL = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def _version_tokens(text: str) -> set[str]:
+    tokens = {
+        *_ISO_TOKEN.findall(text),
+        *_DOTTED_TOKEN.findall(text),
+        *_YEAR_TOKEN.findall(text),
+        *_DAY_MONTH_YEAR.findall(text),
+    }
+    for eight in _EIGHT_DIGITS.findall(text):
+        iso = f"{eight[:4]}-{eight[4:6]}-{eight[6:]}"
+        try:
+            date.fromisoformat(iso)
+        except ValueError:
+            continue
+        tokens |= {iso, eight[:4]}
+    return tokens
+
+
+def _version_findings(requirement: Requirement, source: SourceRecord, where: str) -> list[Finding]:
+    """CAT020 and CAT021: compare the cited version with the source record. Text only.
+
+    The rules do not show that a cited version is the correct one. A structured version key
+    per source (D2-04) would replace this heuristic.
+    """
+    if requirement.authority_class is AuthorityClass.ILLUSTRATIVE:
+        return []
+    found: list[Finding] = []
+    version = requirement.source.version
+    cited, record = _version_tokens(version), _version_tokens(source.edition_or_version)
+    if record and not cited & record:
+        message = (
+            f"The cited version {version!a} shares no version token with the source record '{source.id}'."
+        )
+        found.append(Finding("CAT020", "error", where, message))
+    latest = max((t for t in cited if _ISO_FORM.fullmatch(t)), default=None)
+    if latest is not None:
+        later = sorted(t for t in record if _ISO_FORM.fullmatch(t) and t > latest)
+        later += [
+            a.identifier for a in source.amendment_history if _ISO_FORM.fullmatch(a.date) and a.date > latest
+        ]
+        if later:
+            message = (
+                f"The source record '{source.id}' shows a later version or amendment than the cited "
+                f"version: {', '.join(later)}."
+            )
+            found.append(Finding("CAT021", "warning", where, message))
+    return found
+
+
+def _date_literals(expr: Expr) -> list[str]:
+    operands = [
+        o for c in _comparisons(expr) for o in (c.value if isinstance(c.value, tuple) else (c.value,))
+    ]
+    return [o for o in operands if isinstance(o, str) and _DATE_LITERAL.fullmatch(o)]
+
+
+def _legal_date_findings(requirement: Requirement, source: SourceRecord, where: str) -> list[Finding]:
+    """CAT022: a date literal of a legal obligation is a date that its source record lists."""
+    if requirement.authority_class is not AuthorityClass.LEGAL_OBLIGATION:
+        return []
+    recorded = {d.date for d in source.applicable_dates}
+    literals = {literal for expr in _expressions(requirement) for literal in _date_literals(expr)}
+    return [
+        Finding(
+            "CAT022",
+            "error",
+            where,
+            f"The date {literal!a} is not in applicable_dates of the source '{source.id}'.",
+        )
+        for literal in sorted(literals - recorded)
+    ]
+
+
 def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one block for each rule
     catalogue: Catalogue,
     profiles: Mapping[str, Profile],
     testpacks: Mapping[str, TestPack],
-    known_checks: Collection[str],
+    known_checks: Mapping[str, type[Model]],
     data_root: Path | None = None,
 ) -> list[Finding]:
     """Return every finding, sorted. An empty list means the catalogue is clean."""
@@ -194,6 +300,8 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
             if requirement.review_status in _INTERPRETED and source.verification_level in _UNVERIFIED:
                 message = f"The source verification level is only '{source.verification_level}'."
                 out.append(Finding("CAT011", "warning", where, message))
+            out.extend(_version_findings(requirement, source, where))
+            out.extend(_legal_date_findings(requirement, source, where))
         for interpretation in requirement.interpretations:
             if interpretation.author_kind == "agent" and interpretation.status is ReviewStatus.APPROVED:
                 message = f"Interpretation '{interpretation.id}' is agent-authored and marked approved."
@@ -256,6 +364,10 @@ def lint(  # noqa: PLR0912, PLR0915 - a flat list of independent rules, one bloc
                 f"The check '{purpose.stimulus.check}' is not registered. The step will be 'unsupported'."
             )
             out.append(Finding("CAT006", "warning", test_id, message))
+        model = known_checks.get(purpose.stimulus.check)
+        if model is not None and (problem := params_problem(model, purpose.stimulus.params)) is not None:
+            message = f"The parameters do not fit the check '{purpose.stimulus.check}': {problem}"
+            out.append(Finding("CAT019", "error", test_id, message))
         out.extend(_fact_findings(purpose.applicability, test_id, list(profiles.values())))
         if purpose.verdict_rules.on_unreachable == "fail":
             named = [requirements[r] for r in purpose.requirements if r in requirements]

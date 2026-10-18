@@ -478,7 +478,7 @@ def cmd_catalogue_lint(args: argparse.Namespace) -> int:
         load_catalogue(root, extra_packs=args.import_pack),
         load_profiles(root),
         load_testpacks(root, extra_testpacks=args.import_testpack),
-        registry.names(),
+        registry.param_models(),
         root,
     )
     errors = sum(1 for f in findings if f.severity == "error")

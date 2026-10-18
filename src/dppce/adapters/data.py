@@ -82,6 +82,16 @@ class RulePack(Model):
     rules: tuple[Rule, ...]
 
 
+class DocumentParams(Model):
+    document: DocumentKind = Field(default="item", description="Item-level or model-level document.")
+
+
+class ContextParams(DocumentParams):
+    allowed_contexts: tuple[str, ...] = Field(
+        min_length=1, description="Exact context URLs that are allowed. No context is fetched."
+    )
+
+
 def _fetch_document(
     ctx: CheckContext, kind: str, *, decimals: bool = False
 ) -> tuple[dict[str, Any] | None, Record | None, CheckOutcome | None]:
@@ -101,7 +111,7 @@ def _fetch_document(
     return document, record, None
 
 
-@register("data.jsonschema", capability="data.jsonschema")
+@register("data.jsonschema", capability="data.jsonschema", params=DocumentParams)
 def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
     kind = str(ctx.params.get("document", "item"))
     path = ctx.profile.model_schema if kind == "model" else ctx.profile.item_schema
@@ -133,7 +143,7 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
     )
 
 
-@register("data.context", capability="data.context")
+@register("data.context", capability="data.context", params=ContextParams)
 def context_check(ctx: CheckContext) -> CheckOutcome:
     kind = str(ctx.params.get("document", "item"))
     allowed = ctx.params.get("allowed_contexts")
@@ -203,7 +213,7 @@ def rule_holds(rule: Rule, document: dict[str, Any], now: datetime) -> bool:
     return now - updated <= timedelta(days=rule.max_age_days)
 
 
-@register("data.rules", capability="data.rules")
+@register("data.rules", capability="data.rules", params=DocumentParams)
 def rules_check(ctx: CheckContext) -> CheckOutcome:
     kind = str(ctx.params.get("document", "item"))
     if not ctx.profile.rule_packs:
