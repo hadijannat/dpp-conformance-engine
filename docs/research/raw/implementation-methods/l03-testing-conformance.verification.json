@@ -1,0 +1,376 @@
+{
+ "target": "l03-testing-conformance",
+ "retrieval_date": "2026-10-19",
+ "method_note": "Prioritised DOIs/titles/years/venues (Crossref/OpenAlex), repo and PyPI metadata of aas-test-engines, standards catalogue data (ETSI, ISO listing), NIST and Zenodo records, plus abstract-level numbers of REST testing papers. Engine-mapping claims (existing_check) were not re-run against the repository code or capabilities.md in this session, so none is counted as verified.",
+ "checked": [
+  {
+   "claim_ref": "papers[doi=10.1016/j.procs.2026.02.221]",
+   "claim": "DOI 10.1016/j.procs.2026.02.221 resolves to Gering 2026, Procedia Computer Science with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procs.2026.02.221",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/ichcai70183.2026.11607563]",
+   "claim": "DOI 10.1109/ichcai70183.2026.11607563 resolves to Samarathunga 2026, ICHCAI with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/ichcai70183.2026.11607563",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.23919/cnsm67658.2025.11297456]",
+   "claim": "DOI 10.23919/cnsm67658.2025.11297456 resolves to Fabianek 2025, CNSM with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.23919/cnsm67658.2025.11297456",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.3390/digital6020043]",
+   "claim": "DOI 10.3390/digital6020043 resolves to Lyse 2026, Digital with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/digital6020043",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa61755.2024.10710957]",
+   "claim": "DOI 10.1109/etfa61755.2024.10710957 resolves to Miny 2024, ETFA with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa61755.2024.10710957",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1007/978-3-031-49339-3_6]",
+   "claim": "DOI 10.1007/978-3-031-49339-3_6 resolves to Schottke 2023, CCIS chapter with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1007/978-3-031-49339-3_6",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/icps65515.2025.11087912]",
+   "claim": "DOI 10.1109/icps65515.2025.11087912 resolves to Nowshin 2025, ICPS with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/icps65515.2025.11087912",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa65518.2025.11205665]",
+   "claim": "DOI 10.1109/etfa65518.2025.11205665 resolves to Nowshin 2025, ETFA with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa65518.2025.11205665",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa54631.2023.10275629]",
+   "claim": "DOI 10.1109/etfa54631.2023.10275629 resolves to Rimaz 2023, ETFA with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa54631.2023.10275629",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1145/3597205]",
+   "claim": "DOI 10.1145/3597205 resolves to Zhang 2023, TOSEM with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1145/3597205",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1002/stvr.1808]",
+   "claim": "DOI 10.1002/stvr.1808 resolves to Corradini 2022, STVR with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1002/stvr.1808",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1007/11430230_24]",
+   "claim": "DOI 10.1007/11430230_24 resolves to Kulvatunyou 2005, LNCS with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1007/11430230_24",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/iwast.2013.6595793]",
+   "claim": "DOI 10.1109/iwast.2013.6595793 resolves to El Kateb 2013, AST with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/iwast.2013.6595793",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1007/S11219-013-9216-0]",
+   "claim": "DOI 10.1007/S11219-013-9216-0 resolves to Bertolino 2013, SQJ with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1007/S11219-013-9216-0",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/ICSECOMPANION.2007.73]",
+   "claim": "DOI 10.1109/ICSECOMPANION.2007.73 resolves to Martin 2007, ICSE Companion with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/ICSECOMPANION.2007.73",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1186/1751-0473-3-2]",
+   "claim": "DOI 10.1186/1751-0473-3-2 resolves to Page 2008, SCBM with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1186/1751-0473-3-2",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.3390/bdcc7020079]",
+   "claim": "DOI 10.3390/bdcc7020079 resolves to Tan 2023, BDCC with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/bdcc7020079",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1145/3589334.3645426]",
+   "claim": "DOI 10.1145/3589334.3645426 resolves to Braun 2024, WWW with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1145/3589334.3645426",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.5957/tos-2024-004]",
+   "claim": "DOI 10.5957/tos-2024-004 resolves to Vanderhorn 2024, SNAME with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.5957/tos-2024-004",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa52439.2022.9921521]",
+   "claim": "DOI 10.1109/etfa52439.2022.9921521 resolves to Broring 2022, ETFA with the title, year and venue recorded.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa52439.2022.9921521",
+   "evidence": "Crossref returned the same title, first-author family name, year and container as the file.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources_fetched_besides_searches[aas-test-engines repo]",
+   "claim": "Repo admin-shell-io/aas-test-engines: not archived, Apache-2.0, 17 open issues, pushed 2025-08-05T08:51:00Z, last commit Prepare v1.0.3.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/admin-shell-io/aas-test-engines",
+   "evidence": "gh api on 2026-10-19: archived false, license Apache-2.0, open_issues_count 17, pushed_at 2025-08-05T08:51:00Z; newest commit message Prepare v1.0.3 dated 2025-08-05.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources_fetched_besides_searches[pypi]; CT-03",
+   "claim": "PyPI latest 1.0.3 (2025-08-05); description names only two submodel templates (Contact Information, Digital Nameplate).",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://pypi.org/pypi/aas-test-engines/json",
+   "evidence": "Version 1.0.3 uploaded 2025-08-05; exactly two template semantic IDs named. Two-template claim holds.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources_fetched_besides_searches[pypi] (read-only API profiles)",
+   "claim": "The description lists read-only API profiles (AAS, Submodel, Registry, Discovery, Concept Description Repository).",
+   "risk": "technical_mechanism",
+   "verdict": "refuted",
+   "evidence_url": "https://pypi.org/pypi/aas-test-engines/json",
+   "evidence": "PyPI lists AAS/Submodel Repository Read and AAS/Submodel Read profiles, plus Registry Read, Discovery Service Full, and Concept Description Repository profiles; the last four are marked IDTA-members-only. Discovery is a Full profile, not read-only.",
+   "correction": "Read profiles exist for AAS, AAS repository, Submodel and Submodel repository; Registry Read, Discovery Service Full and Concept Description Repository profiles are marked members-only. 'Read-only' does not hold for Discovery, and members-only status is omitted."
+  },
+  {
+   "claim_ref": "papers[Miny 2024].conformance_relevance (Otto as maintainer)",
+   "claim": "Bjoern Otto is an author of Miny 2024/2026 and a maintainer of aas-test-engines.",
+   "risk": "other",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.21256/zhaw-37448",
+   "evidence": "OpenAlex lists Bj\u00f6rn Otto among Miny 2026 authors; PyPI lists bjoern.otto and otto-ifak among owners (no maintainer/author fields; the word 'maintainer' is loose, 'owner' is exact). The 2024 ETFA author list also includes Bj\u00f6rn Otto per OpenAlex.",
+   "correction": "Say 'PyPI owner' instead of 'maintainer'."
+  },
+  {
+   "claim_ref": "papers[Snelick]",
+   "claim": "Snelick and Gebase 2010, SERP10/WORLDCOMP10 Las Vegas; three environment categories; NIST page date 2012-07-12.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.nist.gov/publications/testing-environments-assessing-conformance-and-interoperability",
+   "evidence": "NIST page confirms authors, venue, categories (data instance validation, isolated systems testing, peer-to-peer systems testing), listed date 12 July 2012 and conference 12-15 July 2010.",
+   "correction": null
+  },
+  {
+   "claim_ref": "bibliographic_only_standards[etsi-es-201-873-1]",
+   "claim": "Latest listed: ES 201 873-1 v4.17.1 (2025); part 11 JSON v4.10.1 (2023).",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ttcn-3.etsi.org/index.php/downloads/standards",
+   "evidence": "ETSI TTCN-3 page lists exactly these versions.",
+   "correction": null
+  },
+  {
+   "claim_ref": "bibliographic_only_standards[iso-iec-9646-1]",
+   "claim": "ISO/IEC 9646-1:1994, second edition replacing 1991 edition, published and confirmed.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.iso.org/standard/17473.html",
+   "evidence": "Search listing of the ISO page shows Edition 2, December 1994, replacing 1991 first edition, status published and confirmed. Page itself not fetched (403 for the other agent too). Other-part list: 9646-3 is dated 1998, not 1994; 9646-7 not seen in my search.",
+   "correction": "Note 9646-3 is the 1998 edition; keep verification_level secondary_only."
+  },
+  {
+   "claim_ref": "papers[REECO]",
+   "claim": "Zenodo record: version DOI 10.5281/zenodo.21825740, concept DOI ...739, CC-BY-4.0, 226078 bytes, deposited 2026-08-06, preprint.",
+   "risk": "licence",
+   "verdict": "confirmed",
+   "evidence_url": "https://zenodo.org/api/records/21825740",
+   "evidence": "Zenodo shows all of these values. Also confirms creator Cipriani, Stefano.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[Hatfield-Dodds].key_contribution",
+   "claim": "Schemathesis evaluation: eight tools, thirty runs, sixteen containerised services.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.1145/3510454.3528637",
+   "evidence": "OpenAlex abstract states thirty runs of eight tools against sixteen services.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[Ed-douibi].key_contribution",
+   "claim": "91 OpenAPI definitions, 76.5% element coverage, 40% of APIs fail.",
+   "risk": "other",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.1109/EDOC.2018.00031",
+   "evidence": "Abstract states 91 definitions, 76.5% average coverage and 40% (text cut at 'of the test...'); the 40% reads as test cases failing for APIs, so 'of the tested APIs fail' is plausible but the truncated sentence was not fully read.",
+   "correction": "Re-read the full abstract before keeping '40 percent of the tested APIs fail'."
+  },
+  {
+   "claim_ref": "papers[Acharya]",
+   "claim": "12 practitioners, 10 companies, five European countries; LCIM-based layered framework.",
+   "risk": "other",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.1016/j.infsof.2026.108048",
+   "evidence": "Abstract matches 12 practitioners, 10 companies, five countries, LCIM-based framework. 26 challenges / 7 categories beyond cut-off not re-read.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[Pareti]",
+   "claim": "DOI 10.1007/978-3-030-95481-9_6 is the published chapter of the SHACL review.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.1007/978-3-030-95481-9_6",
+   "evidence": "Authors Pareti and Konstantinidis, 2022, same title.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[Moseley].venue",
+   "claim": "DOI string says SIIT 2003 but Crossref lists ESSDERC 2003 and no year.",
+   "risk": "doi",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/SIIT.2003.1251206",
+   "evidence": "Crossref confirms the discrepancy; no issue date. Year 2003 rests on the DOI string only.",
+   "correction": "Keep year 2003 flagged as unverified."
+  },
+  {
+   "claim_ref": "papers[Siapera].venue",
+   "claim": "Venue 'Conference on Digital Government Research'.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1145/3598469.3598527",
+   "evidence": "Crossref gives 'Proceedings of the 24th Annual International Conference on Digital Government Research'; OpenAlex gives the short form. Title and year match.",
+   "correction": "Use the Crossref proceedings title."
+  },
+  {
+   "claim_ref": "papers[Miny 2026] findings (51 templates, 11 break metamodel, 9 groups, 3000 lines)",
+   "claim": "Full-text counts.",
+   "risk": "other",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://digitalcollection.zhaw.ch/bitstreams/ba6d9ac6-9db6-410b-b481-3d01a8175bff/download",
+   "evidence": "Not re-read in this session; only DOI/title/year/authors confirmed via OpenAlex (Crossref 404 as the file says).",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[Kulvatunyou].classification_scheme",
+   "claim": "Four content-level test types.",
+   "risk": "other",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1007/11430230_24",
+   "evidence": "Only bibliographic data re-checked; abstract not re-read.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[Dam].doi arXiv",
+   "claim": "arXiv DOI 10.48550/arxiv.2309.11282 title 'A Survey of Dataspace Connector Implementations'.",
+   "risk": "doi",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.48550/arxiv.2309.11282",
+   "evidence": "Crossref does not hold arXiv DOIs (as the file states); not independently matched in this session.",
+   "correction": null
+  }
+ ],
+ "rule5_findings": [
+  {
+   "claim_ref": "papers[REECO].notes / anomalies",
+   "problem": "Mentions that the report quotes EN 18216/18221/18222/18223 clause numbers and describes a back-up service following them; names the standards but not their content.",
+   "fix": "Acceptable as a bibliographic mention; do not add detail on what the report says about them."
+  },
+  {
+   "claim_ref": "bibliographic_only_standards[iso-iec-9646-1].other_parts_seen_in_listing",
+   "problem": "Parenthetical descriptors for parts of ISO/IEC 9646 (e.g. abstract test suite specification) approach summarising content; they are part titles.",
+   "fix": "Replace with part numbers and exact catalogue titles only."
+  },
+  {
+   "claim_ref": "papers[Schieferdecker].conformance_relevance",
+   "problem": "Discusses TTCN-3 and ISO/IEC 9646 concepts in general terms.",
+   "fix": "Limit to the paper's own abstract; no description of the standards."
+  }
+ ],
+ "missed_items": [
+  {
+   "topic": "aas-test-engines API profile gating",
+   "fact": "Several API profiles in aas-test-engines are marked as supported for IDTA members only, which limits what a public engine can wrap.",
+   "source_url": "https://pypi.org/pypi/aas-test-engines/json"
+  },
+  {
+   "topic": "aas-test-engines age",
+   "fact": "No commit or release since 2025-08-05, over a year before the retrieval date.",
+   "source_url": "https://api.github.com/repos/admin-shell-io/aas-test-engines"
+  }
+ ],
+ "overall": "Bibliographic data are highly reliable: all 20 sampled DOIs match Crossref on title, year, venue and first author, and the repo, PyPI, NIST, ETSI and Zenodo facts match. Weaknesses are small: the 'read-only API profiles' wording is wrong, 'maintainer' should be 'owner', Moseley's year and venue are unsettled, and the ISO part list needs care. Full-text claims about Miny 2026 and REECO, and every engine-mapping 'existing_check', were not re-verified here. The file's own honesty flags (metadata_only, secondary_only) are appropriate and rule 5 risk is low.",
+ "counts": {
+  "checked": 37,
+  "confirmed": 31,
+  "refuted": 1,
+  "not_confirmed": 5
+ }
+}

@@ -1,0 +1,1710 @@
+{
+  "method_id": "m02-gs1-web-resolver",
+  "name": "GS1 web resolver family (GS1 Digital Link URI, GS1-Conformant Resolver, RFC 9264 linksets, GS1 Web Vocabulary link types, GS1 data carriers)",
+  "retrieval_date": "2026-10-19",
+  "scope_note": "Covers the GS1 route from a physical data carrier to a passport document: the GS1 Digital Link URI syntax (release 1.7.0), the GS1-Conformant Resolver Standard (release 1.2.1) with its normative linkset schema, JSON-LD context and resolver description file schema, the GS1 Web Vocabulary link types (including gs1:dpp), the EPC Tag Data Standard 2.3 and the EPC binary compression standard 1.0.0 as the RFID path, GS1 in Europe and GS1 AISBL DPP papers (GS1-specific content only), open-source GS1 tools (Resolver CE, resolver test suite, syntax engine, toolkits, OpenEPCIS translator), the UNTP Identity Resolver as a GS1-compatible profile, the IANA 'dpp' link relation, and the Battery Pass technical guidance as a pilot reference. It leaves out: the content of any EN, ISO, IEC or DIN document (ISO/IEC 18975, 15459, 15418, 18004, 16022, 18000-63, 19987/19988, IEC 61406, the EN 182xx DPP standards) beyond bibliographic numbers; EPCIS event semantics (family m-event-traceability); verifiable-credential verification details (UNTP family); the GS1 General Specifications text (page too large to fetch); and any live resolver, including id.gs1.org, which was never contacted. Law articles are cited from the project's sibling records because EUR-Lex returned empty pages in this session.",
+  "summary": "The GS1 web resolver family makes the identifier on the product a web address. A GS1 Digital Link URI carries a GS1 primary key (for a DPP usually GTIN, AI 01) and optional key qualifiers in a fixed path order (for GTIN: 22 consumer product variant, 10 batch/lot, 21 serial), behind any host name and an optional custom path stem; other GS1 Application Identifiers go in the query string. The URI is encoded in a QR Code or Data Matrix, or in RFID tag memory through EPC binary schemes that the EPC Tag Data Standard 2.3 can translate back to a Digital Link URI with a custom domain. A GS1-Conformant Resolver at that host answers HTTP requests for the URI. Without a link-type request it redirects to the single gs1:defaultLink of the identified entity; with linkType=<type> it redirects to that link or returns 404; with linkType=linkset or Accept: application/linkset+json it returns all links as an RFC 9264 linkset that must validate against the GS1 linkset schema. Links carry a link type from the GS1 Web Vocabulary, a title, and optional hreflang, media type and context attributes; links defined at a coarser level (GTIN) are inherited by finer levels (batch, serial). The vocabulary now has a stable link type gs1:dpp ('Digital Product Passport'), and IANA registers a plain 'dpp' relation whose reference is the UNTP Identity Resolver; UNTP tells clients to treat the two as the same. Every resolver publishes a description file at /.well-known/gs1resolver that names its root and supported primary keys. The GS1 resolver standard specifies 400 for a syntax error, 404 for an unknown entity or link type, 300 with a linkset for an unresolvable choice, never 200 for an error, CORS, GET/HEAD/OPTIONS, query-string pass-through, and tolerance of a trailing slash, but it names no redirect status code. The end-to-end flow is: scan carrier, read the URI, send it to the resolver (directly or through a pattern-based redirect such as gs1:handledBy), select the DPP link from the redirect or the linkset, then fetch and validate the passport, whose format the resolver does not define. GS1 papers present this as the single-carrier route to a DPP and argue that the parsed GS1 keys, not the domain, are the persistent identifier. For the engine, nearly every resolver behaviour is observable from outside by HTTP requests to a loopback fixture, but today's identifier.parse accepts only /01/<GTIN>/21/<serial>, the transport hides redirect hops and refuses OPTIONS without an authorization scope, and a linkset JSON object would pass identifier.resolve as if it were a passport.",
+  "method_families": [
+    "web-resolver-gs1",
+    "linked-data-semantic",
+    "event-traceability-epcis",
+    "hybrid"
+  ],
+  "maturity": {
+    "spec_status": "Ratified GS1 standards (voluntary industry specifications, not law). URI Syntax 1.7.0 and Resolver 1.2.1 are current on ref.gs1.org at retrieval; the linkset and description-file schemas became normative in resolver release 1.2.0. The GS1 Web Vocabulary is a ratified, versioned vocabulary (current 1.18.0). The UNTP Identity Resolver is a work-in-progress UN/CEFACT specification declared suitable for pre-production pilots. GS1's DPP AIDC application standard is described by GS1 in Europe as in preparation; no ratified GS1 DPP application standard was located.",
+    "versions_at_retrieval": [
+      {
+        "artifact": "GS1 Digital Link Standard: URI Syntax",
+        "version": "1.7.0",
+        "status": "Ratified Aug 2026 (page); log of changes says Jul 2026, WR 26-180 and WR 26-260; prior record 2026-10-13 gave archive date 2026-08-07. Unchanged since the prior record.",
+        "source_id": "gs1-digital-link-uri-syntax-1-7-0"
+      },
+      {
+        "artifact": "GS1-Conformant Resolver Standard",
+        "version": "1.2.1",
+        "status": "Ratified Aug 2026 (page header still misspelled 'Ratfied'); errata WR 26-270 and WR 26-274. Unchanged since the prior record.",
+        "source_id": "gs1-conformant-resolver-1-2-1"
+      },
+      {
+        "artifact": "GS1 resolver linkset JSON schema",
+        "version": "unversioned URL (draft-07 schema, no version field)",
+        "status": "normative since resolver 1.2.0",
+        "source_id": "new-gs1-resolver-linkset-schema"
+      },
+      {
+        "artifact": "GS1 resolver description file JSON schema",
+        "version": "$id points to the 1.2.0 path",
+        "status": "normative since resolver 1.2.0",
+        "source_id": "new-gs1-resolver-description-file-schema"
+      },
+      {
+        "artifact": "GS1 Web Vocabulary",
+        "version": "1.18.0 (published 2026-06-01; ontology versionInfo 1.18, dct:modified 2026-06-01)",
+        "status": "current per ref.gs1.org/voc/data/archive; gs1:dpp present in the current link-type list",
+        "source_id": "new-gs1-webvoc-archive"
+      },
+      {
+        "artifact": "GS1 EPC Tag Data Standard (TDS)",
+        "version": "2.3",
+        "status": "Ratified, Oct 2025",
+        "source_id": "new-gs1-epc-tds-2-3"
+      },
+      {
+        "artifact": "GS1 Digital Link URI: Compression Technical Standard for EPC binary strings",
+        "version": "1.0.0",
+        "status": "Ratified, Jul 2025",
+        "source_id": "new-gs1-dl-compression-epc-1-0-0"
+      },
+      {
+        "artifact": "GS1 Resolver Test Suite (hosted page and code)",
+        "version": "code last updated 2026-08-07; targets resolver standard 1.2.1; repository commit 32597c108ac1ecb9e90ce0081bb3a16e5a61e616",
+        "status": "work in progress per README; does not test compression",
+        "source_id": "new-gs1dl-resolver-testsuite"
+      },
+      {
+        "artifact": "GS1 Resolver Community Edition",
+        "version": "3.0.0 with March 2026 updates (master commit bf885fdf, 2026-03-29)",
+        "status": "community software, not maintained by GS1, conformance not guaranteed per README",
+        "source_id": "new-gs1-resolver-ce"
+      },
+      {
+        "artifact": "GS1 Barcode Syntax Engine",
+        "version": "release 1.4.1 (2026-05-28)",
+        "status": "active, Apache-2.0",
+        "source_id": "new-gs1-syntax-engine"
+      },
+      {
+        "artifact": "UNTP Identity Resolver specification",
+        "version": "Work in Progress (after 0.7.0; 1.0 expected)",
+        "status": "suitable for pre-production pilots per page",
+        "source_id": "new-untp-identity-resolver"
+      },
+      {
+        "artifact": "IANA link relation 'dpp'",
+        "version": "registry last updated 2026-06-12",
+        "status": "registered; reference is the UNTP Identity Resolver",
+        "source_id": "new-iana-link-relations"
+      },
+      {
+        "artifact": "RFC 9264 Linkset",
+        "version": "July 2022",
+        "status": "Standards Track",
+        "source_id": "new-rfc-9264"
+      },
+      {
+        "artifact": "GS1 2D Barcodes at Retail Point-of-Sale Implementation Guideline",
+        "version": "1.1.0",
+        "status": "Ratified, December 2025",
+        "source_id": "new-gs1-2d-retail-pos-guideline"
+      }
+    ],
+    "adoption_evidence": "GS1 in Europe states that the GS1-Conformant Resolver standard has significant implementations by solution providers, brands and GS1 Member Organisations, and reports a global retail migration to 2D codes with GS1 Digital Link targeted for 2027 with readiness percentages per solution category (GS1's own claims, not independently verified). The Resolver CE README says at least three GS1 Member Organisations use version 3.0. The resolver standard cites a description file of the GS1 AISBL resolver at https://id.gs1.org/.well-known/gs1resolver (not fetched). Peer-reviewed prototypes: Made2Verify (GS1-compliant resolver with fallback dashboard, lab and production demonstration with a remanufacture part, Procedia Computer Science 277, 2026), a KAIST-led GS1-conformant resolver deployed for a port supply chain and DPPs (IEEE RFID-TA 2025), and the R-Cycle plastics DPP based on GS1 (Polymers 2024). The Battery Pass Technical Guidance (v1.0, March 2024) names GS1 Digital Link as one way to embed IDs in URLs but does not mandate it. No GS1 Digital Link or linkset use was found in the CIRPASS-2 GitHub code (code search, 0 hits); its most active repositories (pushed up to 2026-10-15) are ontologies and documentation.",
+    "regulatory_alignment": "EU law does not name GS1 Digital Link, the GS1-Conformant Resolver or any link type. Regulation (EU) 2024/1781, Art. 10(1) points (a)-(b) require a DPP to be connected through a data carrier to a persistent unique product identifier; Art. 10(1) point (c) ties the carrier and identifier to the standards of Annex III second paragraph or equivalents (Annex III names ISO/IEC 15459; bibliographic only); Art. 10(1) point (d) asks for open standards and an interoperable, machine-readable, transferable format without vendor lock-in; Art. 10(1) points (f)-(g) let the delegated act fix model, batch or item granularity; Art. 10(3) requires a digital copy of the carrier or identifier for dealers and online marketplaces; Art. 10(4) requires a back-up copy through a DPP service provider; Art. 13 creates the registry of unique identifiers and Art. 13(5) the unique registration identifier. Commission Implementing Decision (EU) 2026/1736 publishes six harmonised DPP standards (content not read: protected). Regulation (EU) 2023/1542, Art. 77(3) makes the battery passport reachable through a QR code that links to a unique identifier, and Art. 77(10) adds upload of that identifier to the ESPR registry. GS1 maps model/batch/item to GTIN(+22) / GTIN+10 / GTIN+21 and argues that its keys meet the Annex III identifier standard; that is a GS1 claim (secondary for the protected standard). Article content here comes from sibling records espr.json and commission-2026-acts.json (retrieved 2026-10-13/15); EUR-Lex returned empty pages in this session."
+  },
+  "layers": {
+    "L01_unique_identifiers": {
+      "applies": "yes",
+      "mechanism": "Identifier = GS1 primary key plus key qualifiers expressed as a Digital Link URI path. Shape: <scheme>://<host>[/<customURIstem>]/<primaryKeyAI>/<value>[/<qualifierAI>/<value>...][?<AI>=<value>&...][#fragment]. Primary keys (URI Syntax 4.3): 01 GTIN, 8006 ITIP, 8013 GMN, 8010 CPID, 414 GLN, 415 Pay-To GLN, 417 Party GLN, 8017 GSRN provider, 8018 GSRN recipient, 255 GCN, 00 SSCC, 253 GDTI, 401 GINC, 402 GSIN, 8003 GRAI, 8004 GIAI. Qualifiers (4.4): 22 CPV, 10 batch/lot, 21 serial, 8011 CPID serial, 254 GLN extension, 8020 payment ref, 8019 SRIN, 235 TPX, 7040 UIC. Order for GTIN is 22 then 10 then 21; each qualifier is optional; 235 forms a separate GTIN+TPX path. GTIN must be 14 digits (shorter GTINs left-padded since 1.4.0). AI values use the 82-character set (XCHAR), CPID the 39-character set, AI 8030 the 64-character set; reserved characters are percent-encoded. Path is case sensitive after the host. Convenience alphas (gtin, lot, ser, cpv) were removed in 1.3.0. Query-string keys linkType and context are reserved for resolvers; extension keys must not be all-numeric. A canonical URI (4.12) uses https, host id.gs1.org, 14-digit GTIN, only AI keys in the query sorted lexically, no linkType/context, no trailing slash. Compressed URIs are recognised by RE2 (legacy) or RE3 (prefix 'eh' lowercase hex or 'ex' URI-safe base64 of an EPC binary string). GS1 granularity mapping for a DPP (GS1 in Europe paper): model = GTIN or GTIN+22, batch = GTIN+10, item = GTIN+21; identifiers are never reused once allocated.",
+      "specs": [
+        {
+          "source_id": "gs1-digital-link-uri-syntax-1-7-0",
+          "component": "Sections 3, 4.1-4.12 (ABNF rules gtin-path, customURIstem, queryStringComp, extensionParameter; canonical form 4.12), 6.1 (regular expressions RE1-RE3)"
+        },
+        {
+          "source_id": "new-gs1-dl-compression-epc-1-0-0",
+          "component": "Section 4.2.1 ('eh', header 7A) and 4.2.2 ('ex', header 7B)"
+        },
+        {
+          "source_id": "new-gs1-in-europe-enabling-dpp-v2-2",
+          "component": "Section 2 (GS1 DPP standardisation points 1-10, GS1-specific parts only)"
+        },
+        {
+          "source_id": "espr-reg-2024-1781",
+          "component": "Art. 10(1) points (a)-(c) and (f)-(g); Annex III second paragraph (bibliographic only for the named ISO/IEC standard)"
+        }
+      ],
+      "variants": [
+        "GTIN only (model level), GTIN+22 (variant model), GTIN+10 (batch), GTIN+21 (item), GTIN+22+10+21",
+        "Reference host id.gs1.org versus brand host (id.<brand>.com) with or without a custom path stem",
+        "Uncompressed versus EPC-compressed ('eh'/'ex') URIs",
+        "Data attributes in the query string (for example 17 expiry date) that do not change identity",
+        "Other primary keys for DPP-adjacent entities: 417 Party GLN (operator), 414 GLN (facility), 8004 GIAI or 8003 GRAI (assets)"
+      ],
+      "observable_black_box": "The URI string read from the carrier or sample artifact: path segments, AI codes, GTIN check digit, qualifier order, character sets, percent-encoding, query keys, presence of a compressed segment. Equivalence of two URIs can be decided by parsing to AI key-value pairs and comparing those, independent of host.",
+      "law_delta": "Law requires a persistent unique product identifier at the granularity of the delegated act, compliant with Annex III standards or equivalents (Reg. (EU) 2024/1781, Art. 10(1)); it does not require a URI form, a host, or GS1 keys. GS1 adds a web-resolvable syntax and the claim that the parsed keys, not the domain, are the persistent identifier."
+    },
+    "L02_data_carriers": {
+      "applies": "yes",
+      "mechanism": "Optical: QR Code or Data Matrix encoding the uncompressed GS1 Digital Link URI as plain text (GS1 Implementation Considerations, Method 1). GS1 in Europe calls QR Code with Digital Link 'highly likely' for its DPP AIDC application standard and notes Data Matrix as smaller and rectangular-capable but not natively read by consumer phone cameras. RFID (RAIN/UHF): EPC binary in the EPC bank per TDS 2.3; schemes SGTIN-96/198, SGTIN+ and DSGTIN+ (TDS 2.0) and twelve new '++' schemes (SGTIN++, DSGTIN++ and others, TDS 2.3) that add lossless binary encoding of a custom domain name so that a reader can rebuild a non-canonical Digital Link URI; the air interface is EPC UHF Gen2 (GS1 standard; ISO/IEC 18000-63 bibliographic only). The compression standard lets an EPC binary string ride in a URI as '<stem>/eh<hex>' or '<stem>/ex<base64url>'. NFC: can carry a Digital Link URI and is read natively by phones, but GS1 in Europe says NFC is not yet an approved GS1 carrier. GS1 states that any optical carrier can be copied, so the carrier itself cannot be authenticated. For retail packaging, GS1 guidance offers three point-of-sale 2D options: GS1 DataMatrix with an element string (no web link), QR Code with a Digital Link URI (opens with a phone camera), and Data Matrix with a Digital Link URI; during transition the 2D code sits next to the EAN/UPC, and scanners may convert a scanned URI to element string data for the till. The guidance recommends a brand-owned domain and short URIs because URI length drives symbol size.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epc-tds-2-3",
+          "component": "Release 2.3 change log and Section 1 introduction (EPC schemes, '++' schemes, Digital Link as EPC alternative)"
+        },
+        {
+          "source_id": "new-gs1-dl-compression-epc-1-0-0",
+          "component": "Section 4.2 decompression procedure"
+        },
+        {
+          "source_id": "new-gs1-in-europe-enabling-dpp-v2-2",
+          "component": "Section 3 AIDC carrier landscape (3.1-3.4)"
+        },
+        {
+          "source_id": "new-gs1-impl-considerations-upi",
+          "component": "Method 1 table (QR Code/Data Matrix and UHF RFID rows); Annex A 2D migration"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(3) (QR code for the battery passport)"
+        },
+        {
+          "source_id": "new-gs1-2d-retail-pos-guideline",
+          "component": "Release 1.1.0: choice of 2D option, transition, placement and quiet zones"
+        }
+      ],
+      "variants": [
+        "QR Code (uncompressed Digital Link URI)",
+        "GS1 DataMatrix or Data Matrix with Digital Link URI",
+        "RAIN RFID with EPC binary (SGTIN-96, SGTIN+, SGTIN++)",
+        "NFC NDEF URI record (not a GS1-approved carrier)",
+        "Legacy 1D barcode (GTIN only, not web-resolvable) alongside the 2D code",
+        "GS1 DataMatrix with element string only (not web-resolvable; GS1 key without host)"
+      ],
+      "observable_black_box": "Decoded payload of an image sample (QR, Data Matrix); hexadecimal EPC memory dump of an RFID tag sample; NDEF record of an NFC dump. Consistency between multiple carriers on one product (same key values) is observable from samples.",
+      "law_delta": "Law names a data carrier generically and, for batteries, a QR code (Reg. (EU) 2023/1542, Art. 77(3)); it does not fix the payload format. GS1 adds the URI payload and the EPC binary route for RFID."
+    },
+    "L03_data_exchange_protocols": {
+      "applies": "yes",
+      "mechanism": "HTTP/1.1+ over TLS (resolver CS-2, CS-3). Methods GET, HEAD, OPTIONS; CORS enabled (CS-4; no header values fixed; the test suite checks Access-Control-Allow-Origin and Access-Control-Allow-Methods containing GET, HEAD and OPTIONS). Default resolution: request without linkType redirects to the gs1:defaultLink target (CS-15) unless headers allow a better gs1:defaultLinkMulti match; no redirect status code is specified (Resolver CE uses 307). Specific link: ?linkType=<CURIE or URI> (for example gs1:dpp) redirects to that link (CS-17) or returns 404 (CS-18). Several equal candidates: 300 Multiple Choices with the linkset. Linkset: ?linkType=linkset or Accept: application/linkset+json returns 200 with the RFC 9264 JSON linkset, no redirect (CS-10); application/json is recommended to give the same; application/ld+json gives JSON-LD with context; text/html or no Accept gives an HTML page with the linkset embedded as JSON-LD. A linkset response should carry Link: <context URL>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\" (CS-13). Errors: 400 for a URI that fails syntax validation (CS-7), 404 for a valid URI with no data (CS-8), never 200 for an error (CS-9). Query string: all key=value pairs passed on when redirecting (CS-19; the option to drop them was removed in 1.2.0). Trailing slash tolerated (CS-25). Accept-Language should drive selection (CS-20); context query key may disambiguate. Compressed EPC URIs are decompressed (CS-5) and a redirect to another resolver uses the uncompressed URI (CS-6). Pattern-based redirection (2.8): a resolver may forward whole URI patterns (by GS1 Member Organisation or GS1 Company Prefix) with Location and optionally Link rel gs1:handledBy. Since 1.2.0 a Link header pointing to the linkset is no longer required on redirects, and since 1.0.0 dumping all links into the Link header is deprecated. UNTP IDR profile adds: linkset queries must be answered without authentication, resolvers that vary on Accept should send Vary: Accept, Accept-Language must not filter the linkset, linkType=all is a legacy alias clients should not send.",
+      "specs": [
+        {
+          "source_id": "gs1-conformant-resolver-1-2-1",
+          "component": "Sections 2.2, 2.3, 2.4.1, 2.6.1-2.6.3, 2.8, 2.9-2.12, 2.13; Section 5 conformance statements 2-10, 13-20, 25"
+        },
+        {
+          "source_id": "new-rfc-9264",
+          "component": "application/linkset+json structure; 'linkset' relation type; profile parameter"
+        },
+        {
+          "source_id": "new-rfc-8288",
+          "component": "Section 3 Link header ABNF; Section 3.3 relation types"
+        },
+        {
+          "source_id": "new-untp-identity-resolver",
+          "component": "Resolver behaviour section; GS1 compatibility notes"
+        }
+      ],
+      "variants": [
+        "Redirect status 307 (Resolver CE) versus 302/303/308 (unspecified by GS1)",
+        "Linkset by query parameter versus by Accept header",
+        "HTML landing page with embedded JSON-LD linkset versus pure redirect",
+        "Direct brand resolver versus GS1 global resolver with gs1:handledBy delegation",
+        "Legacy linkType=all (pre-1.0 Digital Link) still accepted by some resolvers"
+      ],
+      "observable_black_box": "Status code of each hop, Location header, Link header relations and parameters, Content-Type, CORS headers on GET/HEAD/OPTIONS, Vary, body of 200/300/404 responses, behaviour differences with and without trailing slash, with Accept variants, with linkType variants, with extra query parameters.",
+      "law_delta": "Law requires access through the data carrier without vendor lock-in and, for dealers, a digital copy of the carrier (Reg. (EU) 2024/1781, Art. 10(1) point (d), Art. 10(3)); it sets no HTTP protocol. The status codes, link selection and linkset format are GS1/IETF additions."
+    },
+    "L04_apis_lifecycle_searchability": {
+      "applies": "partial",
+      "mechanism": "The GS1 resolver standard defines only the read side (resolution and linkset retrieval). It defines no create, update, deactivate or search API. Implementations add their own: Resolver CE v3.0 exposes a separate bearer-token data-entry API (POST /new batch, PUT idempotent merge by (linktype, hreflang, context), partial DELETE with a JSON body, OpenAPI at the service root) storing linksets in MongoDB; GS1 Member Organisation resolvers expose their own portals (not examined). The passport API behind the DPP link is out of scope of GS1 resolver standards. The linkset itself is a machine-readable discovery document that GS1 in Europe says can be embedded in a web page so that crawlers can discover the DPP without a scan.",
+      "specs": [
+        {
+          "source_id": "new-gs1-resolver-ce",
+          "component": "README 'Updates March 2026' (data entry API)"
+        },
+        {
+          "source_id": "new-gs1-in-europe-enabling-dpp-v2-2",
+          "component": "Section 5.2 information discovery (embedded linkset)"
+        }
+      ],
+      "variants": [
+        "Vendor data-entry APIs (Resolver CE REST with bearer token)",
+        "Bulk upload formats specific to each resolver",
+        "Linkset embedded in HTML as JSON-LD for crawler discovery"
+      ],
+      "observable_black_box": "Only the read side is observable without authorization: linkset content before and after an announced update, HTML pages with embedded JSON-LD linksets. Write APIs are vendor-specific and need an authorization scope.",
+      "law_delta": "Law requires DPP data to be searchable and transferable and creates a public web portal (Reg. (EU) 2024/1781, Art. 10(1) point (d), Art. 14 per sibling record); GS1 provides discovery of links, not search over passport content."
+    },
+    "L05_system_interoperability_data_models": {
+      "applies": "yes",
+      "mechanism": "Linkset JSON (RFC 9264): {\"linkset\":[{\"anchor\":\"<uncompressed DL URI>\",\"description\":\"...\",\"<relation>\":[{\"href\":\"...\",\"title\":\"...\",\"type\":\"<media type>\",\"hreflang\":[\"en\"],\"context\":[...],\"fwqs\":true,\"public\":true}]}]}. GS1 schema (draft-07, URL https://ref.gs1.org/standards/resolver/linkset-schema): top-level only 'linkset'; entries require 'anchor', allow 'description' and deprecated 'itemDescription'; relation keys must match lowercase-hyphen tokens (IANA style, for example 'describedby') or full http(s) URIs made only of letters, digits, '.', '/' (the character class is written A-z, which also admits '[', '\\\\', ']', '^', '_', '`'); targets require href and title; hreflang items must be two letters or two letters-hyphen-two letters; additionalProperties false at every level. JSON-LD context (https://ref.gs1.org/standards/resolver/linkset-context, @protected) maps gs1 to http://gs1.org/voc/, linkset to @nest, anchor and href to @id, hreflang to dcterms:language, type to dcterms:format, title to dcterms:title. Link types come from the GS1 Web Vocabulary (60 link-type properties in v1.16, all subproperties of gs1:linkType); DPP-relevant: gs1:dpp, gs1:sustainabilityInfo, gs1:certificationInfo, gs1:instructions, gs1:serviceInfo, gs1:safetyInfo, gs1:traceability, gs1:epcis, gs1:masterData, gs1:jws, gs1:registryEntry, gs1:recallStatus, gs1:verificationService; resolver-only: gs1:defaultLink, gs1:defaultLinkMulti, gs1:handledBy; gs1:productSustainabilityInfo is deprecated. The vocabulary declares owl:equivalentProperty to https://gs1.org/voc/<term> and https://www.gs1.org/voc/<term> for most link types but not for gs1:dpp. IANA registers plain 'dpp' (reference UNTP IDR); UNTP uses https://test.uncefact.org/vocabulary/link-type/{dcc,dfr,dte,dia,dcr} for credentials. Resolver description file (/.well-known/gs1resolver) requires resolverRoot (uri) and supportedPrimaryKeys (enum all, 01, 8006, 8013, 8010, 410-415, 417, 8017, 8018, 255, 00, 253, 401, 402, 8003, 8004); optional name, supportedLinkType [{namespace, prefix}], linkTypeDefaultCanBeLinkset (default false), supportedContextValuesEnumerated, supportedContextValuesExternal, contact (vCard), extensionProfile, jsonLdContextLocation. The passport document behind the gs1:dpp link has no GS1-defined schema; it may be HTML, JSON-LD using GS1 Web Vocabulary terms, a UNTP DPP credential (application/vc+jwt per UNTP examples), an AAS, or a battery data model. The copy of the schema in the gs1/linkset repository, which the GS1 resolver test suite loads from gs1.github.io, is identical to the ref.gs1.org schema on every pattern and required array; a looser basic RFC 9264 schema in the same repository requires only href.",
+      "specs": [
+        {
+          "source_id": "new-gs1-resolver-linkset-schema",
+          "component": "whole schema (raw JSON read)"
+        },
+        {
+          "source_id": "new-gs1-resolver-linkset-context",
+          "component": "@context term definitions"
+        },
+        {
+          "source_id": "new-gs1-resolver-description-file-schema",
+          "component": "whole schema (raw JSON read)"
+        },
+        {
+          "source_id": "new-gs1-webvoc-github",
+          "component": "v1.16 gs1Voc.jsonld: properties with rdfs:subPropertyOf gs1:linkType"
+        },
+        {
+          "source_id": "new-gs1-webvoc-linktypes",
+          "component": "data/linktypes JSON (60 entries, gs1:dpp present)"
+        },
+        {
+          "source_id": "new-iana-link-relations",
+          "component": "entry 'dpp'; entry 'linkset'"
+        },
+        {
+          "source_id": "new-untp-identity-resolver",
+          "component": "Link relations table; GS1 compatibility"
+        },
+        {
+          "source_id": "gs1-conformant-resolver-1-2-1",
+          "component": "Sections 2.5.1-2.5.10, 2.10, 2.14, 3"
+        },
+        {
+          "source_id": "new-gs1-linkset-repo",
+          "component": "gs1-linkset-schema.json; linkset-schema.json; valid/invalid example linksets"
+        }
+      ],
+      "variants": [
+        "gs1:dpp (GS1) versus 'dpp' (IANA/UNTP) versus non-vocabulary terms such as gs1:productPassport (Resolver CE configuration)",
+        "Relation keys as CURIE-expanded https://ref.gs1.org/voc/X, http://gs1.org/voc/X or https://gs1.org/voc/X",
+        "UNTP linkset schema (accepts any absolute http(s) relation URI) versus GS1 schema (rejects hyphenated URIs)",
+        "Passport payload as HTML, JSON-LD, VC-JWT, AAS"
+      ],
+      "observable_black_box": "Linkset body (schema validity, relation keys, anchors, link attributes), JSON-LD context Link header, description file content, media type of each target, and the type attribute declared for the DPP link versus the Content-Type actually served.",
+      "law_delta": "Law asks for open standards and an interoperable, machine-readable format (Reg. (EU) 2024/1781, Art. 10(1) point (d); Art. 11 first subparagraph). It does not define a link type or a linkset. The DPP link type is a GS1/IANA addition; the passport content model comes from other families."
+    },
+    "L06_storage_archiving_persistence": {
+      "applies": "partial",
+      "mechanism": "The resolver stores links, not passports. Persistence relies on (a) never reusing GS1 keys, (b) keeping the host in the carrier resolvable, and (c) re-pointing links without reprinting the carrier. GS1 papers note that a manufacturer domain in the URI may lapse, while the parsed keys stay registered independent of the domain; GS1 in Europe proposes that a client replace the domain with an alternative resolver, or that the EU registry act as lookup of last resort (listing primary and backup DPP URLs, possibly as DID service endpoints), and that federated GS1-conformant resolvers can redirect to backups. These are proposals, not specified behaviour. Made2Verify adds a fallback dashboard that keeps essential data when an OEM disappears. No GS1 link type for a backup copy exists in the vocabulary (v1.16 list read).",
+      "specs": [
+        {
+          "source_id": "new-gs1-in-europe-enabling-dpp-v2-2",
+          "component": "Section 5.3 primary data source, backup repository and central registry"
+        },
+        {
+          "source_id": "new-gs1-impl-considerations-upi",
+          "component": "Method 1 row 'Persistent'"
+        },
+        {
+          "source_id": "espr-reg-2024-1781",
+          "component": "Art. 10(4) back-up copy"
+        }
+      ],
+      "variants": [
+        "Brand-hosted resolver",
+        "GS1 MO or service-provider hosted resolver",
+        "Federated resolvers redirecting to backups",
+        "Registry-based fallback (proposal)"
+      ],
+      "observable_black_box": "Repeated resolution over time (status and target stability), description file stability, redirect targets after a simulated outage of the primary target. Lifetime persistence cannot be proven by a bounded number of observations.",
+      "law_delta": "Law requires a back-up copy through a DPP service provider and availability after insolvency (Reg. (EU) 2024/1781, Art. 10(4); Art. 11 per sibling record). GS1 standards specify no backup link or failover behaviour."
+    },
+    "L07_access_rights_security_confidentiality": {
+      "applies": "partial",
+      "mechanism": "GS1 resolution is public by design: no authentication in the resolver standard. Access tiers are left to the target systems. The linkset schema has a boolean 'public' attribute (link can be shared publicly) with no normative processing rule found in the standard text read. context and Accept-Language select among links but are not access control. UNTP IDR requires public, unauthenticated linkset answers and defers extended (authenticated) linksets to a future version. Resolver CE secures only its data-entry API (bearer token, constant-time comparison) and limits Content-Type reflection to an allowlist.",
+      "specs": [
+        {
+          "source_id": "new-gs1-resolver-linkset-schema",
+          "component": "'public' and 'fwqs' target properties"
+        },
+        {
+          "source_id": "new-untp-identity-resolver",
+          "component": "public access requirement; roadmap"
+        },
+        {
+          "source_id": "new-gs1-resolver-ce",
+          "component": "README security section"
+        }
+      ],
+      "variants": [
+        "Fully public linkset",
+        "Public linkset with restricted targets (authentication at target)",
+        "Separate restricted resolver or extended linkset for authenticated roles (proposal)"
+      ],
+      "observable_black_box": "Whether an anonymous linkset lists URLs of restricted resources; whether restricted targets answer anonymous requests; whether error responses leak link data.",
+      "law_delta": "Law requires access rights per delegated act and restricted parts (Reg. (EU) 2024/1781, Art. 10(1) points (f)-(g); Reg. (EU) 2023/1542, Art. 77(9) implementing acts). GS1 resolver standards add nothing on access control."
+    },
+    "L08_authentication_reliability_integrity": {
+      "applies": "partial",
+      "mechanism": "Transport integrity only (HTTPS). Linksets and redirects are not signed. The vocabulary offers gs1:jws (link to a JSON Web Signature) and gs1:verificationService (GS1 Lightweight Messaging Standard for product verification). GS1 states that optical carriers can be copied and cannot authenticate the product. UNTP requires clients to verify the dereferenced credential and says resolvability does not prove the subject stands behind the record. GS1 also publishes a VC data model repository and verifier (gs1/VC-Data-Model, gs1/vc-data-model-verifier; not examined).",
+      "specs": [
+        {
+          "source_id": "new-gs1-webvoc-github",
+          "component": "gs1:jws, gs1:verificationService"
+        },
+        {
+          "source_id": "new-gs1-impl-considerations-upi",
+          "component": "Method 1 row 'Ability to authenticate data carrier'"
+        },
+        {
+          "source_id": "new-untp-identity-resolver",
+          "component": "verifier flow steps 5-6"
+        }
+      ],
+      "variants": [
+        "Unsigned passport behind link",
+        "Passport with linked JWS (gs1:jws)",
+        "Passport as verifiable credential (UNTP DPP)"
+      ],
+      "observable_black_box": "TLS on the resolver host; presence and validity of a gs1:jws target; whether the passport behind gs1:dpp carries a verifiable signature.",
+      "law_delta": "Law requires data integrity, authenticity and security of the DPP (Reg. (EU) 2024/1781, Art. 11 first subparagraph per sibling record). GS1 resolvers do not provide it beyond TLS."
+    },
+    "L09_registry_and_customs": {
+      "applies": "partial",
+      "mechanism": "No GS1 standard defines interaction with the EU registry. GS1 in Europe argues that the parsed keys (GTIN, lot, serial) rather than the URL should be uploaded to the registry, and asks whether non-government registries such as Verified by GS1 could support operator verification. gs1:registryEntry exists as a link type to a register entry. Registry and customs matching is therefore on parsed GS1 keys plus the Art. 13(5) unique registration identifier.",
+      "specs": [
+        {
+          "source_id": "new-gs1-in-europe-enabling-dpp-v2-2",
+          "component": "Figure 1-1 discussion; Section 2.1 'Persistent' and 'Registry accessible'"
+        },
+        {
+          "source_id": "espr-reg-2024-1781",
+          "component": "Art. 13(1), 13(5); Art. 15 (customs) per sibling record"
+        }
+      ],
+      "variants": [
+        "Registry stores keys only",
+        "Registry stores keys plus resolver URL (proposal)"
+      ],
+      "observable_black_box": "Equality of parsed carrier keys with the identifier in a registry record (mock).",
+      "law_delta": "The law defines the registry; GS1 adds only a recommendation to register parsed keys."
+    },
+    "L10_lifecycle_versioning_updates": {
+      "applies": "partial",
+      "mechanism": "Indirection is the update mechanism: the printed URI stays fixed while links in the resolver change. A new model-level identity needs a new GTIN (GTIN Management Rules, per GS1 in Europe). For repair or remanufacture, GS1 in Europe describes two options: the original DPP lapses, or the repairer issues a new DPP for the same serialised identifier that links to the original; it notes that brand owners may not link to third-party DPPs. GS1 standards define no versioning of links, no deactivation status and no end-of-life link type; TDS and EPCIS cover event history (other family).",
+      "specs": [
+        {
+          "source_id": "new-gs1-in-europe-enabling-dpp-v2-2",
+          "component": "Section 5.3 'Repairs' and 'DPPs for component parts'"
+        }
+      ],
+      "variants": [
+        "Re-pointing the default or gs1:dpp link",
+        "New GTIN for a changed model",
+        "Repairer DPP linked from original (proposal)"
+      ],
+      "observable_black_box": "Change of redirect target or linkset over time for the same URI; persistence of the anchor; absence of stale links.",
+      "law_delta": "Law requires versioning, handover after re-use or remanufacture and an end of life for the battery passport (Reg. (EU) 2023/1542, Art. 77 per sibling record). GS1 resolver standards specify none of these."
+    },
+    "L11_roles_and_governance": {
+      "applies": "yes",
+      "mechanism": "GS1 AISBL and 100+ GS1 Member Organisations issue GS1 Company Prefixes; brand owners allocate GTINs and serials. Anyone may run a GS1-Conformant Resolver for URIs on their host; the standard stresses that each resolver is sovereign over its own URI space and need not give the same answers as another resolver. The GS1 AISBL resolver (id.gs1.org) serves the canonical host and can hand off by GS1 Company Prefix pattern to brand resolvers (gs1:handledBy). Standards are made under the GS1 Global Standards Management Process; implementation is under the GS1 IP Policy (royalty-free or RAND, per the vocabulary licence statement). Service providers sell resolver hosting. UNTP positions a resolver per scheme or per issuing register.",
+      "specs": [
+        {
+          "source_id": "gs1-conformant-resolver-1-2-1",
+          "component": "Sections 2.8, 3, 4 (resolvers on the Web, URI ownership)"
+        },
+        {
+          "source_id": "new-gs1-webvoc-github",
+          "component": "ontology node schema:license statement (IP Policy)"
+        }
+      ],
+      "variants": [
+        "Brand-operated resolver",
+        "GS1 MO resolver",
+        "Solution-provider resolver",
+        "GS1 global resolver with delegation"
+      ],
+      "observable_black_box": "resolverRoot and contact in the description file; host of the carrier URI; handledBy delegation chain.",
+      "law_delta": "Law defines economic operators, DPP service providers and future rules for issuing agencies (Reg. (EU) 2024/1781, Art. 2, Art. 12(4) per sibling record). GS1 is one possible issuing agency; the law does not name it."
+    }
+  },
+  "end_to_end_flows": [
+    {
+      "name": "Consumer scan to default page (no app)",
+      "actors": [
+        "consumer phone camera",
+        "brand or GS1-conformant resolver",
+        "brand web server"
+      ],
+      "steps": [
+        "1. Camera decodes the QR Code and reads https://id.brand.example/01/09506000164908/10/LOT1/21/SER1.",
+        "2. Browser sends GET with Accept: text/html.",
+        "3. Resolver validates syntax (400 on failure), looks up links for serial, batch and GTIN levels (walk-up union), and redirects to gs1:defaultLink (status not fixed by GS1; 307 in Resolver CE), passing any query string on.",
+        "4. Browser follows Location to the target page, which may or may not be the DPP (UNTP warns that GS1 retail defaults are usually consumer pages).",
+        "5. If the target is a landing page, it may embed the JSON-LD linkset that lists the gs1:dpp link."
+      ]
+    },
+    {
+      "name": "Machine client to DPP through linkset",
+      "actors": [
+        "scanner app or verifier",
+        "resolver",
+        "DPP host"
+      ],
+      "steps": [
+        "1. Read and parse the Digital Link URI; normalise (14-digit GTIN, decompress if 'eh'/'ex').",
+        "2. GET the URI with Accept: application/linkset+json (or ?linkType=linkset).",
+        "3. Expect 200 and Content-Type application/linkset+json, with a Link header to the JSON-LD context.",
+        "4. Validate the linkset against the GS1 schema; find the anchor equal to the uncompressed URI.",
+        "5. Select the link whose relation is gs1:dpp (any namespace form) or IANA 'dpp'; check its type and hreflang.",
+        "6. GET the href; validate the passport (schema, context, signature) and check that its identifier matches the parsed GS1 keys."
+      ]
+    },
+    {
+      "name": "Direct DPP request by link type",
+      "actors": [
+        "client",
+        "resolver",
+        "DPP host"
+      ],
+      "steps": [
+        "1. GET <DL URI>?linkType=gs1:dpp.",
+        "2. Resolver redirects to the DPP link or answers 404 if no gs1:dpp link exists at any level.",
+        "3. Client follows the redirect and validates the passport."
+      ]
+    },
+    {
+      "name": "RFID tag to DPP",
+      "actors": [
+        "UHF RFID reader",
+        "middleware applying TDS/TDT",
+        "resolver"
+      ],
+      "steps": [
+        "1. Reader inventories tags and reads the EPC bank (for example SGTIN++ with a custom domain name).",
+        "2. Middleware decodes the EPC binary with TDS 2.3 rules into GS1 element strings and a non-canonical Digital Link URI on the encoded domain (or a compressed 'eh'/'ex' URI on a known stem).",
+        "3. Client resolves the URI as in the machine flow; GS1 notes that phones cannot yet isolate one UHF tag, so this flow is mainly B2B."
+      ]
+    },
+    {
+      "name": "Compressed URI from NFC or RFID",
+      "actors": [
+        "reader",
+        "resolver"
+      ],
+      "steps": [
+        "1. Carrier yields <stem>/ex<base64url> or <stem>/eh<hex>.",
+        "2. Resolver (CS-5) treats the part before the compressed string as the URI stem, decodes 6 or 4 bits per character to the EPC binary, decodes the EPC per TDS, and builds the uncompressed path.",
+        "3. Resolver answers as for the uncompressed URI and uses the uncompressed URI as linkset anchor (CS-10) and in any onward redirect (CS-6)."
+      ]
+    },
+    {
+      "name": "Delegation from GS1 global resolver to brand resolver",
+      "actors": [
+        "client",
+        "id.gs1.org resolver",
+        "brand resolver"
+      ],
+      "steps": [
+        "1. Client resolves https://id.gs1.org/01/<GTIN>/21/<serial>.",
+        "2. The global resolver matches the GS1 Company Prefix pattern and redirects the whole request unchanged to the brand resolver, with Location and optionally Link rel gs1:handledBy.",
+        "3. The brand resolver applies its own links."
+      ]
+    },
+    {
+      "name": "Failover after loss of the brand domain (GS1 in Europe proposal)",
+      "actors": [
+        "client or web app",
+        "EU registry or alternative resolver",
+        "backup DPP host"
+      ],
+      "steps": [
+        "1. Resolution of the carrier host fails.",
+        "2. Client extracts the GS1 keys from the URI and substitutes another known resolver host, or queries the registry as lookup of last resort.",
+        "3. Client reaches the backup copy. This flow is not specified in any GS1 standard."
+      ]
+    },
+    {
+      "name": "Distance selling",
+      "actors": [
+        "online marketplace",
+        "consumer browser",
+        "resolver"
+      ],
+      "steps": [
+        "1. The economic operator gives the seller the carrier URI (Reg. (EU) 2024/1781, Art. 10(3)).",
+        "2. The seller page links the same URI.",
+        "3. A click follows the consumer-scan flow."
+      ]
+    }
+  ],
+  "implementations": [
+    {
+      "name": "GS1 Resolver Community Edition v3.0",
+      "url": "https://github.com/gs1/GS1_DigitalLink_Resolver_CE",
+      "kind": "resolver",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-10-13; master commit bf885fdf 2026-03-29; web_namespace.py commit a455f309 2026-03-29",
+      "evidence_level": "substantive",
+      "note": "Python 3.12 Flask front-end resolver plus data-entry API and MongoDB storing linksets. Code read: redirects with 307; returns linkset when Accept contains application/linkset+json or application/json, or linkType is 'linkset' or 'all'; Accept parsed by splitting on commas without trimming or q-values; Link header to the linkset uses rel=\"application/linkset\"; JSON-LD context Link header points to the json-ld#context namespace with type text/html and an unquoted URI rel; description file uses linkTypeDefaultCanBeAll and non-vocabulary link types (gs1:productPassport, gs1:handlingEndOfLife, gs1:repairInfo and others). README: not maintained by GS1, may not fully conform. A realistic SUT and fault source, not an oracle."
+    },
+    {
+      "name": "GS1 Resolver Test Suite",
+      "url": "https://github.com/gs1/GS1DL-resolver-testsuite",
+      "kind": "test-suite",
+      "license": "Apache-2.0",
+      "last_activity": "2026-08-07 (commit 32597c10)",
+      "evidence_level": "substantive",
+      "note": "Hosted at https://ref.gs1.org/test-suites/resolver/. Browser JavaScript plus a PHP helper that sends HEAD and OPTIONS requests with curl, redirects not followed, 10 s timeout. Test ids: isURL, validDL, isHttps, plausibleDL, tlsOK, rdFile, httpVersion, corsCheck, methodsCheck, reportWith400, noErrorWith200, trailingSlash, basicWalkUp, ltLinksetNoRedirect, ltAllNoRedirect (legacy), ltAcceptHeader, validLinkset, linksetJsonldCheck, declaredContentType, hackedLinkset, legacyLinkHeaders, qsPassedOn, defaultLinkExists, singleDefaulLink, singleMultiLink, linkTypesDefined, defaultTarget, loFor<linkType>, specificLinkTypeNotFound. Validates linksets against https://gs1.github.io/linkset/gs1-linkset-schema.json, which is served from gs1/linkset and matches the ref.gs1.org schema on every pattern and required array (checked 2026-10-19). No compression test. Requires a live target; reusable as an oracle reference by porting test logic to loopback fixtures."
+    },
+    {
+      "name": "GS1 Barcode Syntax Engine (gs1encoders)",
+      "url": "https://github.com/gs1/gs1-syntax-engine",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "release 1.4.1 2026-05-28; pushed 2026-10-08",
+      "evidence_level": "substantive",
+      "note": "Reference implementation of the GS1 Barcode Syntax Resource; C library with C++, .NET, Java, Swift and JS/WASM bindings; processes AI element strings and Digital Link URIs. The repository already vendors its dl.c test data under tests/vectors/gs1-syntax-engine (pinned commit 58c1dc85, prior session)."
+    },
+    {
+      "name": "GS1DigitalLinkToolkit.js",
+      "url": "https://github.com/gs1/GS1DigitalLinkToolkit.js",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2025-05-01",
+      "evidence_level": "metadata_only",
+      "note": "Translator between element strings and Digital Link URIs; bundled by the resolver test suite and Resolver CE."
+    },
+    {
+      "name": "interpretGS1scan",
+      "url": "https://github.com/gs1/interpretGS1scan",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2025-06-18",
+      "evidence_level": "metadata_only",
+      "note": "JavaScript library that interprets a scanned string (element string or Digital Link)."
+    },
+    {
+      "name": "gs1/linkset",
+      "url": "https://github.com/gs1/linkset",
+      "kind": "other",
+      "license": "Apache-2.0",
+      "last_activity": "2025-06-16 (commit bedc11ec, gh api)",
+      "evidence_level": "substantive",
+      "note": "Source of https://gs1.github.io/linkset/ (Pages from master root). Its gs1-linkset-schema.json, which the resolver test suite uses, matches the normative ref.gs1.org linkset schema on @id, all patterns and required arrays, so the regex defects recorded under anomalies apply to both. Also holds valid and invalid example linksets usable as test fixtures (Apache-2.0)."
+    },
+    {
+      "name": "GS1DigitalLinkCompressionPrototype",
+      "url": "https://github.com/gs1/GS1DigitalLinkCompressionPrototype",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2025-12-03",
+      "evidence_level": "metadata_only",
+      "note": "Experimental lossless compression of Digital Link URIs (legacy/general compression, not the EPC-only standard)."
+    },
+    {
+      "name": "GS1 EPC Tag Data Translation (TDT)",
+      "url": "https://github.com/gs1/TDT",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-19",
+      "evidence_level": "metadata_only",
+      "note": "Machine-readable translation rules between EPC binary, EPC URIs and GS1 keys."
+    },
+    {
+      "name": "GS1 Web Vocabulary development repository",
+      "url": "https://github.com/gs1/WebVoc",
+      "kind": "ontology",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-01-29",
+      "evidence_level": "substantive",
+      "note": "Holds versions v1.1-v1.11 and v1.16 (no v1.12-v1.15 or v1.17-v1.18 folders). v1.16 jsonld read: 60 link types; gs1:dpp present; v1.10 and v1.11 lack gs1:dpp."
+    },
+    {
+      "name": "GS1 2D barcode generator",
+      "url": "https://github.com/gs1/2d-barcode-generator",
+      "kind": "other",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-05-29",
+      "evidence_level": "metadata_only",
+      "note": "Generates 2D barcodes with AI syntax and Digital Link URIs; candidate source of carrier fixtures."
+    },
+    {
+      "name": "digital-link.js",
+      "url": "https://github.com/gs1/digital-link.js",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2023-01-31",
+      "evidence_level": "metadata_only",
+      "note": "Older SDK; predates removal of convenience alphas handling changes; stale."
+    },
+    {
+      "name": "OpenEPCIS GS1 Digital Link Toolkit (openepcis-epc-digitallink-translator)",
+      "url": "https://github.com/openepcis/openepcis-epc-digitallink-translator",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-13",
+      "evidence_level": "substantive",
+      "note": "Java library, Quarkus extension and REST service; validates GS1 keys and converts EPC URN to Digital Link and back for 16 EPCIS identifier types; GTIN+22 and other combinations off by default (epcisCompliant)."
+    },
+    {
+      "name": "GS1 AISBL resolver (id.gs1.org)",
+      "url": "https://id.gs1.org/.well-known/gs1resolver",
+      "kind": "resolver",
+      "license": "not stated",
+      "last_activity": "not checked",
+      "evidence_level": "secondary_only",
+      "note": "Known only from the example description file in resolver standard Section 3 (supportedPrimaryKeys ['all'], linkTypeDefaultCanBeLinkset true). Not contacted (rule D)."
+    },
+    {
+      "name": "GS1 2D Barcodes in Retail test suite",
+      "url": "https://ref.gs1.org/test-suites/2d-barcodes-in-retail/",
+      "kind": "test-suite",
+      "license": "not stated",
+      "last_activity": "not checked",
+      "evidence_level": "metadata_only",
+      "note": "Tests conformance with the GS1 General Specifications and the 2D Barcodes at Retail Point-of-Sale Implementation Guideline; page content not read."
+    },
+    {
+      "name": "UNTP Identity Resolver (IDR) profile",
+      "url": "https://untp.unece.org/docs/specification/IdentityResolver",
+      "kind": "other",
+      "license": "CC-BY-4.0",
+      "last_activity": "not checked (page footer 2026)",
+      "evidence_level": "substantive",
+      "note": "Profile compatible with GS1 resolvers: linkset via Accept or linkType, public access, IANA 'dpp' treated as gs1:dpp, /.well-known/resolver accepted as equivalent to /.well-known/gs1resolver. No IDR conformance test suite found in the content read."
+    },
+    {
+      "name": "Made2Verify resolver and fallback dashboard",
+      "url": "https://doi.org/10.1016/j.procs.2026.02.212",
+      "kind": "pilot",
+      "license": "not stated",
+      "last_activity": "2026 (publication)",
+      "evidence_level": "secondary_only",
+      "note": "GS1-compliant resolver with lifecycle-aware redirection and fallback when the OEM stops operating; demonstrated with an Open Reference Remanufacture Part (abstract only)."
+    },
+    {
+      "name": "KAIST GS1-conformant resolver and multimodal scanner app",
+      "url": "https://doi.org/10.1109/rfid-ta63091.2025.11265909",
+      "kind": "pilot",
+      "license": "not stated",
+      "last_activity": "2025-10-28 (publication)",
+      "evidence_level": "secondary_only",
+      "note": "Resolver plus app scanning Digital Link from QR, NFC, RFID, Wi-Fi and Bluetooth; deployed for port-to-port supply chain and DPPs (abstract only)."
+    },
+    {
+      "name": "Battery Pass consortium technical guidance (pilot guidance)",
+      "url": "https://en.acatech.de/publication/battery-passport-technical-guidance/",
+      "kind": "pilot",
+      "license": "CC-BY-NC-4.0",
+      "last_activity": "Version 1.0, March 2024",
+      "evidence_level": "substantive",
+      "note": "Names GS1 Digital Link among standards for embedding IDs in URLs (direct access URL variant) versus UID-plus-offline-data needing dedicated resolvers; its architecture has routing/resolver services; it does not mandate GS1."
+    },
+    {
+      "name": "CIRPASS-2 open-source test environment repositories",
+      "url": "https://github.com/CIRPASS-2",
+      "kind": "pilot",
+      "license": "Apache-2.0 (four most recent repositories); ontologie-textiles: not stated",
+      "last_activity": "2026-10-15 (ontologies-docs, most recently pushed repository, gh api)",
+      "evidence_level": "metadata_only",
+      "note": "GitHub code search on 2026-10-19: 0 hits for 'digital link' and 'linkset'; 3 hits for 'resolver' unrelated to GS1 resolution (JWS verifier, JSON schema extraction). No GS1 resolver entry point found. The most active repositories are ontologies and documentation (battery, tyre, textiles), not resolution services."
+    }
+  ],
+  "literature": [
+    {
+      "doi": "10.1016/j.procs.2026.02.212",
+      "title": "Made2Verify: A Scalable GS1-Compliant Resolver and Fallback Dashboard for Digital Product Passports",
+      "year": 2026,
+      "venue": "Procedia Computer Science 277, 1744-1751 (CC BY-NC-ND 4.0 per Crossref)",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org",
+      "relevance": "Empirical prototype of a GS1-based resolver for DPPs with lifecycle-aware redirection and OEM-independent fallback; directly informs persistence and failover tests."
+    },
+    {
+      "doi": "10.1109/rfid-ta63091.2025.11265909",
+      "title": "From Tag to Digital Twin: Unlocking Service Resolution Through GS1 Digital Link",
+      "year": 2025,
+      "venue": "2025 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+      "found_via": "mcp__consensus__search and mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata checked via api.crossref.org",
+      "relevance": "Design and deployment of a GS1-conformant resolver with a multi-carrier scanning app, including DPP use; evidence for QR/NFC/RFID entry points."
+    },
+    {
+      "doi": "10.1109/rfid-ta63091.2025.11265834",
+      "title": "LLM-Powered Digital Link Agent",
+      "year": 2025,
+      "venue": "2025 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata checked via api.crossref.org on 2026-10-19 (title, venue, year 2025 match)",
+      "relevance": "Uses resolver linksets as authoritative retrieval sources; shows machine clients consuming linksets (not run-time relevant to the engine, which uses no LLM)."
+    },
+    {
+      "doi": "10.18461/pfsd.2020.2008",
+      "title": "Empowering Organizations in the Food Sector to Provide Potentially Unknown Parties Easy Access to Trusted Data. Discussion of a Web-based, Globally Applicable Solution Based on Well-established Standards and Technologies",
+      "year": 2020,
+      "venue": "Proceedings in Food System Dynamics (OpenAlex source: International Center for Food Chain and Network Research, University of Bonn)",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; api.crossref.org returned HTTP 404 for this DOI on 2026-10-19; OpenAlex (api.openalex.org/works/doi:...) lists the same title, year 2020, first author Troeger",
+      "relevance": "Pre-2021 prototype study of GS1 Digital Link resolvers, link types and EPCIS endpoints; outside the 2021-2026 window, kept for the link-type and EPCIS-endpoint patterns."
+    },
+    {
+      "doi": "10.3390/polym16101420",
+      "title": "How the Digital Product Passport Can Lead the Plastics Industry towards a Circular Economy—A Case Study from Bottle Caps to Frisbees",
+      "year": 2024,
+      "venue": "Polymers",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org on 2026-10-19 (title, Polymers, 2024 match)",
+      "relevance": "Pilot (R-Cycle) of a GS1-based one-layer public DPP over a real recycling chain; shows a public-only access model."
+    },
+    {
+      "doi": "10.1109/rfid64926.2025.11015538",
+      "title": "Building Digital Product Passports: EPCIS 2.0 Meets Knowledge Graphs",
+      "year": 2025,
+      "venue": "2025 IEEE International Conference on RFID (RFID)",
+      "found_via": "mcp__consensus__search; Crossref answered HTTP 429; metadata checked via api.openalex.org on 2026-10-19 (title and 2025 match)",
+      "relevance": "Links EPCIS 2.0 events by GS1 keys into a knowledge graph for DPP traceability; complements the resolver entry point."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.274",
+      "title": "Bridging the Gaps Towards a Unified Architecture for Digital Product Passports: A Data Space Perspective on Existing Standards and Initiatives",
+      "year": 2026,
+      "venue": "Procedia Computer Science",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org on 2026-10-19 (title, Procedia Computer Science, 2026 match)",
+      "relevance": "Reference architecture that assigns GS1 to identification and event semantics inside a data-space DPP stack (hybrid family)."
+    },
+    {
+      "doi": "10.23919/cnsm67658.2025.11297523",
+      "title": "Exploring the Design Space and Research Directions for Digital Product Passport Systems",
+      "year": 2025,
+      "venue": "2025 21st International Conference on Network and Service Management (CNSM)",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org on 2026-10-19 (title, CNSM 2025 match)",
+      "relevance": "Design space of data carrier, online storage and dynamic data, with counterfeiting and interoperability challenges relevant to resolver-based access."
+    },
+    {
+      "doi": "10.1109/rfid-ta64374.2024.10965188",
+      "title": "Next-Generation Battery Management Systems: Integrating RFID for Battery Passport Applications",
+      "year": 2024,
+      "venue": "2024 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata checked via api.crossref.org on 2026-10-19 (title, RFID-TA 2024 match)",
+      "relevance": "Demonstrator using NFC tags in a battery management system as an alternative to QR for battery passports; evidence for NFC carrier tests."
+    },
+    {
+      "doi": "10.1108/ci-02-2025-0074",
+      "title": "Decentralized phygital identifier systems for digital passports in circular construction: a design science evaluation",
+      "year": 2025,
+      "venue": "Construction Innovation",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata checked via api.crossref.org on 2026-10-19 (title, Construction Innovation, 2025 match)",
+      "relevance": "Empirical comparison of QR versus NFC carriers and DID versus token identifiers; a contrasting identifier method to GS1 keys."
+    },
+    {
+      "doi": "10.1016/j.spc.2025.01.014",
+      "title": "Enabling a dynamic information flow in digital product passports during product use phase: A literature review and proposed framework",
+      "year": 2025,
+      "venue": "Sustainable Production and Consumption",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org on 2026-10-19 (title, Sustainable Production and Consumption, 2025 match)",
+      "relevance": "Review of 25 DPP frameworks showing QR and RFID as dominant carriers; motivates carrier-level tests."
+    }
+  ],
+  "conformance_implications": [
+    {
+      "layer": "L01",
+      "test_objective": "Parse every Digital Link path the pinned URI Syntax release allows (all primary keys, optional qualifiers in order, custom path stem, query attributes) and reject the rest with a reason.",
+      "observable": "Carrier payload string",
+      "oracle": "GS1 Digital Link URI Syntax 1.7.0, ABNF in Section 4 (gtin-path, customURIstem, queryStringComp) and character sets in 4.2; cross-checked against gs1-syntax-engine vectors",
+      "existing_check": "identifier.parse",
+      "existing_capability": "identifier.parse",
+      "new_capability_needed": "identifier.parse extension (gap D4-06): full GS1 DL grammar",
+      "fixtures_needed": "Vendored gs1-syntax-engine dl.c vectors (already in tests/vectors); own valid/invalid URIs for GTIN-only, GTIN+10, GTIN+22+10+21, GTIN+235, custom stem, percent-encoded serial, 13-digit GTIN",
+      "reusable_suite": "gs1-syntax-engine test data, https://github.com/gs1/gs1-syntax-engine",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L01",
+      "test_objective": "Identifier granularity matches the declared passport level (model, batch, item).",
+      "observable": "Parsed AIs present in the carrier URI versus ICS-declared granularity",
+      "oracle": "Reg. (EU) 2024/1781, Art. 10(1) points (f)-(g) and the delegated act; GS1 mapping GTIN(+22)/GTIN+10/GTIN+21 (GS1 in Europe paper, informative)",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.granularity",
+      "fixtures_needed": "One carrier URI per level; ICS entries for each level",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L01",
+      "test_objective": "Two URIs that differ only in host, custom stem, GTIN padding or AI query attributes are judged the same identifier; URIs with different key values are not.",
+      "observable": "Carrier URI, resolved passport identifier field, registry identifier",
+      "oracle": "URI Syntax 1.7.0 Section 4.12 canonical form (14-digit GTIN, AI-only sorted query) as normalisation rule; GS1 claim that the domain is not part of the identifier (informative)",
+      "existing_check": "identifier.consistency",
+      "existing_capability": "identifier.consistency",
+      "new_capability_needed": "identifier.consistency equivalence rule on parsed AI key-value pairs (D4-06)",
+      "fixtures_needed": "Pairs of equivalent and non-equivalent URIs; passport documents with id in canonical and brand-host forms",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L01",
+      "test_objective": "Detect EPC-compressed URIs ('eh' hex, 'ex' base64url) and decompress them to the uncompressed Digital Link URI.",
+      "observable": "Carrier payload string",
+      "oracle": "GS1 DL Compression Technical Standard for EPC binary strings 1.0.0, Section 4.2; EPC TDS 2.3 decoding tables; URI Syntax 1.7.0 RE3",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.decompress_epc",
+      "fixtures_needed": "Own SGTIN-96 and SGTIN++ hex strings with expected URIs, generated from TDS 2.3 worked examples (Appendix E style) and cross-checked with OpenEPCIS translator",
+      "reusable_suite": "OpenEPCIS translator tests (Apache-2.0), not examined",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L02",
+      "test_objective": "QR image decodes to a syntactically valid GS1 Digital Link URI.",
+      "observable": "Decoded QR payload",
+      "oracle": "URI Syntax 1.7.0 ABNF; Reg. (EU) 2023/1542, Art. 77(3) for the QR carrier of batteries",
+      "existing_check": "carrier.qr_decode + identifier.parse",
+      "existing_capability": "carrier.qr",
+      "new_capability_needed": "none (after D4-06)",
+      "fixtures_needed": "QR images of DL URIs at each granularity, including long serials and custom stems",
+      "reusable_suite": "GS1 2D Barcodes in Retail test suite (https://ref.gs1.org/test-suites/2d-barcodes-in-retail/), content not read",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L02",
+      "test_objective": "Data Matrix image decodes to the same Digital Link URI as the QR on the same product.",
+      "observable": "Decoded payloads of two image samples",
+      "oracle": "GS1 in Europe single-value rule (same element value on all carriers of one product; informative); URI Syntax 1.7.0",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "carrier.datamatrix (zxing-cpp already decodes Data Matrix; registration needed)",
+      "fixtures_needed": "Paired QR and Data Matrix images, one pair with a seeded mismatch",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L02",
+      "test_objective": "RFID EPC memory dump translates to the Digital Link URI declared for the sample.",
+      "observable": "Hex EPC bank dump",
+      "oracle": "EPC TDS 2.3 coding tables (SGTIN-96, SGTIN+, SGTIN++)",
+      "existing_check": "none",
+      "existing_capability": "carrier.rfid (interface_only)",
+      "new_capability_needed": "identifier.epc_tds translator plus carrier.rfid dump reader (D4-10)",
+      "fixtures_needed": "TEST-ONLY EPC dumps with expected URIs",
+      "reusable_suite": "gs1/TDT rules (Apache-2.0)",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Resolver serves HTTPS and answers GET, HEAD and OPTIONS with CORS headers.",
+      "observable": "TLS handshake; status and Access-Control-Allow-Origin/-Methods on GET, HEAD and OPTIONS",
+      "oracle": "GS1-Conformant Resolver 1.2.1, Section 2.2, conformance statements 2-4; test-suite logic isHttps, tlsOK, corsCheck, methodsCheck",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour (D4-07) plus transport contract change to allow OPTIONS without a write scope and to expose CORS headers in records",
+      "fixtures_needed": "Loopback GS1-style resolver fixture with seeded faults: no CORS, no OPTIONS, HTTP only",
+      "reusable_suite": "GS1DL-resolver-testsuite (https://github.com/gs1/GS1DL-resolver-testsuite), port logic, not code",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Syntax-invalid URI gives 400; valid URI with unknown key gives 404; no error is reported with 200.",
+      "observable": "Status codes and bodies for crafted URIs",
+      "oracle": "Resolver 1.2.1 Section 2.4.1, conformance statements 7-9; test ids reportWith400, noErrorWith200",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour",
+      "fixtures_needed": "Crafted invalid URIs (bad check digit, wrong qualifier order) and unknown GTIN; fixture fault 'soft 404 with 200'",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Without linkType the resolver redirects to the target of the single gs1:defaultLink.",
+      "observable": "First hop status (3xx) and Location without following the redirect",
+      "oracle": "Resolver 1.2.1 Sections 2.5.8, 2.6.1, conformance statements 14-15; test id defaultTarget",
+      "existing_check": "identifier.resolve (follows redirects; hop not visible)",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "per-hop observation or no-follow request (D4-07 contract change)",
+      "fixtures_needed": "Linkset fixture with one default; fault 'redirect to non-default link'",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "?linkType=gs1:dpp redirects to the DPP link; a link type that is absent at every level gives 404, not the default.",
+      "observable": "First hop status and Location for linkType=gs1:dpp and for an absent type",
+      "oracle": "Resolver 1.2.1 Section 2.6.2, conformance statements 17-18; test ids loFor<type>, specificLinkTypeNotFound; UNTP IDR missing-link rule",
+      "existing_check": "identifier.resolve (can request a URL with the query; cannot see the hop)",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "identifier.resolver_behaviour",
+      "fixtures_needed": "Fixture with and without gs1:dpp; fault 'falls back to default on missing type'",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Linkset is returned with 200 and no redirect for linkType=linkset and for Accept: application/linkset+json, including Accept lists with spaces and q-values; Content-Type is application/linkset+json.",
+      "observable": "Status, Content-Type, body for each request variant",
+      "oracle": "Resolver 1.2.1 Sections 2.9-2.10, conformance statement 10; RFC 9264 media type; test ids ltLinksetNoRedirect, ltAcceptHeader, declaredContentType",
+      "existing_check": "identifier.resolve with accept and accepted_media_types parameters",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "identifier.resolver_behaviour (linkset recognised as linkset, not as passport)",
+      "fixtures_needed": "Accept variants: 'application/linkset+json', 'text/html, application/linkset+json', 'application/linkset+json;q=0.9'; fault replicating comma-split parsing",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Linkset response carries a Link header to a JSON-LD context served as application/ld+json, with a syntactically valid rel parameter.",
+      "observable": "Link header value; Content-Type of the context URL",
+      "oracle": "Resolver 1.2.1 Section 2.10, conformance statement 13; RFC 8288 Section 3 ABNF (parameter value is token or quoted-string); test id linksetJsonldCheck",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour with Link header parsing and redaction allowlist for Link (D4-07)",
+      "fixtures_needed": "Correct header; fault with unquoted URI rel and context target = namespace IRI (as in Resolver CE)",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Query string is passed on when redirecting; extra AI attributes and a target that already has a query are handled without corrupting the Location.",
+      "observable": "Location header for requests with query parameters",
+      "oracle": "Resolver 1.2.1 Section 2.12, conformance statement 19; test id qsPassedOn; RFC 3986 URI syntax for the Location value",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour",
+      "fixtures_needed": "Target URL with its own query; fault 'second ? appended'",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "A trailing slash does not change status or Location.",
+      "observable": "Responses for URI with and without trailing slash",
+      "oracle": "Resolver 1.2.1 Section 2.13, conformance statement 25 (SHOULD); test id trailingSlash",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour (should-level finding, not fail)",
+      "fixtures_needed": "Fault 'trailing slash gives 404'",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Item- or batch-level URI with an unknown qualifier value still resolves to links inherited from the GTIN level, without redirecting to a less granular URI.",
+      "observable": "Status and Location for /01/<known GTIN>/21/<unknown serial>; linkset anchors",
+      "oracle": "Resolver 1.2.1 Sections 2.1, 2.5.9, 2.5.10, conformance statements 1, 16, 23; test id basicWalkUp",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour",
+      "fixtures_needed": "GTIN-level linkset only; fault 'redirect to /01/<GTIN>' and fault '404 for unknown serial'",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "EPC-compressed request URIs are decompressed; linkset anchor and onward redirects use the uncompressed URI.",
+      "observable": "Response to /eh<hex> and /ex<base64> paths; anchor value",
+      "oracle": "Resolver 1.2.1 Section 2.3, conformance statements 5-6, 10; Compression standard 1.0.0 Section 4.2",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour plus identifier.decompress_epc",
+      "fixtures_needed": "Compressed URIs with known uncompressed equivalents",
+      "reusable_suite": "none (the GS1 test suite does not test compression)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Ambiguous equal candidates give 300 Multiple Choices with a linkset; Accept-Language selects among gs1:defaultLinkMulti links.",
+      "observable": "Status and body with/without Accept-Language",
+      "oracle": "Resolver 1.2.1 Section 2.6.3 steps 1-5, conformance statement 20 (SHOULD); test id singleMultiLink",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour",
+      "fixtures_needed": "Linkset with two language variants and with two indistinguishable links",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "Linkset validates against the pinned GS1 linkset schema; each anchor has exactly one gs1:defaultLink with only a title; every link has href and title; media types are IANA-registered; link types claiming the GS1 namespace exist in the pinned vocabulary.",
+      "observable": "Linkset JSON body",
+      "oracle": "Resolver 1.2.1 Sections 2.5, 2.10, conformance statements 10-12, 14, 24; pinned linkset schema; pinned Web Vocabulary link-type list; test ids validLinkset, defaultLinkExists, singleDefaulLink, linkTypesDefined",
+      "existing_check": "data.jsonschema (can validate a document against a pinned schema, but its target is the item passport, not the linkset)",
+      "existing_capability": "data.jsonschema",
+      "new_capability_needed": "resolver.linkset (validate the linkset target with pinned schema and vocabulary; report schema-regex rejections of valid BCP 47 or hyphenated URIs as a distinct finding)",
+      "fixtures_needed": "Valid linkset; faults: two defaults, missing title, unknown gs1: term, hreflang 'zh-Hant' (valid BCP 47, rejected by schema); start from gs1/linkset valid-gs1-example.json and invalid-gs1-example.json (Apache-2.0)",
+      "reusable_suite": "GS1DL-resolver-testsuite test validLinkset (https://github.com/gs1/GS1DL-resolver-testsuite); schema and example fixtures from https://github.com/gs1/linkset (same patterns as the normative schema)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "A DPP link is present for the passport anchor, recognised in all equivalent forms (gs1:dpp as https://ref.gs1.org/voc/dpp, http(s)://gs1.org/voc/dpp, and IANA 'dpp'), and its declared type matches the served Content-Type.",
+      "observable": "Linkset relation keys; HEAD/GET of the DPP href",
+      "oracle": "GS1 Web Vocabulary current link-type list (gs1:dpp, stable); IANA link relations registry entry 'dpp'; UNTP IDR equivalence rule (SHOULD); law requires a DPP reachable through the carrier (Reg. (EU) 2024/1781, Art. 10(1) points (a)-(b)) but no link type",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "resolver.linkset with a profile-configurable relation equivalence table",
+      "fixtures_needed": "Linksets using each form; fault using gs1:productPassport (Resolver CE configuration term) and fault with type mismatch",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "The final resolved document is classified as linkset, HTML landing page or passport before passport checks run.",
+      "observable": "Final Content-Type and top-level JSON shape ({\"linkset\": [...]})",
+      "oracle": "RFC 9264 media type and structure; architecture section 8 meaning of IDENTIFIER.RESOLVED (final JSON object = passport); GS1-Conformant Resolver 1.2.1 (linkset is a list of links, not product data)",
+      "existing_check": "identifier.resolve (at b290791, src/dppce/adapters/identifier.py: without accepted_media_types any 200 body that parses as a JSON object gives IDENTIFIER.RESOLVED with the message that it resolves to a passport document; with an accepted_media_types list that includes application/linkset+json, such an answer ends on the same JSON-object path because the +json suffix is treated as JSON; a list without it gives IDENTIFIER.RESPONSE.MEDIA_TYPE)",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "identifier.resolve guard: a linkset body is not a passport (new reason code, owner decision)",
+      "fixtures_needed": "Resolver returning a linkset JSON object with 200 at the carrier URL",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "Resolver description file exists at /.well-known/gs1resolver, validates against the pinned schema, and resolverRoot matches the carrier host.",
+      "observable": "GET /.well-known/gs1resolver body",
+      "oracle": "Resolver 1.2.1 Section 3, conformance statements 21-22; pinned description-file schema; test id rdFile",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour (description file assertion)",
+      "fixtures_needed": "Valid file; faults: missing resolverRoot, linkTypeDefaultCanBeAll instead of linkTypeDefaultCanBeLinkset, wrong root",
+      "reusable_suite": "GS1DL-resolver-testsuite",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L06",
+      "test_objective": "Carrier URI keeps resolving to the same passport identity over scheduled observations.",
+      "observable": "Status, Location and passport id at each observation",
+      "oracle": "Reg. (EU) 2024/1781, Art. 10(1) points (a)-(b) persistent identifier; Art. 10(4) back-up copy (no GS1 oracle exists)",
+      "existing_check": "persistence.versions",
+      "existing_capability": "persistence.versions (experimental); persistence.scheduled (interface_only)",
+      "new_capability_needed": "persistence.scheduled",
+      "fixtures_needed": "Recordings over time from a loopback resolver whose target changes or disappears",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L07",
+      "test_objective": "Anonymous linkset does not expose URLs or attributes of restricted resources beyond what the declared policy allows; restricted targets refuse anonymous access.",
+      "observable": "Anonymous linkset content; anonymous GET of restricted hrefs",
+      "oracle": "Declared access policy under Reg. (EU) 2024/1781, Art. 10(1) points (f)-(g) and Reg. (EU) 2023/1542, Art. 77(2) per sibling record; no GS1 oracle ('public' attribute has no normative rule found)",
+      "existing_check": "access.restricted_fields",
+      "existing_capability": "access.policy",
+      "new_capability_needed": "access.policy channel 'linkset'",
+      "fixtures_needed": "Linkset with canary URLs for restricted targets",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L08",
+      "test_objective": "If the linkset offers gs1:jws, the signature verifies over the passport reached through gs1:dpp.",
+      "observable": "JWS target and passport payload",
+      "oracle": "RFC 7515 and the integrity.jws profile; gs1:jws term definition (link only, no binding rule)",
+      "existing_check": "integrity.jws",
+      "existing_capability": "integrity.jws",
+      "new_capability_needed": "integrity.jws target selection from linkset",
+      "fixtures_needed": "Linkset with gs1:jws link to a detached or compact JWS",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L09",
+      "test_objective": "Registry record identifier equals the parsed GS1 keys of the carrier, not the carrier URL string.",
+      "observable": "Mock registry record and parsed carrier keys",
+      "oracle": "Reg. (EU) 2024/1781, Art. 13(1) and 13(5) per sibling record; equivalence rule of the L01 implication",
+      "existing_check": "registry.consistency",
+      "existing_capability": "registry.mock",
+      "new_capability_needed": "registry.consistency comparison on parsed keys",
+      "fixtures_needed": "Registry records with canonical keys and carrier URIs on brand hosts",
+      "reusable_suite": "CIRPASS-2 mock-eu-registry (Apache-2.0) as optional SUT, not as oracle",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L10",
+      "test_objective": "After an announced update, the same carrier URI resolves to the new passport version and the old version stays reachable where the update rule says so.",
+      "observable": "Redirect target and passport version before and after",
+      "oracle": "Declared update rule (persistence.versions); no GS1 versioning rule exists",
+      "existing_check": "persistence.versions",
+      "existing_capability": "persistence.versions",
+      "new_capability_needed": "none beyond binding the resolved URL to the version target (D4-05)",
+      "fixtures_needed": "Two-version loopback fixture behind one resolver",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L11",
+      "test_objective": "Delegation by pattern (gs1:handledBy) reaches a resolver whose description file covers the identifier's primary key.",
+      "observable": "Location and optional Link rel gs1:handledBy on the first hop; description file of the delegate",
+      "oracle": "Resolver 1.2.1 Section 2.8 and Section 3",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour with multi-resolver loopback fixture",
+      "fixtures_needed": "Two loopback resolvers (global and brand) with a GCP pattern",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Run the same resolver assertions against a live resolver of the SUT, under authorization.",
+      "observable": "As above, against the SUT host",
+      "oracle": "As above",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "identifier.resolver_behaviour (live mode) under the authorization and transport policy",
+      "fixtures_needed": "Signed authorization naming the resolver origin; test identifiers supplied by the SUT owner",
+      "reusable_suite": "GS1 hosted test suite (https://ref.gs1.org/test-suites/resolver/) as a cross-check run by the owner",
+      "network_needed": "live-sut"
+    },
+    {
+      "layer": "L02",
+      "test_objective": "A retail 2D sample that carries a Digital Link URI also yields the same GTIN as the linear EAN/UPC beside it, and the URI host is not a placeholder domain.",
+      "observable": "Decoded payloads of the 2D and linear symbols in one image sample",
+      "oracle": "GS1 2D Barcodes at Retail POS Implementation Guideline 1.1.0 (transition: linear plus 2D carry the same GTIN; brand-owned domain); GS1 Digital Link URI Syntax 1.7.0 for parsing",
+      "existing_check": "carrier.qr_decode + identifier.parse (QR only; no linear or Data Matrix decode registered)",
+      "existing_capability": "carrier.qr_decode",
+      "new_capability_needed": "carrier.linear_decode and carrier.datamatrix, plus a cross-carrier key comparison in identifier.consistency",
+      "fixtures_needed": "Synthetic image with EAN-13 and QR (same GTIN); fault with different GTINs; fault with example.com host",
+      "reusable_suite": "GS1 2D Barcodes in Retail test suite (metadata only, not examined)",
+      "network_needed": "sample-artifact"
+    }
+  ],
+  "failure_modes": [
+    {
+      "layer": "L03",
+      "fault": "Accept header split on commas without trimming spaces or removing q-values, so 'text/html, application/linkset+json' gets a redirect instead of the linkset (seen in Resolver CE web_namespace.py).",
+      "detectable_by": "Send Accept variants with spaces and q-values; expect 200 linkset each time."
+    },
+    {
+      "layer": "L03",
+      "fault": "Query string appended to a target that already has one, producing a Location with two '?' characters (Resolver CE appends '?'+query unconditionally).",
+      "detectable_by": "Configure a target with a query; request with a query; parse Location per RFC 3986 and compare parameters."
+    },
+    {
+      "layer": "L03",
+      "fault": "Link header pointing to the linkset uses rel=\"application/linkset\" (a media type) instead of the registered relation 'linkset' (Resolver CE).",
+      "detectable_by": "Parse Link header; check relation tokens against the IANA registry."
+    },
+    {
+      "layer": "L03",
+      "fault": "JSON-LD context Link header targets the namespace IRI http://www.w3.org/ns/json-ld#context instead of a context file, declares type text/html, and leaves a URI rel unquoted (Resolver CE).",
+      "detectable_by": "Strict RFC 8288 parse of the Link header; fetch the target and check Content-Type application/ld+json."
+    },
+    {
+      "layer": "L03",
+      "fault": "Soft error: unknown GTIN or invalid URI answered with 200 and an error page.",
+      "detectable_by": "Crafted invalid and unknown URIs; expect 400 and 404."
+    },
+    {
+      "layer": "L03",
+      "fault": "Requested link type missing, resolver falls back to the default link instead of 404.",
+      "detectable_by": "Request ?linkType=gs1:dpp on an entity without a DPP link; expect 404."
+    },
+    {
+      "layer": "L03",
+      "fault": "Permanent redirect (301/308) for the default link, so caches keep an outdated target after the link is re-pointed.",
+      "detectable_by": "Record redirect status per hop; flag permanent codes as a risk finding (GS1 sets no code, so not a fail)."
+    },
+    {
+      "layer": "L03",
+      "fault": "Walk-up implemented as a redirect from /01/<GTIN>/21/<serial> to /01/<GTIN>, losing the serial for the target.",
+      "detectable_by": "Observe first hop for an unknown serial; Location must not be a less granular Digital Link URI."
+    },
+    {
+      "layer": "L03",
+      "fault": "Missing CORS headers on error responses or on OPTIONS preflight, breaking browser clients.",
+      "detectable_by": "OPTIONS and GET on valid, invalid and unknown URIs; check Access-Control headers."
+    },
+    {
+      "layer": "L03",
+      "fault": "Only legacy linkType=all supported; linkType=linkset and Accept-based linkset requests redirect.",
+      "detectable_by": "Compare responses for linkType=all, linkType=linkset and Accept: application/linkset+json."
+    },
+    {
+      "layer": "L03",
+      "fault": "Compressed 'eh'/'ex' URI not decompressed (400 or 404), or linkset anchor left in compressed form.",
+      "detectable_by": "Request compressed equivalents of known URIs; compare with uncompressed responses and anchors."
+    },
+    {
+      "layer": "L03",
+      "fault": "Trailing slash treated as a different resource (404).",
+      "detectable_by": "Compare responses with and without a trailing slash."
+    },
+    {
+      "layer": "L05",
+      "fault": "Linkset relation keys use http://gs1.org/voc/dpp while a client looks for https://ref.gs1.org/voc/dpp (or the reverse), so the DPP link is missed.",
+      "detectable_by": "Engine normalises relation keys via a pinned equivalence table and reports the form used."
+    },
+    {
+      "layer": "L05",
+      "fault": "Non-vocabulary GS1-prefixed link types (gs1:productPassport, gs1:repairInfo) used instead of gs1:dpp.",
+      "detectable_by": "Check every gs1:-namespace relation against the pinned Web Vocabulary link-type list."
+    },
+    {
+      "layer": "L05",
+      "fault": "Two gs1:defaultLink entries for one anchor, or a default carrying hreflang/context attributes.",
+      "detectable_by": "Count defaults per anchor; check attributes."
+    },
+    {
+      "layer": "L05",
+      "fault": "Valid BCP 47 hreflang such as 'zh-Hant' or 'es-419', or a hyphenated relation URI, rejected by the GS1 schema regex, so a correct resolver fails schema validation.",
+      "detectable_by": "Report schema-pattern failures on these fields as a separate finding, not as a resolver fault."
+    },
+    {
+      "layer": "L05",
+      "fault": "Resolver returns a linkset JSON object at the carrier URL and the engine treats it as the passport (false pass of identifier.resolve; identifier.consistency then compares against a missing id).",
+      "detectable_by": "Classify the final body: top-level 'linkset' array means linkset."
+    },
+    {
+      "layer": "L05",
+      "fault": "Description file uses linkTypeDefaultCanBeAll or omits resolverRoot; resolverRoot does not match the serving host.",
+      "detectable_by": "Validate /.well-known/gs1resolver against the pinned schema; compare resolverRoot with the request origin."
+    },
+    {
+      "layer": "L05",
+      "fault": "DPP link declares type application/ld+json but serves text/html (or no type).",
+      "detectable_by": "HEAD/GET the href and compare Content-Type with the declared type."
+    },
+    {
+      "layer": "L01",
+      "fault": "GTIN-13 in the path accepted silently and padded, or rejected, inconsistently across carrier, resolver and passport id.",
+      "detectable_by": "Parse all three; apply the canonical-form rule; report the inconsistency."
+    },
+    {
+      "layer": "L01",
+      "fault": "Qualifiers in the wrong order (/01/x/21/y/10/z) or serial with characters outside the 82-character set without percent-encoding.",
+      "detectable_by": "identifier.parse against the pinned ABNF."
+    },
+    {
+      "layer": "L06",
+      "fault": "Brand domain in the carrier lapses; no alternative resolution path exists.",
+      "detectable_by": "Scheduled observation reports transport failure; check whether the ICS declares a backup or alternative resolver."
+    },
+    {
+      "layer": "L02",
+      "fault": "QR and Data Matrix (or RFID) on the same product carry different key values.",
+      "detectable_by": "Decode all carrier samples and compare parsed keys."
+    },
+    {
+      "layer": "L07",
+      "fault": "Anonymous linkset lists URLs of restricted documents (for example links marked public=false).",
+      "detectable_by": "Canary URLs in restricted links; scan the anonymous linkset and HTML landing page."
+    },
+    {
+      "layer": "L05",
+      "fault": "Resolver answers the carrier URL with 200 and an application/linkset+json body, and the engine reports the identifier as resolved to a passport.",
+      "detectable_by": "Check the final media type and the top-level shape ({\"linkset\": [...]}) before treating the body as a passport; today identifier.resolve does not do this on its default path or when accepted_media_types lists application/linkset+json (src/dppce/adapters/identifier.py at b290791)."
+    },
+    {
+      "layer": "L02",
+      "fault": "2D code on retail packaging uses a placeholder or agency example domain instead of a brand-owned or resolver domain, so scans reach no product content.",
+      "detectable_by": "Parse the decoded URI host from an image sample and compare it with the declared resolver root or a denylist of example domains."
+    }
+  ],
+  "sources": [
+    {
+      "id": "gs1-digital-link-uri-syntax-1-7-0",
+      "title": "GS1 Digital Link Standard: URI Syntax",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+      "edition_or_version": "Release 1.7.0 (Ratified Aug 2026; log of changes Jul 2026, WR 26-180, WR 26-260)",
+      "publication_date": "2026-08 (month only on page; prior record archive date 2026-08-07)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright GS1 AISBL; implement under the GS1 IP Policy; cite, do not republish (prior record).",
+      "what_it_shows": "Full HTML read in two passes through WebFetch: primary keys and qualifiers, qualifier order, character sets, canonical form 4.12, reserved query keys linkType/context, extension parameters, RE1-RE3, change log back to 1.0. Prior record (2026-10-13) was metadata_only; version and status unchanged."
+    },
+    {
+      "id": "gs1-conformant-resolver-1-2-1",
+      "title": "GS1-Conformant Resolver Standard",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/resolver/",
+      "edition_or_version": "Release 1.2.1 (page header 'Ratfied Aug 2026'; WR 26-270, WR 26-274)",
+      "publication_date": "2026-08 (month only on page; prior record archive date 2026-08-19)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright GS1 AISBL; implement under the GS1 IP Policy (prior record).",
+      "what_it_shows": "Full HTML read (0-107148 characters, three passes): sections 2.1-2.14, Section 3 description file, Section 4, Section 5 conformance statements 1-25, references, log of changes 1.1.0-1.2.1. Prior record was metadata_only; version unchanged."
+    },
+    {
+      "id": "new-gs1-resolver-linkset-schema",
+      "title": "JSON schema for linksets as defined in RFC 9264",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/resolver/linkset-schema",
+      "edition_or_version": "unversioned; draft-07; uses '@id' not '$id'",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated on the file; GS1 standards terms assumed to apply",
+      "what_it_shows": "Raw schema read: required linkset/anchor, relation-key regex, target properties href, title, hreflang, type, context, fwqs, public."
+    },
+    {
+      "id": "new-gs1-resolver-linkset-context",
+      "title": "GS1 resolver linkset JSON-LD context",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/resolver/linkset-context",
+      "edition_or_version": "unversioned (versioned example path /1.2.0/linkset-context named in the standard)",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Context maps gs1 to http://gs1.org/voc/, linkset to @nest, anchor/href to @id, hreflang to dcterms:language; @protected true."
+    },
+    {
+      "id": "new-gs1-resolver-description-file-schema",
+      "title": "JSON schema for a conformant GS1 resolver description file",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/resolver/description-file-schema",
+      "edition_or_version": "$id https://ref.gs1.org/standards/resolver/1.2.0/description-file-schema",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Raw schema read: required resolverRoot and supportedPrimaryKeys (enum incl. 410-413), optional fields, linkTypeDefaultCanBeLinkset default false."
+    },
+    {
+      "id": "new-gs1-webvoc-linktypes",
+      "title": "GS1 Web Vocabulary link types in JSON",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/voc/data/linktypes",
+      "edition_or_version": "unversioned (current release per archive: 1.18.0)",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 Web Vocabulary is Apache-2.0 per the WebVoc repository README; IP Policy statement in the ontology",
+      "what_it_shows": "60 link types; 'dpp' present with title 'Digital Product Passport', status stable, no restricted field; 'epcisRepository' key name differs from the gs1:epcis term in v1.16."
+    },
+    {
+      "id": "new-gs1-webvoc-archive",
+      "title": "GS1 Web Vocabulary data archive",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/voc/data/archive",
+      "edition_or_version": "lists 1.11.0 to 1.18.0; current 1.18.0 (2026-06-01)",
+      "publication_date": "2026-06-01 (1.18.0)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "as above",
+      "what_it_shows": "Release dates 1.11.0 (2024-05-28) to 1.18.0; JSON-LD URLs per version. The 1.18.0 jsonld header was read (gs1 prefix https://ref.gs1.org/voc/, versionInfo 1.18, dct:modified 2026-06-01); the rest of that 1.9 MB file was not read. The landing page https://ref.gs1.org/voc/ rendered only unfilled templates."
+    },
+    {
+      "id": "new-gs1-webvoc-github",
+      "title": "GS1 Web vocabulary development site (gs1/WebVoc), v1.16 gs1Voc.jsonld",
+      "issuing_body": "GS1 AISBL (GitHub)",
+      "url": "https://github.com/gs1/WebVoc",
+      "edition_or_version": "v1.16 folder (uploaded 2025-09-21, commit 36fd1935); repository head f8f407bf 2026-01-29",
+      "publication_date": "2025-07-31 (1.16.0 per archive)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Downloaded jsonld (sha256 5b417c158cca7e55766dc5e35a1fa480273f036720b6c7382d61ea6939a7ee66) parsed: 60 subproperties of gs1:linkType with status; gs1:dpp node lacks owl:equivalentProperty; v1.10 and v1.11 files contain no gs1:dpp."
+    },
+    {
+      "id": "new-gs1-resolver-test-suite-page",
+      "title": "GS1 Digital Link Test Suite (resolver)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/test-suites/resolver/",
+      "edition_or_version": "targets resolver standard 1.2.1; code last updated 2026-08-07",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "page copyright GS1 2025; code Apache-2.0",
+      "what_it_shows": "Input field for a Digital Link URI; states that compression is not tested and that the link-to-linkset test was removed after 1.2.0."
+    },
+    {
+      "id": "new-gs1dl-resolver-testsuite",
+      "title": "GS1DL-resolver-testsuite",
+      "issuing_body": "GS1 AISBL (GitHub)",
+      "url": "https://github.com/gs1/GS1DL-resolver-testsuite",
+      "edition_or_version": "commit 32597c108ac1ecb9e90ce0081bb3a16e5a61e616 (2026-08-07)",
+      "publication_date": "2026-08-07 (last commit)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "README, GS1DigitalLinkResolverTestSuite.js, tester.php and Conformance1_2.txt read: test ids, HEAD/OPTIONS via curl without following redirects, schema URLs used."
+    },
+    {
+      "id": "new-gs1-resolver-ce",
+      "title": "GS1 DigitalLink Resolver Community Edition",
+      "issuing_body": "GS1 Resolver Community (GitHub org gs1)",
+      "url": "https://github.com/gs1/GS1_DigitalLink_Resolver_CE",
+      "edition_or_version": "3.0.0 with March 2026 updates; master bf885fdf (2026-03-29); pushed 2026-10-13",
+      "publication_date": "2026-03-29 (last master commit)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "README and web_server/src web_namespace.py, web_logic.py (excerpts) and public/gs1resolver.json read: 307 redirects, Accept handling, Link headers, description-file content. README credentials not repeated here."
+    },
+    {
+      "id": "new-gs1-syntax-engine",
+      "title": "GS1 Barcode Syntax Engine",
+      "issuing_body": "GS1 AISBL (GitHub)",
+      "url": "https://github.com/gs1/gs1-syntax-engine",
+      "edition_or_version": "release 1.4.1 (2026-05-28)",
+      "publication_date": "2026-05-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "README: components, bindings, role as reference implementation of the Barcode Syntax Resource; repository metadata."
+    },
+    {
+      "id": "new-gs1-github-org",
+      "title": "GS1 GitHub organisation repository listing",
+      "issuing_body": "GS1 AISBL (GitHub)",
+      "url": "https://github.com/gs1",
+      "edition_or_version": "API listing sorted by push date",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "per repository (mostly Apache-2.0)",
+      "what_it_shows": "Licence, pushed_at, archived flag and description for GS1DigitalLinkToolkit.js, interpretGS1scan, linkset, GS1DigitalLinkCompressionPrototype, TDT, 2d-barcode-generator, digital-link.js and others."
+    },
+    {
+      "id": "new-openepcis-dl-translator",
+      "title": "OpenEPCIS GS1 Digital Link Toolkit (openepcis-epc-digitallink-translator)",
+      "issuing_body": "OpenEPCIS (benelog GmbH & Co. KG per org; not verified)",
+      "url": "https://github.com/openepcis/openepcis-epc-digitallink-translator",
+      "edition_or_version": "pushed 2026-09-13; release tag not read",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "README: supported identifier types and Digital Link AI paths, EPC URN to Digital Link translation, hosted converter UI (not used)."
+    },
+    {
+      "id": "new-gs1-epc-tds-2-3",
+      "title": "EPC Tag Data Standard (TDS)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/tds/",
+      "edition_or_version": "Release 2.3, Ratified, Oct 2025",
+      "publication_date": "2025-10",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright 2025 GS1 AISBL",
+      "what_it_shows": "PDF text extracted (sha256 13be3e3f854475ec8782a436d89aef8847e4218f3018f0ddc705fce88275156d); read document summary, 2.3 change log, Section 1 introduction on Digital Link as EPC alternative and the new '++' schemes. Coding tables not read."
+    },
+    {
+      "id": "new-gs1-dl-compression-epc-1-0-0",
+      "title": "GS1 Digital Link URI: Compression Technical Standard for EPC binary strings",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/digital-link/compression",
+      "edition_or_version": "Release 1.0.0, Ratified, Jul 2025",
+      "publication_date": "2025-07",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright GS1 AISBL",
+      "what_it_shows": "PDF text extracted (sha256 a40154f5edf52701a4818a8c8d27fd07ba9e92d651d1138a6179dd162a1b6da3); Sections 4.1-4.2: headers 7A/7B, prefixes 'eh'/'ex', decompression steps."
+    },
+    {
+      "id": "new-gs1-in-europe-enabling-dpp-v2-2",
+      "title": "GS1 Standards enabling the EU digital product passport",
+      "issuing_body": "GS1 in Europe",
+      "url": "https://gs1.eu/wp-content/uploads/2025/04/GS1-Standards-Enabling-DPP-V2.2.pdf",
+      "edition_or_version": "Release 2.2, January 2025 (37 pages)",
+      "publication_date": "2025-01",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright 2024-2025 GS1 in Europe; no open licence seen",
+      "what_it_shows": "PDF text extracted (sha256 d401ab43c8c8e5e606d0ab50f29aaaa7b87b71817e651b861ff6f9285ec5fc7d). Used only for GS1's own positions: granularity mapping, carrier assessment, linkset discovery, backup and registry proposals, repair options. Passages explaining ISO/IEC 15459, 15418 and 18975 were not used (rule 5); its quotations of law were not relied on."
+    },
+    {
+      "id": "new-gs1-impl-considerations-upi",
+      "title": "Implementation Considerations for Unique DPP Product Identifiers",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://gs1.eu/wp-content/uploads/2025/07/Implementation-Considerations-for-Unique-DPP-Product-Identifiers_GS1.pdf",
+      "edition_or_version": "Release 1.0, April 2025 (21 pages)",
+      "publication_date": "2025-04",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright 2025 GS1 AISBL",
+      "what_it_shows": "PDF text extracted (sha256 05aa5474b13bbb8c24ab195e2861215d7f6d58c87543c8391a7934c4883ef50c). Read: introduction, Method 1 (GS1 Digital Link) table, Annex A. Methods 2, 3 and 5 concern IEC 61406 and were not read beyond their titles; Methods 4 (DOI) and 6 (DID) not read."
+    },
+    {
+      "id": "new-gs1-eu-news-harmonised-standards",
+      "title": "Six DPP Standards Now Published as Harmonised Standards in the Official Journal of the EU",
+      "issuing_body": "GS1 in Europe",
+      "url": "https://gs1.eu/news/six-gs1-standards-now-published-as-harmonised-standards-in-the-official-journal-of-the-eu/",
+      "edition_or_version": "news item, no date on page",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "GS1 in Europe links Decision (EU) 2026/1736 and calls the six standards the DPP foundation; it does not mention Digital Link or resolvers; the URL slug says 'six-gs1-standards' while the title says 'Six DPP Standards'."
+    },
+    {
+      "id": "new-untp-identity-resolver",
+      "title": "Identity Resolver | UN Transparency Protocol",
+      "issuing_body": "UNECE / UN/CEFACT",
+      "url": "https://untp.unece.org/docs/specification/IdentityResolver",
+      "edition_or_version": "Work in Progress (after 0.7.0)",
+      "publication_date": "not stated (footer 2026)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC BY 4.0 (page footer)",
+      "what_it_shows": "IDR behaviours, link-type table (dpp, dcc, dfr, dte, dia, dcr), GS1 compatibility notes, verifier flow. Its references to ISO/IEC 18975 were not followed or summarized."
+    },
+    {
+      "id": "new-iana-link-relations",
+      "title": "Link Relations registry",
+      "issuing_body": "IANA",
+      "url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml",
+      "edition_or_version": "last updated 2026-06-12",
+      "publication_date": "2026-06-12",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "IANA registry, public",
+      "what_it_shows": "Entry 'dpp' (link from a product context URI to its digital product passport; reference UNTP IDR); entries 'linkset' (RFC 9264) and 'describedby'."
+    },
+    {
+      "id": "new-rfc-9264",
+      "title": "Linkset: Media Types and a Link Relation Type for Link Sets",
+      "issuing_body": "IETF (RFC Editor)",
+      "url": "https://www.rfc-editor.org/rfc/rfc9264.html",
+      "edition_or_version": "RFC 9264, July 2022, Standards Track",
+      "publication_date": "2022-07",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "IETF Trust legal provisions",
+      "what_it_shows": "application/linkset and application/linkset+json, JSON structure, 'linkset' relation, profile parameter, guidance on explicit anchors."
+    },
+    {
+      "id": "new-rfc-8288",
+      "title": "Web Linking",
+      "issuing_body": "IETF (RFC Editor)",
+      "url": "https://www.rfc-editor.org/rfc/rfc8288.html",
+      "edition_or_version": "RFC 8288",
+      "publication_date": "2017-10 (not re-checked on page)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "IETF Trust legal provisions",
+      "what_it_shows": "Section 3 Link header ABNF (link-param value token or quoted-string), rel required, first rel wins, extension relation types are absolute URIs and must be quoted when they contain delimiters."
+    },
+    {
+      "id": "bp-technical-guidance",
+      "title": "Battery Passport Technical Guidance (Battery Pass consortium)",
+      "issuing_body": "Battery Pass consortium (copyright Systemiq on behalf of the consortium), via acatech",
+      "url": "https://www.acatech.de/publikation/battery-passport-technical-guidance/download-pdf/?lang=en",
+      "edition_or_version": "Version 1.0 / March 2024",
+      "publication_date": "2024-03",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "In-file statement: CC BY-NC 4.0 (copyright 2023 Systemiq for the Battery Pass Consortium). The prior record (2026-10-13) saw no licence because the PDF was not opened.",
+      "what_it_shows": "PDF text extracted (sha256 30ef60da083e62b879f453bf2cf5688dd6fb8ca0a7cee476a15dc1ccfad45bfb); read the data-carrier section and system architecture (routing/resolver services). Version 1.0 confirmed in the file. Its passages on ISO/IEC 18004 and IEC 61406 were not used."
+    },
+    {
+      "id": "cirpass2-github-repositories",
+      "title": "CIRPASS-2 GitHub repositories",
+      "issuing_body": "CIRPASS-2 Consortium",
+      "url": "https://github.com/CIRPASS-2",
+      "edition_or_version": "code search and org repository listing on 2026-10-19",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0 on the four most recently pushed repositories; ontologie-textiles declares no licence (gh api, 2026-10-19)",
+      "what_it_shows": "GitHub code search: 0 hits for 'digital link' and 'linkset'; 3 'resolver' hits unrelated to GS1 resolution. gh api orgs/CIRPASS-2/repos sorted by push: ontologies-docs 2026-10-15, ontologies-tyre 2026-10-13, ontologies-battery 2026-10-06, documentation-battery 2026-10-06, ontologie-textiles 2026-09-28."
+    },
+    {
+      "id": "espr-reg-2024-1781",
+      "title": "Regulation (EU) 2024/1781 (Ecodesign for Sustainable Products Regulation)",
+      "issuing_body": "European Parliament and Council",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng",
+      "edition_or_version": "as recorded in sibling file docs/research/raw/espr.json",
+      "publication_date": "2024-06-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text, reuse permitted under Commission Decision 2011/833/EU",
+      "what_it_shows": "Not re-read in this session: three EUR-Lex fetches (/eng, TXT/HTML, TXT) returned empty pages. Article content cited from the sibling record espr.json (retrieved 2026-10-13, substantive there). Continuation on 2026-10-19: one more fetch of the /eng address also returned an empty page; status unchanged. Catalogue alias id: reg-eu-2024-1781 (catalogue/sources.yaml)."
+    },
+    {
+      "id": "reg-eu-2023-1542",
+      "title": "Regulation (EU) 2023/1542 concerning batteries and waste batteries",
+      "issuing_body": "European Parliament and Council",
+      "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj/eng",
+      "edition_or_version": "as recorded in sibling files batteries-regulation.json and commission-2026-acts.json",
+      "publication_date": "2023-07-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text, reuse permitted under Commission Decision 2011/833/EU",
+      "what_it_shows": "Not re-read in this session (EUR-Lex returned an empty page). Art. 77(3) and 77(10) content taken from sibling records."
+    },
+    {
+      "id": "cid-2026-1736-dpp-harmonised-standards",
+      "title": "Commission Implementing Decision (EU) 2026/1736 on harmonised standards for digital product passports",
+      "issuing_body": "European Commission",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601736",
+      "edition_or_version": "as recorded in sibling file en-jtc24.json",
+      "publication_date": "2026-07-15 (OJ L, 2026/1736; adopted 2026-07-14), per sibling records espr.json and en-jtc24.json",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text",
+      "what_it_shows": "Link seen on the GS1 in Europe news page; decision not opened in this session. The six standards it lists are protected; no content used. Alias ids for the same act in sibling records: impl-dec-eu-2026-1736 (catalogue/sources.yaml), dpp-harmonised-standards-decision-2026-1736 (espr.json), impl-dec-eu-2026-1736-dpp-standards (batteries-regulation.json)."
+    },
+    {
+      "id": "new-gs1-linkset-repo",
+      "title": "gs1/linkset",
+      "issuing_body": "GS1 AISBL (GitHub)",
+      "url": "https://github.com/gs1/linkset",
+      "edition_or_version": "master commit bedc11ec (2025-06-16); gs1-linkset-schema.json blob 1ef1a5bd9cc7ffa567f29f4e0193b6a54bfeb134",
+      "publication_date": "2025-06-16 (last commit)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Raw gs1-linkset-schema.json and linkset-schema.json read through gh api. GitHub Pages for the repository is built from master at the root (https://gs1.github.io/linkset/), so the schema URL the resolver test suite uses serves this file (Pages copy itself not fetched). The GS1 schema has the same @id (https://ref.gs1.org/standards/resolver/linkset-schema), the same anchor, href, hreflang, type and relation-key patterns and the same required arrays as the ref.gs1.org schema read by a WebFetch pass today. The basic linkset-schema.json is looser: anchor and href use format uri, relation keys allow only [a-z]+ tokens (no hyphen) or URIs, and only href is required."
+    },
+    {
+      "id": "new-gs1-2d-retail-pos-guideline",
+      "title": "2D Barcodes at Retail Point-of-Sale Implementation Guideline",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/guidelines/2d-in-retail/",
+      "edition_or_version": "Release 1.1.0, Ratified, December 2025",
+      "publication_date": "2025-12 (PDF file name gives 2025-12-15)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "(c) 2025 GS1 AISBL with a linked disclaimer; no open licence stated",
+      "what_it_shows": "Characters 0-200000 of 393666 read through WebFetch. Compares three POS-capable 2D options: GS1 DataMatrix with element string, QR Code with GS1 Digital Link URI (readable by the default phone camera), and Data Matrix with Digital Link URI (needs an app). Says some scanners can turn a scanned Digital Link URI into element string data for the POS host; sets an Ambition 2027 transition target; gives placement and quiet-zone guidance; recommends a brand-owned domain and notes that shorter URIs give smaller symbols. No mention of DPP, compressed URIs, a URI length limit or a QR error-correction level was found in the part read. Its print-quality reference to an ISO/IEC verification standard was not followed (rule 5)."
+    }
+  ],
+  "open_questions": [
+    "Which redirect status code should the engine expect? The GS1 resolver standard names none; Resolver CE uses 307. Proposal: accept any 3xx except 300 as redirect, record the code, and flag 301/308 as a risk, pending an owner decision.",
+    "Which namespace form is the oracle for gs1 link types: https://ref.gs1.org/voc/ (standard text, vocabulary), http://gs1.org/voc/ (normative JSON-LD context), or https://gs1.org/voc/ (owl:equivalentProperty, Resolver CE)? gs1:dpp has no declared equivalents. The engine needs a pinned equivalence table approved by the owner.",
+    "In which Web Vocabulary release was gs1:dpp introduced? Narrowed on 2026-10-19: the GitHub v1.11 Turtle file (versionInfo 1.11, uploaded 2024-05-28) has no gs1:dpp term, and v1.16 has it; releases 1.12.0 to 1.15.x were not checked (no GitHub folders; ref.gs1.org files too large for WebFetch).",
+    "Which linkset schema should the engine pin? Resolved in part on 2026-10-19: the schema the GS1 test suite loads (gs1/linkset, served at gs1.github.io) matches the normative ref.gs1.org schema on every pattern and required array, so there is one GS1 oracle and its regex defects (hreflang, hyphenated relation URIs, A-z class) are shared. Still open: whether to report a schema rejection of a valid BCP 47 tag or hyphenated URI as a fail, a separate finding, or not at all, and whether a UNTP profile uses the UNTP linkset schema instead.",
+    "Is a resolver that answers 200 with a linkset at the carrier URL (allowed when linkTypeDefaultCanBeLinkset is true) a conforming DPP entry point under the EU test purpose, or must a DPP link be followed? This is a test-pack decision for the owner (related to D4-04).",
+    "Does GS1 plan a DPP AIDC application standard that fixes carrier, granularity and the gs1:dpp link type? GS1 in Europe calls QR with Digital Link 'highly likely' but no ratified document was located.",
+    "How should the OPTIONS method (resolver conformance statement 2) be allowed by the transport, which today permits only GET and HEAD without an authorization scope? Needs a contract change in architecture section 9.",
+    "Does the 'public' boolean in the linkset schema carry any normative processing rule (for example, omit from anonymous linksets)? None was found in the resolver text read.",
+    "Does the ESPR registry implementing regulation (EU) 2026/1778 store resolver URLs or only identifiers? Not examined here; it affects the failover flow GS1 proposes.",
+    "D4-04 follow-up: the code at b290791 has the accept and accepted_media_types parameters of identifier.resolve (src/dppce/adapters/identifier.py, tests in tests/test_adapters_identifier.py; tests not run in this research). The default path still reports any JSON object at the end of the chain as a passport, so a linkset answer passes. Should identifier.resolve treat application/linkset+json or a top-level linkset member as a distinct outcome (new reason code, owner decision)?"
+  ],
+  "anomalies": [
+    "gs1 namespace IRI differs across GS1 artifacts: resolver 1.2.1 Section 2.14 and Web Vocabulary 1.16/1.18 use https://ref.gs1.org/voc/; the normative linkset JSON-LD context uses http://gs1.org/voc/; owl:equivalentProperty lists https://gs1.org/voc/ and https://www.gs1.org/voc/; Resolver CE code uses https://gs1.org/voc/defaultLink and its description file declares http://gs1.org/voc/.",
+    "gs1:dpp in Web Vocabulary v1.16 has no owl:equivalentProperty, unlike other link types such as gs1:pip.",
+    "Linkset schema uses '@id' where JSON Schema expects '$id'; its character class 'A-z' admits '[', '\\\\', ']', '^', '_', '`'; relation-key URIs may contain only letters, digits, '.' and '/', so hyphenated relation URIs (UN/CEFACT link types) fail; hreflang pattern rejects valid BCP 47 tags with scripts or numeric regions. UNTP IDR notes the hyphen problem independently.",
+    "Description-file schema $id points to the 1.2.0 path although served at the unversioned URL; its supportedPrimaryKeys enum includes 410-413 that the standard text list omits; 'hasTelephone' sits outside contact.properties so it is not validated; a 'decription' typo appears in a property.",
+    "Resolver 1.2.1 references 'DL-URI: GS1 Digital Link: URI syntax. Version 1.4.0' while the current URI Syntax release is 1.7.0.",
+    "Resolver 1.2.1 Example 3 prose mentions linkType=all and gs1:smp, while the normative text defines only linkset as a special linkType value.",
+    "Resolver test suite validates linksets against https://gs1.github.io/linkset/gs1-linkset-schema.json rather than the normative ref.gs1.org URL (the content matches on every pattern and required array, checked 2026-10-19), keeps a 'hackedLinkset' workaround test, and still tests linkType=all; its Conformance1_2.txt lists owl:sameAs and linkType=all requirements that releases 1.1.0 and 1.2.0 removed.",
+    "Resolver CE description file uses linkTypeDefaultCanBeAll (schema: linkTypeDefaultCanBeLinkset), unprefixed keys 'traceability' and 'statisticInfo', and link types absent from the vocabulary (gs1:productPassport, gs1:handlingEndOfLife, gs1:disassemblyInfo, gs1:recyclingInfo, gs1:repairInfo, gs1:reuseInfo, gs1:sorting).",
+    "Web Vocabulary linktypes JSON uses the key 'epcisRepository' while the v1.16 jsonld term is gs1:epcis.",
+    "Compression standard 1.0.0 Section 4.2.2 ('ex') tells the reader to append the base64 string to 'eh' (apparent typo).",
+    "ref.gs1.org/voc/ and ref.gs1.org/voc/dpp rendered unfilled template placeholders through WebFetch; term data came from the data endpoints and GitHub.",
+    "Web Vocabulary archive lists 1.11.0 twice, lists 1.12.0 after 1.12.1, and has a malformed 1.12.1 JSON-LD link (missing slash).",
+    "GS1 General Specifications page (https://ref.gs1.org/standards/genspecs/) exceeded the 10 MB fetch limit; not read.",
+    "GS1 Germany copy of the 'Enabling DPP' white paper release 1.1 (gs1-germany.de) returned HTTP 404; release 2.2 from gs1.eu was used.",
+    "EUR-Lex returned empty pages for Regulation (EU) 2024/1781 (three URL forms) and 2023/1542 in this session; law content relies on sibling records.",
+    "Battery Pass Technical Guidance carries an in-file CC BY-NC 4.0 licence, which the prior catalogue record (2026-10-13) did not see.",
+    "A web-search summary attributed a statement that compressed URIs are limited to closed systems and that GS1's provisional DPP standard requires the uncompressed form to a blog; not confirmed in GS1 text and not used.",
+    "No text addressed to an AI agent was found in fetched pages or repositories, except Resolver CE's '.github/copilot-instructions.md' named in its README (not opened, not followed).",
+    "Continuation 2026-10-19: EUR-Lex /eng address for Regulation (EU) 2024/1781 again returned an empty page to WebFetch (fifth attempt over two sessions).",
+    "DOI 10.18461/pfsd.2020.2008 is not found at api.crossref.org (HTTP 404) but is listed by OpenAlex with the same title; the DOI may be registered with another agency.",
+    "Commission Implementing Decision (EU) 2026/1736 has four different source ids across sibling records (cid-2026-1736-dpp-harmonised-standards, impl-dec-eu-2026-1736, dpp-harmonised-standards-decision-2026-1736, impl-dec-eu-2026-1736-dpp-standards); ESPR has two (espr-reg-2024-1781, reg-eu-2024-1781). The draft keeps the ids it started with and names the aliases."
+  ],
+  "truncation": "Reading of HTML standards went through WebFetch summaries (a small model) except the three JSON schemas/context, which were read as raw JSON; key values used in oracles (status codes, field names, regexes, conformance statement numbers) were cross-checked between two or more passes or against code (test suite, Resolver CE). Web Vocabulary 1.18.0 jsonld: only the first 100 000 of 1 966 911 characters read; link types taken from the unversioned linktypes JSON and the GitHub v1.16 file. TDS 2.3: only summary, change log and introduction read (448 pages). Compression standard: Sections 4.1-4.2 only. GS1 in Europe paper: GS1-specific sections 1-3 and 5.2-5.3 read; sections 4, 5.4-5.6 and Annex A skimmed only by keyword. Implementation Considerations: Method 1 and Annex A only. UNTP IDR: first 100 000 characters by targeted prompts plus the tail. Resolver CE: web_namespace.py response path and parts of web_logic.py only; data-entry server not read. GS1DigitalLinkToolkit.js, interpretGS1scan, gs1/linkset, TDT, 2d-barcode-generator, digital-link.js: metadata only. Literature: abstracts only; no full texts. Consensus: 4 searches; SciSpace: 1 search (patent-heavy, nothing used). No live resolver or DPP system contacted. Continuation 2026-10-19: 2D retail POS guideline read for characters 0-200000 of 393666 only; WebVoc v1.12-v1.15 not checked; gs1.github.io Pages copy of the linkset schema not fetched (repository source read instead); no additional Consensus or SciSpace searches (all eleven DOIs now checked, none removed).",
+  "continuation_note": "Continuation on 2026-10-19 after the previous agent stopped on HTTP 429 with a complete, valid draft. Changed: checked the nine unchecked literature DOIs (seven at Crossref, one through OpenAlex after a Crossref 429, one Crossref 404 then matched at OpenAlex; all titles matched); read the gs1/linkset schemas through gh api and found that the test-suite schema equals the normative schema on all oracle-relevant points (corrected the test-suite note, open question 4, L05 text and the L05 implication); added the GS1 2D Barcodes at Retail POS Implementation Guideline 1.1.0 as a source with an L02 implication and a failure mode; bounded the gs1:dpp introduction to after v1.11; filled CIRPASS-2 last activity and licence by gh api; read the engine code at b290791 and recorded that D4-04 parameters exist while a linkset still passes the default path (implication, failure mode, open question updated); fixed the publication date of Implementing Decision 2026/1736 and named alias source ids; ran a rule 5 sentence scan (all EN/ISO/IEC/DIN mentions are bibliographic or fence notes). Checked but unchanged: EUR-Lex retry for 2024/1781 (empty again), so the three law sources stay metadata_only and rely on sibling records. Still open: law sources not re-read; WebVoc 1.12-1.15; second half of the 2D guideline; the owner decisions listed in open_questions; engine tests not run."
+}

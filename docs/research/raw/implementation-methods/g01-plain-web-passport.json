@@ -1,0 +1,1368 @@
+{
+ "method_id": "g01-plain-web-passport",
+ "name": "Plain web passport (operator-hosted HTTPS, content negotiation, renderers, human-readable views)",
+ "retrieval_date": "2026-10-19",
+ "scope_note": "Covers passports that an economic operator or a DPP service provider serves at an HTTPS URL as static files or from its own REST/JSON API, with no resolver standard, no AAS, no dataspace connector and no credential layer. Includes: HTTP content negotiation on one URL (RFC 9110 and RFC 9111), JSON, JSON-LD and HTML representations, JSON-LD embedded in HTML (JSON-LD 1.1 section 7), language negotiation and language tags (RFC 5646), renderers that turn passport data into a human-readable view (CIRPASS-2 dpp-renderer-be and dpp-renderer-fe, other open viewers), parity between the human view and the machine data, EU law on consumer access through the carrier, on no registration and no tracking, and on accessibility, and WCAG 2.2 as the open reference for testing an HTML view. Uses the dppce reference system as the project's own worked example, not as an authority. Leaves out: GS1 resolver behaviour (m02), AAS (m03), dataspaces (m04), verifiable credentials except the UNTP and W3C render-method drafts (m05), DLT (m06), and the registry API itself (m07). Protected standards (EN, ISO, IEC, DIN, including EN 301 549 and ISO/IEC 40500) are named by bibliographic metadata only.",
+ "summary": "A plain web passport is a set of documents behind an HTTPS URL that the operator controls. The URL is printed in a QR code on the product, so one URL must serve a person with a phone browser and a machine client. The usual way is proactive content negotiation: the client sends Accept, the server picks HTML, JSON or JSON-LD, and it lists Accept in Vary so that caches keep the variants apart (RFC 9110 sections 12.1 and 12.5.5; RFC 9111 section 4.1). A server may send a default representation when nothing matches, or answer 406 (RFC 9110 sections 12.1 and 15.5.7). The CIRPASS-2 test environment assumes this single-URL pattern: HTML for a plain browser request and machine data for Accept application/json or application/ld+json (prior record m07). A simpler variant gives each representation its own URL, as the project's reference server does with /dpp/{id} for JSON and /dpp/{id}.html for HTML; it sends no Vary header and ignores Accept. The HTML view can carry the same data as a script element of type application/ld+json, which a JSON-LD processor extracts (JSON-LD 1.1 section 7), or the HTML response can point to the JSON-LD document with a Link header of relation alternate (section 6.2). Renderers such as CIRPASS-2 dpp-renderer-be fetch the URL with a long Accept list of JSON-LD and RDF media types, expand JSON-LD and convert RDF with Apache Jena; dpp-renderer-fe then displays it behind an OpenID Connect login, so it is a portal and not a consumer view. EU law requires free access for customers according to access rights (ESPR Art. 11(b); Batteries Art. 78(b)) and, for toys and detergents, access with no registration or password and no tracking beyond strict need (Regulation (EU) 2025/2509, Art. 20(4) and 20(10); Regulation (EU) 2026/405, Art. 22(d) and 22(h)). The passport must be in the languages that the Member State requires (toys Art. 19(2)(e); detergents Art. 21(2)(e)); the ESPR asks for information in a language easily understood (Art. 7(8)). No DPP article that was read requires accessibility for persons with disabilities; the only such clause found is for the detergent digital label (Art. 19(1)(e)), and the European Accessibility Act does not list passports in its scope (Directive (EU) 2019/882, Art. 2). For black-box testing, the useful oracles are the HTTP specifications, the JSON-LD extraction rules, WCAG 2.2 success criteria that a static parse can decide, and the law articles on access, tracking and availability; visual rendering, contrast and the meaning of 'strictly necessary' stay manual.",
+ "method_families": [
+  "other",
+  "linked-data-semantic",
+  "law-baseline"
+ ],
+ "maturity": {
+  "spec_status": "No passport-specific open specification defines this method. It is assembled from general web specifications (RFC 9110 HTTP Semantics, RFC 9111 HTTP Caching, RFC 5646 language tags, JSON-LD 1.1, WCAG 2.2, ACT Rules Format 1.1) plus EU law. CIRPASS-2 D4.1 V1.1 states the single-URL negotiation assumption as non-normative project guidance (prior record m07). Credential render templates are drafts: UNTP work in progress keeps RenderTemplate2024 and the W3C VC render method document calls itself experimental.",
+  "versions_at_retrieval": [
+   {
+    "artifact": "RFC 9110 HTTP Semantics",
+    "version": "June 2022, STD 97, Standards Track",
+    "status": "Internet Standard",
+    "source_id": "new-rfc-9110"
+   },
+   {
+    "artifact": "RFC 9111 HTTP Caching",
+    "version": "June 2022, STD 98, Standards Track, obsoletes RFC 7234",
+    "status": "Internet Standard",
+    "source_id": "new-rfc-9111"
+   },
+   {
+    "artifact": "RFC 5646 Tags for Identifying Languages",
+    "version": "September 2009, BCP 47",
+    "status": "Best Current Practice",
+    "source_id": "new-rfc-5646"
+   },
+   {
+    "artifact": "WCAG 2.2",
+    "version": "W3C Recommendation 12 December 2024 (this version https://www.w3.org/TR/2024/REC-WCAG22-20241212/)",
+    "status": "W3C Recommendation; unchanged from the 2026-10-13 catalogue record",
+    "source_id": "wcag-2-2"
+   },
+   {
+    "artifact": "ACT Rules Format 1.1",
+    "version": "W3C Recommendation 5 February 2026 (https://www.w3.org/TR/2026/REC-act-rules-format-1.1-20260205/)",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-act-rules-format-1-1"
+   },
+   {
+    "artifact": "Verifiable Credential Rendering Methods v1.0 (editor's copy)",
+    "version": "no date shown; defines SuiteRenderMethod with render suites summary, html and static",
+    "status": "self-described experimental, not fit for production",
+    "source_id": "new-w3c-vc-render-method"
+   },
+   {
+    "artifact": "UNTP Verifiable Credentials, work in progress",
+    "version": "Work in Progress page; RenderTemplate2024 kept from 0.7.0",
+    "status": "renderMethod is a SHOULD",
+    "source_id": "new-untp-wip-vc-profile"
+   },
+   {
+    "artifact": "CIRPASS-2 dpp-renderer-fe",
+    "version": "release 1.1.0 (2026-09-23); package.json on main says 1.2.0",
+    "status": "experimental; Apache-2.0",
+    "source_id": "cirpass2-github-repositories"
+   },
+   {
+    "artifact": "CIRPASS-2 dpp-renderer-be",
+    "version": "releases 1.0.2-pgsql-oidc and 1.0.2-mariadb-oidc (2026-06-11)",
+    "status": "experimental; Apache-2.0",
+    "source_id": "cirpass2-github-repositories"
+   },
+   {
+    "artifact": "axe-core",
+    "version": "v4.14.0 (2026-10-05)",
+    "status": "MPL-2.0; active",
+    "source_id": "new-axe-core"
+   },
+   {
+    "artifact": "Directive (EU) 2019/882 (European Accessibility Act)",
+    "version": "Official Journal text dated 7 June 2019 (Cellar expression read; OJ series and page not read)",
+    "status": "measures apply from 28 June 2025 (Art. 31)",
+    "source_id": "new-eaa-dir-2019-882"
+   },
+   {
+    "artifact": "dppce reference system",
+    "version": "worktree file state at commit ed5779c (2026-10-18)",
+    "status": "project example, synthetic, loopback only",
+    "source_id": "new-dppce-reference-system"
+   }
+  ],
+  "adoption_evidence": "Content negotiation on one URL is assumed by the CIRPASS-2 test environment and D4.1 (prior record m07), and the CIRPASS-2 renderer and mock registry code send Accept headers for JSON and JSON-LD (renderer-be read in this session). Open renderers are few and small: dpp-renderer-be and dpp-renderer-fe have 2 GitHub stars each; transpareo-time-machine (GPL-3.0) and boebe-DPP-Viewer (MIT, AAS-based) are single-maintainer projects. Literature shows prototypes with a REST backend, a JSON-LD data format and a web interface (Kroell and Schoen 2026, Zenodo) and visual DPP viewers (Burkhardt et al. 2025), but no independent field measurement of negotiation, parity or accessibility of live passports was located. No adoption statistics were located.",
+  "regulatory_alignment": "The law fixes outcomes, not the protocol. A passport must be reachable electronically through a data carrier (ESPR Art. 2(28)), and the identifier must give a web link to it (ESPR Art. 2(30)). Data must use open standards and an interoperable, machine-readable format where appropriate (ESPR Art. 10(1)(d); Batteries Art. 77(5) adds structured and searchable). Access must be free and easy for customers and other actors according to access rights (ESPR Art. 11(b); Batteries Art. 78(b)). Toys and detergents add: free of charge, no registration or password for consumers, no tracking or analysis of use beyond strict need (Regulation (EU) 2025/2509, Art. 20(3), 20(4), 20(10); Regulation (EU) 2026/405, Art. 22(c), 22(d), 22(h)), passports in the languages that the Member State requires (toys Art. 19(2)(e); detergents Art. 21(2)(e)), and availability for 10 years (toys Art. 19(2)(g); detergents Art. 21(2)(g)). The ESPR requires availability for the delegated-act period also after insolvency or exit (Art. 11(e)) and a back-up copy through a service provider (Art. 10(4)). Accessibility for persons with disabilities: not found in ESPR Arts 7 to 11 or Annex III, not in Batteries Arts 77 and 78, not in toys Arts 19 and 20; found only for the detergent digital label (Regulation (EU) 2026/405, Art. 19(1)(e), with 19(1)(f) on common browsers and 19(1)(h) on free language choice). The European Accessibility Act covers listed products and services (Directive (EU) 2019/882, Art. 2(1) and 2(2)); a passport is not listed. Its Annex I Section I point 1(b) sets requirements for product instructions made available online, but only for products in its own scope. HTML and JSON parity, Vary, caching and WCAG levels are not legal requirements; they are engineering conformance targets."
+ },
+ "layers": {
+  "L01_unique_identifiers": {
+   "applies": "partial",
+   "mechanism": "The identifier is an HTTPS URL on a host that the operator controls. Two shapes occur. (1) The passport URL is itself the identifier, for example https://passport.example.test/p/<opaque-id>. (2) A structured path that mimics a GS1 Digital Link on the operator's own host, without a GS1-conformant resolver; the dppce reference system uses https://id.example.test/01/<14-digit GTIN>/21/<serial> and answers that path with 303 See Other and Location /dpp/<gtin>-<serial> (reference_server.py resolve()). The method adds no identifier syntax of its own; uniqueness and persistence rest on domain ownership. Model-level and item-level URLs can be separate (reference system: /01/<gtin> for the model id inside the document, /dpp/{id}/model for model data).",
+   "specs": [
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 2(30) unique product identifier enables a web link; Art. 2(28) access through a data carrier"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 77(3) QR code links to a unique identifier; the identifier standard named there is recorded as bibliographic only"
+    },
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "reference-system.md section 2 (identifiers and origin override) and section 3 (endpoints)"
+    }
+   ],
+   "variants": [
+    "passport URL used directly as the identifier",
+    "GS1 Digital Link-shaped path on the operator host, no conformant resolver",
+    "model URL plus item URL",
+    "URL with an opaque random token (unguessable, but no semantic parse possible)"
+   ],
+   "observable_black_box": "The carrier payload text, its scheme (http or https), host, path shape, and whether the id inside the returned document equals the URL that was dereferenced.",
+   "law_delta": "The ESPR and Batteries texts read require a link and a persistent identifier but no URL syntax. The https-only rule and the 2000-character limit come from the EU registry user guide (prior records m01 and m07; not re-read in this session)."
+  },
+  "L02_data_carriers": {
+   "applies": "partial",
+   "mechanism": "A QR code encodes the same HTTPS URL for people and machines. A phone camera opens it in a browser that sends a browser-default Accept header (typically text/html first); a machine reader sends Accept application/json or application/ld+json to the same URL. The carrier cannot carry headers or a method other than GET, which is why negotiation must work from a bare GET (prior record m07, CIRPASS-2 assumption 3.1). The CIRPASS-2 renderer front end includes a camera QR scanner (@zxing/ngx-scanner in package.json) that hands the decoded URL to its fetch flow.",
+   "specs": [
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 13(6) QR code on all batteries from 18 February 2027"
+    },
+    {
+     "source_id": "new-reg-eu-2026-405-detergents",
+     "component": "Art. 21(4) carrier on label, indelible, machine-readable, with a scan prompt, visible before purchase"
+    },
+    {
+     "source_id": "new-reg-eu-2025-2509-toys",
+     "component": "Art. 19(7) carrier on the toy or label, visible before purchase"
+    },
+    {
+     "source_id": "cirpass2-github-repositories",
+     "component": "dpp-renderer-fe ScannerComponent and package.json dependencies"
+    }
+   ],
+   "variants": [
+    "QR code with the passport URL",
+    "QR code with a GS1 Digital Link-shaped URL served by the operator",
+    "digital copy of the carrier or a web link for online sellers (ESPR Art. 10(3))"
+   ],
+   "observable_black_box": "Decoded QR text; the result of dereferencing it with a browser-like Accept and with a machine Accept.",
+   "law_delta": "none beyond m01 and m09; the carrier rules are the same for every method."
+  },
+  "L03_data_exchange_protocols": {
+   "applies": "yes",
+   "mechanism": "HTTP GET (and HEAD) over TLS to one URL. Proactive negotiation (RFC 9110 section 12.1): the client sends Accept with optional q weights (section 12.4.2: 0 to 1, default 1, q=0 means not acceptable, at most three decimals) and Accept-Language (12.5.4); the server returns Content-Type and Content-Language (8.5) and should list the request fields that shaped its choice in Vary, for example 'Vary: Accept, Accept-Language' (12.5.5). A cache reuses a stored response only if the fields named in Vary match the new request; 'Vary: *' never matches; a negotiated response without Vary can be served for a different Accept (RFC 9111 section 4.1). When no representation matches, the server may ignore the preferences and send a default (RFC 9110 12.1) or answer 406 with a list of alternatives (15.5.7). Reactive negotiation uses 300 Multiple Choices with a list of alternatives and an optional preferred Location (12.2, 15.4.1). A negotiated variant can name its own URI in Content-Location (8.7). A server may redirect with 303 See Other to a different resource, typically the document about the item (15.4.4). HEAD must give the same header fields as GET without content (9.3.2). Common Accept values in this family: text/html (browser), application/json, application/ld+json (optionally with a profile parameter, see m08), and RDF types. Observed client behaviour: CIRPASS-2 dpp-renderer-be sends one Accept header that joins, with no q values, application/ld+json, application/json, text/json, application/rdf+xml, application/xml, text/xml, application/x+turtle, text/turtle, application/n-triples, text/plain, text/n3, text/rdf+n3, application/n-quads, application/trig, application/x-trig and application/rdf+json (RDFTypes.java and DPPFetcher.fetchDPP), and then routes by the returned Content-Type; text/plain is parsed as N-Triples. dpp-renderer-fe calls its own back end with 'Accept: application/ld+json, application/json;q=0.9'. HTML responses can point to the JSON-LD document with an HTTP Link header, rel alternate and type application/ld+json, which a JSON-LD processor follows when it gets a non-JSON answer (JSON-LD 1.1 section 6.2). The dppce reference system does not negotiate: it ignores Accept, sends no Vary, Cache-Control, Content-Language or Link header, defines only do_GET (so HEAD is not implemented by its handler), and serves HTML at a separate path /dpp/{id}.html; it listens on plain HTTP on 127.0.0.1 and the test rig maps the public https origin to it (origin_override).",
+   "specs": [
+    {
+     "source_id": "new-rfc-9110",
+     "component": "sections 8.5, 8.7, 9.3.2, 12.1, 12.2, 12.4.2, 12.5.1, 12.5.4, 12.5.5, 15.4.1, 15.4.4, 15.5.7, 15.5.11"
+    },
+    {
+     "source_id": "new-rfc-9111",
+     "component": "section 4.1 cache keys with Vary; section 5.2.2 response directives"
+    },
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "section 6.1 context Link header for plain JSON; section 6.2 alternate document location"
+    },
+    {
+     "source_id": "cirpass2-github-repositories",
+     "component": "dpp-renderer-be DPPFetcher.java, RDFTypes.java, CommonUtils.java; dpp-renderer-fe dpp-fetch.service.ts"
+    },
+    {
+     "source_id": "prior-record-m07",
+     "component": "CIRPASS-2 test environment design assumption 3.1 and D4.1 section 3.1 as summarised there"
+    },
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "reference_server.py handle(), resolve(), do_GET"
+    },
+    {
+     "source_id": "new-cirpass2-d41-reference-architecture",
+     "component": "section 3.1 content negotiation via the live URL (content via prior record m07)"
+    },
+    {
+     "source_id": "cirpass2-test-environment-description",
+     "component": "design assumption 3.1 (content via prior record m07)"
+    }
+   ],
+   "variants": [
+    "one URL with proactive negotiation on Accept",
+    "one URL plus negotiation on Accept-Language",
+    "separate URL per representation (suffix .json, .html, or ?format=)",
+    "HTML response with Link rel=alternate type application/ld+json",
+    "redirect 303 from the carrier URL to a document URL",
+    "reactive negotiation with 300 or 406 and a list of alternatives",
+    "static files on a CDN with per-extension media types and no negotiation"
+   ],
+   "observable_black_box": "For each Accept and Accept-Language value: final status, redirect chain, Content-Type, Content-Language, Content-Location, Vary, Cache-Control, Link and Set-Cookie headers, body bytes; the same with HEAD; the answer to an Accept that nothing matches (406, 300 or a default).",
+   "law_delta": "The law names no protocol or media type. It requires a web link, machine-readable data and interoperability (ESPR Arts 2(30), 10(1)(d), 11(a)). Negotiation, Vary and 406 behaviour are engineering targets from RFC 9110 and RFC 9111, not legal duties."
+  },
+  "L04_apis_lifecycle_searchability": {
+   "applies": "partial",
+   "mechanism": "The public side is read-only: GET and HEAD on the passport URL and its sub-resources. Create, update and deactivate are internal operations of the operator's CMS or API and are not exposed to the tester. Search, where present, is an operator-specific endpoint; the reference system has GET /search?q={text} returning {\"results\": [...]} for the role. Static-file hosting has no search at all. Renderers add their own search over an index they build: CIRPASS-2 dpp-renderer-be exposes GET /fetch/v1?url=..., plus search and comparison resources (DPPSearchResource, DPPComparisonResource) over a local store filled by the data extractor.",
+   "specs": [
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "section 3 endpoints table (/search, /dpp/{id}/export, /dpp/{id}/versions)"
+    },
+    {
+     "source_id": "cirpass2-github-repositories",
+     "component": "dpp-renderer-be DPPFetchResource (@Path /fetch/v1, @RestQuery url), DPPSearchResource, DPPComparisonResource"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 77(5) searchable"
+    }
+   ],
+   "variants": [
+    "static files, no API",
+    "operator REST API with GET per resource",
+    "operator search endpoint",
+    "third-party renderer that proxies and indexes passports"
+   ],
+   "observable_black_box": "Only the read side: status and body of GET and HEAD, search results for a known serial, and the behaviour for an unknown identifier (404 or 410 versus a soft 200).",
+   "law_delta": "Batteries Art. 77(5) asks for searchable data and ESPR Art. 14 creates a Commission web portal for search; neither defines an operator search API."
+  },
+  "L05_system_interoperability_data_models": {
+   "applies": "yes",
+   "mechanism": "Representations: (1) JSON with an operator-defined schema, optionally interpreted as JSON-LD through a Link header with the json-ld#context relation (JSON-LD 1.1 section 6.1; only one such header; ignored for application/ld+json); (2) JSON-LD with @context; (3) HTML for people, which may embed the data in <script type=\"application/ld+json\"> blocks (JSON-LD 1.1 section 7). Rules for embedded JSON-LD: the HTML base URL is the base IRI unless <base> changes it (7.1); authors should escape character sequences that look like comment or script tags (7.2); a fragment that matches a script element id selects only that block, otherwise all JSON-LD script blocks are merged into one dataset (7.3 and section 7 text). Human-readable view: either server-rendered HTML (reference system: one table row per top-level field, keys and JSON-encoded values, html.escape applied, <html lang=\"en\">, <th scope=\"row\">) or a client-side single-page application that needs JavaScript (CIRPASS-2 dpp-renderer-fe, Angular 19 and PrimeNG, ontology-aware components with a generic fallback, <html lang=\"en\"> fixed in index.html, nginx try_files to index.html). Language: tags follow BCP 47 (RFC 5646): language, optional script, region and variant subtags, validated against the IANA Language Subtag Registry, case-insensitive. Credential render templates (outside this family, noted for hybrids): UNTP work in progress recommends renderMethod entries of type RenderTemplate2024 with url, mediaType text/html and digestMultibase (SHA-256 multihash, base64url, prefix u); the W3C VC render method editor's copy instead defines SuiteRenderMethod with render suites summary, html and static and asks the html suite to pass the user's accessibility and locale settings to the payload.",
+   "specs": [
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "sections 6.1, 6.2, 7, 7.1, 7.2, 7.3"
+    },
+    {
+     "source_id": "new-rfc-5646",
+     "component": "language tag syntax, subtags, IANA registry, case-insensitivity"
+    },
+    {
+     "source_id": "wcag-2-2",
+     "component": "success criteria 1.1.1, 1.3.1, 1.4.3, 1.4.10, 2.4.2, 3.1.1, 3.1.2, 4.1.2; conformance section 5.2"
+    },
+    {
+     "source_id": "new-untp-wip-vc-profile",
+     "component": "render method section (RenderTemplate2024, digestMultibase)"
+    },
+    {
+     "source_id": "new-w3c-vc-render-method",
+     "component": "SuiteRenderMethod, render suites, digestMultibase, output preferences"
+    },
+    {
+     "source_id": "cirpass2-github-repositories",
+     "component": "dpp-renderer-fe README rendering modes, src/index.html, deploy/nginx.conf"
+    },
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "reference_server.py view()"
+    },
+    {
+     "source_id": "new-w3c-wai-selecting-tools",
+     "component": "limits of automated evaluation tools"
+    },
+    {
+     "source_id": "new-w3c-act-rules-format-1-1",
+     "component": "rule outcomes passed, failed, inapplicable, cantTell, untested"
+    }
+   ],
+   "variants": [
+    "server-rendered HTML table",
+    "HTML with embedded JSON-LD script blocks",
+    "single-page application shell that fetches JSON with JavaScript",
+    "PDF or image views (not examined)",
+    "credential render template (hybrid with m05)"
+   ],
+   "observable_black_box": "Parsed JSON or JSON-LD body; @context values; script blocks of type application/ld+json in the HTML; the lang attribute of the html element and of parts; title element; img alt attributes; table header markup; text content of the HTML after entity decoding. Rendering, layout, contrast and JavaScript output are not observable without a browser, which the engine does not run (architecture section 9: HTML is never rendered or executed).",
+   "law_delta": "ESPR Art. 10(1)(d) asks for open standards and machine-readable formats where appropriate; ESPR Art. 7(8) asks for a language easily understood by end users as the Member State decides; toys Art. 19(2)(e) and detergents Art. 21(2)(e) require the languages of the Member State. No law read requires a human-readable view to equal the machine data; parity is an engineering target."
+  },
+  "L06_storage_archiving_persistence": {
+   "applies": "yes",
+   "mechanism": "The operator or a DPP service provider hosts the files or the API (ESPR Art. 11(c)). Static hosting on object storage or a CDN is common for this family; dynamic hosting uses an application server. Persistence of the URL depends on domain registration, TLS certificate renewal and stable paths. Link rot (404, DNS failure, expired certificate) and content drift are the failure classes known from web-reference studies. A back-up copy through a service provider is required at placing on the market (ESPR Art. 10(4); toys Art. 19(13); detergents Art. 21(12)(c)); the method does not say how a consumer reaches it when the primary host is gone. The reference system has no persistence beyond its fixture files and a version history endpoint.",
+   "specs": [
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 10(4) back-up copy; Art. 11(c) storage; Art. 11(e) availability after insolvency or exit"
+    },
+    {
+     "source_id": "new-reg-eu-2025-2509-toys",
+     "component": "Art. 19(2)(g) 10 years; Art. 19(13) back-up copy"
+    },
+    {
+     "source_id": "new-reg-eu-2026-405-detergents",
+     "component": "Art. 21(2)(g) 10 years; Art. 21(12)(c) back-up; Art. 19(1)(g) digital label 10 years; Art. 19(3) other means when the label is down"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 78(e) availability if the operator stops; Art. 77(8) passport ends after recycling"
+    },
+    {
+     "source_id": "new-rfc-9110",
+     "component": "15.5.11 410 Gone for a permanently removed resource"
+    },
+    {
+     "source_id": "prior-record-m01",
+     "component": "availability and back-up summary"
+    }
+   ],
+   "variants": [
+    "static files on object storage or CDN",
+    "application server with a database",
+    "service-provider hosting with a custom domain CNAME",
+    "back-up copy at a second provider"
+   ],
+   "observable_black_box": "Repeated GETs over time: status, DNS and TLS errors, certificate validity dates, body digest changes. One run cannot prove availability over years.",
+   "law_delta": "The law sets the duration and the back-up duty but no uptime figure, no monitoring method and no rule for redirecting consumers to the back-up copy."
+  },
+  "L07_access_rights_security_confidentiality": {
+   "applies": "yes",
+   "mechanism": "The public tier is served to anonymous GET with no Authorization header. Restricted tiers use an operator mechanism, for example 'Authorization: Bearer <token>' (reference system: roles anonymous, legitimate_interest, authority, tokens named TEST-ONLY-...). The HTML view must apply the same filtering as the JSON view; the reference system builds its HTML from the role-filtered item, and its fault leak_html shows a leak on that channel. Tracking and cookies: a consumer HTML page can set cookies (Set-Cookie), load analytics scripts, fonts or images from third-party origins, or put a consent or login wall before the data. CIRPASS-2 dpp-renderer-fe guards its view route with an OpenID Connect login (authGuard in app.routes.ts) and loads only same-origin assets/env.js from index.html; it is a portal for registered users, not a consumer path. Caching: a response to a request with Authorization is not reused by a shared cache unless directives allow it; 'public' lets a shared cache reuse such a response, 'private' forbids shared storage, 'no-store' forbids storage (RFC 9111 sections 3.5 as referenced, 5.2.2.5, 5.2.2.7, 5.2.2.9). TLS protects transport; HTTP-to-HTTPS redirects and HSTS are deployment choices.",
+   "specs": [
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 11(b) free and easy access by access rights; Art. 11(f) restricted write rights; Art. 11(h) security and privacy"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 77(2) three access groups; Art. 78(b) free access by access rights"
+    },
+    {
+     "source_id": "new-reg-eu-2025-2509-toys",
+     "component": "Art. 20(3) free of charge; Art. 20(4) no registration or password; Art. 20(10) no tracking beyond strict need, no personal data without consent"
+    },
+    {
+     "source_id": "new-reg-eu-2026-405-detergents",
+     "component": "Art. 22(c), 22(d), 22(h); Art. 19(2) digital label no tracking"
+    },
+    {
+     "source_id": "new-eprivacy-dir-2002-58",
+     "component": "Art. 5(3) storing or reading information on the user's terminal (original 2002 text read)"
+    },
+    {
+     "source_id": "new-rfc-9111",
+     "component": "5.2.2.5 no-store, 5.2.2.7 private, 5.2.2.9 public"
+    },
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "section 5.2 access policy and channels including html"
+    }
+   ],
+   "variants": [
+    "anonymous public tier plus bearer-token restricted tier at the same URL",
+    "separate restricted host",
+    "login or consent wall before the public data (non-conforming for toys and detergents)",
+    "public HTML with third-party analytics or fonts"
+   ],
+   "observable_black_box": "Status and body for an anonymous request on each channel including HTML; Set-Cookie headers; origins referenced by script, link, img, iframe and form elements in the HTML; redirects to a login host; Cache-Control and Vary on restricted responses; canary values in any representation.",
+   "law_delta": "For toys and detergents the law forbids registration, passwords and tracking beyond strict need on the consumer path; ESPR and Batteries say free access by access rights but not 'no registration'. Which tracking is 'strictly necessary' is a legal judgment that a black-box test cannot make."
+  },
+  "L08_authentication_reliability_integrity": {
+   "applies": "partial",
+   "mechanism": "Base level is server authentication by TLS only: the data are as reliable as the host. Options seen: a separate signed representation (reference system /dpp/{id}/signed, compact JWS ES256 with x5c over the canonical anonymous item JSON, typ dpp+jws); a digest in a registry (the CIRPASS-2 mock registry stores a sha256 of the bytes fetched with a JSON Accept, prior record m07). An HTML view is not signed, so its integrity can only be tied to signed data by parity checks. A Content-Location header names the variant URI but is not trusted unless verified (RFC 9110 section 8.7). A credential render template with digestMultibase is tamper-evident (UNTP work in progress).",
+   "specs": [
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "section 4.5 signed passport"
+    },
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 11(g) data authentication, reliability and integrity"
+    },
+    {
+     "source_id": "new-rfc-9110",
+     "component": "8.7 Content-Location trust note"
+    },
+    {
+     "source_id": "new-untp-wip-vc-profile",
+     "component": "digestMultibase on render templates"
+    }
+   ],
+   "variants": [
+    "TLS only",
+    "detached or separate JWS over the JSON",
+    "digest stored in a registry",
+    "hybrid with verifiable credentials (m05)"
+   ],
+   "observable_black_box": "TLS certificate chain and validity; JWS on the signed resource; equality of the signed payload, the JSON, the embedded JSON-LD and the values visible in HTML.",
+   "law_delta": "The law requires integrity (ESPR Art. 11(g); Batteries Art. 78(g)) but no mechanism; TLS alone does not give integrity after download."
+  },
+  "L09_registry_and_customs": {
+   "applies": "partial",
+   "mechanism": "The operator registers the passport URL (or the URL-form identifier) in the EU registry; the registry dereferences it and, in the CIRPASS-2 mock, fetches it with Accept application/json or application/ld+json before validation and hashing (prior record m07). A plain web passport that ignores Accept and returns HTML fails that step. The reference system has a mock registry record at /registry/{id} with passport_url equal to the public identifier.",
+   "specs": [
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 13 registry; Art. 13(4) operator uploads; Art. 13(5) registration identifier"
+    },
+    {
+     "source_id": "prior-record-m07",
+     "component": "mock-eu-registry fetch with JSON Accept; EU registry user guide error list as summarised there"
+    },
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "section 4.4 registry record"
+    }
+   ],
+   "variants": [
+    "registry holds the carrier URL",
+    "registry holds a separate document URL"
+   ],
+   "observable_black_box": "Registry record (mock only) compared with the served URL and with the identifier inside the JSON.",
+   "law_delta": "none beyond m01 and m07."
+  },
+  "L10_lifecycle_versioning_updates": {
+   "applies": "partial",
+   "mechanism": "The operator updates files or database rows; the URL stays the same and the representation changes. Version information, if any, is operator-defined (reference system: version and updated_at fields and /dpp/{id}/versions with content_digest per version). Caches can serve an old variant after an update unless validators and Cache-Control are set (RFC 9111). When HTML and JSON come from different pipelines, the HTML can lag the JSON. Memento-style datetime negotiation is a known web pattern for past versions (Van de Sompel et al. 2010) but no DPP use was located. A new passport for a reused or remanufactured product must link to the original one (ESPR Art. 11(d); toys Art. 20(6); detergents Art. 22(f); Batteries Art. 77(7)).",
+   "specs": [
+    {
+     "source_id": "new-dppce-reference-system",
+     "component": "section 4.3 version history and update rule"
+    },
+    {
+     "source_id": "new-rfc-9111",
+     "component": "5.2.2.1 max-age, 5.2.2.4 no-cache"
+    },
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 11(d) link to the original passport"
+    }
+   ],
+   "variants": [
+    "overwrite in place",
+    "versioned sub-resources",
+    "datetime negotiation (not seen in DPP practice)"
+   ],
+   "observable_black_box": "version and updated_at in JSON, the same values in embedded JSON-LD and visible HTML; ETag and Last-Modified; Cache-Control lifetimes; version history endpoint.",
+   "law_delta": "The law requires accurate and up-to-date data (Batteries Art. 77(4); toys Art. 19(2)(d); detergents Art. 21(2)(d)) but no version format."
+  },
+  "L11_roles_and_governance": {
+   "applies": "yes",
+   "mechanism": "The economic operator, or a DPP service provider it authorises, hosts the passport (ESPR Art. 11(c); service-provider definition per prior record m01). The domain owner controls the identifier space, so a change of provider needs a redirect or a custom domain that moves with the operator. Renderers are third parties that read public passports; when they proxy fetches (dpp-renderer-be GET /fetch/v1?url=), they become another party in the consumer path. Service providers may not sell or reuse the data beyond the service (ESPR Art. 11, second subparagraph; toys Art. 20(7); detergents Art. 22(g)).",
+   "specs": [
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 11(c) storage; Art. 11 second subparagraph (no sale or reuse by providers)"
+    },
+    {
+     "source_id": "cirpass2-github-repositories",
+     "component": "dpp-renderer-be fetch proxy"
+    }
+   ],
+   "variants": [
+    "operator self-hosting on its own domain",
+    "service provider hosting on the provider's domain",
+    "service provider on the operator's custom domain"
+   ],
+   "observable_black_box": "Hosts in the redirect chain, TLS certificate subject, third-party origins referenced by the HTML.",
+   "law_delta": "Requirements for service providers await a delegated act (ESPR Art. 11, third subparagraph; prior record m01)."
+  }
+ },
+ "end_to_end_flows": [
+  {
+   "name": "Consumer scans a QR code and reads the passport in a browser",
+   "actors": [
+    "consumer with phone browser",
+    "operator web server or CDN"
+   ],
+   "steps": [
+    "1. The camera app decodes the QR code and opens the HTTPS URL.",
+    "2. The browser sends GET with a browser Accept (HTML first) and an Accept-Language from the user's settings, with no Authorization and no cookies on first visit.",
+    "3. The server may redirect (for example 303) to the document URL.",
+    "4. The server selects text/html and the best language, and answers 200 with Content-Type text/html, Content-Language and 'Vary: Accept, Accept-Language'.",
+    "5. The page shows the public tier without login, consent wall or third-party trackers, with a lang attribute that matches the content.",
+    "6. Optionally the page embeds the same data in a script block of type application/ld+json, or links to it with Link rel=alternate."
+   ]
+  },
+  {
+   "name": "Machine client fetches the same URL",
+   "actors": [
+    "registry, renderer or tester",
+    "operator web server"
+   ],
+   "steps": [
+    "1. The client sends GET to the carrier URL with Accept application/ld+json or application/json.",
+    "2. The server follows the same redirect rules as for the browser.",
+    "3. The server answers 200 with the JSON or JSON-LD representation and the same Vary header.",
+    "4. The client validates the body (schema, @context allowlist, rules) and compares the id with the URL.",
+    "5. A registry stores a digest of the bytes fetched with that Accept (prior record m07)."
+   ]
+  },
+  {
+   "name": "Renderer builds a human view from machine data (CIRPASS-2)",
+   "actors": [
+    "user of the CIRPASS-2 portal",
+    "dpp-renderer-fe",
+    "dpp-renderer-be",
+    "operator web server",
+    "Keycloak (OIDC)"
+   ],
+   "steps": [
+    "1. The user logs in through OpenID Connect; the view route is guarded.",
+    "2. The front end calls GET /fetch/v1?url=<passport URL> on the back end with Accept 'application/ld+json, application/json;q=0.9'.",
+    "3. The back end fetches the passport URL with one Accept header listing JSON-LD, JSON and RDF media types without q values.",
+    "4. It routes by the returned Content-Type: plain JSON is returned as is, JSON-LD is expanded, RDF is converted to JSON-LD with Jena and then expanded.",
+    "5. The front end renders ontology-aware components or a generic fallback; any other content type gives an UnsupportedContentTypeError."
+   ]
+  },
+  {
+   "name": "Engine test of a plain web passport (proposed)",
+   "actors": [
+    "dppce engine",
+    "system under test or reference server"
+   ],
+   "steps": [
+    "1. Decode the carrier and parse the URL (carrier.qr_decode, identifier.parse).",
+    "2. Fetch with a matrix of Accept and Accept-Language values and with HEAD; record status, Content-Type, Vary, Content-Language, Cache-Control, Set-Cookie (identifier.resolve per value today; identifier.negotiation_matrix proposed).",
+    "3. Validate the JSON (data.jsonschema, data.context, data.rules).",
+    "4. Parse the HTML statically: embedded JSON-LD, lang, title, alt, header cells, third-party origins (proposed data.html_embedded_parity, view.html_static_a11y, privacy.tracking_probe).",
+    "5. Probe roles and canaries on all channels including HTML (access.restricted_fields).",
+    "6. Record a manual result for rendering, contrast and readability (manual.review)."
+   ]
+  }
+ ],
+ "implementations": [
+  {
+   "name": "dppce reference system (project example)",
+   "url": "file:src/dppce/infrastructure/reference_server.py",
+   "kind": "server",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-18 (commit ed5779c)",
+   "evidence_level": "substantive",
+   "note": "Synthetic loopback server (http.server). Serves JSON at /dpp/{id}, HTML at /dpp/{id}.html, 303 from /01/{gtin}/21/{serial}. Ignores Accept; no Vary, Cache-Control, Content-Language, Set-Cookie or Link headers; only do_GET is defined. HTML: lang en, a title, one table with th scope=row. Fault flags cover leak_html, resolver_html and api_wrong_content_type but no negotiation, Vary, cookie or language faults. The project's worked example, not an authority."
+  },
+  {
+   "name": "CIRPASS-2 dpp-renderer-be",
+   "url": "https://github.com/CIRPASS-2/dpp-renderer-be",
+   "kind": "renderer",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-06-11; release 1.0.2-pgsql-oidc 2026-06-11",
+   "evidence_level": "substantive",
+   "note": "Java back end (JAX-RS, Mutiny and RESTEasy Reactive imports; build file not read). GET /fetch/v1?url= proxies a fetch with a long Accept list without q values, routes by Content-Type, expands JSON-LD with com.apicatalog.jsonld (Titanium per the m08 record), converts RDF with Jena; detects JSON-LD inside plain JSON by a regex for an @context key. Also search and comparison over a local store. Not a validator; a realistic client whose Accept header a passport server must handle."
+  },
+  {
+   "name": "CIRPASS-2 dpp-renderer-fe",
+   "url": "https://github.com/CIRPASS-2/dpp-renderer-fe",
+   "kind": "renderer",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-09-23; release 1.1.0 2026-09-23",
+   "evidence_level": "substantive",
+   "note": "Angular 19 and PrimeNG single-page app with QR scanner, ontology-aware JSON-LD components and a generic fallback, search and comparison. All functional routes need an OIDC login. index.html fixes lang en; no i18n assets in the tree; nginx serves index.html for every path. A mock EU portal, not a consumer passport view."
+  },
+  {
+   "name": "transpareo-time-machine",
+   "url": "https://github.com/transpareo/transpareo-time-machine",
+   "kind": "renderer",
+   "license": "GPL-3.0",
+   "last_activity": "pushed 2026-10-15",
+   "evidence_level": "metadata_only",
+   "note": "Repository description: framework-free single-page app that renders signature-verified passport pages from snapshots and EPCIS events. Code not read."
+  },
+  {
+   "name": "boebe-DPP-Viewer",
+   "url": "https://github.com/boebe24/boebe-DPP-Viewer",
+   "kind": "renderer",
+   "license": "MIT",
+   "last_activity": "pushed 2026-10-19",
+   "evidence_level": "metadata_only",
+   "note": "Android app that displays passport files; prior record r01 says it imports from a FAAAST (AAS) server, so it is adjacent to this family. Code not read."
+  },
+  {
+   "name": "axe-core",
+   "url": "https://github.com/dequelabs/axe-core",
+   "kind": "validator",
+   "license": "MPL-2.0",
+   "last_activity": "release v4.14.0 2026-10-05; pushed 2026-10-15",
+   "evidence_level": "substantive",
+   "note": "Rule engine for WCAG 2.0, 2.1 and 2.2 A to AAA and best practices. Its README claims it finds on average 57% of WCAG issues automatically and marks uncertain results 'incomplete' for manual review (vendor claim, not verified). Runs in a browser DOM, which conflicts with the engine rule that HTML is never rendered or executed; usable only as a separately sandboxed manual-step tool."
+  },
+  {
+   "name": "Pa11y",
+   "url": "https://github.com/pa11y/pa11y",
+   "kind": "validator",
+   "license": "LGPL-3.0",
+   "last_activity": "release 10.0.0 2026-08-28; pushed 2026-10-19",
+   "evidence_level": "metadata_only",
+   "note": "Command-line accessibility tester; only repository metadata read. Like axe-core it needs a headless browser."
+  },
+  {
+   "name": "DPP prototype for a coffee machine (Kroell and Schoen)",
+   "url": "https://doi.org/10.5281/zenodo.18433713",
+   "kind": "pilot",
+   "license": "CC-BY-4.0",
+   "last_activity": "2026-01-30 (Zenodo record)",
+   "evidence_level": "metadata_only",
+   "note": "Abstract and Zenodo metadata only: FastAPI back end with information-specific endpoints, JSON-LD data format and a web interface. An academic example of this family; the PDF was not read."
+  }
+ ],
+ "literature": [
+  {
+   "doi": "10.5281/zenodo.18433713",
+   "title": "Design and Implementation of a Digital Product Passport Prototype for a Coffee Machine in the Circular Economy",
+   "year": 2026,
+   "venue": "Zenodo (repository record)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Plain web passport prototype: REST back end, JSON-LD format, web interface. A duplicate record 10.5281/zenodo.18433712 also exists."
+  },
+  {
+   "doi": "10.1109/iv68685.2025.00061",
+   "title": "DPPviewer: A Visual Analytics Approach for Optimizing Production Chains on Digital Product Passports",
+   "year": 2025,
+   "venue": "not stated by SciSpace (DOI prefix 10.1109)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Argues that passports are built for machines and need dedicated human views; a renderer-side contribution."
+  },
+  {
+   "doi": "10.1109/exp.at2565440.2025.11348357",
+   "title": "Demonstration of a Digital Product Passport System for Second-Hand Electronic Devices",
+   "year": 2025,
+   "venue": "not stated by SciSpace (DOI prefix 10.1109)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Open-source microservice DPP system with public product information; mixes web serving with a blockchain registry (hybrid)."
+  },
+  {
+   "doi": "10.1002/bse.4346",
+   "title": "Digital Product Passports as Information Providers for Consumers—The Case of Digital Battery Passports",
+   "year": 2025,
+   "venue": "Business Strategy and the Environment",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Survey (n=211) of which battery passport attributes consumers value; informs what the human view must show first."
+  },
+  {
+   "doi": "10.1016/j.spc.2025.01.014",
+   "title": "Enabling a dynamic information flow in digital product passports during product use phase: A literature review and proposed framework",
+   "year": 2025,
+   "venue": "Sustainable Production and Consumption",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Review of 25 DPP frameworks including user access and verification; notes QR carriers dominate."
+  },
+  {
+   "doi": "10.1145/2461121.2461124",
+   "title": "Benchmarking web accessibility evaluation tools: measuring the harm of sole reliance on automated tests",
+   "year": 2013,
+   "venue": "Unknown Journal (as returned by Consensus)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Six tools covered at most half of WCAG 2.0 success criteria with low completeness; evidence that automated checks cannot give a WCAG verdict. Outside the 2021-2026 window, kept as the baseline benchmark."
+  },
+  {
+   "doi": "10.1007/s10209-025-01263-x",
+   "title": "Coverage of web accessibility guidelines provided by automated checking tools",
+   "year": 2025,
+   "venue": "Universal Access in the Information Society",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Tools cover about one sixth of WCAG success criteria and disagree; supports keeping most WCAG judgments manual."
+  },
+  {
+   "doi": "10.1007/s42486-023-00127-8",
+   "title": "Web accessibility automatic evaluation tools: to what extent can they be automated?",
+   "year": 2023,
+   "venue": "CCF Transactions on Pervasive Computing and Interaction",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Classifies WCAG 2.1 criteria by how far they can be tested automatically; input for choosing a static subset."
+  },
+  {
+   "doi": "10.1109/icarc64760.2025.10963173",
+   "title": "Assessing the Limits of Automated Accessibility Testing: Insights for QA Engineers and Tool Developers",
+   "year": 2025,
+   "venue": "ICARC 2025",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Compares seven tools (including axe and Lighthouse) against manual testing at WCAG A and AA."
+  },
+  {
+   "doi": "10.1371/journal.pone.0115253",
+   "title": "Scholarly Context Not Found: One in Five Articles Suffers from Reference Rot",
+   "year": 2014,
+   "venue": "PLoS ONE",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Defines reference rot as link rot plus content drift and measures it at scale; the failure model for passport URLs over 10 years. Outside the window, kept as the defining study."
+  },
+  {
+   "doi": "10.1145/3849476",
+   "title": "URL Rot in Software Engineering Scholarly Works",
+   "year": 2026,
+   "venue": "ACM Transactions on Software Engineering and Methodology",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Recent URL survival estimate (half-life about 11 years, HTTPS URLs more stable); a reference for the scale of link rot over a passport's lifetime."
+  },
+  {
+   "doi": "10.1108/ajim-05-2025-0286",
+   "title": "Link rot in LIS literature: a 20-year study of web citation decay, recovery and preservation challenges",
+   "year": 2026,
+   "venue": "Aslib Journal of Information Management",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Reports that database-driven content decays faster than static files; relevant to dynamic versus static passport hosting."
+  },
+  {
+   "doi": "10.48550/arxiv.2204.10097",
+   "title": "Content negotiation on the Web: State of the art",
+   "year": 2022,
+   "venue": "arXiv",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Survey of negotiation styles and dimensions; states that the problem is not solved, which matches the absence of a DPP-specific negotiation profile."
+  },
+  {
+   "doi": "10.1016/j.websem.2012.02.001",
+   "title": "An empirical survey of Linked Data conformance",
+   "year": 2012,
+   "venue": "Journal of Web Semantics",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Large crawl showing that providers often omit human-readable metadata and licences; an early measurement of the human/machine parity gap. Outside the window."
+  },
+  {
+   "doi": "10.48550/arxiv.1003.3661",
+   "title": "An HTTP-Based Versioning Mechanism for Linked Data",
+   "year": 2010,
+   "venue": "arXiv",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Memento datetime negotiation for past versions at a stable URI; a candidate pattern for passport version access. Outside the window."
+  }
+ ],
+ "conformance_implications": [
+  {
+   "layer": "L03",
+   "test_objective": "A GET with Accept application/json (or application/ld+json) on the carrier URL gives the machine representation.",
+   "observable": "Final status, Content-Type and body after redirects.",
+   "oracle": "Declared representation set in the IXIT; RFC 9110 section 12.1 (server selects among representations); ESPR Art. 10(1)(d) machine-readable where appropriate.",
+   "existing_check": "identifier.resolve (accept='application/json' or 'application/ld+json', accepted_media_types listing the JSON types)",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "none",
+   "fixtures_needed": "Reference server variant that negotiates; fault that always returns HTML.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "A GET with a browser-like Accept on the same URL gives text/html.",
+   "observable": "Final status and Content-Type.",
+   "oracle": "Declared representation set; CIRPASS-2 assumption that a plain browser gets HTML (prior record m07, non-normative).",
+   "existing_check": "identifier.resolve (accept='text/html,application/xhtml+xml;q=0.9,*/*;q=0.8', accepted_media_types=['text/html'])",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "none for one value; the reference server today fails this because it serves HTML only at /dpp/{id}.html",
+   "fixtures_needed": "Negotiating reference-server layout; IXIT flag declaring single-URL negotiation.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "Every negotiated response names the selecting request fields in Vary.",
+   "observable": "Vary header of each response in an Accept and Accept-Language matrix; whether bodies differ across the matrix.",
+   "oracle": "RFC 9110 section 12.5.5 (Vary lists fields that influenced selection); RFC 9111 section 4.1 (cache key). Pass if bodies differ only when Vary lists the varied field; 'Vary: *' passes but is reported.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "identifier.negotiation_matrix (proposed in m07): several Accept and Accept-Language values in one step, records Vary, Content-Type, Content-Language, Content-Location",
+   "fixtures_needed": "Fault flag negotiation_no_vary on a negotiating reference server.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "An Accept that matches nothing gives either 406 (with a list of alternatives) or the declared default representation, as declared.",
+   "observable": "Status, Content-Type and body for Accept 'application/x-unknown'.",
+   "oracle": "RFC 9110 sections 12.1 and 15.5.7 allow both; the IXIT must declare which. A 5xx or an undeclared behaviour fails.",
+   "existing_check": "identifier.resolve can see the status; no check reads a declaration of the default",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "identifier.negotiation_matrix with an IXIT field for the declared no-match behaviour",
+   "fixtures_needed": "Two server variants: 406 and default.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "q weights decide the representation: 'text/html;q=0.9, application/json;q=0.5' gives HTML; 'application/json, text/html;q=0.1' gives JSON; 'application/json;q=0' never gives JSON.",
+   "observable": "Content-Type per Accept value.",
+   "oracle": "RFC 9110 section 12.4.2 (q weight 0 to 1, q=0 not acceptable) and 12.5.1.",
+   "existing_check": "identifier.resolve per value",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "identifier.negotiation_matrix",
+   "fixtures_needed": "Accept vectors including the CIRPASS-2 renderer-be Accept list (many types, no q values) and the renderer-fe list.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "HEAD on the passport URL returns the same status and header fields as GET without a body.",
+   "observable": "Status and headers of HEAD and GET.",
+   "oracle": "RFC 9110 section 9.3.2 (same header fields; may omit fields only known while generating content).",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "identifier.negotiation_matrix with a HEAD probe (HEAD is a read-only method the transport allows)",
+   "fixtures_needed": "Reference server needs do_HEAD; fault head_501.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "JSON-LD embedded in the HTML view equals the JSON-LD (or JSON) representation of the same passport.",
+   "observable": "All script elements of type application/ld+json in the HTML, merged as one dataset; the JSON-LD representation.",
+   "oracle": "JSON-LD 1.1 section 7 (extraction and merging; base IRI 7.1; fragment selection 7.3). Pass if both expand to equal values with pinned local contexts (or are equal JSON values when no context is used).",
+   "existing_check": "none (identifier.consistency compare_item compares two JSON routes only)",
+   "existing_capability": "none",
+   "new_capability_needed": "data.html_embedded_parity: static HTML parse (no rendering), JSON-LD expansion with pinned contexts and no network fetch",
+   "fixtures_needed": "HTML with matching and with stale embedded JSON-LD; HTML with two script blocks; HTML with a <base> element.",
+   "reusable_suite": "W3C JSON-LD 1.1 test suite (HTML tests), https://w3c.github.io/json-ld-api/tests/ (not retrieved in this session)",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Each public field value of the JSON representation appears in the text of the HTML view (value parity without rendering).",
+   "observable": "Text nodes of the HTML after entity decoding; public field paths from the access policy.",
+   "oracle": "Engineering target declared by the operator; no law read requires it. Pass if every declared public path's scalar value is found; units and labels stay manual.",
+   "existing_check": "access.restricted_fields reads the html channel for leaks only",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "view.value_presence (static text search; cannot judge a JavaScript-rendered view, which gives blocked)",
+   "fixtures_needed": "Reference HTML (table view); stale HTML fault; SPA shell with no data in the HTML.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "The consumer view (HTML and JSON) is served to an anonymous request with no registration, login redirect or password.",
+   "observable": "Status, redirect chain hosts, and presence of the data for role anonymous.",
+   "oracle": "Regulation (EU) 2025/2509, Art. 20(4); Regulation (EU) 2026/405, Art. 22(d); ESPR Art. 11(b) and Batteries Art. 78(b) for free access by access rights.",
+   "existing_check": "identifier.resolve (anonymous, text/html and JSON) plus access.restricted_fields (role anonymous; 401 or 403 on fetch with an entitled path fails)",
+   "existing_capability": "identifier.resolve; access.policy",
+   "new_capability_needed": "none for JSON; an html entitlement rule in access.restricted_fields (today html is read for leaks only)",
+   "fixtures_needed": "Fault html_login_redirect (302 to an OIDC host).",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "The anonymous consumer path sets no cookies and references no third-party origin for scripts, frames, images, fonts or beacons.",
+   "observable": "Set-Cookie headers on every response of the anonymous HTML and JSON fetches; origins of src and href attributes in the static HTML.",
+   "oracle": "Regulation (EU) 2025/2509, Art. 20(10); Regulation (EU) 2026/405, Art. 19(2) and 22(h); Directive 2002/58/EC, Art. 5(3) as background. A finding is a fail only against an operator declaration of the allowed origins and cookies; whether a cookie is 'strictly necessary' stays manual.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "privacy.tracking_probe (proposed in m01), static only: header and attribute scan; requests made by JavaScript are not observable because the engine does not execute HTML",
+   "fixtures_needed": "HTML with an analytics script on another origin; response with Set-Cookie; clean page.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "Restricted representations are not stored by shared caches, and the HTML view leaks no withheld field.",
+   "observable": "Cache-Control and Vary on responses to requests with Authorization; canaries in HTML and JSON for each role.",
+   "oracle": "RFC 9111 sections 5.2.2.7 (private) and 5.2.2.9 (public allows shared reuse with Authorization); declared access policy for canaries.",
+   "existing_check": "access.restricted_fields (canaries on the html channel)",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "header rule for Cache-Control on restricted responses, as part of identifier.negotiation_matrix or access.restricted_fields",
+   "fixtures_needed": "Fault restricted_public_cache (Cache-Control: public on a role response).",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The HTML view declares its language with a valid BCP 47 tag, Content-Language agrees, and a requested available language is served.",
+   "observable": "lang attribute on html; Content-Language header; response to Accept-Language for each declared language.",
+   "oracle": "WCAG 2.2 SC 3.1.1 (language of page); RFC 5646 tag validity against the IANA registry; RFC 9110 sections 8.5 and 12.5.4; law: toys Art. 19(2)(e), detergents Art. 21(2)(e), ESPR Art. 7(8). Detergents Art. 19(1)(h) (no language limit by location) needs tests from several network locations and stays manual.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "view.html_static_a11y (lang presence and tag validity with a pinned registry file) plus identifier.negotiation_matrix (Accept-Language)",
+   "fixtures_needed": "Pinned IANA Language Subtag Registry file; HTML with lang missing, invalid and mismatched.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The HTML view passes the WCAG 2.2 checks that a static parse can decide, and reports the rest as not tested.",
+   "observable": "Static DOM: title element, img alt, table header cells, form labels, duplicate ids, lang.",
+   "oracle": "WCAG 2.2 SC 1.1.1, 1.3.1, 2.4.2, 3.1.1 at the declared level; outcomes modelled on ACT Rules Format 1.1 (passed, failed, inapplicable, cantTell, untested). No law read makes WCAG mandatory for passports; detergent digital labels must serve persons with disabilities (Regulation (EU) 2026/405, Art. 19(1)(e)). A full WCAG conformance claim needs manual review (W3C WAI tool guidance).",
+   "existing_check": "manual.review for the parts that need rendering",
+   "existing_capability": "manual.review",
+   "new_capability_needed": "view.html_static_a11y (static subset only; contrast 1.4.3 and reflow 1.4.10 need rendering and stay manual)",
+   "fixtures_needed": "Reference HTML; variants missing title, alt and header markup.",
+   "reusable_suite": "W3C ACT Rules (https://www.w3.org/WAI/standards-guidelines/act/rules/, not retrieved in this session); axe-core rules as a manual-step aid",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "The carrier URL and the final URL use https; an http request redirects to https.",
+   "observable": "Scheme of the carrier URL, each hop and the final URL.",
+   "oracle": "EU registry user guide https rule (prior records m01 and m07; not re-read here). No article read sets https.",
+   "existing_check": "identifier.parse (accepts http too) and identifier.resolve (records the chain)",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "a scheme assertion parameter on identifier.resolve or in identifier.negotiation_matrix",
+   "fixtures_needed": "Carrier fixture with an http URL; downgrade redirect fault.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L06",
+   "test_objective": "The passport URL stays resolvable over time (no link rot, no certificate expiry, no soft 404).",
+   "observable": "Scheduled GETs: status, TLS validity, body digest, answer for an unknown serial (404 or 410 versus 200).",
+   "oracle": "ESPR Art. 11(e); toys Art. 19(2)(g) (10 years); detergents Art. 21(2)(g); RFC 9110 15.5.11 for 410. A limited series cannot prove lifetime availability.",
+   "existing_check": "identifier.resolve (single run; 404 or 410 gives IDENTIFIER.UNRESOLVED)",
+   "existing_capability": "persistence.scheduled (interface_only)",
+   "new_capability_needed": "none new; persistence.scheduled must move from interface_only to supported",
+   "fixtures_needed": "Unknown-serial probe; soft-404 fault (200 HTML for an unknown id).",
+   "reusable_suite": "none",
+   "network_needed": "live-sut"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "version and updated_at agree across JSON, embedded JSON-LD and the visible HTML, and the version history obeys the declared rule.",
+   "observable": "The fields in each representation; /versions endpoint.",
+   "oracle": "Operator update rule (reference-system section 4.3); Batteries Art. 77(4), toys Art. 19(2)(d) and detergents Art. 21(2)(d) on accurate, up-to-date data.",
+   "existing_check": "persistence.versions (JSON only)",
+   "existing_capability": "persistence.versions",
+   "new_capability_needed": "data.html_embedded_parity covers the HTML side",
+   "fixtures_needed": "Stale-HTML fault with an older version number.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L09",
+   "test_objective": "The URL in the registry record equals the served passport URL and the id in the JSON.",
+   "observable": "Mock registry record; passport JSON.",
+   "oracle": "ESPR Art. 13(4); declared registry mapping.",
+   "existing_check": "registry.consistency",
+   "existing_capability": "registry.mock",
+   "new_capability_needed": "none (registry.official stays interface_only)",
+   "fixtures_needed": "Existing registry_inconsistent fault.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  }
+ ],
+ "failure_modes": [
+  {
+   "layer": "L03",
+   "fault": "Server ignores Accept and always returns HTML, so registries and renderers get no machine data.",
+   "detectable_by": "identifier.resolve with accept='application/ld+json' fails with IDENTIFIER.RESPONSE.MEDIA_TYPE."
+  },
+  {
+   "layer": "L03",
+   "fault": "Server negotiates but omits 'Vary: Accept'; a CDN then serves JSON to browsers or HTML to machines.",
+   "detectable_by": "Negotiation matrix: bodies differ across Accept values while Vary does not list Accept."
+  },
+  {
+   "layer": "L03",
+   "fault": "Server matches Accept by exact string or first token and ignores q weights, for example returning JSON for 'application/json;q=0'.",
+   "detectable_by": "Negotiation matrix with weighted Accept vectors."
+  },
+  {
+   "layer": "L03",
+   "fault": "Server picks text/plain or application/xml from a long unweighted Accept list (as sent by CIRPASS-2 renderer-be), so the client parses the body as N-Triples or RDF/XML.",
+   "detectable_by": "Negotiation matrix with the renderer-be Accept string; Content-Type must be one the operator declared for machine use."
+  },
+  {
+   "layer": "L03",
+   "fault": "406 to a browser's default Accept because the server does not treat */* as a wildcard.",
+   "detectable_by": "identifier.resolve with a browser Accept expecting text/html."
+  },
+  {
+   "layer": "L03",
+   "fault": "HEAD not implemented (501) or returns other headers than GET.",
+   "detectable_by": "HEAD probe in the negotiation matrix; the reference server's handler defines only do_GET."
+  },
+  {
+   "layer": "L05",
+   "fault": "HTML view and JSON are built by different pipelines and drift: the HTML shows an older version or other values.",
+   "detectable_by": "data.html_embedded_parity and view.value_presence."
+  },
+  {
+   "layer": "L05",
+   "fault": "The HTML is a single-page-app shell (index.html for every path) that shows data only after JavaScript runs, so non-browser clients and static checks see no passport.",
+   "detectable_by": "view.value_presence gives blocked or fail on an HTML body without data; the CIRPASS-2 renderer-fe nginx try_files pattern is an example of the shell form."
+  },
+  {
+   "layer": "L05",
+   "fault": "Missing or wrong lang attribute, or Content-Language that disagrees with the content.",
+   "detectable_by": "view.html_static_a11y and the Accept-Language matrix."
+  },
+  {
+   "layer": "L05",
+   "fault": "Images of text or icons without alt text carry hazard or recycling information.",
+   "detectable_by": "view.html_static_a11y (img without alt fails SC 1.1.1); whether the alt text is adequate stays manual."
+  },
+  {
+   "layer": "L07",
+   "fault": "Consumer view behind a login or consent wall, or redirect to an identity provider.",
+   "detectable_by": "identifier.resolve anonymous: final host or status differs from the declared public view; html entitlement rule."
+  },
+  {
+   "layer": "L07",
+   "fault": "Analytics script, tracking pixel, third-party font or CDN on the consumer page; Set-Cookie on first visit.",
+   "detectable_by": "privacy.tracking_probe static scan of headers and attributes."
+  },
+  {
+   "layer": "L07",
+   "fault": "Restricted fields rendered in the anonymous HTML while the JSON hides them.",
+   "detectable_by": "access.restricted_fields with canaries on the html channel (reference fault leak_html)."
+  },
+  {
+   "layer": "L07",
+   "fault": "Response to a request with Authorization sent with Cache-Control public, so a shared cache serves restricted data to anonymous users.",
+   "detectable_by": "Header rule on restricted responses."
+  },
+  {
+   "layer": "L06",
+   "fault": "Soft 404: an unknown or withdrawn serial returns 200 with an HTML error page.",
+   "detectable_by": "identifier.resolve on an unknown identifier expecting 404 or 410."
+  },
+  {
+   "layer": "L06",
+   "fault": "Domain or TLS certificate lapses after the operator exits the market; the back-up copy exists but the carrier URL does not lead to it.",
+   "detectable_by": "Scheduled acquisition (persistence.scheduled, interface_only); not detectable in one run."
+  },
+  {
+   "layer": "L11",
+   "fault": "Renderer fetch proxy (GET /fetch/v1?url=) fetches arbitrary URLs including internal addresses (server-side request forgery).",
+   "detectable_by": "Not a passport-server test; for a renderer under test, a loopback probe with a private-address URL (prior record m07 failure mode 12)."
+  }
+ ],
+ "sources": [
+  {
+   "id": "new-dppce-reference-system",
+   "title": "Reference DPP system and data formats (docs/reference/reference-system.md) and src/dppce/infrastructure/reference_server.py",
+   "issuing_body": "dpp-conformance-engine project",
+   "url": "file:docs/reference/reference-system.md; file:src/dppce/infrastructure/reference_server.py",
+   "edition_or_version": "worktree state, last change commit ed5779c (2026-10-18)",
+   "publication_date": "2026-10-18",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (pyproject.toml)",
+   "what_it_shows": "The project's example of this family: endpoints, separate HTML path, 303 from a GS1-shaped path, no Accept handling, no Vary or cookies, only do_GET, HTML with lang en and th scope=row, fault flags including leak_html."
+  },
+  {
+   "id": "new-rfc-9110",
+   "title": "HTTP Semantics",
+   "issuing_body": "IETF (RFC Editor)",
+   "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+   "edition_or_version": "RFC 9110, STD 97",
+   "publication_date": "2022-06",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust legal provisions; cite, do not republish (not re-read)",
+   "what_it_shows": "Read in four chunks (characters 100000 to 500000): sections 8.5, 8.7, 9.3.2, 12.1 to 12.5.5, 15.4.1, 15.4.4, 15.5.7, 15.5.11."
+  },
+  {
+   "id": "new-rfc-9111",
+   "title": "HTTP Caching",
+   "issuing_body": "IETF (RFC Editor)",
+   "url": "https://www.rfc-editor.org/rfc/rfc9111.html",
+   "edition_or_version": "RFC 9111, STD 98, obsoletes RFC 7234",
+   "publication_date": "2022-06",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust legal provisions (not re-read)",
+   "what_it_shows": "Section 4.1 Vary cache keys and the known problem of negotiated responses without Vary; directives no-store, no-cache, max-age, private, public (5.2)."
+  },
+  {
+   "id": "new-rfc-5646",
+   "title": "Tags for Identifying Languages",
+   "issuing_body": "IETF (RFC Editor)",
+   "url": "https://www.rfc-editor.org/rfc/rfc5646.html",
+   "edition_or_version": "RFC 5646, BCP 47, obsoletes RFC 4646",
+   "publication_date": "2009-09",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust legal provisions (not re-read)",
+   "what_it_shows": "First 100000 characters: tag syntax, subtag types, IANA registry role, case-insensitivity. The ISO code lists that subtags draw on are named only."
+  },
+  {
+   "id": "new-w3c-json-ld-11",
+   "title": "JSON-LD 1.1",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/json-ld11/",
+   "edition_or_version": "not re-checked in this session (status block not in the chunks read)",
+   "publication_date": "not re-checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence (not re-read)",
+   "what_it_shows": "Sections 6.1, 6.2 and 7 to 7.3 read (characters 420000 to 520000): context Link header, alternate Link for HTML, script element embedding, base IRI, escaping, fragment selection, merging of script blocks. Reuses the m08 source id."
+  },
+  {
+   "id": "wcag-2-2",
+   "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+   "issuing_body": "W3C Accessibility Guidelines Working Group",
+   "url": "https://www.w3.org/TR/WCAG22/",
+   "edition_or_version": "W3C Recommendation 12 December 2024; this version https://www.w3.org/TR/2024/REC-WCAG22-20241212/",
+   "publication_date": "2024-12-12",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Copyright W3C; W3C Document License https://www.w3.org/copyright/document-license/",
+   "what_it_shows": "Status and licence confirmed today (the 2026-10-13 catalogue record was metadata_only and had not read the licence). First 100000 characters: levels A, AA, AAA; conformance requirements 5.2.1 to 5.2.5 from the table of contents; SC 1.1.1, 1.3.1, 1.4.3, 1.4.10, 2.4.2 text; 3.1.1, 3.1.2 and 4.1.2 seen in the table of contents only."
+  },
+  {
+   "id": "new-w3c-act-rules-format-1-1",
+   "title": "Accessibility Conformance Testing (ACT) Rules Format 1.1",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/act-rules-format-1.1/",
+   "edition_or_version": "W3C Recommendation, this version https://www.w3.org/TR/2026/REC-act-rules-format-1.1-20260205/",
+   "publication_date": "2026-02-05",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence (not read)",
+   "what_it_shows": "Atomic and composite rules; outcomes passed, failed, inapplicable, cantTell, untested; rules may be implemented automatically, semi-automatically or manually."
+  },
+  {
+   "id": "new-w3c-wai-selecting-tools",
+   "title": "Selecting Web Accessibility Evaluation Tools",
+   "issuing_body": "W3C Web Accessibility Initiative",
+   "url": "https://www.w3.org/WAI/test-evaluate/tools/selecting/",
+   "edition_or_version": "last updated 13 May 2024",
+   "publication_date": "2024-05-13",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C (not read)",
+   "what_it_shows": "Tools cannot decide alone whether a site is accessible; many checks need human judgment; tools can give false or misleading results."
+  },
+  {
+   "id": "new-w3c-vc-render-method",
+   "title": "Verifiable Credential Rendering Methods v1.0",
+   "issuing_body": "W3C (editor's copy on w3c.github.io; group not named on the page)",
+   "url": "https://w3c.github.io/vc-render-method/",
+   "edition_or_version": "no date or maturity label shown; self-described experimental",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated in the part read",
+   "what_it_shows": "renderMethod as a VCDM 2.1 extension point; SuiteRenderMethod with summary, html and static suites; digestMultibase (base64url, SHA-256); html suite must pass accessibility and locale settings; summary fields with language tags."
+  },
+  {
+   "id": "new-untp-wip-vc-profile",
+   "title": "UNTP Verifiable Credentials, Work in Progress",
+   "issuing_body": "UN/CEFACT (UNECE)",
+   "url": "https://untp.unece.org/docs/specification/VerifiableCredentials",
+   "edition_or_version": "Work in Progress (versions 0.7.0 and 0.6.0 listed)",
+   "publication_date": "not stated (copyright 2026)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not re-read (see m05)",
+   "what_it_shows": "renderMethod SHOULD, RenderTemplate2024 with url, mediaType text/html, digestMultibase; template versioning and privacy advice; renderer isolation; W3C draft called not fit for production. Reuses the m05 source id."
+  },
+  {
+   "id": "new-eaa-dir-2019-882",
+   "title": "Directive (EU) 2019/882 of the European Parliament and of the Council of 17 April 2019 on the accessibility requirements for products and services",
+   "issuing_body": "European Parliament and Council (Publications Office, Cellar)",
+   "url": "http://publications.europa.eu/resource/cellar/6eb3ceb5-8905-11e9-9369-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Official Journal text dated 7 June 2019 (original text; OJ series not read; consolidated versions not checked)",
+   "publication_date": "2019-06-07",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; reuse under Commission Decision 2011/833/EU (not re-read)",
+   "what_it_shows": "Read characters 0 to 400000: Art. 2 scope (listed products and services; no passport), Art. 3 definitions, Art. 4, Art. 24, Art. 31 (apply from 28 June 2025), Art. 32, Annex I Section I point 1 (information on and off the product), Section III(c) (websites perceivable, operable, understandable, robust), Section IV, Section VI. No mention of digital product passports found."
+  },
+  {
+   "id": "reg-eu-2024-1781",
+   "title": "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products",
+   "issuing_body": "European Parliament and Council (Publications Office, Cellar)",
+   "url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "OJ citation not re-checked in this session (same Cellar URL as m01)",
+   "publication_date": "not re-checked (see m01)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Whole text scanned in chunks for accessibility, language, access and format terms: Arts 2(28), 2(30), 7(5), 7(7), 7(8), 9(2)(e), 9(3)(a), 10(1)(d), 10(3), 10(4), 11(a) to 11(h), 13, 27(7), 27(9), 31(2), Annex III. No accessibility duty for persons with disabilities on the passport found; Art. 27(9) concerns complaint channels."
+  },
+  {
+   "id": "reg-eu-2023-1542",
+   "title": "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries",
+   "issuing_body": "European Parliament and Council (Publications Office, Cellar)",
+   "url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "edition_or_version": "consolidated text (Cellar expression as in m01)",
+   "publication_date": "not re-checked (m01 records consolidated 13.08.2026)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Characters 0 to 200000 and 330000 to 430000: Art. 13(6) QR code, Art. 38(1)(a) and 74(1)(b) language, Arts 77 and 78 in full. No mention of persons with disabilities in the chunks read."
+  },
+  {
+   "id": "new-reg-eu-2025-2509-toys",
+   "title": "Regulation (EU) 2025/2509 of the European Parliament and of the Council on the safety of toys",
+   "issuing_body": "European Parliament and Council (Publications Office, Cellar)",
+   "url": "http://publications.europa.eu/resource/cellar/f2294563-d703-11f0-8da2-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "OJ text (Cellar expression as in m01)",
+   "publication_date": "not re-checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Characters 200000 to 300000: Art. 19 (passport content, languages, 10 years, carrier, Safety Gate link, back-up) and Art. 20 (interoperability, open standards, free access, no registration or password, no tracking, no personal data without consent). No accessibility clause."
+  },
+  {
+   "id": "new-reg-eu-2026-405-detergents",
+   "title": "Regulation (EU) 2026/405 of the European Parliament and of the Council on detergents and surfactants",
+   "issuing_body": "European Parliament and Council (Publications Office, Cellar)",
+   "url": "http://publications.europa.eu/resource/cellar/886a72ea-15d9-11f1-8870-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "OJ text (Cellar expression as in m01)",
+   "publication_date": "not re-checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Characters 150000 to 250000: Art. 19 digital label (persons with disabilities 19(1)(e), common browsers 19(1)(f), 10 years 19(1)(g), no language limit by location 19(1)(h), no tracking 19(2), other means when down 19(3)), Art. 21 passport, Art. 22 design (free of charge, no registration or password, no tracking)."
+  },
+  {
+   "id": "new-eprivacy-dir-2002-58",
+   "title": "Directive 2002/58/EC of the European Parliament and of the Council of 12 July 2002 concerning the processing of personal data and the protection of privacy in the electronic communications sector",
+   "issuing_body": "European Parliament and Council (Publications Office, Cellar)",
+   "url": "http://publications.europa.eu/resource/cellar/cb5af945-9d9f-40e6-acee-bd0c5bb4ed0a.0008.01/DOC_1",
+   "edition_or_version": "original text, OJ L 201, 31.7.2002; the expression returned was the Italian language version; amendments not read",
+   "publication_date": "2002-07-31",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Original Art. 5(3): storing or reading information on the user's terminal only with clear information and a right to refuse, with exemptions for transmission and for a service the user explicitly requested. The later amended wording was not read, so the current text is not stated here."
+  },
+  {
+   "id": "cirpass2-github-repositories",
+   "title": "CIRPASS-2 GitHub repositories (dpp-renderer-be, dpp-renderer-fe read in this session)",
+   "issuing_body": "CIRPASS-2 consortium",
+   "url": "https://github.com/CIRPASS-2",
+   "edition_or_version": "dpp-renderer-be releases 1.0.2-pgsql-oidc and 1.0.2-mariadb-oidc (2026-06-11); dpp-renderer-fe release 1.1.0 (2026-09-23), package.json 1.2.0",
+   "publication_date": "2026-09-23 (latest renderer release)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (GitHub API)",
+   "what_it_shows": "Read with gh api: DPPFetcher.java, RDFTypes.java, CommonUtils.java, DPPFetchResource.java; dpp-renderer-fe index.html, deploy/nginx.conf, app.routes.ts, dpp-fetch.service.ts, package.json, README. Reuses the m07 source id."
+  },
+  {
+   "id": "new-cirpass2-d41-reference-architecture",
+   "title": "D4.1 Reference Architecture",
+   "issuing_body": "CIRPASS-2 consortium (Zenodo)",
+   "url": "https://zenodo.org/records/20720002",
+   "edition_or_version": "DOI 10.5281/zenodo.20720002; file 'D4.1 REFERENCE ARCHITECTURE V1.1.pdf'",
+   "publication_date": "2026-06-16",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 (Zenodo metadata)",
+   "what_it_shows": "Zenodo metadata only in this session; the content claims about section 3.1 content negotiation rely on prior record m07, which read the PDF."
+  },
+  {
+   "id": "cirpass2-test-environment-description",
+   "title": "CIRPASS-2 OPEN SOURCE TEST ENVIRONMENT",
+   "issuing_body": "CIRPASS-2 consortium (Zenodo)",
+   "url": "https://zenodo.org/records/20749604",
+   "edition_or_version": "DOI 10.5281/zenodo.20749604; file CIRPASS2_TestEnvironment_Description.pdf",
+   "publication_date": "2026-06-16",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 (Zenodo metadata)",
+   "what_it_shows": "Zenodo metadata only in this session; design assumption 3.1 (HTML for browsers, data for JSON Accept) is taken from prior record m07."
+  },
+  {
+   "id": "prior-record-m07",
+   "title": "Project prior record m07-eu-reference-pilots.json",
+   "issuing_body": "dpp-conformance-engine project research",
+   "url": "file:docs/research/raw/implementation-methods/m07-eu-reference-pilots.json",
+   "edition_or_version": "retrieval_date 2026-10-19",
+   "publication_date": "2026-10-19",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "project internal",
+   "what_it_shows": "Summaries of CIRPASS-2 D4.1, the test environment report, the mock registry fetch and the EU registry user guide, used here where the originals were not re-read."
+  },
+  {
+   "id": "prior-record-m01",
+   "title": "Project prior record m01-law-baseline.json",
+   "issuing_body": "dpp-conformance-engine project research",
+   "url": "file:docs/research/raw/implementation-methods/m01-law-baseline.json",
+   "edition_or_version": "retrieval_date 2026-10-19",
+   "publication_date": "2026-10-19",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "project internal",
+   "what_it_shows": "Law baseline, the proposed privacy.tracking_probe capability, and the EU registry https rule as summarised there."
+  },
+  {
+   "id": "new-axe-core",
+   "title": "dequelabs/axe-core repository and README",
+   "issuing_body": "Deque Systems",
+   "url": "https://github.com/dequelabs/axe-core",
+   "edition_or_version": "v4.14.0",
+   "publication_date": "2026-10-05",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MPL-2.0 (GitHub API)",
+   "what_it_shows": "README claims about WCAG 2.0 to 2.2 rule coverage, 'on average 57%' of issues found automatically, 'incomplete' results for manual review (vendor claims)."
+  },
+  {
+   "id": "new-pa11y",
+   "title": "pa11y/pa11y repository metadata",
+   "issuing_body": "Pa11y project",
+   "url": "https://github.com/pa11y/pa11y",
+   "edition_or_version": "10.0.0",
+   "publication_date": "2026-08-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "LGPL-3.0 (GitHub API)",
+   "what_it_shows": "Licence, latest release and push date only."
+  },
+  {
+   "id": "new-transpareo-time-machine",
+   "title": "transpareo/transpareo-time-machine repository metadata",
+   "issuing_body": "transpareo",
+   "url": "https://github.com/transpareo/transpareo-time-machine",
+   "edition_or_version": "no release checked",
+   "publication_date": "pushed 2026-10-15",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "GPL-3.0 (GitHub API)",
+   "what_it_shows": "Repository description and licence."
+  },
+  {
+   "id": "new-boebe-dpp-viewer",
+   "title": "boebe24/boebe-DPP-Viewer repository metadata",
+   "issuing_body": "individual maintainer",
+   "url": "https://github.com/boebe24/boebe-DPP-Viewer",
+   "edition_or_version": "no release checked",
+   "publication_date": "pushed 2026-10-19",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MIT (GitHub API)",
+   "what_it_shows": "Repository description and licence."
+  },
+  {
+   "id": "new-kroell-coffee-dpp-zenodo",
+   "title": "Design and Implementation of a Digital Product Passport Prototype for a Coffee Machine in the Circular Economy",
+   "issuing_body": "Zenodo (authors Markus Kroell, Gabriel Lukas Schoen)",
+   "url": "https://doi.org/10.5281/zenodo.18433713",
+   "edition_or_version": "Zenodo record 18433713",
+   "publication_date": "2026-01-30",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 (Zenodo metadata)",
+   "what_it_shows": "Zenodo metadata via the Zenodo API and the abstract from SciSpace; PDF not read."
+  }
+ ],
+ "open_questions": [
+  "Should the reference system gain a negotiating layout (one URL, Accept and Accept-Language, Vary, HEAD) next to the current separate-path layout, so that the proposed negotiation checks have a passing baseline and fault flags such as negotiation_no_vary and head_501?",
+  "Which Accept vectors form the pinned test matrix? Candidates: a browser default, application/json, application/ld+json, the CIRPASS-2 renderer-be list, weighted mixes, an unmatched type. A maintainer must choose and pin them.",
+  "Is a 406 or a default representation the expected answer to an unmatched Accept? RFC 9110 permits both, so the IXIT needs a declaration field; the architecture contract has none today.",
+  "Can a static HTML parse (no rendering, no script execution) be added inside the architecture rule that HTML is never rendered or executed? A parser that only tokenises is not rendering, but this needs an owner decision.",
+  "Does the toy safety regulation have a digital-label article with an accessibility clause like detergents Art. 19(1)(e)? Only toys Arts 10 to 38 were scanned; no such clause appeared there.",
+  "What is the current consolidated wording of Directive 2002/58/EC Art. 5(3)? Only the original 2002 text (Italian expression) was read.",
+  "Will product-specific delegated acts under ESPR Art. 4 or the toys and detergents implementing acts (toys Art. 49(1); detergents Art. 21(10)) set layout or accessibility rules for the passport view? None was located (see m01).",
+  "Should HTML and JSON parity be a mandatory or a recommended engineering requirement in the illustrative catalogue? No law read requires it.",
+  "Could a passport reached from a distance-selling page fall under the e-commerce services of Directive (EU) 2019/882, Art. 2(2) and Annex I Section III(c)? The text read does not mention passports; this needs a legal reading, not an engineering one."
+ ],
+ "anomalies": [
+  "The project's reference system serves HTML at /dpp/{id}.html and ignores Accept, while the CIRPASS-2 assumption and this family's main variant use one URL with negotiation. The engine's own example therefore cannot pass a single-URL HTML test today.",
+  "dpp-renderer-fe: latest GitHub release is 1.1.0 (2026-09-23) but package.json on the default branch says 1.2.0; its README says Angular 17+ while package.json pins Angular 19.",
+  "W3C VC render method editor's copy defines SuiteRenderMethod and references VCDM 2.1, while UNTP work in progress keeps RenderTemplate2024; the two drafts use different types for the same purpose.",
+  "WCAG 2.2: the 2026-10-13 catalogue record was metadata_only and had not read the licence; today the page names the W3C Document License. Version and date are unchanged.",
+  "ESPR Cellar URLs differ between prior records: m01 uses 66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03 (OJ text, used here) and m07 uses 78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03 (consolidated text).",
+  "EUR-Lex ELI pages https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng and https://eur-lex.europa.eu/eli/dir/2019/882/oj/eng and the CELEX HTML page returned empty content to WebFetch today; Cellar expression URLs worked.",
+  "The publications.europa.eu CELEX redirect for 32002L0058 led to a Cellar expression in Italian, not English.",
+  "axe-core states that it returns zero false positives and finds 57% of WCAG issues on average; academic benchmarks found far lower criterion coverage for tools in general (Vigo et al. 2013; Fischer et al. 2025). The two measure different things (issues found versus criteria covered)."
+ ],
+ "truncation": "Long texts were read in chunks through WebFetch, which summarises with a small model: RFC 9110 characters 100000 to 500000 of 564890; RFC 9111 0 to 100000 of 107472; RFC 5646 0 to 100000 of 223693; JSON-LD 1.1 170000 to 520000 of 573572 (status block not read); WCAG 2.2 0 to 100000 of 269706; ESPR all chunks of 819249 for targeted terms; EAA 0 to 400000 of 482253; Batteries 0 to 200000 and 330000 to 430000 of 727481; toys 200000 to 300000 of 788306; detergents 150000 to 250000 of 594328. A term search by a summarising model can miss a hit, so 'not found' statements are as strong as that method. The CIRPASS-2 D4.1 and test environment PDFs were not downloaded (metadata only; content from m07). Of the renderer code only the fetch path, routes, index.html and nginx config were read; components and tests were not. transpareo-time-machine, boebe-DPP-Viewer and Pa11y code were not read. Literature: 5 searches (2 mcp__consensus__search, 2 mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search, 1 SciSpace search-papers), about 70 records returned, 15 kept; the rest were general DPP reviews, blockchain DPPs or accessibility studies of specific national websites. Some kept papers are older than 2021 because they are the defining measurements. The W3C ACT Rules list, the JSON-LD test suite and the IANA language subtag registry were named as suites but not retrieved."
+}

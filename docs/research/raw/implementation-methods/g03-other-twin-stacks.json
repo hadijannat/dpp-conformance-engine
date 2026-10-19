@@ -1,0 +1,466 @@
+{
+ "method_id": "g03-other-twin-stacks",
+ "name": "Other twin and data-sharing stacks: NGSI-LD/FIWARE, DTDL/Azure Digital Twins, OPC UA, oneM2M, W3C WoT, BIM material passports",
+ "retrieval_date": "2026-10-19",
+ "scope_note": "Covers six non-AAS twin or data-sharing stacks plus BIM-based construction and material passports, as DPP implementation substrates. For each: publisher, version and status, data model, API style, DPP evidence, bridge to AAS/JSON-LD/resolver, black-box testability. Leaves out: AAS itself (see m03), EPCIS (f01), dataspaces (m04), and the content of every protected standard. IFC (ISO 16739) and IEC 62541 are bibliographic only. oneM2M was only reached through the project's published-specification index, so its protocol detail is thin. Prior records l02 and m10 were read for BIM and platform items; their source ids are reused where the same source is cited and flagged 'carried' where not re-fetched here.",
+ "summary": "None of these stacks is a DPP standard; each is a twin or IoT data-sharing substrate that a DPP host could be built on, and only one has a DPP-specific artefact. NGSI-LD is an ETSI Context Information Management group API (GS CIM 009, V1.9.1, July 2025) in which entities with Property and Relationship attributes are exchanged as JSON-LD over HTTP, with a @context supplied either in the body or in a Link header with rel json-ld#context; FIWARE brokers (Orion-LD, Scorpio, Stellio) implement it with subscriptions, registrations for federation and a temporal API. DTDL v4 is a Microsoft-published JSON-LD modelling language (interfaces, properties, telemetry, commands, relationships, components, DTMI identifiers such as dtmi:...;1); Azure Digital Twins stores twin graphs from DTDL models and exposes REST and event routes, while the public DTDL repository was last pushed in March 2025. W3C WoT Thing Description 1.1 (Recommendation, 5 Dec 2023) describes a device by properties, actions, events and protocol forms in JSON-LD with media type application/td+json, and WoT Discovery defines a /things directory API and a /.well-known/wot introduction point. OPC UA is the OPC Foundation's industrial client-server and pub-sub stack; the foundation now lists a companion specification OPC 30450-1 'Digital Product Passport - Information Model' V1.0.0, dated 2026-10-17 on its listing, which maps an ESPR passport model into OPC UA object and data types and which can be downloaded only after login. In November 2024 the OPC Foundation, IDTA, CESMII, ECLASS, ZVEI, VDMA, LNI 4.0 and the Digital Twin Consortium announced a joint architecture combining AAS and OPC UA for DPPs. oneM2M (Release 5 is the latest with published features) is an IoT service layer with HTTP, CoAP, MQTT and WebSocket bindings; the only DPP-adjacent paper found combines it with EPCIS 2.0 and IOTA in a container-logistics testbed. BIM material passports are a literature family: Revit, Unity or IFC-based prototypes link building elements to passport records (identity, embodied carbon, reuse and disassembly data), with buildingSMART IDS 1.0 and bSDD as the open requirement and dictionary layers; EU construction passports are expected to be compatible with the ESPR passport. Most of these stacks reach a DPP through bridges, not natively: DTDL to AAS and WoT TD to AAS have published transformations, NGSI-LD is JSON-LD and so is nearest to the linked-data route, and none has a GS1 Digital Link resolver step unless a gateway adds one. From outside, the testable surface is HTTP with JSON or JSON-LD, which the engine already handles partly (data.context, api.contract), but pinned OpenAPI for NGSI-LD, TD or DTDL schema checks, OPC UA binary sessions and IFC files have no check today.",
+ "method_families": ["linked-data-semantic", "aas-digital-twin", "platform-saas", "other"],
+ "maturity": {
+  "spec_status": "Mixed. NGSI-LD: ETSI group specification (ISG output, not an EN) at V1.9.1, July 2025. WoT TD 1.1 and WoT Discovery: W3C Recommendations of 5 Dec 2023. DTDL: Microsoft-hosted open specification, v4 current, no formal standards-body status. OPC UA: OPC Foundation specifications at 1.05.x core; OPC 30450-1 DPP companion listed V1.0.0. oneM2M: Release 5 latest with published features per the project site. BIM passports: research prototypes; IDS 1.0 approved June 2024 per secondary sources.",
+  "versions_at_retrieval": [
+   {"artifact": "ETSI GS CIM 009 NGSI-LD API", "version": "V1.9.1 (2025-07); folders 01.01.01 to 01.09.01 exist on the ETSI deliver server", "status": "published group specification; folder file dated 7/2/2025 in listing", "source_id": "etsi-gs-cim-009-v1-9-1"},
+   {"artifact": "FIWARE Orion-LD", "version": "1.12.0 (release 2026-01-28); repository pushed 2026-09-25", "status": "active; README says near-compliant with NGSI-LD 1.6.1 plus selected newer features", "source_id": "new-orion-ld-repo"},
+   {"artifact": "Scorpio Broker", "version": "6.0.1-java-kafka (release 2026-01-19); pushed 2026-07-29", "status": "active", "source_id": "new-scorpio-repo"},
+   {"artifact": "Stellio Context Broker", "version": "2.38.0 (release 2026-10-06); pushed 2026-10-18", "status": "active; README says checked against NGSI-LD 1.9.1", "source_id": "new-stellio-repo"},
+   {"artifact": "DTDL", "version": "v4 specification in repository; v3 used by Azure Digital Twins; v2 by IoT Plug and Play and others", "status": "repository last pushed 2025-03-26; no releases published", "source_id": "new-dtdl-repo"},
+   {"artifact": "Azure Digital Twins", "version": "service (no version); docs page updated_at 2026-08-11", "status": "generally available PaaS; 3D Scenes Studio marked preview; no retirement notice on the overview page", "source_id": "new-azure-dt-overview"},
+   {"artifact": "W3C WoT Thing Description", "version": "1.1", "status": "W3C Recommendation 2023-12-05", "source_id": "new-w3c-wot-td-1-1"},
+   {"artifact": "W3C WoT Discovery", "version": "Recommendation", "status": "W3C Recommendation 2023-12-05", "source_id": "new-w3c-wot-discovery"},
+   {"artifact": "OPC UA core specification parts", "version": "mostly 1.05.x (parts range 1.05.00 to 1.05.07)", "status": "published on the online reference", "source_id": "new-opcua-online-reference"},
+   {"artifact": "OPC 30450-1 Digital Product Passport - Information Model", "version": "V1.0.0 on the listing page; online index also shows 1.0.0", "status": "listing gives release date 2026-10-17, status field blank, access 'Registered' (login to download); a web-search summary of the same page said Release Candidate dated 2026-07-08 (conflict, see anomalies)", "source_id": "new-opc-30450-1-listing"},
+   {"artifact": "OPC UA for Asset Administration Shell (OPC 30270)", "version": "1.00", "status": "listed on online reference; page body not read", "source_id": "new-opcua-online-reference"},
+   {"artifact": "oneM2M", "version": "Release 5 latest with published features; Release 6 planned", "status": "index page only; TS-0001 and TS-0004 versions not stated there", "source_id": "new-onem2m-published-specs"},
+   {"artifact": "buildingSMART IDS", "version": "1.0", "status": "approved 2024-06-01 per search excerpt (secondary_only)", "source_id": "new-buildingsmart-ids-search"},
+   {"artifact": "ISO 16739-1 (IFC)", "version": "not retrieved", "status": "bibliographic only; protected", "source_id": "iso-16739-1-ifc"}
+  ],
+  "adoption_evidence": "Weak to moderate and uneven. NGSI-LD/FIWARE: strong smart-city and data-space footprint (FIWARE for Data Spaces chapter, 2022), but no peer-reviewed or vendor DPP implementation on NGSI-LD was found; a 2024 DPP architecture paper with two FIWARE Foundation authors was read in full text and does not mention NGSI-LD. DTDL: a 2026 paper builds an AAS-grounded ontology in DTDL on Azure Digital Twins for a board-production line (not a DPP), and a 2023 paper maps DTDL to AAS. WoT: a 2025 paper shows AAS and TD documents for one machine hosted together; no DPP. OPC UA: the most DPP-specific evidence: a foundation demonstrator (2024) extended with a battery passport model, a 2024 joint AAS and OPC UA architecture announcement, an April 2026 talk on an open-source OPC UA DPP stack (secondary_only), and the companion specification OPC 30450-1. oneM2M: one 2026 logistics paper. BIM: many prototypes and reviews; one review found only 17% of 64 studies built material passports for real projects.",
+  "regulatory_alignment": "The law is protocol-neutral. Regulation (EU) 2024/1781 requires a unique product identifier that enables a web link to the passport (Art. 2(30)), carriers on product or documents (Art. 10(1)(b)), data transfer through an open interoperable network without vendor lock-in and searchable data (Art. 10(1)(d)), access by actor class (Art. 11(b)), a back-up copy through a DPP service provider (Art. 10(4)), and a registry (Art. 13). None of the stacks here provides identifiers, carriers, registry upload or backup by itself; each can supply the data model and API of the passport host only. For construction products the carried record cites Regulation (EU) 2024/3110 (CPR) Art. 78 and 79(3); a search excerpt of a CEN/TC 442 slide attributes an ESPR Art. 75 compatibility requirement for the construction passport (unverified). Article citations in this file come from the prior record m01, not re-read in this session (an EUR-Lex fetch returned empty text twice)."
+ },
+ "layers": {
+  "L01_unique_identifiers": {
+   "applies": "partial",
+   "mechanism": "None of the stacks defines a product identifier compatible with the GS1 Digital Link form. NGSI-LD requires an entity id to be a URI; the ETSI examples use urn:ngsi-ld:Vehicle:A4567 and urn:ngsi-ld:OffStreetParking:Downtown1 and put the id in the path GET /ngsi-ld/v1/entities/{id}. DTDL identifies models (not instances) with DTMI strings of the form dtmi:<path segments>;<version>. Azure Digital Twins twins have a service-scoped twin id chosen by the creator. WoT TD carries an optional id URI for the Thing. OPC UA nodes are addressed by NodeId within a namespace URI (background knowledge, not verified in this session). BIM: IFC identifiers are not described here (protected schema). A DPP on these stacks must carry the ESPR unique product identifier as an attribute (for example a Property holding a GS1 Digital Link URI) or map it to the entity id.",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "entity examples and entity operations (clause 5.6 provision, 5.7 consumption)"},
+    {"source_id": "new-dtdl-v4-spec", "component": "DTMI identifier description"},
+    {"source_id": "new-w3c-wot-td-1-1", "component": "Thing Description data model"},
+    {"source_id": "iso-16739-1-ifc", "component": "bibliographic only"}
+   ],
+   "variants": ["entity id equals a GS1 Digital Link URI wrapped as a URN", "separate gtin/serial Properties on the entity", "twin id derived from GTIN plus serial in Azure Digital Twins"],
+   "observable_black_box": "Entity id string in the path and in the payload id field; whether a separate identifier attribute equals the id carried on the data carrier.",
+   "law_delta": "Law (ESPR Art. 2(30)) needs a web-link-capable unique identifier; these stacks add only generic URI or model identifiers, so the mapping is the implementer's choice."
+  },
+  "L02_data_carriers": {
+   "applies": "no",
+   "mechanism": "No data carrier definition in any stack. BIM prototypes tag components physically with QR or RFID per reviews (Markou 2025 classifies QR/RFID approaches); the unique component ID in the Yilmaz 2024 testbed is described as an aspiration for physical tagging. The CIRPASS-2 construction pilot is reported by a vendor page to use QR with a GS1 Digital Link example (secondary_only).",
+   "specs": [
+    {"source_id": "new-cirpass2-lighthouse-pilots", "component": "pilot index page (PC2 named, no technical detail)"}
+   ],
+   "variants": ["QR to GS1 Digital Link resolving to a BIM-linked record", "RFID on building components (literature only)"],
+   "observable_black_box": "Carrier image decoded to a URL; the stack itself is invisible at this layer.",
+   "law_delta": "none beyond ESPR Art. 10(1)(b); stacks are silent."
+  },
+  "L03_data_exchange_protocols": {
+   "applies": "yes",
+   "mechanism": "NGSI-LD: HTTP binding under /ngsi-ld/v1/. Request bodies are application/json with the context in a Link header (rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\") or application/ld+json with @context in the body; GeoJSON responses use application/geo+json; pagination uses a Link header with rel=\"next\"; notifications go to webhook or MQTT endpoints. Distributed operations forward requests to registered context sources and strip @context when the registration states a JSON-LD context. Temporal retrieval under /ngsi-ld/v1/temporal/entities/. WoT: protocol-agnostic TD forms; discovery by /.well-known/wot, DNS-SD names _wot._tcp and _directory._sub._wot._tcp; TD Directory API at /things with CRUDL, /events as Server-Sent Events (text/event-stream), optional /search/jsonpath, /search/xpath, /search/sparql; media types application/td+json (preferred), application/json, application/ld+json, application/merge-patch+json for PATCH; CoAP content-format 432 for td+json. Node-wot supports HTTP(S), CoAP(S), MQTT fully, OPC UA client-only. Azure Digital Twins: REST data plane, event routes to Event Hubs, Event Grid, Service Bus. OPC UA: the foundation's DPP announcement states access through the REST interfaces of OPC UA and AAS; native OPC UA binary and pub-sub transports are background knowledge (not verified in this session). oneM2M: HTTP, CoAP, MQTT, WebSocket bindings per the project index.",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "binding clauses; Link header examples; distributed operations 4.3.6; GeoJSON Accept handling"},
+    {"source_id": "new-w3c-wot-discovery", "component": "Introduction mechanisms; Thing Description Directory API; media types"},
+    {"source_id": "new-w3c-wot-td-1-1", "component": "forms and protocol bindings"},
+    {"source_id": "new-azure-dt-overview", "component": "event routes"},
+    {"source_id": "new-opc-joint-forces", "component": "REST access statement"},
+    {"source_id": "new-onem2m-published-specs", "component": "bindings by release"},
+    {"source_id": "new-node-wot", "component": "binding support table"}
+   ],
+   "variants": ["NGSI-LD JSON vs JSON-LD request with Link header", "TD served at /.well-known/wot", "OPC UA binary vs REST gateway", "Azure event routes vs polling REST"],
+   "observable_black_box": "HTTP status codes, Content-Type, Link headers (context and next), Location header on create, SSE streams for TD directories, MQTT topics if exposed.",
+   "law_delta": "Law has no protocol rule beyond 'open, interoperable, web link' (ESPR Art. 10(1)(d), 2(30)); none of these resolves a unique identifier to a record the way a resolver does, so a gateway is needed."
+  },
+  "L04_apis_lifecycle_searchability": {
+   "applies": "yes",
+   "mechanism": "NGSI-LD: create POST /ngsi-ld/v1/entities/ (201 with Location /ngsi-ld/v1/entities/{id}); query GET /ngsi-ld/v1/entities/?type=...&q=...&attrs=...&format=simplified&limit=...; retrieve GET /ngsi-ld/v1/entities/{id}; batch operations for create, upsert, update, delete and merge; metadata GET /ngsi-ld/v1/types and /attributes; query language q with attribute comparisons and scopeQ; temporal queries with timerel and timeAt. Deactivation is modelled by deleting the entity or setting an application Property. Azure Digital Twins: models uploaded as DTDL, twins created from models, query API with SQL-like language, relationships as edges, data history to Azure Data Explorer. WoT: TD Directory CRUDL plus search endpoints. OPC UA: browse, read, write services; the companion specification lists ObjectTypes for browsing and DataTypes for reading and writing whole passport instances. BIM: no HTTP API in IFC itself; bSDD offers a Dictionaries v1 API (Swagger) and a GraphQL test UI; IfcOpenShell is a toolkit.",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "5.6 Context Information Provision (incl. 5.6.7-5.6.20 batch); 5.7 Consumption; 5.8 Subscription; clause 5.2 data types"},
+    {"source_id": "new-azure-dt-overview", "component": "query API; data history"},
+    {"source_id": "new-w3c-wot-discovery", "component": "TD Directory API"},
+    {"source_id": "new-opc-30450-1-listing", "component": "scope statement of the information model"},
+    {"source_id": "new-bsdd-github", "component": "API description"}
+   ],
+   "variants": ["NGSI-LD simplified vs normalized representation", "Azure Digital Twins query vs graph traversal", "TD Directory JSONPath vs SPARQL search"],
+   "observable_black_box": "CRUD behaviour per endpoint, pagination Link headers, error bodies, behaviour of filters and type-list endpoints.",
+   "law_delta": "Law requires searchability and a registry API (ESPR Art. 10(1)(d), 13) but no host API; these APIs give generic CRUD, not the passport lifecycle operations (issue, supersede, deactivate) the law implies."
+  },
+  "L05_system_interoperability_data_models": {
+   "applies": "yes",
+   "mechanism": "NGSI-LD information model: Entity with id, type, and attributes that are Property, Relationship, GeoProperty (further attribute subtypes in newer versions were not verified; the clause list in 5.2 includes Entity, EntityInfo, EntityType, EntityMap) with optional nested attributes; terms expand through a JSON-LD @context. DTDL v4: JSON-LD context string dtmi:dtdl:context;4 (a #limitless variant is mentioned); elements Interface, Telemetry, Property, Command, Relationship, Component plus Array, Enum, Map, Object schemas. WoT TD 1.1: JSON-LD 1.1 document with metadata, properties, actions, events, data schemas, security definitions and links; Thing Models act as templates. OPC UA: address-space of ObjectTypes and DataTypes, NodeSet files for models; OPC 30450-1 reportedly maps a CEN/CENELEC DPP data model (the listing names EN 18223:2026; content not read or described here) to ObjectTypes, DataTypes and address-space structures with Model/Batch/Item levels, documents, multi-language and multi-value data. A 2026 talk describes OPC UA NodeSets at rest and CENELEC JSON in transit, with IEC CDD and ECLASS dictionaries (secondary_only). BIM: IFC schema not described (ISO 16739, protected); buildingSMART IDS 1.0 states information requirements in a machine-readable file and links to bSDD, an MIT-licensed dictionary service with JSON import templates. Bridges: DTDL to AAS mapping (Schmidt 2023); AAS plus TD documents mapped for interoperability (Mattila 2025); AAS templates to RDFS/OWL converter (Kuiper 2026); IDTA and OPC Foundation partners announced a joint AAS plus OPC UA architecture (2024).",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "5.2 data types; 4.3.6.8 conformance fallbacks for Property and Relationship"},
+    {"source_id": "new-dtdl-v4-spec", "component": "contexts, element list"},
+    {"source_id": "new-w3c-wot-td-1-1", "component": "data model, serialization"},
+    {"source_id": "new-opc-30450-1-listing", "component": "scope"},
+    {"source_id": "en-18223-2026", "component": "bibliographic only (named on the OPC listing; not read)"},
+    {"source_id": "new-bsdd-github", "component": "import model and API"},
+    {"source_id": "new-buildingsmart-ids-search", "component": "IDS description (secondary)"},
+    {"source_id": "iso-16739-1-ifc", "component": "bibliographic only"}
+   ],
+   "variants": ["NGSI-LD key-values vs normalized", "DTDL v2/v3/v4 differences by service", "TD vs Thing Model", "OPC UA NodeSet vs JSON in transit", "IFC export plus IDS check"],
+   "observable_black_box": "JSON-LD documents retrievable over HTTP: @context URLs, expanded term IRIs, schema validity of DTDL and TD documents, presence of the passport fields.",
+   "law_delta": "Law fixes content per delegated act (ESPR Annex III menu; batteries Annex XIII) and not the representation. Only OPC 30450-1 names a DPP-specific mapping; all others need an application profile (for example NGSI-LD data models for the passport) that does not exist in the sources read."
+  },
+  "L06_storage_archiving_persistence": {
+   "applies": "partial",
+   "mechanism": "NGSI-LD brokers persist current state; Orion-LD stores in MongoDB and optionally writes history (TRoE) to PostgreSQL; Scorpio needs Kafka and PostgreSQL with PostGIS; Stellio uses TimescaleDB and Kafka. Azure Digital Twins keeps the live graph and can historize to Azure Data Explorer. WoT TD directories index descriptions, not data. OPC UA servers expose live values; history is a server feature (background knowledge). BIM files are stored in project or cloud repositories; reviews say centralised material-passport platforms are unreliable for long building lifecycles and propose blockchain (Kc 2026), a conceptual claim. None provides the ESPR back-up copy via an independent DPP service provider.",
+   "specs": [
+    {"source_id": "new-orion-ld-repo", "component": "README features"},
+    {"source_id": "new-scorpio-repo", "component": "README stack"},
+    {"source_id": "new-stellio-repo", "component": "README stack"},
+    {"source_id": "new-azure-dt-overview", "component": "data history"}
+   ],
+   "variants": ["current-state only vs temporal history", "multi-broker federation with registrations"],
+   "observable_black_box": "Whether the temporal endpoint returns earlier values after an update; availability after restart cannot be observed black-box.",
+   "law_delta": "Law adds a back-up copy and retention beyond the stack (ESPR Art. 10(4), 11 per m01); none of the stacks supplies it."
+  },
+  "L07_access_rights_security_confidentiality": {
+   "applies": "partial",
+   "mechanism": "NGSI-LD core is silent on authentication at the API level; the spec lets a subscription carry custom headers such as HTTP Authentication to the notification endpoint (KeyValuePair, clause 5.2.22). FIWARE adds identity management and roles in the tutorials (Keycloak with Stellio, per tutorial page). WoT TD declares securityDefinitions: nosec, basic, digest, bearer, psk, oauth2, apikey, auto, combo. Azure Digital Twins uses Azure role-based access (documentation page not read in detail; background knowledge). OPC UA has its own session security (background knowledge). Field-level tiers of access by actor class (ESPR Art. 11(b) per m01) are not modelled by any of these; they would need per-attribute filtering by the host.",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "5.2.22 KeyValuePair"},
+    {"source_id": "new-w3c-wot-td-1-1", "component": "security schemes"},
+    {"source_id": "new-ngsi-ld-tutorials", "component": "Security chapter listing"}
+   ],
+   "variants": ["OAuth 2 bearer in front of broker", "PEP proxy", "TD security scheme per form"],
+   "observable_black_box": "401/403 behaviour on unauthenticated vs authenticated vs wrong-role calls; whether restricted attributes are absent in responses.",
+   "law_delta": "Law demands role-tiered access and credentials for operators (ESPR Art. 11(b), 11(g)); stacks supply authentication primitives only."
+  },
+  "L08_authentication_reliability_integrity": {
+   "applies": "no",
+   "mechanism": "No integrity or provenance mechanism is defined by NGSI-LD, DTDL, TD, or OPC UA in the pages read. A TD document is not signed in the Recommendation text read; the OPC UA stack has message signing at session level (background knowledge). The blockchain-based BIM proposals (Palma 2025, Kc 2026) and the oneM2M/IOTA logistics paper add hash anchoring externally. The foundation's joint architecture mentions no credential scheme.",
+   "specs": [
+    {"source_id": "new-wot-td-note", "component": "none; absence recorded"}
+   ],
+   "variants": ["external JWS or VC envelope around exported JSON-LD", "ledger anchoring of document hashes"],
+   "observable_black_box": "Presence and verifiability of signatures only if an envelope is added; stacks give nothing to verify.",
+   "law_delta": "Law requires authentication, reliability and integrity outcomes (ESPR Art. 11(g)); these stacks leave all of it to the implementer."
+  },
+  "L09_registry_and_customs": {
+   "applies": "no",
+   "mechanism": "No stack interacts with the EU DPP registry or customs. NGSI-LD context-source registrations (clauses 5.9 to 5.15) are broker federation and not the EU registry; the name collision is an anomaly worth a fixture note.",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "5.9 Context Source Registration (distinct from the EU registry)"}
+   ],
+   "variants": [],
+   "observable_black_box": "none for the EU registry.",
+   "law_delta": "Registry upload is required by ESPR Art. 13; no stack provides it."
+  },
+  "L10_lifecycle_versioning_updates": {
+   "applies": "partial",
+   "mechanism": "NGSI-LD has partial update, replace, merge batch and temporal history; entity versions are not first-class (history is a time series). DTDL versions models by the ;N suffix of the DTMI; twin state has no version identifier in the page read. WoT Thing Models and TDs have no mandated versioning field in the text read. BIM reviews call current material passports static and manual, and ask for dynamic passports (Markou 2025); Honic 2021 builds an end-of-life passport from a demolition case. Handover between operators and deactivation are not modelled in any stack.",
+   "specs": [
+    {"source_id": "etsi-gs-cim-009-v1-9-1", "component": "5.6.9 Batch Update, 5.6.20 Batch Merge, temporal operations"},
+    {"source_id": "new-dtdl-v4-spec", "component": "DTMI version suffix"}
+   ],
+   "variants": ["history via temporal API", "application-level version Property"],
+   "observable_black_box": "Retrieval of earlier states through the temporal endpoint; model version in DTMI.",
+   "law_delta": "Law requires linking a new passport to the original and up-to-date data (ESPR Art. 9(1), 11(d) per m01); stacks do not model that."
+  },
+  "L11_roles_and_governance": {
+   "applies": "partial",
+   "mechanism": "NGSI-LD data spaces: FIWARE for Data Spaces chapter pairs NGSI-LD with marketplace and IDS connector elements; the Gering et al. architecture (FIWARE Foundation, Fraunhofer, Circulor authors) splits a DPP system into Commission central services, distributed economic-operator or provider services, and third-party services, without naming NGSI-LD in the text. OPC Foundation holds a liaison with CEN/CENELEC per a trade page; the joint architecture partners include IDTA, ECLASS, VDMA, ZVEI, CESMII, LNI 4.0 and the Digital Twin Consortium. W3C WoT is governed by a working group with Siemens and Intel editors. BIM: buildingSMART holds IDS and bSDD; platforms such as Madaster and Cobuilder are vendors (carried, secondary_only).",
+   "specs": [
+    {"source_id": "new-gering-ceur-dpp-architecture", "component": "abstract and architecture overview"},
+    {"source_id": "new-opc-joint-forces", "component": "participants"},
+    {"source_id": "new-w3c-wot-td-1-1", "component": "editors"}
+   ],
+   "variants": ["host-by-operator", "host-by-platform vendor"],
+   "observable_black_box": "Operator identity only through endpoints and certificates; not governance.",
+   "law_delta": "Law defines economic operators and DPP service providers (ESPR Art. 2(46), 2(32) per m01); the stacks define neither."
+  }
+ },
+ "end_to_end_flows": [
+  {
+   "name": "NGSI-LD context broker as passport host",
+   "actors": ["economic operator", "FIWARE-type context broker", "consumer client", "JSON-LD context server"],
+   "steps": [
+    "1. Operator publishes a JSON-LD context file that maps passport terms to IRIs (an application profile; none was found in the sources).",
+    "2. Operator sends POST /ngsi-ld/v1/entities/ with an entity of the passport type and a Link header naming the context; the broker answers 201 and a Location header.",
+    "3. A consumer calls GET /ngsi-ld/v1/entities/{id} with a Link header or accepts application/ld+json and gets the expanded or compacted passport.",
+    "4. A second broker may register as a context source so that queries to the first are forwarded.",
+    "5. A subscription pushes changes to a webhook or MQTT endpoint, optionally with an authorisation header carried in the subscription."
+   ]
+  },
+  {
+   "name": "OPC UA companion model plus REST gateway",
+   "actors": ["manufacturer", "OPC UA server with OPC 30450-1 model", "REST gateway", "consumer or dataspace connector"],
+   "steps": [
+    "1. Manufacturer loads the companion model (access to the specification requires login) into an OPC UA server.",
+    "2. Server fills product properties, documents and Model/Batch/Item levels in the address space.",
+    "3. A gateway exposes the passport instance as JSON (the OPC UA open-source DPP talk names CENELEC JSON in transit; secondary_only).",
+    "4. A consumer or connector requests the instance; access control sits in the gateway or connector."
+   ]
+  },
+  {
+   "name": "BIM element linked to a product passport",
+   "actors": ["product manufacturer", "BIM library plugin or Revit add-in", "passport system", "designer"],
+   "steps": [
+    "1. Manufacturer publishes a product passport (Palma 2025 describes Product Data Template structure and blockchain registration).",
+    "2. Designer finds the product through a BIM library plugin and imports passport data into the BIM model.",
+    "3. Model elements carry passport fields such as embodied carbon and disassembly data (Shah 2026).",
+    "4. At end of life, element lists are exported from the BIM model to assess recycling potential (Honic 2021)."
+   ]
+  },
+  {
+   "name": "DTDL twin graph bridged to AAS",
+   "actors": ["Azure Digital Twins instance", "transformation tool", "AAS repository"],
+   "steps": [
+    "1. Models are written in DTDL and twins are created in the instance.",
+    "2. A mapping tool converts DTDL interfaces and properties into AAS submodel elements (Schmidt 2023, tested for one asset).",
+    "3. The AAS repository then serves the passport through AAS APIs, outside this stack."
+   ]
+  }
+ ],
+ "implementations": [
+  {"name": "FIWARE Orion-LD", "url": "https://github.com/FIWARE/context.Orion-LD", "kind": "server", "license": "AGPL-3.0", "last_activity": "pushed 2026-09-25; release 1.12.0 on 2026-01-28", "evidence_level": "substantive", "note": "NGSI-LD context broker with temporal storage in PostgreSQL, MQTT subscriptions, Kafka consumer, MongoDB. README says near-compliant with API 1.6.1 plus select newer features. Source new-orion-ld-repo."},
+  {"name": "Scorpio Broker", "url": "https://github.com/ScorpioBroker/ScorpioBroker", "kind": "server", "license": "BSD-3-Clause", "last_activity": "pushed 2026-07-29; release 6.0.1-java-kafka on 2026-01-19", "evidence_level": "substantive", "note": "Java/Quarkus NGSI-LD broker with Kafka and PostGIS and federation by context-source registration. Source new-scorpio-repo."},
+  {"name": "Stellio Context Broker", "url": "https://github.com/stellio-hub/stellio-context-broker", "kind": "server", "license": "Apache-2.0", "last_activity": "pushed 2026-10-18; release 2.38.0 on 2026-10-06", "evidence_level": "substantive", "note": "Kotlin/Spring Boot broker on TimescaleDB and Kafka; README says development version is checked against NGSI-LD 1.9.1. Source new-stellio-repo."},
+  {"name": "NGSI-LD tutorials (FIWARE)", "url": "https://ngsi-ld-tutorials.readthedocs.io/en/latest/", "kind": "other", "license": "not stated", "last_activity": "not checked", "evidence_level": "substantive", "note": "Lists Orion-LD, Scorpio and Stellio as compliant brokers and chapters on subscriptions, registrations, temporal, security. Page cites API 1.7.1 as latest, which is older than the ETSI folder (see anomalies)."},
+  {"name": "Azure Digital Twins service", "url": "https://learn.microsoft.com/en-us/azure/digital-twins/overview", "kind": "platform", "license": "not stated (commercial PaaS)", "last_activity": "docs updated_at 2026-08-11", "evidence_level": "substantive", "note": "DTDL-modelled twin graph, query API, event routes, data history to Azure Data Explorer."},
+  {"name": "opendigitaltwins-dtdl", "url": "https://github.com/Azure/opendigitaltwins-dtdl", "kind": "data-model", "license": "CC-BY-4.0 (spec) and MIT (code) per README; GitHub reports CC-BY-4.0", "last_activity": "pushed 2025-03-26; no releases", "evidence_level": "substantive", "note": "DTDL v2, v3, v4 specifications; v4 supported in Azure IoT Operations, v3 in Azure Digital Twins per README."},
+  {"name": "Eclipse Thingweb node-wot", "url": "https://github.com/eclipse-thingweb/node-wot", "kind": "sdk", "license": "EPL-2.0 or W3C Software Notice (dual per README; GitHub reports NOASSERTION)", "last_activity": "pushed 2026-10-16; release v0.9.2 on 2026-01-26", "evidence_level": "substantive", "note": "WoT scripting runtime; HTTP, CoAP, MQTT full; OPC UA client only."},
+  {"name": "ZION W3C Thing Description Directory", "url": "https://doi.org/10.1109/ccnc51664.2024.10454685", "kind": "server", "license": "not stated", "last_activity": "not checked", "evidence_level": "metadata_only", "note": "Open-source TD directory per the paper abstract; JSONPath metadata queries; used in structural health monitoring."},
+  {"name": "OPC UA .NET Standard stack", "url": "https://github.com/OPCFoundation/UA-.NETStandard", "kind": "sdk", "license": "NOASSERTION per GitHub", "last_activity": "pushed 2026-10-19; release 2.0.1 on 2026-10-12", "evidence_level": "metadata_only", "note": "Reference OPC UA stack; only GitHub metadata read."},
+  {"name": "open62541", "url": "https://github.com/open62541/open62541", "kind": "sdk", "license": "MPL-2.0", "last_activity": "pushed 2026-10-19; release v1.5.9 on 2026-10-04", "evidence_level": "metadata_only", "note": "Open-source C OPC UA stack; only GitHub metadata read."},
+  {"name": "OPC 30450-1 Digital Product Passport - Information Model", "url": "https://opcfoundation.org/developer-tools/documents/view/406", "kind": "data-model", "license": "OPC Foundation Specifications License 1.14 (per listing)", "last_activity": "release date 2026-10-17 on the listing", "evidence_level": "metadata_only", "note": "Download needs login; the specification text was not read. No NodeSet file linked on the listing."},
+  {"name": "OPC Foundation battery passport demonstrator", "url": "https://opcfoundation.org/news/press-releases/battery-passport-proof-of-concept-based-on-opc-ua/", "kind": "pilot", "license": "not stated", "last_activity": "announced 2024-04-21/22", "evidence_level": "substantive", "note": "OPC Foundation with CESMII and VDMA, cooperation partner Fraunhofer FFB; extends an existing DPP and PCF demonstrator; no repositories named."},
+  {"name": "OPC UA open-source DPP solution (Barnstedt talk)", "url": "https://wiot-group.com/think/en/articles/opc-ua-open-source-dpp-solution-erich-barnstedt/", "kind": "pilot", "license": "not stated", "last_activity": "talk 2026-04-29; page 2026-07-08", "evidence_level": "secondary_only", "note": "NodeSets at rest, CENELEC JSON in transit, EDC for exchange; no repository named on the page."},
+  {"name": "IfcOpenShell", "url": "https://github.com/IfcOpenShell/IfcOpenShell", "kind": "sdk", "license": "LGPL-3.0", "last_activity": "pushed 2026-10-19; release bonsai-0.9.1-alpha2610190626", "evidence_level": "metadata_only", "note": "Open IFC toolkit; only GitHub metadata read; the IFC schema is not described here (ISO 16739 is protected)."},
+  {"name": "buildingSMART bSDD", "url": "https://github.com/buildingSMART/bSDD", "kind": "data-model", "license": "MIT", "last_activity": "pushed 2026-10-07", "evidence_level": "substantive", "note": "Dictionary service with Dictionaries v1 API (Swagger) and GraphQL test UI; JSON import model and templates."},
+  {"name": "buildingSMART Information Delivery Specification (IDS)", "url": "https://www.buildingsmart.org/standards/bsi-standards/information-delivery-specification-ids/", "kind": "validator", "license": "not stated", "last_activity": "approval 2024-06-01 per excerpt", "evidence_level": "secondary_only", "note": "The official page returned HTTP 403; facts come from search excerpts (computer-readable requirements, automatic checking of IFC models, link to bSDD)."},
+  {"name": "Madaster materials passport platform", "url": "https://www.madaster.com/en", "kind": "platform", "license": "not stated", "last_activity": "not checked", "evidence_level": "secondary_only", "note": "Carried from m10 (source new-vendor-madaster); not re-fetched here."},
+  {"name": "Cobuilder Supply and CIRPASS-2 PC2 construction pilot", "url": "https://cirpass2.eu/lighthouse-pilots/", "kind": "pilot", "license": "not stated", "last_activity": "not stated", "evidence_level": "secondary_only", "note": "Index page names PC2 'Digital Product Passports for Construction' but gives no partners or technology; details carried from m10 vendor excerpts."},
+  {"name": "BIM-CES (Revit-based material passport prototype)", "url": "https://doi.org/10.1108/ecam-08-2024-1020", "kind": "pilot", "license": "not stated", "last_activity": "paper 2025", "evidence_level": "metadata_only", "note": "Python and Visual Studio integration with Autodesk Revit; NEOM case; 12 expert validations (abstract)."},
+  {"name": "BIM library plugin plus blockchain DPP platform (Palma et al.)", "url": "https://doi.org/10.35490/ec3.2025.361", "kind": "pilot", "license": "not stated", "last_activity": "paper 2025", "evidence_level": "metadata_only", "note": "BIM library plugin links to a DPP system using Product Data Templates; abstract only."},
+  {"name": "Material passport testbed on Unity (Yilmaz et al.)", "url": "https://doi.org/10.1049/icp.2024.3501", "kind": "pilot", "license": "not stated", "last_activity": "paper 2024", "evidence_level": "metadata_only", "note": "3D BIM of a modular house, six UK stakeholders; unique component ID."}
+ ],
+ "literature": [
+  {"doi": "10.1007/978-3-030-93975-5_24", "title": "FIWARE for Data Spaces", "year": 2022, "venue": "book chapter (venue not given by tool)", "found_via": "mcp__consensus__search", "relevance": "Describes data spaces built from FIWARE parts where applications share twin data through NGSI-LD and standard data models; the only NGSI-LD data-space source found; not about DPPs."},
+  {"doi": "10.3390/s26041193", "title": "Interacting with IoT Data Spaces Using LLMs and the Model Context Protocol", "year": 2026, "venue": "Sensors (Basel, Switzerland)", "found_via": "mcp__consensus__search", "relevance": "Confirms NGSI-LD is the standard interface of a FIWARE-based data space; the LLM layer is out of scope (rule 4)."},
+  {"doi": "10.3390/s23187742", "title": "Increasing Interoperability between Digital Twin Standards and Specifications: Transformation of DTDL to AAS", "year": 2023, "venue": "Sensors (Basel, Switzerland)", "found_via": "mcp__consensus__search", "relevance": "A generic mapping from DTDL to AAS tested on one physical asset; the main DTDL-to-AAS bridge."},
+  {"doi": "10.1016/j.procs.2026.03.018", "title": "A Structured Methodology for Semantic Integration of Physical and Cyber Assets in Industrial Digital Twins", "year": 2026, "venue": "Procedia Computer Science (venue per tool: Unknown Journal)", "found_via": "mcp__consensus__search", "relevance": "AAS-grounded ontology implemented in DTDL on Azure Digital Twins in a board-production line; not a DPP."},
+  {"doi": "10.1109/access.2025.3633736", "title": "Interoperability of Digital Twins for Automation With Digital Twin Schema", "year": 2025, "venue": "IEEE Access", "found_via": "mcp__consensus__search", "relevance": "Maps fields between AAS and WoT Thing Description documents hosted in a LAN; bridge evidence for WoT to AAS."},
+  {"doi": "10.1109/access.2023.3312286", "title": "Overview and Comparison of Asset Information Model Standards", "year": 2023, "venue": "IEEE Access", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Compares WoT TD, AAS, OPC UA device models and others on property, service, access and discovery; basis for choosing integration strategy."},
+  {"doi": "10.1109/ccnc51664.2024.10454685", "title": "ZION: A Scalable W3C Web of Things Directory", "year": 2024, "venue": "2024 IEEE 21st Consumer Communications & Networking Conference (CCNC)", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Open-source TD directory with CRUDL API and JSONPath; the closest test target for a WoT Discovery server."},
+  {"doi": "10.3390/logistics10080177", "title": "A DLT- and ZKP-Enabled Framework for Privacy-Preserving Digital Product Passports in Maritime Container Logistics", "year": 2026, "venue": "Logistics", "found_via": "carried from m10 (mcp__consensus__search); not re-retrieved", "relevance": "Only oneM2M-related DPP item: combines EPCIS 2.0, oneM2M, IOTA and zero-knowledge proofs in a single-host testbed."},
+  {"doi": "10.1016/j.jobe.2021.103233", "title": "Digitizing material passport for sustainable construction projects using BIM", "year": 2021, "venue": "Journal of Building Engineering", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Framework embedding a material passport tool in BIM with three sustainability indicators and a residential case."},
+  {"doi": "10.35490/ec3.2025.361", "title": "Leveraging Blockchain for Circular Economy: a Digital Product Passport Platform for BIM-based Design", "year": 2025, "venue": "Computing in Construction", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "BIM library plugin plus DPP system using Product Data Template structure; the nearest BIM-to-DPP link found."},
+  {"doi": "10.1049/icp.2024.3501", "title": "Material passport for modular construction", "year": 2024, "venue": "IET Conference Proceedings", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Unity testbed on a modular-house BIM; unique component IDs; stakeholder-driven requirements."},
+  {"doi": "10.1108/ecam-08-2024-1020", "title": "Cloud-based BIM for data sharing and collaboration to foster circular economy in construction", "year": 2025, "venue": "Engineering, Construction and Architectural Management", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Revit-integrated material passport prototype with bidirectional data sharing and a NEOM case."},
+  {"doi": "10.1016/j.cscm.2025.e04267", "title": "Current methodologies of creating Material Passports: A Systematic Literature Review", "year": 2025, "venue": "Case Studies in Construction Materials", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Classifies passport approaches (BIM, blockchain, platform, QR/RFID, Level(s)) and flags static passports."},
+  {"doi": "10.1088/1755-1315/1568/1/012026", "title": "Integrating Digital Product Passports and BIM for Circular Construction: A Review of Challenges and Opportunities for Data-Driven Material Reuse and Sustainability Assessment", "year": 2025, "venue": "IOP Conference Series: Earth and Environmental Science", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Names interoperability, missing automation and missing sector standards as barriers to DPP-BIM integration."},
+  {"doi": "10.1080/15623599.2026.2642423", "title": "Material passports for circular economy in the construction industry: state-of-art-review", "year": 2026, "venue": "International Journal of Construction Management", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "64 articles; only 17% built real-project passports; 40 technologies, BIM dominant."},
+  {"doi": "10.3390/buildings16030658", "title": "Blockchain-Based Material Passports: A Review of Managing Built Asset Information for Material Circularity", "year": 2026, "venue": "Buildings", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Conceptual model linking BIM, digital twin and blockchain; no empirical validation."},
+  {"doi": "10.1016/j.jclepro.2021.128702", "title": "Material Passports for the end-of-life stage of buildings: Challenges and potentials", "year": 2021, "venue": "Journal of Cleaner Production", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "BIM model built from laser scan and demolition data to produce an end-of-life passport for walls and foundation."},
+  {"doi": "10.3390/buildings15234323", "title": "Application of Materials Passport to the Wood Frame Construction System Using Revit and Dynamo", "year": 2025, "venue": "Buildings", "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search", "relevance": "Passport with 49 parameters in nine categories modelled in Revit for a commercial wood panel."},
+  {"doi": "10.35490/ec3.2026.311", "title": "Usage Policies for Fragmented Digital Product Passport Data Retrieval in AECO Data Spaces", "year": 2026, "venue": "Computing in Construction", "found_via": "carried from l02", "relevance": "Eclipse-component data space proof of concept with negotiated usage policies for a ceiling element; construction link to the dataspace route."},
+  {"doi": "10.1016/j.procs.2026.02.330", "title": "A General-Purpose Tool to Convert Asset Administration Shell Templates to RDFS/OWL", "year": 2026, "venue": "Procedia Computer Science (per prior record)", "found_via": "mcp__consensus__search", "relevance": "AAS to RDF bridge applied to Battery Pass and Carbon Footprint models; provides the route from AAS to JSON-LD/NGSI-LD style linked data."}
+ ],
+ "conformance_implications": [
+  {
+   "layer": "L03",
+   "test_objective": "NGSI-LD broker returns correct media type and context signalling for entity retrieval.",
+   "observable": "GET /ngsi-ld/v1/entities/{id} with Accept: application/ld+json returns Content-Type application/ld+json with @context in body; with Accept: application/json returns a Link header rel=\"http://www.w3.org/ns/json-ld#context\".",
+   "oracle": "ETSI GS CIM 009 V1.9.1 binding clauses and the Link header examples (open ETSI document).",
+   "existing_check": "data.context",
+   "existing_capability": "data.context (allowlist of @context URLs); the header-versus-body rule itself is not covered",
+   "new_capability_needed": "api.header_contract (assert Link/Content-Type pairs)",
+   "fixtures_needed": "Loopback mock NGSI-LD server with both representations, one with missing Link header, one with a disallowed @context URL.",
+   "reusable_suite": "none found (an ETSI-maintained NGSI-LD test suite was not located in this session)",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L04",
+   "test_objective": "NGSI-LD create then retrieve round trip returns 201 with Location and the same entity.",
+   "observable": "POST /ngsi-ld/v1/entities/ status 201, Location header equals /ngsi-ld/v1/entities/{id}, subsequent GET equals payload (modulo expansion).",
+   "oracle": "ETSI GS CIM 009 V1.9.1 clause 5.6 and the create example.",
+   "existing_check": "api.contract",
+   "existing_capability": "api.contract works on a pinned OpenAPI; ETSI OpenAPI pinning is an open question (Orion-LD README mentions an OpenAPI reference but its location was not verified)",
+   "new_capability_needed": "none for HTTP checks if the OpenAPI is pinned; otherwise api.contract fixture authoring",
+   "fixtures_needed": "Pinned NGSI-LD OpenAPI, loopback broker mock.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Entity attributes of the passport map to the declared context and carry required passport fields.",
+   "observable": "Expanded JSON-LD of entity; presence of unique product identifier attribute and required fields.",
+   "oracle": "Project passport application profile (to be defined; ESPR Annex III is a menu per m01) plus JSON-LD expansion.",
+   "existing_check": "data.context + data.jsonschema + data.rules",
+   "existing_capability": "data.context, data.jsonschema; data.shacl is interface_only",
+   "new_capability_needed": "data.shacl (to validate expanded JSON-LD graphs)",
+   "fixtures_needed": "Sample NGSI-LD entity documents (valid and invalid), local context file.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "A DTDL model document is syntactically valid for its declared version and uses the declared context.",
+   "observable": "JSON document with @context dtmi:dtdl:context;4 (or v2/v3), @id DTMI, @type Interface, contents list.",
+   "oracle": "DTDL v4 specification in Azure/opendigitaltwins-dtdl (CC-BY-4.0).",
+   "existing_check": "none (data.jsonschema only if a schema is authored; a published JSON Schema for DTDL was not located)",
+   "existing_capability": "none",
+   "new_capability_needed": "data.dtdl_validate (wrap a DTDL parser; adding a dependency needs owner approval)",
+   "fixtures_needed": "Valid and invalid DTDL v3 and v4 interfaces with bad DTMI and bad context.",
+   "reusable_suite": "DTDL parsers exist in the Azure ecosystem; not evaluated here",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "A WoT Thing Description for a passport host validates against the TD 1.1 data model and uses application/td+json.",
+   "observable": "TD document body and Content-Type from /.well-known/wot or a TD directory.",
+   "oracle": "W3C WoT Thing Description 1.1 Recommendation; WoT Discovery Recommendation for endpoints and media types.",
+   "existing_check": "data.jsonschema (if the normative TD JSON Schema is pinned; availability not verified in this session)",
+   "existing_capability": "data.jsonschema",
+   "new_capability_needed": "none if schema pinned; api.contract for the /things directory API",
+   "fixtures_needed": "Valid and invalid TDs; loopback directory serving /things and /.well-known/wot.",
+   "reusable_suite": "none verified (W3C WoT test material not examined)",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "Restricted passport attributes are absent for an unauthorised role in a broker or gateway.",
+   "observable": "Diff of responses for anonymous, wrong-role and right-role requests.",
+   "oracle": "Per-product access rules from the delegated act (ESPR Art. 11(b) per m01); stack gives none.",
+   "existing_check": "access.restricted_fields",
+   "existing_capability": "access.restricted_fields",
+   "new_capability_needed": "none",
+   "fixtures_needed": "Mock broker with role-dependent filtering.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "An exported JSON-LD passport from any of these stacks carries a verifiable signature envelope.",
+   "observable": "JWS or COSE envelope around the exported document.",
+   "oracle": "Whatever the host claims; the stacks define no signature. For JWS, the existing engine oracle.",
+   "existing_check": "integrity.jws",
+   "existing_capability": "integrity.jws (integrity.cose is interface_only)",
+   "new_capability_needed": "none for JWS",
+   "fixtures_needed": "TEST-ONLY signing key, signed and tampered exports.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L01",
+   "test_objective": "Entity identifier or identifier attribute equals the identifier on the data carrier.",
+   "observable": "Entity id URI and identifier attribute versus the decoded carrier URL.",
+   "oracle": "GS1 Digital Link URI Syntax (open) for GS1-form identifiers; ESPR Art. 2(30) for the link requirement.",
+   "existing_check": "identifier.consistency",
+   "existing_capability": "identifier.parse handles only /01/<GTIN>/21/<serial>; entity ids in urn:ngsi-ld form are not parsed",
+   "new_capability_needed": "identifier.parse_urn (URN-wrapped GS1 form) or an adapter",
+   "fixtures_needed": "Pairs of urn:ngsi-ld ids and GS1 Digital Link carrier URLs.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "OPC UA DPP model instance conforms to OPC 30450-1.",
+   "observable": "Address-space browse and read results over an OPC UA session; or a gateway's JSON.",
+   "oracle": "OPC 30450-1 (licensed download; text not read). The engine cannot decide pass or fail without it; and the EN 18223 mapping it names is a protected document that the engine team must not read.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "protocol.opcua_client (needs an OPC UA client library, a new dependency; report to owner)",
+   "fixtures_needed": "Loopback OPC UA server (open62541 or UA-.NETStandard based) with the model; or only gateway JSON checked by data.jsonschema.",
+   "reusable_suite": "OPC Foundation compliance tools exist (background knowledge; not verified)",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "BIM export (IFC) satisfies an IDS information requirement for a passport field set.",
+   "observable": "IFC file and IDS XML file; checker result.",
+   "oracle": "buildingSMART IDS 1.0 file as the requirement; IFC is ISO 16739 (protected, not read).",
+   "existing_check": "none",
+   "existing_capability": "none (manual.review fallback)",
+   "new_capability_needed": "data.ids_check (wrap an open IFC/IDS checker; dependency approval needed)",
+   "fixtures_needed": "Small IFC and IDS samples written by the project, not copied from standards.",
+   "reusable_suite": "IfcOpenShell ecosystem (LGPL-3.0, metadata only read)",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "NGSI-LD temporal retrieval returns earlier states after an update.",
+   "observable": "GET /ngsi-ld/v1/temporal/entities/?type=...&timerel=between&timeAt=... after two updates.",
+   "oracle": "ETSI GS CIM 009 V1.9.1 temporal clause (query example at the spec's temporal GET).",
+   "existing_check": "persistence.versions",
+   "existing_capability": "persistence.versions (written for passport version URLs; a temporal-API adapter is needed)",
+   "new_capability_needed": "persistence.temporal_adapter",
+   "fixtures_needed": "Mock broker with history.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "AAS to DTDL or AAS to WoT TD bridge keeps identifiers and values of a sample passport.",
+   "observable": "Source AAS JSON and target DTDL or TD document.",
+   "oracle": "Mapping from Schmidt 2023 (DTDL to AAS) or Mattila 2025; AAS side from IDTA specifications.",
+   "existing_check": "aas.validate (for the AAS side only)",
+   "existing_capability": "aas.validate",
+   "new_capability_needed": "data.bridge_roundtrip (generic comparison fixture)",
+   "fixtures_needed": "Paired AAS and DTDL/TD samples.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  }
+ ],
+ "failure_modes": [
+  {"layer": "L03", "fault": "NGSI-LD server ignores the Link header and returns terms without expansion, or sends application/json with an @context in the body.", "detectable_by": "Retrieve with both Accept types and compare Content-Type, Link header and expanded terms."},
+  {"layer": "L03", "fault": "Pagination Link rel=\"next\" missing or pointing to a wrong offset.", "detectable_by": "Query with limit smaller than the entity count and follow Link next until exhaustion."},
+  {"layer": "L04", "fault": "POST of an existing entity id returns 201 or silently overwrites instead of a conflict.", "detectable_by": "Post the same id twice and check the status."},
+  {"layer": "L05", "fault": "@context URL unreachable or changed after publication, so the same entity expands to different IRIs.", "detectable_by": "Fetch the context twice and compare; check against the engine's allowlist (data.context)."},
+  {"layer": "L05", "fault": "DTDL model uses a context version the target service does not support (v4 model in a v3-only service).", "detectable_by": "Check @context string against the service's declared DTDL version."},
+  {"layer": "L05", "fault": "Thing Description served with Content-Type application/json only, lacking application/td+json, or forms pointing to unreachable URLs.", "detectable_by": "Request /.well-known/wot with Accept td+json and test forms on a loopback target."},
+  {"layer": "L01", "fault": "Entity id does not match the identifier on the data carrier (serial copied wrongly).", "detectable_by": "identifier.consistency on carrier URL versus identifier attribute."},
+  {"layer": "L07", "fault": "Subscription notification endpoint receives restricted attributes because filtering is applied only on GET.", "detectable_by": "Register a subscription from a low-privilege client and inspect notified payload."},
+  {"layer": "L08", "fault": "Exported passport JSON-LD is unsigned or signature covers only part of the document.", "detectable_by": "integrity.jws on export plus tampering a field outside the signed part."},
+  {"layer": "L10", "fault": "Temporal history lost after broker migration; only current state remains.", "detectable_by": "Compare temporal query output before and after a controlled update sequence."},
+  {"layer": "L10", "fault": "BIM-linked passport stays static after components are replaced (reviews report static passports).", "detectable_by": "Compare passport record version against model revision; needs a project-specific oracle."},
+  {"layer": "L09", "fault": "Context-source registration is confused with EU registry upload, so no registry entry exists.", "detectable_by": "registry.consistency against the registry mock after publish."}
+ ],
+ "sources": [
+  {"id": "etsi-gs-cim-009-v1-9-1", "title": "ETSI GS CIM 009 V1.9.1 (2025-07) Context Information Management (CIM); NGSI-LD API", "issuing_body": "ETSI Industry Specification Group CIM", "url": "https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.09.01_60/gs_cim009v010901p.pdf", "edition_or_version": "V1.9.1", "publication_date": "2025-07", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "ETSI document with a notice that electronic versions must not be modified; own-words use only", "what_it_shows": "NGSI-LD entity, property, relationship model; HTTP endpoints under /ngsi-ld/v1; Link header context handling; batch, subscription, registration, temporal operations; distributed operation rules. Directory listing shows folders 01.01.01 to 01.09.01. The PDF text was extracted locally and searched."},
+  {"id": "new-orion-ld-repo", "title": "FIWARE/context.Orion-LD", "issuing_body": "FIWARE Foundation", "url": "https://github.com/FIWARE/context.Orion-LD", "edition_or_version": "1.12.0", "publication_date": "2026-01-28 (release)", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "AGPL-3.0", "what_it_shows": "NGSI-LD broker features, MongoDB requirement, API conformance note, TRoE, MQTT, Kafka; GitHub API gave push date and release."},
+  {"id": "new-scorpio-repo", "title": "ScorpioBroker/ScorpioBroker", "issuing_body": "Scorpio Broker project", "url": "https://github.com/ScorpioBroker/ScorpioBroker", "edition_or_version": "6.0.1-java-kafka", "publication_date": "2026-01-19 (release)", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "BSD-3-Clause", "what_it_shows": "Java Quarkus NGSI-LD broker, Kafka and PostGIS, federation."},
+  {"id": "new-stellio-repo", "title": "stellio-hub/stellio-context-broker", "issuing_body": "EGM/Stellio community", "url": "https://github.com/stellio-hub/stellio-context-broker", "edition_or_version": "2.38.0", "publication_date": "2026-10-06 (release)", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "Apache-2.0", "what_it_shows": "Kotlin broker, TimescaleDB and Kafka, compatibility check against NGSI-LD 1.9.1."},
+  {"id": "new-ngsi-ld-tutorials", "title": "NGSI-LD Tutorials (FIWARE)", "issuing_body": "FIWARE Foundation", "url": "https://ngsi-ld-tutorials.readthedocs.io/en/latest/", "edition_or_version": "not stated", "publication_date": "not stated", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "Overview of NGSI-LD, three compliant brokers, chapter list including security and data spaces; cites API version 1.7.1 as latest."},
+  {"id": "new-dtdl-v4-spec", "title": "Digital Twins Definition Language (DTDL) Specification v4", "issuing_body": "Microsoft (Azure organization on GitHub)", "url": "https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v4/DTDL.Specification.v4.md", "edition_or_version": "v4", "publication_date": "not stated", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "CC-BY-4.0 per repository", "what_it_shows": "JSON-LD based modelling language, element list, DTMI form, context string dtmi:dtdl:context;4. Only the first part of the page was returned by the fetch tool."},
+  {"id": "new-dtdl-repo", "title": "Azure/opendigitaltwins-dtdl", "issuing_body": "Microsoft", "url": "https://github.com/Azure/opendigitaltwins-dtdl", "edition_or_version": "v2, v3, v4 directories", "publication_date": "pushed 2025-03-26", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "CC-BY-4.0 and MIT", "what_it_shows": "Version-to-service table; 576 stars at retrieval; no GitHub releases."},
+  {"id": "new-azure-dt-overview", "title": "What is Azure Digital Twins?", "issuing_body": "Microsoft Learn", "url": "https://learn.microsoft.com/en-us/azure/digital-twins/overview", "edition_or_version": "page updated_at 2026-08-11", "publication_date": "ms.date 2025-01-27", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "Microsoft documentation terms; not stated on page", "what_it_shows": "PaaS twin graph, DTDL models, REST APIs, query API, event routes, data history, 3D Scenes Studio preview."},
+  {"id": "new-w3c-wot-td-1-1", "title": "Web of Things (WoT) Thing Description 1.1", "issuing_body": "W3C Web of Things Working Group", "url": "https://www.w3.org/TR/wot-thing-description11/", "edition_or_version": "1.1", "publication_date": "2023-12-05", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "W3C Document License (not shown in fetch)", "what_it_shows": "Recommendation status, data model, JSON-LD 1.1, security schemes, td+json media type listed. Only the first 100000 of about 402000 characters were read."},
+  {"id": "new-wot-td-note", "title": "Absence note: no integrity mechanism found in TD 1.1 portion read", "issuing_body": "not applicable", "url": "https://www.w3.org/TR/wot-thing-description11/", "edition_or_version": "n/a", "publication_date": "n/a", "retrieval_date": "2026-10-19", "verification_level": "not_located", "protected_standard": false, "license_or_reuse_terms": "n/a", "what_it_shows": "Recorded only as the support for the L08 'no mechanism found' statement; the unread 300000 characters could contain relevant text."},
+  {"id": "new-w3c-wot-discovery", "title": "Web of Things (WoT) Discovery", "issuing_body": "W3C Web of Things Working Group", "url": "https://www.w3.org/TR/wot-discovery/", "edition_or_version": "Recommendation", "publication_date": "2023-12-05", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "W3C Document License (not shown in fetch)", "what_it_shows": "Introduction and Exploration phases, /.well-known/wot, DNS-SD, TD Directory API /things, /events, /search/*, media types. First 100000 of about 171000 characters read."},
+  {"id": "new-node-wot", "title": "eclipse-thingweb/node-wot", "issuing_body": "Eclipse Thingweb", "url": "https://github.com/eclipse-thingweb/node-wot", "edition_or_version": "v0.9.2", "publication_date": "2026-01-26 (release)", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "EPL-2.0 / W3C Software Notice per README; GitHub: NOASSERTION", "what_it_shows": "Binding support table (OPC UA client-only)."},
+  {"id": "new-onem2m-published-specs", "title": "oneM2M published specifications (technical page)", "issuing_body": "oneM2M Partners", "url": "https://www.onem2m.org/technical/published-specifications", "edition_or_version": "Release 5 latest with published features", "publication_date": "not stated", "retrieval_date": "2026-10-19", "verification_level": "metadata_only", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "Release list, bindings by release, SDT mention. TS-0001 and TS-0004 versions not shown. A second page (latest-drafts) returned HTTP 404."},
+  {"id": "new-opcua-online-reference", "title": "OPC Foundation Online Reference (index)", "issuing_body": "OPC Foundation", "url": "https://reference.opcfoundation.org/", "edition_or_version": "core parts mostly 1.05.x", "publication_date": "not stated", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "OPC Foundation terms; IEC 62541 is the corresponding IEC publication (protected): bibliographic only", "what_it_shows": "Index of core and companion specifications incl. OPC 30270 AAS 1.00 and OPC 30450-1 DPP 1.0.0. Two guessed deep links (DPP and AAS paths) returned only search pages and were not used."},
+  {"id": "new-opc-30450-1-listing", "title": "Digital Product Passport - Information Model (OPC 30450-1)", "issuing_body": "OPC Foundation (Cloud Library for UA Information Models working group)", "url": "https://opcfoundation.org/developer-tools/documents/view/406", "edition_or_version": "V 1.0.0", "publication_date": "2026-10-17 per listing", "retrieval_date": "2026-10-19", "verification_level": "metadata_only", "protected_standard": false, "license_or_reuse_terms": "OPC Foundation Specifications License 1.14; login required to download", "what_it_shows": "Scope: OPC UA information model for ESPR passports, mapping of the data model of EN 18223:2026 to ObjectTypes and DataTypes (EN 18223 is a protected standard, named only; its content is not used)."},
+  {"id": "new-opc-press-battery-poc", "title": "Battery Passport Proof of Concept based on OPC UA", "issuing_body": "OPC Foundation", "url": "https://opcfoundation.org/news/press-releases/battery-passport-proof-of-concept-based-on-opc-ua/", "edition_or_version": "press release", "publication_date": "2024-04-22", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "Demonstrator with CESMII and VDMA; Fraunhofer FFB; no AAS or Catena-X mention, no repository."},
+  {"id": "new-opc-joint-forces", "title": "Joint forces for Digital Product Passport (DPP)", "issuing_body": "OPC Foundation with CESMII, LNI 4.0, Digital Twin Consortium, ECLASS, IDTA, VDMA, ZVEI", "url": "https://opcfoundation.org/news/press-releases/joint-forces-for-digital-product-passport-dpp/", "edition_or_version": "press release", "publication_date": "2024-11-12", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "Announced joint AAS plus OPC UA architecture, REST access, optional dataspace links; no milestones."},
+  {"id": "new-wiot-opcua-dpp", "title": "OPC UA open-source DPP solution (Barnstedt session page)", "issuing_body": "WIoT Group (event organiser)", "url": "https://wiot-group.com/think/en/articles/opc-ua-open-source-dpp-solution-erich-barnstedt/", "edition_or_version": "page of 2026-07-08", "publication_date": "2026-07-08", "retrieval_date": "2026-10-19", "verification_level": "secondary_only", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "NodeSets at rest, CENELEC JSON in transit, EDC; no repositories named."},
+  {"id": "new-gering-ceur-dpp-architecture", "title": "Architecture for a Digital Product Passport System based on the Ecodesign for Sustainable Products Regulation and the corresponding Standardisation Request", "issuing_body": "Fraunhofer IPK, FIWARE Foundation, Circulor (authors); CEUR-WS proceedings of I-ESA 2024", "url": "https://ceur-ws.org/Vol-4167/paper23.pdf", "edition_or_version": "CEUR vol. 4167 paper 23", "publication_date": "conference 2024-04 per paper footer", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "CC BY 4.0 per paper", "what_it_shows": "Three-part DPP architecture; text search found no NGSI-LD or FIWARE software mentioned beyond author affiliations. Only the first pages and a keyword search were read."},
+  {"id": "new-bsdd-github", "title": "buildingSMART/bSDD", "issuing_body": "buildingSMART International", "url": "https://github.com/buildingSMART/bSDD", "edition_or_version": "API v1", "publication_date": "pushed 2026-10-07", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "MIT", "what_it_shows": "Dictionary service, Swagger API, GraphQL test UI, JSON import model."},
+  {"id": "new-buildingsmart-ids-search", "title": "Information Delivery Specification (IDS) search excerpts", "issuing_body": "buildingSMART International (official page); trade articles", "url": "https://www.buildingsmart.org/standards/bsi-standards/information-delivery-specification-ids/", "edition_or_version": "1.0", "publication_date": "2024-06-01 (approval per excerpt)", "retrieval_date": "2026-10-19", "verification_level": "secondary_only", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "Official page and IFC standard page returned HTTP 403 or 404; IDS facts come from web-search excerpts."},
+  {"id": "iso-16739-1-ifc", "title": "ISO 16739-1 Industry Foundation Classes (IFC) for data sharing in the construction and facility management industries", "issuing_body": "ISO", "url": "not located", "edition_or_version": "not retrieved", "publication_date": "not retrieved", "retrieval_date": "2026-10-19", "verification_level": "not_located", "protected_standard": true, "license_or_reuse_terms": "protected ISO publication; not opened; no catalogue page fetched", "what_it_shows": "Bibliographic placeholder only; no schema described."},
+  {"id": "en-18223-2026", "title": "Digital Product Passport - System interoperability", "issuing_body": "CEN/CLC/JTC 24", "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80714&cs=1B90D9", "edition_or_version": "2026", "publication_date": "not retrieved", "retrieval_date": "2026-10-19", "verification_level": "metadata_only", "protected_standard": true, "license_or_reuse_terms": "protected; id and URL reused from prior record m10; not opened in this session", "what_it_shows": "Bibliographic title only; named on the OPC 30450-1 listing."},
+  {"id": "new-cirpass2-lighthouse-pilots", "title": "CIRPASS-2 lighthouse pilots", "issuing_body": "CIRPASS-2 project", "url": "https://cirpass2.eu/lighthouse-pilots/", "edition_or_version": "n/a", "publication_date": "not stated", "retrieval_date": "2026-10-19", "verification_level": "substantive", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "PC2 construction pilot title and 13 pilots in four value chains; no technical details on this page."},
+  {"id": "new-vendor-madaster", "title": "Madaster home page", "issuing_body": "Madaster", "url": "https://www.madaster.com/en", "edition_or_version": "n/a", "publication_date": "not stated", "retrieval_date": "2026-10-19", "verification_level": "secondary_only", "protected_standard": false, "license_or_reuse_terms": "not stated", "what_it_shows": "Carried from m10; not re-fetched in this session."},
+  {"id": "reg-eu-2024-1781", "title": "Regulation (EU) 2024/1781 establishing a framework for the setting of ecodesign requirements for sustainable products", "issuing_body": "European Parliament and Council", "url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj", "edition_or_version": "OJ L 2024/1781", "publication_date": "2024", "retrieval_date": "2026-10-19", "verification_level": "metadata_only", "protected_standard": false, "license_or_reuse_terms": "EU legal text, reuse per Commission decision 2011/833/EU", "what_it_shows": "Article citations in this file are carried from m01; two EUR-Lex fetches in this session returned empty text, so the articles were not re-read."},
+  {"id": "new-reg-eu-2024-3110-cpr", "title": "Regulation (EU) 2024/3110 laying down harmonised rules for the marketing of construction products", "issuing_body": "European Parliament and Council", "url": "http://publications.europa.eu/resource/cellar/a860ee13-bce2-11ef-91ed-01aa75ed71a1.0006.03/DOC_1", "edition_or_version": "2024/3110", "publication_date": "2024", "retrieval_date": "2026-10-19", "verification_level": "metadata_only", "protected_standard": false, "license_or_reuse_terms": "EU legal text", "what_it_shows": "Carried from m10/m01; not re-read here."}
+ ],
+ "open_questions": [
+  "Does an NGSI-LD application profile or data model for the DPP exist (for example in FIWARE smart data models)? None was found in this session; a search of the smart-data-models repository was not done.",
+  "What is the true status of OPC 30450-1: V1.0.0 released 2026-10-17 (listing page) or Release Candidate dated 2026-07-08 (search summary)? The specification text needs member or registered login.",
+  "Does OPC 30450-1 use AAS submodel semantics, or only the CEN/CENELEC data model named on the listing? The joint architecture announcement points to both.",
+  "Where is the pinned machine-readable NGSI-LD OpenAPI (ETSI or FIWARE) that api.contract could pin, and which version matches Orion-LD, Scorpio and Stellio?",
+  "Is a normative JSON Schema for WoT TD 1.1 and for DTDL available for data.jsonschema? Not verified.",
+  "oneM2M TS-0001/TS-0004 versions and the SDT/product-data models remain unread.",
+  "Which BIM-to-DPP path (IFC property sets, IDS, bSDD, GS1 Digital Link) will the EU construction passport use? Only a search excerpt of a CEN/TC 442 slide and a vendor post speak to it."
+ ],
+ "anomalies": [
+  "ETSI deliver listing shows V1.9.1 (folder dated 7/2/2025, which can be read as 2 July or 7 February; the document header says 2025-07), while the FIWARE tutorial page cites 1.7.1 (June 2023) as the latest and the Orion-LD README says near-compliance with 1.6.1 and an OpenAPI reference at 1.7.1 being updated to 1.8.1. The Scorpio README links a 01.02.02 path. Brokers lag the spec by several minor versions.",
+  "OPC 30450-1: listing page said V1.0.0, release date 2026-10-17, status blank; a web-search summary of the same page said Release Candidate dated 2026-07-08. The online index also shows 1.0.0. Not resolved.",
+  "Guessed deep links on reference.opcfoundation.org (DPP/v100 and AAS/v100) returned only the search UI; the content of OPC 30270 and OPC 30450-1 was therefore not read.",
+  "The buildingSMART IFC page (technical.buildingsmart.org) and the IDS page returned HTTP 403; the oneM2M latest-drafts page returned HTTP 404. No ISO catalogue page for ISO 16739-1 was fetched.",
+  "The Consensus tool returned 'Unknown Journal' for some entries; venues for 10.1016/j.procs.* items were filled from the prior record.",
+  "The CEUR paper (vol. 4167 paper 23) has a footer saying I-ESA 2024 and 'Copyright 2020'; the CEUR volume number suggests later publication. Date therefore stated as the conference date only.",
+  "Name collision: NGSI-LD 'context source registration' is broker federation, not the EU DPP registry.",
+  "DTDL repository last push 2025-03-26 and no releases, while v4 is referenced as supported in Azure IoT Operations; Azure Digital Twins still lists v3 and v2.",
+  "Two EUR-Lex fetches for Regulation 2024/1781 returned empty page text, so ESPR article numbers are carried from m01 unverified in this session."
+ ],
+ "truncation": "Time-boxed. Not read: oneM2M specification texts (index only), OPC UA specification text (login-gated; online reference index only), the IFC schema (protected), Azure Digital Twins API reference, FIWARE smart data models, the unread 300000 characters of the TD 1.1 page and 71000 of WoT Discovery, the AAS-OPC UA companion specification page. Consensus searches: 4 calls (2 per Consensus tool); SciSpace: 2 calls. Literature capped at 20 entries chosen for DPP, BIM or bridge relevance. Search coverage for NGSI-LD or oneM2M DPP implementations is shallow: one web search and two literature queries found no NGSI-LD DPP implementation."
+}

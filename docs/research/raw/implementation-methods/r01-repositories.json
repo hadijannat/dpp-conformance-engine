@@ -1,0 +1,2111 @@
+{
+ "id": "r01-repositories",
+ "retrieval_date": "2026-10-19",
+ "queries_run": [
+  {
+   "query": "gh search/repositories q=topic:digital-product-passport",
+   "n_results": 101
+  },
+  {
+   "query": "gh search/repositories q=topic:digitalproductpassport",
+   "n_results": 1
+  },
+  {
+   "query": "gh search/repositories q=topic:product-passport",
+   "n_results": 1
+  },
+  {
+   "query": "gh search/repositories q=topic:battery-passport",
+   "n_results": 12
+  },
+  {
+   "query": "gh search/repositories q=topic:dpp",
+   "n_results": 146
+  },
+  {
+   "query": "gh search/repositories q=topic:asset-administration-shell",
+   "n_results": 41
+  },
+  {
+   "query": "gh search/repositories q=topic:verifiable-credentials topic:supply-chain",
+   "n_results": 8
+  },
+  {
+   "query": "gh search/repositories q=topic:dataspace",
+   "n_results": 34
+  },
+  {
+   "query": "gh search/repositories q=topic:epcis",
+   "n_results": 51
+  },
+  {
+   "query": "gh search/repositories q=\"digital product passport\" in:name,description,readme",
+   "n_results": 1412
+  },
+  {
+   "query": "gh search/repositories q=\"battery passport\" in:name,description,readme",
+   "n_results": 421
+  },
+  {
+   "query": "gh search/repositories q=topic:gs1-digital-link",
+   "n_results": 22
+  },
+  {
+   "query": "gh search/repositories q=topic:digital-twin topic:aas",
+   "n_results": 14
+  },
+  {
+   "query": "gh search/repositories q=\"product passport\" in:description",
+   "n_results": 290
+  },
+  {
+   "query": "gh search/repositories q=topic:untp",
+   "n_results": 7
+  },
+  {
+   "query": "gh search/repositories q=\"digital product passport\" in:readme",
+   "n_results": 1302
+  },
+  {
+   "query": "gh api orgs/{CIRPASS-2,batterypass,cir4fun-eu,uncefact,open-dpp,OpenDPP}/repos",
+   "n_results": 52
+  },
+  {
+   "query": "gh api repos/<owner>/<repo> + /readme + /contents for 86 named candidates",
+   "n_results": 86
+  },
+  {
+   "query": "WebFetch https://opensource.unicc.org/un/unece/uncefact/spec-untp",
+   "n_results": 1
+  },
+  {
+   "query": "WebFetch https://zenodo.org/api/records?q=digital product passport software (type=software)",
+   "n_results": 0
+  }
+ ],
+ "repos": [
+  {
+   "name": "gs1/GS1_DigitalLink_Resolver_CE",
+   "url": "https://github.com/gs1/GS1_DigitalLink_Resolver_CE",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-13T15:59:55Z",
+   "stars": 65,
+   "language": "JavaScript",
+   "description_own_words": "Community edition of a GS1 Digital Link resolver with a multi-service architecture. The README states that GS1 does not maintain it and that users should not assume full conformance with the GS1-Conformant Resolver standard.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "resolver",
+   "layers": [
+    "L01_unique_identifiers",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "Top-level tests directory present; contents and coverage not inspected.",
+   "reusable_for_engine": "Second implementation for differential testing of identifier.resolve; use only as an oracle after the engine checks it against the published resolver standard, since its own README disclaims conformance. Conformance implication: identifier.resolve and identifier.consistency apply; a link-set (RFC 9264) check and redirect-chain check would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/gs1/GS1_DigitalLink_Resolver_CE"
+  },
+  {
+   "name": "gs1/GS1DigitalLinkToolkit.js",
+   "url": "https://github.com/gs1/GS1DigitalLinkToolkit.js",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2025-05-01T16:14:04Z",
+   "stars": 20,
+   "language": "HTML",
+   "description_own_words": "JavaScript toolkit that converts between GS1 element strings and GS1 Digital Link URIs.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L01_unique_identifiers",
+    "L02_data_carriers"
+   ],
+   "has_tests_or_suite": "No test directory in the top-level listing.",
+   "reusable_for_engine": "Parser oracle for identifier.parse beyond the /01/<GTIN>/21/<serial> form; convert-and-compare vectors. Conformance implication: identifier.parse applies; wider AI-set parsing needs a new parser capability or a dependency decision.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/gs1/GS1DigitalLinkToolkit.js"
+  },
+  {
+   "name": "gs1/gs1-syntax-engine",
+   "url": "https://github.com/gs1/gs1-syntax-engine",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-08T13:21:41Z",
+   "stars": 52,
+   "language": "C",
+   "description_own_words": "C reference implementation that processes GS1 barcode syntax data: application-identifier element strings and Digital Link URIs. Part of the GS1 Barcode Syntax Resource.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L01_unique_identifiers",
+    "L02_data_carriers"
+   ],
+   "has_tests_or_suite": "No test directory at top level; the project ships a src tree and docs. Test content not inspected.",
+   "reusable_for_engine": "Syntax oracle for identifier.parse; second implementation for differential tests of AI syntax. Conformance implication: identifier.parse applies; wrapping it needs a new adapter.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/gs1/gs1-syntax-engine"
+  },
+  {
+   "name": "gs1/gs1-syntax-dictionary",
+   "url": "https://github.com/gs1/gs1-syntax-dictionary",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-08-29T06:12:04Z",
+   "stars": 21,
+   "language": "C",
+   "description_own_words": "Machine-readable and human-readable text file that describes each assigned GS1 Application Identifier, plus syntax tests.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L01_unique_identifiers"
+   ],
+   "has_tests_or_suite": "README names Syntax Tests; the top-level listing shows src and docs.",
+   "reusable_for_engine": "Data file for AI validation tables and test vectors for identifier.parse. Conformance implication: identifier.parse applies; table-driven AI checks are new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/gs1/gs1-syntax-dictionary"
+  },
+  {
+   "name": "uncefact/tests-untp",
+   "url": "https://github.com/uncefact/tests-untp",
+   "host": "github",
+   "license_spdx": "GPL-3.0",
+   "archived": false,
+   "pushed_at": "2026-10-05T14:34:00Z",
+   "stars": 10,
+   "language": "TypeScript",
+   "description_own_words": "UNTP project repository holding a reference implementation (issue, store, verify credentials), test suites for technical interoperability, semantic interoperability and graph validation, a validation playground and a documentation site.",
+   "method_families": [
+    "verifiable-credentials-ssi",
+    "linked-data-semantic"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L08_authentication_reliability_integrity",
+    "L11_roles_and_governance"
+   ],
+   "has_tests_or_suite": "Yes: README lists three test suites; examples directory present.",
+   "reusable_for_engine": "UNTP credential samples and schema validation as fixtures for data.jsonschema and data.context; second verifier for integrity.jws. GPL-3.0 limits copying code into a non-GPL engine; use as external oracle only. Conformance implication: data.jsonschema, data.context, integrity.jws apply; graph validation needs data.shacl (interface_only) and evidence.untp_dcc.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/uncefact/tests-untp"
+  },
+  {
+   "name": "uncefact/project-vckit",
+   "url": "https://github.com/uncefact/project-vckit",
+   "host": "github",
+   "license_spdx": "GPL-3.0",
+   "archived": false,
+   "pushed_at": "2026-09-10T22:14:42Z",
+   "stars": 23,
+   "language": "TypeScript",
+   "description_own_words": "Reference implementation of a verifiable-credentials platform for digital trade and traceability.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L08_authentication_reliability_integrity",
+    "L11_roles_and_governance"
+   ],
+   "has_tests_or_suite": "Top-level tests directory present; contents not inspected.",
+   "reusable_for_engine": "Second issuer/verifier implementation for differential tests of credential signatures. Conformance implication: integrity.jws partly applies; status handling needs integrity.status_list.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/uncefact/project-vckit"
+  },
+  {
+   "name": "uncefact/project-storage-service",
+   "url": "https://github.com/uncefact/project-storage-service",
+   "host": "github",
+   "license_spdx": "GPL-3.0",
+   "archived": false,
+   "pushed_at": "2026-06-12T01:53:08Z",
+   "stars": 4,
+   "language": "TypeScript",
+   "description_own_words": "Express REST service that stores, encrypts and deletes documents and computes a multibase multihash digest so consumers can verify integrity.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L06_storage_archiving_persistence",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "No tests directory in the top-level listing.",
+   "reusable_for_engine": "Digest computation behavior as a reference for integrity checks on stored evidence. Conformance implication: persistence.versions and integrity.jws only partly apply; a digestMultibase check would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/uncefact/project-storage-service"
+  },
+  {
+   "name": "eclipse-basyx/basyx-python-sdk",
+   "url": "https://github.com/eclipse-basyx/basyx-python-sdk",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-08T08:18:07Z",
+   "stars": 105,
+   "language": "Python",
+   "description_own_words": "Python SDK for building and handling Asset Administration Shells; the monorepo contains a compliance tool, an SDK and a server.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "compliance_tool directory present at top level.",
+   "reusable_for_engine": "Second AAS parser for differential tests of aas.validate; sample generation. Conformance implication: aas.validate applies (aas-test-engines wrapper); a differential run would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-basyx/basyx-python-sdk"
+  },
+  {
+   "name": "eclipse-basyx/basyx-java-server-sdk",
+   "url": "https://github.com/eclipse-basyx/basyx-java-server-sdk",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-19T07:51:14Z",
+   "stars": 85,
+   "language": "Java",
+   "description_own_words": "Java server and client SDK for AAS version 3 with registry, discovery and repository components and in-memory or MongoDB backends.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "Examples directory present; test contents not inspected.",
+   "reusable_for_engine": "Local system under test for black-box api.contract and aas.validate runs (loopback only); second server for differential tests. Conformance implication: api.contract and aas.validate apply.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-basyx/basyx-java-server-sdk"
+  },
+  {
+   "name": "admin-shell-io/aas-test-engines",
+   "url": "https://github.com/admin-shell-io/aas-test-engines",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2025-08-05T08:51:00Z",
+   "stars": 30,
+   "language": "Python",
+   "description_own_words": "Command-line and library tools that check AAS files (JSON, AASX) and AAS servers against the AAS specification.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "Yes: it is a test tool; also has a test directory.",
+   "reusable_for_engine": "Already wrapped by aas.validate. Last push 2025-08-05, so check currency against the AAS specification versions. Conformance implication: aas.validate.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/admin-shell-io/aas-test-engines"
+  },
+  {
+   "name": "admin-shell-io/submodel-templates",
+   "url": "https://github.com/admin-shell-io/submodel-templates",
+   "host": "github",
+   "license_spdx": "CC-BY-4.0",
+   "archived": false,
+   "pushed_at": "2026-10-15T10:22:47Z",
+   "stars": 94,
+   "language": "Python",
+   "description_own_words": "IDTA repository of published and deprecated AAS submodel templates, including the DPP-related templates.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "No test directory; published and tools directories present.",
+   "reusable_for_engine": "Template JSON/AASX files as fixtures and as the schema source for submodel checks. Conformance implication: aas.validate applies for structure; template-specific rule checks need data.rules additions.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/admin-shell-io/submodel-templates"
+  },
+  {
+   "name": "admin-shell-io/aas-specs-api",
+   "url": "https://github.com/admin-shell-io/aas-specs-api",
+   "host": "github",
+   "license_spdx": "CC-BY-4.0",
+   "archived": false,
+   "pushed_at": "2026-10-16T11:43:31Z",
+   "stars": 27,
+   "language": "Python",
+   "description_own_words": "IDTA-01002 repository with the normative OpenAPI files of the AAS HTTP/REST services: registry, repository, discovery and AASX file server.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "OpenAPI documents for each service; no separate test suite seen.",
+   "reusable_for_engine": "Pinned OpenAPI inputs for api.contract against AAS servers. Conformance implication: api.contract applies.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/admin-shell-io/aas-specs-api"
+  },
+  {
+   "name": "admin-shell-io/aas-specs-metamodel",
+   "url": "https://github.com/admin-shell-io/aas-specs-metamodel",
+   "host": "github",
+   "license_spdx": "CC-BY-4.0",
+   "archived": false,
+   "pushed_at": "2026-09-09T08:39:49Z",
+   "stars": 78,
+   "language": "PowerShell",
+   "description_own_words": "IDTA-01001 repository with the AAS metamodel specification and its JSON/XML schemas.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "schemas directory; CI check badge in README.",
+   "reusable_for_engine": "JSON Schema for AAS payloads. Conformance implication: data.jsonschema and aas.validate apply.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/admin-shell-io/aas-specs-metamodel"
+  },
+  {
+   "name": "aas-core-works/aas-core3.0-python",
+   "url": "https://github.com/aas-core-works/aas-core3.0-python",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-02-06T08:18:07Z",
+   "stars": 6,
+   "language": "Python",
+   "description_own_words": "Generated Python SDK to create, read, verify and (de)serialize AAS version 3.0 models.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "tests and test_data directories at top level.",
+   "reusable_for_engine": "Independent verifier of AAS constraints for differential tests of aas.validate; test_data as fixtures (licence is NOASSERTION in API metadata; check LICENSE before reuse). Conformance implication: aas.validate.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/aas-core-works/aas-core3.0-python"
+  },
+  {
+   "name": "FraunhoferIOSB/FAAAST-Service",
+   "url": "https://github.com/FraunhoferIOSB/FAAAST-Service",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-16T13:43:37Z",
+   "stars": 94,
+   "language": "Java",
+   "description_own_words": "Java AAS service implementation with asset-connection modules for digital twins.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test and examples directories present.",
+   "reusable_for_engine": "Local AAS server as system under test (loopback); sample AAS models in examples. Conformance implication: api.contract and aas.validate apply.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/FraunhoferIOSB/FAAAST-Service"
+  },
+  {
+   "name": "eclipse-aaspe/server",
+   "url": "https://github.com/eclipse-aaspe/server",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-10-14T13:08:03Z",
+   "stars": 87,
+   "language": "C#",
+   "description_own_words": "C# server for AASX packages and AAS repositories with Docker images.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "content-for-demo and examples directories; no test directory seen.",
+   "reusable_for_engine": "Third AAS server for differential system-under-test runs. Conformance implication: api.contract and aas.validate apply.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-aaspe/server"
+  },
+  {
+   "name": "eclipse-mnestix/mnestix-browser",
+   "url": "https://github.com/eclipse-mnestix/mnestix-browser",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-15T08:51:44Z",
+   "stars": 83,
+   "language": "TypeScript",
+   "description_own_words": "Web browser and viewer for AAS content, with example submodel visualizations.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "renderer",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test-data directory at top level.",
+   "reusable_for_engine": "Sample AAS data in test-data as fixtures. Conformance implication: aas.validate on the samples; rendering checks would be new capability.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/eclipse-mnestix/mnestix-browser"
+  },
+  {
+   "name": "eclipse-aasportal/AASPortal",
+   "url": "https://github.com/eclipse-aasportal/AASPortal",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-18T20:01:41Z",
+   "stars": 15,
+   "language": "TypeScript",
+   "description_own_words": "Node.js web portal that visualizes and manages Asset Administration Shells.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "renderer",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "Test Dockerfile and vitest configuration present.",
+   "reusable_for_engine": "none beyond a second viewer for manual.review of AAS samples. Conformance implication: none; manual.review only.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/eclipse-aasportal/AASPortal"
+  },
+  {
+   "name": "hadijannat/mini-dpp-platform",
+   "url": "https://github.com/hadijannat/mini-dpp-platform",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-05-28T10:42:38Z",
+   "stars": 1,
+   "language": "Python",
+   "description_own_words": "AAS-based DPP platform to create, manage and publish passports; classification taken from the GitHub description only, README not read.",
+   "method_families": [
+    "aas-digital-twin",
+    "platform-saas"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "not inspected",
+   "reusable_for_engine": "Possible local demo system under test; unverified. Conformance implication: api.contract, aas.validate if it exposes AAS APIs.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/hadijannat/mini-dpp-platform"
+  },
+  {
+   "name": "hadijannat/DPP40",
+   "url": "https://github.com/hadijannat/DPP40",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2025-03-24T14:20:04Z",
+   "stars": 1,
+   "language": "Python",
+   "description_own_words": "BaSyx-based DPP prototype with nameplate, carbon footprint and a web portal; classified from the GitHub description only.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "demo",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "not inspected",
+   "reusable_for_engine": "none verified. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/hadijannat/DPP40"
+  },
+  {
+   "name": "Freezor/FluentAAS",
+   "url": "https://github.com/Freezor/FluentAAS",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-03-28T21:44:12Z",
+   "stars": 3,
+   "language": "C#",
+   "description_own_words": "C# library to build, validate and serialize AAS models; from the GitHub description only.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "not inspected",
+   "reusable_for_engine": "none verified. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/Freezor/FluentAAS"
+  },
+  {
+   "name": "SmartFactory-KL/shellsmith",
+   "url": "https://github.com/SmartFactory-KL/shellsmith",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-08T13:25:34Z",
+   "stars": 8,
+   "language": "Python",
+   "description_own_words": "Python client that manages AAS content on an Eclipse BaSyx backend, with compose files and tests.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "tests directory and pytest configuration.",
+   "reusable_for_engine": "Helper pattern for loading AAS fixtures into a local BaSyx instance for tests. Conformance implication: api.contract fixtures only.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/SmartFactory-KL/shellsmith"
+  },
+  {
+   "name": "batterypass/BatteryPassDataModel",
+   "url": "https://github.com/batterypass/BatteryPassDataModel",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-09-14T09:46:09Z",
+   "stars": 69,
+   "language": "HTML",
+   "description_own_words": "Battery Pass project data model. README says the project ended in April 2025 and the repository is kept for reference only. No licence was detected by the GitHub API.",
+   "method_families": [
+    "linked-data-semantic",
+    "other"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "No test directory; BatteryPass and docs directories.",
+   "reusable_for_engine": "Battery attribute schemas and examples as fixtures for data.jsonschema; licence is unclear, so confirm before copying. Conformance implication: data.jsonschema and data.rules apply.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/batterypass/BatteryPassDataModel"
+  },
+  {
+   "name": "Jwrede/battery-passport-kit",
+   "url": "https://github.com/Jwrede/battery-passport-kit",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-18T15:53:49Z",
+   "stars": 0,
+   "language": "Python",
+   "description_own_words": "Python CLI that builds CSV templates, converts rows to battery passport JSON and validates them against the BatteryPass-Ready JSON schemas.",
+   "method_families": [
+    "other"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "tests and examples directories.",
+   "reusable_for_engine": "Second validator for battery passport JSON in differential tests of data.jsonschema. Conformance implication: data.jsonschema.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/Jwrede/battery-passport-kit"
+  },
+  {
+   "name": "ODATANO/NIGHTPASS",
+   "url": "https://github.com/ODATANO/NIGHTPASS",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-09-20T15:07:36Z",
+   "stars": 10,
+   "language": "TypeScript",
+   "description_own_words": "Battery passport consumer app on SAP CAP using the Midnight privacy chain for selective disclosure.",
+   "method_families": [
+    "dlt-anchored",
+    "platform-saas"
+   ],
+   "dpp_role": "demo",
+   "layers": [
+    "L07_access_rights_security_confidentiality",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "test directory at top level.",
+   "reusable_for_engine": "Example of tiered disclosure for access.restricted_fields tests; no licence detected, so no reuse of code. Conformance implication: access.restricted_fields (tier behavior only); chain proofs have no check.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/ODATANO/NIGHTPASS"
+  },
+  {
+   "name": "CIRPASS-2/mock-eu-registry",
+   "url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-08-04T10:26:04Z",
+   "stars": 14,
+   "language": "Java",
+   "description_own_words": "CIRPASS-2 mock of an EU DPP metadata registry (Java, SQL back end). README disclaims completeness and normative status.",
+   "method_families": [
+    "hybrid"
+   ],
+   "dpp_role": "registry",
+   "layers": [
+    "L09_registry_and_customs",
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "test-report directory at top level.",
+   "reusable_for_engine": "Local registry mock to exercise registry.consistency (loopback only) and a second mock beside the engine's own. Conformance implication: registry.consistency applies (mock registry only); registry.official stays interface_only.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry"
+  },
+  {
+   "name": "CIRPASS-2/dpp-validator",
+   "url": "https://github.com/CIRPASS-2/dpp-validator",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-08-04T08:52:58Z",
+   "stars": 9,
+   "language": "Java",
+   "description_own_words": "Service that validates DPP payloads in JSON or JSON-LD against JSON Schema or SHACL templates and has REST APIs to manage those artefacts.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test-report directory.",
+   "reusable_for_engine": "Second implementation for differential tests of data.jsonschema and, later, data.shacl. Conformance implication: data.jsonschema applies; data.shacl is interface_only and would need an engine-side SHACL runner.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/dpp-validator"
+  },
+  {
+   "name": "CIRPASS-2/dpp-renderer-be",
+   "url": "https://github.com/CIRPASS-2/dpp-renderer-be",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-06-11T09:14:13Z",
+   "stars": 2,
+   "language": "Java",
+   "description_own_words": "Backend that retrieves DPPs as JSON or JSON-LD, compares properties across passports and searches local storage.",
+   "method_families": [
+    "hybrid"
+   ],
+   "dpp_role": "renderer",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test-report directory.",
+   "reusable_for_engine": "Possible system under test for content negotiation (JSON vs JSON-LD) checks. Conformance implication: identifier.resolve and api.contract.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/dpp-renderer-be"
+  },
+  {
+   "name": "CIRPASS-2/dpp-renderer-fe",
+   "url": "https://github.com/CIRPASS-2/dpp-renderer-fe",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-23T15:08:52Z",
+   "stars": 2,
+   "language": "TypeScript",
+   "description_own_words": "Angular front end to display, search and compare DPPs using the CIRPASS-2 ontology.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "renderer",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "Karma spec configuration present.",
+   "reusable_for_engine": "none (visual renderer). Conformance implication: manual.review only.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/dpp-renderer-fe"
+  },
+  {
+   "name": "CIRPASS-2/dpp-data-extractor",
+   "url": "https://github.com/CIRPASS-2/dpp-data-extractor",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-08-04T10:31:34Z",
+   "stars": 1,
+   "language": "Java",
+   "description_own_words": "Service that pulls search keys from JSON, JSON-LD, RDF or AAS passports into a cache for decentralized search.",
+   "method_families": [
+    "hybrid",
+    "linked-data-semantic"
+   ],
+   "dpp_role": "other",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test-report directory.",
+   "reusable_for_engine": "Reference for which fields a search layer extracts; no direct test reuse. Conformance implication: none; search checks would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/dpp-data-extractor"
+  },
+  {
+   "name": "CIRPASS-2/ontologies-battery",
+   "url": "https://github.com/CIRPASS-2/ontologies-battery",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-06T14:02:19Z",
+   "stars": 4,
+   "language": "Python",
+   "description_own_words": "Development resources for the CIRPASS-2 battery ontology, with a coverage matrix, examples and tests. README disclaims normative status.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "tests and Examples directories.",
+   "reusable_for_engine": "OWL/SHACL and JSON-LD examples as fixtures for data.context and future data.shacl. Conformance implication: data.context applies; data.shacl would be new.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/ontologies-battery"
+  },
+  {
+   "name": "CIRPASS-2/ontologies-tyre",
+   "url": "https://github.com/CIRPASS-2/ontologies-tyre",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-13T09:39:08Z",
+   "stars": 0,
+   "language": null,
+   "description_own_words": "Tyre-sector ontology development resources from CIRPASS-2, with a disclaimer.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "No test directory seen.",
+   "reusable_for_engine": "Fixtures for a second product category. Conformance implication: data.context; data.shacl for shapes if provided.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIRPASS-2/ontologies-tyre"
+  },
+  {
+   "name": "CIRPASS-2/ontologie-textiles",
+   "url": "https://github.com/CIRPASS-2/ontologie-textiles",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-09-28T12:01:43Z",
+   "stars": 0,
+   "language": "HTML",
+   "description_own_words": "Early work on a textile DPP ontology led by GS1 and Graphwise, with reference data collections.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "No tests; ontology, background-data-models, ref-data directories.",
+   "reusable_for_engine": "none yet; no licence detected. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/CIRPASS-2/ontologie-textiles"
+  },
+  {
+   "name": "CIR4FUN-EU/java-dpp-sdk",
+   "url": "https://github.com/CIR4FUN-EU/java-dpp-sdk",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-29T17:39:08Z",
+   "stars": 0,
+   "language": "Java",
+   "description_own_words": "Java SDK with a DPP data model, PostgreSQL storage, client libraries, lifecycle operations and a demo. The README states that it implements selected API shapes only and is not a formal compliance implementation.",
+   "method_families": [
+    "dataspace-federated",
+    "platform-saas"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L10_lifecycle_versioning_updates",
+    "L09_registry_and_customs"
+   ],
+   "has_tests_or_suite": "dpp-sdk-demo module; no separate tests directory seen.",
+   "reusable_for_engine": "Local SUT candidate for api.contract and persistence.versions. Conformance implication: api.contract, persistence.versions.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIR4FUN-EU/java-dpp-sdk"
+  },
+  {
+   "name": "CIR4FUN-EU/python-dpp-sdk",
+   "url": "https://github.com/CIR4FUN-EU/python-dpp-sdk",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-03T11:24:10Z",
+   "stars": 0,
+   "language": "Python",
+   "description_own_words": "Python client library to describe, check and serialize passports and call a repository or registry API; not a service.",
+   "method_families": [
+    "platform-saas"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "tests and examples directories.",
+   "reusable_for_engine": "Second client for differential tests of API behavior. Conformance implication: api.contract.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIR4FUN-EU/python-dpp-sdk"
+  },
+  {
+   "name": "CIR4FUN-EU/edc-client",
+   "url": "https://github.com/CIR4FUN-EU/edc-client",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-10-18T14:13:06Z",
+   "stars": 0,
+   "language": "Python",
+   "description_own_words": "Python client generated from the OpenAPI document of the Eclipse Dataspace Connector management API.",
+   "method_families": [
+    "dataspace-federated"
+   ],
+   "dpp_role": "connector",
+   "layers": [
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "test directory and test requirements file (generated).",
+   "reusable_for_engine": "none (generated client). Conformance implication: none; dataspace checks would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/CIR4FUN-EU/edc-client"
+  },
+  {
+   "name": "eclipse-tractusx/digital-product-pass",
+   "url": "https://github.com/eclipse-tractusx/digital-product-pass",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": true,
+   "pushed_at": "2025-09-18T16:15:42Z",
+   "stars": 50,
+   "language": "Java",
+   "description_own_words": "Catena-X digital product pass application. Archived by the owner; prior research records it as deprecated in favor of the Industry Core Hub.",
+   "method_families": [
+    "dataspace-federated"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L03_data_exchange_protocols",
+    "L04_apis_lifecycle_searchability",
+    "L07_access_rights_security_confidentiality"
+   ],
+   "has_tests_or_suite": "No test directory in the top-level listing.",
+   "reusable_for_engine": "none (archived). Conformance implication: none.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-tractusx/digital-product-pass"
+  },
+  {
+   "name": "eclipse-tractusx/sldt-semantic-models",
+   "url": "https://github.com/eclipse-tractusx/sldt-semantic-models",
+   "host": "github",
+   "license_spdx": "CC-BY-4.0",
+   "archived": false,
+   "pushed_at": "2026-09-25T02:34:31Z",
+   "stars": 54,
+   "language": "HTML",
+   "description_own_words": "Catena-X SAMM aspect models, including the battery pass aspect, one folder per model with versions.",
+   "method_families": [
+    "dataspace-federated",
+    "linked-data-semantic"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "No test directory; generate.sh and documentation present.",
+   "reusable_for_engine": "Aspect model schemas for data.jsonschema fixtures (via generated JSON Schema). Conformance implication: data.jsonschema; SAMM-specific handling would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-tractusx/sldt-semantic-models"
+  },
+  {
+   "name": "eclipse-tractusx/industry-core-hub",
+   "url": "https://github.com/eclipse-tractusx/industry-core-hub",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-09T22:16:38Z",
+   "stars": 25,
+   "language": "TypeScript",
+   "description_own_words": "Catena-X Industry Core Hub, a kit for sharing product data between dataspace participants.",
+   "method_families": [
+    "dataspace-federated"
+   ],
+   "dpp_role": "connector",
+   "layers": [
+    "L03_data_exchange_protocols",
+    "L11_roles_and_governance"
+   ],
+   "has_tests_or_suite": "pytest configuration and test.sh present.",
+   "reusable_for_engine": "none directly. Conformance implication: none; dataspace checks would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-tractusx/industry-core-hub"
+  },
+  {
+   "name": "eclipse-edc/Connector",
+   "url": "https://github.com/eclipse-edc/Connector",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-19T08:14:11Z",
+   "stars": 425,
+   "language": "Java",
+   "description_own_words": "Eclipse Dataspace Components connector, the main open-source dataspace connector.",
+   "method_families": [
+    "dataspace-federated"
+   ],
+   "dpp_role": "connector",
+   "layers": [
+    "L03_data_exchange_protocols",
+    "L07_access_rights_security_confidentiality"
+   ],
+   "has_tests_or_suite": "system-tests directory.",
+   "reusable_for_engine": "Local connector for loopback tests only if a dataspace check is added. Conformance implication: none today.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-edc/Connector"
+  },
+  {
+   "name": "eclipse-dataspacetck/dsp-tck",
+   "url": "https://github.com/eclipse-dataspacetck/dsp-tck",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-19T06:59:04Z",
+   "stars": 19,
+   "language": "Java",
+   "description_own_words": "JUnit-based technology compatibility kit that tests a connector against the Dataspace Protocol (catalog, contract negotiation, transfer process).",
+   "method_families": [
+    "dataspace-federated"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "Yes: it is the test kit; run by JUnit, TestContainers, Docker or command line.",
+   "reusable_for_engine": "Pattern for a black-box protocol test kit and a possible external runner. Conformance implication: none today; a dataspace connector check would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/eclipse-dataspacetck/dsp-tck"
+  },
+  {
+   "name": "International-Data-Spaces-Association/ids-specification",
+   "url": "https://github.com/International-Data-Spaces-Association/ids-specification",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2025-03-13T08:01:39Z",
+   "stars": 52,
+   "language": null,
+   "description_own_words": "Former home of the Dataspace Protocol specification; README says it moved to an Eclipse specification project.",
+   "method_families": [
+    "dataspace-federated"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "No tests; catalog, negotiation and model directories.",
+   "reusable_for_engine": "Message schemas for a possible dataspace check; moved, so use the new home. Conformance implication: none today.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/International-Data-Spaces-Association/ids-specification"
+  },
+  {
+   "name": "open-dpp/open-dpp",
+   "url": "https://github.com/open-dpp/open-dpp",
+   "host": "github",
+   "license_spdx": "AGPL-3.0",
+   "archived": false,
+   "pushed_at": "2026-10-19T06:40:34Z",
+   "stars": 35,
+   "language": "TypeScript",
+   "description_own_words": "Open-source platform for managing DPPs (README shows a local quick start).",
+   "method_families": [
+    "platform-saas",
+    "aas-digital-twin"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L10_lifecycle_versioning_updates",
+    "L07_access_rights_security_confidentiality"
+   ],
+   "has_tests_or_suite": "No tests directory in the top-level listing.",
+   "reusable_for_engine": "Local system under test for black-box runs. AGPL-3.0 rules out copying code. Conformance implication: api.contract, persistence.versions, access.restricted_fields.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/open-dpp/open-dpp"
+  },
+  {
+   "name": "open-dpp/passport-templates",
+   "url": "https://github.com/open-dpp/passport-templates",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-01T07:57:05Z",
+   "stars": 0,
+   "language": null,
+   "description_own_words": "Collection of passport template JSON files (battery categories among them); the README could not be decoded as text.",
+   "method_families": [
+    "aas-digital-twin",
+    "platform-saas"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "No tests.",
+   "reusable_for_engine": "Battery template JSON as fixtures; unverified format. Conformance implication: data.jsonschema if schema-backed.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/open-dpp/passport-templates"
+  },
+  {
+   "name": "OpenDPP/opendpp-interop",
+   "url": "https://github.com/OpenDPP/opendpp-interop",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-14T18:44:08Z",
+   "stars": 4,
+   "language": "TypeScript",
+   "description_own_words": "Offline Node CLI and schema kit from a vendor; prior research records check categories for AAS, UNTP, SHACL, SD-JWT, EPCIS and GS1. Has CONFORMANCE.md, samples and schemas.",
+   "method_families": [
+    "verifiable-credentials-ssi",
+    "aas-digital-twin",
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "samples directory and CONFORMANCE.md; test code not inspected.",
+   "reusable_for_engine": "Competing validator for differential tests and sample payloads. Vendor-maintained; do not treat as authority. Conformance implication: data.jsonschema, aas.validate, integrity.jws overlap; SD-JWT handling is not in the registered checks.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/OpenDPP/opendpp-interop"
+  },
+  {
+   "name": "OpenDPP/opendpp-sdk",
+   "url": "https://github.com/OpenDPP/opendpp-sdk",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-13T20:12:04Z",
+   "stars": 1,
+   "language": "Java",
+   "description_own_words": "Generated client SDKs mirrored from a private backend's OpenAPI contract.",
+   "method_families": [
+    "platform-saas"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "No tests seen; mirror of private source.",
+   "reusable_for_engine": "none (generated mirror). Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/OpenDPP/opendpp-sdk"
+  },
+  {
+   "name": "openepcis/openepcis-dpp-ready",
+   "url": "https://github.com/openepcis/openepcis-dpp-ready",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-11T15:35:18Z",
+   "stars": 12,
+   "language": "TypeScript",
+   "description_own_words": "Preview-stage semantic vocabulary framework (v0.9.9) that merges GS1, schema.org, SEMIC and UNTP terms across several regulated product groups; ontology published as TTL with JSON-LD contexts.",
+   "method_families": [
+    "linked-data-semantic",
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L01_unique_identifiers"
+   ],
+   "has_tests_or_suite": "demos, examples, bruno collections; no test suite verified.",
+   "reusable_for_engine": "JSON-LD contexts and TTL as fixtures for data.context allowlist tests. Conformance implication: data.context; data.shacl if shapes exist.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/openepcis/openepcis-dpp-ready"
+  },
+  {
+   "name": "openepcis/openepcis-event-sentry",
+   "url": "https://github.com/openepcis/openepcis-event-sentry",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-09T09:36:06Z",
+   "stars": 5,
+   "language": "JavaScript",
+   "description_own_words": "Tooling to check EPCIS events against profiles, with JSON Schema snippets and examples.",
+   "method_families": [
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test and examples directories.",
+   "reusable_for_engine": "EPCIS event vectors. Conformance implication: data.jsonschema; no EPCIS-specific check is registered.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/openepcis/openepcis-event-sentry"
+  },
+  {
+   "name": "openepcis/openepcis-document-validation-service",
+   "url": "https://github.com/openepcis/openepcis-document-validation-service",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-17T14:05:13Z",
+   "stars": 1,
+   "language": "Java",
+   "description_own_words": "Service that validates EPCIS documents and events against the GS1 standard and explains errors in plain language.",
+   "method_families": [
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "restassured module.",
+   "reusable_for_engine": "Second validator for EPCIS payloads. Conformance implication: none registered; EPCIS check would be new capability.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/openepcis/openepcis-document-validation-service"
+  },
+  {
+   "name": "openepcis/openepcis-epc-digitallink-translator",
+   "url": "https://github.com/openepcis/openepcis-epc-digitallink-translator",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-13T19:15:57Z",
+   "stars": 6,
+   "language": "Java",
+   "description_own_words": "Java toolkit to validate GS1 identifiers, convert between EPC URN and Digital Link form, and generate scannable codes.",
+   "method_families": [
+    "web-resolver-gs1",
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L01_unique_identifiers",
+    "L02_data_carriers"
+   ],
+   "has_tests_or_suite": "converter, qrcode-generator, utils and validator modules.",
+   "reusable_for_engine": "Second parser for identifier.parse; QR generation for carrier.qr_decode fixtures. Conformance implication: identifier.parse, carrier.qr_decode.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/openepcis/openepcis-epc-digitallink-translator"
+  },
+  {
+   "name": "openepcis/epcis-testdata-generator",
+   "url": "https://github.com/openepcis/epcis-testdata-generator",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-04T09:58:06Z",
+   "stars": 8,
+   "language": "Vue",
+   "description_own_words": "Generator for valid EPCIS 2.0 and CBV 2.0 test events in JSON/JSON-LD/XML.",
+   "method_families": [
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "Yes: test data generator with examples.",
+   "reusable_for_engine": "Valid-event fixture source. Conformance implication: none registered; EPCIS check would be new capability.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/openepcis/epcis-testdata-generator"
+  },
+  {
+   "name": "JaewookByun/epcis",
+   "url": "https://github.com/JaewookByun/epcis",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-01-15T22:53:24Z",
+   "stars": 51,
+   "language": "Java",
+   "description_own_words": "Oliot EPCIS, an EPCIS/CBV 2.0 repository server with extensions.",
+   "method_families": [
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L03_data_exchange_protocols",
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "Not inspected; no tests directory at top level.",
+   "reusable_for_engine": "Local EPCIS repository for SUT experiments. Conformance implication: none registered.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/JaewookByun/epcis"
+  },
+  {
+   "name": "louisaxel-ambroise/epcis",
+   "url": "https://github.com/louisaxel-ambroise/epcis",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-10-19T07:48:15Z",
+   "stars": 34,
+   "language": "C#",
+   "description_own_words": "FasTnT, a lightweight EPCIS 1.2 and 2.0 repository in .NET.",
+   "method_families": [
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L03_data_exchange_protocols",
+    "L04_apis_lifecycle_searchability"
+   ],
+   "has_tests_or_suite": "tests directory.",
+   "reusable_for_engine": "Second EPCIS server. Conformance implication: none registered.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/louisaxel-ambroise/epcis"
+  },
+  {
+   "name": "RalphTro/epcis-event-hash-generator",
+   "url": "https://github.com/RalphTro/epcis-event-hash-generator",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-09-25T12:02:32Z",
+   "stars": 10,
+   "language": "Python",
+   "description_own_words": "Reference implementation of the EPCIS event hash ID algorithm from the GS1 CBV standard, for XML or JSON-LD events.",
+   "method_families": [
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L08_authentication_reliability_integrity",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "tests directory.",
+   "reusable_for_engine": "Hash vectors for an event-identity check. Conformance implication: none registered.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/RalphTro/epcis-event-hash-generator"
+  },
+  {
+   "name": "COPPA-CCP/epcis-signing",
+   "url": "https://github.com/COPPA-CCP/epcis-signing",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-01-12T14:15:57Z",
+   "stars": 4,
+   "language": "TypeScript",
+   "description_own_words": "Signing of EPCIS events for traceability and tamper evidence.",
+   "method_families": [
+    "event-traceability-epcis",
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "Tests badge in README; no tests directory at top level.",
+   "reusable_for_engine": "Signed-event samples. Conformance implication: integrity.jws if JWS-based; unverified.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/COPPA-CCP/epcis-signing"
+  },
+  {
+   "name": "louisaxel-ambroise/gs1-digitallink-resolver",
+   "url": "https://github.com/louisaxel-ambroise/gs1-digitallink-resolver",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-16T17:26:49Z",
+   "stars": 2,
+   "language": "C#",
+   "description_own_words": "HTTP resolver API intended to follow the GS1 Digital Link resolver specification; includes tests.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "resolver",
+   "layers": [
+    "L01_unique_identifiers",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "Goto.Tests project.",
+   "reusable_for_engine": "Local resolver SUT for identifier.resolve loopback tests. Conformance implication: identifier.resolve.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/louisaxel-ambroise/gs1-digitallink-resolver"
+  },
+  {
+   "name": "pyx-industries/pyx-identity-resolver",
+   "url": "https://github.com/pyx-industries/pyx-identity-resolver",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-06-12T01:49:37Z",
+   "stars": 6,
+   "language": "TypeScript",
+   "description_own_words": "Link resolver for GS1-style identifiers that lets registry operators register links and lets value-chain actors resolve them.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "resolver",
+   "layers": [
+    "L01_unique_identifiers",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "Not seen at top level.",
+   "reusable_for_engine": "Third resolver for differential tests. Conformance implication: identifier.resolve.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/pyx-industries/pyx-identity-resolver"
+  },
+  {
+   "name": "grigolatoe/gs1-digital-link-resolver",
+   "url": "https://github.com/grigolatoe/gs1-digital-link-resolver",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-09-07T21:48:25Z",
+   "stars": 3,
+   "language": "Python",
+   "description_own_words": "Self-hostable GS1 Digital Link resolver positioned as routing layer for DPPs.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "resolver",
+   "layers": [
+    "L01_unique_identifiers",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "tests directory.",
+   "reusable_for_engine": "Python resolver as local SUT. Conformance implication: identifier.resolve.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/grigolatoe/gs1-digital-link-resolver"
+  },
+  {
+   "name": "Starfish-Network/gs1-digital-link-resolver",
+   "url": "https://github.com/Starfish-Network/gs1-digital-link-resolver",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-07T15:33:04Z",
+   "stars": 1,
+   "language": "Python",
+   "description_own_words": "Python library that parses Digital Link URLs into application identifiers and resolves them to links, with tests and examples.",
+   "method_families": [
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "resolver",
+   "layers": [
+    "L01_unique_identifiers",
+    "L03_data_exchange_protocols"
+   ],
+   "has_tests_or_suite": "tests and examples directories.",
+   "reusable_for_engine": "Parser cross-check for identifier.parse. Conformance implication: identifier.parse, identifier.resolve.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/Starfish-Network/gs1-digital-link-resolver"
+  },
+  {
+   "name": "w3c/vc-data-model-2.0-test-suite",
+   "url": "https://github.com/w3c/vc-data-model-2.0-test-suite",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-09-27T05:29:56Z",
+   "stars": 24,
+   "language": "JavaScript",
+   "description_own_words": "W3C interoperability test suite for the Verifiable Credentials Data Model 2.0 using issuer and verifier endpoints.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L08_authentication_reliability_integrity",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "Yes: tests directory.",
+   "reusable_for_engine": "Credential test vectors and negative cases. Dual W3C licence in README. Conformance implication: data.context and integrity.jws partly; credential model checks need evidence.untp_dcc.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/w3c/vc-data-model-2.0-test-suite"
+  },
+  {
+   "name": "w3c/vc-jose-cose-test-suite",
+   "url": "https://github.com/w3c/vc-jose-cose-test-suite",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-10-18T05:13:29Z",
+   "stars": 6,
+   "language": "JavaScript",
+   "description_own_words": "Test suite runner for securing VCs with JOSE and COSE; includes signed sample inputs.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "Yes: tests and implementations directories.",
+   "reusable_for_engine": "Signed JOSE/COSE vectors, including invalid ones, as fixtures. Conformance implication: integrity.jws applies; integrity.cose is interface_only and these vectors would test it.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/w3c/vc-jose-cose-test-suite"
+  },
+  {
+   "name": "w3c/vc-di-eddsa-test-suite",
+   "url": "https://github.com/w3c/vc-di-eddsa-test-suite",
+   "host": "github",
+   "license_spdx": "BSD-3-Clause",
+   "archived": false,
+   "pushed_at": "2026-10-18T05:20:44Z",
+   "stars": 4,
+   "language": "JavaScript",
+   "description_own_words": "Interoperability tests for issuers and verifiers using EdDSA data integrity cryptosuites.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "Yes.",
+   "reusable_for_engine": "Data-integrity proof vectors. Conformance implication: no registered check covers Data Integrity proofs; would be new capability.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/w3c/vc-di-eddsa-test-suite"
+  },
+  {
+   "name": "w3c/vc-bitstring-status-list-test-suite",
+   "url": "https://github.com/w3c/vc-bitstring-status-list-test-suite",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-10-18T05:12:00Z",
+   "stars": 6,
+   "language": "JavaScript",
+   "description_own_words": "Interoperability tests for issuers and verifiers of the VC Bitstring Status List, with a credential generator.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L08_authentication_reliability_integrity",
+    "L10_lifecycle_versioning_updates"
+   ],
+   "has_tests_or_suite": "Yes.",
+   "reusable_for_engine": "Status list vectors for revocation/suspension. Conformance implication: integrity.status_list (interface_only) is the target check.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/w3c/vc-bitstring-status-list-test-suite"
+  },
+  {
+   "name": "artiso-ai/dppvalidator",
+   "url": "https://github.com/artiso-ai/dppvalidator",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-05-10T17:51:07Z",
+   "stars": 10,
+   "language": "Python",
+   "description_own_words": "Python validator for EU DPPs with schemas, examples and tests.",
+   "method_families": [
+    "other"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "tests, schemas, examples directories.",
+   "reusable_for_engine": "Competing validator for differential tests. Conformance implication: data.jsonschema, data.rules.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/artiso-ai/dppvalidator"
+  },
+  {
+   "name": "LiUSemWeb/DPPO",
+   "url": "https://github.com/LiUSemWeb/DPPO",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-06-30T10:52:41Z",
+   "stars": 10,
+   "language": "Python",
+   "description_own_words": "Linkoping University modular DPP ontology network with SHACL shapes and SPARQL queries.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "shacl and sparql directories.",
+   "reusable_for_engine": "SHACL shapes as input to future data.shacl. No licence detected. Conformance implication: data.shacl (interface_only).",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/LiUSemWeb/DPPO"
+  },
+  {
+   "name": "malinoto/tracepass-dpp-schemas",
+   "url": "https://github.com/malinoto/tracepass-dpp-schemas",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-16T11:37:51Z",
+   "stars": 2,
+   "language": "JavaScript",
+   "description_own_words": "Vendor field specifications for 13 product categories, each field traced by the vendor to EU law articles. Vendor mapping, not authoritative.",
+   "method_families": [
+    "other"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "audit directory; schema.json.",
+   "reusable_for_engine": "Schemas as fixtures only after checking each trace against EU law. Conformance implication: data.jsonschema.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/malinoto/tracepass-dpp-schemas"
+  },
+  {
+   "name": "malinoto/tracepass-dpp-vc",
+   "url": "https://github.com/malinoto/tracepass-dpp-vc",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-16T11:38:01Z",
+   "stars": 0,
+   "language": "JavaScript",
+   "description_own_words": "UNTP extension profile with JSON-LD contexts and VC schemas for EU product categories.",
+   "method_families": [
+    "verifiable-credentials-ssi",
+    "linked-data-semantic"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "examples and schemas.",
+   "reusable_for_engine": "JSON-LD context fixtures. Conformance implication: data.context.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/malinoto/tracepass-dpp-vc"
+  },
+  {
+   "name": "malinoto/tracepass-open",
+   "url": "https://github.com/malinoto/tracepass-open",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-13T14:11:11Z",
+   "stars": 0,
+   "language": "TypeScript",
+   "description_own_words": "Dependency-free TypeScript validator, EPCIS 2.0 event mapper and GS1 identifier helpers.",
+   "method_families": [
+    "other",
+    "event-traceability-epcis"
+   ],
+   "dpp_role": "validator",
+   "layers": [
+    "L01_unique_identifiers",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "vitest configuration; dpp-validate tests referenced in README.",
+   "reusable_for_engine": "Cross-check of identifier handling. Conformance implication: identifier.parse, data.rules.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/malinoto/tracepass-open"
+  },
+  {
+   "name": "material-identity/dictionary",
+   "url": "https://github.com/material-identity/dictionary",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-12T16:41:31Z",
+   "stars": 1,
+   "language": "TypeScript",
+   "description_own_words": "Add-only data dictionary with dereferenceable URIs and content negotiation, built from YAML. The title uses an EN 18xxx label; I recorded only that label.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "test, schema, examples directories.",
+   "reusable_for_engine": "Content-negotiation behavior as a sample SUT. Conformance implication: data.context.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/material-identity/dictionary"
+  },
+  {
+   "name": "odal-node/dpp-core",
+   "url": "https://github.com/odal-node/dpp-core",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-16T00:09:16Z",
+   "stars": 2,
+   "language": "Rust",
+   "description_own_words": "Rust library with DPP domain types, Ed25519 JWS signing, VCs, Digital Link resolution and AAS mapping.",
+   "method_families": [
+    "verifiable-credentials-ssi",
+    "web-resolver-gs1"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L08_authentication_reliability_integrity",
+    "L01_unique_identifiers"
+   ],
+   "has_tests_or_suite": "Not seen at top level.",
+   "reusable_for_engine": "Second JWS signer/verifier. Conformance implication: integrity.jws.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/odal-node/dpp-core"
+  },
+  {
+   "name": "odal-node/dpp-engine",
+   "url": "https://github.com/odal-node/dpp-engine",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-10-16T13:08:58Z",
+   "stars": 2,
+   "language": "Rust",
+   "description_own_words": "Self-hostable runtime with HTTP services, PostgreSQL, auth and telemetry; README names BSL-1.1.",
+   "method_families": [
+    "platform-saas"
+   ],
+   "dpp_role": "server",
+   "layers": [
+    "L04_apis_lifecycle_searchability",
+    "L07_access_rights_security_confidentiality",
+    "L10_lifecycle_versioning_updates"
+   ],
+   "has_tests_or_suite": "Not seen.",
+   "reusable_for_engine": "Local SUT only; BSL-1.1 restricts reuse. Conformance implication: api.contract, access.restricted_fields.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/odal-node/dpp-engine"
+  },
+  {
+   "name": "boebe24/boebe-DPP-Viewer",
+   "url": "https://github.com/boebe24/boebe-DPP-Viewer",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-19T07:55:26Z",
+   "stars": 6,
+   "language": "Kotlin",
+   "description_own_words": "Android app that imports a DPP from a FAAAST server by QR scan, photo or URL.",
+   "method_families": [
+    "aas-digital-twin"
+   ],
+   "dpp_role": "renderer",
+   "layers": [
+    "L02_data_carriers",
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "Not seen.",
+   "reusable_for_engine": "none. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/boebe24/boebe-DPP-Viewer"
+  },
+  {
+   "name": "transpareo/transpareo-time-machine",
+   "url": "https://github.com/transpareo/transpareo-time-machine",
+   "host": "github",
+   "license_spdx": "GPL-3.0",
+   "archived": false,
+   "pushed_at": "2026-10-15T21:11:11Z",
+   "stars": 3,
+   "language": "TypeScript",
+   "description_own_words": "Embeddable DPP renderer with a version timeline; README says it renders signature-verified passports.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "renderer",
+   "layers": [
+    "L10_lifecycle_versioning_updates",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "fixtures and tests directories.",
+   "reusable_for_engine": "Version-history fixtures for persistence.versions. GPL-3.0. Conformance implication: persistence.versions, integrity.jws.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/transpareo/transpareo-time-machine"
+  },
+  {
+   "name": "bsv-blockchain/dpp",
+   "url": "https://github.com/bsv-blockchain/dpp",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-16T23:37:57Z",
+   "stars": 2,
+   "language": "TypeScript",
+   "description_own_words": "Working-draft (pre-1.0) standard for DPPs on BSV with specs, fixtures, a conformance folder and a reference implementation.",
+   "method_families": [
+    "dlt-anchored"
+   ],
+   "dpp_role": "test-suite",
+   "layers": [
+    "L08_authentication_reliability_integrity",
+    "L06_storage_archiving_persistence"
+   ],
+   "has_tests_or_suite": "conformance, fixtures and examples directories.",
+   "reusable_for_engine": "Fixtures as sample negative cases only. Conformance implication: none registered for chain anchoring.",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/bsv-blockchain/dpp"
+  },
+  {
+   "name": "DigitalProductPassport/SmartContracts",
+   "url": "https://github.com/DigitalProductPassport/SmartContracts",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-16T11:41:11Z",
+   "stars": 3,
+   "language": "TypeScript",
+   "description_own_words": "Solidity contracts for on-chain DPPs on EVM chains (Hardhat), aiming at a public reference and a possible EIP.",
+   "method_families": [
+    "dlt-anchored"
+   ],
+   "dpp_role": "other",
+   "layers": [
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "test directory.",
+   "reusable_for_engine": "none. Conformance implication: none; no live chain calls allowed.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/DigitalProductPassport/SmartContracts"
+  },
+  {
+   "name": "lambdasistemi/eu-digital-product-passport",
+   "url": "https://github.com/lambdasistemi/eu-digital-product-passport",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-04-02T18:50:26Z",
+   "stars": 2,
+   "language": "Gleam",
+   "description_own_words": "Feasibility study on storing DPPs on Cardano.",
+   "method_families": [
+    "dlt-anchored"
+   ],
+   "dpp_role": "demo",
+   "layers": [
+    "L06_storage_archiving_persistence"
+   ],
+   "has_tests_or_suite": "proofs directory.",
+   "reusable_for_engine": "none. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/lambdasistemi/eu-digital-product-passport"
+  },
+  {
+   "name": "object-digital-passport/specifications",
+   "url": "https://github.com/object-digital-passport/specifications",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-10-18T18:33:27Z",
+   "stars": 2,
+   "language": "JavaScript",
+   "description_own_words": "Open spec for verifiable passports of art or limited-edition objects, with schema and tools. Outside the regulated DPP scope.",
+   "method_families": [
+    "dlt-anchored"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "schema and tools.",
+   "reusable_for_engine": "none. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/object-digital-passport/specifications"
+  },
+  {
+   "name": "Trustlayer-Foundation/ucdm-protocol",
+   "url": "https://github.com/Trustlayer-Foundation/ucdm-protocol",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-07-17T18:00:33Z",
+   "stars": 3,
+   "language": null,
+   "description_own_words": "Open commerce data model where each claim carries a proof level.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "examples and spec.",
+   "reusable_for_engine": "none. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/Trustlayer-Foundation/ucdm-protocol"
+  },
+  {
+   "name": "Jorge-Lopes/dpp-did",
+   "url": "https://github.com/Jorge-Lopes/dpp-did",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2025-10-23T15:33:45Z",
+   "stars": 1,
+   "language": "JavaScript",
+   "description_own_words": "Demo of DPPs with DIDs and verifiable credentials; README says it is experimental.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "demo",
+   "layers": [
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "None seen.",
+   "reusable_for_engine": "none. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/Jorge-Lopes/dpp-did"
+  },
+  {
+   "name": "databricks-industry-solutions/dpp-solution-accelerator",
+   "url": "https://github.com/databricks-industry-solutions/dpp-solution-accelerator",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-07-16T13:54:01Z",
+   "stars": 2,
+   "language": "Python",
+   "description_own_words": "Vendor solution accelerator for building DPPs on a data platform.",
+   "method_families": [
+    "platform-saas"
+   ],
+   "dpp_role": "demo",
+   "layers": [
+    "L06_storage_archiving_persistence"
+   ],
+   "has_tests_or_suite": "tests directory.",
+   "reusable_for_engine": "none. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/databricks-industry-solutions/dpp-solution-accelerator"
+  },
+  {
+   "name": "CE-RISE-models/dp-architecture",
+   "url": "https://github.com/CE-RISE-models/dp-architecture",
+   "host": "github",
+   "license_spdx": "NOASSERTION",
+   "archived": false,
+   "pushed_at": "2026-09-11T14:18:36Z",
+   "stars": 1,
+   "language": null,
+   "description_own_words": "Source of the CE-RISE documentation website on DPP and material-passport data-model architecture.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "None.",
+   "reusable_for_engine": "none (documentation). Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/CE-RISE-models/dp-architecture"
+  },
+  {
+   "name": "louistrue/lignum-dpp-bsdd",
+   "url": "https://github.com/louistrue/lignum-dpp-bsdd",
+   "host": "github",
+   "license_spdx": null,
+   "archived": false,
+   "pushed_at": "2026-03-31T12:52:44Z",
+   "stars": 3,
+   "language": "Python",
+   "description_own_words": "Construction-product DPP demo linking properties to the buildingSMART data dictionary, with QR codes and IFC. README mentions draft standard numbers; I did not read standard content.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "demo",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L02_data_carriers"
+   ],
+   "has_tests_or_suite": "None seen.",
+   "reusable_for_engine": "Sample QR codes. Conformance implication: carrier.qr_decode on samples.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/louistrue/lignum-dpp-bsdd"
+  },
+  {
+   "name": "materialdigital/material-sustainability-application-ontology",
+   "url": "https://github.com/materialdigital/material-sustainability-application-ontology",
+   "host": "github",
+   "license_spdx": "CC-BY-4.0",
+   "archived": false,
+   "pushed_at": "2026-10-12T14:25:06Z",
+   "stars": 1,
+   "language": "Makefile",
+   "description_own_words": "Material-centred sustainability application ontology built on the PMD core ontology.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "None seen.",
+   "reusable_for_engine": "none direct. Conformance implication: data.shacl if shapes appear.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/materialdigital/material-sustainability-application-ontology"
+  },
+  {
+   "name": "VinKet-AI/textile-dpp",
+   "url": "https://github.com/VinKet-AI/textile-dpp",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-06-20T14:04:15Z",
+   "stars": 1,
+   "language": null,
+   "description_own_words": "Vendor-published textile DPP schema and examples.",
+   "method_families": [
+    "other"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "schema and examples.",
+   "reusable_for_engine": "Textile fixtures. Conformance implication: data.jsonschema.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/VinKet-AI/textile-dpp"
+  },
+  {
+   "name": "GS1-Switzerland/WebOntology",
+   "url": "https://github.com/GS1-Switzerland/WebOntology",
+   "host": "github",
+   "license_spdx": "Apache-2.0",
+   "archived": false,
+   "pushed_at": "2026-10-06T06:18:34Z",
+   "stars": 1,
+   "language": "JavaScript",
+   "description_own_words": "GS1 Switzerland ontologies and vocabularies with registry and scripts.",
+   "method_families": [
+    "linked-data-semantic"
+   ],
+   "dpp_role": "ontology",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "None seen.",
+   "reusable_for_engine": "Vocabulary terms. Conformance implication: data.context.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/GS1-Switzerland/WebOntology"
+  },
+  {
+   "name": "nmis-group/remake_dpp",
+   "url": "https://github.com/nmis-group/remake_dpp",
+   "host": "github",
+   "license_spdx": "MIT",
+   "archived": false,
+   "pushed_at": "2026-09-02T13:24:08Z",
+   "stars": 2,
+   "language": "HTML",
+   "description_own_words": "Python toolkit that maps business data to DPP schemas; GitHub description only.",
+   "method_families": [
+    "other"
+   ],
+   "dpp_role": "sdk",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "not inspected",
+   "reusable_for_engine": "none verified. Conformance implication: none.",
+   "in_prior_research": false,
+   "evidence_url": "https://github.com/nmis-group/remake_dpp"
+  },
+  {
+   "name": "uncefact/spec-untp",
+   "url": "https://github.com/uncefact/spec-untp",
+   "host": "github",
+   "license_spdx": "GPL-3.0",
+   "archived": true,
+   "pushed_at": "2025-11-14",
+   "stars": 33,
+   "language": "JavaScript",
+   "description_own_words": "Archived GitHub copy of UNTP; description says it moved to GitLab. pushed_at is a date only, from the org listing.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models"
+   ],
+   "has_tests_or_suite": "not inspected",
+   "reusable_for_engine": "none (archived; use GitLab).",
+   "in_prior_research": true,
+   "evidence_url": "https://github.com/uncefact"
+  },
+  {
+   "name": "un/unece/uncefact/spec-untp",
+   "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp",
+   "host": "gitlab",
+   "license_spdx": "GPL-3.0-or-later",
+   "archived": false,
+   "pushed_at": null,
+   "stars": null,
+   "language": null,
+   "description_own_words": "Current UNTP specification project on GitLab: 1,645 commits on main, 73 branches, 11 tags, 1 release as read on 2026-10-19. Directory contents were not shown by the page fetch, so tests and schemas are unverified.",
+   "method_families": [
+    "verifiable-credentials-ssi"
+   ],
+   "dpp_role": "data-model",
+   "layers": [
+    "L05_system_interoperability_data_models",
+    "L08_authentication_reliability_integrity"
+   ],
+   "has_tests_or_suite": "not verified",
+   "reusable_for_engine": "Source for UNTP schemas and samples; confirm file tree before use. Conformance implication: data.jsonschema, data.context; evidence.untp_dcc for conformity credentials.",
+   "in_prior_research": true,
+   "evidence_url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp"
+  }
+ ],
+ "observations": [
+  "web-resolver-gs1: mature GS1 reference code (syntax engine, dictionary, resolver CE) plus several small community resolvers; GS1 publishes a resolver test suite on ref.gs1.org (not a repository, per prior research). Best oracle source for identifier.parse and identifier.resolve.",
+  "aas-digital-twin: most mature open source. Several independent AAS servers and SDKs (BaSyx, FAAAST, AASPX server, aas-core) and the IDTA spec repos with OpenAPI and JSON Schema. A real test tool exists (aas-test-engines, last push 2025-08) already wrapped by aas.validate.",
+  "verifiable-credentials-ssi: W3C test suites are active and give reusable vectors (JOSE/COSE, data integrity, status list). UNTP has its own test repo under GPL-3.0.",
+  "dataspace-federated: EDC connector and a DSP technology compatibility kit exist. No DPP-specific dataspace test suite was found. The Tractus-X DPP application is archived.",
+  "dlt-anchored: only small, single-maintainer or experimental repositories; none has a test suite useful for the engine.",
+  "linked-data-semantic: CIRPASS-2 ontologies and validator (JSON Schema and SHACL), LiU DPPO, OpenEPCIS DPP-Ready. SHACL shapes are the main fixture source for the interface_only data.shacl capability.",
+  "event-traceability-epcis: OpenEPCIS and FasTnT are mature; EPCIS validators and test-data generators exist, but the engine has no EPCIS check.",
+  "No official, open DPP conformance test suite was found in this search. Several vendor validators (OpenDPP, TracePass, dppvalidator) exist; treat them as comparators, not authorities.",
+  "Licence matters for reuse: GPL-3.0 (UNTP repos), AGPL-3.0 (open-dpp), BSL-1.1 (odal engine) limit copying; use these as external oracles only."
+ ],
+ "anomalies": [
+  "The Zenodo API fetch ignored the keyword query and returned unrelated records, so no Zenodo software record is recorded.",
+  "The uncefact/spec-untp pushed_at value is approximate is date only, from the org listing.",
+  "GitHub topic and text searches are noisy: topic:dpp returned many unrelated projects (Discord bot library, other dpp acronyms), which I excluded.",
+  "The engine's own repository (hadijannat/dpp-conformance-engine) appeared in search results and was excluded from the inventory.",
+  "CIR4FUN java-dpp-sdk README names a CEN standard number as an alignment claim; I recorded only that the project says it is not a formal compliance implementation."
+ ],
+ "truncation": "Search results capped at 200 per query (two pages of 100) and most queries have far more hits; I hand-picked about 85 repositories by relevance from roughly 820 unique search hits plus organization listings. READMEs read only up to the first 1,800 characters; test contents were not opened. Star counts and pushed_at come from the GitHub API on 2026-10-19. GitLab and Zenodo coverage is minimal: one GitLab page read, Zenodo query unusable. Further GitLab projects under opensource.unicc.org and Codeberg/Forgejo projects (CE-RISE) were not searched."
+}

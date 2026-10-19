@@ -1,0 +1,366 @@
+{
+ "target": "g02-carrier-embedded-data",
+ "retrieval_date": "2026-10-19",
+ "method_note": "Read the whole target file (1651 lines). Ranked claims by risk to a test oracle: GS1 versions and status lines, repository metadata (gh api), EU law articles (ESPR, Batteries, registry regulation), the draft standardisation request and its amendment draft, ICAO/HCERT/SHC/NFC platform mechanisms, the DigSig layout in TDS, DOIs (Crossref/DataCite/OpenAlex), and the engine mapping fields (existing_check, existing_capability, dependencies) against docs/reference/capabilities.md, pyproject.toml and src/dppce/adapters/identifier.py. PDFs were fetched with WebFetch (saved locally) and read with pdftotext. No protected EN/ISO/IEC/DIN text was opened. ISO catalogue page returned 403, so ISO bibliographic titles stay unverified.",
+ "checked": [
+  {
+   "claim_ref": "maturity.versions_at_retrieval[0] (gs1-digital-link-uri-syntax-1-7-0)",
+   "claim": "GS1 Digital Link URI Syntax is Release 1.7.0, ratified Aug 2026.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "evidence": "Page states Release 1.7.0, ratified August 2026 (PDF file name carries 2026-08-06).",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (URI Syntax 4.10 / 4.10.1)",
+   "claim": "Data attributes go in the query string as key=value; extension keys must not be all-numeric; linkType and context are reserved.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "evidence": "Sec. 4.10 says data attributes are expressed in the query string; 4.10.1 forbids all-numeric extension keys and reserves linkType and context. Last 20374 characters of the page were not read by this verifier either.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[1] (new-gs1-dl-compression-epc-1-0-0)",
+   "claim": "Compression TS for EPC binary strings is Release 1.0.0, ratified Jul 2025, closed systems only (Policy B11).",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/compression/",
+   "evidence": "PDF cover reads Release 1.0.0, Ratified, Jul 2025. Text says compressed URIs are 'any URL' and should only be used in closed systems, and that the standard is subject to Policy B11.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L01_unique_identifiers.mechanism (eh/ex worked example)",
+   "claim": "https://example.com/eh30164596f40c0e5cbe991a83 decodes to SGTIN-96 (01)09528765123457(21)123456789123 and the base64url form is MBZFlvQMDly-mRqD; stem must exclude query and fragment with exactly one slash before the string; eh uses lower-case hex.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/compression/",
+   "evidence": "Sec. 4.2.1 and 4.2.2 give both worked examples and the stem rule. Verifier recomputed base64url of the 12 bytes with the standard library: MBZFlvQMDly-mRqD. Header 0x30, filter 0, partition 5 also match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[2] (new-gs1-dl-1-1-4-legacy)",
+   "claim": "DL 1.1.4 cover says Ratified Dec 2025, hub page says Published January 2026, legacy with no further updates.",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/1.1.4/",
+   "evidence": "PDF cover: Release 1.1.4, Ratified, Dec 2025, legacy standard. Hub page row: Published January 2026 and no further updates expected. The odd-component rule for the primary key appears in the PDF.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[3] (new-gs1-tds-2-3)",
+   "claim": "EPC Tag Data Standard is Release 2.3, ratified Oct 2025.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/tds/",
+   "evidence": "PDF cover and summary table: Release 2.3, Ratified, Oct 2025.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (AI 8030 DigSig in user memory)",
+   "claim": "DSFID 00010001 selects the DigSig layout: DAID 8 bits 11111110 plus 44-bit PGLN, CID 16 bits, signature plus timestamp 256+20 bits, total 352 bits; one-year signing period at minute resolution; DAID is the GS1 Party GLN (AI 417).",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/tds/",
+   "evidence": "TDS 2.3 Bank 11 table row gives these values. A separate TDS passage states the total length of 352 bits for one-year signing period. TDS itself calls this both 'Access Method 17' (table) and 'Data Format 17' (text); the target uses both names without saying so.",
+   "correction": "Note in the target that TDS uses both names for DSFID 00010001 (Access Method 17 in the table, Data Format 17 in the text). Under the DSFID field split the target describes, 00010001 is Access Method 00 with Data Format 17, so the sentence 'selects Access Method 17' should say 'as TDS words it'."
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (+AIDC toggle, UMI/RUM)",
+   "claim": "EPC bank may hold +AIDC data after the EPC when a toggle bit is 1 (TDS 14.5.1, 15.3); UMI (Gen2v2) / RUM (Gen2v3) flag user memory.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/tds/",
+   "evidence": "TDS table of contents lists 14.5.1 '+AIDC Data Toggle Bit' and 15.3 '+AIDC data following new EPC schemes'; PC bit table names UMI at bit 15h for Gen2v2 and earlier and RUM for Gen2v3.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism / new-gs1-ai-dataset (AI 8030, 17, 21)",
+   "claim": "AI 8030 is N4+Z..90, regex [0-9A-Za-z_-]{1,90}, requires a serialised key (01+21, 8006+21, 8010+8011, 8003, 8004, 8017, 8018, 00, 253, 255), valid as data attribute; AI 17 valid data attribute; AI 21 not; versionInfo 1.2, lastModified 2026-01-26.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/ai/GS1_Application_Identifiers.jsonld",
+   "evidence": "Dataset read in windows: versionInfo 1.2, dc:lastModified 2026-01-26; AI 17 true, AI 21 false; AI 8030 formatString N4+Z..90, regex ([0-9A-Za-z_-]{1,90}), requires list identical to the claim, validAsDataAttribute true.",
+   "correction": null
+  },
+  {
+   "claim_ref": "end_to_end_flows[3] and implications[2] (2D-in-retail 50 mm)",
+   "claim": "2D Barcodes at Retail POS Guideline is Release 1.1 ratified Dec 2025; the 2D code must sit within 50 mm of the linear code centre.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/guidelines/2d-in-retail/1.1.0/GS1-2DRetailPOS-Guideline-i1.1-r-2025-12-15",
+   "evidence": "Cover: Release 1.1, Ratified, Dec 2025. A section on placement states testing showed the 2D code must lie within 50 mm of the linear code centre to reach target items per minute. This is a retail throughput guideline, not a DPP rule.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[*] (repository metadata)",
+   "claim": "Licence, archived flag and last push for 15 repositories (eu-dcc-hcert-spec archived 2023-07-11, eu-dcc-schema Apache-2.0 archived 2023-07-26, dgc-testdata, dcc-testdata, ehn-sign-verify-python-trivial EUPL-1.2, python-hcert BSD-2-Clause, dgc-business-rules-testdata 2025-11-21, python-base45 2026-02-20, cbor2 MIT 2026-10-09, pycose NOASSERTION 2025-10-09, ndeflib ISC 2020-09-07, zxing-cpp Apache-2.0 2026-10-06, GS1DigitalLinkCompressionPrototype 2025-12-03, health-cards NOASSERTION 2023-06-22, smart-trust NOASSERTION).",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/ehn-dcc-development/eu-dcc-hcert-spec",
+   "evidence": "gh api returned the same licence ids, archived flags and push timestamps for 14 of 15. Only WorldHealthOrganization/smart-trust changed: pushed_at is now 2026-10-19 (file says 2026-10-12). eu-dcc-hcert-spec licence field is null as stated. zxing-cpp latest release v3.1.1 published 2026-07-29 confirmed.",
+   "correction": "smart-trust last_activity: pushed 2026-10-19 on the verification date (file: 2026-10-12). Repository is very active, so this date drifts daily."
+  },
+  {
+   "claim_ref": "implementations[zxing-cpp].note and new-zxing-cpp-python-binding",
+   "claim": "The Python binding exposes symbology_identifier, ec_level, content_type, bytes, extra; Data Matrix is readable and writable.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/zxing-cpp/zxing-cpp/blob/master/wrappers/python/zxing.cpp",
+   "evidence": "Binding defines all five properties read-only. core/src/BarcodeFormat.h (gh api) lists DataMatrix with the mode string 'mrwG ' (read, write, GS1) beside QRCode 'mrwG '. Release-vs-master difference still untested (as the target says).",
+   "correction": null
+  },
+  {
+   "claim_ref": "regulatory_alignment (ESPR Art. 9(2)(b)-(d), 10(1)(a)-(c), 10(3))",
+   "claim": "Delegated acts name one or more carriers, layout and position, granularity; the passport is linked via a carrier to a persistent unique identifier, physically on product/packaging/documents; a digital copy goes to dealers and marketplaces free of charge within five working days.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Window at offset 380000 shows Art. 9(2)(b) carriers, (c) layout and position, (d) granularity; Art. 10(1)(a)-(c) as claimed (c: Annex III standards or equivalents); Art. 10(3) copy within five working days, free of charge. The eur-lex /eng page returned an empty body to WebFetch.",
+   "correction": null
+  },
+  {
+   "claim_ref": "regulatory_alignment (Batteries Art. 13(6)-(9), Annex VI Part C)",
+   "claim": "From 18 Feb 2027 a QR code per Annex VI Part C; passport link for LMT, industrial above 2 kWh and EV batteries; printed or engraved visibly, legibly, indelibly else on packaging/documents; smart labels by delegated act; new markings after re-use/repurposing/remanufacturing; Annex VI Part C asks for high contrast and readable size only.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "evidence": "Offset 95000: 13(6)-(9) as claimed; offset 495000: Annex VI Part C high contrast and size readable by common hand-held readers; no symbology named. Note 13(6) applies to all batteries (limbs (b) and (c) cover other batteries and SLI), not only passport batteries; the target mentions only limb (a).",
+   "correction": "Add that Art. 13(6) covers all batteries: limb (a) passport link, limb (b) labelling and conformity information, limb (c) recovered-material share for SLI batteries."
+  },
+  {
+   "claim_ref": "regulatory_alignment / sources impl-reg-eu-2026-1778 (Arts 2(16), 8, 9)",
+   "claim": "Implementing Regulation (EU) 2026/1778 of 16 July 2026: Art. 2(16) hash of a passport version via a cryptographic algorithm; Art. 9 proof of registration with passport-version hash, qualified electronic seal (eIDAS Art. 38), 90 days; no algorithm or canonical form.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Act is Implementing Regulation (EU) 2026/1778 of 16 July 2026 (OJ 17.7.2026). Art. 2(16) defines the hash as the output of a cryptographic algorithm over a passport version's data. Art. 9(2) lists identifier, commodity code, operator, Commission time stamp and hash; 9(3) qualified seal under eIDAS Art. 38; 9(4) available 90 calendar days. The sub-letter '9(2)(e)' used in the target could not be verified from the window (the paraphrase lists items without letters).",
+   "correction": "Cite Art. 9(2) without the letter (e), or confirm the letter on the OJ text. Publication date 17.7.2026 can replace 'not re-checked'. Art. 9 says the proof is available for 90 calendar days; the target's L10 phrase 'lasts 90 days' is right."
+  },
+  {
+   "claim_ref": "sources.new-m604-draft-sr-2024-02 and L05/L08 (Annex II Part B 2.4-2.6, 2.10, 7.1)",
+   "claim": "Draft request: control data optional (2.4), offline basic data optional with four failure cases (2.5), six elements numbered (2)-(7) with no (1) (2.6), hash and counterfeit link example (2.10), signed encoded data set schemes (7.1); two Ares references 27/02/2024 and 21/03/2024.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ec.europa.eu/transparency/comitology-register/core/api/integration/ers/414796/096100/1/attachment",
+   "evidence": "pdftotext of the PDF shows Ref. Ares(2024)1502512 - 27/02/2024 and Ref. Ares(2024)2138468 - 21/03/2024; 2.4 'may also include control data elements'; 2.5 (a)-(d) four failure cases; 2.6 six pieces numbered (2) to (7); 2.10 counterfeit link and hash of the registered passport ('could be'); 7.1 offline and online originality and integrity, ESEDS schemes.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[M/604] and sources.new-m604-amd-draft-2025-09",
+   "claim": "Amendment draft notified 23.9.2025 (feedback by 4.10.2025) moves standards deadline Dec 2025 to Mar 2026 and expiry Jun 2026 to Mar 2028; points (38)-(39), (49)-(50) insert 'harmonised'. Adopted amendment is C(2025) 8024 of 2025-11-28; ETSI page shows expiry 2026-06-26.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://webgate.ec.europa.eu/circabc-ewpp/d/d/workspace/SpacesStore/8ee064ee-4352-4502-af57-9db78208a3fc/download",
+   "evidence": "PDF text: Brussels 23.9.2025, deadline 4.10.2025, Art. 1 points (11)-(12) dates, (38)-(39) and (49)-(50) as stated. A search result quoting EUR-Lex Decision (EU) 2026/1736 names C(2025) 8024 of 28 November 2025 amending C(2024) 5423. ETSI portal lists M/604 expiry 26 June 2026, no amendment listed, footer 2026-10-05. Adopted text still unread by this verifier.",
+   "correction": "Drop the hedge that the 2025-11-28 date comes only from m01: Decision (EU) 2026/1736 recitals also name C(2025) 8024 of 28 November 2025. The expiry in the adopted amendment remains unconfirmed."
+  },
+  {
+   "claim_ref": "sources.new-icao-9303-p13 and L01/L02/L08 (ICAO VDS)",
+   "claim": "Doc 9303 Part 13, 8th edition 2021, Amendment 1 dated 14/6/24, Corrigendum 1 dated 11/12/20; header magic 0xDC; version byte 0x02/0x03 = versions 3/4; signer id = 2-letter country + 2 alphanumerics; certificate reference 5 hex chars (v3) or length-prefixed (v4); 0...0 reserved for tests; module size at least 0.3386 mm; ECDSA >=256 bit with SHA-256 recommended, raw r||s.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.icao.int/sites/default/files/publications/DocSeries/9303_p13_cons_en.pdf",
+   "evidence": "Record of amendments shows Amendment 1 14/6/24 and Corrigendum 1 11/12/20. Table 1 and sec. 2.2.1 match the header and signer fields. The inkjet module size recommendation and the ECDSA/SHA-256 recommendation with raw signature format appear in the text. ICAO is not an EN/ISO/IEC/DIN body, so reading it is allowed.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism and L08 (HCERT)",
+   "claim": "HCERT 1.0.8 (2023-02-13): ES256 primary and PS256 (RSASSA-PSS 2048); kid = first 8 bytes of SHA-256 of the DSC DER; claims iss 1, exp 4, iat 6, hcert -260 key 1; zlib, Base45, prefix HC1:; QR alphanumeric, ECC Q, 35-60 mm diagonal; CC BY 4.0.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/ehn-dcc-development/eu-dcc-hcert-spec/blob/main/hcert_spec.md",
+   "evidence": "All items match the document. The 'daily download, 24-hour update target' trust-list detail and 'try every certificate whose truncated kid matches' were not in the answered window and are not confirmed here.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (SMART Health Cards)",
+   "claim": "SHC 1.4.0: ES256, zip DEF raw DEFLATE, shc:/ with two digits per character (ASCII minus 45), QR up to version 22, chunking deprecated, kid = JWK thumbprint, CC-BY 4.0.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://spec.smarthealth.cards/",
+   "evidence": "Page gives all of these. Chunking deprecated since December 2022. The 'rid up to 24 characters' and 'rotate keys at least yearly' details were not checked.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (Android, iOS NFC dispatch)",
+   "claim": "Android dispatches on the first NDEF record and advises AAR not first; Android 16 http(s) tags trigger ACTION_VIEW, Android 17 needs an explicit open-link action; page updated 2026-07-30. iOS background reading uses the first URI record found, http(s)/mailto/sms/tel/facetime/facetime-audio/Maps/HomeKit schemes, custom schemes unsupported, iPhone XS or later.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://developer.apple.com/tutorials/data/documentation/corenfc/adding-support-for-background-tag-reading.json",
+   "evidence": "Android page: first NdefRecord decides dispatch; AAR not first unless only record; Android 16 and 17 behaviour as claimed; 'Last updated 2026-07-30 UTC'. Apple JSON: first URI record when several; scheme list and device floor as claimed. Neither source is an oracle for a DPP rule (platform docs).",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources.new-ndeflib (record.py)",
+   "claim": "ndeflib header bits MB 0x80, ME 0x40, CF 0x20, SR 0x10, IL 0x08, TNF mask 0x07, TNF 7 rejected, MIME pattern [a-zA-Z0-9-]+/[a-zA-Z0-9-+.]+, ISC licence.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/nfcpy/ndeflib",
+   "evidence": "gh api of src/ndef/record.py shows the same bit masks, TNF == 7 branch, the MIME regex and a 1 MB payload cap (0x100000). Licence ISC from repo API.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.spec_status and adoption_evidence (EU DCC dates)",
+   "claim": "DCC regulation applied from 1 July 2021, expired 30 June 2023; WHO took up the system on 1 July 2023; DCC technical specification page published 22 Feb 2022 with Volumes 1-5, Volume 1 file dated 1 Dec 2021.",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://commission.europa.eu/strategy-and-policy/coronavirus-response/safe-covid-19-vaccines-europeans/eu-digital-covid-certificate_en",
+   "evidence": "Commission page gives the application, expiry and WHO dates. Health page (health.ec.europa.eu/publications/technical-specifications-eu-digital-covid-certificates-volumes-1-5_en) lists publication 22 February 2022, the five volume titles and Volume 1 file date 1 December 2021, with no version numbers.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources.new-rfc-9285-base45 and new-rfc-9052-cose",
+   "claim": "RFC 9285 is Informational (Faltstrom, Ljunggren, van Gulik, 2022); RFC 9052 is Internet Standard STD 96 and with RFC 9053 obsoletes RFC 8152.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.rfc-editor.org/info/rfc9052",
+   "evidence": "Both RFC info pages match; year 2022 from copyright line.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources.new-bsi-tr-03137",
+   "claim": "BSI TR-03137 Part 1 Version 3.0, Part 2 (JAB Code) Version 1.0, no dates on page.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Technische-Richtlinien/TR-nach-Thema-sortiert/tr03137/tr-03137.html",
+   "evidence": "Page lists Part 1 Version 3.0 and Part 2 Version 1.0 without dates; it names ISO/IEC 23634:2022 for the JAB Code.",
+   "correction": null
+  },
+  {
+   "claim_ref": "literature[10.1145/3530877]",
+   "claim": "COVID-19 Vaccination Certificates in the Darkweb, 2021, Digital Threats: Research and Practice.",
+   "risk": "doi",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1145/3530877",
+   "evidence": "Title and venue match. Crossref year is 2023 (journal version); the 2021 date belongs to the earlier preprint.",
+   "correction": "year: 2023 (journal), preprint 2021. The 'accepted by official apps' content claim was not checked against the abstract."
+  },
+  {
+   "claim_ref": "literature[10.56553/popets-2023-0113]",
+   "claim": "Privacy-Preserving Outsourced Certificate Validation, 2023, venue IACR Cryptol. ePrint Arch.",
+   "risk": "doi",
+   "verdict": "refuted",
+   "evidence_url": "https://api.crossref.org/works/10.56553/popets-2023-0113",
+   "evidence": "Crossref gives title as stated, year 2023, but container Proceedings on Privacy Enhancing Technologies, not the ePrint archive. The 10.56553 prefix is the PoPETs DOI space.",
+   "correction": "venue: Proceedings on Privacy Enhancing Technologies (PoPETs), 2023."
+  },
+  {
+   "claim_ref": "literature[10.1016/j.procir.2026.01.056]",
+   "claim": "Protected QR Code-based Anti-counterfeit System for Pharmaceutical Manufacturing, year 2024, venue ArXiv.",
+   "risk": "doi",
+   "verdict": "refuted",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procir.2026.01.056",
+   "evidence": "Crossref: title matches, year 2026, container Procedia CIRP. The target hedges that the Procedia DOI and an arXiv year 2024 may be different versions, but the DOI as given resolves to a Procedia CIRP item of 2026.",
+   "correction": "For this DOI: year 2026, venue Procedia CIRP. Keep the arXiv version as a separate record if it is used."
+  },
+  {
+   "claim_ref": "literature[10.5281/zenodo.18711539]",
+   "claim": "MaDiTraCe: D3.3 Guidelines for Methodology implementation, 2025, Zenodo.",
+   "risk": "doi",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.datacite.org/dois/10.5281/zenodo.18711539",
+   "evidence": "Crossref has no record (404, as expected for DataCite DOIs). DataCite gives the same title, publisher Zenodo, creators CEA and Spherity, but publication year 2026, not 2025. The second DOI 10.5281/zenodo.18711538 was not checked.",
+   "correction": "year: 2026 per DataCite."
+  },
+  {
+   "claim_ref": "literature (10 other DOIs: 10.48550/arxiv.2607.08383, 10.1109/nfc.2011.9, 10.1109/rfid-ta.2012.6404492, 10.1109/trustcom.2015.396, 10.1109/nfc.2010.10, 10.1109/smartcomp.2016.7501715, 10.1016/j.spc.2025.01.014, 10.1108/ci-02-2025-0074, 10.23919/cnsm67658.2025.11297523, 10.1007/s43615-025-00500-y)",
+   "claim": "Titles, years and venues as listed.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/nfc.2011.9",
+   "evidence": "Crossref/OpenAlex returned the same title, year and venue for each. Also matched: 10.1109/access.2021.3117781, 10.1016/j.jisa.2019.102369, 10.1002/pts.2781 (online Nov 2023, print Feb 2024), 10.1515/aut-2024-0002, 10.24018/ejeng.2026.11.3.63302, 10.1109/saci66288.2025.11030179, 10.3390/s25133855, 10.1007/978-3-662-44736-9_36 (series is LNCS, venue string in the target is the conference), 10.1007/978-3-642-37377-0_8. The arXiv record is a preprint not published in a peer-reviewed venue. Abstract-vs-relevance fit was not re-read.",
+   "correction": null
+  },
+  {
+   "claim_ref": "conformance_implications[0].existing_check (identifier.parse)",
+   "claim": "identifier.parse today refuses any query use beyond a character check (only /01/<GTIN>/21/<serial>).",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "src/dppce/adapters/identifier.py",
+   "evidence": "parse_gs1_digital_link matches only the path /01/<14 digits>/21/<serial 1-20 of A-Za-z0-9._-> and checks the GTIN check digit. The query string is accepted if all characters are URI characters; no AI, requires or data-attribute logic. The sentence 'refuses any query use' reads as the opposite; the engine accepts any query.",
+   "correction": "Reword: identifier.parse accepts any query string made of URI characters and does not interpret it."
+  },
+  {
+   "claim_ref": "conformance_implications[*].existing_capability and new_capability_needed",
+   "claim": "identifier.consistency compares exact text on one QR sample; carrier.nfc, carrier.rfid, integrity.cose are interface_only; access.restricted_fields uses capability access.policy; core dependencies are cryptography, joserfc, rfc8785, asn1crypto and no CBOR library; zxing-cpp is the qr extra.",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "docs/reference/capabilities.md; pyproject.toml",
+   "evidence": "Manifest rows match. pyproject lists pydantic, pyyaml, jsonschema, referencing, rfc8785, cryptography, joserfc, asn1crypto; qr extra zxing-cpp>=2.2 and pillow; no CBOR library. Capability names carrier.datamatrix, integrity.vds, identifier.cross_carrier, carrier.epc_decode, carrier.ndef_sample, carrier.control_hash do not exist today, which the target presents as new. Registered check name for QR is carrier.qr_decode with capability carrier.qr; the target never names carrier.qr, so a reader may not link the two. Note: zxing-cpp is optional ('qr' extra), not a core dependency.",
+   "correction": "Add that the existing capability for QR is carrier.qr (supported, extra 'qr'), and that Data Matrix decoding would reuse the same dependency."
+  }
+ ],
+ "rule5_findings": [
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (DSFID: 'two MSBs Access Method ... five-bit Data Format')",
+   "problem": "The DSFID field split is defined in ISO/IEC 15961/15962. The target states it as fact. Its source is TDS 2.3 (open GS1 text), which itself cites the ISO documents. The reader cannot tell the statement is second-hand.",
+   "fix": "Prefix with 'As TDS 2.3 sec. 17 and its Bank 11 table describe it' and tag the source secondary_only for ISO/IEC 15962. Do not add detail that TDS does not state."
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism and L08 (DigSig structure: DAID, CID, signature 256+20 bits, ISO/IEC 20248)",
+   "problem": "The layout of a DigSig is the content of ISO/IEC 20248. The target describes it, though only from TDS 2.3. The same text should not read as a description of the ISO structure.",
+   "fix": "Say 'TDS 2.3 places a DigSig in user memory as follows' and add 'ISO/IEC 20248 itself was not read'. Keep the ISO entry bibliographic only."
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism ('UMI or RUM indicator in the PC bits')",
+   "problem": "PC-word bit semantics belong to the UHF air interface (ISO/IEC 18000-63 and the GS1 Gen2 standard). The statement is correct for TDS but is close to describing an ISO/IEC air-interface behaviour.",
+   "fix": "Attribute it only to TDS 2.3 sec. 9 and the GS1 Gen2 reference, with the wording 'TDS 2.3 lists'. Do not mention ISO/IEC 18000-63 behaviour."
+  },
+  {
+   "claim_ref": "sources.new-iso-iec-15962.title",
+   "problem": "Title '(RFID for item management - data protocol: data encoding rules and logical memory functions) and ISO/IEC 15961 (data protocol)' is composed from TDS citations and not checked on a catalogue page (the target admits this). Bibliographic metadata must be exact.",
+   "fix": "Replace with the exact catalogue title for each of ISO/IEC 15961 and ISO/IEC 15962, or write 'cited by TDS 2.3 as [ISO15961] and [ISO15962]; titles not checked'. ISO catalogue returned HTTP 403 to this verifier, so it could not be checked here either."
+  },
+  {
+   "claim_ref": "sources.new-iso-iec-20248.title",
+   "problem": "Title given in full but url is 'not opened' and edition 'not checked'. Same issue: unverified bibliographic data.",
+   "fix": "State 'title as listed in the draft request point 7.3; edition and year not checked'."
+  },
+  {
+   "claim_ref": "anomalies[last] ('iTeh catalogue page ... EN 18220:2026')",
+   "problem": "Names a vendor/catalogue page that describes the scope of a protected EN. The target says it was not used. No scope content is recorded, so this is not a violation, but it keeps a pointer to secondary explanation.",
+   "fix": "Delete the sentence or reduce it to 'EN 18220:2026 catalogue metadata only'."
+  }
+ ],
+ "missed_items": [
+  {
+   "topic": "Published EN standards under M/604",
+   "fact": "A search result reports CEN and CENELEC published the first DPP standards (EN 18216, 18219, 18220, 18221, 18222, 18223) on 27 May 2026, with two more expected in September 2026. The target says only that EN 18220 and EN 18246 'were not read' and relies on the 2024 draft for what a carrier should contain. The draft's optional items (control data, offline basic data) may therefore be settled by published standards, which are protected and cannot be read by the agent; the owner should check them. This fact is from a secondary source.",
+   "source_url": "https://public.cdxsystem.com/de/web/cdx/w/first-european-standards-for-the-digital-product-passport-published"
+  },
+  {
+   "topic": "Decision (EU) 2026/1736 as OJ source for M/604",
+   "fact": "The Commission Implementing Decision (EU) 2026/1736 names both C(2024) 5423 and C(2025) 8024 of 28 November 2025 in its recitals. It is open EU law and may give an official citation for the amended request, replacing the eNorm page that renders empty.",
+   "source_url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj/eng/pdf"
+  },
+  {
+   "topic": "Art. 9(2) wording of the registry proof",
+   "fact": "Art. 9(2) lists the unique identifier, the commodity code, the verified operator, the Commission time stamp of the latest version and the hash; Art. 9(3) the qualified seal; Art. 9(4) availability for 90 calendar days through the registry interface or API. The target says 'no registry API for hash lookup was located', while Art. 9(4) states the proof is retrievable through a secure interface or API.",
+   "source_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1"
+  },
+  {
+   "topic": "Batteries Art. 13(6) limbs (b) and (c)",
+   "fact": "The QR obligation from 18 Feb 2027 covers all batteries: non-passport batteries link to labelling and conformity information, and SLI batteries show the recovered-material share. A QR sample test for batteries must pick the right limb by category.",
+   "source_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1"
+  },
+  {
+   "topic": "Engine identifier.parse leniency",
+   "fact": "Today identifier.parse accepts any query string and does not test AI keys, so a sample with a linkType key or an all-numeric extension key passes. This is a current false-pass risk, not only a missing feature.",
+   "source_url": "src/dppce/adapters/identifier.py (repository)"
+  },
+  {
+   "topic": "GS1 TDS wording for DSFID 00010001",
+   "fact": "TDS 2.3 uses both 'Access Method 17' (Bank 11 table) and 'Data Format 17' (sec. 17 text, total 352 bits). A fixture author needs one chosen term in the engine glossary.",
+   "source_url": "https://ref.gs1.org/standards/tds/"
+  }
+ ],
+ "overall": "The file is reliable on its high-risk technical and status claims: 14 GS1, ICAO, HCERT, SHC, RFC, platform-documentation and EU-law claims were re-read at the primary source and match, including version strings, dates, field layouts, and article numbers. Repository metadata is exact except one daily-drifting push date (smart-trust). Errors found are small: two literature venue/year mismatches (PoPETs venue, Procedia CIRP year), a Zenodo year, and one DCC darkweb year. The sentence on identifier.parse reads as the opposite of the code, which accepts any query. Rule 5 handling is mostly careful; the open points are TDS-derived descriptions of ISO-defined structures (DSFID, DigSig, PC bits) that should be marked as TDS-sourced, and two ISO titles that stay unverified. The largest open uncertainty is the content of the adopted request and published ENs, which the file honestly marks as unread.",
+ "counts": {
+  "checked": 32,
+  "confirmed": 28,
+  "refuted": 2,
+  "not_confirmed": 2
+ }
+}

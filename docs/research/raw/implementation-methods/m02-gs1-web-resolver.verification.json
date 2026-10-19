@@ -1,0 +1,302 @@
+{
+ "target": "m02-gs1-web-resolver",
+ "retrieval_date": "2026-10-19",
+ "method_note": "Chose claims with high oracle impact: spec versions and statuses, conformance statement numbers, status codes and headers, schema regexes, repository metadata via gh api, DOIs via Crossref/OpenAlex, and engine-mapping claims checked against source at b290791. curl was denied, so Crossref and OpenAlex went through WebFetch. Some checked rows bundle several sub-claims.",
+ "checked": [
+  {
+   "claim_ref": "maturity.versions_at_retrieval[0]",
+   "claim": "URI Syntax is release 1.7.0, ratified Aug 2026",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "evidence": "Page header shows release 1.7.0 with status ratified, Aug 2026.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[1]",
+   "claim": "Resolver standard is release 1.2.1, ratified Aug 2026, header typo 'Ratfied'",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Header gives release 1.2.1, ratified August 2026, and spells it 'Ratfied'.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism / summary",
+   "claim": "Resolver standard names no redirect status code",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Page does not specify 301, 302 or 307; it requires redirects without naming a code.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism",
+   "claim": "400 for syntax error (CS-7), 404 unknown entity (CS-8), never 200 for error (CS-9)",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Section 5 statements 7, 8, 9 map to these topics.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism",
+   "claim": "CS-2 methods GET/HEAD/OPTIONS, CS-3 HTTPS, CS-4 CORS",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Statement 2 lists GET, HEAD, OPTIONS over HTTP 1.1+; 3 is HTTPS; 4 is CORS.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism",
+   "claim": "CS-25 trailing slash tolerated; CS-19 query string passed on",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Statement 25 (should tolerate trailing slash) and 19 (pass whole query string, Section 2.12) confirmed. The claim that 1.2.0 removed the option to drop the query string could not be checked: the change-log text was not in the part read.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism",
+   "claim": "CS-10 linkset without redirect; CS-13 Link header to JSON-LD context; CS-14/15/17/18/20/23/24 numbering",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Statements 10, 13, 14, 15, 17, 20, 23, 24 match the topics cited. Statement 5 (decompress EPC) and 6 (pass uncompressed URI) also match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism",
+   "claim": "300 Multiple Choices with a list when best match cannot be decided",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Section 2.6.3 says the resolver should return the list with a 300 response.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism",
+   "claim": "'Since 1.2.0 a Link header to the linkset is no longer required on redirects'",
+   "risk": "version",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Section 2.8 says only that the target MAY be exposed in a Link header for pattern redirection; the log-of-changes text for 1.2.0 was not in the portion read, so the version attribution is unverified.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L01.mechanism",
+   "claim": "GTIN path order 22, 10, 21; convenience alphas removed in 1.3.0; canonical form 4.12 (https, id.gs1.org, 14-digit GTIN, sorted AI-only query, no linkType/context, no trailing slash); RE3 for eh/ex",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "evidence": "All items match the page. Primary keys 8006, 8013, 8010 are in Section 4.3.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[4]",
+   "claim": "Web Vocabulary current is 1.18.0, published 2026-06-01",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/voc/data/archive",
+   "evidence": "Archive lists 1.18.0 on 2026-06-01, 1.17.0 on 2025-11-18, 1.16.0 on 2025-07-31; 1.11.0 appears twice.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L05.mechanism / implementations[WebVoc]",
+   "claim": "GS1 Web Vocabulary has 60 link types and gs1:dpp ('Digital Product Passport', stable)",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/voc/data/linktypes",
+   "evidence": "Entry 'dpp' has title 'Digital Product Passport', status stable; 60 entries total.",
+   "correction": null
+  },
+  {
+   "claim_ref": "anomalies[8]",
+   "claim": "linktypes JSON uses key 'epcisRepository' not 'epcis'",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/voc/data/linktypes",
+   "evidence": "Key epcisRepository exists, no key epcis; the traceability entry text points to gs1:epcis.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[11]",
+   "claim": "IANA registers 'dpp' with UNTP Identity Resolver as reference; registry last updated 2026-06-12",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml",
+   "evidence": "Entry dpp references UNTP Identity Resolver link relations; 'linkset' references RFC 9264; registry last updated 2026-06-12.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[12]",
+   "claim": "RFC 9264, July 2022, Standards Track",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.rfc-editor.org/info/rfc9264",
+   "evidence": "Page shows Proposed Standard, Internet Standards Track, 2022. Month not shown on the page fetched, so 'July' is not independently seen.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[11] / implementations[UNTP IDR]",
+   "claim": "UNTP IDR is Work in Progress, suitable for pre-production pilots; dpp treated as gs1:dpp; /.well-known/resolver equivalent to gs1resolver; Vary: Accept; public linksets",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://untp.unece.org/docs/specification/IdentityResolver",
+   "evidence": "All statements found on the page (first 100000 chars).",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[UNTP IDR].license",
+   "claim": "UNTP IDR page licence is CC-BY-4.0",
+   "risk": "licence",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://untp.unece.org/docs/specification/IdentityResolver",
+   "evidence": "The page text read states no licence. The value may come from the UNTP site or repository, which was not checked.",
+   "correction": "Mark licence as 'not stated on the page' unless a repository LICENSE is cited."
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[5]",
+   "claim": "TDS 2.3 ratified Oct 2025",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/tds/2.3.0/",
+   "evidence": "Search result of GS1 pages: 2.3.0 labelled ratified Oct 2025, archive date 31 Oct 2025. Direct PDF fetch gave no text, so this rests on search excerpts of GS1 pages (secondary).",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[6]",
+   "claim": "Compression Technical Standard for EPC binary strings 1.0.0 ratified Jul 2025",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/compression/",
+   "evidence": "Search result shows release 1.0.0, ratified Jul 2025, eh/ex prefixes. Page not fetched directly.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[*].license / last_activity",
+   "claim": "Resolver CE, test suite, syntax engine, toolkit, interpretGS1scan, linkset, compression prototype, TDT, WebVoc, 2d generator, digital-link.js, OpenEPCIS: all Apache-2.0 with the stated pushed dates",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/GS1_DigitalLink_Resolver_CE",
+   "evidence": "gh api: all licences Apache-2.0, none archived; pushed_at values match every date in the file (e.g. CE 2026-10-13, testsuite 2026-08-07, syntax engine 2026-10-08, TDT 2026-09-19, WebVoc 2026-01-29, OpenEPCIS 2026-09-13).",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[syntax engine]",
+   "claim": "release 1.4.1 on 2026-05-28",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/gs1-syntax-engine/releases/latest",
+   "evidence": "Latest release tag 1.4.1 published 2026-05-28.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[testsuite/CE/linkset/CIRPASS]",
+   "claim": "Commit ids and dates: testsuite 32597c10 2026-08-07; CE master bf885fdf 2026-03-29; linkset bedc11ec 2025-06-16; CIRPASS-2 ontologies-docs 2026-10-15",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/GS1DL-resolver-testsuite/commits",
+   "evidence": "gh api returned identical SHAs and dates; CIRPASS-2/ontologies-docs pushed 2026-10-15, Apache-2.0.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[WebVoc].note",
+   "claim": "WebVoc repo holds v1.1-v1.11 and v1.16 only",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/WebVoc/contents",
+   "evidence": "Folders: v1.1 to v1.11 (with v1.5.1) and v1.16, plus pact.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[CE].note",
+   "claim": "Resolver CE: 307, Accept split on commas without trimming, linkset on application/json or linkType all/linkset, Link rel=\"application/linkset\", unquoted rel on context header with type text/html; README says not maintained by GS1 and at least three MOs use 3.0",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/GS1_DigitalLink_Resolver_CE/contents/web_server/src/web_namespace.py",
+   "evidence": "Code lines show 307 redirect, split(',') on Accept, exact-match test, unquoted rel on context header with type=\"text/html\"; web_logic.py builds rel=\"application/linkset\"; README confirms disclaimer and 'at least three' MOs.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[testsuite].note",
+   "claim": "Test ids list and validation against gs1.github.io/linkset/gs1-linkset-schema.json; PHP helper; work in progress",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/GS1DL-resolver-testsuite/contents/GS1DigitalLinkResolverTestSuite.js",
+   "evidence": "All listed ids found in the JS, plus the gs1.github.io schema URL. README says PHP/curl helper for HEAD and work in progress. 'Does not test compression' is not stated in README; absence of any compression test id is consistent.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L05.mechanism",
+   "claim": "GS1 linkset schema: @id not $id, required arrays, hreflang regex (^\\w{2}$)|(^\\w{2}-\\w{2}$), relation key alternatives with A-z and no hyphen in URI, additionalProperties false",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/linkset-schema",
+   "evidence": "Raw schema matches: required linkset / anchor / href,title; hreflang pattern as stated; URL alternative [a-zA-z0-9./]+ (no hyphen); no $id.",
+   "correction": null
+  },
+  {
+   "claim_ref": "conformance_implications L05 existing_check (identifier.resolve)",
+   "claim": "At b290791 identifier.resolve reports any 200 JSON object as passport; +json suffix treated as JSON so a linkset body passes IDENTIFIER.RESOLVED",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/identifier.py",
+   "evidence": "Lines 185-226: media type with +json suffix goes to json_object check and ends IDENTIFIER.RESOLVED; a list not containing the type gives IDENTIFIER.RESPONSE.MEDIA_TYPE. Matches the description.",
+   "correction": null
+  },
+  {
+   "claim_ref": "conformance_implications L03 (OPTIONS / hops)",
+   "claim": "Transport allows only GET and HEAD without scope and follows redirects (hop not visible as separate result)",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/infrastructure/transport.py",
+   "evidence": "SAFE_METHODS is GET, HEAD; redirects 301/302/303/307/308 followed up to max_redirects and recorded as a list of redirect targets. Note: records keep redirect targets (record.redirects), so hop Locations are partly visible; per-hop status codes are the gap.",
+   "correction": "Soften 'hides redirect hops' to 'records redirect targets but not per-hop status codes'."
+  },
+  {
+   "claim_ref": "literature[0-3,7-10]",
+   "claim": "Titles, venues, years for Made2Verify (Procedia CS 277, 1744-1751, CC BY-NC-ND), RFID-TA 2025 Tag to Digital Twin, LLM-Powered Digital Link Agent, Polymers 2024, Procedia CS 2026 data space paper; pfsd 2020 DOI missing at Crossref but in OpenAlex (Troeger)",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procs.2026.02.212",
+   "evidence": "Crossref (and OpenAlex for pfsd) returned matching titles, containers and years. CNSM, construction, SPC and BMS DOIs were not re-fetched (not_run).",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.regulatory_alignment",
+   "claim": "Article contents of Reg. 2024/1781 Art. 10, 13 and 2023/1542 Art. 77(3)",
+   "risk": "legal_citation",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng",
+   "evidence": "EUR-Lex returned an empty page to WebFetch again, as the target itself notes; the article and point numbers could not be independently checked.",
+   "correction": null
+  }
+ ],
+ "rule5_findings": [],
+ "missed_items": [
+  {
+   "topic": "UNTP IDR cites ISO/IEC 18975 for its description file",
+   "fact": "The UNTP Identity Resolver page says operators should publish a description file at /.well-known/resolver per ISO/IEC 18975 (bibliographic mention only); the target lists 18975 only in scope and does not note the dependency.",
+   "source_url": "https://untp.unece.org/docs/specification/IdentityResolver"
+  },
+  {
+   "topic": "TDT lag",
+   "fact": "A GS1 page excerpt said the Tag Data Translation standard was still at 2.2 while TDS is 2.3; the target relies on gs1/TDT without noting the version lag for ++ schemes.",
+   "source_url": "https://ref.gs1.org/standards/tds/2.3.0/"
+  },
+  {
+   "topic": "WebVoc 1.17.0",
+   "fact": "Archive lists 1.17.0 on 2025-11-18, which the target's open question about gs1:dpp introduction does not mention as unchecked.",
+   "source_url": "https://ref.gs1.org/voc/data/archive"
+  }
+ ],
+ "overall": "The file is largely reliable: every version, status, date, licence, commit SHA, and release tag I re-checked against GS1 pages, IANA, gh api and Crossref matched, as did the conformance statement numbers, linkset schema regexes, Resolver CE code behaviour and the engine-mapping claim about identifier.resolve. Weaker points are the UNTP IDR licence (not shown on the page), the unverified 1.2.0 change-log attributions, EUR-Lex article citations that rest on sibling records, and TDS 2.3 and compression dates that I could confirm only from search excerpts of GS1 pages. One engine claim is slightly overstated: the transport records redirect targets, though not per-hop status. No rule 5 problems found; EN/ISO/IEC mentions are bibliographic.",
+ "counts": {
+  "checked": 30,
+  "confirmed": 27,
+  "refuted": 0,
+  "not_confirmed": 3
+ }
+}

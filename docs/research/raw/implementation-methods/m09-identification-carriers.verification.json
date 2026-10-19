@@ -1,0 +1,392 @@
+{
+ "target": "m09-identification-carriers",
+ "retrieval_date": "2026-10-19",
+ "method_note": "Read the whole target file. Chose claims by impact on a test oracle: GS1 resolver status codes and file names, GS1 Digital Link rules, TDS header values, IANA relation, IDTA discovery endpoints and deprecations, EU legal citations (articles and paragraphs), repository metadata (gh api), NXP SUN constants, ndeflib prefix table, AI rules from the GS1 syntax dictionary, DOIs (Crossref and OpenAlex), and the existing_check statements (compared with src/dppce/adapters/identifier.py and docs/reference/capabilities.md). PDFs were saved by WebFetch and read with pdftotext. No live DPP system was contacted. Checks of the large EU texts used windows of the Cellar manifestations, as the EUR-Lex /eng pages returned empty content to WebFetch in this session.",
+ "checked": [
+  {
+   "claim_ref": "maturity.versions_at_retrieval[0] (gs1-digital-link-uri-syntax-1-7-0)",
+   "claim": "GS1 Digital Link URI Syntax is release 1.7.0, ratified Aug 2026, PDF dated 2026-08-06.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "evidence": "Page shows release 1.7.0, ratified Aug 2026, PDF dated 2026-08-06.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[1] (gs1-conformant-resolver-1-2-1)",
+   "claim": "GS1-Conformant Resolver Standard is release 1.2.1, ratified Aug 2026 (page typo 'Ratfied'; PDF file name 2026-08-07).",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Page shows 1.2.1, ratified Aug 2026 with the same typo, and the PDF name carries 7 August 2026.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03_data_exchange_protocols.mechanism (GS1 resolver status codes)",
+   "claim": "Resolver 1.2.1 returns 404 (not a default redirect) when the requested link type is unavailable (changed from 1.1), 300 for ambiguous best match, 400 on validation failure including check digit, never 200 for errors, and names no redirect status code (301/302/307/308).",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Page text states 404 for an unavailable link type (change from 1.1), 300 when the resolver cannot choose, 400 for failed basic validation (check calculation is one of the tests; the 400 sentence itself does not name check digits), a SHALL NOT use 200 for error conditions, and no redirect code is named. Read through character 100000 of 107148; the last 7148 characters were not read.",
+   "correction": "Optional precision: the check digit is covered only through the 'basic validation' wording, not by name in the 400 sentence."
+  },
+  {
+   "claim_ref": "layers.L03_data_exchange_protocols.mechanism (resolver protocol details)",
+   "claim": "Resolver must support GET, HEAD, OPTIONS and CORS; offers gs1:defaultLinkMulti; may expose gs1:handledBy in a Link header; decompresses EPC binary strings; the conformance statement has 25 requirements; description file at /.well-known/gs1resolver.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "All items found on the page: methods and CORS, defaultLinkMulti, handledBy relation, EPC binary decompression required (full Digital Link decompression optional), 25 numbered requirements, and the well-known path gs1resolver.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L01_unique_identifiers.mechanism (Digital Link rules)",
+   "claim": "Qualifier order is 22, 10, 21; GTIN-8/12/13 are zero-padded to 14 digits (mandatory since 1.4.0); linkType and context are reserved query keys; canonical form uses https, id.gs1.org, 14 digits, only AI keys in the query, sorted keys, no trailing slash.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "evidence": "Page states the same qualifier order, padding requirement effective from 1.4.0, the reserved keys (excluded from canonical URIs) and the canonical rules, including lexical key sorting.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[2],[3] (TDS 2.3 and Gen2 3.0.1)",
+   "claim": "TDS is release 2.3, ratified Oct 2025, 448 pages; Gen2 air interface is release 3.0.1, ratified Feb 2026, 204 pages.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/tds/ and https://ref.gs1.org/standards/gen2/",
+   "evidence": "pdftotext of the saved PDFs shows 'Release 2.3, Ratified, Oct 2025' and 'Release 3.0.1, Ratified, Feb 2026'. The page counts 448 and 204 come from PDF linearization metadata, not from a counted page tree.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (EPC headers)",
+   "claim": "EPC header values: SGTIN-96 0x30, SSCC-96 0x31, SGLN-96 0x32, GRAI-96 0x33, GIAI-96 0x34, SGTIN-198 0x36, SGTIN+ 0xF7, DSGTIN+ 0xFB, DSGTIN++ 0xFC, SGTIN++ 0xFD; 0xE2 permanently reserved; SGTIN-96 serial is 38 bits with maximum 274,877,906,943.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/tds/",
+   "evidence": "The header table in the TDS 2.3 PDF lists every value above. A note gives the 38-bit SGTIN-96 serial and the numeric limit. E2 is marked permanently reserved.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03_data_exchange_protocols.mechanism and sources new-iana-link-relations",
+   "claim": "IANA registers the relation 'dpp' with UNTP as reference; 'linkset' is RFC 9264; 'predecessor-version' is RFC 5829; registry last updated 2026-06-12.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml",
+   "evidence": "Registry row for dpp points to the UNTP identity resolver page; linkset and predecessor-version references match; last updated 2026-06-12.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03_data_exchange_protocols.mechanism (UNTP Identity Resolver)",
+   "claim": "UNTP IDR (GitLab main) uses 307 for redirects, 400 for invalid queries, 404 when nothing matches (linkset may be included), 200 for linkset; /.well-known/resolver (or gs1resolver); linkType=all is only a deprecated alias.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/raw/main/website/docs/specification/IdentityResolver.md",
+   "evidence": "Page states each of these. Read the first 100000 of 105639 characters.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L07_access_rights_security_confidentiality.mechanism (UNTP UUID claim)",
+   "claim": "UNTP proposes UUIDs as hard-to-guess item identifiers acting as a shared secret for item data, in conflict with RFC 9562.",
+   "risk": "technical_mechanism",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/raw/main/website/docs/specification/IdentityResolver.md",
+   "evidence": "The UNTP page says UUIDs can be useful where being hard to guess matters, for example to limit item data to the genuine holder, and points to a separate access control specification. It does not call them secrets. RFC 9562 section 8 does say UUIDs must not be used as security capabilities and must not be assumed hard to guess, so the tension is real, but 'shared secret' is the file's wording, not UNTP's.",
+   "correction": "Say: UNTP suggests UUIDs where hard-to-guess values help limit item-data visibility; RFC 9562 warns against relying on UUID unguessability for security. Drop 'shared secret' or tag it as the file's inference."
+  },
+  {
+   "claim_ref": "layers.L01_unique_identifiers.mechanism (UNTP uuid form) and anomalies[3]",
+   "claim": "UNTP uses the non-URN form uuid:{UUID}, not urn:uuid.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/raw/main/website/docs/specification/IdentityResolver.md",
+   "evidence": "Page gives uuid:{UUID} with an example and does not mention urn:uuid. RFC 9562 gives the urn:uuid form.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[9] (new-w3c-did-1-1)",
+   "claim": "W3C DID v1.1 is a Candidate Recommendation Snapshot of 2026-03-05, not advancing to Recommendation before 2026-04-05.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/did-1.1/",
+   "evidence": "The latest-version URL still shows a CR Snapshot dated 05 March 2026 with the 05 April 2026 earliest date. Status was still CR on 2026-10-19 per the fetched page.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[12] (new-catenax-cx-0010)",
+   "claim": "CX-0010 Business Partner Number is version 3.0.1 in release CX-Titan (current); BPN has 16 characters: BPN + L/S/A + 10 entity characters + 2 check characters; one licensed issuing organisation.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://catenax-ev.github.io/docs/standards/CX-0010-BusinessPartnerNumber",
+   "evidence": "Page shows 3.0.1, CX-Titan current, the 16-character structure with type letters L, S, A, 2 check characters, and a single central issuing organisation that Catena-X e.V. may license. The date 3.0.0 = 2025-06-01 was not re-checked.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[11] (new-rfc-9562) and L01/L07",
+   "claim": "RFC 9562 (May 2024) obsoletes RFC 4122, has the urn:uuid form, v4 with 122 random bits, v7 with a 48-bit ms timestamp, and says UUIDs must not be used as security capabilities.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.rfc-editor.org/rfc/rfc9562.html",
+   "evidence": "All points found on the page (first 100000 of 119565 characters).",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[0..13] (repository metadata)",
+   "claim": "Licence, archived flag, last push and release for zxing-cpp (Apache-2.0, v3.1.1 2026-07-29, push 2026-10-06), gs1-syntax-engine (Apache-2.0, 1.4.1 2026-05-28, push 2026-10-08), gs1-syntax-dictionary (release 2026-01-27), GS1 Resolver CE (Apache-2.0, push 2026-10-13, no releases), GS1DigitalLinkToolkit.js (push 2025-05-01), digital-link.js (2023-01-31), interpretGS1scan (2025-06-18), gs1/TDT (2026-09-19), epc-tds (MIT, 2024-07-06), ndeflib (ISC, v0.3.3 2019-05-27, push 2020-09-07), python-stdnum (LGPL-2.1, push 2026-08-15), pylibdmtx (MIT, 2025-08-20), digital-product-pass (Apache-2.0, archived, push 2025-09-18).",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.github.com/repos/gs1/gs1-syntax-engine (and the other repositories, read with gh api)",
+   "evidence": "Every licence, archived flag, push date and latest-release tag in the file matches the GitHub API output of 2026-10-19. Resolver CE has no releases (404). The gs1-syntax-dictionary release date matches; its last push is later (2026-08-29).",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[3] (GS1 Resolver CE README)",
+   "claim": "README version 3.0.0; not maintained by GS1; users must not assume full conformance; MongoDB storage.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/gs1/GS1_DigitalLink_Resolver_CE",
+   "evidence": "README welcomes version 3.0.0, states the software is not maintained by GS1 and may not fully conform to the resolver standard, and describes MongoDB.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[10] (python-stdnum modules)",
+   "claim": "python-stdnum has lei.py, ean.py and gs1_128.py.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/arthurdejong/python-stdnum/tree/master/stdnum",
+   "evidence": "gh api listing shows ean.py, gs1_128.py, lei.py (and an eu package).",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[7] (idta-01001-metamodel)",
+   "claim": "IDTA-01001 version 3.2 adds AssetKind Batch; repository master pushed 2026-09-09; release 2026-07-21; licence CC-BY-4.0.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/admin-shell-io/aas-specs-metamodel",
+   "evidence": "gh api: licence CC-BY-4.0, pushed 2026-09-09, release v3.2.0 published 2026-07-21. core.adoc lists AssetKind Type, Instance, Batch, Role and the semantic id AssetKind/Batch under /3/2/. The constraint texts AASd-131 and AASd-133 are only referenced by attribute names in core.adoc; their wording was not read (AASd-116 text was read and fits).",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03_data_exchange_protocols.mechanism (AAS Discovery)",
+   "claim": "Discovery V3.2.0_SSP-001: POST /lookup/shellsByAssetLink takes a JSON array of AssetLink (name 1-64, value 1-2048; name globalAssetId searches the global id); GET /lookup/shells is deprecated; file is OpenAPI 3.0.3; last file commit 2026-07-20.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/main/DiscoveryServiceSpecification/V3.2_SSP-001.yaml",
+   "evidence": "YAML shows openapi 3.0.3, version V3.2.0_SSP-001, deprecated: true on /lookup/shells, the shellsByAssetLink POST with the globalAssetId note referring to AASd-116, and the AssetLink schema with the stated length limits. Latest commit of the file 2026-07-20T14:29:40Z.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[10] and L05 (IDTA 02099-1)",
+   "claim": "IDTA 02099-1 version 1.0.1 (bugfix, July 2026) has digitalProductPassportId, uniqueProductIdentifier, granularity (Model, Batch, Item), economicOperatorId, facilityId (0..1) with admin-shell.io/idta/cds semantic ids; cites FprEN 18219:2026 for two elements and EN 18219:2026 for facilityId.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/index.html",
+   "evidence": "Page shows 1.0.1 dated July 2026 (bugfix), 1.0 in May 2026, the five elements with cardinality 1 except facilityId 0..1, three granularity values, and the FprEN/EN inconsistency. Licence not stated on the page.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (NXP SUN)",
+   "claim": "AN12196 Rev. 2.0, 4 March 2025; PICCData encrypted with AES-128 CBC and zero IV; PICCDataTag bit 7 UID mirroring, bit 6 counter mirroring, bits 3-0 UID length; SV1 prefix C33C 0001 0080, SV2 prefix 3CC3 0001 0080; MAC truncated to 8 bytes by keeping even-numbered bytes S14..S0.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.nxp.com/docs/en/application-note/AN12196.pdf",
+   "evidence": "pdftotext of the PDF shows 'Rev. 2.0 - 4 March 2025', the notation table with IV all 0x00 and the S14||S12||...||S0 truncation, SV1 and SV2 values, and the PICCDataTag bit table.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism (ndeflib prefix table)",
+   "claim": "ndeflib URI prefix table has 36 entries: 0x00 none, 0x03 http://, 0x04 https://, 0x1E urn:epc:id:, 0x1F urn:epc:tag:, 0x23 urn:nfc:; record type urn:nfc:wkt:U.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/nfcpy/ndeflib/blob/master/src/ndef/uri.py",
+   "evidence": "Parsed the tuple from uri.py: length 36 and the listed indices map to the stated strings; _type is urn:nfc:wkt:U.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L01_unique_identifiers.mechanism (AI rules)",
+   "claim": "AI 235 is X..28 and requires 01; AI 21 excludes 235; AI 414 qualifiers 254 and 7040; AI 415 qualifier 8020; AI 8004 up to 30 characters with qualifier 7040; AI 8003 N14 with check digit plus up to 16 serial characters; AI 8006 qualifiers 22, 10, 21; AI 8013 up to 25 characters; CPID 8010 with serial 8011; GTIN AI 01 with check digit.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/gs1/gs1-syntax-dictionary/blob/main/gs1-syntax-dictionary.txt (and https://ref.gs1.org/ai/GS1_Application_Identifiers.jsonld for 22, 235 and version 1.2, modified 2026-01-26)",
+   "evidence": "Dictionary lines match every rule (AI 21 has ex=235; AI 235 X..28 req=01; 414 dlpkey 254|7040; 415 dlpkey 8020; 8003 N1 N13 csum [X..16]; 8006 dlpkey 22,10,21). The JSON-LD page read confirmed AI 22, AI 235 and the version. Note that AI 8006 has an exclusion list (01, 03, 37) and 8013 uses check characters (csumalpha).",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02_data_carriers.mechanism and sources new-gs1-data-carriers-finding",
+   "claim": "GS1 Data Carriers finding is release 1.0.2, Final, Mar 2021 (document date 25 Feb 2021); GS1 DotCode is indicated by absence of FNC1; Type B candidates are NFC tag, Han Xin Code, digital watermark; Type C example is Channel Code; Table 3-3 lists means of indicating GS1 structures.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/architecture/findings/data-carriers-and-gs1",
+   "evidence": "PDF text shows release, status and date, Table 3-3 title, the DotCode entry, and the Type B and Type C examples.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L01_unique_identifiers.mechanism (LEI)",
+   "claim": "LEI is 20 characters: LOU prefix 1-4, reserved zeros 5-6, entity part 7-18, check digits 19-20; never reused; one LEI per entity.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://leiroc.org/lei.htm",
+   "evidence": "Page matches the layout, non-reuse and exclusivity. It adds that codes issued before 30 November 2012 do not follow the prefix rule, and that an LEI can move to another LOU.",
+   "correction": "Add the pre-2012 exception and portability to the LEI description."
+  },
+  {
+   "claim_ref": "regulatory_alignment and L01/L02/L11 (Regulation (EU) 2024/1781)",
+   "claim": "Art. 2(29) data carrier, 2(30) unique product identifier (with web link), 2(31) operator identifier, 2(33) facility identifier; Art. 10(1)(a)-(c),(f); Art. 10(3) digital copy within five working days; Art. 12(1)-(6) operator and facility identifiers and delegated acts (12(4)(a)-(b), 12(5)(c)-(d)); Art. 13(1) registry stores at least unique identifiers; Annex III (c) names GTIN under ISO/IEC 15459-6.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Windows 200000-300000, 300000-400000, 400000-500000 and 719249 onward show all cited points and paragraph numbers. Annex III has points (a) to (l), second paragraph names ISO/IEC 15459 parts 1 to 6. Art. 13(1) sets a registry date of 19 July 2026. EUR-Lex /eng pages returned empty content in this session, so the Cellar text was used.",
+   "correction": null
+  },
+  {
+   "claim_ref": "regulatory_alignment and L02/L10/L09 (Regulation (EU) 2023/1542)",
+   "claim": "Art. 13(6) QR code; Art. 13(7) visible, legible, indelible printing or engraving; Annex VI Part C high contrast, readable by common readers; Art. 77(3) QR linked to operator-assigned identifier under ISO/IEC 15459; 77(7) new passport linked to original; 77(8) passport ceases after recycling; 77(10) upload identifier to the ESPR registry.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "evidence": "Windows show Art. 13(6)-(7) and Art. 77(3), (7), (8), (10) as cited and Annex VI Part C on the QR code. Nuance: Art. 13(6) requires a QR code on all batteries from 18 February 2027, but it leads to the battery passport only for LMT, industrial batteries above 2 kWh and EV batteries; other batteries link to labelling and conformity information.",
+   "correction": "In L02 'Battery passports: QR code mandatory', add the scope: the QR leads to the passport only for LMT, industrial >2 kWh and EV batteries."
+  },
+  {
+   "claim_ref": "regulatory_alignment, L09 (Implementing Regulation (EU) 2026/1778)",
+   "claim": "Adopted 16 July 2026, published 2026-07-17; Art. 8(1)-(10): registration at the level set by Union law, most granular level where rules differ, item passport links batch and model identifiers, batch passport links model, UI or API, automated checks, persistent registration identifier; recital 14: operator issues batch and model identifiers.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Text shows adoption 16 July 2026, publication 17 July 2026, Art. 8(1)-(10) as described (8(2): third parties may register once verified; 8(6) UI listed first then API; 8(7) automated checks; 8(8) registration identifier; 8(10) communication of the identifier) and recital 14.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L06_storage_archiving_persistence.mechanism",
+   "claim": "Registry data are deleted ten years after registration unless Union law says otherwise (Implementing Regulation (EU) 2026/1778, Art. 10(3)).",
+   "risk": "legal_citation",
+   "verdict": "not_confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Recital 18 states the ten-year automatic deletion rule when Union law sets no period. The window read ended inside Art. 8(10), so Art. 10(3) itself was not seen. The file already marks it 'not re-read'.",
+   "correction": "Cite recital 18 as seen, and keep Art. 10(3) marked unverified until the article text is read."
+  },
+  {
+   "claim_ref": "sources impl-dec-eu-2026-1736",
+   "claim": "Implementing Decision (EU) 2026/1736 of 14 July 2026, published 2026-07-15; Annex lists EN 18216, 18219 (Unique identifiers), 18220 (Data carriers), 18221, 18222, 18223.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Text shows adoption 14 July 2026, publication 15 July 2026, Annex rows 1 to 6 with the stated numbers and titles. Bibliographic data only; no standard text used.",
+   "correction": null
+  },
+  {
+   "claim_ref": "literature (DOIs 10.1016/j.procs.2026.02.212, 10.1109/rfid-ta63091.2025.11265909, 10.3390/polym16101420, 10.1108/ci-02-2025-0074, 10.3390/s23031619, 10.3390/electronics10030320, 10.1109/jiot.2025.3605841, 10.1109/smartcomp.2016.7501715, 10.1109/access.2026.3724250)",
+   "claim": "Titles, years and venues of these nine records match their DOIs; Made2Verify authors Howie et al. 2026; Rumetshofer et al. 2024 traced 2192 frisbees; the DPM study reports 97.38 percent mAP and 89.36 percent readability.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/polym16101420 (and the other eight DOIs)",
+   "evidence": "Crossref shows matching titles, container titles and years for all nine. The Polymers and Sensors abstracts contain 2192 frisbees, 97.38 and 89.36. Journal for Made2Verify is Procedia Computer Science (the file says 'not stated'). Park et al. first author is Park; Alzahrani and Bulusu wrote the SMARTCOMP 2016 paper. Note: the 89.36 percent is readability after a network re-encoded the code, not readability of the raw part.",
+   "correction": "Fill venue of 10.1016/j.procs.2026.02.212 as Procedia Computer Science (Elsevier). Rephrase the DPM statement: 89.36 percent readability after a re-encoding network."
+  },
+  {
+   "claim_ref": "literature[16] (doi 10.15488/17776)",
+   "claim": "Record has year 0 and venue 'not stated'.",
+   "risk": "doi",
+   "verdict": "refuted",
+   "evidence_url": "https://api.openalex.org/works/doi:10.15488/17776",
+   "evidence": "OpenAlex gives publication year 2024; host repository Reutlingen University bibliography; other copies list Proceedings of the Conference on Production Systems and Logistics (CPSL 2024); raw type conference object.",
+   "correction": "year 2024; venue CPSL 2024 (Conference on Production Systems and Logistics), record held in the Reutlingen University academic bibliography."
+  },
+  {
+   "claim_ref": "conformance_implications[2].existing_check (identifier.parse)",
+   "claim": "identifier.parse accepts only /01/{gtin}/21/{serial} with serial [A-Za-z0-9._-]{1,20}, and checks the GTIN check digit only.",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "src/dppce/adapters/identifier.py",
+   "evidence": "_GS1_PATH is ^/01/[0-9]{14}/21/[A-Za-z0-9._-]{1,20}$; gtin_check_digit_ok is the only check-digit code; parse() returns UNSUPPORTED for any scheme other than gs1-digital-link.",
+   "correction": null
+  },
+  {
+   "claim_ref": "conformance_implications[5].existing_check (identifier.resolve)",
+   "claim": "identifier.resolve treats 404 and 410 specially and 5xx as unreachable; has accept and accepted_media_types parameters.",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "src/dppce/adapters/identifier.py; docs/reference/capabilities.md",
+   "evidence": "Code branches on status 404 and 410, then reports any other non-200 status; parameters accept and accepted_media_types exist in the capability manifest. The 5xx-as-unreachable detail lives in fetch_once in adapters/common.py and was not opened.",
+   "correction": null
+  },
+  {
+   "claim_ref": "conformance_implications (capability states) and implementations[13]",
+   "claim": "carrier.nfc, carrier.rfid, registry.official, persistence.scheduled are interface_only; carrier.qr_decode uses capability carrier.qr; registry.consistency uses registry.mock; api.contract supports a subset of OpenAPI 3.1; tests/vectors/gs1-syntax-engine/dl.c is vendored.",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "docs/reference/capabilities.md; tests/vectors/gs1-syntax-engine/dl.c",
+   "evidence": "Capability table lists these states and mappings; the api.contract row says a subset of OpenAPI 3.1; dl.c and a README exist in the vector folder.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[0].note and open_questions[3] (zxing-cpp symbology identifier)",
+   "claim": "Whether the zxing-cpp Python result exposes the symbology identifier was not verified.",
+   "risk": "other",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://github.com/zxing-cpp/zxing-cpp",
+   "evidence": "The file itself marks this open. My attempt to read wrappers/python/zxingcpp.cpp via gh api returned 404 (path differs), so I could not settle it either.",
+   "correction": null
+  }
+ ],
+ "rule5_findings": [
+  {
+   "claim_ref": "layers.L01_unique_identifiers.mechanism (Catena-X and LEI check characters)",
+   "problem": "Low risk. The text names ISO/IEC 7064 MOD 1271-36 and MOD 97-10 as the check schemes. Both names come from the Catena-X and LEI ROC pages, and the file does not describe the algorithm. This is naming, not paraphrase.",
+   "fix": "No change needed. Keep the 'bibliographic only' tag and do not add algorithm details."
+  },
+  {
+   "claim_ref": "layers.L05_system_interoperability_data_models.law_delta",
+   "problem": "Low risk. States that IDTA 02099-1 follows (F)prEN 18219:2026 for the format of two elements. This reports what an open IDTA page says about the reference, not what EN 18219 requires.",
+   "fix": "No change needed. Keep the wording 'reference noted, content not used'."
+  },
+  {
+   "claim_ref": "whole file",
+   "problem": "No sentence was found that describes, paraphrases or summarizes the content of an EN, ISO, IEC or DIN document. AAS facts come from IDTA and admin-shell-io, identification link facts from GS1, and battery facts from Regulation (EU) 2023/1542. Search-result scope text for ISO/IEC 18004 was discarded as stated.",
+   "fix": "none"
+  }
+ ],
+ "missed_items": [
+  {
+   "topic": "Registry set-up date in ESPR Art. 13(1)",
+   "fact": "Art. 13(1) sets 19 July 2026 as the date by which the Commission must set up the digital registry. The file says nothing about this date, though 2026/1778 was published on 17 July 2026.",
+   "source_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1"
+  },
+  {
+   "topic": "Scope of the battery QR code",
+   "fact": "Art. 13(6) of the Batteries Regulation applies the QR code to all batteries from 18 February 2027, but only LMT, industrial above 2 kWh and EV batteries link to the passport. A conformance test for 'QR leads to passport' needs the battery category in the ICS.",
+   "source_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1"
+  },
+  {
+   "topic": "ESPR Annex III point (l)",
+   "fact": "Annex III has twelve points (a) to (l); point (l) refers to the service provider that hosts the back-up copy of the passport. Point (c) names GTIN under ISO/IEC 15459-6. Relevant to a registry back-up link check.",
+   "source_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1"
+  },
+  {
+   "topic": "AI 8006 exclusions and AI 8013 check characters",
+   "fact": "In the GS1 syntax dictionary AI 8006 excludes AIs 01, 03 and 37, and AI 8013 uses alphanumeric check characters (csumalpha), so a numeric mod-10 routine cannot validate it. AI 01 allows the qualifiers 22, 10, 21 or the alternative 235 path.",
+   "source_url": "https://github.com/gs1/gs1-syntax-dictionary/blob/main/gs1-syntax-dictionary.txt"
+  },
+  {
+   "topic": "LEI exceptions",
+   "fact": "LEIs issued before 30 November 2012 do not follow the 4-character LOU prefix rule, and maintenance can move to another LOU without changing the code. An LEI syntax check must not rely on the prefix to identify the current LOU.",
+   "source_url": "https://leiroc.org/lei.htm"
+  },
+  {
+   "topic": "Release tags of related repositories",
+   "fact": "python-stdnum latest release is 2.2 (2026-01-04). eclipse-tractusx/digital-product-pass is archived; its latest release is digital-product-pass-4.0.2 (2024-09-13), the last push 2025-09-18. aas-specs-api was pushed 2026-10-16 (after the file's 2026-07-20 file commit) and has release v3.2.0 (2026-07-21).",
+   "source_url": "https://api.github.com/repos/arthurdejong/python-stdnum/releases/latest"
+  },
+  {
+   "topic": "IANA dpp reference points at UNTP page",
+   "fact": "The IANA row for 'dpp' states the description 'a link from a context URI that identifies a product to its digital product passport' and references the UNTP identity resolver anchor. A linkset check can use the registry as an open oracle.",
+   "source_url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml"
+  }
+ ],
+ "overall": "The file is highly reliable on the points checked. All version numbers, statuses and dates of GS1, IDTA, W3C, IANA, NXP, RFC and Catena-X sources match the primary pages, and every repository field (licence, archived flag, push date, release) matches the GitHub API. EU legal citations match the Cellar texts, with two caveats: Implementing Regulation 2026/1778 Art. 10(3) was not seen (only recital 18), and the battery QR code scope should be qualified. Engine mappings (existing_check statements) match the code and capability manifest. Defects found are small: one literature record with year 0 (true year 2024), one missing venue, an overstated 'shared secret' wording for UNTP UUIDs, and the AASd-131 and AASd-133 constraint wording that was not read. No rule 5 problem found. Limits of this check: EUR-Lex HTML was unavailable, so legal texts were read from Cellar windows; PDF page counts rest on PDF metadata.",
+ "counts": {
+  "checked": 36,
+  "confirmed": 32,
+  "refuted": 1,
+  "not_confirmed": 3
+ }
+}

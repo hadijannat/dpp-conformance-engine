@@ -1,0 +1,1898 @@
+{
+  "method_id": "m07-eu-reference-pilots",
+  "name": "EU reference implementations, registry, consortium architectures and pilots",
+  "retrieval_date": "2026-10-19",
+  "scope_note": "Covers the EU-funded and EU-adjacent reference work on the DPP system: CIRPASS (2022-2024) D3.2 system architecture; CIRPASS-2 (2024-2027) D4.1 reference architecture and its Apache-2.0 open source test environment (mock EU registry, validator, data extractor, renderer, deploy resources, ontologies); the EU DPP registry as set up by Regulation (EU) 2024/1781 Art. 13-15 and Implementing Regulation (EU) 2026/1778, and its user guide for economic operators; the Battery Pass consortium (Technical Guidance v1.0, data model v1.2.0) and its successor BatteryPass-Ready (data model v2.0/v2.0.1, user stories v1.0, test environment); the Cir4Fun SDKs; the Eclipse OSS4DPP initiative; and three adjacent items classified as adjacent, not as EU reference implementations: TRACE4EU (Digital Europe, EBSI), DaCapo (Horizon Europe, AAS plus dataspace) and the commercial OpenDPP interop kit. It extends and corrects docs/research/gap-assessment-2026-10-15.md section 7.2 with dates; it does not repeat its rows. It leaves out GS1 resolver, AAS/IDTA, UNTP/W3C VC, Catena-X and EPCIS details, which other method files cover. Protected standards (EN 18216-18246, IEC 63278, IEC 61406, ISO/IEC 15459, ISO/IEC 18004, DIN DKE SPEC 99100) appear only as bibliographic references in 'specs' through their catalogue/sources.yaml ids; those catalogue records were not re-read in this session and are therefore not listed in 'sources'. No live system, registry, test environment, resolver or dataspace endpoint was contacted.",
+  "summary": "The EU reference family splits the DPP system into a central EU layer and a decentralised operator layer. The central layer is the Commission-run DPP registry (operational since 2026-07-20 per the prior catalogue record ec-dpp-batteries-webpage-and-timeline, not re-read here; Implementing Regulation (EU) 2026/1778 in force 2026-08-06): a verified economic operator registers a URL-form unique product identifier (UPI) through a web form, a JSON/XML file upload of up to 100 records, or an API, and receives a unique registration identifier; the registry runs automated checks (semantic conformity, mandatory-data coherence, granularity, commodity code range, back-up link), stores identifiers, commodity code, service-provider reference and registrant data, and can issue a QSeal-sealed, timestamped proof of registration. Customs will verify the registration identifier and commodity code through an interconnection with EU CSW-CERTEX that must be operational within four years. The passport data itself stays with the economic operator or a DPP service provider, with a mandatory back-up copy at an independent provider (ESPR Art. 10(4), Art. 11(c)). CIRPASS D3.2 (2024) proposed two architectures for this split: an HTTP-URI design with an operator-controlled resolver, typed links and a default EU resolver of last resort, and a DID/VC design. CIRPASS-2 D4.1 v1.1 (2026-06) recommends JSON-LD as default exchange format, content negotiation (application/ld+json versus application/vc+jwt), DPPs and updates as W3C VCs with JOSE enveloping proofs (ES256 first), hash-chained immutable updates with signed receipts, Bitstring Status List, generic roles carried as SD-JWT VCs under eIDAS 2.0, UPI-to-URI redirection with an EU fallback, a /.well-known model-level endpoint and a central search-key repository. The CIRPASS-2 test environment prototypes the registry and web portal: a Quarkus mock registry (JSON Schema 2020-12 metadata, liveURL/backupURL pointers, SHA-256 hash of the fetched DPP, RS256 proof-of-registration JWT, optional detached JWS on submissions), a validator that auto-selects JSON Schema or SHACL, an extractor that polls the registry and indexes search keys from JSON, JSON-LD, RDF or AAS JSON, and a renderer that fetches the live URL with content negotiation and compares DPPs via SPARQL-backed paths, all behind Keycloak OIDC with roles admin/eo/eu. Its battery ontology publishes OWL modules plus SHACL shapes and three access-tier views. Battery Pass (concluded April 2025) contributed an RDF/SAMM data model with generated JSON Schema, JSON-LD, AASX and OpenAPI artefacts and a Technical Guidance that splits EC central services, distributed operator services and third-party backup services; its successor BatteryPass-Ready ships JSON Schema 2020-12 and XSD per battery category and runs a validation test environment. End to end: the operator assigns a UPI and encodes it in the carrier, hosts the DPP (and a back-up), registers the UPI in the EU registry, and users reach the DPP by resolving the carrier URL with content negotiation and role-based access.",
+  "method_families": [
+    "law-baseline",
+    "web-resolver-gs1",
+    "linked-data-semantic",
+    "verifiable-credentials-ssi",
+    "dataspace-federated",
+    "aas-digital-twin",
+    "hybrid"
+  ],
+  "maturity": {
+    "spec_status": "Mixed. Binding EU law: Regulation (EU) 2024/1781 (ESPR), Regulation (EU) 2023/1542 Art. 77-78, Implementing Regulation (EU) 2026/1778 (registry). Everything else is non-normative: CIRPASS D3.2 v1.9 (2024-05), CIRPASS-2 D4.1 v1.1 (2026-06-16, PDF still carries a draft watermark), CIRPASS-2 test environment v1.0 (2026-06-16; READMEs call the tools example and experimental), Battery Pass Technical Guidance v1.0 (March 2024) and data model v1.2.0 (unmaintained since April 2025), BatteryPass-Ready data model v2.0 (work in progress). The registry API specification ('DPP Registry technical guidelines') is announced but not published as of 2026-10-19.",
+    "versions_at_retrieval": [
+      {
+        "artifact": "Implementing Regulation (EU) 2026/1778 (DPP registry)",
+        "version": "OJ L 2026/1778 of 17.7.2026",
+        "status": "in force since 2026-08-06; DNA appointment by 2027-02-18; 24-hour support tool by February 2029",
+        "source_id": "impl-reg-eu-2026-1778"
+      },
+      {
+        "artifact": "ESPR consolidated text",
+        "version": "02024R1781-20240628 (000.001) with corrigenda C1, C2",
+        "status": "in force",
+        "source_id": "reg-eu-2024-1781"
+      },
+      {
+        "artifact": "Batteries Regulation consolidated text",
+        "version": "02023R1542 13.08.2026 (003.001)",
+        "status": "in force; battery passport from 2027-02-18 (Art. 77(1))",
+        "source_id": "reg-eu-2023-1542"
+      },
+      {
+        "artifact": "DPP Registry - User Guide for Economic Operators",
+        "version": "PDF says 'Last Published 2026-09-16 v1.03'; resources page says 'V3, 14 September 2026, changes to pages 22, 23, 41'",
+        "status": "published; battery registration not yet possible because the semantic catalogue for batteries is not defined",
+        "source_id": "ec-dpp-registry-user-guide"
+      },
+      {
+        "artifact": "CIRPASS D3.2 DPP System Architecture",
+        "version": "v1.9 (Zenodo 12206138, 2024-05); earlier record 10.5281/zenodo.10949842 dated 2024-03-26",
+        "status": "final project deliverable (project ended 2024-03-31)",
+        "source_id": "new-cirpass1-d32-system-architecture"
+      },
+      {
+        "artifact": "CIRPASS-2 D4.1 Reference Architecture",
+        "version": "V1.1 (Zenodo 20720002, 2026-06-16; concept 10.5281/zenodo.15388412; earlier v1.0 2025-05-19)",
+        "status": "published deliverable, non-normative",
+        "source_id": "new-cirpass2-d41-reference-architecture"
+      },
+      {
+        "artifact": "CIRPASS-2 Open Source Test Environment description",
+        "version": "1.0 (16/06/2026), Zenodo 20749604",
+        "status": "published report, CC BY 4.0",
+        "source_id": "cirpass2-test-environment-description"
+      },
+      {
+        "artifact": "mock-eu-registry",
+        "version": "1.1.1-pgsql-oidc and 1.1.1-mariadb-oidc (released 2026-07-01); last push 2026-08-04",
+        "status": "experimental example implementation",
+        "source_id": "cirpass2-github-repositories"
+      },
+      {
+        "artifact": "dpp-renderer-fe",
+        "version": "last push 2026-09-23 (release 1.1.0 per prior record)",
+        "status": "experimental",
+        "source_id": "cirpass2-github-repositories"
+      },
+      {
+        "artifact": "EU DPP Battery Ontology (ontologies-battery)",
+        "version": "umbrella 0.4.0 DRAFT, pinned to CORE P_DPP v2.1.0 and MAT v1.1.0; changelog 6 October 2026",
+        "status": "draft",
+        "source_id": "new-cirpass2-ontologies-battery"
+      },
+      {
+        "artifact": "Battery Passport Technical Guidance",
+        "version": "Version 1.0 / March 2024 (title page)",
+        "status": "final, not updated by BatteryPass-Ready",
+        "source_id": "bp-technical-guidance"
+      },
+      {
+        "artifact": "Battery Pass Data Model",
+        "version": "v1.2.0 (SAMM meta-model 2.1.0); last commit 2026-09-14 only adds a pointer to the successor",
+        "status": "unmaintained, reference only",
+        "source_id": "bp-data-model-github-v1-2-0"
+      },
+      {
+        "artifact": "BatteryPass-Ready Data Model",
+        "version": "README: 'Current version 2.0 (work in progress)'; tree labels v2.0.1 'Current release' (JSON Schema only)",
+        "status": "work in progress",
+        "source_id": "bp-ready-data-model-v2"
+      },
+      {
+        "artifact": "BatteryPass-Ready User Stories from a Technical Perspective",
+        "version": "v1.0 (PDF metadata created 2026-06-29)",
+        "status": "published",
+        "source_id": "new-bpr-user-stories-v1"
+      },
+      {
+        "artifact": "Cir4Fun java-dpp-sdk",
+        "version": "0.5.1 (README); no tag; last main commit 2026-08-10; push 2026-09-29",
+        "status": "pre-1.0",
+        "source_id": "cir4fun-java-dpp-sdk"
+      },
+      {
+        "artifact": "Cir4Fun python-dpp-sdk (PyPI dpp-sdk)",
+        "version": "0.4.0 uploaded 2026-08-11; last main commit 2026-09-03",
+        "status": "pre-1.0",
+        "source_id": "cir4fun-python-dpp-sdk"
+      },
+      {
+        "artifact": "OpenDPP/opendpp-interop",
+        "version": "v1.18.0 released 2026-10-13; push 2026-10-14",
+        "status": "vendor kit, generated mirror of a private backend",
+        "source_id": "new-opendpp-interop"
+      },
+      {
+        "artifact": "Eclipse OSS4DPP",
+        "version": "landing page 'Sources checked 24 July 2026'",
+        "status": "pre-launch; no working group, project, repository or deliverable",
+        "source_id": "oss4dpp-eclipse"
+      }
+    ],
+    "adoption_evidence": "The EU registry is in production (registry.product-passport.ec.europa.eu, per the user guide) with a separate acceptance test site, but the guide states that successful battery registration is not yet possible. CIRPASS-2 lists 49 consortium partners and pilots in textiles, electronics, construction and automotive/tyres (test environment report); its tools are packaged as GHCR images and a single Docker Compose stack, with no hosted public instance documented. Battery Pass ran a demonstrator (WP4 documents in the repository) and BatteryPass-Ready announced a public test environment (resources page). Cir4Fun SDKs are on PyPI and in a Maven monorepo but have no GitHub releases. OpenDPP runs a hosted commercial node. TRACE4EU published EUPL-1.2 components (2024-11 to 2025-07). No independent adoption metrics were located.",
+    "regulatory_alignment": "The registry, customs link and back-up obligations are set by law: ESPR Art. 13(1)-(6) (registry stores at least the unique identifiers, the commodity code for products released for free circulation and battery identifiers; operator uploads; registry returns a registration identifier; authorities have access), Art. 14 (public web portal searchable within access rights), Art. 15 (customs verify registration identifier and commodity code; EU CSW-CERTEX interconnection within four years of the Art. 13(5) implementing act), Art. 10(1) and 10(4), Art. 11(a)-(h); Regulation (EU) 2023/1542 Art. 77(2) three access groups, Art. 77(7)-(8) new linked passport after reuse/repurposing/remanufacturing and end after recycling, Art. 77(10) upload of the battery identifier to the ESPR registry, Art. 78(a)-(h); Implementing Regulation (EU) 2026/1778 Art. 3, 4-6a, 7, 8-15, 17-22. CIRPASS, CIRPASS-2, Battery Pass and BatteryPass-Ready outputs interpret these provisions and add design choices (JSON-LD default, VC-JOSE, hash chains, receipts, fallback resolver, /.well-known endpoint, search-key repository) that the law does not require."
+  },
+  "layers": {
+    "L01_unique_identifiers": {
+      "applies": "yes",
+      "mechanism": "EU registry: the UPI is a mandatory URL-form value supplied by the operator, https only, at most 2000 characters; optional Model Identifier and Batch Identifier fields at item level; the registry returns a Unique Registration Identifier (the guide abbreviates it 'URI', which clashes with RFC 3986 usage) after successful checks (guide 6.2.1 and glossary; 2026/1778 Art. 8(8),(10); ESPR Art. 13(5)). Item-level records link batch and model identifiers where they exist (2026/1778 Art. 8(4)-(5)). Mock registry: free-string 'upi' 1-200 characters (examples urn:epc:id:sgtin:0614141.107346.2017), 'reoId' 1-50 characters (examples LEI-..., EORI-...), 'facilitiesId' array of strings up to 250 characters (examples GLN-...), registry-generated 'registryId' (36-character UUID), 'modelUpi'/'batchUpi' cross-references; field names configurable (registry.upi-field-name, registry.reoid-field-name); reoId can be taken from a JWT claim instead of the payload. CIRPASS D3.2: Product UID as a canonical HTTP URI (with a UID-to-URI transformation for legacy numbers, GS1 Digital Link given as the main example) or a DID variant where the product DID is the REO DID plus a query part with a UUID (did:method:REO-DID?UUID=...). D4.1: operator-run UPI-to-URI redirection (3.16) with an EU fallback redirection service (3.17); item-level UPIs for products expecting lifecycle events (3.20); facility identifiers issued by trusted bodies. Battery Pass v1.2.0: SAMM properties productIdentifier and batteryPassportIdentifier in urn:samm:io.BatteryPass.GeneralProductInformation:1.2.0#. TRACE4EU: did:ebsi actor identifiers and a did:web issuer (did:web:trace4eu.github.io:trace4eu-dpp-interop-did-web). OpenDPP: GS1 Digital Link paths /01/{gtin}, /01/{gtin}/21/{serial}, /8003/{grai}.",
+      "specs": [
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 10(1)(a),(c); Art. 13(1),(5); Annex III second paragraph (standards named there are bibliographic only)"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 3(d) registration-identifier scheme; Art. 8(4)-(5),(8),(10)"
+        },
+        {
+          "source_id": "ec-dpp-registry-user-guide",
+          "component": "6.2.1 Submission via Online Form; Chapter 9 glossary (UPI, Unique Registration Identifier)"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "mock-eu-registry default JSON Schema (upi, reoId, facilitiesId, modelUpi, batchUpi)"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.4 Product UID, 3.1.9 UID to URI transformation, 3.2.1.2 Product DID"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.6, 3.16, 3.17, 3.20"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(3) unique identifier linked from the QR code (standard named there is bibliographic only)"
+        },
+        {
+          "source_id": "en-18219-2026",
+          "component": "bibliographic only (catalogue id; not read)"
+        },
+        {
+          "source_id": "iso-iec-15459-1-2014",
+          "component": "bibliographic only (catalogue id; named in ESPR Annex III and Art. 77(3); not read)"
+        },
+        {
+          "source_id": "gs1-digital-link-uri-syntax-1-7-0",
+          "component": "catalogue id for GS1 Digital Link; not re-read in this session"
+        }
+      ],
+      "variants": [
+        "https URL UPI (EU registry production rule)",
+        "EPC URN UPI (mock registry examples)",
+        "GS1 Digital Link URI (OpenDPP, D3.2 example)",
+        "DID with UUID query (CIRPASS D3.2 DID variant)",
+        "did:ebsi / did:web for actors (TRACE4EU)",
+        "registry-generated registration identifier (UUID in the mock; scheme not published for the EU registry)"
+      ],
+      "observable_black_box": "The UPI string decoded from the carrier; whether it is an https URL of at most 2000 characters; whether it dereferences; the registration identifier returned by a registry; consistency of upi/modelUpi/batchUpi across registry record and passport.",
+      "law_delta": "ESPR requires a persistent UPI connected through a carrier and registry identifiers; the user guide adds the URL-form and https-only rule and the 2000-character limit, and says the UPI must follow JTC 24 standards (guide's wording; standard content not read). The mock registry is looser than the EU registry: it accepts non-URL URNs and 200 characters."
+    },
+    "L02_data_carriers": {
+      "applies": "partial",
+      "mechanism": "Carrier content is the UPI only (CIRPASS D3.2 3.1.6 recommends carrying just the product-UID URI). Battery carriers are QR codes linked to the unique identifier (Regulation (EU) 2023/1542 Art. 77(3)); ESPR Art. 10(1)(b) requires physical presence on product, packaging or documentation and Art. 10(3) a digital copy for dealers and marketplaces within five working days. D4.1 3.19 recommends a separate model-level carrier or link for online and pre-purchase use, not a second carrier on the product. The CIRPASS-2 renderer front end has a camera QR scanner that hands the decoded URL to the fetch flow; the CIRPASS-2 CORE ontology deliberately excludes carriers (ontologies-core issue 61, as reported in the battery README). Battery Pass Technical Guidance 6.1 discusses QR, RFID, NFC and Data Matrix options (its summaries of ISO/IEC carrier standards are not recorded here).",
+      "specs": [
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 10(1)(b), Art. 10(3)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(3)"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.6 Data Carrier, 3.1.7 Scanning Device, 3.1.8 Internet Connected Device"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.19 data carrier for online and pre-purchase use"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "dpp-renderer-fe ScannerComponent"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "6.1 Application of different data carriers (standards summaries not used)"
+        }
+      ],
+      "variants": [
+        "QR code with https UPI",
+        "model-level link or QR on web shop / label",
+        "RFID/NFC (discussed, not implemented in any reference tool)"
+      ],
+      "observable_black_box": "Decoded payload of a sample QR image; whether it equals the registered UPI; whether a digital copy or link is offered for distance sales.",
+      "law_delta": "No reference tool tests print quality or carrier grading; D4.1's model-level carrier for pre-purchase use goes beyond the law, which only requires a digital copy or link on request (ESPR Art. 10(3))."
+    },
+    "L03_data_exchange_protocols": {
+      "applies": "yes",
+      "mechanism": "HTTP content negotiation on one URL is the shared assumption. CIRPASS-2 test environment design assumption 3.1: the live URL (in the registry or the QR code) returns HTML to a browser without a specific Accept header and machine-readable DPP data for Accept application/json or application/ld+json; POST and custom headers are excluded because a QR URL cannot carry them. The renderer back end sends all supported media types in Accept, routes by returned Content-Type, returns plain JSON as is, expands JSON-LD, and converts Turtle, RDF/XML, N-Triples, N3 and N-Quads to expanded JSON-LD with Apache Jena. The mock registry fetches the liveURL with Accept application/json or application/ld+json before validation and hashing. D4.1 3.1: application/ld+json returns the JSON-LD DPP; application/vc+jwt returns the full DPP as a JOSE-enveloped VC (compact JWS whose payload is the compacted JSON-LD DPP, header cty vc). CIRPASS D3.2: the product URI points to an REO resolver that answers with RFC 9110 redirects; a plain GET yields the consumer HTML view; role- or format-specific targets are selected with typed links (RFC 8288), a linkset (RFC 9264) lists available link types; resolvers can chain; a default EU resolver answers when the REO host is gone. EU registry: the registry itself dereferences the submitted UPI and rejects excessive redirects, redirects to a less secure protocol, disallowed domains or ports and oversized responses (guide 6.2.2 error list). Battery Pass TG 4.6: HTTPS over TCP/IP, REST, JSON-LD payloads, a translator service mapping generic CRUD calls to platform-specific APIs, GraphQL in the demonstrator, co-existing standard APIs (AAS, NGSI-LD, Web of Things, EPCIS) and dataspace connectors (Eclipse Dataspace Components, FIWARE connector). Cir4Fun: generated EDC client. TRACE4EU: OID4VCI pre-authorised code flow for credential issuance. OpenDPP: GET /passport/{id} with Accept application/aas+json, application/vc+jwt or vc+ld+json.",
+      "specs": [
+        {
+          "source_id": "cirpass2-test-environment-description",
+          "component": "3.1 Content negotiation via the live URL; 4.3 visualisation flow"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "dpp-renderer-be GET /fetch/v1; mock-eu-registry 'DPP data validation' (Accept header)"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.1 implementation guidance (Accept values); 3.10 media type note"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.10 Resolver, 3.1.10.1 REO Resolver, 3.1.10.2 Default EU Resolver"
+        },
+        {
+          "source_id": "ec-dpp-registry-user-guide",
+          "component": "6.2.2 Registration Validation Errors (UPI URL invalid; unable to process: redirects, protocol downgrade, response size)"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.6 Data integration, distribution, exchange and protocols; 5.2 translator service"
+        },
+        {
+          "source_id": "new-trace4eu-github",
+          "component": "vc-and-digital-twin issuer (OID4VCI pre-authorized code)"
+        },
+        {
+          "source_id": "new-opendpp-interop",
+          "component": "README 'The two doors'"
+        },
+        {
+          "source_id": "cir4fun-edc-client",
+          "component": "repository listing (EDC client; README not read)"
+        },
+        {
+          "source_id": "new-dacapo-fullstack-dpp",
+          "component": "record description: AAS-based minimum viable DPP with a dataspace exchange pattern (metadata only)"
+        },
+        {
+          "source_id": "en-18223-2026",
+          "component": "bibliographic only (catalogue id; not read)"
+        }
+      ],
+      "variants": [
+        "single URL plus Accept negotiation (CIRPASS-2, D4.1)",
+        "resolver redirect plus typed links / linkset (CIRPASS D3.2)",
+        "DID document service endpoints (CIRPASS D3.2 DID variant)",
+        "dataspace connector exchange (Battery Pass TG, Cir4Fun EDC client)",
+        "VC issuance over OID4VCI (TRACE4EU)"
+      ],
+      "observable_black_box": "Status code, Content-Type, Vary and Location headers for GET with no Accept, text/html, application/json, application/ld+json, application/vc+jwt; redirect chain length and scheme changes; Link headers or linkset when present.",
+      "law_delta": "Law requires an open interoperable data exchange network without vendor lock-in and full interoperability (ESPR Art. 10(1)(d), Art. 11(a); Batteries Art. 78(a)); it names no protocol. The negotiation rules, media types and resolver behaviour are project choices; the registry's UPI dereference limits are operational rules published only in the user guide."
+    },
+    "L04_apis_lifecycle_searchability": {
+      "applies": "yes",
+      "mechanism": "Mock registry (CIRPASS-2): POST /metadata/v1 and POST /metadata/v1/registerDPP (JSON body; optional query autocompleteBy=field,field; 201 with registryId, createdAt, modifiedAt, dppHash, contentType, metadata and, when validation is on, a validation report; 400 on schema or validation failure); GET /metadata/v1/{registryId}/proof?reoId=... (Produces application/jwt; 404 if unknown); POST /schema/v1, GET /schema/v1/current, DELETE /schema/v1/current; GET /q/openapi (JSON or YAML by Accept, generated from the active schema); GET /.well-known/jwks.json. There is no GET or search endpoint for registry records in the code (the report says the registry exposes a search API; see anomalies). Validator: POST /validate/v1 (auto-match), POST /validate/v1/{name}/{version}; POST /resource/v1/{payloadType} multipart (payloadType json, json_ld, turtle, rdf_xml, rdf_json, n3, n_triples, n_quads); GET/DELETE /resource/v1/{resourceType}/{id}; codes 200, 204, 400, 401, 403, 404, 409, 500. Extractor: GET /capabilities/v1, POST /config/v1, GET and DELETE /config/v1/current. Renderer back end: GET /fetch/v1?url=..., POST /search/v1 with filters [{property, op in EQ|LT|LTE|GT|GTE|LIKE, literal}], offset, limit (AND-combined; string literals in single quotes), POST /comparison/v1 with dppUrls and propertyPaths in the form segment[*@type=Type].property per namespace. EU registry (2026/1778 Art. 3(a)-(b), Art. 8(6)): secure web interface and API; the user guide documents the web form (single DPP) and file upload (JSON or XML, max 100 DPPs, max 1 GB, template per format, all-or-nothing rejection), a correlation ID, statuses PROCESSING, SUCCESS, FAILURE, per-DPP error details and CSV export; the API itself is not documented publicly. Cir4Fun SDK routes (project-defined): /v1/dpps and /v1/dpps/{dppId} (create, full or compressed read, update, delete), /v1/dppsByProductId/{productId}, /v1/dppsByIdAndDate/{dppId}?date={instant} (historical read), POST /v1/dppsByProductIds (batch lookup), /v1/dpps/{dppId}/elements/{elementIdPath} (fine-grained read and update using a singular subset of RFC 9535 JSONPath; partial update follows RFC 7396 merge semantics but is sent as application/json), POST /v1/registerDPP (registry registration with metadata only); mock returns 400 for malformed paths, 404 for no node, 501 for unsupported. Battery Pass TG 4.4: core services onboarding, issuing (bulk and single), update, transfer, archiving, search/view/compare; WSDL/OpenAPI for definitions; SPARQL for querying. BatteryPass-Ready user stories: seven modules (authentication and authorisation, registration, create DPP, read (QR public read or controlled read), update, backup, deletion). Search: ESPR Art. 14 web portal; D4.1 3.23 central search-key repository; CIRPASS-2 extractor indexes model-level entries only.",
+      "specs": [
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "READMEs and JAX-RS resources of mock-eu-registry, dpp-validator, dpp-data-extractor, dpp-renderer-be"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 3(a)-(b), Art. 8(6), Art. 12(5)-(7) public search service of the semantic repository"
+        },
+        {
+          "source_id": "ec-dpp-registry-user-guide",
+          "component": "6.2.1 Submission via File; 6.2.2 Registration Requests Outcomes"
+        },
+        {
+          "source_id": "cir4fun-java-dpp-sdk",
+          "component": "dpp-sdk-clients README route table"
+        },
+        {
+          "source_id": "cir4fun-python-dpp-sdk",
+          "component": "README (POST /v1/dpps, POST /v1/registerDPP)"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.4 Core passport software services and APIs; 5.1 Data services"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "5 Methodology (modules); chapters 4.3 and 6 not read"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.3 (recommends adopting the standard lifecycle API; content of that standard not recorded), 3.4, 3.23"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 14 web portal"
+        },
+        {
+          "source_id": "en-18222-2026",
+          "component": "bibliographic only (catalogue id; not read)"
+        }
+      ],
+      "variants": [
+        "registry-only metadata API (mock, EU registry)",
+        "repository CRUD plus history and fine-grained paths (Cir4Fun)",
+        "file batch registration (EU registry)",
+        "GraphQL canonical API with translator (Battery Pass demonstrator)",
+        "SPARQL-backed comparison (CIRPASS-2 renderer)"
+      ],
+      "observable_black_box": "HTTP status codes and bodies for create, read, historical read, partial update and registration calls; batch all-or-nothing behaviour; correlation IDs and request status transitions; search filter semantics.",
+      "law_delta": "Law requires a registry API and web interface (2026/1778 Art. 3) and a searchable web portal (ESPR Art. 14) but defines no repository API; the CRUD route shapes above are project choices. Cir4Fun's README lists limitations of its own API: no backup-operator field in registry requests, a project-defined compressed representation, and application/json for merge-patch updates."
+    },
+    "L05_system_interoperability_data_models": {
+      "applies": "yes",
+      "mechanism": "CIRPASS-2 CORE ontology (EU DPP CO; modules P_DPP v2.1.0, MAT v1.1.0, published on the DPP Vocabulary Hub) plus sector modules. Battery modules (umbrella 0.4.0 DRAFT) use namespaces https://w3id.org/eudpp/battery#, battery-performance#, battery-materials#, battery-locations#, battery-chemistries#, battery-metals#, battery-labeling#, battery-extinguisher-classes#, battery-categories#, battery-statuses#, battery-cf-shapes#; no owl:imports, CORE terms referenced by IRI; no OWL cardinalities; mandatory/optional rules and access tiers expressed in SHACL (battery-shapes.ttl profile, three view files, battery-access-tiers.ttl) with a tests/run_tests.py harness (27 checks reported on 28 September, 23 here and 29 with fixtures on 6 October). Passport status values on dpp:dppStatus: Active, Archived, Inactive, Invalid; battery status (original, repurposed, re-used, remanufactured, waste) on bat:hasBatteryStatus. TalTech namespaces http://dpp.taltech.ee/EUDPP# (reference ontology) and http://dpp.taltech.ee/MODDPP# appear in extractor and renderer configuration. Validator: JSON payloads matched to a schema by weighted Jaccard similarity over required property paths (variants from oneOf/anyOf/allOf, pattern properties); JSON-LD payloads matched to SHACL templates by root @type against owl:targetClass, then @context URI, then vocabulary URI; templates accepted in Turtle, RDF/XML, JSON-LD, N-Triples, N-Quads, N3. Extractor strategies in fixed order: AAS JSON (root modelType AssetAdministrationShellEnvironment, Submodel or AssetAdministrationShell; semanticId suffix-insensitive match, then idShortPath; MultiLanguageProperty by preferLanguage), known ontology (exact key paths with @type filters), unknown-ontology JSON-LD (typeHints plus variants), plain JSON (case-insensitive variants with parent-context rules); target types STRING or DECIMAL. Mock registry metadata: JSON Schema draft 2020-12, properties limited to primitives or arrays of primitives. EU registry: semantic repository with meanings, link specifications, data models and formats, role meanings, multilingual labels, DCAT-AP metadata and a free public search API (2026/1778 Art. 11-12); registration files are JSON or XML following pre-defined schemas with downloadable templates (guide). D4.1: JSON-LD default (other formats optional), compacted form inside VCs, versioned @context URLs kept available for the DPP lifetime, templates as JSON Schema plus SHACL describing source, product group, granularity, cardinality, units, semantic identifier, access rights, proof needs, update rules and version per element. Battery Pass v1.2.0: platform-independent RDF model in SAMM 2.1.0 (urn:samm:io.BatteryPass.<Aspect>:<version>#) with seven aspects (GeneralProductInformation, CarbonFootprint, Circularity, Labels, MaterialComposition, Performance 1.2.1, SupplyChainDueDiligence) and generated JSON Schema, JSON-LD, payload JSON, AAS/AASX, OpenAPI 3.0, AsyncAPI, SQL, HTML; aligned to DIN DKE SPEC 99100:2025-02 per README (bibliographic only). BatteryPass-Ready v2.x: JSON Schema 2020-12 and XSD (v1.3 and v2.0) per category (EV, industrial without BMS, LMT, other industrial above 2 kWh, stationary above 2 kWh), each with a 'Feb27' variant; no mandatory requirements at master level; twelve conditional elements left optional pending plausibility checks; no SAMM, JSON-LD or SHACL. OpenDPP kit vendors the CIRPASS-2 registry schema verbatim, an AAS v3 schema, UNTP DPP 0.7.0 schema and EPCIS 2.0.1 schema.",
+      "specs": [
+        {
+          "source_id": "new-cirpass2-ontologies-battery",
+          "component": "README: module table, modelling conventions, SHACL profile, changelog"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "dpp-validator matching algorithm; dpp-data-extractor strategies"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 11 data models; Art. 12 semantic repository"
+        },
+        {
+          "source_id": "ec-dpp-registry-user-guide",
+          "component": "6.1 DPP Data vs Registration Record; 6.2.1 file templates"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.1, 3.2"
+        },
+        {
+          "source_id": "bp-data-model-github-v1-2-0",
+          "component": "BatteryPass/io.BatteryPass.* aspect folders; README Data Model Structure"
+        },
+        {
+          "source_id": "bp-ready-data-model-v2",
+          "component": "README: folders, conditional elements"
+        },
+        {
+          "source_id": "new-bpr-resources-page",
+          "component": "resource list (longlist v2.0, data model link, test environment link)"
+        },
+        {
+          "source_id": "new-cirpass2-open-source-catalogue",
+          "component": "catalogue entries (BaSyx DPP API, open-dpp; metadata only)"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.9 Data models and data formats"
+        },
+        {
+          "source_id": "new-opendpp-interop",
+          "component": "schemas/ directory"
+        },
+        {
+          "source_id": "en-18223-2026",
+          "component": "bibliographic only (cited by the battery SHACL profile and OpenDPP; content not read)"
+        },
+        {
+          "source_id": "din-dke-spec-99100-2025-02",
+          "component": "bibliographic only (Battery Pass v1.2.0 alignment target; not read)"
+        },
+        {
+          "source_id": "idta-01001-metamodel",
+          "component": "catalogue id for the AAS metamodel used by the extractor's AAS route; not re-read in this session"
+        }
+      ],
+      "variants": [
+        "OWL plus SHACL linked-data model (CIRPASS-2)",
+        "SAMM aspect models with generated artefacts (Battery Pass)",
+        "JSON Schema plus XSD per category (BatteryPass-Ready)",
+        "AAS JSON (extractor route, Battery Pass AASX)",
+        "schema-agnostic extraction and rendering (CIRPASS-2 tools)"
+      ],
+      "observable_black_box": "Response bodies and their media type; JSON Schema validity against a pinned schema; SHACL conformance of JSON-LD against pinned shapes; @context URLs used; AAS modelType and semanticIds.",
+      "law_delta": "Law demands open standards, machine-readable, structured, searchable data (ESPR Art. 10(1)(d); Batteries Art. 77(5)) and data models based on delegated acts and the semantic repository (2026/1778 Art. 11); the concrete vocabularies, formats and the JSON-LD default are project choices. The registry semantic catalogue for batteries was not yet defined on 2026-09-16 (guide)."
+    },
+    "L06_storage_archiving_persistence": {
+      "applies": "yes",
+      "mechanism": "Passport data is stored by the responsible operator or a DPP service provider (ESPR Art. 11(c); Batteries Art. 78(c)), with a back-up copy at a service provider (ESPR Art. 10(4)) and availability after insolvency or cessation (ESPR Art. 11(e); Batteries Art. 78(e)). The mock registry stores liveURL and backupURL (both required, pattern ^http) and the SHA-256 and content type of the fetched live DPP. CIRPASS D3.2: decentralised DPP data repositories (knowledge graphs, SPARQL endpoints), archives as a cheaper, slower last resort reached through a root (default EU) resolver; long-term archives may strip data. D4.1 3.15: the back-up provider holds all data including optional data, keeps it current and enforces the same access rules; it can attest a successor operator; 3.21 caching for bulk users with the operator as source of truth. Battery Pass TG 4.7 and 5.3: high-availability storage, archiving by a third-party provider, back-ups in the platform-independent semantic format rather than system-specific formats. BatteryPass-Ready: backup module after every registration or update and soft deletion at the backup service provider. Registry side (2026/1778): registration data deleted 10 years after registration unless Union law sets another period (Art. 10(3)); logs kept six months (access), five years (administrative, data exchange) or registration lifetime (modifications) (Art. 14(3)); availability at all times except maintenance, outage records kept five years (Art. 15). TRACE4EU off-chain storage: Apache Cassandra behind an OIDC-protected proxy with scopes ocs:read and ocs:write.",
+      "specs": [
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 10(4), Art. 11(c),(e)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 78(c),(e)"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 10(3), Art. 14(3), Art. 15"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "mock-eu-registry schema liveURL/backupURL; dpp_hash column"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.12 DDR, 3.1.13 Archives"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.15, 3.21, 3.22"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.7 Data storage and persistence; 5.3 Third-party services"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "5 Methodology: Backup and Deletion modules"
+        },
+        {
+          "source_id": "new-trace4eu-github",
+          "component": "off-chain-storage README"
+        }
+      ],
+      "variants": [
+        "operator-hosted repository plus independent back-up provider",
+        "knowledge-graph repository with SPARQL (D3.2)",
+        "archive reached through a root resolver (D3.2)",
+        "off-chain store plus ledger anchoring (TRACE4EU)"
+      ],
+      "observable_black_box": "Whether the backup URL in the registry record resolves; whether its content equals the live content as JSON values or by hash; whether it enforces the same restricted fields; behaviour when the live host is unavailable (loopback simulation only).",
+      "law_delta": "Law fixes the back-up duty and the continuity goal but not the back-up interface, its synchronisation or the fallback route; the Art. 11 ESPR delegated act on service providers was not located. Equivalence of access control at the back-up (D4.1 3.15) is a project recommendation."
+    },
+    "L07_access_rights_security_confidentiality": {
+      "applies": "yes",
+      "mechanism": "Law: battery access groups are the public; notified bodies, market surveillance authorities and the Commission; persons with a legitimate interest (Batteries Art. 77(2)), detailed by the Art. 77(9) implementing act (not located); ESPR Art. 11(b) free access by role and Art. 11(f) restricted write rights. EU registry: users authenticate with EU Login (MFA); organisations are verified by an EC-sealed PDF declaration counter-signed or sealed with a QES or QSeal from a QTSP (guide 4); 2026/1778 Art. 4-5 accept QES, eID at assurance level high or (qualified) electronic attestations of attributes, verified status valid up to three years, Art. 6 delegation to third-party users, Art. 7 designated national administrators by 2027-02-18. CIRPASS-2 tools: Keycloak realm cirpass-2; machine clients use OAuth 2.0 client credentials, browser uses authorization code with PKCE; internal roles admin, eo (economic operator), eu mapped from IdP roles via role-mappings and role-claim paths; reoId and reoName injected by a protocol mapper so the operator cannot self-declare it. Observed path policies in mock-eu-registry application.properties: /metadata/v1* allows admin, eo, eu; /schema/v1* allows admin, eu; /q/openapi and /.well-known/* are public. Validator: eo may only validate; admin and eu may manage resources. The test environment report states OIDC was a simplification and that OIDC4VC is the expected long-term model. D4.1 3.6-3.9: organisation identity and roles as eIDAS 2.0 VCs or QEAA held in a wallet, SD-JWT VC with OpenID for Verifiable Presentations, interim signed short-lived JWTs or API keys, generic EU-level roles refined per delegated act, RBAC, role-specific protected data sets as separate VCs carrying the hash of the public DPP VC and linked from it (3.8), trusted issuers using did:web and registration with UN/CEFACT trust registries; 3.4 rate limits, audit logs and no public bulk item-level access. CIRPASS D3.2 3.1.11: a policy decision point at the operator-controlled resolver, usage control with ODRL annotations, dataspace governance. Battery Pass TG 4.5: Gaia-X Trust Framework with SSI, DIDs, VCs, VPs, OID4VCI/OID4VP; access rights attribute-based and product-group specific. CIRPASS-2 battery SHACL views: 52 public data points, 26 legitimate interest, 4 shared with authorities, 4 notified bodies and authorities (view files 0.2.0 regenerated from the long list v1.3 access-rights column; later changelog entries of 28 September and 6 October 2026 relaxed the required sets, so these counts are not a current policy). TRACE4EU: access tokens from an authorisation server requested with did:ebsi keys (ES256).",
+      "specs": [
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(2), Art. 77(9), Art. 78(b),(f),(h)"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 10(1)(g), Art. 11(b),(f),(h)"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 4, 5, 6, 7, 16, 17"
+        },
+        {
+          "source_id": "ec-dpp-registry-user-guide",
+          "component": "3 Accessing the DPP Registry; 4 Enrolment and verification"
+        },
+        {
+          "source_id": "cirpass2-test-environment-description",
+          "component": "3.3 Authentication: OIDC as a pragmatic baseline"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "mock-eu-registry application.properties; dpp-validator role table; deploy-resources Keycloak clients"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.4, 3.6, 3.7, 3.8, 3.9"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.11 PDP"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.5 Identity and access management"
+        },
+        {
+          "source_id": "new-cirpass2-ontologies-battery",
+          "component": "view files and battery-access-tiers.ttl (changelog)"
+        },
+        {
+          "source_id": "en-18239-2026",
+          "component": "bibliographic only (catalogue id; not read)"
+        }
+      ],
+      "variants": [
+        "OIDC/OAuth2 with RBAC (CIRPASS-2 test environment)",
+        "EU Login plus eIDAS-verified organisation (EU registry)",
+        "VC/VP with eIDAS wallets (D4.1, Battery Pass TG)",
+        "role-specific documents vs selective disclosure (D4.1 vs UNTP variants)",
+        "ODRL usage policies (D3.2)",
+        "did:ebsi token scopes (TRACE4EU)"
+      ],
+      "observable_black_box": "401 without token, 403 with a wrong role, field sets returned to each role, absence of restricted fields in public HTML/JSON views, behaviour of protected endpoints linked from the public DPP.",
+      "law_delta": "Law fixes the battery access groups and eIDAS-based verification for registry users; per-field battery access rights await the Art. 77(9) implementing act. RBAC, the admin/eo/eu split and the role-specific VC structure are project choices."
+    },
+    "L08_authentication_reliability_integrity": {
+      "applies": "yes",
+      "mechanism": "Mock registry: optional detached JWS on registration requests (RS256 over the raw body, compact form header..signature in header x-jws-signature; verifier fetches the caller's key from the URI in the token claim jwksUri; 400 if missing, 401 if invalid); proof of registration as a compact RS256 JWT (GET /metadata/v1/{registryId}/proof, application/jwt) with claims iss, registryId, registeredAt, commodityCode, reoId, reoName, dppHash, dppContentType, verifiable with GET /.well-known/jwks.json (kid default mock-eu-registry-key-1); dppHash is 'sha256:' plus the hex SHA-256 of the payload fetched from liveURL. EU registry (2026/1778 Art. 9): the operator can download a proof of registration at any time containing UPI, commodity code, operator name and identity, registration date and time validated by a Commission timestamp and a hash of the passport version, sealed with a qualified electronic seal (eIDAS Art. 38) and available for 90 days; Art. 8(9) stores passport-integrity information; Art. 14(5) logs immutable. D4.1 3.10-3.14: DPP and updates as W3C VC Data Model 2.0 credentials secured with the JOSE enveloping proof (application/vc+jwt, cty vc), algorithms ES256, then ES384, then EdDSA (Ed25519), issuer key optionally in the JWS jwk header, optional JAdES profiles for qualified seals (bibliographic only), credentialStatus with W3C Bitstring Status List, COSE for constrained carriers; immutable records, each update carrying a signed hash of the previous version, operator serialising concurrent third-party updates; signed update receipts to submitters; anchoring hashes with trusted third parties; status values such as active, suspected, disputed, corrected, superseded, withdrawn, revoked. D3.2: VC issuance, VC-based authorisation and verification of third-party claims; provenance vocabularies for repair writes. TRACE4EU: EBSI ledger checks, signature, timestamp and track-and-trace wrappers. OpenDPP: vc+jwt with ES256 or Data Integrity ecdsa-jcs-2019, SD-JWT VC validator.",
+      "specs": [
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "mock-eu-registry README: Detached JWS Verification, Proof of Registration, JWKS Endpoint"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 8(9), Art. 9(1)-(4), Art. 10(2), Art. 14(5)"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 11(g)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 78(g)"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.10, 3.11, 3.12, 3.13, 3.14"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "4.3 Advanced features (VC issuance and verification)"
+        },
+        {
+          "source_id": "new-trace4eu-github",
+          "component": "ebsi-services-wrapper (signature, authorisation, timestamp, track-and-trace)"
+        },
+        {
+          "source_id": "new-ebsi-trace4eu-page",
+          "component": "illustrative credential scenario (ledger check of legal entity identifier)"
+        },
+        {
+          "source_id": "new-opendpp-interop",
+          "component": "README door table; validate/ sdjwt door"
+        },
+        {
+          "source_id": "en-18246-2026",
+          "component": "bibliographic only (catalogue id; not read)"
+        },
+        {
+          "source_id": "w3c-vc-jose-cose",
+          "component": "catalogue id for VC-JOSE-COSE; not re-read in this session"
+        }
+      ],
+      "variants": [
+        "registry-issued proof JWT plus JWKS (mock)",
+        "QSeal-sealed proof document with Commission timestamp (EU registry)",
+        "VC-JOSE enveloped DPP (D4.1, OpenDPP)",
+        "Data Integrity proof (OpenDPP alternative)",
+        "ledger anchoring and timestamping (TRACE4EU)",
+        "hash-chained updates and receipts (D4.1)"
+      ],
+      "observable_black_box": "JWS/JWT header alg, kid, cty; signature validity against a pinned key or trust anchor; dppHash recomputed over the fetched bytes; presence and dereferenceability of credentialStatus; hash link from an update to its predecessor.",
+      "law_delta": "Law requires authentication, reliability and integrity (ESPR Art. 11(g); Batteries Art. 78(g)) and a sealed, timestamped registry proof (2026/1778 Art. 9) but prescribes no DPP signature format. VC-JOSE, the algorithm order, receipts, hash chains and anchoring are project recommendations; the mock's RS256 JWT proof differs from the QSeal proof of the EU registry."
+    },
+    "L09_registry_and_customs": {
+      "applies": "yes",
+      "mechanism": "EU registry structure (2026/1778 Art. 3): website, API, verification platform, registration-identifier scheme, storage of at least unique identifiers and commodity codes, list of verified service providers, semantic repository, log system, identification and authorisation schemes. Registration (Art. 8): by a verified operator (or verified third party) at the granularity set by the delegated act or Union law, the most granular level winning when several apply; automated checks of semantic conformity, mandatory-data coherence, granularity, commodity-code validity against permitted ranges and back-up link; unique persistent registration identifier returned in the interface or API response; stored data: unique identifiers, commodity codes, service-provider references, registrant information including registration time and passport integrity. Art. 6a transfer of passports to another verified operator; Art. 10 logging and versioning with Commission timestamps; Art. 21(3) sharing with authorities including customs. User guide: production at https://registry.product-passport.ec.europa.eu/, acceptance test site at registry.acc.product-passport.ec.europa.eu (printed with http://, separate EU Login, periodic data cleaning, same verification as production); product group 'Batteries' pre-selected, item level only; registration record vs DPP data distinction. Customs: ESPR Art. 15(1) the declarant provides the registration identifier; Art. 15(2) customs release only after verifying registration identifier and commodity code against the registry, electronically through the Art. 15(3) EU CSW-CERTEX interconnection, which must work within four years of the entry into force of 2026/1778 (computed 2030-08-06). Mock registry: commodityCode pattern ^[0-9]{4,10}$ (HS or TARIC examples), granularityLevel MODEL|BATCH|ITEM with if/then rules (ITEM needs deactivated, modelUpi, batchUpi; BATCH needs modelUpi and forbids batchUpi; MODEL forbids both), required liveURL and backupURL, optional pre-validation of the live DPP before persisting. CIRPASS D3.2: registry as key-value store, ideally storing full URIs, the REO resolver URI and the backup resolver, acting as a resolver of resolvers like DNS root servers, with a SHACL validation and control engine. Battery Pass TG 5.1: EC central services (user web portal, company service with bulk M2M API, authority portal, operations portal, verification and validation services, registry, routing/resolver services, data modelling and policy management services). CIRPASS-2 responded to the draft registry act consultation (Zenodo 10.5281/zenodo.20417510; not read).",
+      "specs": [
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 13(1)-(6), Art. 15(1)-(5)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(10)"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 3, 6a, 8, 9, 10, 12, 21"
+        },
+        {
+          "source_id": "ec-dpp-registry-user-guide",
+          "component": "Chapters 2, 3, 6, 8"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "mock-eu-registry default schema and update strategies"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.5 EU-Registry, 3.1.5.1 Validation & Control Engine, 4.1.1.3"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "5.1 EC Central services"
+        },
+        {
+          "source_id": "new-cirpass2-results-page",
+          "component": "item 'CIRPASS-2 Response to EC Consultation on Draft EU DPP Registry Implementing Regulation' (metadata only)"
+        }
+      ],
+      "variants": [
+        "official EU registry (web form, file upload, API)",
+        "CIRPASS-2 mock registry with pluggable schema",
+        "registry as resolver of resolvers (D3.2 proposal)"
+      ],
+      "observable_black_box": "For the official registry: nothing without authorisation (engine must not contact it). Against a mock or a recorded registry response: registry record fields, granularity rules, commodity-code format, registration identifier, proof document; consistency of the record with the passport fetched from the UPI.",
+      "law_delta": "The mock registry stores more (liveURL, backupURL, facilitiesId, reoId, deactivated, hash) than ESPR Art. 13(1) minimally requires, which matches 2026/1778 Art. 8(9) only in part; the official registry dereferences the UPI itself instead of storing a separate live URL (guide). The customs interconnection is not yet operational."
+    },
+    "L10_lifecycle_versioning_updates": {
+      "applies": "yes",
+      "mechanism": "Mock registry duplicate-UPI strategies: MODIFY (overwrite, default), APPEND_WITH_NEW_ID, APPEND_WITH_SAME_ID, NONE (400 on duplicate); 'deactivated' flag required for ITEM records and forbidden otherwise; createdAt and modifiedAt timestamps. EU registry: versioning with Commission timestamps and logged creation, modification and deletion reflected in registration status (2026/1778 Art. 10(1)-(2)); transfer to another verified operator from a stated date (Art. 6a); loss of verified status after three years blocks new registrations and changes (Art. 4(4), 5(4)). Law: new passport linked to the original when a new passport is created (ESPR Art. 11(d)); batteries prepared for reuse, repurposed or remanufactured get a new passport linked to the original and responsibilities move; on waste the producer or PRO takes over; the passport ends after recycling (Batteries Art. 77(7)-(8)). CIRPASS-2 ontology: dpp:linkToPreviousDPP plus object properties added in P_DPP v2.1.0; passport status Active, Archived, Inactive, Invalid; battery status set of five. D4.1: append-only records, signed hash of the previous version in each update, operator-serialised third-party updates, signed receipts, signed succession statement by the outgoing operator or attestation by the back-up provider, redirection updated after succession (3.11, 3.12, 3.22). Battery Pass TG 4.4: transfer and archiving services. BatteryPass-Ready: update module and deletion module (removal from public hosting, soft deletion at the backup provider, notification of the registry). Cir4Fun: historical read by date and lifecycle-event recording (project extension).",
+      "specs": [
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "mock-eu-registry Update Strategy; default schema deactivated rule"
+        },
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 4(4), 5(4), 6a, 10"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 11(d),(f)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(4),(7),(8)"
+        },
+        {
+          "source_id": "new-cirpass2-ontologies-battery",
+          "component": "Battery status vs passport status"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "3.11, 3.12, 3.14, 3.22"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "5 Methodology: Update and Deletion modules"
+        },
+        {
+          "source_id": "cir4fun-java-dpp-sdk",
+          "component": "historical read route; lifecycle-event extension"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.4 transfer and archiving services"
+        }
+      ],
+      "variants": [
+        "overwrite in place (mock MODIFY)",
+        "append new record (mock APPEND_*)",
+        "immutable hash-chained VC updates (D4.1)",
+        "soft deletion plus registry notification (BatteryPass-Ready)",
+        "new linked passport on reuse or remanufacture (law)"
+      ],
+      "observable_black_box": "Version list or history endpoint, timestamps, previous-version links and hashes, status values, behaviour on duplicate registration, retained availability of old versions, link from a new passport to the original.",
+      "law_delta": "Law requires linked new passports, restricted update rights and registry versioning; it does not require hash chains, receipts or a specific duplicate-handling rule. The mock's default MODIFY overwrites the previous record, which conflicts with the immutability recommended by D4.1."
+    },
+    "L11_roles_and_governance": {
+      "applies": "yes",
+      "mechanism": "Commission owns, hosts and manages the registry and its semantic repository, runs audits and a helpdesk (08:00-20:00 Brussels time; 24-hour automated tool by February 2029) (2026/1778 Art. 12, 13, 16, 21); Member States designate national administrators and own interconnection components (Art. 7, 22); verified economic operators and verified value-chain actors are responsible and controllers for the data they submit (Art. 19, 20). ESPR: operator uploads registry data (Art. 13(4)); DPP service providers may not reuse data (Art. 11 second subparagraph); delegated acts on service providers and on identifier issuing agencies are empowered (Art. 11, Art. 12(4)-(6)) but were not located. Battery: the operator placing on the market is responsible and may authorise another operator in writing (Art. 77(4)). CIRPASS D3.2: REO controls its resolver, possibly pooled by industry associations; EU default resolver as root. D4.1: trusted bodies (public authorities, QTSPs) issue identity and role credentials; EC-operated fallback redirection; back-up provider can attest successors; registry as preferred trust anchor. Battery Pass TG 5: EC central services, operator distributed services, third-party backup service. BatteryPass-Ready: economic operator, main service provider, backup service provider, market surveillance authority. CIRPASS-2 governance: all tools carry a disclaimer that they are exploratory and not normative and do not reflect EC, HADEA or CEN-CENELEC JTC 24 views. Eclipse OSS4DPP: pre-launch, ideas only (APIs and data formats, conformance testing, identity/data/storage, access/trust/interoperability).",
+      "specs": [
+        {
+          "source_id": "impl-reg-eu-2026-1778",
+          "component": "Art. 7, 13, 16, 19-22"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 11 second and third subparagraphs; Art. 13(4)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(4)"
+        },
+        {
+          "source_id": "new-cirpass1-d32-system-architecture",
+          "component": "3.1.10.1, 3.1.10.2"
+        },
+        {
+          "source_id": "new-cirpass1-results-page",
+          "component": "deliverable list (D3.3 identification schemes, D3.4 roadmap, D5.1 prototypes; not read)"
+        },
+        {
+          "source_id": "cir4fun-eu-github-org",
+          "component": "repository list (SDKs, EDC client, demo, project repositories)"
+        },
+        {
+          "source_id": "new-cirpass2-d41-reference-architecture",
+          "component": "2 Building Blocks; 3.9, 3.13, 3.17"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "5 System Architecture"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "abbreviations and modules (EO, MSP, BSP, MSA)"
+        },
+        {
+          "source_id": "oss4dpp-eclipse",
+          "component": "landing page"
+        },
+        {
+          "source_id": "cirpass2-github-repositories",
+          "component": "README disclaimers"
+        }
+      ],
+      "variants": [
+        "Commission-run central services",
+        "operator or service-provider hosting",
+        "industry-pooled resolvers",
+        "trusted credential issuers under eIDAS 2.0"
+      ],
+      "observable_black_box": "Mostly not observable: who hosts, who issues credentials. Observable: issuer identifiers in signatures, host of live and backup URLs, registry proof issuer.",
+      "law_delta": "Law sets Commission, Member State and operator roles; issuing-agency and service-provider rules await delegated acts. Trust-framework choices (did:web, UN registries, industry resolvers) are project proposals."
+    }
+  },
+  "end_to_end_flows": [
+    {
+      "name": "EU registry registration by a verified operator (production rules)",
+      "actors": [
+        "economic operator user",
+        "EU Login",
+        "DPP Registry",
+        "QTSP",
+        "operator DPP host"
+      ],
+      "steps": [
+        "1. User signs in through EU Login (MFA) at the registry web site.",
+        "2. User enrols the organisation; the registry produces an EC-sealed PDF declaration of the entered data.",
+        "3. Legal representative signs or seals the PDF with a QES or QSeal from a QTSP and uploads it; the registry checks file, signature, certificates and data, and marks the organisation verified (user becomes organisation administrator).",
+        "4. Operator hosts the DPP data and makes the https UPI resolve to it.",
+        "5. Operator registers one DPP by web form (UPI, optional model and batch identifiers) or up to 100 DPPs by JSON or XML file; a correlation ID is returned.",
+        "6. Registry validates schema, duplicates, UPI URL syntax, dereferences the UPI (redirect, protocol and size limits) and runs semantic validation; any error rejects the whole file.",
+        "7. Request moves from PROCESSING to SUCCESS (UPI, registration identifier, product group per DPP) or FAILURE (UPI, error per DPP, CSV export).",
+        "8. Operator can download a QSeal-sealed proof of registration with Commission timestamp and passport-version hash, valid for 90 days (2026/1778 Art. 9)."
+      ]
+    },
+    {
+      "name": "CIRPASS-2 test environment: rEO registration",
+      "actors": [
+        "rEO system",
+        "Keycloak",
+        "mock-eu-registry",
+        "operator repository (live URL)",
+        "dpp-validator"
+      ],
+      "steps": [
+        "1. rEO system gets a JWT from Keycloak with the client-credentials grant; a protocol mapper adds reoId and reoName.",
+        "2. rEO POSTs JSON metadata (upi, reoId, liveURL, backupURL, commodityCode, facilitiesId, granularityLevel, ...) to /metadata/v1 or /metadata/v1/registerDPP, optionally with a detached RS256 JWS in x-jws-signature.",
+        "3. Registry validates the body against the active JSON Schema 2020-12.",
+        "4. Registry GETs the liveURL with Accept application/json or application/ld+json, stores sha256:<hex> and Content-Type, and if enabled forwards the payload to the validator.",
+        "5. On success the registry persists the record and answers 201 with registryId and the validation report; on validation failure 400 with the report.",
+        "6. rEO later GETs /metadata/v1/{registryId}/proof (application/jwt) and verifies it with /.well-known/jwks.json."
+      ]
+    },
+    {
+      "name": "CIRPASS-2 search-key extraction (background)",
+      "actors": [
+        "dpp-data-extractor",
+        "mock-eu-registry database",
+        "operator repository",
+        "search keys cache"
+      ],
+      "steps": [
+        "1. On a schedule (example every 30 s) the extractor reads model-level registry entries added or changed since the last run.",
+        "2. It GETs each liveURL with all supported Accept types.",
+        "3. It classifies the response (AAS JSON, known ontology, unknown-ontology JSON-LD, plain JSON) and applies the configured strategy.",
+        "4. It stores extracted fields keyed by UPI and live URL; failed entries get a retry counter and are dropped after max retrials.",
+        "5. GET /capabilities/v1 publishes the searchable fields used by the portal search form."
+      ]
+    },
+    {
+      "name": "CIRPASS-2 consumer visualisation (mock EU web portal)",
+      "actors": [
+        "end user",
+        "Keycloak",
+        "dpp-renderer-fe",
+        "dpp-renderer-be",
+        "operator repository"
+      ],
+      "steps": [
+        "1. User signs in (authorization code with PKCE).",
+        "2. User searches via POST /search/v1, enters a URL, or scans a QR code.",
+        "3. Back end GETs the live URL with content negotiation; JSON passes through; JSON-LD is expanded; other RDF serialisations are converted with Jena then expanded.",
+        "4. Front end renders with ontology-aware components for CIRPASS-2 CORE terms or a generic collapsible view.",
+        "5. Comparison: POST /comparison/v1 with type-filtered property paths per namespace, executed as SPARQL over each DPP."
+      ]
+    },
+    {
+      "name": "CIRPASS D3.2 HTTP flow with fallback",
+      "actors": [
+        "scanning device / app",
+        "REO resolver",
+        "DPP data repository",
+        "EU registry",
+        "default EU resolver",
+        "archive"
+      ],
+      "steps": [
+        "1. App decodes the product UID URI from the carrier (or transforms a non-URI UID into a URI).",
+        "2. Plain GET to the REO resolver returns a redirect to the consumer HTML view; a request carrying a link type gets the matching target (file or SPARQL endpoint); a linkset request lists all link types.",
+        "3. Privileged roles present credentials at the resolver/policy decision point; repairers write back with provenance data.",
+        "4. If the REO host is gone (no host or 404), the app asks the default EU resolver, fed by registry data, for a backup or archive target."
+      ]
+    },
+    {
+      "name": "Customs release (ESPR Art. 15, future)",
+      "actors": [
+        "declarant",
+        "national customs system",
+        "EU CSW-CERTEX",
+        "DPP registry"
+      ],
+      "steps": [
+        "1. Declarant provides the registration identifier with the customs declaration (applies since the registry is operational).",
+        "2. Customs verifies registration identifier and commodity code against the registry, electronically through EU CSW-CERTEX once the interconnection is operational (deadline four years after 2026-08-06).",
+        "3. Release for free circulation follows; it is not proof of compliance."
+      ]
+    },
+    {
+      "name": "Third-party update with receipt (D4.1 recommendation)",
+      "actors": [
+        "independent operator (repairer)",
+        "rEO DPP system",
+        "back-up provider",
+        "trusted anchor"
+      ],
+      "steps": [
+        "1. Repairer authenticates with a role credential and submits update content.",
+        "2. rEO system serialises concurrent updates, adds the hash of the previous version and signs the update as a VC.",
+        "3. rEO returns a signed receipt with a hash of the submitted content.",
+        "4. Update is mirrored to the back-up provider and optionally anchored with a trusted third party."
+      ]
+    },
+    {
+      "name": "BatteryPass-Ready module chain (EO via main service provider)",
+      "actors": [
+        "economic operator",
+        "main service provider",
+        "backup service provider",
+        "EC registry",
+        "market surveillance authority"
+      ],
+      "steps": [
+        "1. Authentication and authorisation of each actor.",
+        "2. Create DPP: EO transfers DPP data to the MSP, which hosts it.",
+        "3. Registration: IDs submitted to the EC registry; registration ID received.",
+        "4. Backup: copy created at the backup service provider.",
+        "5. Read: public QR read or controlled read after authentication; Update and Backup repeat on changes; Deletion removes public hosting, soft-deletes at the backup provider and notifies the registry."
+      ]
+    },
+    {
+      "name": "TRACE4EU credential-backed battery passport (adjacent)",
+      "actors": [
+        "supplier",
+        "certification body",
+        "battery manufacturer",
+        "EBSI",
+        "verifier"
+      ],
+      "steps": [
+        "1. Actors hold did:ebsi identities; legal entity identifiers are checked against the EBSI ledger.",
+        "2. Certification bodies and auditors issue VCs (carbon footprint, responsible mining, due diligence) via OID4VCI.",
+        "3. The manufacturer issues a battery passport credential whose subject is the battery serial number and references supplier credentials.",
+        "4. Verifiers check signatures and ledger anchors; confidential data sits in off-chain storage behind scoped tokens."
+      ]
+    }
+  ],
+  "implementations": [
+    {
+      "name": "CIRPASS-2 mock-eu-registry",
+      "url": "https://github.com/CIRPASS-2/mock-eu-registry",
+      "kind": "registry",
+      "license": "Apache-2.0",
+      "last_activity": "push 2026-08-04; release 1.1.1-pgsql-oidc / 1.1.1-mariadb-oidc 2026-07-01",
+      "evidence_level": "substantive",
+      "note": "Quarkus, PostgreSQL or MariaDB, Keycloak OIDC; JSON Schema 2020-12 metadata; RS256 proof JWT; families: law-baseline prototype plus linked-data validation hook. Layers L01, L04, L07, L08, L09, L10."
+    },
+    {
+      "name": "CIRPASS-2 dpp-validator",
+      "url": "https://github.com/CIRPASS-2/dpp-validator",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "push 2026-08-04",
+      "evidence_level": "substantive",
+      "note": "JSON Schema and SHACL validation with automatic resource selection; ships with no schemas. Layers L05, L07."
+    },
+    {
+      "name": "CIRPASS-2 dpp-data-extractor",
+      "url": "https://github.com/CIRPASS-2/dpp-data-extractor",
+      "kind": "other",
+      "license": "Apache-2.0",
+      "last_activity": "push 2026-08-04",
+      "evidence_level": "substantive",
+      "note": "Search-key indexer for the mock web portal; JSON, JSON-LD, RDF and AAS JSON strategies. Layers L03, L04, L05."
+    },
+    {
+      "name": "CIRPASS-2 dpp-renderer-be / dpp-renderer-fe",
+      "url": "https://github.com/CIRPASS-2/dpp-renderer-fe",
+      "kind": "renderer",
+      "license": "Apache-2.0",
+      "last_activity": "renderer-be push 2026-06-11; renderer-fe push 2026-09-23",
+      "evidence_level": "substantive",
+      "note": "Mock EU web portal: fetch with content negotiation, search, SPARQL-backed comparison, QR scanner, validator resource UI (Angular 17). Layers L02, L03, L04, L05."
+    },
+    {
+      "name": "CIRPASS-2 deploy-resources",
+      "url": "https://github.com/CIRPASS-2/deploy-resources",
+      "kind": "test-suite",
+      "license": "Apache-2.0",
+      "last_activity": "push 2026-06-10",
+      "evidence_level": "substantive",
+      "note": "Single Docker Compose stack on localhost (Keycloak 8180, registry 8082, validator 8083, extractor 8084, renderer-be 8085, renderer-fe 4200); default credentials documented in README (not repeated). Not a conformance test suite; a runnable reference environment."
+    },
+    {
+      "name": "CIRPASS-2 ontologies-battery (EU DPP Battery Ontology)",
+      "url": "https://github.com/CIRPASS-2/ontologies-battery",
+      "kind": "ontology",
+      "license": "Apache-2.0",
+      "last_activity": "push 2026-10-06",
+      "evidence_level": "substantive",
+      "note": "OWL modules plus SHACL profile and three access-tier views with a test runner; depends on the CORE ontology whose repository ontologies-core is referenced but returns 404 publicly. Family linked-data-semantic. Layers L05, L07, L10."
+    },
+    {
+      "name": "CIRPASS-2 other ontology repositories (ontologies-tyre, ontologie-textiles, documentation-battery, ontologies-docs)",
+      "url": "https://github.com/CIRPASS-2",
+      "kind": "ontology",
+      "license": "Apache-2.0 except ontologie-textiles (no licence)",
+      "last_activity": "ontologies-tyre 2026-10-13; ontologie-textiles 2026-09-28; documentation-battery 2026-10-06; ontologies-docs 2026-10-15",
+      "evidence_level": "metadata_only",
+      "note": "Contents not read; ontologie-textiles description says 'Led by GS1'."
+    },
+    {
+      "name": "EU DPP Registry (production)",
+      "url": "https://registry.product-passport.ec.europa.eu/",
+      "kind": "registry",
+      "license": "not stated",
+      "last_activity": "operational since 2026-07-20 (Commission page, prior record); guide published 2026-09-16",
+      "evidence_level": "substantive",
+      "note": "Documented from the user guide and Implementing Regulation (EU) 2026/1778 only; not contacted. Family law-baseline. Layers L01, L04, L07, L08, L09, L10, L11."
+    },
+    {
+      "name": "EU DPP Registry test environment",
+      "url": "http://registry.acc.product-passport.ec.europa.eu/",
+      "kind": "registry",
+      "license": "not stated",
+      "last_activity": "not checked",
+      "evidence_level": "metadata_only",
+      "note": "Sandbox named in the user guide (printed with http://); separate EU Login; data cleaned periodically; not contacted (task rule D and repository rule 3)."
+    },
+    {
+      "name": "Battery Pass Data Model v1.2.0",
+      "url": "https://github.com/batterypass/BatteryPassDataModel",
+      "kind": "data-model",
+      "license": "CC-BY-4.0 (README statement; no LICENSE file)",
+      "last_activity": "last commit 2026-09-14 (pointer to successor)",
+      "evidence_level": "substantive",
+      "note": "SAMM 2.1.0 aspects with generated JSON Schema, JSON-LD, AAS/AASX, OpenAPI, AsyncAPI, SQL; also hosts project deliverable PDFs (Technical Guidance). Families aas-digital-twin, linked-data-semantic."
+    },
+    {
+      "name": "BatteryPass-Ready Data Model v2.0 / v2.0.1",
+      "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/tree/main/BatteryPass-Ready?ref_type=heads",
+      "kind": "data-model",
+      "license": "CC-BY-4.0",
+      "last_activity": "not checked (v2.0 announced 2026-08-27 per prior record)",
+      "evidence_level": "substantive",
+      "note": "JSON Schema 2020-12 and XSD per battery category with Feb27 variants; conditionals relaxed to optional. Family other (schema-only)."
+    },
+    {
+      "name": "BatteryPass-Ready test environment",
+      "url": "https://batterypass-ready.gefeg.com/",
+      "kind": "validator",
+      "license": "not stated",
+      "last_activity": "first version released to the public (resources page; date not stated)",
+      "evidence_level": "metadata_only",
+      "note": "Validation plus test scenarios derived from the user stories; not contacted."
+    },
+    {
+      "name": "Cir4Fun java-dpp-sdk",
+      "url": "https://github.com/CIR4FUN-EU/java-dpp-sdk",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "main commit 2026-08-10; push 2026-09-29",
+      "evidence_level": "substantive",
+      "note": "Models, validation, PostgreSQL persistence, repository and registry clients (artifacts dpp.client:*:0.5.1), mock services; some contracts derived from confidential specifications. Family hybrid. Layers L04, L10."
+    },
+    {
+      "name": "Cir4Fun python-dpp-sdk (PyPI dpp-sdk)",
+      "url": "https://pypi.org/project/dpp-sdk/",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "PyPI 0.4.0 2026-08-11; main commit 2026-09-03",
+      "evidence_level": "substantive",
+      "note": "pydantic and httpx client; PyPI project_urls point to a Fraunhofer IPK GitLab group while the GitHub repository sits in CIR4FUN-EU."
+    },
+    {
+      "name": "Cir4Fun edc-client",
+      "url": "https://github.com/CIR4FUN-EU/edc-client",
+      "kind": "connector",
+      "license": "not stated",
+      "last_activity": "push 2026-10-18",
+      "evidence_level": "metadata_only",
+      "note": "OpenAPI-generated client for the Eclipse Dataspace Connector; README not read. Family dataspace-federated."
+    },
+    {
+      "name": "OpenDPP/opendpp-interop",
+      "url": "https://github.com/OpenDPP/opendpp-interop",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "v1.18.0 2026-10-13; push 2026-10-14",
+      "evidence_level": "substantive",
+      "note": "Adjacent, not an EU project: interop kit of a commercial B2B DPP service (Opendpp UAB). Offline validator doors aas, untp, semanticids, registry (vendored CIRPASS-2 schema), shacl, sdjwt, en18223, en18223-expanded, epcis, gs1; the repository labels the registry, shacl and en18223 doors non-normative. Family platform-saas. Not the same thing as the CIRPASS-2 'OpenDPP Catalogue'."
+    },
+    {
+      "name": "TRACE4EU components",
+      "url": "https://github.com/trace4eu",
+      "kind": "connector",
+      "license": "EUPL-1.2 (trace4eu-dpp-interop-did-web: not stated)",
+      "last_activity": "2024-11-21 to 2025-07-10",
+      "evidence_level": "substantive",
+      "note": "Adjacent Digital Europe EBSI project: ebsi-services-wrapper (signature, authorisation, timestamp, track-and-trace), off-chain-storage (Cassandra, OIDC scopes), vc-and-digital-twin (OID4VCI issuer, verifier), qtsp-gateway, did:web for a UNTP demo. Families dlt-anchored, verifiable-credentials-ssi."
+    },
+    {
+      "name": "Eclipse BaSyx DPP API",
+      "url": "https://github.com/eclipse-basyx/basyx-go-components",
+      "kind": "server",
+      "license": "MIT",
+      "last_activity": "not checked (v1.0.9 per CIRPASS-2 catalogue)",
+      "evidence_level": "metadata_only",
+      "note": "Listed in the CIRPASS-2 OpenDPP Catalogue as a Go API mapping DPPs to AAS with lifecycle, lookup and history operations; not inspected here (AAS family file covers it)."
+    },
+    {
+      "name": "open-dpp platform",
+      "url": "https://github.com/open-dpp/open-dpp",
+      "kind": "platform",
+      "license": "AGPL-3.0",
+      "last_activity": "not checked (v2.4.0 per CIRPASS-2 catalogue)",
+      "evidence_level": "metadata_only",
+      "note": "Listed in the CIRPASS-2 catalogue; not inspected."
+    },
+    {
+      "name": "Eclipse OSS4DPP",
+      "url": "https://dpp.eclipse.org/",
+      "kind": "other",
+      "license": "not stated",
+      "last_activity": "page 'Sources checked 24 July 2026'; meetings 2026-09-17 and 2026-09-24 announced, outcomes not published",
+      "evidence_level": "substantive",
+      "note": "No code, working group or project; proposed areas include conformance testing."
+    }
+  ],
+  "literature": [
+    {
+      "doi": "10.5281/zenodo.10949842",
+      "title": "DPP System Architecture",
+      "year": 2024,
+      "venue": "Zenodo (CIRPASS deliverable D3.2, record dated 2024-03-26)",
+      "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+      "relevance": "Earlier Zenodo record of the CIRPASS system architecture; the v1.9 record 12206138 (2024-05) was read in full."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.077",
+      "title": "Ontology Requirements for Digital Product Passports based on the Ecodesign for Sustainable Products Regulation",
+      "year": 2026,
+      "venue": "Unknown Journal per Consensus (DOI prefix of Procedia Computer Science; listed by CIRPASS-2 under the 7th International Conference on Industry of the Future and Smart Manufacturing)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "CIRPASS-2 requirements for the ESPR core ontology behind the CORE/battery modules."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.334",
+      "title": "Achieving Semantic Interoperability for Digital Product Passports",
+      "year": 2026,
+      "venue": "Unknown Journal per Consensus; listed by the CIRPASS-2 results page under the 7th International Conference on Industry of the Future and Smart Manufacturing",
+      "found_via": "mcp__consensus__search",
+      "relevance": "CIRPASS-2 paper on semantic interoperability options that underlie the JSON-LD/SHACL recommendation."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.364",
+      "title": "From Conceptual Silos to a Circular Economy: The BFO-Based Framework for the Digital Product Passport",
+      "year": 2026,
+      "venue": "Unknown Journal per Consensus (venue not returned; Procedia Computer Science inferred from the DOI prefix, unverified)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Independent critique of the CIRPASS-2 Core Ontology (ambiguities between processes and instructions); relevant to stability of SHACL fixtures."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.330",
+      "title": "A General-Purpose Tool to Convert Asset Administration Shell Templates to RDFS/OWL",
+      "year": 2026,
+      "venue": "Unknown Journal per Consensus (venue not returned; Procedia Computer Science inferred from the DOI prefix, unverified)",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+      "relevance": "TNO tool converting AAS templates (including Battery Pass and CarbonFootprint models) to OWL; bridges AAS and RDF tracks of this family."
+    },
+    {
+      "doi": "10.1007/978-3-031-78955-7_19",
+      "title": "Designing an Ontology Network for Digital Product Passports",
+      "year": 2025,
+      "venue": "book chapter (listed on the CIRPASS-2 results page)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Core DPP ontology network with SHACL shapes for data quality, a precursor of the CIRPASS-2 modelling approach."
+    },
+    {
+      "doi": "10.23919/cnsm67658.2025.11297456",
+      "title": "Compliance-by-Design: Validating Decentralised Architectures for Digital Product Passports under the EU Data Governance Act",
+      "year": 2025,
+      "venue": "2025 21st International Conference on Network and Service Management (CNSM)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Pilot-validated decentralised DPP architecture (PACEDPP, USEFLEDS) with data intermediaries and decentralised identity."
+    },
+    {
+      "doi": "10.18420/inf2025_03",
+      "title": "Legal Challenges and Technical Solutions to Decentralised Digital Product Passports",
+      "year": 2025,
+      "venue": "Unknown Journal per Consensus (venue not returned; GI INFORMATIK 2025 inferred from the DOI prefix, unverified)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Legal analysis of decentralisation at identifier minting, storage and distributed storage; flags distributed storage as problematic."
+    },
+    {
+      "doi": "10.12688/openreseurope.24195.1",
+      "title": "Digital Passport Model Assessment Workbench: SHACL-based assessment, use-case coverage, and integration guidance for digital passport model ecosystems",
+      "year": 2026,
+      "venue": "Open Research Europe",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+      "relevance": "CE-RISE deterministic SHACL model assessment tool (dpawb on PyPI) compared against BatteryPass v1.2.0; extends gap-assessment row ce-rise-dpawb."
+    },
+    {
+      "doi": "10.1016/j.procir.2024.07.039",
+      "title": "An Asset Administration Shell-Based Digital Product Passport as a Gaia-X Service",
+      "year": 2024,
+      "venue": "Procedia CIRP",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+      "relevance": "Prototype of the AAS plus Gaia-X option named in the Battery Pass Technical Guidance."
+    },
+    {
+      "doi": "10.48550/arxiv.2410.15758",
+      "title": "Digital Product Passport Management with Decentralised Identifiers and Verifiable Credentials",
+      "year": 2024,
+      "venue": "ArXiv",
+      "found_via": "mcp__consensus__search",
+      "relevance": "DID/VC realisation of ESPR requirements with performance scenarios; comparable to the CIRPASS D3.2 DID variant."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.274",
+      "title": "Bridging the Gaps Towards a Unified Architecture for Digital Product Passports: A Data Space Perspective on Existing Standards and Initiatives",
+      "year": 2026,
+      "venue": "Unknown Journal per Consensus (venue not returned; Procedia Computer Science inferred from the DOI prefix, unverified)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Layered blueprint combining dataspaces, AAS, CIRPASS semantic models and GS1 identification."
+    },
+    {
+      "doi": "10.1109/wetice67341.2025.11092048",
+      "title": "Design and Implementation of a Software System for Digital Product Passport",
+      "year": 2025,
+      "venue": "2025 33rd International Conference on Enabling Technologies: Infrastructure for Collaborative Enterprises (WETICE)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Implemented DPP protocol with server and stateless browser, recursive querying and RBAC; an empirical prototype outside the EU projects."
+    },
+    {
+      "doi": "10.5281/zenodo.20848510",
+      "title": "Full-Stack Digital Product Passport Architecture Supporting Interoperability and AI-Enabled Use",
+      "year": 2026,
+      "venue": "Zenodo conference proceeding (DaCapo, Horizon Europe GA 101091780)",
+      "found_via": "WebSearch (extended) then Zenodo API",
+      "relevance": "Horizon Europe pilot architecture: AAS-based minimum viable DPP, dataspace exchange, item-level smart tags, PWA reader (metadata read; PDF not read)."
+    },
+    {
+      "doi": "10.1109/isse65546.2025.11370080",
+      "title": "From Regulation to Realisation: Architecting a Digital Battery Passport System",
+      "year": 2025,
+      "venue": "not returned by SciSpace (journal null); an IEEE ISSE 2025 proceedings inferred from the DOI, unverified",
+      "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+      "relevance": "Delphi-validated battery passport reporting architecture for SMEs."
+    },
+    {
+      "doi": "10.1109/ichcai70183.2026.11607563",
+      "title": "Explainability-Oriented Semantic Validation for Digital Product Passports in Industrial Systems",
+      "year": 2026,
+      "venue": "2026 1st International Conference on Human Centric Artificial Intelligence (ICHCAI)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "SHACL validation prototype using two public CIRPASS datasets; maps SHACL findings to explanations (useful for report design)."
+    }
+  ],
+  "conformance_implications": [
+    {
+      "layer": "L03",
+      "test_objective": "Live URL serves machine-readable DPP data under content negotiation.",
+      "observable": "Final status, Content-Type and body for GET with Accept application/ld+json and with Accept application/json.",
+      "oracle": "CIRPASS-2 test environment design assumption 3.1 and D4.1 3.1 (non-normative); RFC 9110 proactive negotiation; legal anchor ESPR Art. 10(1)(d) machine-readable data.",
+      "existing_check": "identifier.resolve",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "none for a single Accept value; set accept='application/ld+json' and accepted_media_types=['application/ld+json','application/json']",
+      "fixtures_needed": "Loopback SUT serving JSON-LD and JSON for one UPI; recorded responses.",
+      "reusable_suite": "CIRPASS-2 deploy-resources stack as a second implementation (https://github.com/CIRPASS-2/deploy-resources)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Same URL returns a human-readable view to a plain browser request.",
+      "observable": "GET with no Accept or Accept text/html gives a 200 text/html final response (possibly after redirects).",
+      "oracle": "CIRPASS-2 test environment 3.1; CIRPASS D3.2 3.1.10.1 (default consumer view). For this method an HTML answer to a bare GET is a pass, not a failure.",
+      "existing_check": "identifier.resolve",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "none if accepted_media_types=['text/html'] is set; otherwise the default (final JSON object) wrongly fails. A combined 'identifier.negotiation_matrix' check would run several Accept values in one step and also inspect Vary.",
+      "fixtures_needed": "Loopback SUT with HTML and JSON-LD representations.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Enveloped VC representation is offered and verifiable.",
+      "observable": "GET with Accept application/vc+jwt returns a compact JWS with header cty vc, alg ES256/ES384/EdDSA, payload equal to the JSON-LD DPP.",
+      "oracle": "D4.1 3.1 and 3.10 (non-normative); W3C VC-JOSE-COSE (catalogue id w3c-vc-jose-cose).",
+      "existing_check": "integrity.jws",
+      "existing_capability": "integrity.jws",
+      "new_capability_needed": "integrity.vc_jose profile (media type, cty, payload equals negotiated JSON-LD)",
+      "fixtures_needed": "TEST-ONLY ES256 key pair; signed and tampered VC samples.",
+      "reusable_suite": "w3c/vc-jose-cose-test-suite inputs (see gap assessment 7.2)",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L01",
+      "test_objective": "UPI has the form the EU registry accepts.",
+      "observable": "Decoded carrier payload or declared UPI string.",
+      "oracle": "DPP Registry user guide 6.2.1 and glossary: URL form, https, at most 2000 characters (guide's rule; JTC 24 content not used).",
+      "existing_check": "identifier.parse",
+      "existing_capability": "identifier.parse",
+      "new_capability_needed": "identifier.parse scheme 'https-url-upi' (generic https URL with length bound); scheme 'epc-urn' for mock-registry style UPIs",
+      "fixtures_needed": "Valid and invalid UPI strings (http, over 2000 chars, user-info, odd ports).",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "UPI dereference survives the registry's documented pre-checks.",
+      "observable": "Redirect count, any https-to-http downgrade, final port and host, response size when GETting the UPI.",
+      "oracle": "User guide 6.2.2 error descriptions (excessive redirects, downgrade, disallowed domain or port, oversized response). Thresholds are not published: record values, flag downgrades as fail.",
+      "existing_check": "identifier.resolve",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "identifier.registry_preflight (downgrade, redirect count, size reporting)",
+      "fixtures_needed": "Loopback redirect chains including a downgrade and a long chain.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L09",
+      "test_objective": "Registry metadata record is well formed for its granularity.",
+      "observable": "Registry record JSON (from a mock registry response or a declared sample).",
+      "oracle": "CIRPASS-2 mock-eu-registry default JSON Schema 2020-12 (non-normative) for structure; 2026/1778 Art. 8(4)-(5) for model/batch links at item and batch level.",
+      "existing_check": "data.jsonschema",
+      "existing_capability": "data.jsonschema",
+      "new_capability_needed": "none (pin the Apache-2.0 schema as a resource); data.rules for the Art. 8 link rule if the schema is replaced",
+      "fixtures_needed": "Vendored mock-eu-registry default schema; ITEM/BATCH/MODEL positive and negative records.",
+      "reusable_suite": "mock-eu-registry default schema (https://github.com/CIRPASS-2/mock-eu-registry)",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L09",
+      "test_objective": "Registry record agrees with the passport it points to.",
+      "observable": "Mock registry record (upi, liveURL, backupURL, granularity, dppHash) and passport fetched from liveURL.",
+      "oracle": "ESPR Art. 13(1),(4) (registry holds the identifiers the operator uploads); mock semantics for liveURL/dppHash.",
+      "existing_check": "registry.consistency",
+      "existing_capability": "registry.mock",
+      "new_capability_needed": "align the engine mock registry fields with the CIRPASS-2 schema (upi, reoId, liveURL, backupURL, commodityCode, facilitiesId, granularityLevel, deactivated, modelUpi, batchUpi, dppHash 'sha256:<hex>')",
+      "fixtures_needed": "Loopback mock registry plus loopback passport host.",
+      "reusable_suite": "CIRPASS-2 mock-eu-registry run locally (Java/Quarkus, Keycloak) as second implementation",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L08",
+      "test_objective": "Registry hash binds the record to the exact passport representation.",
+      "observable": "SHA-256 over the bytes of the passport fetched with the same Accept header the registry used, compared with dppHash.",
+      "oracle": "Mock-eu-registry README (hash of the payload fetched from liveURL); 2026/1778 Art. 9(2)(e) hash of the passport version in the proof (official hashing rule not published).",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "registry.hash_binding (records which media type was hashed)",
+      "fixtures_needed": "Passport with two representations; registry record with matching and mismatching hashes.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L08",
+      "test_objective": "Proof of registration verifies.",
+      "observable": "Mock: application/jwt from /metadata/v1/{registryId}/proof and JWKS. Official: downloadable sealed document.",
+      "oracle": "Mock README claims set (iss, registryId, registeredAt, commodityCode, reoId, reoName, dppHash, dppContentType; RS256). Official: 2026/1778 Art. 9(2)-(4) content, QSeal, Commission timestamp, 90-day availability.",
+      "existing_check": "integrity.jws",
+      "existing_capability": "integrity.jws",
+      "new_capability_needed": "registry.proof (mock JWT via pinned JWKS); official proof needs evidence.qualified_seal and registry.official",
+      "fixtures_needed": "TEST-ONLY RSA key, recorded proof JWTs (valid, wrong kid, wrong issuer, altered dppHash).",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L06",
+      "test_objective": "Back-up copy is reachable and equivalent.",
+      "observable": "Content and restricted-field behaviour at backupURL versus liveURL.",
+      "oracle": "ESPR Art. 10(4) back-up copy through a service provider; Art. 11(e) availability; D4.1 3.15 (same data and access rules, non-normative).",
+      "existing_check": "identifier.consistency",
+      "existing_capability": "identifier.consistency",
+      "new_capability_needed": "persistence.backup_equivalence (JSON-value or hash comparison plus access probe on the backup)",
+      "fixtures_needed": "Two loopback hosts (live, backup), one with drift.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L07",
+      "test_objective": "Each battery access group receives exactly its fields.",
+      "observable": "Field sets returned to anonymous, legitimate-interest and authority roles.",
+      "oracle": "Regulation (EU) 2023/1542 Art. 77(2) groups; per-field assignment from the CIRPASS-2 battery view files (non-normative, long list v1.3) until the Art. 77(9) act exists.",
+      "existing_check": "access.restricted_fields",
+      "existing_capability": "access.policy",
+      "new_capability_needed": "none; needs a declared policy derived from the views",
+      "fixtures_needed": "Policy file from battery view shapes; synthetic canary values; TEST-ONLY role tokens.",
+      "reusable_suite": "CIRPASS-2 ontologies-battery views and tests (https://github.com/CIRPASS-2/ontologies-battery)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "JSON-LD battery passport conforms to the battery SHACL profile.",
+      "observable": "Passport JSON-LD document.",
+      "oracle": "CIRPASS-2 battery-shapes.ttl (draft, non-normative), derived from Regulation (EU) 2023/1542 Annex XIII and long list v1.3.",
+      "existing_check": "none",
+      "existing_capability": "data.shacl",
+      "new_capability_needed": "data.shacl must leave interface_only (pySHACL, pinned TTL)",
+      "fixtures_needed": "Pinned shapes and the repository's worked examples and fixtures (Apache-2.0).",
+      "reusable_suite": "ontologies-battery tests/run_tests.py",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "JSON-LD contexts are known and versioned.",
+      "observable": "@context entries of the passport.",
+      "oracle": "D4.1 3.1 (versioned context URLs kept available; non-normative); allowlist from the project vocabularies (https://w3id.org/eudpp/...).",
+      "existing_check": "data.context",
+      "existing_capability": "data.context",
+      "new_capability_needed": "none for the allowlist; context availability over time would need persistence.scheduled",
+      "fixtures_needed": "Allowlist of pinned context URLs.",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "Battery passport JSON validates against the consortium schemas.",
+      "observable": "Passport JSON document.",
+      "oracle": "Battery Pass v1.2.0 generated JSON Schemas or BatteryPass-Ready v2.0.1 category schemas (CC BY 4.0; non-normative). Conditional elements are optional in these schemas, so completeness needs rules.",
+      "existing_check": "data.jsonschema",
+      "existing_capability": "data.jsonschema",
+      "new_capability_needed": "none; data.rules pack for the twelve conditional elements",
+      "fixtures_needed": "Pinned schema files with attribution; category samples (EV, LMT, industrial, stationary; Feb27 variants).",
+      "reusable_suite": "BatteryPass-Ready test environment (hosted; not usable offline)",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "AAS serialisation of a battery passport is valid.",
+      "observable": "AAS JSON or AASX file.",
+      "oracle": "IDTA AAS metamodel (catalogue id idta-01001-metamodel); Battery Pass generated AASX as sample.",
+      "existing_check": "aas.validate",
+      "existing_capability": "aas.validate",
+      "new_capability_needed": "none",
+      "fixtures_needed": "Battery Pass v1.2.0 AASX samples.",
+      "reusable_suite": "aas-test-engines (see gap assessment 7.2)",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L04",
+      "test_objective": "Repository read endpoints match a pinned contract.",
+      "observable": "GET /v1/dpps/{id}, /v1/dppsByProductId/{productId}, /v1/dppsByIdAndDate/{id}?date=... responses.",
+      "oracle": "Pinned OpenAPI for the SUT (Cir4Fun routes are project-defined and partly derived from confidential specifications, so they are not an oracle of law).",
+      "existing_check": "api.contract",
+      "existing_capability": "api.contract",
+      "new_capability_needed": "api.write_ops for POST/PATCH/DELETE (api.contract supports GET only)",
+      "fixtures_needed": "Maintainer-supplied OpenAPI; Cir4Fun mock services run locally.",
+      "reusable_suite": "Cir4Fun sdk-demo / dpp-sdk-demo (local Docker; licence of sdk-demo not stated)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L10",
+      "test_objective": "Updates are append-only and linked.",
+      "observable": "Version history, timestamps, previous-version hash or link.",
+      "oracle": "2026/1778 Art. 10(2) (registry versioning); ESPR Art. 11(d) link to original passport; D4.1 3.11 hash chain (non-normative).",
+      "existing_check": "persistence.versions",
+      "existing_capability": "persistence.versions",
+      "new_capability_needed": "persistence.hash_chain",
+      "fixtures_needed": "Recorded version series with a broken link and an in-place overwrite.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L10",
+      "test_objective": "Status changes and deactivation are reflected consistently.",
+      "observable": "Registry 'deactivated' flag, passport status (Active/Archived/Inactive/Invalid), HTTP status of deactivated passports.",
+      "oracle": "Batteries Art. 77(7)-(8); 2026/1778 Art. 10(1) registration status; CIRPASS-2 CORE status values (non-normative).",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "lifecycle.status_transitions",
+      "fixtures_needed": "Passport and registry samples before and after deactivation.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L07",
+      "test_objective": "Write and admin operations reject wrong roles.",
+      "observable": "401/403 for registration, schema change and validator resource upload with tokens of each role.",
+      "oracle": "ESPR Art. 11(f) restricted update rights; mock path policies as recorded configuration.",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "access.write_authz (needs authorised write probes)",
+      "fixtures_needed": "TEST-ONLY Keycloak realm export with admin, eo, eu users.",
+      "reusable_suite": "CIRPASS-2 deploy-resources realm cirpass-2 (local)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L04",
+      "test_objective": "Model-level discovery endpoint (if offered).",
+      "observable": "GET https://<operator>/.well-known/dppdata.",
+      "oracle": "D4.1 3.18 proposal only; no registered well-known URI. Informative result, never pass/fail on law.",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "discovery.well_known (informative)",
+      "fixtures_needed": "Loopback host with and without the endpoint.",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    }
+  ],
+  "failure_modes": [
+    {
+      "layer": "L03",
+      "fault": "Live URL ignores Accept and always returns HTML, so the registry cannot hash or validate data.",
+      "detectable_by": "identifier.resolve with accept='application/ld+json' fails on text/html final media type."
+    },
+    {
+      "layer": "L03",
+      "fault": "Server negotiates but omits 'Vary: Accept', so caches serve HTML to machines or JSON to browsers.",
+      "detectable_by": "Inspect Vary on negotiated responses (needs the proposed negotiation matrix check)."
+    },
+    {
+      "layer": "L03",
+      "fault": "Redirect chain downgrades from https to http or loops.",
+      "detectable_by": "Bounded resolution recording each hop; registry preflight check."
+    },
+    {
+      "layer": "L01",
+      "fault": "UPI printed as an EPC URN or plain GTIN, which the EU registry rejects as an invalid URL.",
+      "detectable_by": "identifier.parse with the https-url-upi scheme."
+    },
+    {
+      "layer": "L09",
+      "fault": "Item-level record without modelUpi/batchUpi or batch record carrying batchUpi.",
+      "detectable_by": "data.jsonschema against the mock registry schema."
+    },
+    {
+      "layer": "L08",
+      "fault": "dppHash computed over a different representation or with formatting differences, so the hash never matches.",
+      "detectable_by": "Recompute SHA-256 per media type and compare; the mock README example hash is itself only 63 hex digits without the 'sha256:' prefix."
+    },
+    {
+      "layer": "L08",
+      "fault": "Proof JWT verifies only via a JWKS URL controlled by the same server (no independent trust anchor).",
+      "detectable_by": "integrity.jws reports issuer-trust failure when the key is not in the pinned trust bundle."
+    },
+    {
+      "layer": "L08",
+      "fault": "Detached JWS checked against a key fetched from a caller-supplied jwksUri claim, letting a caller pick its own trust root.",
+      "detectable_by": "Submit a body signed by a key at an attacker-controlled JWKS (loopback) and observe acceptance."
+    },
+    {
+      "layer": "L07",
+      "fault": "Role 'eu' labelled End User can upload or delete validation schemas and registry schemas (observed path policies).",
+      "detectable_by": "Write-authorisation probes with an eu token expecting 403."
+    },
+    {
+      "layer": "L06",
+      "fault": "backupURL points at the same host or at a GS1 resolver URL instead of an independent provider copy (as in the OpenDPP registry pointer sample).",
+      "detectable_by": "Compare hosts and content of liveURL and backupURL."
+    },
+    {
+      "layer": "L05",
+      "fault": "Conditional battery attributes missing because the consortium schemas make them optional.",
+      "detectable_by": "data.rules completeness pack per battery category."
+    },
+    {
+      "layer": "L05",
+      "fault": "Search-key cache truncates or rejects UPIs longer than 36 characters (extractor and renderer DDL declare upi VARCHAR(36) while the registry allows 200 and the EU registry 2000).",
+      "detectable_by": "Register a long UPI in a loopback stack and search for it."
+    },
+    {
+      "layer": "L03",
+      "fault": "Renderer fetch proxy (GET /fetch/v1?url=) fetches arbitrary URLs, including internal addresses.",
+      "detectable_by": "Loopback probe with an internal-address URL; expect refusal."
+    },
+    {
+      "layer": "L10",
+      "fault": "Duplicate registration silently overwrites the previous record (MODIFY default), losing history.",
+      "detectable_by": "Register the same UPI twice and inspect history or registryId behaviour."
+    },
+    {
+      "layer": "L03",
+      "fault": "Content-Type spelled 'application/json+ld' instead of 'application/ld+json' (appears in a mock README example).",
+      "detectable_by": "identifier.resolve accepted_media_types exact match; data.context."
+    },
+    {
+      "layer": "L09",
+      "fault": "File upload with one bad record rejects all records; operators misread partial success.",
+      "detectable_by": "Not testable against the official registry; replicate in a mock with a recorded outcome fixture."
+    }
+  ],
+  "sources": [
+    {
+      "id": "impl-reg-eu-2026-1778",
+      "title": "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry set up under Regulation (EU) 2024/1781 of the European Parliament and of the Council (Text with EEA relevance)",
+      "issuing_body": "European Commission",
+      "url": "https://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "edition_or_version": "OJ L, 2026/1778, 17.7.2026",
+      "publication_date": "2026-07-17",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text; cite by article",
+      "what_it_shows": "Registry structure (Art. 3), operator and value-chain-actor verification (Art. 4-5), profiles and transfer (Art. 6, 6a), national administrators (Art. 7), registration, automated checks and stored data (Art. 8), proof of registration (Art. 9), data management and retention (Art. 10), data models and semantic repository (Art. 11-12), support, logs, availability, security, fraud, personal data, responsibilities (Art. 13-22). Read through a summarising fetch tool; EUR-Lex /eng and TXT/HTML returned no text on 2026-10-19."
+    },
+    {
+      "id": "reg-eu-2024-1781",
+      "title": "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC",
+      "issuing_body": "European Parliament and Council",
+      "url": "https://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+      "edition_or_version": "consolidated 02024R1781 — EN — 28.06.2024 — 000.001 (corrigenda C1, C2)",
+      "publication_date": "2024-06-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text; cite by article",
+      "what_it_shows": "Text extracted locally from the consolidated PDF: Art. 10, 11, 13, 14, 15 (carrier, back-up copy, essential design requirements, registry, web portal, customs and EU CSW-CERTEX). EUR-Lex /eng returned an empty page."
+    },
+    {
+      "id": "reg-eu-2023-1542",
+      "title": "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries",
+      "issuing_body": "European Parliament and Council",
+      "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "edition_or_version": "consolidated 02023R1542 EN 13.08.2026 (003.001)",
+      "publication_date": "2026-08-13",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text; cite by article",
+      "what_it_shows": "Art. 77(1)-(10) and Art. 78(a)-(h) read through a summarising fetch tool (characters 380000-480000)."
+    },
+    {
+      "id": "ec-dpp-registry-user-guide",
+      "title": "DPP Registry - User Guide for Economic Operators",
+      "issuing_body": "European Commission, DG GROW (Digital Solutions)",
+      "url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf",
+      "edition_or_version": "PDF 'Last Published 2026-09-16 v1.03'; resources page 'V3, last update on September 2026, changes to pages 22, 23, 41', dated 14 September 2026",
+      "publication_date": "2026-09-16",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated in the PDF text read; Commission reuse policy not re-read",
+      "what_it_shows": "EU Login access, eIDAS-based organisation verification, registration by form and by JSON/XML file (max 100 DPPs, 1 GB), UPI rules, outcomes and error messages, test environment, glossary. Upgrades prior metadata_only record. Local SHA-256 of the PDF: 1ca1d444e1252e807403ba7bcb66d4132b5aa80b4bf0ca59c5aa5b921bc9d446 (computed in this session)."
+    },
+    {
+      "id": "cirpass2-test-environment-description",
+      "title": "CIRPASS-2 OPEN SOURCE TEST ENVIRONMENT",
+      "issuing_body": "CIRPASS-2 consortium (author Marco Volpini, ExtraRed)",
+      "url": "https://zenodo.org/records/20749604",
+      "edition_or_version": "Version 1.0 (16/06/2026); DOI 10.5281/zenodo.20749604; concept 10.5281/zenodo.20749602",
+      "publication_date": "2026-06-16",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0",
+      "what_it_shows": "Design assumptions (content negotiation, unknown schema, OIDC baseline), architecture, three flows and service catalogue. PDF text extracted locally; MD5 matched Zenodo checksum bf8ba8f08db4d031c3869f3560a9d0d2. Upgrades prior metadata_only record."
+    },
+    {
+      "id": "cirpass2-github-repositories",
+      "title": "CIRPASS-2 GitHub repositories (mock-eu-registry, dpp-validator, dpp-data-extractor, dpp-renderer-be, dpp-renderer-fe, deploy-resources, ontologies)",
+      "issuing_body": "CIRPASS-2 Consortium",
+      "url": "https://github.com/CIRPASS-2",
+      "edition_or_version": "13 public repositories on 2026-10-19; mock-eu-registry release 1.1.1 (2026-07-01)",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0 except ontologie-textiles and assets (no licence)",
+      "what_it_shows": "READMEs, JAX-RS resource interfaces and application.properties read through read-only gh api: endpoints, schemas, roles, JWS and proof behaviour, extraction and validation logic, Docker Compose layout."
+    },
+    {
+      "id": "new-cirpass2-ontologies-battery",
+      "title": "ontologies-battery: EU DPP Battery Ontology (README)",
+      "issuing_body": "CIRPASS-2 Consortium",
+      "url": "https://github.com/CIRPASS-2/ontologies-battery",
+      "edition_or_version": "umbrella 0.4.0 DRAFT; changelog entry 6 October 2026",
+      "publication_date": "2026-10-06",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Module namespaces, modelling conventions, SHACL profile and access-tier views, status vocabularies, dependency on CORE P_DPP v2.1.0 and MAT v1.1.0. The README cites a JTC 24 draft table as one input; that content is not recorded."
+    },
+    {
+      "id": "new-cirpass2-d41-reference-architecture",
+      "title": "D4.1 Reference Architecture",
+      "issuing_body": "CIRPASS-2 consortium (lead TNO)",
+      "url": "https://zenodo.org/records/20720002",
+      "edition_or_version": "V1.1 (cover 'Version 1.1 (11 june 2026)', revision history 1.1 10/06/2026, submitted 2026-06-16); concept DOI 10.5281/zenodo.15388412; versions 15388413 (2025-05), 15467720 v1.0 (2025-05-19), 20698579 V1.1 (2026-06-15), 20720002 V1.1 (2026-06-16)",
+      "publication_date": "2026-06-16",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0",
+      "what_it_shows": "Building blocks per role and 25 architectural recommendations (interoperability, IAM, integrity, access, data management, display). PDF text extracted locally; MD5 b6b9b1f97d7433bf096f1a4b2c38a909 matched Zenodo. Statements about the content of prEN 18222 and prEN 18219 in 3.3 and 3.6 were not recorded."
+    },
+    {
+      "id": "new-cirpass1-d32-system-architecture",
+      "title": "DPP System Architecture",
+      "issuing_body": "CIRPASS consortium (ERCIM, CEA-LIST authors), Digital Europe DIGITAL-2021-TRUST-01",
+      "url": "https://zenodo.org/records/12206138",
+      "edition_or_version": "v1.9, DOI 10.5281/zenodo.12206138",
+      "publication_date": "2024-05",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0",
+      "what_it_shows": "HTTP-URI and DID architectures, EU-Registry, REO and default EU resolver, PDP, archives, data flows. PDF text extracted locally (MD5 9bf8cbdd9ad95e2a21ac0371d0325a10 matched). Passages on IEC 61406 and IEC 63278 were not used. Resolves the gap-assessment row 'cirpass-1-deliverables: not located'."
+    },
+    {
+      "id": "new-cirpass1-results-page",
+      "title": "CIRPASS project results",
+      "issuing_body": "CIRPASS consortium",
+      "url": "https://cirpassproject.eu/project-results/",
+      "edition_or_version": "web page as retrieved",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Lists D3.2 DPP System Architecture, D3.3 Identification schemes, D3.4 DPP System Roadmap, D5.1 DPP Prototypes, D2.2 use cases, user stories V2.0, standardisation gaps and roadmap (upload folders 2023-03 to 2024-07)."
+    },
+    {
+      "id": "new-cirpass2-results-page",
+      "title": "CIRPASS-2 project results",
+      "issuing_body": "CIRPASS-2 consortium",
+      "url": "https://cirpass2.eu/project-results/",
+      "edition_or_version": "web page; newest dated item 2026-10-12",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "29 result items with dates and DOIs, including the registry consultation response (2026-05-27), AAS/RDF interoperability approaches (2026-04-30), user stories V3.1 (2025-12-19), web-portal search options (2025-03-05), backup redirection options (2024-12-06). Newest item moved from 2026-09-24 (gap assessment) to 2026-10-12."
+    },
+    {
+      "id": "new-cirpass2-open-source-catalogue",
+      "title": "OpenDPP Catalogue (CIRPASS-2)",
+      "issuing_body": "CIRPASS-2 consortium",
+      "url": "https://cirpass2.eu/open-source-dpp-catalogue/",
+      "edition_or_version": "web page; 8 entries visible with a 'Load More' control",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Catalogue entries (BaSyx DPP API v1.0.9 MIT, open-dpp v2.4.0 AGPL-3.0, OpenEPCIS DL toolkit, TracePath, TracePass, Transpareo); no inclusion criteria stated."
+    },
+    {
+      "id": "bp-technical-guidance",
+      "title": "Battery Passport Technical Guidance",
+      "issuing_body": "Battery Pass consortium (acatech publisher)",
+      "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP3%20Battery%20Passport%20Technical%20Guidance",
+      "edition_or_version": "Version 1.0 / March 2024 (title page)",
+      "publication_date": "2024-03-26",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Prior record: acatech copyright, cite and link only, private non-commercial downloads. The copy read sits in a repository whose README states CC BY 4.0; whether that covers the PDF is not stated. Own words only.",
+      "what_it_shows": "Standard stack (4.4-4.14), system architecture (EC central, distributed, third-party services) and key challenges. Its one-line summaries of ISO/IEC and IEC standards were not recorded. Confirms 'Version 1.0' that the prior record could not confirm."
+    },
+    {
+      "id": "bp-data-model-github-v1-2-0",
+      "title": "Battery Pass Data Model repository (GitHub, v1.2.0)",
+      "issuing_body": "Battery Pass project",
+      "url": "https://github.com/batterypass/BatteryPassDataModel",
+      "edition_or_version": "v1.2.0; last commit 2026-09-14",
+      "publication_date": "2025-01-14",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0 per README (no LICENSE file; GitHub API licence null)",
+      "what_it_shows": "Aspect folder tree, SAMM 2.1.0 prefixes and generated artefact types; README status (concluded April 2025, reference only)."
+    },
+    {
+      "id": "bp-ready-data-model-v2",
+      "title": "BatteryPass-Ready Data Model (README)",
+      "issuing_body": "BatteryPass-Ready consortium (maintained by acatech)",
+      "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads",
+      "edition_or_version": "2.0 (work in progress); v2.0.1 labelled current release",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0",
+      "what_it_shows": "JSON Schema 2020-12 and XSD per category, Feb27 variants, conditional elements optional, folder inconsistencies; no SAMM, JSON-LD or SHACL (correction to the task framing)."
+    },
+    {
+      "id": "new-bpr-resources-page",
+      "title": "BatteryPass-Ready resources",
+      "issuing_body": "BatteryPass-Ready consortium",
+      "url": "https://thebatterypass.eu/battery-pass-ready/resources/",
+      "edition_or_version": "web page",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "none stated on the page",
+      "what_it_shows": "Test environment link (batterypass-ready.gefeg.com, first version public), longlist v2.0 (August 2026) and v1.3 (March 2026), user stories v1.0 (June 2026), data model link."
+    },
+    {
+      "id": "new-bpr-user-stories-v1",
+      "title": "User Stories from a Technical Perspective (BatteryPass-Ready), v1.0",
+      "issuing_body": "BatteryPass-Ready consortium",
+      "url": "https://thebatterypass.eu/wp-content/uploads/BatteryPass-Ready_User-Stories_v1.0.cleaned.pdf",
+      "edition_or_version": "v1.0 (PDF created 2026-06-29)",
+      "publication_date": "2026-06",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated; own words only",
+      "what_it_shows": "Chapters 1-3 and 5 read: scope, method (user stories, failure scenarios, test scenarios) and seven reusable modules. Chapter 4.3 (tables 'according to EN 18222') and chapter 6 were deliberately not read."
+    },
+    {
+      "id": "cir4fun-java-dpp-sdk",
+      "title": "java-dpp-sdk (Cir4Fun)",
+      "issuing_body": "Cir4Fun consortium",
+      "url": "https://github.com/CIR4FUN-EU/java-dpp-sdk",
+      "edition_or_version": "0.5.1 (README); main commit 2026-08-10; push 2026-09-29",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "README and dpp-sdk-clients README: route table, artifacts, disclosed deviations and the statement that some contracts come from confidential specifications."
+    },
+    {
+      "id": "cir4fun-python-dpp-sdk",
+      "title": "python-dpp-sdk (Cir4Fun; PyPI dpp-sdk)",
+      "issuing_body": "Cir4Fun consortium",
+      "url": "https://pypi.org/pypi/dpp-sdk/json",
+      "edition_or_version": "0.4.0 (2026-08-11); releases 0.1.0, 0.1.1 (2026-06-09), 0.2.1 (2026-06-11)",
+      "publication_date": "2026-08-11",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0 (license_expression)",
+      "what_it_shows": "PyPI metadata (author, requires-python >=3.11, Fraunhofer IPK GitLab project_urls) and README routes POST /v1/dpps and POST /v1/registerDPP."
+    },
+    {
+      "id": "cir4fun-edc-client",
+      "title": "edc-client (Cir4Fun)",
+      "issuing_body": "Cir4Fun consortium",
+      "url": "https://github.com/CIR4FUN-EU/edc-client",
+      "edition_or_version": "push 2026-10-18 (was 2026-10-07 in prior record)",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "none declared",
+      "what_it_shows": "Repository listing only."
+    },
+    {
+      "id": "cir4fun-eu-github-org",
+      "title": "CIR4FUN-EU GitHub organization",
+      "issuing_body": "Cir4Fun consortium",
+      "url": "https://github.com/CIR4FUN-EU",
+      "edition_or_version": "8 public repositories on 2026-10-19",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "per repository",
+      "what_it_shows": "Repository list, licences and push dates via read-only gh api."
+    },
+    {
+      "id": "new-opendpp-interop",
+      "title": "OpenDPP Interop Boundary Kit (OpenDPP/opendpp-interop)",
+      "issuing_body": "Opendpp UAB",
+      "url": "https://github.com/OpenDPP/opendpp-interop",
+      "edition_or_version": "v1.18.0 (2026-10-13); created 2026-06-16",
+      "publication_date": "2026-10-13",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "README (doors, validator categories, directory layout), vendored CIRPASS-2 registry schema and registry pointer sample. CONFORMANCE.md not read; the live node and its openapi.json were not contacted."
+    },
+    {
+      "id": "oss4dpp-eclipse",
+      "title": "Open Source for the Digital Product Passport (Eclipse Foundation initiative, 'OSS4DPP')",
+      "issuing_body": "Eclipse Foundation",
+      "url": "https://dpp.eclipse.org/",
+      "edition_or_version": "'Sources checked 24 July 2026'",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "none stated",
+      "what_it_shows": "Unchanged pre-launch status; no outcomes of the September meetings published."
+    },
+    {
+      "id": "new-trace4eu-github",
+      "title": "trace4eu GitHub organization",
+      "issuing_body": "TRACE4EU consortium (Digital Europe)",
+      "url": "https://github.com/trace4eu",
+      "edition_or_version": "8 public repositories; pushes 2024-11-21 to 2025-07-10",
+      "publication_date": "not applicable",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EUPL-1.2 for seven repositories; none for trace4eu-dpp-interop-did-web",
+      "what_it_shows": "READMEs of vc-and-digital-twin, off-chain-storage, ebsi-services-wrapper and trace4eu-dpp-interop-did-web."
+    },
+    {
+      "id": "new-ebsi-trace4eu-page",
+      "title": "TRACE4EU Battery Materials Traceability (EBSI project page)",
+      "issuing_body": "European Commission EBSI",
+      "url": "https://ebsi.eu/projects/trace4eu-battery-materials-traceability",
+      "edition_or_version": "web page (contains placeholder text)",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Illustrative credential scenario for a battery passport using EBSI VCs; no dates, outcomes or repository link."
+    },
+    {
+      "id": "new-dacapo-fullstack-dpp",
+      "title": "Full-Stack Digital Product Passport Architecture Supporting Interoperability and AI-Enabled Use",
+      "issuing_body": "DaCapo project (Horizon Europe GA 101091780); authors Valtanen, Ylikerälä, Hakola",
+      "url": "https://zenodo.org/records/20848510",
+      "edition_or_version": "DOI 10.5281/zenodo.20848510",
+      "publication_date": "2026-06-25",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0",
+      "what_it_shows": "Zenodo record metadata and description only; PDF not read."
+    }
+  ],
+  "open_questions": [
+    "Will the Commission publish the registry API specification ('DPP Registry technical guidelines' section still empty on 2026-10-19), and does the API registration payload match the JSON/XML upload templates?",
+    "Which exact hashing input does the EU registry use for the 'hash of the version of the digital product passport' (2026/1778 Art. 2 definition, Art. 9(2)(e)): bytes of a negotiated representation, a canonical form, or a value supplied by the operator?",
+    "What thresholds does the EU registry apply when it dereferences a UPI (redirect count, response size, allowed ports and domains)? The guide names the error classes only.",
+    "Does the mock 'eu' role mean End User (README) or EU authority (deploy-resources maps privileged CRUD to the public-authority client)? The answer changes which access tests are meaningful.",
+    "Is the CIRPASS-2 CORE ontology repository (ontologies-core) private, renamed or moved? Pinning SHACL fixtures needs the CORE files.",
+    "When will the battery semantic catalogue be defined so that battery registration succeeds (guide 6.2.1), and will it be exposed through the public semantic repository search API (2026/1778 Art. 12(5)-(7))?",
+    "Does the Battery Pass repository's CC BY 4.0 statement cover the deliverable PDFs in docs/, given the acatech imprint on thebatterypass.eu?",
+    "What did the OSS4DPP community meetings of 17 and 24 September 2026 decide about a conformance-testing project?"
+  ],
+  "anomalies": [
+    "User guide version labels disagree: PDF 'Last Published 2026-09-16 v1.03' versus resources page 'V3' dated 14 September 2026.",
+    "User guide prints the test environment as http://registry.acc.product-passport.ec.europa.eu/ (http, not https), while it requires https for UPIs.",
+    "User guide abbreviates Unique Registration Identifier as 'URI', colliding with the RFC 3986 meaning used elsewhere in the same family.",
+    "CIRPASS-2 test environment report says the Mock EU Registry exposes a search API; the code exposes only POST /metadata/v1(/registerDPP) and GET /metadata/v1/{registryId}/proof; search lives in renderer-be over the extractor cache.",
+    "mock-eu-registry README: one example returns contentType 'application/json+ld' while others use 'application/ld+json'; the first example dppHash has 63 hex digits (a mistyped SHA-256 of the empty string) and lacks the documented 'sha256:' prefix.",
+    "mock-eu-registry README uses config keys registry-auth.oidc.role-claim-path and registry.oidc.role-claim-path in examples, while the configuration table lists quarkus.oidc.roles.role-claim-path.",
+    "dpp-data-extractor README links its artifacts to the mock-eu-registry releases page; dpp-renderer-be README Docker Compose examples deploy the extractor image (copy-paste errors).",
+    "Extractor and renderer DDL declare upi VARCHAR(36) although the registry schema allows UPIs up to 200 characters.",
+    "dpp-validator README says role eu (End User) may use all endpoints, including schema and template management; mock-eu-registry application.properties grants /schema/v1* to admin and eu but not eo.",
+    "ontologies-battery README links many issues in CIRPASS-2/ontologies-core, but that repository returns HTTP 404 through the public API.",
+    "D4.1 V1.1: two Zenodo records (20698579 and 20720002) both carry a 'V1.1' file with different sizes and checksums (per Zenodo versions listing); the PDF text still shows a 'Draft' watermark; the cover date (11 June 2026) differs from the revision table (10/06/2026) and submission (2026-06-16); the suggested citation lists an author (Lazrak) who is not a Zenodo creator and the year 2025.",
+    "D4.1 3.18 text proposes '/.well-known/dppdata' while its Figure 15 label shows '/.well-known/dpp'.",
+    "CIRPASS D3.2 exists as two Zenodo records: 10.5281/zenodo.10949842 (2024-03-26, found via SciSpace) and 12206138 v1.9 (2024-05).",
+    "Name collision: the CIRPASS-2 'OpenDPP Catalogue' web page is unrelated to the OpenDPP GitHub organisation (Opendpp UAB).",
+    "OpenDPP registry pointer sample sets backupURL to the same GS1 resolver URL as the upi (https://id.gs1.org/01/09521234543213), which is not an independent back-up location.",
+    "BatteryPass-Ready README: current version stated as 2.0 while the tree labels v2.0.1 as current release; changelog and diagram paths differ between text and tree; one XSD file name contains a space.",
+    "The task framing listed 'Battery Pass Data Model (SAMM, JSON Schema, JSON-LD) v1.2.0 and BatteryPass-Ready v2.x'; only v1.2.0 is SAMM/JSON-LD based; BatteryPass-Ready v2.x is JSON Schema plus XSD.",
+    "PyPI dpp-sdk project_urls point to gitlab.cc-asp.fraunhofer.de while the GitHub repository is CIR4FUN-EU/python-dpp-sdk (unchanged since prior record).",
+    "TRACE4EU did:web README points to github.com/trace4eu/trace4eu-dpp-interop, which is not in the public organisation listing.",
+    "EUR-Lex /eng and TXT/HTML addresses returned empty pages for 2026/1778, 2024/1781 and 2023/1542 on 2026-10-19; Cellar DOC_1 addresses worked.",
+    "EBSI TRACE4EU page contains placeholder text ('Lorem ipsum', headings) and a developer-hub button linking to '#'.",
+    "mock-eu-registry README gives the default JWKS kid as 'mock-eu-registry-key-1' while main/src/main/resources/application.properties sets smallrye.jwt.sign.key.id=mock-eu-registry-key."
+  ],
+  "truncation": "Not read: CIRPASS D3.3 Identification schemes, D3.4 Roadmap, D5.1 Prototypes and user stories V2.0 (results page only); CIRPASS-2 user stories V3.1, web-portal search options, backup redirection options, AAS/RDF interoperability approaches, registry consultation response and the Risks and Mitigations companion (titles and DOIs only); D4.1 chapter 2 building-block tables and appendices (only recommendations 3.1-3.24 read); CIRPASS D3.2 chapters 4.2 and 5 (DID flows and validation) beyond headings; BatteryPass-Ready user stories chapter 4.3 and chapter 6 (they restate a protected standard); Battery Pass Content Guidance and data attribute longlists (licence-restricted, prior metadata kept); OpenDPP CONFORMANCE.md and openapi.json; Cir4Fun sdk-demo and DPP4Fun contents; CIRPASS-2 dpp-validator releases (not re-listed); ontology files themselves (TTL) and the textile and tyre ontology repositories; DaCapo PDF. Literature capped at 16 records from 3 Consensus calls (2 on mcp__consensus__search, 1 on the second Consensus server), 2 SciSpace calls and 1 extended web search; abstracts only, no full texts read. No hosted environment was contacted (EU registry, its test site, BatteryPass-Ready test environment, OpenDPP node, DPP Vocabulary Hub, EBSI hub)."
+}

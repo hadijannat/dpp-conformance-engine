@@ -1,0 +1,1330 @@
+{
+  "method_id": "f02-hybrid-stack-composition",
+  "name": "Composition rules for hybrid DPP stacks",
+  "retrieval_date": "2026-10-19",
+  "scope_note": "Defines the hybrid family as a per-layer composition: which method family supplies each of the layers L01-L11 in five real stacks, and where control passes from one family to another (hand-over points). Cases: (A) Battery Pass Technical Guidance v1.0 and its demonstrator, with the successor BatteryPass-Ready (data model v2.0.1, user stories v1.0, test environment); (B) Catena-X CX-0160 Battery Passport (base v1.1.0, CX-0160-3 v1.0.0) with its section 5.2 bridge to the EU DPP system, still in the 'CX-Neptune (Preview)' docs; (C) IDTA ID Link plus RFC 9264 linkset discovery into AAS services (IDTA-01002 v3.2.0); (D) GS1 resolver plus verifiable credential (UNTP 0.7.0 profile); (E) operator API plus ledger anchor (EBSI Timestamp as the worked example). It resolves m06 open question 8 (the EUBOF claim that the Battery Pass platform relies on a private permissioned blockchain) against the Battery Pass texts. AAS is described only from IDTA/admin-shell-io texts; identification links only from GS1 texts and IETF RFCs; battery attributes only from Regulation (EU) 2023/1542 Annex XIII and the open Battery Pass/BatteryPass-Ready models. Left out: the content of any EN/ISO/IEC/DIN document; chapter 4 and chapter 6 of the BatteryPass-Ready user stories (they restate JTC 24 standards); Catena-X standards other than CX-0160 (CX-0002, CX-0018, CX-0126, CX-0127, CX-0151, CX-0152 are named, not read); UNTP and DLT internals beyond what the sibling records m05 and m06 already hold (reused, not re-verified, and marked as such).",
+  "summary": "A hybrid DPP stack is not a sixth technology; it is a per-layer assignment in which different method families supply different layers and hand control to each other at a small number of hand-over points. In every stack examined, EU law fixes the outer frame: a carrier on the product links to a unique identifier (Regulation (EU) 2023/1542, Art. 77(3); Regulation (EU) 2024/1781, Art. 10(1)(a)), the passport sits with the operator or a service provider (Art. 78(c); ESPR Art. 11(c)), a back-up copy goes to a service provider (ESPR Art. 10(4)), and the identifier is uploaded to the EU registry (2023/1542 Art. 77(10); ESPR Art. 13). The Battery Pass Technical Guidance v1.0 proposes a three-part architecture (EC central services, distributed operator services, third-party back-up) with a central routing/resolver service, URN-shaped identifiers with a preference for DIDs, an RDF meta model turned into platform-specific models, REST over HTTPS with JSON-LD payloads, and a translator service that maps generic CRUD calls onto AAS, NGSI-LD or SQL repositories; its demonstrator ran AAS and NGSI-LD repositories side by side behind a common API and a central registry resolver. Read in full for this purpose, the guidance names distributed ledger technology only once, as an optional feature of upstream supply-chain transparency systems; it has no ledger in its system architecture, and the demonstrator and standard-stack documents contain no ledger term, so the EUBOF statement that the Battery Pass platform relies heavily on a private permissioned blockchain is not supported by the Battery Pass sources. BatteryPass-Ready narrows the open part to JSON Schema 2020-12 and XSD per battery category and to a module chain (authenticate, create, register, back up, read, update, delete); its README and user stories do not mention GS1 Digital Link, resolvers or routing, so GS1 Digital Link enters that ecosystem only through individual supporting partners. Catena-X supplies L04, L05 and L07 inside the dataspace (Digital Twin Registry lookup, AAS descriptors with a DSP subprotocol, EDC contract negotiation, usage purpose cx.circular.dpp:1, seven IDTA-02035 battery submodels plus IDTA-02099-1 DppMetadata) but states in CX-0160-3 section 5.2 that public free access is impossible inside the dataspace, so a proxy outside Catena-X must supply registration, a lifecycle API, a stable resolver endpoint, role-based access, carrier access and back-up. The IDTA ID Link pattern makes an HTTP(S) URL the AAS globalAssetId and answers it with an RFC 9264 linkset whose relations 'aas', 'aas-service-endpoints', 'dpp' and 'dpp-service-endpoints' hand the client to AAS or DPP services; of these only 'dpp' is in the IANA link-relation registry, where it was registered with a UNTP reference. The GS1-conformant resolver also answers with an RFC 9264 linkset (Accept: application/linkset+json or linkType=linkset) and redirects to a default link otherwise, so GS1 resolution and AAS discovery share one wire format and differ in relation names. In the UNTP composition the resolver hands over to a W3C VC (vc+jwt) whose signature, status list and issuer DID form L08, and in the anchored composition the operator API serves the passport while a ledger holds only a digest that a verifier recomputes. The common failure surface of all hybrids is therefore at the seams: relation names, identifier equality across layers, the byte form that is signed or hashed, and the change of access regime between a closed dataspace or wallet world and the free public tier required by law.",
+  "method_families": [
+    "hybrid",
+    "law-baseline",
+    "web-resolver-gs1",
+    "aas-digital-twin",
+    "dataspace-federated",
+    "verifiable-credentials-ssi",
+    "dlt-anchored",
+    "linked-data-semantic"
+  ],
+  "maturity": {
+    "spec_status": "No single specification defines a hybrid stack. The components have mixed status: EU law in force (2023/1542 consolidated 13.08.2026; 2024/1781); Battery Pass Technical Guidance v1.0 (March 2024, project concluded April 2025, not updated); BatteryPass-Ready data model 2.0 'work in progress' with release folder v2.0.1; CX-0160 base v1.1.0 in the CX-Neptune docs, labelled preview on the site and 'not eligible for certification yet', go-live announced for 24 November 2026; IDTA-01002 v3.2.0 released 2026-07-21; GS1-Conformant Resolver 1.2.1 ratified August 2026; UNTP 0.7.0 'Pilots', no 1.0 listed.",
+    "versions_at_retrieval": [
+      {
+        "artifact": "Battery Passport Technical Guidance",
+        "version": "Version 1.0 (March 2024); PDF sha256 30ef60da083e62b879f453bf2cf5688dd6fb8ca0a7cee476a15dc1ccfad45bfb (same file as the sibling record m02)",
+        "status": "final project deliverable; project concluded April 2025",
+        "source_id": "bp-technical-guidance"
+      },
+      {
+        "artifact": "BatteryPass-Ready Data Model",
+        "version": "2.0 (work in progress); current release folder v2.0.1 with ten JSON Schema files (five categories, each with a Feb27 variant)",
+        "status": "work in progress per README",
+        "source_id": "bp-ready-data-model-v2"
+      },
+      {
+        "artifact": "BatteryPass-Ready User Stories from a Technical Perspective",
+        "version": "v1.0 (PDF sha256 0e0ddbb9346fbd10080a65b0018169d48f89e5e278fc7639351a356718dd4da9)",
+        "status": "published June 2026",
+        "source_id": "new-bpr-user-stories-v1"
+      },
+      {
+        "artifact": "CX-0160 Battery Passport Data Management Base",
+        "version": "v.1.1.0 (changelog: 1.1.0 CX-Neptune 26.09; 1.0.0 CX-Neptune Preview 26.06); last commit on the folder 2026-09-18 (45e41becf9)",
+        "status": "docs folder labelled 'CX-Neptune (Preview)' in docusaurus.config.ts; warning box says not eligible for certification yet; current released version on the site is CX-Titan",
+        "source_id": "new-cx-0160"
+      },
+      {
+        "artifact": "CX-0160-3 Complete exchange of DPPs to service providers",
+        "version": "v.1.0.0",
+        "status": "preview, same as base",
+        "source_id": "new-cx-0160"
+      },
+      {
+        "artifact": "IDTA-01002 AAS Part 2 API",
+        "version": "v3.2.0 (GitHub release 2026-07-21, not pre-release; v3.1.3 2026-07-06)",
+        "status": "released",
+        "source_id": "idta-01002-api"
+      },
+      {
+        "artifact": "GS1-Conformant Resolver Standard",
+        "version": "Release 1.2.1",
+        "status": "ratified August 2026 (page)",
+        "source_id": "gs1-conformant-resolver-1-2-1"
+      },
+      {
+        "artifact": "UN Transparency Protocol",
+        "version": "0.7.0",
+        "status": "'Pilots' under Maintained; Work in Progress labelled 'Testing'; 0.6.0 Unmaintained; no 1.0 listed",
+        "source_id": "untp-versions-page"
+      },
+      {
+        "artifact": "IANA Link Relation Types registry",
+        "version": "last updated 2026-06-12",
+        "status": "'dpp' registered (reference UNTP); 'linkset' registered (RFC 9264); 'aas', 'aas-service-endpoints', 'dpp-service-endpoints' not registered",
+        "source_id": "new-iana-link-relations"
+      },
+      {
+        "artifact": "EUBOF report 'Digital Product Passports: A Blockchain-based Perspective'",
+        "version": "PDF created 2024-05-02 (sha256 35b876a3577c848692383ff566f1b506a923c4d479f662e01df1a693c2eb9d2e)",
+        "status": "report of the EU Blockchain Observatory and Forum; not an official Commission position",
+        "source_id": "new-eubof-dpp-report-2024"
+      }
+    ],
+    "adoption_evidence": "Battery Pass ran a minimum viable demonstrator with several operator repositories (AAS and NGSI-LD named), a battery passport manager, a viewer and a central registry with a resolver mechanism (State of Play slides May 2024; closing-event slides 25 February 2025). BatteryPass-Ready reports over 100 supporting partners on its project page and a public test environment (not contacted). Catena-X CX-0160 is a preview standard with conformity assessment criteria files (CAC-base, CAC-uc1, CAC-uc3) in the same folder. Literature shows hybrids as the norm in prototypes: AAS inside a Gaia-X service (10.1016/j.procir.2024.07.039), a four-block layered blueprint (10.1016/j.procs.2026.02.274), UNTP semantics embedded as an AAS submodel (10.1016/j.procs.2026.02.153), GS1 Digital Link resolvers that route to digital twins (10.1109/rfid-ta63091.2025.11265909) or fall back when an OEM disappears (10.1016/j.procs.2026.02.212), DID/VC plus Merkle-tree notarisation (MaDiTraCe, 10.5281/zenodo.18711539). No source reports a production deployment that combines all of these layers.",
+    "regulatory_alignment": "Law fixes the hand-over points but not the technologies. Regulation (EU) 2023/1542: passport from 18 February 2027 for LMT, industrial >2 kWh and EV batteries (Art. 77(1)); three access tiers by Annex XIII point (Art. 77(2)); reached through a QR code that links to a unique identifier attributed by the operator (Art. 77(3), which names a protected identifier series: bibliographic only); open standards, interoperable format, transferable over an open interoperable network without vendor lock-in, machine-readable, structured, searchable (Art. 77(5)); new linked passport after repurposing or remanufacturing (Art. 77(7)); passport ceases after recycling (Art. 77(8)); identifier uploaded to the ESPR registry (Art. 77(10)); essential requirements in Art. 78(a)-(h): interoperability with other DPPs, free access by rights, storage by the responsible operator or its delegate, no resale of data by delegates, availability after insolvency or exit, restricted write rights, authenticated reliable integral data, high security and privacy. Regulation (EU) 2024/1781: carrier linked to a persistent unique product identifier (Art. 10(1)(a)); back-up copy through a DPP service provider (Art. 10(4)); Art. 11(a)-(h) design rules; registry storing at least identifiers, commodity codes and battery identifiers, with an automatic registration identifier that is not proof of compliance (Art. 13(1), (5)); customs check of registration identifier and commodity code (Art. 15(1)-(2)). None of these articles names a resolver protocol, AAS, a dataspace, a credential format or a ledger."
+  },
+  "layers": {
+    "L01_unique_identifiers": {
+      "applies": "yes",
+      "mechanism": "Each case supplies L01 from a different family, and the hybrid must keep one identity across layers. (A) Battery Pass TG 4.10 and 6.2: all internal identifiers as URNs of the form urn:<NID>:<NSS> (examples urn:epc:id:sgtin:..., urn:eori:...), random urn:uuid: when nothing exists, lower-case namespace preferred, IRIs' extended characters excluded against homograph attacks; for access to the passport itself the guidance recommends DIDs (free of charge, generated by the operator, resolving to a decentral service endpoint). The demonstrator issued a 'Battery Pass ID' in URN notation that can wrap other schemes such as a DID (State of Play slide 33). BatteryPass-Ready README names no identifier syntax. (B) Catena-X: the AAS id is a urn:uuid; twins carry specificAssetIds manufacturerId (a BPNL), manufacturerPartId, digitalTwinType (PartInstance or PartType), partInstanceId (any identifier agreed between the partners) and optional customerPartId; DPP data fields UniqueFacilityIdentifier must hold a BPNS and ManufacturerIdentifier a BPNL (CX-0160 base 2.1.1 and 3). (C) IDTA: the globalAssetId is itself an HTTP(S) 'ID Link' URL, e.g. https://id.example.com/my-asset-id, and the shell id in AAS paths is base64url-encoded. (D) GS1/UNTP: a GS1 Digital Link URI such as https://<domain>/01/<GTIN>/21/<serial> (sibling record m02). (E) Ledger anchoring adds a second identifier (transaction hash, timestampId or token id) bound to the passport digest.",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.10 Unique identifiers; 6.2 Allow different principles of unique identifiers"
+        },
+        {
+          "source_id": "new-bp-state-of-play-2024",
+          "component": "slide 33 Battery Pass ID in URN notation"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "base 2.1.1 Digital twins and specific asset IDs; 3 Application of the Data Models; 1.4.1 examples"
+        },
+        {
+          "source_id": "idta-01002-api",
+          "component": "interactions.adoc 'Direct Discovery of AAS Objects based on ID Link and LinkSets'"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(3) (names a protected identifier series; bibliographic only)"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 10(1)(a), Art. 12"
+        },
+        {
+          "source_id": "prior-m02-gs1-web-resolver",
+          "component": "GS1 Digital Link URI forms (sibling record, not re-read)"
+        }
+      ],
+      "variants": [
+        "Battery Pass TG: URN for internal ids; DID recommended for passport access; urn:uuid fallback",
+        "BatteryPass-Ready: not specified in README or user stories",
+        "Catena-X: urn:uuid AAS id plus specificAssetIds (BPNL, manufacturerPartId, partInstanceId); no public URL form in CX-0160",
+        "IDTA ID Link: HTTP(S) URL as globalAssetId",
+        "UNTP/GS1: GS1 Digital Link URI or other resolver URL, plus did:web issuer DIDs",
+        "Operator API plus anchor: operator URL plus ledger record id or transaction hash"
+      ],
+      "observable_black_box": "The identifier read from the carrier; the identifier echoed in the resolved passport (DppMetadata, credentialSubject.id, AAS globalAssetId or specificAssetIds); the identifier stored with an anchor. A tester can compare these as exact strings and can check the syntax of each.",
+      "law_delta": "Law requires a persistent unique product identifier linked from the carrier and (for batteries) a scheme from a protected series or equivalent; it does not say which of URN, DID, GS1 URI or ID Link satisfies that, and says nothing about cross-layer identity. The Battery Pass DID preference and the Catena-X BPN-based ids are additions."
+    },
+    "L02_data_carriers": {
+      "applies": "yes",
+      "mechanism": "QR code is the only carrier named by battery law (Regulation (EU) 2023/1542, Art. 13(6), Art. 77(3)). Battery Pass TG 6.1 contrasts two carrier contents: a direct-access URL (works with stock phone readers) and an identifier plus offline data (needs a dedicated app and resolver); it recommends a stable intermediate URL with flexible routing so the printed code never changes. The demonstrator offered QR scan or manual entry of the Battery Pass ID. CX-0160 defines no carrier content; the CX-0160-3 bridge assigns 'free access to public DPP data via a data carrier' to the EU-facing proxy. IDTA: the carrier holds the ID Link URL (sibling m03). GS1/UNTP: the carrier holds the GS1 Digital Link URI. Anchored stacks put the operator URL on the carrier; the ledger reference is inside the passport, not on the label.",
+      "specs": [
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 13(6)-(7), Art. 77(3)"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.11 Data carriers; 6.1 Application of different data carriers (table of pros and cons of URL vs identifier plus offline data)"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "CX-0160-3 5.2 (carrier access delegated to the EU-facing system)"
+        },
+        {
+          "source_id": "new-bp-state-of-play-2024",
+          "component": "slides 28 and 37 (QR, NFC, Data Matrix and ID link shown as carrier options; QR or ID entry in the demonstrator)"
+        }
+      ],
+      "variants": [
+        "URL in QR (GS1 Digital Link URI, ID Link URL, operator URL)",
+        "identifier plus offline data in QR (TG variant 2; needs an app)",
+        "no carrier in the dataspace layer (Catena-X)"
+      ],
+      "observable_black_box": "Decoded QR payload text: whether it is an absolute HTTPS URL, which pattern it follows, whether it contains a DID or a bare identifier.",
+      "law_delta": "Battery law fixes a QR code; ESPR leaves the carrier type to delegated acts. TG variant 2 (identifier plus offline data needing an app) would conflict with free easy access only if a stock reader cannot reach the passport; the law text read does not settle this."
+    },
+    "L03_data_exchange_protocols": {
+      "applies": "yes",
+      "mechanism": "This is the main hand-over layer. (A) Battery Pass TG 4.6: HTTPS over TCP/IP, REST, JSON-LD as the RDF serialisation of payloads; three API categories (canonical-model API, for which the demonstrator used GraphQL; platform-specific standard APIs such as AAS, NGSI-LD, WoT, EPCIS behind translator adapters; supporting APIs); TG 5.1 a central routing/resolver service gives central access to distributed repositories; TG 5.2 a translator service maps generic CRUD calls (method, headers, payload, path, query parameters, query language) onto each platform API. (B) Catena-X: DTR lookup POST {dtr}/lookup/shells?createdAfter=<RFC 3339> with an assetIds array; GET {dtr}/shell-descriptors/<base64url(aasId)>; each submodel endpoint has protocolInformation.href, endpointProtocol HTTP 1.1, subprotocol 'DSP' and subprotocolBody 'id=<asset id>;dspEndpoint=<control plane>'; the client negotiates a contract, then calls the data plane href, appending /$value for interface SUBMODEL-VALUE-3.1 or -3.2. (C) IDTA ID Link: GET <ID Link> with Accept: application/linkset+json, application/json;q=0.9; 200 with an RFC 9264 linkset anchored at the ID Link holding relations aas, aas-service-endpoints, dpp and dpp-service-endpoints, each link with href, type, profiles (operation lists keyed by service specification profile URIs such as .../API/3/2/AssetAdministrationShellServiceSpecification/SSP-001) and authentication hints (OIDC well_known_url, OAuth2 flows and scopes); a linkset-unaware client may get 302 Found with Location to the AAS and a Link header rel=\"alternate\" type=\"application/linkset+json\". (D) GS1-conformant resolver 1.2.1: without linkType, redirect to the single default link; ?linkType=<type> redirects to that link or 404; Accept: application/linkset+json or linkType=linkset returns the linkset with 200; malformed URI 400, unknown valid URI 404 (official page). UNTP then fetches the credential typed 'dpp' (sibling m05). (E) Anchored: plain REST GET of the passport at the operator, plus a read of the ledger record (EBSI Timestamp API under /api/core/timestamp per the EBSI page).",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.6 Data integration, distribution, exchange and protocols; 5.1 Routing / resolver services; 5.2 Translator service"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "base 1.4.1.1-1.4.1.3 retrieval examples; 4.1 data asset structure"
+        },
+        {
+          "source_id": "idta-01002-api",
+          "component": "interactions.adoc, ID Link and LinkSets section, client interaction patterns 1 and 2"
+        },
+        {
+          "source_id": "gs1-conformant-resolver-1-2-1",
+          "component": "linkset responses, linkType, default link, 400/404"
+        },
+        {
+          "source_id": "new-iana-link-relations",
+          "component": "entries 'dpp' and 'linkset'"
+        },
+        {
+          "source_id": "new-ebsi-timestamp-docs",
+          "component": "Timestamp introduction (hash only; API reference location)"
+        },
+        {
+          "source_id": "prior-m05-verifiable-credentials",
+          "component": "UNTP verification flow steps 1-4 (sibling record, not re-read)"
+        }
+      ],
+      "variants": [
+        "GS1 resolver redirect or linkset -> passport document or credential",
+        "ID Link linkset -> AAS repository (relation 'aas') or DPP API (relation 'dpp')",
+        "DTR lookup -> descriptor -> DSP contract negotiation -> data plane (Catena-X internal only)",
+        "central routing/resolver in front of distributed repositories plus translator (Battery Pass TG)",
+        "REST GET plus ledger read (anchored)"
+      ],
+      "observable_black_box": "Status codes (200, 300, 302/307, 400, 404), Location and Link headers, Content-Type (application/linkset+json, application/json, application/ld+json, application/vc+jwt), linkset relation names and anchors, whether Vary: Accept is sent, whether authentication is demanded for the public tier.",
+      "law_delta": "Law requires an open interoperable exchange network without vendor lock-in (2023/1542 Art. 77(5); ESPR Art. 10(1)(d)) but names no protocol. The relation vocabularies differ between families: GS1 uses its own link types (gs1:dpp per sibling m02), IDTA uses unregistered tokens 'aas', 'aas-service-endpoints', 'dpp-service-endpoints' plus the IANA-registered 'dpp'. A Catena-X-only stack cannot meet free public access; CX-0160-3 5.2 says so itself."
+    },
+    "L04_apis_lifecycle_searchability": {
+      "applies": "yes",
+      "mechanism": "(A) Battery Pass TG 4.4 lists core services: onboarding, issuing (single and bulk, with registration), update, transfer between operators, archiving (by a third-party service provider), search and view; it recommends WSDL for the logical service definition, REST with OpenAPI, the Catena-X service catalogue as a starting point and SPARQL for queries over RDF. TG 5.1 adds an EC company service with a machine-to-machine bulk API and an EC user web portal. BatteryPass-Ready reduces this to seven modules: authentication and authorisation, registration, create DPP, read (public QR read or controlled read), update, backup, deletion (soft delete at the backup provider plus registry notification) (user stories chapter 5). (B) Catena-X: AAS registry and submodel APIs via CX-0002, bulk retrieval by createdAfter (a Tractus-X feature not required by CX-0002 2.3.0), notifications per CX-0151 with header {messageId, context 'IndustryCore-DigitalTwinEvent-SubmodelUpdate:3.0.0', senderBpn, receiverBpn, version} and events such as CreateSubmodel with globalAssetId and submodelSemanticId. (C) IDTA linkset advertises operations per profile (e.g. GetAssetAdministrationShellById, GetSubmodelVersionByIdAndDate) and DPP operation names ReadDPPByProductId and ReadDPPVersionByProductIdAndDate with URL templates /dpps/<url-encoded product id> and /dppsByProductIdAndDate/<id>?date={date}. (D) UNTP: the passport is a credential document; lifecycle is issue new credential plus revoke old via status list (sibling m05). (E) Anchored: operator CRUD API; each version gets a new anchor or a record version (sibling m06).",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.4 Core passport software services and APIs; 5.1 EC Company service"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "chapter 5 Methodology, 'Modules' list (chapter 4 and 6 not used)"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "base 1.4.1, 4.1, 4.2 Notification payload"
+        },
+        {
+          "source_id": "idta-01002-api",
+          "component": "linkset examples (profiles, dpp-service-endpoints)"
+        },
+        {
+          "source_id": "prior-m06-dlt-anchored",
+          "component": "EBSI timestamp record versions (sibling record)"
+        }
+      ],
+      "variants": [
+        "canonical GraphQL/REST plus translators (Battery Pass demonstrator)",
+        "AAS Part 2 API profiles",
+        "Catena-X DTR plus EDC plus notifications",
+        "credential issue/revoke",
+        "operator REST plus per-version anchor"
+      ],
+      "observable_black_box": "Public read endpoint behaviour; version-by-date reads where advertised; search endpoints if exposed; profile lists advertised in a linkset vs. operations that actually answer.",
+      "law_delta": "Law requires searchability (2023/1542 Art. 77(5)) and update rights limited by access rights (Art. 78(f); ESPR Art. 11(f)); it fixes no API. The linkset operation names and the BatteryPass-Ready modules are project choices."
+    },
+    "L05_system_interoperability_data_models": {
+      "applies": "yes",
+      "mechanism": "(A) Battery Pass: RDF-based meta model following OMG MOF; platform-independent semantic models per content cluster transformed (OMG MDA) into platform-specific models (AAS, NGSI-LD, others); SHACL named for meta-model constraints; Catena-X SAMM cited as an RDF meta model generating AAS submodels (TG 4.9). The open data model v1.2.0 uses SAMM 2.1.0 aspects (sibling m07, m08). BatteryPass-Ready v2.0.1: JSON Schema draft 2020-12 per category (EV, LMT, Industrial_Without_BMS, Other_Industrial_Above_2kWh, Stationary_Industrial_Above_2kWh, each also as _Feb27) plus XSD per category (Datatypes.xsd, DPP_Header.xsd, <category>.xsd); no SAMM, JSON-LD or SHACL in the README. (B) Catena-X: seven IDTA-02035 battery submodels with semantic ids urn:samm:io.admin-shell.idta.batterypass.<model>:1.0.0#<Aspect>, plus urn:samm:io.admin-shell.idta.dpp.dpp_metadata:1.0.0#DppMetadata and supplemental https://admin-shell.io/idta/cds/dppMetadata/1 at instance level (CX-0160-3 3.1.3); type-level twins SHOULD carry parts 2, 4, 6, 7; optional fields must not break consumers. (C) IDTA: AAS metamodel and submodel templates (sibling m03). (D) UNTP: VCDM 2.0 credential with UNTP JSON-LD context and JSON Schema (sibling m05). (E) Anchored: any payload; the anchor binds bytes, not semantics. Law-level content: Annex XIII points 1-4 of Regulation (EU) 2023/1542 define what the models must carry by tier.",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.9 Data models and data formats"
+        },
+        {
+          "source_id": "bp-ready-data-model-v2",
+          "component": "README folder tree JSONSchemaFiles/v2.0.1 and XSDFiles/v2.0"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "base 3 Semantic models; CX-0160-3 3 and 3.1.3"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(2), Annex XIII (via sibling batteries-regulation.json for point detail)"
+        },
+        {
+          "source_id": "prior-m03-aas-digital-twin",
+          "component": "IDTA-02035 parts 1-7 semantic ids (sibling record)"
+        }
+      ],
+      "variants": [
+        "RDF/SAMM platform-independent model with generated artefacts (Battery Pass v1.2.0)",
+        "JSON Schema 2020-12 plus XSD per category (BatteryPass-Ready v2.0.1)",
+        "AAS submodels per IDTA-02035 plus IDTA-02099-1 (Catena-X, IDTA)",
+        "UNTP DPP credential (UNTP)"
+      ],
+      "observable_black_box": "Payload media type, @context values, AAS semanticId values, JSON Schema validity against a pinned schema, presence of Annex XIII fields per tier.",
+      "law_delta": "Annex XIII fixes content by tier and model/item level; the choice between RDF/SAMM, JSON Schema/XSD, AAS and VC is not in law. CX-0160 states alignment with a protected DIN document for field optionality; that alignment is not assessed here (fence)."
+    },
+    "L06_storage_archiving_persistence": {
+      "applies": "yes",
+      "mechanism": "Battery Pass TG 4.7: distributed storage per operator or DPP-as-a-service provider, high-availability systems, archiving for market surveillance, back-up at an independent third party in the platform-independent semantic format rather than a system-specific one; TG 5.3 back-up service must hold the most recent version. BatteryPass-Ready backup module runs after registration and after each update; deletion soft-deletes at the backup provider. CX-0160-3 5.2 assigns back-up management to the EU-facing proxy, not to the dataspace. Anchored stacks keep data off chain and only digests on chain (EBSI stores hash, submitter, block number, block time).",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.7 Data storage and persistence; 5.3 Backup service"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "chapter 5 modules Backup and Deletion"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "CX-0160-3 5.2"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 10(4), Art. 11(c), (e)"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 78(c), (e)"
+        },
+        {
+          "source_id": "new-ebsi-timestamp-docs",
+          "component": "what the Timestamp service stores"
+        }
+      ],
+      "variants": [
+        "operator repository plus third-party back-up",
+        "dataspace twin inside, public copy at proxy plus back-up outside",
+        "off-chain document plus on-chain digest"
+      ],
+      "observable_black_box": "Back-up reference in the passport or registry record (if exposed); whether the back-up copy matches the live copy (needs both URLs); anchor digest equality.",
+      "law_delta": "Law: back-up copy via a service provider and availability after insolvency; it does not say whether a ledger copy or a dataspace copy counts as back-up (open in m06)."
+    },
+    "L07_access_rights_security_confidentiality": {
+      "applies": "yes",
+      "mechanism": "(A) Battery Pass TG 4.5 and 4.12: three actor groups from battery law; attribute-based, product-group-specific access rights managed by the operator; identity and access control in front of every API; TG 6.6 recommends W3C DIDs and VCs and the Gaia-X Trust Framework for access by restricted groups. BatteryPass-Ready: authentication and authorisation precede every module; registry onboarding uses a qualified e-signature or e-seal, an eID or an attestation (user stories chapter 6 headings; content not used beyond the figure in chapter 5). (B) Catena-X: onboarding with BPN, connector contract negotiation, access and usage policies per CX-0152, usage purpose 'cx.circular.dpp:1' expressed as {leftOperand UsagePurpose, operator isAnyOf, rightOperand [...]}; only onboarded participants reach the data. (C) IDTA linkset carries authentication hints per link (OIDC discovery URL, OAuth2 base_url, flows, scopes). (D) UNTP: public linkset, encrypted targets with accessRole, DID-based presentation for restricted data (sibling m05). (E) Anchored: access control is the operator API's; the ledger exposes only digests.",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.5 Identity and access management; 4.12 Policy management; 6.6 Seamless and secure provision of access"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "base 2.2 Policy constraints for data exchange; CX-0160-3 5.2"
+        },
+        {
+          "source_id": "idta-01002-api",
+          "component": "linkset 'authentication' members"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(2), Art. 78(b), (f), (h)"
+        },
+        {
+          "source_id": "prior-m05-verifiable-credentials",
+          "component": "UNTP decentralised access control flow (sibling record)"
+        }
+      ],
+      "variants": [
+        "role/attribute-based at operator API",
+        "dataspace contract policy (closed membership)",
+        "OIDC/OAuth2 hinted from a linkset",
+        "VC/DID presentation plus encrypted payloads"
+      ],
+      "observable_black_box": "Public tier reachable without credentials; restricted fields absent from the anonymous view; 401/403 for restricted endpoints; whether a linkset itself demands authentication.",
+      "law_delta": "Law requires free access for the public tier and restricted tiers for legitimate interest and authorities. A pure dataspace stack fails the public tier by construction (CX-0160-3 5.2), so a hybrid must add a public channel. Who counts as legitimate interest for batteries is left to an Art. 77(9) implementing act."
+    },
+    "L08_authentication_reliability_integrity": {
+      "applies": "partial",
+      "mechanism": "Battery Pass TG 5.1 lists EC verification services that check correctness cryptographically, for example signatures within VCs, and validation services that reject data not matching the models with an explanatory error; TG 6.5 names DLT only as an optional tamper-evidence feature of upstream supply-chain transparency systems, not of the passport system. CX-0160 names no signature or provenance mechanism beyond connector policies. IDTA linkset: none. UNTP: vc+jwt with JOSE header kid as a DID URL, Bitstring Status List, issuer DID and identity anchor (sibling m05). Anchored: digest of the served bytes stored on a ledger (EBSI Timestamp: hash, timestampedBy, block number and time; records with ordered version hashes and revocation status).",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "5.1 Data services (verification, validation); 6.5 item 7 (DLT optional)"
+        },
+        {
+          "source_id": "new-ebsi-timestamp-docs",
+          "component": "Timestamp introduction"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 78(g)"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 11(g); Art. 11 further subparagraph on implementing acts for digital credentials"
+        },
+        {
+          "source_id": "prior-m05-verifiable-credentials",
+          "component": "vc+jwt verification steps 5-10 (sibling record)"
+        },
+        {
+          "source_id": "prior-m06-dlt-anchored",
+          "component": "anchoring flows (sibling record)"
+        }
+      ],
+      "variants": [
+        "no integrity layer (Catena-X, IDTA ID Link)",
+        "VC signature plus status list (UNTP)",
+        "ledger digest anchor (EBSI, others)",
+        "central verification service (Battery Pass TG proposal, not specified)"
+      ],
+      "observable_black_box": "Signature presence and validity; status-list bit; digest recomputed over the exact bytes served vs. the anchored digest; issuer identity vs. the operator named in the passport.",
+      "law_delta": "Law requires authenticated, reliable and integral data (2023/1542 Art. 78(g); ESPR Art. 11(g)) but no specific mechanism; implementing acts on digital credentials are announced in ESPR Art. 11 and not located. Two of the five stacks (Catena-X internal, ID Link) provide no observable integrity evidence."
+    },
+    "L09_registry_and_customs": {
+      "applies": "yes",
+      "mechanism": "Battery Pass TG 5.1 describes a Commission registry storing identifiers and commodity codes, accessible by national and customs authorities, plus the demonstrator's 'resolver mechanism in central registry' that maps Battery Pass IDs to operator repositories. BatteryPass-Ready registration module: submit a set of IDs to the EC registry and receive a registration ID; deletion notifies the registry. CX-0160-3 5.2: registration at the EU registry is done by the EU-facing proxy outside Catena-X. IDTA, GS1 and UNTP: no registry interaction defined. Law: upload of the unique identifier (2023/1542 Art. 77(10)); registry contents and automatic registration identifier (ESPR Art. 13(1), (5)); customs check of registration identifier and commodity code (ESPR Art. 15(1)-(2)); CSW-CERTEX link within four years (Art. 15(3)). Registry implementation detail is in sibling m07 (Implementing Regulation (EU) 2026/1778).",
+      "specs": [
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 13, Art. 15"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(10)"
+        },
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "5.1 Registry; Routing / resolver services"
+        },
+        {
+          "source_id": "new-bp-state-of-play-2024",
+          "component": "slide 34 central registry resolver"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "chapter 5 Registration module"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "CX-0160-3 5.2"
+        },
+        {
+          "source_id": "prior-m07-eu-reference-pilots",
+          "component": "L09 registry and customs (sibling record)"
+        }
+      ],
+      "variants": [
+        "registry as identifier store only (law)",
+        "registry as resolver of resolvers (Battery Pass demonstrator; CIRPASS D3.2 per m07)",
+        "registration delegated to a proxy (Catena-X bridge)"
+      ],
+      "observable_black_box": "Only against a mock registry: record fields, registration identifier returned, consistency between registry identifier and carrier identifier. The official registry is out of scope for tests.",
+      "law_delta": "The registry is law; using it as a routing resolver is a project proposal, not a legal function (ESPR Art. 13 lists storage and access, not resolution)."
+    },
+    "L10_lifecycle_versioning_updates": {
+      "applies": "yes",
+      "mechanism": "Battery Pass TG 4.4 transfer service for handing responsibility to another operator and TG 6.3 a routing service that always points to the current operator's repository, so the static QR remains valid; TG 6.1 stable intermediate URL. BatteryPass-Ready update module followed by backup; deletion removes public hosting. CX-0160-3 5.2 requires system-neutral transfer of DPP data based on a generic DPP meta model when the operator changes after a battery status change. IDTA linkset advertises version-by-date operations (GetAssetAdministrationShellVersionByIdAndDate, ReadDPPVersionByProductIdAndDate) and calls the ID Link a stable proxy so backends can change. UNTP: new credential, old one revoked by status bit (m05). Anchored: new digest per version. Law: new linked passport after repurposing/remanufacturing (2023/1542 Art. 77(7); ESPR Art. 11(d)); status values original, repurposed, re-used, remanufactured, waste (Annex XIII point 4(c)); passport ends after recycling (Art. 77(8)).",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "4.4 Transfer services; 6.1; 6.3 Routing to different distributed DPP systems"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "CX-0160-3 5.2"
+        },
+        {
+          "source_id": "idta-01002-api",
+          "component": "linkset profiles SSP-004 version operations; guidance on stable proxy"
+        },
+        {
+          "source_id": "reg-eu-2023-1542",
+          "component": "Art. 77(7)-(8)"
+        },
+        {
+          "source_id": "reg-eu-2024-1781",
+          "component": "Art. 11(d)"
+        }
+      ],
+      "variants": [
+        "stable redirecting URL with re-pointing",
+        "version-by-date API",
+        "credential re-issue with revocation",
+        "per-version anchor"
+      ],
+      "observable_black_box": "Carrier URL still resolves after a simulated operator change (fixture); version operations answer with the declared date semantics; link to predecessor passport present after repurposing.",
+      "law_delta": "Law fixes the outcomes (linked new passport, end after recycling, availability after exit); the redirect mechanics for operator change are not in law (also noted in sibling m10)."
+    },
+    "L11_roles_and_governance": {
+      "applies": "yes",
+      "mechanism": "Battery Pass TG 5: three service owners: European Commission (central services, registry, routing/resolver, data modelling and policy management services), economic operator or DPP-as-a-service provider (distributed repositories, translator, operator portal), certified independent third party (back-up). BatteryPass-Ready: economic operator, main service provider, backup service provider, EC registry, market surveillance. Catena-X: Catena-X e.V. standards, conformity assessment bodies and CACs, onboarding and BPN issuance; a 'DPP service provider with a Catena-X certified business application' runs the EU-facing proxy. IDTA governs the AAS API and submodel templates; GS1 governs Digital Link and resolver standards and GS1 company prefixes (sibling m02); UN/CEFACT governs UNTP; ledger operators (EBSI: Commission and Member States) govern the anchor layer.",
+      "specs": [
+        {
+          "source_id": "bp-technical-guidance",
+          "component": "5 System Architecture overview"
+        },
+        {
+          "source_id": "new-bpr-user-stories-v1",
+          "component": "chapter 5 figure 'List of User Stories' actors"
+        },
+        {
+          "source_id": "new-cx-0160",
+          "component": "base 1.3 Conformance; CX-0160-3 5.3.1 Actors and roles"
+        },
+        {
+          "source_id": "new-bpr-project-page",
+          "component": "partners and funding"
+        }
+      ],
+      "variants": [
+        "Commission central plus distributed operators (Battery Pass proposal)",
+        "dataspace association with certification (Catena-X)",
+        "standards bodies only (IDTA, GS1, UN/CEFACT)",
+        "ledger consortium (EBSI)"
+      ],
+      "observable_black_box": "Mostly not observable; partially through issuer identities, BPNs, resolver domains and service-provider references in records.",
+      "law_delta": "Law names operator, authorised operator or service provider, back-up provider, Commission (registry, portal) and customs; it does not recognise dataspace associations, resolver operators or ledger consortia as roles."
+    }
+  },
+  "end_to_end_flows": [
+    {
+      "name": "Per-layer composition matrix (who supplies which layer)",
+      "actors": [
+        "Case A Battery Pass TG/BatteryPass-Ready",
+        "Case B Catena-X with CX-0160-3 bridge",
+        "Case C IDTA ID Link",
+        "Case D GS1 resolver plus UNTP VC",
+        "Case E operator API plus ledger anchor"
+      ],
+      "steps": [
+        "1. L01 identifiers: A law-baseline plus URN/DID proposal (verifiable-credentials-ssi for passport access); B dataspace-federated (urn:uuid AAS id, BPN-based specificAssetIds); C aas-digital-twin (ID Link URL); D web-resolver-gs1 (GS1 Digital Link URI) plus SSI (issuer DID); E platform plus dlt-anchored (record id).",
+        "2. L02 carriers: A law-baseline QR (URL or identifier plus offline data); B none inside, proxy supplies the QR; C QR with ID Link; D QR with GS1 URI; E QR with operator URL.",
+        "3. L03 exchange: A central routing/resolver plus translator (hybrid by design); B DTR plus DSP plus data plane inside, proxy resolver outside; C RFC 9264 linkset; D GS1 linkset or redirect then credential fetch; E REST plus ledger read.",
+        "4. L04 lifecycle APIs: A REST/OpenAPI with GraphQL canonical API in the demonstrator; B AAS Part 2 via CX-0002 plus notifications; C AAS Part 2 profiles plus advertised DPP operations; D credential issue/revoke; E operator CRUD.",
+        "5. L05 models: A linked-data-semantic (RDF/SAMM) then JSON Schema/XSD in BatteryPass-Ready; B aas-digital-twin (IDTA-02035 plus IDTA-02099-1); C aas-digital-twin; D verifiable-credentials-ssi plus linked-data (UNTP context); E any.",
+        "6. L06 storage: A operator repository plus third-party back-up; B dataspace twin plus proxy copy plus back-up; C AAS repository; D credential store; E off-chain store plus on-chain digest.",
+        "7. L07 access: A operator access control with VC/Gaia-X trust proposal; B dataspace policies (no public tier) plus proxy RBAC; C OIDC/OAuth2 hints; D public linkset plus encrypted targets; E operator API.",
+        "8. L08 integrity: A proposed central verification service (unspecified); B none observable; C none; D VC signature plus status list; E ledger digest.",
+        "9. L09 registry: A law plus registry-as-resolver proposal; B proxy registers; C none; D none; E none.",
+        "10. L10 lifecycle: A transfer service plus re-pointing routing; B system-neutral transfer by proxy; C version-by-date operations; D re-issue plus revoke; E per-version anchor.",
+        "11. L11 governance: A Commission plus operators plus back-up provider; B Catena-X e.V. and CABs; C IDTA; D GS1 and UN/CEFACT; E ledger operator."
+      ]
+    },
+    {
+      "name": "Battery Pass demonstrator path (Case A)",
+      "actors": [
+        "economic operator",
+        "Battery Passport Manager",
+        "operator data repository (AAS or NGSI-LD or SQL)",
+        "central registry with resolver mechanism",
+        "viewer (EC web portal or operator portal)"
+      ],
+      "steps": [
+        "1. Collect data from back-end systems and map it to the common battery pass data model (State of Play slide 33).",
+        "2. Issue a Battery Pass ID in URN notation, which can carry other schemes such as a DID.",
+        "3. Store the passport in the operator's own repository; repositories differ in technology and sit behind a common CRUD API, with translator services between the canonical model and each platform API (TG 5.2).",
+        "4. Publish the ID through the central registry, which also resolves the ID to the right repository (slide 34-36).",
+        "5. A user scans the QR or types the ID; the viewer shows public data, and restricted data after authorisation.",
+        "6. Hand-over points: registry resolver -> operator repository (L03/L09); canonical API -> platform API through the translator (L04/L05)."
+      ]
+    },
+    {
+      "name": "Catena-X dataspace to EU DPP system bridge (Case B, CX-0160-3 5.2, preview)",
+      "actors": [
+        "data provider (cell or pack maker)",
+        "economic operator or DPP service provider with a Catena-X certified business application",
+        "Digital Twin Registry",
+        "EDC connectors",
+        "EU-facing DPP management system (proxy outside Catena-X)",
+        "EU DPP registry",
+        "public user"
+      ],
+      "steps": [
+        "1. Provider registers PartInstance twins with specificAssetIds and attaches the eight required submodels (DppMetadata and IDTA-02035 parts 1-7) on instance level; parts 2, 4, 6, 7 also on type level.",
+        "2. Provider registers each submodel as an EDC data asset with dct:type cx-taxo:BatteryPass and cx-common:version, guarded by usage purpose cx.circular.dpp:1.",
+        "3. Consumer (the DPP business application) searches the DTR (POST /lookup/shells with assetIds, optional createdAfter), reads descriptors, negotiates a contract over DSP and reads submodels from the data plane (/$value for value-only interfaces).",
+        "4. The operator completes passport data on model and item level; an incomplete data set is rejected from publishing.",
+        "5. Hand-over: data move from the operator back end to the EU-facing system outside Catena-X, which registers at the EU registry, exposes a lifecycle API and a stable resolver endpoint, enforces role-based access, serves public data free of charge via the carrier, keeps a back-up and supports system-neutral transfer on operator change. CX-0160-3 gives no technical profile for this proxy."
+      ]
+    },
+    {
+      "name": "Carrier to AAS through an ID Link linkset (Case C)",
+      "actors": [
+        "client app",
+        "ID Link landing service",
+        "AAS repository or AAS service",
+        "DPP service"
+      ],
+      "steps": [
+        "1. Decode the carrier; the URL is the AAS globalAssetId (ID Link).",
+        "2. GET the ID Link with Accept: application/linkset+json, application/json;q=0.9.",
+        "3. Receive 200 application/linkset+json anchored at the ID Link with relations aas, aas-service-endpoints, dpp, dpp-service-endpoints; each link may list supported operations by profile and authentication hints.",
+        "4. A client that does not ask for a linkset may receive 302 to the AAS and a Link header rel=alternate type=application/linkset+json.",
+        "5. Follow 'aas' to GET /aas/shells/<base64url id>, then submodels; or follow 'dpp' to a DPP resource.",
+        "6. Hand-over: the 'dpp' relation is the same token that IANA registered for UNTP; a GS1 resolver could serve the same linkset shape, so a GS1 Digital Link URI can in principle act as the ID Link (not stated by either spec; inference)."
+      ]
+    },
+    {
+      "name": "GS1 resolver to verifiable credential (Case D, summarised from sibling m02/m05)",
+      "actors": [
+        "scanner",
+        "GS1-conformant resolver",
+        "credential host",
+        "DID resolver",
+        "status list host"
+      ],
+      "steps": [
+        "1. Decode the GS1 Digital Link URI; GET it with Accept: application/linkset+json or ?linkType=linkset.",
+        "2. Select the passport link (gs1:dpp / dpp) and fetch the credential (application/vc+jwt in the UNTP profile).",
+        "3. Verify the JWS with the key named by kid (DID URL), check iss, validity dates and the status-list bit.",
+        "4. Validate the payload against the pinned UNTP schema and context.",
+        "5. Hand-over points: resolver -> credential host (L03); credential -> DID document and status list (L08)."
+      ]
+    },
+    {
+      "name": "Operator API plus ledger anchor (Case E, EBSI example)",
+      "actors": [
+        "economic operator API",
+        "EBSI Timestamp service",
+        "verifier"
+      ],
+      "steps": [
+        "1. Operator hashes the passport bytes and submits the hash with an access token of scope timestamp:write.",
+        "2. Ledger records hash, submitting account, block number and block time; data stay off chain.",
+        "3. Passport (or its metadata) states the timestamp or record id.",
+        "4. Verifier fetches the passport from the operator, recomputes the digest and compares it with the ledger record (sibling m06 for API paths).",
+        "5. Hand-over: operator API bytes -> digest -> ledger record (L03/L08). The canonical byte form is the critical agreement."
+      ]
+    }
+  ],
+  "implementations": [
+    {
+      "name": "Battery Pass Demonstrator (minimum viable battery passport system)",
+      "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP4%20Battery%20Passport%20Demonstrator",
+      "kind": "pilot",
+      "license": "not stated",
+      "last_activity": "slides dated 2024-05-22 and 2025-02-25",
+      "evidence_level": "substantive",
+      "note": "Known only from slides: several cloud repositories per operator (AAS, NGSI-LD named), common CRUD API, battery passport manager, central registry with resolver mechanism, viewer with QR or ID entry. No code located. No ledger component."
+    },
+    {
+      "name": "Battery Pass Data Model v1.2.0",
+      "url": "https://github.com/batterypass/BatteryPassDataModel",
+      "kind": "data-model",
+      "license": "CC-BY-4.0 (README statement)",
+      "last_activity": "not re-checked (sibling m07: last commit 2026-09-14)",
+      "evidence_level": "substantive",
+      "note": "Repository also hosts the Technical Guidance, Standard Stack, State of Play and closing-event PDFs read here."
+    },
+    {
+      "name": "BatteryPass-Ready Data Model v2.0 / v2.0.1",
+      "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads",
+      "kind": "data-model",
+      "license": "CC-BY-4.0 (README)",
+      "last_activity": "not checked",
+      "evidence_level": "substantive",
+      "note": "README read; raw schema file URL returned 404 to WebFetch, so field-level content was not read."
+    },
+    {
+      "name": "BatteryPass-Ready test environment",
+      "url": "https://thebatterypass.eu/battery-pass-ready/",
+      "kind": "test-suite",
+      "license": "not stated",
+      "last_activity": "not checked",
+      "evidence_level": "metadata_only",
+      "note": "Project page describes data completeness, structure and format checks and interaction tests with Commission systems; not contacted."
+    },
+    {
+      "name": "Catena-X CX-0160 Battery Passport standard (base, uc1, uc3, CAC files)",
+      "url": "https://github.com/catenax-eV/catenax-ev.github.io/tree/main/docs/standards/CX-0160-BatteryPassport",
+      "kind": "other",
+      "license": "not stated (repository licence NOASSERTION per GitHub API; semantic models CC-BY-4.0 per base 3.1.1)",
+      "last_activity": "2026-09-18 (folder commit 45e41becf9)",
+      "evidence_level": "substantive",
+      "note": "Preview standard; section 5.2 of CX-0160-3 is the only Catena-X text found that bridges to the EU system."
+    },
+    {
+      "name": "IDTA-01002 AAS API v3.2.0 (aas-specs-api)",
+      "url": "https://github.com/admin-shell-io/aas-specs-api",
+      "kind": "other",
+      "license": "CC-BY-4.0",
+      "last_activity": "pushed 2026-10-16; release v3.2.0 2026-07-21",
+      "evidence_level": "substantive",
+      "note": "Source of the ID Link and linkset discovery pattern."
+    },
+    {
+      "name": "GoodsTag Smart Products Platform (BatteryPass-Ready supporting partner)",
+      "url": "https://en.pine.gs1.de/news/von-todo-gmbh-41b9c",
+      "kind": "platform",
+      "license": "not stated",
+      "last_activity": "news item 2026-02-15",
+      "evidence_level": "secondary_only",
+      "note": "Only source found that links BatteryPass-Ready and GS1 Digital Link; vendor statement on a GS1 Germany listing page."
+    },
+    {
+      "name": "EBSI Timestamp service",
+      "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/timestamp-introduction",
+      "kind": "other",
+      "license": "not stated",
+      "last_activity": "page last updated 2026-09-30",
+      "evidence_level": "substantive",
+      "note": "Worked example for Case E; not called."
+    }
+  ],
+  "literature": [
+    {
+      "doi": "10.1016/j.procs.2026.02.274",
+      "title": "Bridging the Gaps Towards a Unified Architecture for Digital Product Passports: A Data Space Perspective on Existing Standards and Initiatives",
+      "year": 2026,
+      "venue": "Procedia Computer Science (per prior record l01; Consensus shows 'Unknown Journal')",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Layered blueprint that assigns governance to data spaces, structure to AAS, vocabularies to CIRPASS models and identification to GS1; closest published analogue of a per-layer hybrid matrix."
+    },
+    {
+      "doi": "10.1016/j.procir.2024.07.039",
+      "title": "An Asset Administration Shell-Based Digital Product Passport as a Gaia-X Service",
+      "year": 2024,
+      "venue": "Procedia CIRP",
+      "found_via": "mcp__consensus__search",
+      "relevance": "AAS REST interfaces wrapped as a Gaia-X service: the AAS-in-dataspace composition in a learning-factory demonstrator."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.153",
+      "title": "A Design Study on Integrating UNTP Semantics into AAS Submodels for Digital Product Passports",
+      "year": 2026,
+      "venue": "Procedia Computer Science (Consensus: Unknown Journal)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Composes the UNTP and AAS families at L05 by embedding UNTP semantics as a submodel; positions Catena-X downstream."
+    },
+    {
+      "doi": "10.1109/rfid-ta63091.2025.11265909",
+      "title": "From Tag to Digital Twin: Unlocking Service Resolution Through GS1 Digital Link",
+      "year": 2025,
+      "venue": "2025 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "GS1-conformant resolver implementation that routes multiple carrier types to twin services; empirical L02/L03 hand-over."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.212",
+      "title": "Made2Verify: A Scalable GS1-Compliant Resolver and Fallback Dashboard for Digital Product Passports",
+      "year": 2026,
+      "venue": "Procedia Computer Science (Consensus: Unknown Journal)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Lifecycle-aware redirection and fallback when the manufacturer ceases operation; relevant to L06/L10 hand-over to back-up."
+    },
+    {
+      "doi": "10.1080/00207543.2025.2464161",
+      "title": "Blockchain-based digital product passport: design principles and demonstration",
+      "year": 2025,
+      "venue": "International Journal of Production Research",
+      "found_via": "mcp__consensus__search; mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+      "relevance": "Textile prototype that puts the ledger at the centre; contrast case for Case E where the ledger holds only digests."
+    },
+    {
+      "doi": "10.5281/zenodo.18711539",
+      "title": "MaDiTraCe: D3.3 Guidelines for Methodology implementation",
+      "year": 2025,
+      "venue": "Zenodo (project deliverable)",
+      "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+      "relevance": "Combines DIDs, VCs, QR codes and a Merkle-tree notarisation module: a VC plus anchor hybrid for critical raw materials."
+    },
+    {
+      "doi": "10.1145/3813822.3814036",
+      "title": "Battery Passport Generation Method Based on Trusted Data Space",
+      "year": 2026,
+      "venue": "Proceedings of the 2026 7th International Conference on Computer Information and Big Data Applications",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+      "relevance": "Battery passport combining an identity resolution system, SM9 signatures and a data-space connector; non-EU hybrid with a resolver plus dataspace seam."
+    },
+    {
+      "doi": "10.1109/isse65546.2025.11370080",
+      "title": "From Regulation to Realisation: Architecting a Digital Battery Passport System",
+      "year": 2025,
+      "venue": "not shown by SciSpace; DOI prefix suggests IEEE ISSE 2025 proceedings (unverified)",
+      "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+      "relevance": "Delphi-validated multi-level architecture for an SME battery passport reporting tool; architecture-level evidence for Case A style decomposition."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.02.330",
+      "title": "A General-Purpose Tool to Convert Asset Administration Shell Templates to RDFS/OWL",
+      "year": 2026,
+      "venue": "Procedia Computer Science (Consensus: Unknown Journal)",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+      "relevance": "Converts AAS templates (including Battery Pass and CarbonFootprint) to RDF: an L05 bridge between the AAS and linked-data families."
+    },
+    {
+      "doi": "10.17560/atp.v66i4.2707",
+      "title": "Shared Digital Product Passport for holistic lifecycle assessment",
+      "year": 2024,
+      "venue": "atp magazin",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Distributed hosted AAS submodels under Gaia-X principles; L06 composition across providers."
+    }
+  ],
+  "conformance_implications": [
+    {
+      "layer": "L01",
+      "test_objective": "The identifier on the carrier, the identifier in the resolved passport and the identifier bound in any integrity artefact are the same string.",
+      "observable": "Decoded QR text; passport id field (DppMetadata, credentialSubject.id or globalAssetId); anchored or signed subject.",
+      "oracle": "Regulation (EU) 2024/1781 Art. 10(1)(a) (carrier linked to a persistent unique identifier); 2023/1542 Art. 77(3). Exact-string rule per IXIT.",
+      "existing_check": "identifier.consistency",
+      "existing_capability": "identifier.consistency",
+      "new_capability_needed": "identifier.cross_layer (compare across carrier, linkset anchor, payload and signature subject)",
+      "fixtures_needed": "QR image, recorded linkset, passport JSON, signed credential with matching and mismatching ids",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L01",
+      "test_objective": "Parse identifiers that are not GS1 /01/<GTIN>/21/<serial>: URN (urn:uuid, urn:epc), DID, ID Link URL.",
+      "observable": "Carrier payload or passport id.",
+      "oracle": "IETF URN syntax as cited by Battery Pass TG 6.2; IDTA ID Link is an HTTP(S) URL; DID syntax per W3C DID (sibling m05).",
+      "existing_check": "identifier.parse",
+      "existing_capability": "identifier.parse",
+      "new_capability_needed": "identifier.parse profiles: urn, did, idlink",
+      "fixtures_needed": "valid and invalid URN, DID and URL samples",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L02",
+      "test_objective": "The QR on a battery sample carries something a stock reader can open (absolute HTTPS URL) rather than an identifier that needs an app.",
+      "observable": "Decoded payload scheme and form.",
+      "oracle": "2023/1542 Art. 13(6), Art. 77(3); free easy access per Art. 78(b). Pass if an absolute https URL; 'inconclusive' otherwise (law does not forbid TG variant 2).",
+      "existing_check": "carrier.qr_decode",
+      "existing_capability": "carrier.qr",
+      "new_capability_needed": "none",
+      "fixtures_needed": "QR images with URL, bare URN, DID",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "An identification URL answers a linkset request with 200 and application/linkset+json, anchored at the requested URL, and redirects otherwise.",
+      "observable": "Status, Content-Type, linkset anchor, Location, Link header.",
+      "oracle": "GS1-Conformant Resolver 1.2.1 (linkset and default-link behaviour); IDTA-01002 v3.2 ID Link section (200 linkset or 302 with Link rel=alternate); RFC 9264.",
+      "existing_check": "identifier.resolve",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "resolver.linkset (parse RFC 9264, check anchor, media type, relation set)",
+      "fixtures_needed": "loopback resolver serving GS1-style and IDTA-style linksets, plus a 302 variant",
+      "reusable_suite": "GS1DL-resolver-testsuite https://github.com/gs1/GS1DL-resolver-testsuite (per sibling m02)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "The hand-over relation to the passport is discoverable under a declared relation name and the profile is stated in the ICS.",
+      "observable": "Relation keys in the linkset: dpp, gs1:dpp (or its URI form), aas, aas-service-endpoints, dpp-service-endpoints.",
+      "oracle": "IANA registry entry 'dpp'; IDTA-01002 v3.2 relation list; RFC 8288 (extension relations are URIs). Fail if the declared relation is missing; warn on unregistered short tokens.",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "resolver.linkset with relation map in IXIT",
+      "fixtures_needed": "linksets with each relation style",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Following the 'aas' relation reaches an AAS whose globalAssetId equals the ID Link.",
+      "observable": "AAS JSON from the href; assetInformation.globalAssetId.",
+      "oracle": "IDTA-01002 v3.2 ID Link concept (globalAssetId is the ID Link).",
+      "existing_check": "aas.validate (structure only)",
+      "existing_capability": "aas.validate",
+      "new_capability_needed": "aas.idlink_roundtrip",
+      "fixtures_needed": "loopback ID Link landing plus AAS repository fixture",
+      "reusable_suite": "aas-test-engines (wrapped by aas.validate)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L04",
+      "test_objective": "Operations advertised in a linkset 'profiles' map actually answer (e.g. GetAssetAdministrationShellById, ReadDPPVersionByProductIdAndDate).",
+      "observable": "HTTP responses at the advertised hrefs.",
+      "oracle": "IDTA-01002 v3.2 profiles named in the linkset; pinned OpenAPI per profile.",
+      "existing_check": "api.contract",
+      "existing_capability": "api.contract",
+      "new_capability_needed": "api.contract driven by linkset-advertised profiles",
+      "fixtures_needed": "pinned AAS Part 2 OpenAPI 3.2 subset; loopback server",
+      "reusable_suite": "aas-test-engines (API part, per sibling m03)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "Battery passport payload validates against the pinned BatteryPass-Ready schema for its category, or the AAS submodels carry the IDTA-02035 / IDTA-02099-1 semantic ids.",
+      "observable": "Payload JSON; submodel semanticId values.",
+      "oracle": "bp-ready-data-model-v2 JSON Schema 2020-12 files; CX-0160-3 3.1.3 identifiers; content coverage per 2023/1542 Annex XIII.",
+      "existing_check": "data.jsonschema; aas.validate; data.rules",
+      "existing_capability": "data.jsonschema; aas.validate; data.rules",
+      "new_capability_needed": "data.rules pack 'annex-xiii-tiers' (field-to-tier map from law)",
+      "fixtures_needed": "pinned schema files (need retrieval; raw URL failed), sample passports per category",
+      "reusable_suite": "BatteryPass-Ready test environment (not contacted; terms unknown)",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L06",
+      "test_objective": "The passport references a back-up location and the back-up copy equals the live copy.",
+      "observable": "Back-up reference in the passport or registry record; two fetched documents.",
+      "oracle": "Regulation (EU) 2024/1781 Art. 10(4); 2023/1542 Art. 78(e).",
+      "existing_check": "registry.consistency (mock registry backupURL only)",
+      "existing_capability": "registry.mock; persistence.scheduled (interface_only)",
+      "new_capability_needed": "persistence.backup_equivalence",
+      "fixtures_needed": "loopback live and back-up hosts with equal and diverging copies",
+      "reusable_suite": "CIRPASS-2 mock-eu-registry (per sibling m07)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L07",
+      "test_objective": "The public tier is reachable without credentials across the hand-over (no dataspace contract, wallet or login needed for Annex XIII point 1 data).",
+      "observable": "Anonymous fetch result and fields present.",
+      "oracle": "2023/1542 Art. 77(2)(a), Art. 78(b); CX-0160-3 5.2 states the dataspace alone cannot do this.",
+      "existing_check": "access.restricted_fields",
+      "existing_capability": "access.policy",
+      "new_capability_needed": "none",
+      "fixtures_needed": "role views: anonymous, legitimate interest, authority",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L07",
+      "test_objective": "Authentication hints in a linkset are well formed and point to discovery documents of the declared type.",
+      "observable": "linkset authentication members (OIDC well_known_url, OAuth2 base_url, flows, scopes).",
+      "oracle": "IDTA-01002 v3.2 linkset example structure; OpenID Connect discovery shape (not read here).",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "resolver.linkset auth-hint lint",
+      "fixtures_needed": "linksets with valid and broken hints",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L08",
+      "test_objective": "Where a stack claims integrity, the signature or anchor covers the exact bytes served at the hand-over.",
+      "observable": "Served bytes; JWS; anchor receipt digest and algorithm.",
+      "oracle": "2023/1542 Art. 78(g); ESPR Art. 11(g); W3C VC-JOSE for vc+jwt (sibling m05); declared digest algorithm and canonicalisation (sibling m06).",
+      "existing_check": "integrity.jws",
+      "existing_capability": "integrity.jws; integrity.status_list (interface_only)",
+      "new_capability_needed": "integrity.anchor_receipt (offline digest and inclusion-proof check)",
+      "fixtures_needed": "signed credential, anchor receipt bundle with matching and mismatching digests",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L08",
+      "test_objective": "Report honestly when a stack layer has no integrity mechanism (Catena-X internal, ID Link).",
+      "observable": "Absence of signature or anchor.",
+      "oracle": "Engine rule 7: not run / unsupported, never pass.",
+      "existing_check": "integrity.jws (returns not applicable)",
+      "existing_capability": "integrity.jws",
+      "new_capability_needed": "none",
+      "fixtures_needed": "unsigned passport",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L09",
+      "test_objective": "The identifier registered (mock registry) equals the carrier identifier and the registry record points to the live and back-up locations used by the resolver.",
+      "observable": "Mock registry record; resolver target.",
+      "oracle": "2023/1542 Art. 77(10); ESPR Art. 13(1), (4)-(5).",
+      "existing_check": "registry.consistency",
+      "existing_capability": "registry.mock",
+      "new_capability_needed": "none (official registry stays out of scope)",
+      "fixtures_needed": "mock registry records, resolver fixture",
+      "reusable_suite": "CIRPASS-2 mock-eu-registry",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L10",
+      "test_objective": "After a simulated operator change the printed URL still reaches the current passport, and a repurposed battery's passport links to its predecessor.",
+      "observable": "Resolution result before and after re-pointing; predecessor link field.",
+      "oracle": "2023/1542 Art. 77(7); ESPR Art. 11(d), (e); Battery Pass TG 6.3 (routing to current operator, informative).",
+      "existing_check": "persistence.versions (experimental)",
+      "existing_capability": "persistence.versions",
+      "new_capability_needed": "lifecycle.handover scenario (two-phase fixture)",
+      "fixtures_needed": "loopback resolver with two backends and a switch; original and repurposed passport pair",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    }
+  ],
+  "failure_modes": [
+    {
+      "layer": "L01",
+      "fault": "The carrier holds a GS1 Digital Link URI, the AAS globalAssetId holds a urn:uuid and the passport holds a partInstanceId; nothing ties the three together.",
+      "detectable_by": "Cross-layer exact-string comparison; mismatch reported as a consistency failure."
+    },
+    {
+      "layer": "L01",
+      "fault": "Identifier case changes across systems (upper-case URN namespace in one system, lower-case in another), breaking equality.",
+      "detectable_by": "Exact-string comparison with a note on case; TG 6.2 recommends lower-case namespaces."
+    },
+    {
+      "layer": "L03",
+      "fault": "ID Link landing returns the linkset as application/json without the linkset media type, or returns 200 HTML to a linkset-aware client.",
+      "detectable_by": "Accept negotiation test with application/linkset+json; Content-Type check."
+    },
+    {
+      "layer": "L03",
+      "fault": "Linkset uses an unregistered short relation (aas, dpp-service-endpoints) that a GS1-only client ignores, so the passport is unreachable for that client.",
+      "detectable_by": "Relation inventory against the ICS-declared relation; warning for tokens absent from the IANA registry."
+    },
+    {
+      "layer": "L03",
+      "fault": "Linkset anchor differs from the requested URL (copied from a template or another product).",
+      "detectable_by": "Anchor equality check per RFC 9264."
+    },
+    {
+      "layer": "L03",
+      "fault": "Published JSON contains comments or a misspelt relation key (the IDTA v3.2 example itself has '//' comments and both 'dpp-service-endpoint' and 'dpp-service-endpoints'), so strict parsers fail.",
+      "detectable_by": "Strict JSON parse and schema check of the linkset."
+    },
+    {
+      "layer": "L04",
+      "fault": "Linkset advertises profile operations (version by date) that the server does not implement.",
+      "detectable_by": "Call each advertised operation on a loopback fixture; compare with pinned OpenAPI."
+    },
+    {
+      "layer": "L05",
+      "fault": "Proxy republishes Catena-X submodels with semantic ids of a different minor version or omits DppMetadata, so the public passport no longer matches the dataspace model.",
+      "detectable_by": "semanticId inventory and JSON Schema validation of the public payload."
+    },
+    {
+      "layer": "L06",
+      "fault": "Back-up copy is stored in a system-specific format or is stale relative to the live copy.",
+      "detectable_by": "Fetch both and compare normalised content and version stamp."
+    },
+    {
+      "layer": "L07",
+      "fault": "Public tier placed behind a dataspace contract, wallet presentation or login.",
+      "detectable_by": "Anonymous fetch of Annex XIII point 1 fields fails with 401/403 or contract error."
+    },
+    {
+      "layer": "L08",
+      "fault": "Ledger anchor computed over a different serialisation (pretty-printed JSON) than the bytes served, so verification fails although content is equal.",
+      "detectable_by": "Recompute digest over served bytes and over declared canonical form; report which one matches."
+    },
+    {
+      "layer": "L09",
+      "fault": "Registration made with the operator's dataspace identifier (BPN-based) while the carrier carries a different identifier.",
+      "detectable_by": "Mock registry record vs. carrier identifier comparison."
+    },
+    {
+      "layer": "L10",
+      "fault": "After an operator change the QR target still points to the old operator, which now answers 404 or stale data.",
+      "detectable_by": "Two-phase loopback scenario with re-pointing; observe target and version."
+    }
+  ],
+  "sources": [
+    {
+      "id": "bp-technical-guidance",
+      "title": "Battery Passport Technical Guidance",
+      "issuing_body": "Battery Pass consortium (publisher acatech)",
+      "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP3%20Battery%20Passport%20Technical%20Guidance",
+      "edition_or_version": "Version 1.0, March 2024 (2024_BatteryPassport_Technical_Guidance.pdf, sha256 30ef60da083e62b879f453bf2cf5688dd6fb8ca0a7cee476a15dc1ccfad45bfb)",
+      "publication_date": "2024-03-26",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "acatech copyright per prior record; repository README states CC BY 4.0 but does not say it covers the PDFs. Own words only.",
+      "what_it_shows": "Read 4.4-4.7, 4.9-4.12, 5.1-5.3, 6.1-6.6 for architecture, identifiers, routing, translator and the only DLT mention (6.5 item 7, optional, upstream supply-chain systems). Its one-line descriptions of ISO/IEC and IEC documents and its explanatory paragraph on two protected carrier/identifier standards were not recorded."
+    },
+    {
+      "id": "new-bp-standard-stack-pdf",
+      "title": "Battery Pass Technical Standard Stack (PDF)",
+      "issuing_body": "Battery Pass consortium",
+      "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP3%20Battery%20Passport%20Technical%20Guidance",
+      "edition_or_version": "Battery Pass_Technical_Standard_Stack.pdf, sha256 dcacbe181d725b205cde20855d35f9c00ad30a74726027745031f336ac898145",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Searched by term only: no occurrence of blockchain, ledger or DLT. Content otherwise not used."
+    },
+    {
+      "id": "new-bp-state-of-play-2024",
+      "title": "Battery Pass State of Play (slides)",
+      "issuing_body": "Battery Pass consortium",
+      "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP4%20Battery%20Passport%20Demonstrator",
+      "edition_or_version": "20240522_Battery Pass_State_of_Play.pdf, sha256 b3c454372b880610c22664d207887153e0a76756110d6ef64308e5664e947e34",
+      "publication_date": "2024-05-22",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Interoperability slide (carriers, registry, routing, NGSI-LD/AAS/SQL/GS1 portal repositories) and demonstrator slides 32-37 (URN-based Battery Pass ID, central registry resolver, multiple repositories, QR or ID entry). No ledger terms."
+    },
+    {
+      "id": "new-bp-closing-event-2025",
+      "title": "From Concept to Demonstration (Battery Pass closing event slides)",
+      "issuing_body": "Battery Pass consortium",
+      "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP4%20Battery%20Passport%20Demonstrator",
+      "edition_or_version": "2.2 From Concept to Demonstration.pdf, sha256 e658d20119f5e4129360000b790f77cc880efceca259129604f8e59138a75141; event 25 February 2025, Brussels",
+      "publication_date": "2025-02-25",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Architecture figure with routing/resolver, registry, backup and AAS/NGSI-LD/SQL repositories; demonstrator scope (verification, identity and access management, validation, dynamic update). No ledger terms."
+    },
+    {
+      "id": "new-bpr-user-stories-v1",
+      "title": "User Stories from a Technical Perspective (BatteryPass-Ready), v1.0",
+      "issuing_body": "BatteryPass-Ready consortium",
+      "url": "https://thebatterypass.eu/wp-content/uploads/BatteryPass-Ready_User-Stories_v1.0.cleaned.pdf",
+      "edition_or_version": "v1.0, sha256 0e0ddbb9346fbd10080a65b0018169d48f89e5e278fc7639351a356718dd4da9",
+      "publication_date": "2026-06",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated; own words only",
+      "what_it_shows": "Chapter 5 (method, seven modules, module order per user story) read. Whole-text term counts: GS1 0, Digital Link 0, resolver 0, routing 0, blockchain 0, ledger 0, Catena 0, AAS 0, JSON 0. Chapters 4 and 6 restate JTC 24 standards and were not used."
+    },
+    {
+      "id": "bp-ready-data-model-v2",
+      "title": "BatteryPass-Ready Data Model (README)",
+      "issuing_body": "BatteryPass-Ready consortium (maintained by acatech)",
+      "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads",
+      "edition_or_version": "2.0 (work in progress); release folder v2.0.1",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC BY 4.0 (README)",
+      "what_it_shows": "File formats (JSON Schema 2020-12, XSD), folder and file names per category, no mention of GS1, Digital Link, URN, UUID, DID, routing, resolver, blockchain, AAS, SAMM or JSON-LD."
+    },
+    {
+      "id": "new-bpr-project-page",
+      "title": "BatteryPass-Ready project page",
+      "issuing_body": "BatteryPass-Ready consortium (lead Fraunhofer IPK)",
+      "url": "https://thebatterypass.eu/battery-pass-ready/",
+      "edition_or_version": "web page",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Partners (Fraunhofer IPK, acatech, GEFEG, TU Berlin), BMWE grant 16BZF363C, over 100 supporting partners, test environment aims; no mention of GS1, resolver, carrier, blockchain, Catena-X or AAS."
+    },
+    {
+      "id": "new-gs1-pine-goodstag-news",
+      "title": "GoodsTag Joins BatteryPass-Ready Initiative",
+      "issuing_body": "GS1 PINE listing (posted by todo GmbH)",
+      "url": "https://en.pine.gs1.de/news/von-todo-gmbh-41b9c",
+      "edition_or_version": "news item",
+      "publication_date": "2026-02-15",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "A supporting partner of BatteryPass-Ready uses GS1 Digital Link in its own platform; no BatteryPass-Ready specification of GS1 Digital Link."
+    },
+    {
+      "id": "new-eubof-dpp-report-2024",
+      "title": "Digital Product Passports: A Blockchain-based Perspective",
+      "issuing_body": "EU Blockchain Observatory and Forum",
+      "url": "https://blockchain-observatory.ec.europa.eu/document/download/b6e3c85c-43c1-405b-aba8-e49a71249ef7_en?filename=EUBOF_DPP_report.pdf",
+      "edition_or_version": "PDF created 2024-05-02; sha256 35b876a3577c848692383ff566f1b506a923c4d479f662e01df1a693c2eb9d2e",
+      "publication_date": "2024-05",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not checked",
+      "what_it_shows": "Section 2.2 'Battery Pass' cites thebatterypass.eu; subsection 2.2.2 asserts that the battery passport platform relies heavily on multi-party private permissioned blockchain and describes participants, recording, consensus and traceability without citing a Battery Pass document."
+    },
+    {
+      "id": "new-cx-0160",
+      "title": "CX-0160 Battery Passport Data Management (base v1.1.0; CX-0160-1 v1.0.0; CX-0160-3 v1.0.0; Changelog; CAC files)",
+      "issuing_body": "Catena-X Automotive Network e.V.",
+      "url": "https://github.com/catenax-eV/catenax-ev.github.io/tree/main/docs/standards/CX-0160-BatteryPassport",
+      "edition_or_version": "base v.1.1.0 (CX-Neptune 26.09); folder commit 45e41becf9 of 2026-09-18",
+      "publication_date": "2026-09-18",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "repository licence NOASSERTION (GitHub API; LICENSE.md not read); semantic models CC-BY-4.0 per base 3.1.1",
+      "what_it_shows": "Retrieval examples, specific asset ids, usage purpose, data asset structure, notification payload, required models and semantic ids, section 5.2 bridge. Changed since the sibling m04 record: the standard is now split into base and use-case documents, and the bridge sits in CX-0160-3 v1.0.0. Statements that tie data points to EN 18223 or field optionality to DIN DKE SPEC 99100 were not used."
+    },
+    {
+      "id": "new-catenax-site-config",
+      "title": "catenax-ev.github.io docusaurus.config.ts and versions.json",
+      "issuing_body": "Catena-X Automotive Network e.V.",
+      "url": "https://github.com/catenax-eV/catenax-ev.github.io/blob/main/docusaurus.config.ts",
+      "edition_or_version": "main as of 2026-10-19 (repository pushed 2026-10-14)",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "NOASSERTION",
+      "what_it_shows": "'current' docs labelled 'CX-Neptune (Preview)'; Titan labelled 'CX-Titan (Current)'; versions.json lists Titan, Saturn, Io, Jupiter."
+    },
+    {
+      "id": "idta-01002-api",
+      "title": "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces (IDTA-01002) v3.2.0 - interactions page",
+      "issuing_body": "Industrial Digital Twin Association (admin-shell-io)",
+      "url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/http-rest-api/interactions.adoc",
+      "edition_or_version": "v3.2.0 (release 2026-07-21)",
+      "publication_date": "2026-07-21",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC-BY-4.0 (GitHub API licence of aas-specs-api)",
+      "what_it_shows": "ID Link as globalAssetId, RFC 9264 linkset with relations aas, aas-service-endpoints, dpp, dpp-service-endpoints, profiles and authentication hints, linkset-aware and redirect client patterns."
+    },
+    {
+      "id": "new-iana-link-relations",
+      "title": "Link Relation Types (IANA registry)",
+      "issuing_body": "IANA",
+      "url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml",
+      "edition_or_version": "last updated 2026-06-12",
+      "publication_date": "2026-06-12",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "public registry",
+      "what_it_shows": "'dpp' registered with a UNTP reference; 'linkset' registered (RFC 9264); 'aas', 'aas-service-endpoints', 'dpp-service-endpoints' not registered."
+    },
+    {
+      "id": "gs1-conformant-resolver-1-2-1",
+      "title": "GS1-Conformant Resolver Standard",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/resolver/",
+      "edition_or_version": "Release 1.2.1, ratified August 2026",
+      "publication_date": "2026-08",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 copyright with standards disclaimer and IP policy (per prior record)",
+      "what_it_shows": "Linkset on Accept: application/linkset+json or linkType=linkset; one default link per entity with redirect; linkType redirect or 404; 400 for malformed URIs. The first 100,000 characters were read; DPP link type confirmed only through sibling m02."
+    },
+    {
+      "id": "untp-versions-page",
+      "title": "UNTP versions",
+      "issuing_body": "UN/CEFACT (UNECE)",
+      "url": "https://untp.unece.org/versions",
+      "edition_or_version": "web page",
+      "publication_date": "not stated",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC BY 4.0 per site footer (prior record; licence conflict noted there)",
+      "what_it_shows": "Work in Progress 'Testing'; 0.7.0 'Pilots' (Maintained); 0.6.0 Unmaintained; no 1.0."
+    },
+    {
+      "id": "reg-eu-2023-1542",
+      "title": "Regulation (EU) 2023/1542 concerning batteries and waste batteries (consolidated text 13.08.2026)",
+      "issuing_body": "European Parliament and Council",
+      "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "edition_or_version": "02023R1542 - EN - 13.08.2026 - 003.001 (consolidated; documentation tool)",
+      "publication_date": "2023-07-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EUR-Lex reuse under Commission Decision 2011/833/EU (prior record)",
+      "what_it_shows": "Art. 77(1)-(10) and Art. 78(a)-(h) re-read this session. Annex XIII point detail taken from sibling batteries-regulation.json (not re-read)."
+    },
+    {
+      "id": "reg-eu-2024-1781",
+      "title": "Regulation (EU) 2024/1781 establishing a framework for the setting of ecodesign requirements for sustainable products",
+      "issuing_body": "European Parliament and Council",
+      "url": "https://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "edition_or_version": "Original OJ text, OJ L, 2024/1781, 28.6.2024",
+      "publication_date": "2024-06-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text; EUR-Lex reuse policy (not re-read)",
+      "what_it_shows": "Art. 9, Art. 10(1)-(4), Art. 11(a)-(h) and further subparagraphs, Art. 12, Art. 13, Art. 14, Art. 15 re-read this session."
+    },
+    {
+      "id": "new-ebsi-timestamp-docs",
+      "title": "EBSI Timestamp - introduction",
+      "issuing_body": "European Blockchain Services Infrastructure",
+      "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/timestamp-introduction",
+      "edition_or_version": "page last updated 2026-09-30",
+      "publication_date": "2026-09-30",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "not stated",
+      "what_it_shows": "Hash-only storage with submitter, block number and time; write scope timestamp:write; records with ordered version hashes and revocation status; API reference location."
+    },
+    {
+      "id": "prior-m02-gs1-web-resolver",
+      "title": "Sibling research record m02-gs1-web-resolver.json",
+      "issuing_body": "this repository (prior agent research, 2026-10-19)",
+      "url": "docs/research/raw/implementation-methods/m02-gs1-web-resolver.json",
+      "edition_or_version": "working tree 2026-10-19",
+      "publication_date": "2026-10-19",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "internal",
+      "what_it_shows": "GS1 URI forms, resolver behaviours, gs1:dpp link type; reused without re-verifying the underlying GS1 pages except the resolver landing page."
+    },
+    {
+      "id": "prior-m03-aas-digital-twin",
+      "title": "Sibling research record m03-aas-digital-twin.json",
+      "issuing_body": "this repository (prior agent research)",
+      "url": "docs/research/raw/implementation-methods/m03-aas-digital-twin.json",
+      "edition_or_version": "working tree 2026-10-19",
+      "publication_date": "2026-10-19",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "internal",
+      "what_it_shows": "IDTA-02035 semantic ids and the ID Link consumer flow."
+    },
+    {
+      "id": "prior-m05-verifiable-credentials",
+      "title": "Sibling research record m05-verifiable-credentials.json",
+      "issuing_body": "this repository (prior agent research)",
+      "url": "docs/research/raw/implementation-methods/m05-verifiable-credentials.json",
+      "edition_or_version": "working tree 2026-10-19",
+      "publication_date": "2026-10-19",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "internal",
+      "what_it_shows": "UNTP verification, issuance and access-control flows."
+    },
+    {
+      "id": "prior-m06-dlt-anchored",
+      "title": "Sibling research record m06-dlt-anchored.json",
+      "issuing_body": "this repository (prior agent research)",
+      "url": "docs/research/raw/implementation-methods/m06-dlt-anchored.json",
+      "edition_or_version": "working tree 2026-10-19",
+      "publication_date": "2026-10-19",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "internal",
+      "what_it_shows": "Anchoring flows and the open question resolved here."
+    },
+    {
+      "id": "prior-m07-eu-reference-pilots",
+      "title": "Sibling research record m07-eu-reference-pilots.json",
+      "issuing_body": "this repository (prior agent research)",
+      "url": "docs/research/raw/implementation-methods/m07-eu-reference-pilots.json",
+      "edition_or_version": "working tree 2026-10-19",
+      "publication_date": "2026-10-19",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "internal",
+      "what_it_shows": "Registry implementing act detail, mock registry schema, BatteryPass-Ready module chain."
+    }
+  ],
+  "open_questions": [
+    "Resolved m06 open question 8: the Battery Pass Technical Guidance v1.0 names DLT only as an optional tamper-evidence feature of upstream supply-chain transparency systems (6.5 item 7) and recommends DIDs, VCs and the Gaia-X Trust Framework for trust (6.6); its architecture (chapter 5) has no ledger; the Standard Stack, State of Play and closing-event documents contain no ledger term. The EUBOF report (May 2024, 2.2.2) asserts reliance on a private permissioned blockchain without citing a Battery Pass document. Verdict: mischaracterisation by EUBOF, possibly conflating Battery Pass with other battery passport initiatives such as the Re|Source/GBA work described in the same report (inference).",
+    "Can a GS1 Digital Link URI serve as an IDTA ID Link (globalAssetId) with one landing linkset that carries both gs1: link types and the IDTA 'aas' relation? Neither specification says so or forbids it.",
+    "Which relation name should the engine treat as the passport hand-over: IANA 'dpp', GS1 'gs1:dpp' (or its URI), or IDTA 'dpp'? UNTP reportedly treats IANA 'dpp' and gs1:dpp as the same (sibling m02); IDTA uses the bare token. An ICS field for the relation is proposed.",
+    "Who operates the CX-0160-3 'EU-facing DPP management system', and with which resolver and API profile? CX-0160-3 gives no technical profile; the fast-track Use Case 2 is pending for 24 November 2026.",
+    "Does the Battery Pass TG preference for DIDs as passport identifiers satisfy the identifier series named in 2023/1542 Art. 77(3)? Not assessable without reading protected documents; left to the owner.",
+    "BatteryPass-Ready JSON Schema files were not retrievable by raw URL (HTTP 404); the exact identifier and header fields of v2.0.1 remain unread.",
+    "Engine contract: a 'resolver.linkset' capability (RFC 9264 parse, anchor and relation checks) and an 'identifier.cross_layer' check are not in the registered set; this needs an architecture-contract change by the owner."
+  ],
+  "anomalies": [
+    "IDTA-01002 v3.2.0 interactions page: the JSON examples contain '//' comments (invalid JSON), an author note left in an example, the key 'dpp-service-endpoint' in one example and 'dpp-service-endpoints' elsewhere, and the third example is captioned as the ID Link response while its anchor is the dpp-service-endpoints URL.",
+    "CX-0160-3: section numbering jumps from '5.2 Bridging Catena-X DPP to EU DPP System' to '5.3.1' and '5.3.2' with no 5.3 heading; the DppMetadata specification-artefact links point to the Digital Nameplate (IDTA-02035-1) files.",
+    "CX-0160 base 1.4.1.1 links IDTA-01002 v3.1 operations while the note expects v3.2 in a later CX-0002; the createdAfter parameter is a Tractus-X feature not required by CX-0002 2.3.0 (stated by the standard).",
+    "CX-0160 changed shape since the sibling m04 record of 2026-10-19 (single document with section 5.2) to base v1.1.0 plus use-case documents; the bridge is now in CX-0160-3 v1.0.0.",
+    "The task framing links BatteryPass-Ready to GS1 Digital Link and routing services; no BatteryPass-Ready document read (README, user stories v1.0, project page) mentions either. Only a supporting partner's news item does (secondary_only).",
+    "BatteryPass-Ready README tree contains a file name with a space ('Other_Industrial _2kWh_Feb27.xsd') and folder names in the README text that do not match the tree (noted by the fetch).",
+    "EUR-Lex ELI /eng URLs returned empty content to WebFetch for both regulations this session; the Publications Office cellar copies were used instead.",
+    "GitLab API and raw schema URLs at git.gefeg.com returned HTTP 404 to WebFetch."
+  ],
+  "truncation": "Consensus: two searches per tool (4 calls; 20 results each, top results screened, 11 papers recorded). SciSpace: two searches (10 results each, duplicates and non-DPP items dropped). The Battery Pass TG was read by section, not cover to cover (chapters 1-3 skipped). The GS1 resolver page was read to 100,000 of 107,148 characters. Regulation 2024/1781 was read from offset 300,000 to 500,000 (Art. 5-26) and 2023/1542 from 400,000 to 500,000 (Art. 77-96). BatteryPass-Ready user stories chapters 4 and 6 were not used (they restate JTC 24 standards). UNTP, GS1 and DLT internals are summarised from sibling records m02, m05, m06 without re-verification and are tagged secondary_only. Catena-X standards referenced by CX-0160 (CX-0002, CX-0018, CX-0126, CX-0127, CX-0151, CX-0152) were not read."
+}

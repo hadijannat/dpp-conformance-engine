@@ -1,0 +1,369 @@
+{
+  "target": "f01-epcis-event-traceability",
+  "retrieval_date": "2026-10-19",
+  "method_note": "Chose claims by risk for a conformance engine: GS1 release list and statuses, repository metadata for all 14 repositories (gh api), OpenAPI path count and header/status mechanisms, JSON Schema fields, spec conformance sections (14.7, 14.8, 12.10, 12.5) and CBV hash rules 16-23 (GS1 PDFs fetched and read as text; GS1 documents are not protected under rule 5), GS1 Web Vocabulary link types, UNTP 0.7.0 mapping, 11 DOIs on Crossref, and every existing_check mapping against the engine source (src/dppce/adapters) and docs/reference/capabilities.md. ESPR article citations and ISO/IEC 19987 could not be re-verified (EUR-Lex returned empty content to WebFetch; no search source for 19987).",
+  "checked": [
+    {
+      "claim_ref": "maturity.versions_at_retrieval[1]",
+      "claim": "EPCIS release list: 2.0.1 published 2025-07-01 is latest; 2.0.0 2022-06-22; 1.2.0 2016-09-29; 1.1.0 2014-05-20; 1.0.1 2007-09-21; 1.0.0 2007-04-12",
+      "risk": "version",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/archive",
+      "evidence": "Archive page lists the same six releases with the same dates; 2.0.1 is marked latest.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[3]",
+      "claim": "CBV release list: 2.0.0 (2022-06-22) latest; 1.2.2 2017-10-12; 1.1.0 2014-05-20; 1.0.0 2010-01-13",
+      "risk": "version",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/cbv/archive",
+      "evidence": "Archive lists 1.0.0 (13 Jan 2010), 1.1.0 (20 May 2014), 1.2.2 (12 Oct 2017), 2.0.0 (22 Jun 2022, latest).",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[0]",
+      "claim": "EPCIS PDF cover reads Release 2.0, Ratified, Jun 2022; CBV PDF the same",
+      "risk": "status",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/ and https://ref.gs1.org/standards/cbv/2.0.0/",
+      "evidence": "Text of both PDFs shows 'Release 2.0, Ratified, Jun 2022' as page footer and Document Status Ratified (EPCIS 229 pages, CBV 124 pages).",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[4]",
+      "claim": "ref.gs1.org openapi.json: OpenAPI 3.0.3, info.version 2.0.1, license name Apache2",
+      "risk": "version",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/openapi.json",
+      "evidence": "First 100000 characters show openapi 3.0.3, info.version 2.0.1, license name Apache2. Components not inspected (same limit as the target).",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[5]; layers.L04.mechanism; sources[new-gs1-epcis-repo].what_it_shows",
+      "claim": "gs1/EPCIS master openapi.yaml is OpenAPI 3.0.3, info.version 2.0.0, has 30 paths, no securitySchemes",
+      "risk": "technical_mechanism",
+      "verdict": "refuted",
+      "evidence_url": "https://github.com/gs1/EPCIS/blob/master/REST%20Bindings/openapi.yaml",
+      "evidence": "Parsed with PyYAML: len(paths) = 29, not 30. Version 2.0.0 and OpenAPI 3.0.3 are right. components has keys responses, schemas, parameters, headers, requestBodies and no securitySchemes (confirmed).",
+      "correction": "The master openapi.yaml has 29 paths. Fix 'OpenAPI 2.0.0 master, 30 paths' in L04 and the versions list and the repo source entry."
+    },
+    {
+      "claim_ref": "layers.L03.mechanism (GS1-EPC-Format)",
+      "claim": "GS1-EPC-Format enum: No_Preference, Always_GS1_Digital_Link (default when absent), Always_EPC_URN, Never_Translates",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/gs1/EPCIS/blob/master/REST%20Bindings/openapi.yaml",
+      "evidence": "Parameter description lists exactly these four values and states the default Always_GS1_Digital_Link.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism (header list)",
+      "claim": "Custom headers GS1-EPCIS-Version/Min/Max, GS1-CBV-Version, GS1-EPC-Format, GS1-CBV-XML-Format, GS1-Extensions, GS1-Vendor-Version, capture limit headers, GS1-Capture-Error-Behaviour, GS1-Next-Page-Token-Expires, GS1-Query-Min-Record-Time, GS1-Signature; OpenAPI also GS1-CBV-Min/Max",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/gs1/EPCIS/blob/master/REST%20Bindings/openapi.yaml",
+      "evidence": "components.headers and components.parameters contain all of these names including GS1-CBV-Min and GS1-CBV-Max. The spec conformance list 14.8 also names GS1-CBV-Format, which the OpenAPI calls GS1-CBV-XML-Format (a naming difference a test oracle must handle).",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism (status codes)",
+      "claim": "Exception to HTTP status mapping (400, 401/403, 404, 406, 409, 413, 414, 415, 500/501) with RFC 7807 bodies",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/",
+      "evidence": "Table 12-9 in section 12.10 maps Validation, QueryValidation, QueryParameter, SubscriptionControls to 400; Security to 403/401; NoSuchResource 404; NotAcceptable 406; ResourceAlreadyExists 409; CaptureLimitExceeded, QueryTooLarge, QueryTooComplex 413; URITooLong 414; UnsupportedMediaType 415; Implementation 501/500. Problem Details format required.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism / layers.L04.mechanism (pagination)",
+      "claim": "perPage default 30, next page in Link header rel=\"next\", events never split",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/",
+      "evidence": "Section 14.8 (per 12.5) and 12.5 text state default 30, Link per RFC 8288 with quoted next URL, events returned atomically. OpenAPI PerPage schema has default 30.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L04.mechanism (capture, POST /events, OPTIONS)",
+      "claim": "POST /capture returns 202 with captureID; POST /events returns 201; OPTIONS returns 204 with Allow/GS1 headers; 406 on unsupported Accept",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/gs1/EPCIS/blob/master/REST%20Bindings/openapi.yaml",
+      "evidence": "/capture post responses: 202,400,401,403,413,406,415,500; /events post: 201,...; OPTIONS on / : 204. Spec 14.8 states 202 Accepted with captureID and rollback as default behaviour. Note: GET /queries/{queryName}/events lists status 101 for the WebSocket upgrade, which the target does not mention.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L04.mechanism (URL limit)",
+      "claim": "Query URL limited to 2000 characters, 414 beyond",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/",
+      "evidence": "Section 12.8.5 and 14.8 state the 2000-character limit; Table 12-9 maps URITooLongException to 414.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L04.mechanism (mandatory resources)",
+      "claim": "Server SHALL support /epcs, /events and named queries; /eventTypes, /bizLocations, /bizSteps, /readPoints, /dispositions optional",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/",
+      "evidence": "Section 12.7 text and 14.8 state SHALL for /epcs and /events and named queries, MAY for the others.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L05.mechanism / sources[new-gs1-epcis-json-schema-ref]",
+      "claim": "JSON Schema is draft-07 with $id .../2.0.1/epcis-json-schema.json, top-level required only 'type'; EPCISDocument requires @context,type,schemaVersion,creationDate,epcisBody; EPCISQueryDocument requires @context,type,epcisBody; vocab-other-uri rejects urn:epcglobal:cbv and ns.gs1.org/cbv",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/epcis-json-schema.json",
+      "evidence": "Fetched schema shows $schema draft-07, the 2.0.1 $id, required [type], the two required arrays as stated and the negative-lookahead pattern for those two prefixes.",
+      "correction": null
+    },
+    {
+      "claim_ref": "conformance_implications[0].oracle; layers.L05.specs",
+      "claim": "EPCIS 2.0 sections 10.3 and 14.7 require JSON to validate against the JSON Schema and JSON-LD against SHACL; spec cites the 2.0.0 path",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/",
+      "evidence": "Section 14.7 items 1 and 2 cite https://ref.gs1.org/standards/epcis/2.0.0/epcis-json-schema.json and .../2.0.0/epcis-shacl.ttl.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L08.mechanism; conformance_implications[3]",
+      "claim": "CBV 8.9.2 rules: EPC URNs converted to canonical Digital Link on https://id.gs1.org (rule 16); query string stripped and only finest-grained key combination kept with the listed key list (rule 17); ni:///{alg};{digest}?ver=... (rule 21); IANA registry algorithm names (rule 22); CBV version format (rule 23)",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/cbv/2.0.0/",
+      "evidence": "Rules 16, 17, 21, 22, 23 in the CBV text match, and the key list in rule 17 is identical to the target list (00, 01, 01+21, 01+10, 01+235, 253, 255, 401, 402, 414, 414+254, 417, 8003, 8004, 8006, 8006+21, 8006+10, 8010, 8010+8011, 8017, 8018). Rule 17 also says a custom domain is replaced by id.gs1.org.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L07.mechanism / L03 (authentication)",
+      "claim": "Clients SHALL authenticate on every call; 401 on failed authentication, 403 if not authorised",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/2.0.0/",
+      "evidence": "Section 14.8 (per 12.4) states these three rules.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism (link types)",
+      "claim": "GS1 Web Vocabulary gs1:epcis is 'a link to an EPCIS repository' and gs1:traceability says to use gs1:epcis if the target is an EPCIS repository; both stable; v1.16 file",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/gs1/WebVoc/blob/main/v1.16/gs1Voc.jsonld",
+      "evidence": "Both nodes exist, both sw:term_status stable, subPropertyOf gs1:linkType; the gs1:traceability comment contains the instruction to use gs1:epcis. v1.16 is the highest version folder in the repository.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L05.mechanism (JSON-LD context prefixes)",
+      "claim": "gs1 prefix is https://ref.gs1.org/voc/ on ref.gs1.org and https://gs1.org/voc/ in the gs1/EPCIS master copy; public_review_2_1 context imports the GS1 WebVoc context first",
+      "risk": "url",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/gs1/EPCIS/blob/master/epcis-context.jsonld",
+      "evidence": "Master context has @version 1.1, @protected true, gs1 = https://gs1.org/voc/. The public_review_2_1 context starts with the array [https://ref.gs1.org/voc/data/GS1-WebVoc-context.jsonld, {...}]. Ref-side prefix not re-fetched.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.spec_status (public_review_2_1)",
+      "claim": "gs1/EPCIS holds public_review_2_1 with one draft context created 2026-09-04; previous commit 2023-05-16",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/gs1/EPCIS",
+      "evidence": "Folder contains one file epcis-context.jsonld; latest commit 2026-09-04T13:11:12Z 'Hosted public review draft v2.1'; the commit before is 2023-05-16.",
+      "correction": null
+    },
+    {
+      "claim_ref": "implementations[*].license and last_activity (all 14)",
+      "claim": "Licence and pushed date of OpenEPCIS CE (Apache-2.0, 2026-01-10), Oliot (Apache-2.0, 2026-01-15), FasTnT (NOASSERTION, 2026-10-19), validation service (2026-10-17), event sentry (2026-09-09), testdata generator (2026-09-04), test resources (2026-10-16), RalphTro hash generator (MIT, 2026-09-25), OpenEPCIS hash generator (2026-09-07), converter (2026-09-09), DL translator (2026-09-13), dpp-ready (2026-10-11), opendpp-interop (2026-10-14), gs1/EPCIS (NOASSERTION, 2026-09-04)",
+      "risk": "repo_metadata",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.github.com/repos/<each>",
+      "evidence": "gh api repos/<repo> returned the same SPDX id, archived=false and the same pushed_at date for all 14. All are not archived. Retrieval date 2026-10-19 so FasTnT push is same-day.",
+      "correction": null
+    },
+    {
+      "claim_ref": "implementations[2] (FasTnT)",
+      "claim": "FasTnT: .NET 10, EPCIS 1.2 and 2.0, HTTP Basic, queries partitioned by hash of Authorization value, rollback only, Never_Translates only, synchronous capture, Apache-2.0 per README",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/louisaxel-ambroise/epcis",
+      "evidence": "README says .NET 10, EPCIS 1.2 and 2.0, Apache 2.0, Basic auth with stored hash of the authorization value and same-header scoping, only rollback and only Never_Translates, synchronous capture, OpenAPI at /v2_0/openapi.json. The 'formerly FasTnT/epcis-ef-core' rename is not stated on the page (only badge links hint at it).",
+      "correction": "Soften 'formerly FasTnT/epcis-ef-core' to 'badge links reference FasTnT/epcis-ef-core'."
+    },
+    {
+      "claim_ref": "implementations[7] (RalphTro generator)",
+      "claim": "Reference generator: CBV2.0 default, draft CBV2.1 selectable, sha256/sha3-256/sha384/sha512, prototypical demo software",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/RalphTro/epcis-event-hash-generator",
+      "evidence": "README: -v CBV2.0 default or CBV2.1, -a sha256 default, sha3-256, sha384, sha512; labelled prototypical demo software not for production.",
+      "correction": null
+    },
+    {
+      "claim_ref": "implementations[13].note",
+      "claim": "Conformance Requirements: Mandatory matrix with M1, M121 and M122 filled and M123-M127 empty; TCR-53 and TCR-54",
+      "risk": "other",
+      "verdict": "refuted",
+      "evidence_url": "https://github.com/gs1/EPCIS/tree/master/Conformance%20Requirements",
+      "evidence": "Matrix has M1 (full), M121 and M122 (filled), M123 holds only '...' placeholder text, M124 and later rows blank. TCR53_SensorElement.md and TCR54_AssociationEvent.md exist. The same file in maturity.adoption_evidence says only 'one filled requirement (M1)', which contradicts this.",
+      "correction": "Make the two statements agree: three requirement rows have text (M1, M121, M122), M123 is a placeholder, the rest are empty. Matrix says it applies to the 2.0 spec; the folder is a draft."
+    },
+    {
+      "claim_ref": "implementations[12] (OpenDPP interop)",
+      "claim": "CONFORMANCE.md: POST /api/v1/events/epcis, vendored 2.0.1 schema, urn:epcglobal:cbv rejected, query interface, XML and TransactionEvent persistence not claimed, ecdsa-jcs-2019 on its event ingest",
+      "risk": "other",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/OpenDPP/opendpp-interop/blob/main/CONFORMANCE.md",
+      "evidence": "All items present. The ecdsa-jcs-2019 requirement is on POST /api/v1/events (credential ingest), a separate row, not on the /epcis endpoint; the target phrase 'on its own event ingest' is acceptable but could be misread. Page also says no GS1 endorsement is claimed.",
+      "correction": "Say that ecdsa-jcs-2019 applies to the credential ingest at POST /api/v1/events, not to the native EPCIS endpoint."
+    },
+    {
+      "claim_ref": "layers.L05.mechanism (UNTP mapping) and maturity.versions_at_retrieval[10]",
+      "claim": "UNTP DTE 0.7.0: pilot-only, public review closed, EPCIS event as credentialSubject, MakeEvent to TransformationEvent (and Aggregation), MoveEvent to ObjectEvent OBSERVE, ModifyEvent to ObjectEvent, activityType = bizStep URI, TEV-01..TEV-13 with TEV-01/02/07/12 as described",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://spec-untp-fbb45f.opensource.unicc.org/docs/0.7.0/specification/DigitalTraceabilityEvents/",
+      "evidence": "Mapping table, credentialSubject statement, activityType/bizStep linkage, 13 TEV requirements and the TEV-01/02/07/12 gist all match. ModifyEvent may use ADD for repair re-commissioning and must be split per disposition; target says only 'ObjectEvent'. Note: the github mirror uncefact/spec-untp is GPL-3.0 and its latest tag is v0.6.1 (2025-06-16), so the 0.7.0 page lives on the unicc host only.",
+      "correction": "Add that ModifyEvent can map to ObjectEvent with action ADD for repair, and that the licence of UNTP text is unresolved (mirror repository says GPL-3.0)."
+    },
+    {
+      "claim_ref": "literature[0..10] (11 DOIs)",
+      "claim": "Titles, years and venues of the 11 DOIs",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.crossref.org/works/<doi>",
+      "evidence": "Crossref returned the identical title, year and venue for all 11 (RFID 2025, Logistics 2026 x2, SoftwareX 2023, DAPPS 2025, Procedia CS 2026, Blockchain 2024, Sensors 2022, IEEE Access 2021, IOT 2010, LNCS chapter). Crossref has no issued year for the LNCS chapter (the 2008 year is not shown), and arXiv DOI 10.48550/arxiv.2204.00317 was not checked. OpenAlex confirms Oliot: SoftwareX vol 23, art. 101477, July 2023, 5 authors, abstract matches the relevance text.",
+      "correction": "Year 2008 for the LNCS chapter and the arXiv entry are unconfirmed by this check; venue 'not stated' could be filled with Lecture Notes in Computer Science."
+    },
+    {
+      "claim_ref": "conformance_implications[0].existing_check and new_capability_needed",
+      "claim": "data.jsonschema covers EPCIS JSON validation provided it asserts format 'uri' and 'date-time' and resolves draft-07 offline",
+      "risk": "engine_mapping",
+      "verdict": "refuted",
+      "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/common.py (lines 347-461)",
+      "evidence": "The engine validator extends Draft202012Validator with a fixed FormatChecker: date, email, idn-email, ipv4, ipv6, uuid, plus its own 'uri'. 'date-time' is not asserted: unassertable_formats() lists it and data.py (line 154) stops with 'schema uses formats that the engine cannot assert'. Draft-07 is not selected by $schema; the validator is always 2020-12. Non-local $ref gives None (unsupported). So the check is not ready as stated.",
+      "correction": "State that data.jsonschema asserts 'uri' but not 'date-time' today, validates under 2020-12 rules regardless of $schema, and needs a change (format checker plus a draft-07 check) before the EPCIS schema yields a pass. Rule 1 hard-rule file ownership: report as contract change."
+    },
+    {
+      "claim_ref": "conformance_implications[4].existing_check ('data.rules (pattern rule)')",
+      "claim": "data.rules can check eventID grammar with a pattern rule",
+      "risk": "engine_mapping",
+      "verdict": "refuted",
+      "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/data.py (line 67, 240-262)",
+      "evidence": "Rule.kind is Literal required_fields, unit, range, relationship, freshness. 'unit' is an allowed-value list, not a regex. No pattern kind exists. Rules address one dotted field path via dig(), so they cannot iterate epcisBody.eventList entries.",
+      "correction": "existing_check should be 'none'. New capability: epcis.event_id (or a pattern rule kind plus array traversal)."
+    },
+    {
+      "claim_ref": "conformance_implications[5] and failure_modes (api.contract)",
+      "claim": "api.contract with the pinned GS1 OpenAPI can detect a /capture that answers 201/200 or lacks /capture/{captureID}, and (with extension) OPTIONS and header assertions",
+      "risk": "engine_mapping",
+      "verdict": "refuted",
+      "evidence_url": "file:///Users/aeroshariati/DPP-CE/docs/reference/capabilities.md and src/dppce/adapters/api.py (lines 53, 222-228)",
+      "evidence": "api.contract is GET only (method Literal['get']), supports a subset of OpenAPI 3.1 (status, media type, JSON Schema), judges one marked passport resource (item, model, signed, versions, registry_record) at the IXIT template, and refuses redirects. The EPCIS contract is 3.0.3 and its capture operation is POST. So api.contract cannot judge POST /capture or OPTIONS today. Failure mode 'detectable_by api.contract against pinned OpenAPI' is therefore wrong.",
+      "correction": "Set detectable_by to epcis.rest_probe (new). For the existing check list api.contract as 'none' for POST/OPTIONS and 'partial' only for GET query responses of an EPCIS SUT after OpenAPI 3.0.3 to 3.1 conversion."
+    },
+    {
+      "claim_ref": "conformance_implications[8].existing_capability and existing_check",
+      "claim": "access.restricted_fields maps to capability access.policy; event-level policy would need an extension",
+      "risk": "engine_mapping",
+      "verdict": "confirmed",
+      "evidence_url": "file:///Users/aeroshariati/DPP-CE/docs/reference/capabilities.md",
+      "evidence": "Check access.restricted_fields uses capability access.policy (supported); it compares entitled and withheld fields per role over fetch, search, export, error, HTML channels with synthetic canaries. It is field-based, so withheld events or coarsened locations are not covered, as the target says.",
+      "correction": null
+    },
+    {
+      "claim_ref": "conformance_implications[3,6,9] (data.context, data.shacl, identifier.resolve)",
+      "claim": "data.context allowlist of exact URLs; data.shacl is interface_only; identifier.resolve with Accept linkset+json",
+      "risk": "engine_mapping",
+      "verdict": "confirmed",
+      "evidence_url": "file:///Users/aeroshariati/DPP-CE/docs/reference/capabilities.md",
+      "evidence": "data.context takes allowed_contexts (exact URLs, nothing fetched); data.shacl interface_only; identifier.resolve has accept and accepted_media_types params. Note identifier.resolve by default counts only a final JSON object as resolved, so application/linkset+json needs accepted_media_types set, and identifier.parse supports only the /01/<GTIN>/21/<serial> Digital Link form.",
+      "correction": "Add that accepted_media_types must list application/linkset+json."
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[12..13], layers.L11.mechanism",
+      "claim": "ISO/IEC 19987:2024 is edition 3 (per search excerpt) and ISO/IEC 19988:2024 exists as the CBV edition",
+      "risk": "protected_standard",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://scc-ccn.ca/standardsdb/standards/8185963",
+      "evidence": "Catalogue-level search results confirm ISO/IEC 19988:2024 as third edition 2024-03 (88 pages), CBV 2.0. No source for ISO/IEC 19987:2024 was found in this check, so its edition and year are unverified. Bibliographic metadata only; nothing else read.",
+      "correction": "Mark 19987 as not_located in this check; keep 19988 edition 3, 2024-03 as metadata_only."
+    },
+    {
+      "claim_ref": "maturity.regulatory_alignment; layers.*.law_delta",
+      "claim": "Regulation (EU) 2024/1781 article and recital citations (Art. 9(2)(f)-(g), 9(3)(a),(c), 10(1)(a),(d), 10(4), recitals 32, 36)",
+      "risk": "legal_citation",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng",
+      "evidence": "Both EUR-Lex fetches returned empty content, so letters and numbers could not be re-checked. The target itself says Art. 11 and others come from the sibling record m01 and were not re-read.",
+      "correction": "Re-verify the points by article text before the file is used; do not treat as confirmed."
+    },
+    {
+      "claim_ref": "layers.L05.mechanism (local jsonschema test)",
+      "claim": "Key 'bizstep' passes without a format checker and fails with Draft7Validator.FORMAT_CHECKER",
+      "risk": "technical_mechanism",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://ref.gs1.org/standards/epcis/epcis-json-schema.json",
+      "evidence": "The schema's propertyNames clause with format uri was not re-run here. The engine's own uri checker accepts any string with an RFC 3986 scheme, so whether 'bizstep' is rejected under the engine depends on that regex (no scheme -> rejected, probably) and was not tested.",
+      "correction": "Run the same test with the engine's _FORMATS checker before relying on it."
+    }
+  ],
+  "rule5_findings": [
+    {
+      "claim_ref": "layers.L11_roles_and_governance.mechanism; maturity.spec_status",
+      "problem": "ISO/IEC 19987 and 19988 are named with a statement of what they are (ISO/IEC editions of EPCIS and CBV) and a claimed correspondence to release 2.0. This rests on a search excerpt and edges toward describing the content relation of a protected standard.",
+      "fix": "Keep only number, title, edition, year, publisher and catalogue URL. Delete the sentence on correspondence to release 2.0."
+    },
+    {
+      "claim_ref": "implementations[11].note (openepcis-dpp-ready)",
+      "problem": "Names CEN/CENELEC JTC 24 harmonisation as taken from a repository description. This is a name only and acceptable. The repository README lists specific EN numbers and statuses; none were copied into the target.",
+      "fix": "No change needed. Do not add the EN list from the README without checking rule 5."
+    },
+    {
+      "claim_ref": "none further",
+      "problem": "No sentence in the target describes the content of an EN, IEC, DIN or ISO document. GS1 documents (EPCIS, CBV, Web Vocabulary) are not covered by rule 5.",
+      "fix": "none"
+    }
+  ],
+  "missed_items": [
+    {
+      "topic": "WebSocket status",
+      "fact": "GET /queries/{queryName}/events lists status 101 (Switching Protocols) for the WebSocket upgrade; the target mentions upgrade but no status code, which a test oracle needs.",
+      "source_url": "https://github.com/gs1/EPCIS/blob/master/REST%20Bindings/openapi.yaml"
+    },
+    {
+      "topic": "Header name mismatch",
+      "fact": "Spec conformance list 14.8 names GS1-CBV-Format while the OpenAPI names the header GS1-CBV-XML-Format; a probe must accept both or pick one per pinned artefact.",
+      "source_url": "https://ref.gs1.org/standards/epcis/2.0.0/"
+    },
+    {
+      "topic": "Engine OpenAPI version gap",
+      "fact": "The engine supports an OpenAPI 3.1 subset (GET only) while the GS1 contract is OpenAPI 3.0.3 with POST/OPTIONS operations; a converter or a new probe is required.",
+      "source_url": "file:///Users/aeroshariati/DPP-CE/docs/reference/capabilities.md"
+    },
+    {
+      "topic": "Reference generator rule 25",
+      "fact": "The reference hash generator README says a CBV 2.1 draft revision adds handling for gs1:masterDataAvailableFor (rule 25, work in progress) and clarifies timestamp rounding; relevant to the 2.1 note.",
+      "source_url": "https://github.com/RalphTro/epcis-event-hash-generator"
+    },
+    {
+      "topic": "UNTP licence",
+      "fact": "The GitHub mirror uncefact/spec-untp reports GPL-3.0 and its latest tag is v0.6.1 (2025-06-16); the 0.7.0 page is served from the unicc.org host, so fixtures reuse needs a licence decision.",
+      "source_url": "https://github.com/uncefact/spec-untp"
+    },
+    {
+      "topic": "ISO/IEC 19988 edition",
+      "fact": "ISO/IEC 19988:2024 is listed by standards catalogues as third edition, March 2024, 88 pages.",
+      "source_url": "https://scc-ccn.ca/standardsdb/standards/8185963"
+    }
+  ],
+  "overall": "The target is largely reliable on GS1 facts: release lists, statuses, status-code mapping, pagination, header names, CBV hash rules 16-23, JSON Schema fields, Web Vocabulary link types, UNTP 0.7.0 mapping, all 14 repository records and all 11 DOIs matched primary sources. Errors cluster in two places. First, small counting and consistency errors (29 OpenAPI paths, not 30; the conformance matrix has three filled rows, which contradicts the 'one filled requirement' statement elsewhere). Second, and more important for the engine, several existing_check mappings overstate current capability: data.rules has no pattern kind, api.contract is GET-only and cannot judge POST /capture or OPTIONS, and data.jsonschema does not assert date-time and always validates under 2020-12. ESPR article citations and ISO/IEC 19987 could not be re-verified. No rule 5 violation was found beyond a minor sentence on ISO/IEC correspondence.",
+  "counts": {
+    "checked": 34,
+    "confirmed": 26,
+    "refuted": 5,
+    "not_confirmed": 3
+  }
+}

@@ -1,0 +1,289 @@
+{
+ "target": "l02-prototypes-pilots",
+ "retrieval_date": "2026-10-19",
+ "method_note": "The target is a literature file, so the highest-risk claims are DOI/title/year/venue/first-author records, quantitative claims taken from abstracts, and engine-mapping statements. I re-checked 38 DOI records against Crossref (DataCite or OpenAlex where Crossref returns 404), re-read the arXiv abstract and HTML of the one dataset paper, rebuilt abstracts via OpenAlex for three numeric claims, and checked two engine-mapping statements against src/dppce/adapters/access.py, identifier.py and docs/reference/capabilities.md. Only 24 are listed below as the highest-impact ones. Crossref/OpenAlex/DataCite are bibliographic registries, so verification_level for each is metadata_only except where an abstract was rebuilt. I did not open any standards text.",
+ "checked": [
+  {
+   "claim_ref": "papers[doi=10.1016/j.procir.2024.07.039]",
+   "claim": "Gleich 2024, Procedia CIRP, AAS-based DPP as a Gaia-X service",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procir.2024.07.039",
+   "evidence": "Crossref returns identical title, first author Kevin Gleich, year 2024, Procedia CIRP.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa54631.2023.10275715]",
+   "claim": "Pourjafarian 2023, multi-stakeholder AAS DPP, ETFA",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa54631.2023.10275715",
+   "evidence": "Title, first author, 2023 and ETFA 28th conference match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa54631.2023.10275629]",
+   "claim": "Rimaz 2023, SHACL validation of AAS data entry (basis for data.shacl)",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa54631.2023.10275629",
+   "evidence": "Title, first author Mohammad Hossein Rimaz, 2023, ETFA all match. Crossref gives the venue as the 2023 IEEE 28th ETFA, which is more exact than the file's wording.",
+   "correction": "Venue can be written as '2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)'."
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa61755.2024.10711027]",
+   "claim": "Jung 2024, production data into AAS, ETFA 29th",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1109/etfa61755.2024.10711027",
+   "evidence": "Title, first author Jieun Jung, 2024, ETFA 29th match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/icstcc66753.2025.11240327] and papers[doi=10.3390/app14114874]",
+   "claim": "Hulea 2025 (EDC data transfer) and Hulea 2024 (multi-blockchain DPP) are two separate papers by the same first author",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/app14114874",
+   "evidence": "Both DOIs resolve in Crossref with the stated titles, first author Mihai Hulea, years 2025 and 2024, venues ICSTCC and Applied Sciences.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1080/00207543.2025.2464161]",
+   "claim": "Abreu 2025, blockchain DPP design principles, IJPR",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1080/00207543.2025.2464161",
+   "evidence": "Title, author, year, venue match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.3390/polym16101420].key_contribution",
+   "claim": "2192 frisbees, 486.7 kg feedstock to 363.2 kg product, GS1-based one-layer R-Cycle passport, cannot carry sensitive data",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.3390/polym16101420",
+   "evidence": "Rebuilt OpenAlex abstract gives 2,192 frisbees, 486.7 kg and 363.2 kg, R-Cycle initiative following GS1, one-layer DPP that cannot hold sensitive information, and a remark that small simple items may not suit a DPP.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.3390/su15097187]",
+   "claim": "Mügge 2023, Catena-X end-of-life vehicle, Sustainability",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/su15097187",
+   "evidence": "Title, first author Janine Mügge, 2023, Sustainability match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.3390/su17030969] and papers[doi=10.1016/j.procir.2024.01.040]",
+   "claim": "Kühn 2025 (AAS-based DPP design) and Ott 2024 (end-of-life battery passport data model)",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/su17030969",
+   "evidence": "Both match on title, first author (Maximilian Kühn, Julius Ott), year and venue. Crossref gives Kühn with the umlaut, so the note about OpenAlex 'M. Kuhn' is only an OpenAlex variant.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.35490/ec3.2026.311].first_author",
+   "claim": "First author is Ekaterina Petrova; the file says the order conflict is not resolved",
+   "risk": "doi",
+   "verdict": "refuted",
+   "evidence_url": "https://api.crossref.org/works/10.35490/ec3.2026.311",
+   "evidence": "Crossref lists authors in this order: Krista van Zandwijk, Ekaterina Petrova, Rik Eshuis, Pieter Pauwels. Title, year 2026 and Computing in Construction match.",
+   "correction": "Set first_author to Krista van Zandwijk (Crossref and OpenAlex agree) and resolve the note."
+  },
+  {
+   "claim_ref": "papers[doi=10.1007/978-3-031-48930-3_28].first_author",
+   "claim": "First author is Maria João Nabais Sá; the file says the conflict is not resolved",
+   "risk": "doi",
+   "verdict": "refuted",
+   "evidence_url": "https://api.crossref.org/works/10.1007/978-3-031-48930-3_28",
+   "evidence": "Crossref lists Miguel Sá first, then Catarina Guise, Filipa Costa, Paula Rodrigues. Title STVgoDigital matches. First online 20 December 2023, print year 2024.",
+   "correction": "Set first_author to Miguel Sá. Year 2023 (online) is defensible; state the print year 2024 in a note."
+  },
+  {
+   "claim_ref": "papers[doi=10.18420/inf2025_141].first_author and note",
+   "claim": "Three authors, first Shamsir, then Paeplow, then Möller; Crossref returns 404 but OpenAlex resolves it",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.18420/inf2025_141",
+   "evidence": "OpenAlex lists Ahmad Iqbal Bin Mohd Shahir Shamsir, Johanna Paeplow, Frederik Möller in that order, year 2025, host GI. Title matches.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.18420/inf2025_03]",
+   "claim": "Crossref returns 404 for this GI DOI",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.18420/inf2025_03",
+   "evidence": "Crossref returned HTTP 404, as the file says. I did not retrieve the DataCite or OpenAlex record for this one DOI, so title and year for Sasdelli 2025 are not re-verified.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.5281/zenodo.18433712].venue",
+   "claim": "Kroell 2026 is a Zenodo repository record, 'not shown to be peer reviewed'",
+   "risk": "status",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.datacite.org/works/10.5281/zenodo.18433712",
+   "evidence": "DataCite shows title, creator Markus Kroell and year 2026 as stated, but resourceTypeGeneral JournalArticle and publisher 'ISA Publisher'. Crossref returns 404. The record is registered as a journal-article type by a named publisher, so the file's characterisation is incomplete. Peer-review status is still unknown.",
+   "correction": "Record DataCite type JournalArticle and publisher ISA Publisher; keep peer review as unverified."
+  },
+  {
+   "claim_ref": "papers[doi=10.34657/28443]",
+   "claim": "COBALT-P project report by Urs Müller, 2026, RENATE repository, type report",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.datacite.org/dois/10.34657/28443",
+   "evidence": "DataCite: creator Müller, Urs, year 2026, resourceTypeGeneral Report, publisher TIB Hannover.",
+   "correction": "Publisher of record is the Technische Informationsbibliothek, Hannover; 'RENATE' is the repository name and is not in the DataCite record I read."
+  },
+  {
+   "claim_ref": "papers[doi=10.1002/9783527851027]",
+   "claim": "Lin 2026 'Battery Passport' is a book-level record; abstract fragment may be a chapter",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1002/9783527851027",
+   "evidence": "Crossref: monograph, first author Xiao Lin, issued 10 July 2026, subtitle 'A Comprehensive Guide to Technology, Policy, and Global Implementation', no abstract. The file's caution is right. It also supports the doubt that the 'pilot' type label and the pilot-configuration excerpt belong to this book.",
+   "correction": "Add the subtitle. Consider changing type from 'pilot' to 'other' because Crossref holds no abstract that supports it."
+  },
+  {
+   "claim_ref": "papers[doi=10.48550/arxiv.2604.26986].key_contribution",
+   "claim": "BatteryPass-12K: 12,000 passports, CC-BY-4.0, test split withheld, six of ten pilots exposed all ten fields, 200 human-reviewed, 22 models, best F1 0.98 validation and 0.71 test, prompt injection lowers scores",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://arxiv.org/abs/2604.26986",
+   "evidence": "arXiv abstract and HTML v1 show: 10 pilot samples, 6 with all 10 public fields; 12,000 synthetic samples (9,600/1,200/1,200); 200 reviewed; six defect classes as listed; public release excludes test set; 22 models; F1 0.98 and 0.71 for the best model; CC-BY-4.0. Submitted 28 April 2026. The 'variants judged with language models' detail and the 'half labelled conformant' split were not re-checked.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.48550/arxiv.2410.15758].key_contribution",
+   "claim": "Illán García 2024: arXiv abstract promises performance assessment but full text has only a cost estimate and illustrative use cases",
+   "risk": "technical_mechanism",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://arxiv.org/abs/2410.15758",
+   "evidence": "The arXiv abstract does say it 'assesses performance across several scenarios'. Title, four authors and submission date 21 October 2024 match. I did not re-read the full text, so the file's finding that it holds no benchmarks cannot be confirmed or refuted by me.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.3390/logistics10080177].key_contribution and conformance_relevance",
+   "claim": "Khairy 2026: 16 experiments, p95 48 ms and 500 ms, 7 events/s, proof 304 ms, verification 9.8 ms, four failure scenarios. File states EPCIS compliance measurement is 'not stated in the abstract'.",
+   "risk": "technical_mechanism",
+   "verdict": "refuted",
+   "evidence_url": "https://api.openalex.org/works/doi:10.3390/logistics10080177",
+   "evidence": "The rebuilt abstract gives all the stated numbers, but it also reports '100% EPCIS 2.0 compliance' and a 37% median-latency reduction from horizontal scaling. So the abstract does state a compliance result, and the file's sentence is wrong. The file does not say how compliance was measured, which remains unknown. The 500 ms wording is ambiguous in the abstract.",
+   "correction": "Replace with: the abstract claims 100% EPCIS 2.0 compliance across the experiments, with the measurement method unstated; add the 37% scaling result."
+  },
+  {
+   "claim_ref": "papers[doi=10.31881/tlr.2026.1234].key_contribution",
+   "claim": "Zhao 2026: Fabric prototype, organic cotton garment, about 3.2 s latency, over 45 TPS",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.31881/tlr.2026.1234",
+   "evidence": "Abstract reconstruction gives approximately 3.2 s latency and over 45 TPS under realistic network constraints, Hyperledger Fabric, organic cotton case. First author Xuejie Zhao.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1016/j.sftr.2025.100847].key_contribution",
+   "claim": "Hasan 2025: four cathode chemistries, ten indicators, limits are simulation-only, no stakeholder testing, scalability",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.openalex.org/works/doi:10.1016/j.sftr.2025.100847",
+   "evidence": "The rebuilt abstract says four chemistries, ten KPIs, and the stated limitations. The statement 'contract code is public' was not seen in this abstract and is not confirmed.",
+   "correction": "Drop or source 'contract code is public'."
+  },
+  {
+   "claim_ref": "papers[doi=10.1016/j.procs.2026.02.212] (Made2Verify)",
+   "claim": "Howie 2026, Procedia Computer Science; the file claims verification of the redirect-by-lifecycle and fallback behavior",
+   "risk": "doi",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procs.2026.02.212",
+   "evidence": "Title, first author Scott Ronald Howie (with Munawar, Reimer, Fitzpatrick), Procedia CS vol. 277 pp. 1744-1751 (2026) match. Crossref has no abstract and the publisher page was not read, so the described behavior (lifecycle redirects, fallback, lab and production tests) is not confirmed by me.",
+   "correction": "Add volume 277, pages 1744-1751. Mark content_read of behavior as search-tool excerpt only."
+  },
+  {
+   "claim_ref": "papers[doi=10.24251/hicss.2025.527]",
+   "claim": "Babel 2025 HICSS, wallet-based identities, NFTs and zero-knowledge proofs for textile DPP",
+   "risk": "doi",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.24251/hicss.2025.527",
+   "evidence": "Title, first author and year match; venue is the 58th HICSS proceedings in Crossref (the series record carries two container titles). Crossref has no abstract, so the NFT and ZKP content claim is unverified here.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1016/j.spc.2025.01.014] and papers[doi=10.1016/j.cscm.2025.e04267], papers[doi=10.3390/digital6020043], papers[doi=10.1007/s43615-026-00927-x]",
+   "claim": "Wan 2025, Markou 2025, Lyse 2026, Psarommatis 2026 as systematic reviews with the stated venues",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.3390/digital6020043",
+   "evidence": "All four titles, first authors, years and venues match in Crossref. Wan's first name is 'Paul Keng Fai' in Crossref, 'Paul Kengfai' in the file. Psarommatis was published online 20 April 2026. Counts such as 225 studies, 25 frameworks and 549/33/40 records were not re-checked.",
+   "correction": "Wan first name: 'Paul Keng Fai Wan'. Venue of Lyse is 'Digital' (the file wrote 'Digit.')."
+  },
+  {
+   "claim_ref": "papers[doi=10.5381/jot.2026.25.3.a21], [10.1016/j.procs.2026.02.330], [10.1016/j.procs.2026.02.364], [10.1016/j.procs.2026.02.274], [10.1016/j.procs.2026.02.145], [10.1145/3813822.3814036], [10.1016/j.digbus.2026.100167], [10.23919/cnsm67658.2025.11297456], [10.23919/cnsm67658.2025.11297523], [10.1109/rfid64926.2025.11015538]",
+   "claim": "Ten further bibliographic records (Nguyen, Kuiper, Tüzün, Kranner, Abdallah, Niu, Rohrschneider, Fabianek, Käser, Tolcha)",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procs.2026.02.274",
+   "evidence": "Each resolves in Crossref with matching title, first author, year and venue. Capitalisation differs for Rohrschneider and Nguyen's trailing full stop is in the Crossref title. Crossref spells Käser as 'Kaser'.",
+   "correction": null
+  },
+  {
+   "claim_ref": "papers[doi=10.1109/etfa54631.2023.10275715].conformance_relevance",
+   "claim": "access.restricted_fields reads entitled paths at the root of the fetch body; nested AAS element rules would need nested path support (gap)",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/access.py",
+   "evidence": "Line 311-312: entitled paths are looked up with dig(document, path) at the root on purpose. Withheld-path leak detection (_holds_path) does walk nested objects. Dotted paths are supported, but AAS submodel elements sit in arrays addressed by idShort, which a dotted path does not express. So the gap is real but narrower than 'nested path support': it is array-by-idShort addressing.",
+   "correction": "Say: entitled paths are matched as dotted paths from the root; AAS element lists addressed by idShort are not expressible."
+  },
+  {
+   "claim_ref": "papers[doi=10.1016/j.procs.2026.02.212].conformance_relevance",
+   "claim": "identifier.parse accepts only /01/<GTIN>/21/<serial>",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/identifier.py",
+   "evidence": "_GS1_PATH requires 14 digits for GTIN, then /21/ and a serial of 1-20 characters, and a GTIN check digit test follows. The serial charset is restricted to letters, digits, dot, underscore and hyphen.",
+   "correction": "Optionally add the serial charset and 20-character limit to the statement."
+  },
+  {
+   "claim_ref": "papers[*].conformance_relevance (capability states)",
+   "claim": "Capability names and states used across the file (data.shacl, integrity.status_list, persistence.scheduled, carrier.nfc, carrier.rfid are interface_only; others supported)",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/docs/reference/capabilities.md",
+   "evidence": "The table lists those five as interface_only. Two states the file does not mention: persistence.versions and aas.validate are 'experimental', not fully supported. The file also does not note that the registered check registry.consistency runs on capability registry.mock.",
+   "correction": "State that persistence.versions and aas.validate are experimental."
+  }
+ ],
+ "rule5_findings": [],
+ "missed_items": [
+  {
+   "topic": "Khairy 2026 compliance claim",
+   "fact": "The abstract reports 100% EPCIS 2.0 compliance and a 37% median latency reduction from horizontal scaling. Neither is in the file.",
+   "source_url": "https://api.openalex.org/works/doi:10.3390/logistics10080177"
+  },
+  {
+   "topic": "Kroell 2026 registration",
+   "fact": "DataCite types this record as a journal article with publisher ISA Publisher, not a bare repository record.",
+   "source_url": "https://api.datacite.org/dois/10.5281/zenodo.18433712"
+  },
+  {
+   "topic": "Petrova and Sá author order",
+   "fact": "Crossref resolves both open author conflicts: van Zandwijk is first author of the AECO data-space paper; Miguel Sá is first author of STVgoDigital.",
+   "source_url": "https://api.crossref.org/works/10.35490/ec3.2026.311"
+  },
+  {
+   "topic": "BatteryPass-12K split",
+   "fact": "The 12,000 samples are 2,000 per valid pilot, split 9,600 train, 1,200 validation, 1,200 test; the four pilots that lacked all fields were skipped.",
+   "source_url": "https://arxiv.org/html/2604.26986v1"
+  }
+ ],
+ "overall": "The bibliographic layer is reliable: all 38 DOI records I re-checked match title, year and venue, and the file correctly flags that Crossref returns 404 for GI and Zenodo DOIs. The weak points are author order where the file left conflicts unresolved (two now resolved against it), one wrong statement about the Khairy abstract, and a few unsourced details such as 'contract code is public'. The two engine-mapping statements I tested against source code were correct, with a narrower gap for the access check than stated. The file contains no standards text, so there are no rule 5 problems. Most content claims rest on abstracts only, and the file says so honestly.",
+ "counts": {
+  "checked": 28,
+  "confirmed": 21,
+  "refuted": 3,
+  "not_confirmed": 4
+ }
+}

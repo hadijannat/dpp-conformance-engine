@@ -1,0 +1,1996 @@
+{
+ "method_id": "m04-dataspace-federated",
+ "name": "Dataspace-federated DPP (Catena-X / Eclipse Tractus-X: DSP connectors, DCP credentials, AAS Digital Twin Registry, SAMM aspect models)",
+ "retrieval_date": "2026-10-19",
+ "scope_note": "Covers the dataspace-federated way to provide and consume product passports as practised in the Catena-X automotive dataspace and its Eclipse Tractus-X open-source reference stack: the Eclipse Dataspace Protocol (DSP 2025-1) and the Decentralized Claims Protocol (DCP 1.0.x), the Eclipse Dataspace Components (EDC) connector and the Tractus-X EDC distribution (EDR tokens, ODRL policies), the central discovery services (Discovery Finder, BPN Discovery, EDC Discovery), the decentralized Digital Twin Registry built on the IDTA AAS Part 2 registry and discovery API, SAMM aspect models and the files ESMF generates from them, the Catena-X standards that bind these parts for the DPP use case (CX-0143, preview CX-0160), and the test kits (DSP TCK, DCP TCK, DPS TCK) and the Catena-X conformity assessment process. Gaia-X and Factory-X/Manufacturing-X appear as context only. Left out: the AAS family itself beyond its registry/discovery role (see the AAS method file), VC/SSI wallets beyond DCP, GS1 resolvers, EU registry operations, and the text of any EN, ISO, IEC or DIN document (rule 5: bibliographic data only). EU law statements reuse the prior substantive records of 2026-10-13 because EUR-Lex returned empty bodies on 2026-10-19.",
+ "summary": "In this method a passport is not a public web document but a data asset that the economic operator keeps behind its own dataspace connector. Each participant runs a connector (in Catena-X the Tractus-X distribution of the Eclipse Dataspace Components) that speaks the Eclipse Dataspace Protocol 2025-1: a catalog protocol to list datasets with ODRL offers, a contract negotiation state machine, and a transfer process state machine, all as JSON-LD messages over HTTPS. Participants authenticate with the Decentralized Claims Protocol: a self-issued JWT bound to a DID, plus verifiable presentations of dataspace credentials (membership, BPN, framework agreement) fetched from a credential service. The provider registers a digital twin for each product (type or instance level) in its own Digital Twin Registry, which implements the IDTA AAS Part 2 registry and discovery profiles and is itself offered as a DSP dataset. Each twin lists specificAssetIds (manufacturerId, manufacturerPartId, partInstanceId, digitalTwinType) and submodel descriptors whose semanticId names a SAMM aspect model (for example the generic Digital Product Passport or the IDTA/Catena-X battery passport parts) and whose endpoint carries subprotocol DSP with the dataset id and the provider control-plane address. A consumer that holds a QR payload of the Tractus-X form CX:<manufacturerPartId>:<partInstanceId> first asks the Discovery Finder and BPN Discovery for the owner BPN, then the EDC Discovery for that BPN's connector address, reads /.well-known/dspace-version to choose the DSP version, requests the catalog filtered on the Digital Twin Registry type, negotiates a contract, and receives an Endpoint Data Reference (an HTTP endpoint plus a short-lived bearer token) in the TransferStartMessage. With that token it calls the registry through the provider data plane, looks up the twin by specificAssetIds, reads the passport submodel descriptor, negotiates a second contract for the submodel dataset, and finally GETs the aspect payload (JSON value-only serialization) through the data plane. Access tiers are realised by credential-based access policies in the connector, by BPN-based visibility rules in the registry (Edc-Bpn header injected by the provider connector, PUBLIC_READABLE only for selected keys), and by usage policies that must carry the framework agreement and the usage purpose cx.circular.dpp:1. Semantics come from SAMM models in Turtle, from which ESMF generates JSON Schema, OpenAPI, AAS submodel templates, sample payloads and documentation. The architecture deliberately has no public anonymous access path: the preview battery-passport standard CX-0160 itself states that a proxy outside the dataspace is needed to bridge Catena-X passports to the public EU DPP system and registry. The original Tractus-X Digital Product Pass consumer app is archived and deprecated; the Industry Core Hub is the recommended successor and still parses the CX triplet QR form.",
+ "method_families": [
+  "dataspace-federated",
+  "aas-digital-twin",
+  "linked-data-semantic",
+  "verifiable-credentials-ssi"
+ ],
+ "maturity": {
+  "spec_status": "DSP: stable release 2025-1, errata 2 tagged 2026-09-11 (rendered page says stable; the root redirect text still says 'Release Candidate'). DCP: stable v1.0, latest tag v1.0.1 (2025-11-13). EDC Connector: last stable v0.18.1 (2026-09-25), v1.0.0 at release-candidate stage (RC4, 2026-09-29). Tractus-X EDC 0.13.0 (2026-08-27). Digital Twin Registry 0.13.0 (2026-09-01). Catena-X standards: release CX-Titan is current, CX-Neptune is preview; CX-0143 v1.4.0 (DPP) is in Titan, CX-0160 v1.1.0 (battery passport) exists only in the Neptune preview tree. Tractus-X Digital Product Pass app: deprecated and archived (last release 4.0.2, 2024-09-13).",
+  "versions_at_retrieval": [
+   {
+    "artifact": "Eclipse Dataspace Protocol",
+    "version": "2025-1 (tag 2025-1-err2)",
+    "status": "stable release with editorial errata; tag published 2026-09-11",
+    "source_id": "new-dsp-github-repo"
+   },
+   {
+    "artifact": "Eclipse Dataspace Protocol rendered specification",
+    "version": "2025-1-err2 page titled 'Dataspace Protocol Release 2025-1'",
+    "status": "stable",
+    "source_id": "new-dsp-spec-2025-1"
+   },
+   {
+    "artifact": "Eclipse Decentralized Claims Protocol",
+    "version": "v1.0.1",
+    "status": "stable release (2025-11-13)",
+    "source_id": "new-dcp-spec-v1-0-1"
+   },
+   {
+    "artifact": "Dataspace Protocol TCK (dsp-tck)",
+    "version": "v1.0.2",
+    "status": "release 2026-09-04; supports DSP 2025-1",
+    "source_id": "new-dsp-tck"
+   },
+   {
+    "artifact": "Decentralized Claims Protocol TCK (dcp-tck)",
+    "version": "v1.2.1",
+    "status": "release 2026-09-07",
+    "source_id": "new-dcp-tck"
+   },
+   {
+    "artifact": "Dataplane Signaling TCK (dps-tck)",
+    "version": "v1.3.0",
+    "status": "release 2026-08-27; content not read",
+    "source_id": "new-dps-tck"
+   },
+   {
+    "artifact": "Eclipse Dataspace Components Connector",
+    "version": "v0.18.1 stable; v1.0.0-RC4 pre-release",
+    "status": "active",
+    "source_id": "new-edc-connector"
+   },
+   {
+    "artifact": "Eclipse Tractus-X EDC",
+    "version": "0.13.0",
+    "status": "release 2026-08-27",
+    "source_id": "new-tractusx-edc"
+   },
+   {
+    "artifact": "Eclipse Tractus-X Digital Twin Registry",
+    "version": "digital-twin-registry-0.13.0",
+    "status": "release 2026-09-01; OpenAPI titled V3.1.0_SSP-001",
+    "source_id": "new-tractusx-dtr"
+   },
+   {
+    "artifact": "Tractus-X Discovery Finder",
+    "version": "discoveryfinder-0.5.1",
+    "status": "release 2025-02-13",
+    "source_id": "new-tractusx-discovery-finder"
+   },
+   {
+    "artifact": "Tractus-X BPN Discovery",
+    "version": "bpndiscovery-0.6.0",
+    "status": "release 2025-11-12",
+    "source_id": "new-tractusx-bpn-discovery"
+   },
+   {
+    "artifact": "Tractus-X Digital Product Pass app",
+    "version": "4.0.2 (helm) / v4.0.1 (app)",
+    "status": "deprecated, repository archived",
+    "source_id": "new-tractusx-dpp-app"
+   },
+   {
+    "artifact": "Eclipse Tractus-X Industry Core Hub",
+    "version": "v0.6.0 (community-days tags, 2026-06-30)",
+    "status": "active, pre-1.0",
+    "source_id": "new-industry-core-hub"
+   },
+   {
+    "artifact": "Aspect model io.catenax.generic.digital_product_passport",
+    "version": "7.0.0 (latest folder, metadata status release); 6.1.0 also release",
+    "status": "CX-0143 v1.4.0 mandates 6.1.0",
+    "source_id": "new-tractusx-semantic-models"
+   },
+   {
+    "artifact": "Aspect model io.catenax.battery.battery_pass",
+    "version": "6.1.0",
+    "status": "release; imports DPP 5.0.0 metadata",
+    "source_id": "new-tractusx-semantic-models"
+   },
+   {
+    "artifact": "IDTA/Catena-X battery passport SAMM models io.admin-shell.idta.batterypass.* and io.admin-shell.idta.dpp.dpp_metadata",
+    "version": "1.0.x per CX-0160",
+    "status": "published in admin-shell-io/smt-semantic-models",
+    "source_id": "new-idta-smt-semantic-models"
+   },
+   {
+    "artifact": "SAMM (Semantic Aspect Meta Model)",
+    "version": "2.2.0 latest release (models in sldt-semantic-models use 2.1.0 namespaces)",
+    "status": "stable",
+    "source_id": "new-esmf-samm-spec"
+   },
+   {
+    "artifact": "ESMF SDK / samm-cli",
+    "version": "v2.16.1 (2026-10-19)",
+    "status": "active",
+    "source_id": "new-esmf-samm-cli"
+   },
+   {
+    "artifact": "CX-0018 Dataspace Connectivity",
+    "version": "v.4.2",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0018"
+   },
+   {
+    "artifact": "CX-0002 Digital Twins in Catena-X",
+    "version": "v2.4.0",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0002"
+   },
+   {
+    "artifact": "CX-0143 Use Case Circular Economy - Digital Product Passport",
+    "version": "v1.4.0 (overview page lists 1.2.0)",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0143"
+   },
+   {
+    "artifact": "CX-0160 Battery Passport Data Management Base",
+    "version": "v.1.1.0 (with parts CX-0160-1 v1.0.0 and CX-0160-3 v1.0.0)",
+    "status": "CX-Neptune preview only",
+    "source_id": "new-cx-0160"
+   },
+   {
+    "artifact": "CX-0053 Discovery Finder and BPN Discovery Service APIs",
+    "version": "v1.1.1",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0053"
+   },
+   {
+    "artifact": "CX-0001 Participant Agent Registration",
+    "version": "v1.2.1",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0001"
+   },
+   {
+    "artifact": "CX-0010 Business Partner Number",
+    "version": "v3.0.1",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0010"
+   },
+   {
+    "artifact": "CX-0152 Policy Constraints For Data Exchange",
+    "version": "v1.0.0; policy profile IRI https://w3id.org/catenax/2025/9/policy/",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0152"
+   },
+   {
+    "artifact": "CX-0050 Catena-X-specific verifiable credentials",
+    "version": "v.2.2.1 (overview shows no version)",
+    "status": "CX-Titan current",
+    "source_id": "new-cx-0050"
+   },
+   {
+    "artifact": "IDTA 01002 AAS Part 2 API",
+    "version": "v3.2 (referenced normatively by CX-0002 v2.4.0)",
+    "status": "published",
+    "source_id": "idta-01002-api"
+   },
+   {
+    "artifact": "Tractus-X EcoPass KIT",
+    "version": "26.09",
+    "status": "lists DPP 5.0.0, battery pass 6.0.0",
+    "source_id": "new-tractusx-ecopass-kit"
+   }
+  ],
+  "adoption_evidence": "Production use is limited to the Catena-X association's onboarded members; no public deployment count was found. Evidence seen: the Tractus-X reference stack is actively maintained (Tractus-X EDC, DTR, EDC Connector, DSP/DCP TCK repositories pushed in October 2026); Catena-X runs a third-party conformity assessment with four named conformity assessment bodies (TUEV SUED, Deloitte, TUEV Rheinland, SQS) under a CAF Handbook release Saturn (minor release Titan). The tractusx-edc multi-dataspace decision record of 2026-01-07 names Factory-X, Construct-X and Semiconductor-X as further dataspaces that want the same connector midstream. Counter-evidence of maturity for the DPP use case: the Tractus-X Digital Product Pass consumer app was deprecated for lack of maintenance and archived; the battery passport standard CX-0160 is only in the preview release; three different DPP aspect versions are named by the KIT (5.0.0), the standard (6.1.0) and the model repository (7.0.0). Academic evidence is prototype-level: an EDC-based DPP transfer prototype (Hulea et al. 2025), EDC/AAS integration comparisons with Catena-X and Factory-X prototypes (Schmidt et al. 2025), and Catena-X digital-twin lifecycle and circular-economy studies (Manoury et al. 2025; Muegge et al. 2023).",
+  "regulatory_alignment": "Own reading against prior substantive law records (2026-10-13; not re-fetched this session). Strong fit: Regulation (EU) 2024/1781, Art. 10(1)(d) asks for open standards, interoperable formats and transfer through an open interoperable data exchange network without vendor lock-in; DSP and DCP are Apache-2.0 open specifications with an open TCK. Art. 11(f) and Regulation (EU) 2023/1542, Art. 78(f) restrict who may introduce or modify data by access rights; the connector policy model and DTR write roles support this. Art. 11(g) and Art. 78(g) ask for authentication, reliability and integrity; DCP gives authenticated participants, but passports are not signed as documents. Weak fit: Regulation (EU) 2023/1542, Art. 77(2)(a) and Art. 78(b), and Regulation (EU) 2024/1781, Art. 11(b), require free access for the public to the public part; the Catena-X architecture admits only onboarded participants with membership credentials, and CX-0160-3 section 5.2 (preview) itself calls for a bridge outside the dataspace. Regulation (EU) 2024/1781, Art. 2 defines the unique product identifier as also enabling a web link to the passport, and Regulation (EU) 2023/1542, Art. 77(3) makes the QR code link to a unique identifier; the Tractus-X carrier payload CX:<manufacturerPartId>:<partInstanceId> is not a web link and needs a discovery chain plus credentials. Regulation (EU) 2024/1781, Art. 10(4) (backup copy through a DPP service provider) and Art. 11(e) / Regulation (EU) 2023/1542, Art. 78(e) (availability after the operator ceases activity) are not addressed by the peer-to-peer model, in which the passport is reachable only while the provider connector runs; the DPP 7.0.0 aspect carries a backupReference field but no mechanism. Regulation (EU) 2024/1781, Art. 13 and Regulation (EU) 2023/1542, Art. 77(10) (upload of identifiers to the EU registry) have no Catena-X counterpart; the DPP 7.0.0 aspect has a registrationIdentifier field."
+ },
+ "layers": {
+  "L01_unique_identifiers": {
+   "applies": "partial",
+   "mechanism": "Participants are identified twice: by a DID (CX-0018 v4.2 section 2.1.1 requires a DID in every DSP message property that identifies a participant; DCP self-issued tokens carry iss = sub = participant DID, aud = verifier DID) and by a Business Partner Number (CX-0010 v3.0.1): prefix 'BPN', a type character L (legal entity), S (site) or A (address), ten upper-case alphanumeric entity characters and two check characters, example BPNL00000000IF61 (written with spaces in the standard). The BPN still drives discovery (BPN Discovery, EDC Discovery), DTR visibility (externalSubjectId = BPN) and the BusinessPartnerNumber/BusinessPartnerGroup policy constraints; the Tractus-X connector resolves BPN to DID via a separate directory (connector-discovery extension, decision record 2026-01-07 names BDRS). Products are identified by AAS twin ids (urn:uuid), globalAssetId (urn:uuid in examples) and specificAssetIds: manufacturerId (BPNL), manufacturerPartId (type-level part number), partInstanceId (serial, unique only as agreed between provider and consumer, per CX-0160 base 2.1.1), customerPartId (optional), digitalTwinType = PartInstance or PartType (mandatory since CX-0143 v1.4.0 2.1.4.3). The DPP aspect carries its own passportIdentifier with a UUID pattern (plain UUID or urn:uuid:) in metadata (DPP aspect 7.0.0 JSON Schema). Assets in the connector have their own @id; the submodel dataset id is referenced from subprotocolBody 'id=' and SHOULD be a UUIDv4 (CX-0143 2.1.4.3).",
+   "specs": [
+    {
+     "source_id": "new-cx-0018",
+     "component": "section 2.1.1 Usage of DID in the data exchange"
+    },
+    {
+     "source_id": "new-cx-0010",
+     "component": "section 1.4 example and BPN structure table (check characters computed with an algorithm from a protected ISO/IEC document, not described here)"
+    },
+    {
+     "source_id": "new-cx-0160",
+     "component": "base 2.1.1 Digital twins and specific asset IDs (preview)"
+    },
+    {
+     "source_id": "new-cx-0143",
+     "component": "2.1.4.3 Registration of the digital twin and the submodels"
+    },
+    {
+     "source_id": "new-dcp-spec-v1-0-1",
+     "component": "base.protocol Self-Issued ID Tokens"
+    },
+    {
+     "source_id": "new-tractusx-semantic-models",
+     "component": "io.catenax.generic.digital_product_passport 7.0.0 metadata.passportIdentifier pattern"
+    },
+    {
+     "source_id": "new-iso-iec-7064-2003",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "new-iso-iec-6523-1-2023",
+     "component": "bibliographic only"
+    }
+   ],
+   "variants": [
+    "Participant id: DID (did:web in DSP and DCP examples) for protocol, BPN for business logic and discovery; older Catena-X releases used the BPN in the protocol",
+    "Product key: manufacturerPartId plus partInstanceId (instance twin) or manufacturerPartId only (type twin)",
+    "Passport key: DPP aspect metadata.passportIdentifier (UUID) separate from twin id and submodel id",
+    "IDTA battery passport parts referenced by supplemental semanticIds and the DPP Metadata model (CX-0160 preview)"
+   ],
+   "observable_black_box": "From a carrier sample: the decoded text and whether it is a URL or a CX triplet. From a DTR response (behind a connector or a loopback mock): the specificAssetIds list, twin id and globalAssetId formats. From a passport payload: metadata.passportIdentifier and identification.partTypeInformation.manufacturerPartId; consistency between carrier triplet, twin keys and payload. BPN syntax (prefix, type letter, length, character set) is checkable; the check-character algorithm is only in a protected ISO/IEC document and is not reproduced.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 2 and Art. 10(1)(a)-(c) bind the passport to a persistent unique product identifier that also enables a web link; the Catena-X keys are composite, scoped to the manufacturer BPN, and not web links. Regulation (EU) 2023/1542, Art. 77(3) names the ISO/IEC 15459 series for the unique identifier (bibliographic only); whether a CX triplet or a urn:uuid twin id satisfies that cannot be judged without the protected text. Operator identifiers: the BPN is a private Catena-X scheme; Regulation (EU) 2024/1781, Art. 12(1) points to the standards listed in Annex III for unique operator identifiers (not examined here)."
+  },
+  "L02_data_carriers": {
+   "applies": "partial",
+   "mechanism": "No Catena-X standard read in this session fixes a carrier or payload. The Tractus-X reference practice encodes plain text CX:<manufacturerPartId>:<partInstanceId> in a QR code: the archived Digital Product Pass app tutorial tells users to generate a text QR code of that form, and the Industry Core Hub passport QR scanner validates the decoded text with the regular expression ^CX:[^:]+:[^:]+$ before discovery. The DPP aspect (5.0.0 to 7.0.0) records carrier metadata inside the passport: identification.dataCarriers[] with carrierType (for example 'QR') and carrierPositions; the EcoPass KIT example shows carrierType QR and a layout position text. The battery passport parts in CX-0160 (preview) do not define a carrier.",
+   "specs": [
+    {
+     "source_id": "new-tractusx-dpp-app",
+     "component": "dpp-tutorial/qr-code.md"
+    },
+    {
+     "source_id": "new-industry-core-hub",
+     "component": "ichub-frontend passport-consumption PassportQRScanner.tsx (CX pattern check)"
+    },
+    {
+     "source_id": "new-tractusx-semantic-models",
+     "component": "DPP 7.0.0 identification.dataCarriers"
+    },
+    {
+     "source_id": "new-tractusx-ecopass-kit",
+     "component": "adoption view, example payload"
+    }
+   ],
+   "variants": [
+    "QR code with CX triplet text (reference apps)",
+    "Manual entry of manufacturer part id and part instance id in the consumer app",
+    "A bridging proxy outside the dataspace could expose a web URL carrier (CX-0160-3 section 5.2, preview; no URL form specified)"
+   ],
+   "observable_black_box": "QR image sample decodes to text; the engine can test whether the text is an http(s) URL, a GS1 Digital Link, or a CX triplet. The carrier metadata inside the passport (dataCarriers) can be compared with the physical carrier sample.",
+   "law_delta": "Regulation (EU) 2023/1542, Art. 13(6) and Art. 77(3) require a QR code that gives access to the battery passport through a unique identifier; Regulation (EU) 2024/1781, Art. 10(1)(a)-(b) require a data carrier physically present on the product, packaging or documents connected to a persistent unique product identifier. A CX triplet QR gives no access to a party outside the dataspace. Carrier technical requirements in harmonised standards were not examined (rule 5)."
+  },
+  "L03_data_exchange_protocols": {
+   "applies": "yes",
+   "mechanism": "Three protocol layers. (1) Discovery (Catena-X central services, plain HTTPS JSON, not behind a connector): Discovery Finder POST {base}/api/{version}/administration/connectors/discovery/search returns BPN Discovery endpoints for a key type (for example manufacturerPartId; CX-0143 2.1.4.2 uses type 'mpn'); BPN Discovery POST .../administration/connectors/bpnDiscovery/search with body {searchFilter:[{type, keys[]}]} returns {bpns:[{type,key,value(BPN),resourceId}]}; registration via POST .../bpnDiscovery (and /batch, DELETE /{resourceId}); EDC Discovery POST /api/administration/connectors/discovery with a JSON array of BPNLs returns [{bpn, connectorEndpoint[]}] (CX-0001 v1.2.1 section 3.1). (2) Dataspace Protocol 2025-1 HTTPS binding, all messages application/json, JSON-LD context https://w3id.org/dspace/2025/1/context.jsonld (terms @protected), JSON Schemas normative: GET {root}/.well-known/dspace-version (MUST be unversioned and unauthenticated; body {protocolVersions:[{version, path, binding:'HTTPS', serviceId?, identifierType?, auth?:{protocol, version, profile[]}}]}, schema protocol-version-schema.json, draft 2019-09, required version/path/binding); catalog POST {base}/catalog/request (CatalogRequestMessage with optional filter; unsupported filter gives 400), GET {base}/catalog/datasets/{id}; pagination by HTTP Link headers rel next/previous; optional gzip. Contract negotiation provider paths GET /negotiations/{providerPid}, POST /negotiations/request (201 Created), POST /negotiations/{providerPid}/request|events|agreement/verification|termination; consumer callback paths /negotiations/offers, /{callback}/negotiations/{consumerPid}/offers|agreement|events|termination; states REQUESTED, OFFERED, ACCEPTED, AGREED, VERIFIED, FINALIZED, TERMINATED. Transfer process provider paths GET /transfers/{providerPid}, POST /transfers/request (201), /transfers/{providerPid}/start|completion|termination|suspension; consumer callbacks /{callback}/transfers/{consumerPid}/start|completion|termination|suspension; states REQUESTED, STARTED, SUSPENDED, COMPLETED, TERMINATED; invalid transition gives 400, unknown or unauthorized process gives 404. Pull transfers return a DataAddress in TransferStartMessage. Connectors MAY advertise DataService/CatalogService entries in their DID document service array. (3) Catena-X profile (CX-0018 v4.2): DSP 2025-1 mandatory, legacy key 'v0.8' (and tolerance for '0.8') in version metadata; version endpoint at https://<host>/<subpath>/.well-known/dspace-version advertised in the DID document as service type DataService; transfer types HttpData-PULL, AmazonS3-PUSH, AzureStorage-PUSH. For HttpData-PULL the TransferStartMessage dataAddress MUST use endpointType https://w3id.org/idsa/v4.1/HTTP with endpointProperties https://w3id.org/edc/v0.0.1/ns/endpoint (REQUIRED), .../authorization (REQUIRED, used unchanged in the Authorization header), .../authType (OPTIONAL), https://w3id.org/tractusx/auth/refreshEndpoint and refreshToken (OPTIONAL, refresh per RFC 6749 section 6 with an STS token), https://w3id.org/tractusx/auth/expiresIn (REQUIRED). Tractus-X EDC exposes the result to the consumer backend as an Endpoint Data Reference: management API POST /v3/edrs (negotiate and auto-transfer, protocol 'dataspace-protocol-http:2025-1', counterPartyAddress like https://provider/api/v1/dsp/2025-1), POST /v3/edrs/request (query), GET /v3/edrs/{transferProcessId}/dataaddress?auto_refresh=true, POST /v3/edrs/{id}/refresh; data fetch GET {endpoint}/{subpath} with header Authorization: <token>; or consumer proxy POST {consumer-dataplane}/proxy/aas/request with {assetId, providerId, pathSegments, queryParams}. Connector discovery helper POST /v3/connectordiscovery/connectors {counterPartyId: did} and /v3/connectordiscovery/dspversionparams.",
+   "specs": [
+    {
+     "source_id": "new-dsp-spec-2025-1",
+     "component": "Common requirements: Exposure of Versions; Catalog, Contract Negotiation and Transfer Process HTTPS bindings"
+    },
+    {
+     "source_id": "new-dsp-github-repo",
+     "component": "specifications/*/ *.binding.https.md and artifacts/src/main/resources (JSON Schemas, dspace.jsonld, examples) at tag 2025-1-err2"
+    },
+    {
+     "source_id": "new-cx-0018",
+     "component": "sections 2.1, 2.2.1-2.2.3, 2.6, 2.7, 3"
+    },
+    {
+     "source_id": "new-cx-0053",
+     "component": "sections 2 and 3 with assets discovery-finder-openapi.yaml and bpn-discovery-service-openapi.yaml"
+    },
+    {
+     "source_id": "new-cx-0001",
+     "component": "section 3.1 EDC Discovery API"
+    },
+    {
+     "source_id": "new-tractusx-edc",
+     "component": "docs/usage/management-api-walkthrough 04_catalog.md and 07_edrs.md; migration 0.12.x to 0.13.x"
+    },
+    {
+     "source_id": "new-tractusx-dpp-app",
+     "component": "docs/data-retrieval/README.md (four phases)"
+    }
+   ],
+   "variants": [
+    "DSP 2025-1 vs legacy v0.8 (IDSA-era) endpoints in parallel; Tractus-X decision record 2025-02-12: no compatibility promise across DSP versions",
+    "Pull (HttpData-PULL with EDR token) vs push (AmazonS3-PUSH, AzureStorage-PUSH)",
+    "Direct provider data plane call vs consumer data plane proxy (/aas/request)",
+    "JSON processing vs JSON-LD expansion of the same messages (DSP allows both)",
+    "Earlier IDSA-governed DSP versions (up to 2024-1) as history"
+   ],
+   "observable_black_box": "Without dataspace credentials: the version metadata endpoint (unauthenticated by rule), the DID document service entries, the HTTP status of DSP endpoints (404 is the mandated answer to unauthorized access), the central discovery service APIs if they are reachable. With credentials: catalog content and ODRL offers, negotiation and transfer state transitions, the EDR dataAddress and its token lifetime, and finally the passport payload. Sample artifacts (catalog JSON, TransferStartMessage, EDR) can be checked offline against the DSP JSON Schemas and contexts.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 10(1)(d) and Regulation (EU) 2023/1542, Art. 77(5) ask for transfer through an open interoperable data exchange network without vendor lock-in; DSP is an open Apache-2.0 specification, but participation in Catena-X requires membership credentials and Catena-X standards are published as all-rights-reserved documents. Neither law prescribes a negotiation step; the contract negotiation before each read is an addition."
+  },
+  "L04_apis_lifecycle_searchability": {
+   "applies": "yes",
+   "mechanism": "Search and read go through the Digital Twin Registry (AAS Part 2 registry and discovery interfaces, IDTA 01002 v3.2 referenced by CX-0002 v2.4.0). Data providers MUST offer the Registry Minimal Read profile SSP-005 and the Discovery Read profile SSP-002, SHOULD offer the Query profile SSP-004, MAY offer the Full profile SSP-001 (create/delete) and the Bulk profile; paths SHOULD carry only the major version (/v3/); unsupported operations or parameter values MUST answer 501 (CX-0002 2.1.5, 3.1.2). Tractus-X DTR 0.13.0 OpenAPI: GET/POST /shell-descriptors, GET/PUT/DELETE /shell-descriptors/{aasIdentifier}, GET/POST /shell-descriptors/{aasIdentifier}/submodel-descriptors, GET/PUT/DELETE .../submodel-descriptors/{submodelIdentifier}, GET /description, GET /lookup/shells?assetIds=<base64url SpecificAssetId JSON>&limit&cursor&createdAfter (deprecated), POST /lookup/shellsByAssetLink?limit&cursor[&createdAfter] with body of {name, value} pairs, GET/POST/DELETE /lookup/shells/{aasIdentifier}, private POST /submodel-descriptor/authorized; identifiers in paths are UTF-8 base64url encoded; paging by cursor and paging_metadata; createdAfter in RFC 3339 is a Tractus-X extension (CX-0160 base 1.4.1 notes CX-0002 2.3.0 did not require it). The registry itself is offered as a DSP dataset with dct:type {'@id': https://w3id.org/catenax/taxonomy#DigitalTwinRegistry} and cx-common:version >= '3.0' (deprecated asset:prop:type 'data.core.digitalTwinRegistry' MAY remain). Passport payloads are served by a submodel server under the Submodel Service Specification Value Profile SSP-003: consumers call the descriptor href with GET; for interface 'SUBMODEL-3.x' they append /$value, for 'SUBMODEL-VALUE-3.x' they use href as is; operations /serialization, $metadata-style modifiers and Level=Core are not supported in that profile (CX-0002 4.1, 5). Submodel datasets carry dct:type https://w3id.org/catenax/taxonomy#Submodel and SHOULD carry aas-semantics:semanticId. CX-0143 4.1.1 fixes the EDC asset shape for passports (dataAddress type HttpData, baseUrl of the submodel server, proxyPath/proxyQueryParams/proxyMethod/proxyBody 'true'). Lifecycle writes (create, update, deactivate) are provider-internal: provider updates the twin or submodel in its own DTR and submodel server; CX-0160 base 4.2 and 5.1.4 (preview) add optional event notifications (CreateSubmodel events under CX-0151) and bulk retrieval of new instance twins via createdAfter. No deactivate or archive operation for passports is standardised; the DPP aspect carries passportStatus.",
+   "specs": [
+    {
+     "source_id": "new-cx-0002",
+     "component": "sections 2.1.2, 2.1.5, 3.1.2, 3.1.4, 4.1, 4.1.2, 4.1.4, 5"
+    },
+    {
+     "source_id": "idta-01002-api",
+     "component": "v3.2 Asset Administration Shell Registry Interface, Basic Discovery Interface (GetAllAssetAdministrationShellIdsByAssetLink deprecated; SearchAllAssetAdministrationShellIdsByAssetLink), Submodel Interface"
+    },
+    {
+     "source_id": "new-tractusx-dtr",
+     "component": "backend/src/main/resources/static/aas-registry-openapi.yaml at tag digital-twin-registry-0.13.0"
+    },
+    {
+     "source_id": "new-cx-0143",
+     "component": "4.1.1 EDC data asset, 4.1.3 contract definition"
+    },
+    {
+     "source_id": "new-cx-0160",
+     "component": "base 1.4.1 retrieval of new battery instance twins; 4.2 notification; 5.1.2-5.1.4 (preview)"
+    }
+   ],
+   "variants": [
+    "Single-entity lookup (specificAssetIds) vs bulk load (digitalTwinType + createdAfter) vs push notifications",
+    "DTR reached through provider data plane (normal) vs directly (provider-internal only)",
+    "SUBMODEL-3.x href plus /$value vs SUBMODEL-VALUE-3.x href",
+    "Item Relationship Service (CX-0005) traversal for multi-level BOM (SHOULD for consumers, not read)"
+   ],
+   "observable_black_box": "Through an EDR: HTTP status codes (501 for unsupported), paging metadata, base64url handling, lookup results for given specificAssetIds, shell descriptor JSON, submodel descriptor endpoints and semanticIds, value-only payload. On a loopback mock DTR: the same API without a connector.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 9(2)(f)-(h) and Art. 11(f) leave create/update rights to delegated acts; Catena-X has no standard create or update API between parties (writes are local). Searchability (Regulation (EU) 2024/1781, Art. 10(1)(d); Regulation (EU) 2023/1542, Art. 77(5)) is met only inside the dataspace and only after discovery and two contract negotiations."
+  },
+  "L05_system_interoperability_data_models": {
+   "applies": "yes",
+   "mechanism": "Payload semantics are SAMM aspect models written in RDF/Turtle (SAMM 2.2.0 latest; Catena-X models use the urn:samm:org.eclipse.esmf.samm:meta-model:2.1.0# namespaces), validated with SHACL shapes in ESMF. Model element ids are URNs urn:samm:<namespace>:<version>#<Element>, for example urn:samm:io.catenax.generic.digital_product_passport:7.0.0#DigitalProductPassport; older twins in examples still use urn:bamm:... ids. ESMF samm-cli (2.16.x) generates from one model: JSON Schema ('to schema'; the published DPP 7.0.0 schema declares draft-04 and uses boolean exclusiveMinimum/exclusiveMaximum inside components.schemas), OpenAPI 3.0.3 YAML/JSON ('to openapi'; DPP 7.0.0 OpenAPI path /{tenant-id}/digital-product-passport with server catenax.io/api/v7), AsyncAPI, example JSON payload ('to json'), Apache Parquet sample, JSON-LD, HTML documentation, PNG/SVG diagrams, SQL (Databricks dialect), Java classes, and AAS submodel templates in XML, JSON or AASX ('to aas'); the sldt-semantic-models gen/ folder ships -schema.json, .yml, .json, .html, -aas.xml, .aasx and .parquet per model. The generic DPP aspect 7.0.0 has top-level properties metadata, identification, operation, handling, characteristics, commercial, sustainability, sources, additionalData (optional), compliances, composition; metadata holds version, passportStatus (enum draft, approved, invalid, expired), issueDate and expirationDate (YYYY-MM-DD), passportIdentifier (UUID), predecessor, backupReference, registrationIdentifier, lastModification, language, economicOperator, specVersion. The battery pass 6.1.0 aspect reuses DPP 5.0.0 metadata/commercial/handling. CX-0143 v1.4.0 mandates DPP 6.1.0 (idShort digitalProductPass) and Transmission Pass 3.1.0 (idShort transmissionPass); CX-0160 (preview) moves batteries to seven joint IDTA/Catena-X models io.admin-shell.idta.batterypass.{digital_nameplate, handover_documentation, carbon_footprint, technical_data, product_condition, material_composition, circularity}:1.0.x, split between PartType and PartInstance twins, plus urn:samm:io.admin-shell.idta.dpp.dpp_metadata:1.0.0#DppMetadata with supplemental semantic id https://admin-shell.io/idta/cds/dppMetadata/1. Protocol-level vocabularies: DSP context https://w3id.org/dspace/2025/1/context.jsonld and ODRL profile context https://w3id.org/dspace/2025/1/odrl-profile.jsonld; EDC namespace https://w3id.org/edc/v0.0.1/ns/; Tractus-X namespaces https://w3id.org/tractusx/v0.0.1/ns/ and https://w3id.org/tractusx/auth/; Catena-X policy context https://w3id.org/catenax/2025/9/policy/context.jsonld and ODRL file https://w3id.org/catenax/2025/9/policy/odrl.jsonld; taxonomy https://w3id.org/catenax/taxonomy#; ontology https://w3id.org/catenax/ontology/common#; credentials context https://w3id.org/catenax/credentials/v1.0.0; DCP context https://w3id.org/dspace-dcp/v1.0/dcp.jsonld.",
+   "specs": [
+    {
+     "source_id": "new-esmf-samm-spec",
+     "component": "SAMM specification 2.2.0 (RDF/Turtle, SHACL)"
+    },
+    {
+     "source_id": "new-esmf-samm-cli",
+     "component": "samm-cli command reference (aspect to schema/openapi/asyncapi/json/aas/html/sql/java)"
+    },
+    {
+     "source_id": "new-tractusx-semantic-models",
+     "component": "io.catenax.generic.digital_product_passport/7.0.0 (TTL and gen/), io.catenax.battery.battery_pass/6.1.0"
+    },
+    {
+     "source_id": "new-cx-0143",
+     "component": "2.1.4.3 table of data models and idShort values"
+    },
+    {
+     "source_id": "new-cx-0160",
+     "component": "base section 3 semantic models; CX-0160-3 section 3.1 DPP Metadata (preview)"
+    },
+    {
+     "source_id": "new-idta-smt-semantic-models",
+     "component": "io.admin-shell.idta.batterypass.* and io.admin-shell.idta.dpp.dpp_metadata folders"
+    },
+    {
+     "source_id": "idta-02035-1-dbp-digital-nameplate",
+     "component": "IDTA 02035 Digital Battery Passport parts 1-7 (open SMT specifications; not re-read this session)"
+    },
+    {
+     "source_id": "idta-02099-1-dpp-metadata",
+     "component": "IDTA 02099-1 DPP Metadata (not re-read this session)"
+    },
+    {
+     "source_id": "new-cx-0003",
+     "component": "CX-0003 SAMM Aspect Meta Model v1.3.0 (heading only)"
+    },
+    {
+     "source_id": "new-dsp-github-repo",
+     "component": "artifacts/src/main/resources/context/dspace.jsonld, odrl.jsonld"
+    }
+   ],
+   "variants": [
+    "Generic DPP aspect (5.0.0 / 6.1.0 / 7.0.0) vs product-specific passports (battery 6.x, transmission 3.x, electric drive 2.0.0 per EcoPass KIT)",
+    "Catena-X battery pass 6.x vs joint IDTA/Catena-X seven-part battery models (CX-0160 preview)",
+    "Value-only JSON payload ($value) vs full AAS submodel serialization (not supported by SSP-003 profile)",
+    "Instance-level vs type-level twins carrying different parts of the passport"
+   ],
+   "observable_black_box": "Payload JSON can be validated against the pinned generated JSON Schema; submodel descriptor semanticId and idShort can be compared with the mandated URN; generated AASX/XML submodel templates can be validated as AAS; JSON-LD @context values of DSP messages and policies can be checked against an allowlist without fetching.",
+   "law_delta": "Regulation (EU) 2023/1542, Annex XIII lists the battery passport content; the mapping from Annex XIII to the Catena-X or IDTA battery models was not checked here (the Battery Pass / BatteryPass-Ready open models are the reference for attributes). Regulation (EU) 2024/1781, Annex III content depends on delegated acts not yet adopted for most products; the generic DPP aspect is a Catena-X proposal, not a legal schema."
+  },
+  "L06_storage_archiving_persistence": {
+   "applies": "partial",
+   "mechanism": "Storage is decentralised by design: each provider keeps the passport in its own submodel server behind its own connector and DTR (CX-0143 1.2; CX-0002). Persistence is only as long as the provider runs these services; there is no Catena-X central copy, archive or escrow mechanism. The DPP aspect 7.0.0 metadata has backupReference (string) and the version/predecessor fields, so a provider can point to a backup copy and to an earlier passport, but no protocol defines how a backup is reached. The Industry Core Hub stores submodel data and registers the EDC asset on behalf of the provider. CX-0160-3 section 5.2 (preview) describes a separate EU-facing DPP management system that keeps a synchronised copy for public access.",
+   "specs": [
+    {
+     "source_id": "new-cx-0143",
+     "component": "1.2 context and architecture fit"
+    },
+    {
+     "source_id": "new-tractusx-semantic-models",
+     "component": "DPP 7.0.0 metadata.backupReference, predecessor, lastModification"
+    },
+    {
+     "source_id": "new-cx-0160",
+     "component": "CX-0160-3 section 5.2 bridging to EU DPP system (preview)"
+    },
+    {
+     "source_id": "new-industry-core-hub",
+     "component": "README data provision"
+    }
+   ],
+   "variants": [
+    "Provider-hosted submodel server (self-hosted or by a business application provider)",
+    "Synchronised copy in an EU-facing DPP system outside the dataspace (CX-0160-3, preview)"
+   ],
+   "observable_black_box": "Presence and syntax of backupReference and predecessor in payloads; repeated observations over time (version, lastModification) for the same twin; nothing about the actual existence of a backup can be observed through the dataspace.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 10(4) requires a backup copy through a DPP service provider, and Art. 11(e) and Regulation (EU) 2023/1542, Art. 78(e) require availability after the responsible operator ceases activity; the peer-to-peer model gives no such guarantee by itself."
+  },
+  "L07_access_rights_security_confidentiality": {
+   "applies": "yes",
+   "mechanism": "Four stacked controls. (a) Participant authentication by DCP 1.0 (CX-0018 2.3): the consumer obtains a Self-Issued ID Token (JWT; iss = sub = own DID, aud = verifier DID, jti, exp, iat; optional token claim carrying an access token for the credential service) from its Secure Token Service and sends it in the Authorization header of each DSP message; the provider (verifier) resolves the DID document, checks a key with the capabilityInvocation relationship, then calls the consumer Credential Service POST {base}/presentations/query (PresentationQueryMessage with scopes such as org.eclipse.dspace.dcp.vc.type:<Type>) to obtain verifiable presentations; Catena-X catalog requests must be scoped to MembershipCredential, BPN credential and DataExchangeGovernance (framework agreement) credential (CX-0050). (b) Access policies (ODRL, action 'access') on contract definitions decide catalog visibility: BusinessPartnerNumber or BusinessPartnerGroup checked against the BPN from the credential, Membership, FrameworkAgreement. (c) Usage policies (action 'use') evaluated at negotiation: CX-0152 requires each usage policy to contain FrameworkAgreement and one UsagePurpose constraint chained with odrl:and, only constraints from the Catena-X policy schema, and the ODRL profile IRI https://w3id.org/catenax/2025/9/policy/; CX-0143 4.1.2 and CX-0160 require UsagePurpose cx.circular.dpp:1 for passports (Tractus-X EDC lists 25+ allowed leftOperands such as UsagePurpose, ContractReference, DataUsageEndDate, AffiliatesBpnl). (d) Data-plane tokens: the EDR authorization token is short-lived (expiresIn, 300 s in the Tractus-X example) and refreshable; the provider data plane may still refuse requests outside the agreement. Inside the DTR, visibility of specificAssetIds is BPN-based: the provider EDC injects header Edc-Bpn with the consumer BPN; a specificAssetId is visible only to the owner and to BPNs listed in its externalSubjectId keys (closed by default); the wildcard PUBLIC_READABLE is allowed by default only for manufacturerPartId and assetLifecyclePhase (helm values registry.externalSubjectIdWildcardPrefix and ...AllowedTypes); read access to one specificAssetId grants read of the other twin fields, while PUBLIC_READABLE-only readers see a reduced field set; an alternative granular access-control mode uses rule sets (roles read_access_rules, write_access_rules, submodel_access_control). DTR technical clients use OAuth/OIDC (Keycloak or AWS Cognito) with RBAC roles. DSP error semantics hide existence: unauthorized requests for a negotiation or transfer MUST get 404.",
+   "specs": [
+    {
+     "source_id": "new-dcp-spec-v1-0-1",
+     "component": "base.protocol (Self-Issued ID Tokens, validation steps), verifiable.presentation.protocol (/presentations/query, CredentialService DID service), dcp.profiles (vc20-bssl/jwt, vc11-sl2021/jwt)"
+    },
+    {
+     "source_id": "new-cx-0018",
+     "component": "2.3 authentication; 2.4 framework agreement to credential mapping"
+    },
+    {
+     "source_id": "new-cx-0152",
+     "component": "2.1 conventions for constraints, Catena-X policy schema, 2.2/2.3 access and usage policy conventions"
+    },
+    {
+     "source_id": "new-cx-0050",
+     "component": "2.1 Membership credential, 2.2 BPN credential (schemas with statusListIndex/statusListCredential)"
+    },
+    {
+     "source_id": "new-cx-0143",
+     "component": "4.1.2 policy constraints (cx.circular.dpp:1)"
+    },
+    {
+     "source_id": "new-tractusx-edc",
+     "component": "docs/usage/management-api-walkthrough/02_policies.md; 07_edrs.md"
+    },
+    {
+     "source_id": "new-tractusx-dtr",
+     "component": "docs/architecture/6-crosscutting-concepts.md (Edc-Bpn, externalSubjectId, PUBLIC_READABLE, granular access control, RBAC)"
+    },
+    {
+     "source_id": "new-dsp-github-repo",
+     "component": "negotiation and transfer HTTPS bindings: Unauthorized Access returns 404"
+    },
+    {
+     "source_id": "idta-01004-security",
+     "component": "AAS Part 4 access rule language (CX-0002 mentions it as optional; not read)"
+    }
+   ],
+   "variants": [
+    "BPN-list access policy vs BusinessPartnerGroup vs membership-only",
+    "DTR BPN visibility (externalSubjectId) vs granular access-control rules",
+    "Direct data plane call with EDR token vs consumer proxy that refreshes automatically",
+    "Static callback (transfer.process.started) delivery of EDRs to the consumer backend"
+   ],
+   "observable_black_box": "Without credentials: 401/403/404 answers from DSP endpoints (404 is the specified answer for unauthorized negotiation/transfer reads), absence of a public read path. With test credentials on a loopback dataspace: catalog filtering per BPN, policy rejection at negotiation, DTR responses that differ by Edc-Bpn header value, EDR expiry behaviour. Catalog and policy samples can be checked offline for the required constraints.",
+   "law_delta": "Regulation (EU) 2023/1542, Art. 77(2) defines three access groups (public; notified bodies, market surveillance authorities and the Commission; persons with a legitimate interest) and Art. 78(b) requires free access per those rights; Regulation (EU) 2024/1781, Art. 11(b) requires free and easy access for listed actors. Catena-X has no public tier and no role for authorities that are not dataspace members; legitimate-interest roles would have to be modelled as BPN groups or custom credentials. The usage-purpose constraint cx.circular.dpp:1 refers to use under public law requiring passports (CX-0160 base 2.2, preview), which is an addition, not a legal requirement."
+  },
+  "L08_authentication_reliability_integrity": {
+   "applies": "partial",
+   "mechanism": "Integrity and authenticity are channel- and party-based, not document-based. TLS (HTTPS base URLs are mandatory in DSP and DCP) protects transport; DCP authenticates the requesting party with a DID-bound JWT whose signature is checked against the DID document key (kid header or single capabilityInvocation method), with replay protection by jti and expiry by exp; verifiable credentials follow DCP profiles vc20-bssl/jwt (VC Data Model 2.0, enveloped JOSE proofs, Bitstring Status List revocation) or vc11-sl2021/jwt (VC 1.1, external JWT proofs, StatusList2021); credentials and presentations must be homogeneous in model and proof; the concrete signature algorithm is not fixed by DCP. Catena-X credentials carry credentialStatus with statusListIndex and statusListCredential (CX-0050). The passport payload itself carries no signature in the Catena-X DPP or battery aspect models read here. The Tractus-X DPP Verification add-on (simple-wallet issuing aspect-model verifiable credentials for attribute certification) was a proof of concept inside the archived DPP app; its documentation moved to the Data Trust and Security KIT (not read).",
+   "specs": [
+    {
+     "source_id": "new-dcp-spec-v1-0-1",
+     "component": "base.protocol validation steps; dcp.profiles; credential.issuance.protocol (key rotation and revocation, credential revocation)"
+    },
+    {
+     "source_id": "new-cx-0050",
+     "component": "credential JSON schemas (credentialStatus)"
+    },
+    {
+     "source_id": "new-tractusx-dpp-app",
+     "component": "README Digital Product Pass Verification Add-on"
+    }
+   ],
+   "variants": [
+    "DCP profile vc20-bssl/jwt vs vc11-sl2021/jwt",
+    "Optional aspect-level verifiable credential wrapping (Verification add-on, archived PoC)"
+   ],
+   "observable_black_box": "Token and credential samples (JWT headers and claims, VC status entries) can be checked offline; DID documents can be pinned as fixtures. A live provider's signature checks are observable only by sending deliberately bad tokens from a credentialed test participant. The passport payload offers no signature to verify.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 11(g) and Regulation (EU) 2023/1542, Art. 78(g) require data authentication, reliability and integrity; party authentication plus TLS does not let a downstream holder verify a passport copy. Art. 11 fourth subparagraph of Regulation (EU) 2024/1781 foresees implementing acts on credentials of actors with access rights; DCP credentials are dataspace-specific."
+  },
+  "L09_registry_and_customs": {
+   "applies": "no",
+   "mechanism": "No Catena-X or Tractus-X component uploads identifiers to the EU DPP registry or links to customs. The DPP aspect 7.0.0 metadata has a registrationIdentifier string field that could hold the registry's registration identifier. CX-0160-3 section 5.2 (preview) assigns registry registration to a separate EU-facing DPP management system run by the economic operator or a DPP service provider with a Catena-X certified application. The Catena-X 'registries' (DTR, BPN Discovery) are operational directories, not legal registries.",
+   "specs": [
+    {
+     "source_id": "new-cx-0160",
+     "component": "CX-0160-3 section 5.2 (preview)"
+    },
+    {
+     "source_id": "new-tractusx-semantic-models",
+     "component": "DPP 7.0.0 metadata.registrationIdentifier"
+    },
+    {
+     "source_id": "impl-reg-eu-2026-1778-dpp-registry",
+     "component": "registry implementing rules (prior record; not re-read)"
+    }
+   ],
+   "variants": [
+    "Bridge proxy registers the passport (preview concept)"
+   ],
+   "observable_black_box": "Only presence and format of registrationIdentifier in a payload, and its agreement with a mock registry record.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 13(4)-(5) and Regulation (EU) 2023/1542, Art. 77(10) require upload of unique identifiers to the registry and give a registration identifier; this is outside the dataspace method."
+  },
+  "L10_lifecycle_versioning_updates": {
+   "applies": "partial",
+   "mechanism": "Three versioning planes. Protocol: DSP versions are negotiated through /.well-known/dspace-version; Catena-X keeps v0.8 alongside 2025-1; Tractus-X promises strict backward compatibility within one DSP version only. Models: every aspect model change produces a new URN version (for example DPP 5.0.0, 6.0.0, 6.1.0, 7.0.0); CX-0143 has a backward-compatibility page and requires consumers to identify the semantic model version; metadata.specVersion and the battery specVersion example urn:io.catenax.battery.battery_pass:6.1.0 name the model inside the payload. Passports: the DPP aspect metadata carries version, passportStatus (draft, approved, invalid, expired), issueDate, expirationDate, lastModification and predecessor; updates are made in place by the provider; CX-0160 (preview) adds CreateSubmodel event notifications and createdAfter polling for new twins. Ownership change: Catena-X research compares approaches for digital-twin ownership change across lifecycles (Manoury et al.); no standardised handover protocol between operators was found. Battery status values (original, repurposed, re-used, remanufactured, waste) come from Annex XIII of Regulation (EU) 2023/1542 and would sit in the battery models.",
+   "specs": [
+    {
+     "source_id": "new-cx-0018",
+     "component": "2.7 protocol version handling; 3 backward compatibility"
+    },
+    {
+     "source_id": "new-tractusx-edc",
+     "component": "decision record 2025-02-12 DSP downward compatibility"
+    },
+    {
+     "source_id": "new-cx-0143",
+     "component": "CX-0143-BackwardCompatibility.md (file present, not read in full)"
+    },
+    {
+     "source_id": "new-tractusx-semantic-models",
+     "component": "DPP 7.0.0 metadata fields; version folders per model"
+    },
+    {
+     "source_id": "new-cx-0160",
+     "component": "base 4.2 notification, 5.1.4 (preview)"
+    }
+   ],
+   "variants": [
+    "In-place update with lastModification",
+    "New passport linked by predecessor",
+    "Status change to invalid/expired"
+   ],
+   "observable_black_box": "Sequence of payload observations (version, lastModification, passportStatus, predecessor); version metadata answers; semanticId version vs payload specVersion.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 11(d) requires a new passport to be linked to the original; the predecessor field supports it but is not enforced. Regulation (EU) 2023/1542, Art. 77(7) moves responsibility to the operator of a repurposed or remanufactured battery and Art. 77(8) ends the passport after recycling; neither has a dataspace mechanism (the new operator would need its own connector and twin)."
+  },
+  "L11_roles_and_governance": {
+   "applies": "yes",
+   "mechanism": "Governance is association-based. Catena-X Automotive Network e.V. publishes the standards (release trains Jupiter, Io, Saturn, Titan current, Neptune preview), the operating model and rulebooks; participants sign the Catena-X terms and the Data Exchange Governance framework agreement and hold the corresponding credential. Roles in the standards: Data Provider/Consumer, Business Application Provider, Enablement Service Provider, Core Service Provider (CX-0001 Core Service Provider B runs participant-agent registration and the EDC Discovery API; Gaia-X style self-description documents MUST be created and registered at an SD storage), Onboarding Service Provider, Advisory Provider, Conformity Assessment Body. Conformity: business applications, enablement services and data providers/consumers are certified by nominated CABs (TUEV SUED, Deloitte, TUEV Rheinland, SQS) against conformity assessment criteria (CX-0143 ConformityAssessmentCriteria.md; CX-0160 CAC files with ids such as CX-0160-1-CAC-001 that review data offers and EDC assets); the CAF Handbook release Saturn (minor release Titan) governs; BPN conformity is by a self-audited signed declaration (CX-0010 1.3). Identity anchor: DIDs (CX-0049 DID document schema) and Catena-X credentials (CX-0050) issued by the operating company's issuer. Open-source stewardship: Eclipse Foundation (Dataspace Working Group for DSP/DCP and the TCKs; Eclipse Tractus-X for the reference stack; ESMF for SAMM). Context: Gaia-X trust framework (Architecture Document 25.11: compliance engine, registry, notaries, Digital Clearing Houses, wallets with OID4VC, Eclipse DCP or DIDComm) is named as a basis in older Catena-X papers; Factory-X/Manufacturing-X reuse the Tractus-X EDC midstream (factoryx-edc now archived).",
+   "specs": [
+    {
+     "source_id": "new-cx-standards-overview",
+     "component": "standard library overview, release labels"
+    },
+    {
+     "source_id": "new-cx-certification",
+     "component": "catena-x.net certification page; Titan certification page 'Coming Soon'"
+    },
+    {
+     "source_id": "new-cx-0001",
+     "component": "Core Service Provider B duties, self-description documents"
+    },
+    {
+     "source_id": "new-cx-0143",
+     "component": "1.3 conformance and proof of conformity; ConformityAssessmentCriteria.md"
+    },
+    {
+     "source_id": "new-cx-0160",
+     "component": "CAC-base.md, CAC-uc1.md, CAC-uc3.md (preview)"
+    },
+    {
+     "source_id": "new-cx-legal-notice",
+     "component": "LICENSE.md Legal Notice"
+    },
+    {
+     "source_id": "new-gaiax-ad-25-11",
+     "component": "trust framework architecture"
+    },
+    {
+     "source_id": "new-tractusx-edc",
+     "component": "decision record 2026-01-07 multi data space support"
+    },
+    {
+     "source_id": "new-factoryx-edc",
+     "component": "repository metadata"
+    }
+   ],
+   "variants": [
+    "Self-hosted connector vs business application provider hosting",
+    "Catena-X flavour vs other dataspace flavours of the same connector"
+   ],
+   "observable_black_box": "Only artifacts: published certificates of conformity (not examined), credential types in presentations, DID documents. No public list of certified DPP applications was examined.",
+   "law_delta": "Regulation (EU) 2024/1781, Art. 11 second and third subparagraphs regulate DPP service providers (no resale or reuse of data; future delegated act and possible certification scheme); Catena-X certification is private and does not replace that. Economic-operator responsibility stays with the operator under Regulation (EU) 2023/1542, Art. 77(4)."
+  }
+ },
+ "end_to_end_flows": [
+  {
+   "name": "Carrier scan to passport payload inside Catena-X (consumer with membership)",
+   "actors": [
+    "End user with consumer app (Industry Core Hub or archived DPP app)",
+    "Consumer connector (Tractus-X EDC) and its Secure Token Service and Credential Service",
+    "Discovery Finder",
+    "BPN Discovery",
+    "EDC Discovery (portal backend)",
+    "Provider DID document host",
+    "Provider connector control plane and data plane",
+    "Provider Digital Twin Registry",
+    "Provider submodel server"
+   ],
+   "steps": [
+    "1. Scan the QR code and decode text CX:<manufacturerPartId>:<partInstanceId>; check it against ^CX:[^:]+:[^:]+$ and split at ':' (IC-Hub practice).",
+    "2. POST Discovery Finder .../administration/connectors/discovery/search with the key type (manufacturerPartId; 'mpn' in CX-0143 examples) to get the BPN Discovery endpoint(s).",
+    "3. POST BPN Discovery .../administration/connectors/bpnDiscovery/search {searchFilter:[{type, keys:[<manufacturerPartId>]}]} and read bpns[].value (BPNL of the manufacturer).",
+    "4. POST EDC Discovery /api/administration/connectors/discovery with [\"BPNL...\"] and read connectorEndpoint[] (or resolve the provider DID and read its DataService service entry; Tractus-X helper POST /v3/connectordiscovery/connectors).",
+    "5. GET <connector root>/.well-known/dspace-version (no credentials) and pick 2025-1; build <base> = root + path.",
+    "6. Consumer obtains a Self-Issued ID Token from its STS scoped to Membership, BPN and DataExchangeGovernance credentials; provider will call the consumer Credential Service /presentations/query to verify.",
+    "7. Consumer control plane POSTs <base>/catalog/request (DSP) and filters datasets with dct:type https://w3id.org/catenax/taxonomy#DigitalTwinRegistry (legacy asset:prop:type data.core.digitalTwinRegistry).",
+    "8. Negotiate the DTR offer: POST <base>/negotiations/request with the offer copied unchanged plus assigner and target; states move REQUESTED to AGREED, VERIFIED, FINALIZED (Tractus-X POST /v3/edrs collapses negotiation and transfer).",
+    "9. POST <base>/transfers/request with format HttpData-PULL; provider answers TransferStartMessage whose dataAddress (endpointType https://w3id.org/idsa/v4.1/HTTP) carries endpoint, authorization token and expiresIn; the consumer caches it as an EDR.",
+    "10. Through the provider data plane with header Authorization: <token>, POST {dtr}/lookup/shellsByAssetLink with [{name:'manufacturerPartId'}, {name:'partInstanceId'}, {name:'digitalTwinType', value:'PartInstance'}] (the provider EDC adds Edc-Bpn = consumer BPN; DTR filters by externalSubjectId).",
+    "11. GET {dtr}/shell-descriptors/{base64url(aasId)}; select the submodel descriptor whose semanticId is the passport aspect URN (for example urn:samm:io.catenax.generic.digital_product_passport:6.1.0#DigitalProductPassport, idShort digitalProductPass).",
+    "12. Parse endpoints[].protocolInformation: subprotocol 'DSP', subprotocolBody 'id=<datasetId>;dspEndpoint=<provider control plane>', href = data plane URL plus submodel path, interface SUBMODEL-3.x or SUBMODEL-VALUE-3.x.",
+    "13. Catalog request filtered on the dataset id, negotiate the submodel offer whose usage policy holds FrameworkAgreement and UsagePurpose cx.circular.dpp:1, start an HttpData-PULL transfer and receive a second EDR.",
+    "14. GET href (+ '/$value' for SUBMODEL-3.x) with the second EDR token; the provider data plane proxies to the submodel server and returns the aspect JSON payload; refresh the token at refreshEndpoint when expiresIn passes.",
+    "15. Validate and render the payload against the generated JSON Schema (IC-Hub renders any draft-04+ schema)."
+   ]
+  },
+  {
+   "name": "Provider publishes a passport (registration side)",
+   "actors": [
+    "Economic operator (data provider) or business application provider",
+    "Provider EDC",
+    "Provider DTR",
+    "Submodel server",
+    "BPN Discovery"
+   ],
+   "steps": [
+    "1. Produce the aspect payload conforming to the mandated SAMM model version; store it in the submodel server.",
+    "2. Create an EDC asset for the submodel (dataAddress type HttpData, baseUrl submodel server, proxyPath/proxyQueryParams/proxyMethod/proxyBody 'true'; dct:type taxonomy#Submodel, cx-common:version, aas-semantics:semanticId).",
+    "3. Create access and usage policy definitions (profile https://w3id.org/catenax/2025/9/policy/; FrameworkAgreement and UsagePurpose cx.circular.dpp:1 chained with and) and a contract definition selecting the asset by id.",
+    "4. Register or update the twin in the DTR with specificAssetIds (manufacturerId, manufacturerPartId, partInstanceId, digitalTwinType), set externalSubjectId to consumer BPNs or PUBLIC_READABLE (manufacturerPartId only), and add the submodel descriptor (semanticId, idShort, DSP subprotocolBody, href).",
+    "5. Offer the DTR itself as a DSP dataset (dct:type taxonomy#DigitalTwinRegistry).",
+    "6. Register manufacturerPartId -> own BPN at BPN Discovery (POST .../bpnDiscovery {type, key}); the BPN comes from the caller token.",
+    "7. Publish the connector version endpoint in the DID document as a DataService entry and register the connector at the Core Service Provider for EDC Discovery."
+   ]
+  },
+  {
+   "name": "Bridge from Catena-X to the EU DPP system (CX-0160-3 section 5.2, preview concept)",
+   "actors": [
+    "Economic operator or DPP service provider with a certified business application",
+    "EU-facing DPP management system outside Catena-X",
+    "EU DPP registry",
+    "Public users and authorities"
+   ],
+   "steps": [
+    "1. Collect complete battery passport data on model and item level from suppliers through the Catena-X flows above.",
+    "2. Transfer the data from the operator back end to the EU-facing DPP management system; reject incomplete data sets.",
+    "3. That system registers the passport at the EU registry, offers a lifecycle API, a stable resolver endpoint, role-based access for restricted data and free public access (functions listed in the preview text; no technical profile given)."
+   ]
+  }
+ ],
+ "implementations": [
+  {
+   "name": "Eclipse Dataspace Components Connector (eclipse-edc/Connector)",
+   "url": "https://github.com/eclipse-edc/Connector",
+   "kind": "connector",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-19 (push); v0.18.1 2026-09-25; v1.0.0-RC4 2026-09-29",
+   "evidence_level": "metadata_only",
+   "note": "Upstream control and data plane; system tests embed the DSP TCK and a dps-tck connector-under-test. Release notes read; code not read."
+  },
+  {
+   "name": "Eclipse Tractus-X EDC (eclipse-tractusx/tractusx-edc)",
+   "url": "https://github.com/eclipse-tractusx/tractusx-edc",
+   "kind": "connector",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-16 (push); release 0.13.0 2026-08-27",
+   "evidence_level": "substantive",
+   "note": "Catena-X distribution: EDR cache and refresh (/v3/edrs), consumer proxy /aas/request, connector discovery (/v3/connectordiscovery), cx-policy extension, BPN groups (/v3/business-partner-groups). 0.13.0 removed the federated catalog and the v2/v4alpha APIs."
+  },
+  {
+   "name": "Eclipse Tractus-X Digital Twin Registry (sldt-digital-twin-registry)",
+   "url": "https://github.com/eclipse-tractusx/sldt-digital-twin-registry",
+   "kind": "registry",
+   "license": "Apache-2.0",
+   "last_activity": "2026-09-01; release digital-twin-registry-0.13.0",
+   "evidence_level": "substantive",
+   "note": "AAS registry + basic discovery API (OpenAPI 'V3.1.0_SSP-001'), Edc-Bpn based visibility, PUBLIC_READABLE wildcard, granular access control, Keycloak/Cognito."
+  },
+  {
+   "name": "Eclipse Tractus-X Discovery Finder (sldt-discovery-finder)",
+   "url": "https://github.com/eclipse-tractusx/sldt-discovery-finder",
+   "kind": "registry",
+   "license": "Apache-2.0",
+   "last_activity": "2026-06-17 (push); release discoveryfinder-0.5.1 2025-02-13",
+   "evidence_level": "metadata_only",
+   "note": "Reference implementation of the CX-0053 Discovery Finder API."
+  },
+  {
+   "name": "Eclipse Tractus-X BPN Discovery (sldt-bpn-discovery)",
+   "url": "https://github.com/eclipse-tractusx/sldt-bpn-discovery",
+   "kind": "registry",
+   "license": "Apache-2.0",
+   "last_activity": "2026-06-17 (push); release bpndiscovery-0.6.0 2025-11-12",
+   "evidence_level": "metadata_only",
+   "note": "Reference implementation of the CX-0053 BPN Discovery API."
+  },
+  {
+   "name": "Eclipse Tractus-X Portal Backend (EDC Discovery API)",
+   "url": "https://github.com/eclipse-tractusx/portal-backend",
+   "kind": "registry",
+   "license": "Apache-2.0",
+   "last_activity": "2026-09-11 (push); release v2.6.0 2025-09-29",
+   "evidence_level": "metadata_only",
+   "note": "Hosts the EDC Discovery endpoint POST /api/administration/connectors/discovery named by the DPP app guide and CX-0001."
+  },
+  {
+   "name": "Eclipse Tractus-X Digital Product Pass (digital-product-pass)",
+   "url": "https://github.com/eclipse-tractusx/digital-product-pass",
+   "kind": "renderer",
+   "license": "Apache-2.0 (code), CC-BY-4.0 (docs)",
+   "last_activity": "2025-09-18 (push, archived); last release 4.0.2 2024-09-13",
+   "evidence_level": "substantive",
+   "note": "Deprecated under Tractus-X TRG 7.09 because dependencies were unmaintained; README recommends the Industry Core Hub. Docs still describe the four-phase retrieval and the CX QR text form; includes a Verification add-on PoC with simple-wallet."
+  },
+  {
+   "name": "Eclipse Tractus-X Industry Core Hub (industry-core-hub)",
+   "url": "https://github.com/eclipse-tractusx/industry-core-hub",
+   "kind": "platform",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-09 (push); tags v0.6.0-* 2026-06-30",
+   "evidence_level": "substantive",
+   "note": "Provision and consumption orchestrator over EDC, DTR and discovery services; EcoPass KIT add-on with passport API and a QR scanner that accepts only CX:<manufacturerPartId>:<partInstanceId>; schema-driven passport renderer."
+  },
+  {
+   "name": "Eclipse Tractus-X semantic models (sldt-semantic-models)",
+   "url": "https://github.com/eclipse-tractusx/sldt-semantic-models",
+   "kind": "data-model",
+   "license": "CC-BY-4.0",
+   "last_activity": "2026-09-25 (push)",
+   "evidence_level": "substantive",
+   "note": "SAMM models with generated artifacts: generic DPP 2.0.0 to 7.0.0, battery_pass 3.0.0 to 6.1.0, transmission_pass 1.0.0 to 3.1.0, serial_part, part_type_information, single_level_bom_as_built."
+  },
+  {
+   "name": "IDTA SMT semantic models (admin-shell-io/smt-semantic-models)",
+   "url": "https://github.com/admin-shell-io/smt-semantic-models",
+   "kind": "data-model",
+   "license": "CC-BY-4.0",
+   "last_activity": "2026-10-16 (push)",
+   "evidence_level": "metadata_only",
+   "note": "Holds io.admin-shell.idta.batterypass.* and io.admin-shell.idta.dpp.dpp_metadata SAMM models used by CX-0160 (preview). Folder listing only."
+  },
+  {
+   "name": "Eclipse ESMF SDK and samm-cli (esmf-sdk)",
+   "url": "https://github.com/eclipse-esmf/esmf-sdk",
+   "kind": "sdk",
+   "license": "MPL-2.0",
+   "last_activity": "2026-10-19; release v2.16.1",
+   "evidence_level": "substantive",
+   "note": "Loads and validates SAMM models; generates JSON Schema, OpenAPI, AsyncAPI, AAS (XML/JSON/AASX), sample JSON, Parquet, HTML, SQL, Java."
+  },
+  {
+   "name": "SAMM specification (esmf-semantic-aspect-meta-model)",
+   "url": "https://github.com/eclipse-esmf/esmf-semantic-aspect-meta-model",
+   "kind": "ontology",
+   "license": "MPL-2.0",
+   "last_activity": "2026-10-09 (push); release v2.2.0 2025-03-11",
+   "evidence_level": "metadata_only",
+   "note": "Formal (SHACL) and textual SAMM specification; spec site confirms 2.2.0 as latest. Licence and last push re-checked 2026-10-19."
+  },
+  {
+   "name": "Dataspace Protocol specification and artifacts (eclipse-dataspace-protocol-base/DataspaceProtocol)",
+   "url": "https://github.com/eclipse-dataspace-protocol-base/DataspaceProtocol",
+   "kind": "other",
+   "license": "Apache-2.0",
+   "last_activity": "2026-09-11; tag 2025-1-err2",
+   "evidence_level": "substantive",
+   "note": "Normative JSON Schemas (draft 2019-09), JSON-LD contexts and example messages usable as pinned fixtures."
+  },
+  {
+   "name": "Decentralized Claims Protocol specification (eclipse-dataspace-dcp/decentralized-claims-protocol)",
+   "url": "https://github.com/eclipse-dataspace-dcp/decentralized-claims-protocol",
+   "kind": "other",
+   "license": "Apache-2.0",
+   "last_activity": "2026-08-05 (push); tag v1.0.1 2025-11-13",
+   "evidence_level": "substantive",
+   "note": "Self-issued ID tokens, presentation query, credential issuance, profiles."
+  },
+  {
+   "name": "Dataspace Protocol TCK (eclipse-dataspacetck/dsp-tck)",
+   "url": "https://github.com/eclipse-dataspacetck/dsp-tck",
+   "kind": "test-suite",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-19; release v1.0.2 2026-09-04",
+   "evidence_level": "substantive",
+   "note": "JUnit-based; test groups MET (version metadata), CAT (catalog), CN and CN_C (negotiation as provider/consumer), TP (transfer). Needs the connector under test to call back to the TCK (callback address, initiate URLs) and seeded dataset ids."
+  },
+  {
+   "name": "Decentralized Claims Protocol TCK (eclipse-dataspacetck/dcp-tck)",
+   "url": "https://github.com/eclipse-dataspacetck/dcp-tck",
+   "kind": "test-suite",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-13; release v1.2.1 2026-09-07",
+   "evidence_level": "substantive",
+   "note": "Tests Credential Service (VPP and CIP), Issuer Service (CIP) and Verifier (VPP)."
+  },
+  {
+   "name": "Dataplane Signaling TCK (eclipse-dataspacetck/dps-tck)",
+   "url": "https://github.com/eclipse-dataspacetck/dps-tck",
+   "kind": "test-suite",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-16; release v1.3.0 2026-08-27",
+   "evidence_level": "substantive",
+   "note": "Tests DPS control-plane and data-plane roles (scenario ids such as CP_C:01-01, CP_P:02-01, tag base-compliance) against Data Plane Signaling 1.0-RC4; runs embedded in JUnit (TckRuntime) or as the Docker image eclipsedataspacetck/dps-tck-runtime with webhook, protocol and signaling URLs as properties. GitHub API reports no licence because the repository has no LICENSE file; NOTICE.md declares Apache-2.0. Not relevant to passport payloads; it tests the connector's internal control-plane/data-plane interface."
+  },
+  {
+   "name": "Factory-X EDC (factory-x-contributions/factoryx-edc)",
+   "url": "https://github.com/factory-x-contributions/factoryx-edc",
+   "kind": "connector",
+   "license": "Apache-2.0",
+   "last_activity": "2026-06-29 (archived)",
+   "evidence_level": "metadata_only",
+   "note": "Context only: Factory-X flavour built on Tractus-X EDC midstream; archived."
+  },
+  {
+   "name": "aas-test-engines (admin-shell-io)",
+   "url": "https://github.com/admin-shell-io/aas-test-engines",
+   "kind": "validator",
+   "license": "Apache-2.0",
+   "last_activity": "2025-08-05 (push; re-checked 2026-10-19, no newer push; no GitHub releases listed)",
+   "evidence_level": "metadata_only",
+   "note": "Wrapped by the engine's aas.validate; applicable to SAMM-generated AASX/XML submodel templates and to DTR API testing outside a connector."
+  }
+ ],
+ "literature": [
+  {
+   "doi": "10.1109/icstcc66753.2025.11240327",
+   "title": "Digital Product Passport Data Transfer via Dataspace Connector: Technical Implementation and Analysis",
+   "year": 2025,
+   "venue": "2025 29th International Conference on System Theory, Control and Computing (ICSTCC)",
+   "found_via": "mcp__consensus__search (metadata confirmed via Crossref)",
+   "relevance": "Working EDC prototype that moves structured passport data between operators after pre-negotiated contracts using HTTP push; shows feasibility but limited scope."
+  },
+  {
+   "doi": "10.3390/app152111623",
+   "title": "Integration Approaches for Digital Twins in Dataspaces",
+   "year": 2025,
+   "venue": "Applied Sciences",
+   "found_via": "mcp__consensus__search; mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Analyses ways to expose AAS twins in IDS-style dataspaces, adds an EDC extension that automates AAS registration, and compares with Catena-X and Factory-X prototypes."
+  },
+  {
+   "doi": "10.1016/j.procs.2025.01.099",
+   "title": "Supporting Changes in Digital Ownership and Data Sovereignty Across the Automotive Value Chain with Catena-X",
+   "year": 2025,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__consensus__search (Crossref gives 2025; Consensus listed 2024)",
+   "relevance": "Compares three approaches to manage digital twins over multiple lifecycles in Catena-X, covering updates and ownership change; relevant to L10 handover."
+  },
+  {
+   "doi": "10.3390/su15097187",
+   "title": "Empowering End-of-Life Vehicle Decision Making with Cross-Company Data Exchange and Data Sovereignty via Catena-X",
+   "year": 2023,
+   "venue": "Sustainability",
+   "found_via": "mcp__consensus__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Catena-X circular-economy application consuming digital-twin data with contract negotiation and usage policies; end-of-life use case."
+  },
+  {
+   "doi": "10.18420/inf2025_142",
+   "title": "A Reference Architecture for Digital Twin-Based Supply Chain Information Exchange: The PURIS Case",
+   "year": 2025,
+   "venue": "INFORMATIK 2025 (GI) proceedings (DataCite: publisher Gesellschaft fuer Informatik e.V., conference paper; container field empty)",
+   "found_via": "mcp__consensus__search; mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; DOI, title and year confirmed via DataCite API on 2026-10-19",
+   "relevance": "Design-science reference architecture on Catena-X with an open-source reference implementation; shows how use-case apps sit on EDC and twins."
+  },
+  {
+   "doi": "10.3390/s23177601",
+   "title": "On the Role of Digital Twins in Data Spaces",
+   "year": 2023,
+   "venue": "Sensors (Crossref container title; Consensus listed Sensors (Basel, Switzerland))",
+   "found_via": "mcp__consensus__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Prototype sharing product carbon footprints from an AAS twin over a dataspace; early building-block view."
+  },
+  {
+   "doi": "10.1016/j.procir.2024.07.039",
+   "title": "An Asset Administration Shell-Based Digital Product Passport as a Gaia-X Service",
+   "year": 2024,
+   "venue": "Procedia CIRP",
+   "found_via": "mcp__consensus__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "AAS-based passport offered as a Gaia-X service in a learning-factory demonstrator; Gaia-X context for dataspace passports."
+  },
+  {
+   "doi": "10.1109/etfa61755.2024.10711067",
+   "title": "An Approach for Sovereign Data Exchange of AAS Digital Twins Through the International Data Space Network",
+   "year": 2024,
+   "venue": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Model-based engineering that combines AAS, ODRL usage policies and EDC for sovereign exchange."
+  },
+  {
+   "doi": "10.1109/icsa-c68850.2026.00075",
+   "title": "Model-Driven Development of Data Space-Enabled Asset Administration Shell Digital Twins",
+   "year": 2026,
+   "venue": "2026 IEEE 23rd International Conference on Software Architecture Companion (ICSA-C)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Generates an EDC connector plus AAS twin from models to lower the deployment barrier for providers."
+  },
+  {
+   "doi": "10.1145/3828534.3828537",
+   "title": "Automated Contract Negotiation in Data Spaces: Practitioner Needs Assessment and Negotiation Framework",
+   "year": 2026,
+   "venue": "ACM SIGAPP Applied Computing Review",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Multi-issue negotiation aligned with DSP and ODRL, integrated with EDC; shows that DSP negotiation is in practice accept-or-reject today."
+  },
+  {
+   "doi": "10.48550/arxiv.2309.11282",
+   "title": "A Survey of Dataspace Connector Implementations",
+   "year": 2023,
+   "venue": "ArXiv",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; DOI, title and year confirmed via DataCite API on 2026-10-19",
+   "relevance": "Reviews four IDS-compliant open-source connectors (architecture, data model, usage-control language); background for connector variants."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.153",
+   "title": "A Design Study on Integrating UNTP Semantics into AAS Submodels for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science (per Crossref; Consensus listed Unknown Journal)",
+   "found_via": "mcp__consensus__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Positions Catena-X as a downstream sector ecosystem and proposes UNTP semantics as an AAS submodel; relevant to cross-method semantic bridging."
+  },
+  {
+   "doi": "10.1145/3813822.3814036",
+   "title": "Battery Passport Generation Method Based on Trusted Data Space",
+   "year": 2026,
+   "venue": "Proceedings of the 2026 7th International Conference on Computer Information and Big Data Applications",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; DOI, title and year confirmed via Crossref API on 2026-10-19",
+   "relevance": "Non-EDC trusted-data-space variant (industrial internet identity resolution, SM9 crypto, own connector) for battery passports; shows the family is broader than Catena-X."
+  }
+ ],
+ "conformance_implications": [
+  {
+   "layer": "L02",
+   "test_objective": "Classify the carrier payload of a dataspace passport: GS1 Digital Link URL, other http(s) URL, or Tractus-X CX triplet.",
+   "observable": "Decoded QR text from an image sample.",
+   "oracle": "Tractus-X reference practice CX:<manufacturerPartId>:<partInstanceId> (IC-Hub regex ^CX:[^:]+:[^:]+$; DPP app tutorial). Law: Regulation (EU) 2024/1781, Art. 2 (unique product identifier enables a web link) and Art. 10(1)(a)-(c); Regulation (EU) 2023/1542, Art. 13(6) and Art. 77(3).",
+   "existing_check": "carrier.qr_decode, then identifier.parse (gives IDENTIFIER.SYNTAX.INVALID for a CX triplet) and identifier.consistency (blocked, IDENTIFIER.NOT_RESOLVABLE)",
+   "existing_capability": "carrier.qr, identifier.parse",
+   "new_capability_needed": "identifier.parse scheme 'catenax-triplet' (syntax only; reports 'not a web link' as a separate finding)",
+   "fixtures_needed": "QR images with CX triplets, with ':' inside the part id, with URL payloads",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "Version metadata endpoint exists without authentication and lists DSP 2025-1 (and the legacy key v0.8 where offered).",
+   "observable": "GET <root>/.well-known/dspace-version status, media type and JSON body.",
+   "oracle": "DSP 2025-1 Common Requirements, Exposure of Versions (unversioned, unauthenticated, VersionResponse with at least one item, protocol-version-schema.json requires version, path, binding); CX-0018 v4.2 sections 2.7 and 3.",
+   "existing_check": "none directly; data.jsonschema and api.contract only accept the resources item/model/signed/versions/registry_record",
+   "existing_capability": "api.contract, data.jsonschema",
+   "new_capability_needed": "dataspace.version_metadata (new resource kind for api.contract/data.jsonschema; contract change to report, not made)",
+   "fixtures_needed": "pinned protocol-version-schema.json from tag 2025-1-err2; loopback mock connector answering good and bad bodies",
+   "reusable_suite": "Eclipse dsp-tck MET group, https://github.com/eclipse-dataspacetck/dsp-tck",
+   "network_needed": "live-sut"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "DSP message samples (Catalog, Dataset, ContractRequestMessage, TransferStartMessage, errors) conform to the normative JSON Schemas.",
+   "observable": "Sample JSON artifacts captured from or supplied by the SUT.",
+   "oracle": "DSP 2025-1 artifacts/src/main/resources/*/*-schema.json (draft 2019-09).",
+   "existing_check": "data.jsonschema - partial. Probe 2026-10-19: protocol-version, data-address and context schemas load under the engine's 2020-12 metaschema check; message schemas such as transfer-start-message and catalog-request-message reference other schemas by absolute w3id.org URL, so validator() returns None and data.jsonschema gives blocked DATA.SCHEMA.NOT_LOCAL",
+   "existing_capability": "data.jsonschema",
+   "new_capability_needed": "schema.pinned_bundle: an offline, reviewed bundle of the DSP 2025-1-err2 schemas with every w3id.org $ref rewritten to a local pointer, pinned by digest (keeps the engine's no-fetch rule)",
+   "fixtures_needed": "DSP example files from the spec repo (valid) and mutated copies (invalid)",
+   "reusable_suite": "DSP repo schema tests (artifacts/src/test), https://github.com/eclipse-dataspace-protocol-base/DataspaceProtocol",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "JSON-LD contexts in DSP messages, Catena-X policies and EDR data addresses are only the expected ones.",
+   "observable": "@context arrays of sample artifacts.",
+   "oracle": "DSP common requirements (protected context https://w3id.org/dspace/2025/1/context.jsonld); CX-0152 policy context/profile; Tractus-X EDC walkthrough warning on prefix resolution.",
+   "existing_check": "data.context",
+   "existing_capability": "data.context",
+   "new_capability_needed": "none",
+   "fixtures_needed": "allowlist: https://w3id.org/dspace/2025/1/context.jsonld, https://w3id.org/dspace/2025/1/odrl-profile.jsonld, https://w3id.org/catenax/2025/9/policy/context.jsonld, https://w3id.org/edc/v0.0.1/ns/, https://w3id.org/tractusx/auth/, https://w3id.org/dspace-dcp/v1.0/dcp.jsonld, https://w3id.org/catenax/credentials/v1.0.0",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "An HttpData-PULL TransferStartMessage carries a usable data address.",
+   "observable": "dataAddress of a TransferStartMessage or EDR sample.",
+   "oracle": "CX-0018 v4.2 section 2.2.1: endpointType https://w3id.org/idsa/v4.1/HTTP; endpoint, authorization, expiresIn REQUIRED; refresh properties OPTIONAL.",
+   "existing_check": "data.rules",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "none (rule pack 'cx-0018-pull-dataaddress')",
+   "fixtures_needed": "EDR samples with and without expiresIn, wrong endpointType; tokens marked TEST-ONLY",
+   "reusable_suite": "dsp-tck TP group (protocol level only)",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L04",
+   "test_objective": "The Digital Twin Registry implements the required read and discovery profiles and answers 501 for unsupported operations.",
+   "observable": "GET /shell-descriptors/{base64url id}, POST /lookup/shellsByAssetLink, deprecated GET /lookup/shells, status codes, paging.",
+   "oracle": "CX-0002 v2.4.0 sections 2.1.2, 2.1.5, 3.1.2 (SSP-005, SSP-002, 501); IDTA 01002 v3.2 API; Tractus-X DTR OpenAPI.",
+   "existing_check": "api.contract (GET only, resource enum item/model/signed/versions/registry_record) - partial",
+   "existing_capability": "api.contract",
+   "new_capability_needed": "api.contract support for POST and a 'dtr' resource family (contract change to report)",
+   "fixtures_needed": "pinned aas-registry-openapi.yaml (tag digital-twin-registry-0.13.0); loopback mock DTR with seeded twins",
+   "reusable_suite": "aas-test-engines API tests (https://github.com/admin-shell-io/aas-test-engines) for profiles; Tractus-X DTR tavern e2e tests (e2e-tests/aas-registry)",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Passport payload validates against the pinned SAMM-generated JSON Schema of the mandated model version.",
+   "observable": "Value-only JSON payload of the passport submodel.",
+   "oracle": "CX-0143 v1.4.0 2.1.4.3 (generic DPP 6.1.0, transmission 3.1.0); sldt-semantic-models gen/*-schema.json; CX-0160 base section 3 for battery parts (preview).",
+   "existing_check": "data.jsonschema - refuses the schema as published. Probe 2026-10-19: validator() raised SchemaError ('False is not of type number') for DPP 6.1.0 and 7.0.0 DigitalProductPassport-schema.json (draft-04 boolean exclusiveMinimum/exclusiveMaximum checked against the 2020-12 metaschema); data.jsonschema maps this to blocked DATA.SCHEMA.MALFORMED, never pass",
+   "existing_capability": "data.jsonschema",
+   "new_capability_needed": "schema.draft04_import (maintainer-reviewed, pinned conversion to 2020-12) or draft-04 support",
+   "fixtures_needed": "DigitalProductPassport-schema.json 6.1.0 and 7.0.0, generated sample payloads (gen/*.json) as valid fixtures, mutated invalid payloads",
+   "reusable_suite": "ESMF samm-cli (aspect validate, to schema, to json) https://github.com/eclipse-esmf/esmf-sdk",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The passport submodel descriptor names the mandated aspect and idShort and points through DSP.",
+   "observable": "Submodel descriptor JSON from a DTR sample.",
+   "oracle": "CX-0143 v1.4.0 2.1.4.3 (semanticId urn:samm:io.catenax.generic.digital_product_passport:6.1.0#DigitalProductPassport, idShort digitalProductPass); CX-0002 v2.4.0 4.1.2 (semanticId present, subprotocol 'DSP', subprotocolBody id=...;dspEndpoint=..., interface SUBMODEL-3.x or SUBMODEL-VALUE-3.x).",
+   "existing_check": "data.rules",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "none (rule pack 'cx-0002-submodel-descriptor')",
+   "fixtures_needed": "shell descriptor samples: correct, urn:bamm legacy id, missing semanticId, malformed subprotocolBody",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "AAS submodel templates generated from the aspect models (XML/JSON/AASX) are valid AAS.",
+   "observable": "Generated -aas.xml / .aasx sample files.",
+   "oracle": "IDTA 01001 metamodel and IDTA 01005 package format via aas-test-engines.",
+   "existing_check": "aas.validate",
+   "existing_capability": "aas.validate",
+   "new_capability_needed": "none",
+   "fixtures_needed": "gen/DigitalProductPassport.aasx (7.0.0 and 6.1.0)",
+   "reusable_suite": "aas-test-engines",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "DTR shows each specificAssetId only to the owner and listed BPNs, and PUBLIC_READABLE only on allowed keys.",
+   "observable": "Lookup and descriptor responses for requests with different Edc-Bpn header values against a DTR reachable without a connector.",
+   "oracle": "Tractus-X DTR crosscutting concepts (closed by default, externalSubjectId, PUBLIC_READABLE limited to manufacturerPartId and assetLifecyclePhase).",
+   "existing_check": "access.restricted_fields (roles mapped to BPN values; needs a role-to-header binding)",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "access.header_role (role asserted by a request header such as Edc-Bpn; loopback only, never against a production DTR)",
+   "fixtures_needed": "access policy with BPN roles TEST-ONLY-BPNL..., canary specificAssetIds",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "Public-tier passport data is reachable without dataspace credentials.",
+   "observable": "Anonymous resolution from the carrier and anonymous fetch of the passport.",
+   "oracle": "Regulation (EU) 2023/1542, Art. 77(2)(a) and Art. 78(b); Regulation (EU) 2024/1781, Art. 11(b). Expected result for a pure Catena-X SUT: no anonymous path (CX-0160-3 section 5.2, preview).",
+   "existing_check": "identifier.resolve; access.restricted_fields with role anonymous",
+   "existing_capability": "identifier.resolve, access.policy",
+   "new_capability_needed": "none for a bridged SUT; for a pure dataspace SUT the result is blocked/not resolvable, never pass",
+   "fixtures_needed": "declared public field list derived from Annex XIII point 1 (synthetic), bridged mock SUT on loopback",
+   "reusable_suite": "none",
+   "network_needed": "live-sut"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "DSP endpoints hide unauthorized resources with 404 and refuse unauthorized catalog/negotiation requests.",
+   "observable": "Status codes for requests with no, invalid, and valid-but-unentitled tokens.",
+   "oracle": "DSP 2025-1 negotiation and transfer HTTPS bindings (Unauthorized Access: 404); DCP base.protocol token validation.",
+   "existing_check": "none (access.restricted_fields interprets only 401/403 as refusal)",
+   "existing_capability": "none",
+   "new_capability_needed": "dataspace.dcp_participant (engine acts as a test participant with TEST-ONLY DID keys and credentials on a loopback dataspace) and DSP-aware refusal semantics",
+   "fixtures_needed": "loopback issuer, credential service, DID documents, STS; TEST-ONLY keys",
+   "reusable_suite": "dcp-tck (Verifier group), https://github.com/eclipse-dataspacetck/dcp-tck",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L11",
+   "test_objective": "Passport data offers carry the Catena-X usage policy constraints.",
+   "observable": "Catalog dataset hasPolicy offers (sample artifact or captured catalog).",
+   "oracle": "CX-0152 v1.0.0 sections 2.1 and 2.3 (FrameworkAgreement and UsagePurpose, chained with odrl:and, profile https://w3id.org/catenax/2025/9/policy/, only listed constraints); CX-0143 v1.4.0 4.1.2 (cx.circular.dpp:1); CX-0160 CAC-uc1 (preview).",
+   "existing_check": "data.rules",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "none (rule pack 'cx-0152-dpp-usage-policy'); data.shacl would help if the Catena-X policy schema is used as shapes",
+   "fixtures_needed": "pinned Catena-X policy-schema.json and constraint schemas (CX-0152 assets; licence is all-rights-reserved, check reuse before vendoring), offer samples",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "DCP self-issued ID token samples meet the claim rules.",
+   "observable": "JWT header and claims of a captured or supplied token; pinned DID document.",
+   "oracle": "DCP v1.0.1 base.protocol: iss equals sub (DID), aud equals verifier DID, jti present, exp in the future, iat present, signing key has capabilityInvocation relationship; kid rules.",
+   "existing_check": "integrity.jws (signature only) - partial",
+   "existing_capability": "integrity.jws",
+   "new_capability_needed": "integrity.dcp_token (claim rules + DID-document key selection from pinned documents)",
+   "fixtures_needed": "TEST-ONLY DID documents and ES256 keys, valid and broken tokens",
+   "reusable_suite": "dcp-tck",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "Dataspace credentials in presentations are not revoked.",
+   "observable": "credentialStatus entries and status list credential samples.",
+   "oracle": "DCP profile vc20-bssl/jwt (W3C Bitstring Status List) or vc11-sl2021/jwt (StatusList2021); CX-0050 credential schemas.",
+   "existing_check": "none",
+   "existing_capability": "integrity.status_list (interface_only)",
+   "new_capability_needed": "integrity.status_list implementation with a mock status service",
+   "fixtures_needed": "status list credentials with set and unset bits",
+   "reusable_suite": "dcp-tck",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "Passport metadata obeys the lifecycle rules of the aspect model and the declared update rule.",
+   "observable": "metadata.version, passportStatus, issueDate, expirationDate, lastModification, predecessor over repeated observations.",
+   "oracle": "DPP aspect 6.1.0/7.0.0 JSON Schema (status enum, date patterns); declared update rule in the ICS; Regulation (EU) 2024/1781, Art. 11(d) for predecessor linking.",
+   "existing_check": "data.rules and persistence.versions",
+   "existing_capability": "data.rules, persistence.versions",
+   "new_capability_needed": "none",
+   "fixtures_needed": "payload sequences with status changes, broken predecessor links",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L06",
+   "test_objective": "A backup reference and a registration identifier are declared.",
+   "observable": "metadata.backupReference and metadata.registrationIdentifier in the payload.",
+   "oracle": "Regulation (EU) 2024/1781, Art. 10(4) and Art. 13(5) (presence only; reachability of the backup is not observable).",
+   "existing_check": "data.rules (presence); registry.consistency against the mock registry for the registration identifier",
+   "existing_capability": "data.rules, registry.mock",
+   "new_capability_needed": "persistence.scheduled for repeated availability checks (interface_only today)",
+   "fixtures_needed": "payloads with and without the fields; mock registry record",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "Accept a signed result of an external DSP or DCP TCK run as evidence for protocol conformance.",
+   "observable": "Signed manual result referencing a TCK report.",
+   "oracle": "dsp-tck v1.0.2 / dcp-tck v1.2.1 test plans; the engine checks only the signature and binding, not the TCK run.",
+   "existing_check": "manual.review",
+   "existing_capability": "manual.review",
+   "new_capability_needed": "none",
+   "fixtures_needed": "manual result file signed with a TEST-ONLY key",
+   "reusable_suite": "dsp-tck https://github.com/eclipse-dataspacetck/dsp-tck; dcp-tck https://github.com/eclipse-dataspacetck/dcp-tck",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L01",
+   "test_objective": "BPN syntax of manufacturerId and policy BPNs.",
+   "observable": "BPN strings in twins, policies and payloads.",
+   "oracle": "CX-0010 v3.0.1 structure (BPN prefix, type L/S/A, 10 entity characters, 2 check characters). Check characters: algorithm only in a protected ISO/IEC document; not checkable from open sources found.",
+   "existing_check": "data.rules (pattern only)",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "none for syntax; check-character verification blocked until an open specification is found",
+   "fixtures_needed": "TEST-ONLY BPN strings with wrong length/type letter",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The generated sample payload (gen/*.json) of the pinned aspect version validates against the converted schema of the same version, and fails against a different version.",
+   "observable": "Sample payload and schema pair per model version (6.1.0, 7.0.0).",
+   "oracle": "sldt-semantic-models gen/ files of the same model URN version; CX-0143 v1.4.0 mandated version.",
+   "existing_check": "data.jsonschema (after schema.draft04_import)",
+   "existing_capability": "data.jsonschema",
+   "new_capability_needed": "schema.draft04_import",
+   "fixtures_needed": "DigitalProductPassport.json and -schema.json for 6.1.0 and 7.0.0 (fetched 2026-10-19 to the scratchpad, not committed)",
+   "reusable_suite": "ESMF samm-cli 'aspect validate' and 'to json', https://github.com/eclipse-esmf/esmf-sdk",
+   "network_needed": "sample-artifact"
+  }
+ ],
+ "failure_modes": [
+  {
+   "layer": "L01",
+   "fault": "manufacturerPartId contains ':' so the CX triplet splits into wrong parts.",
+   "detectable_by": "Parse the decoded QR text and compare the split fields with the twin's specificAssetIds in a sample."
+  },
+  {
+   "layer": "L01",
+   "fault": "partInstanceId is unique only per manufacturer, and two providers register the same manufacturerPartId at BPN Discovery.",
+   "detectable_by": "BPN Discovery sample returning more than one BPN for one key; consistency check between carrier and twin manufacturerId."
+  },
+  {
+   "layer": "L03",
+   "fault": "Version metadata endpoint requires authentication, omits 2025-1, or uses '0.8' where CX-0018 wants 'v0.8'.",
+   "detectable_by": "Unauthenticated GET of /.well-known/dspace-version and schema plus rule checks."
+  },
+  {
+   "layer": "L03",
+   "fault": "TransferStartMessage lacks expiresIn or uses a non-standard endpointType, so consumers cannot refresh or call the data plane.",
+   "detectable_by": "Rule pack on TransferStartMessage/EDR samples."
+  },
+  {
+   "layer": "L03",
+   "fault": "JSON-LD prefixes in policies resolve to unintended IRIs, so a constraint silently means something else.",
+   "detectable_by": "data.context allowlist on samples; compare compacted terms with the expected expanded IRIs."
+  },
+  {
+   "layer": "L04",
+   "fault": "DTR answers 404 or 500 instead of 501 for an unsupported profile operation, or only offers the deprecated GET /lookup/shells.",
+   "detectable_by": "Contract test against the pinned DTR OpenAPI on a loopback instance."
+  },
+  {
+   "layer": "L04",
+   "fault": "AAS ids in paths are not base64url encoded or are double encoded.",
+   "detectable_by": "Request the same twin with correct and incorrect encodings and compare responses."
+  },
+  {
+   "layer": "L05",
+   "fault": "Submodel descriptor uses an outdated semanticId (urn:bamm or an older DPP version), so consumers cannot identify the passport.",
+   "detectable_by": "Rule on the descriptor semanticId against the mandated URN list."
+  },
+  {
+   "layer": "L05",
+   "fault": "Payload validates against a different model version than its semanticId or specVersion states.",
+   "detectable_by": "Validate against the schema chosen by the semanticId and compare with metadata.specVersion."
+  },
+  {
+   "layer": "L07",
+   "fault": "partInstanceId (serial) flagged PUBLIC_READABLE through changed helm values, leaking instance data to every DTR reader.",
+   "detectable_by": "Access probe with an unlisted BPN on a loopback DTR; canary specificAssetIds."
+  },
+  {
+   "layer": "L07",
+   "fault": "DTR reachable directly (not only through the provider EDC), so any caller can set Edc-Bpn and impersonate a partner.",
+   "detectable_by": "Direct request with a forged Edc-Bpn header to a deployment (loopback test environment only)."
+  },
+  {
+   "layer": "L07",
+   "fault": "Pure dataspace deployment offers no anonymous access to the public battery passport part.",
+   "detectable_by": "Anonymous resolution from the carrier ends without a passport (identifier not resolvable)."
+  },
+  {
+   "layer": "L08",
+   "fault": "EDR token accepted after the transfer process was terminated or after expiresIn.",
+   "detectable_by": "Replay of a captured TEST-ONLY token on a loopback provider after termination."
+  },
+  {
+   "layer": "L08",
+   "fault": "Verifier accepts a self-issued token whose iss differs from sub or whose jti was used before.",
+   "detectable_by": "Token mutation tests (dcp-tck verifier group or engine sample checks)."
+  },
+  {
+   "layer": "L10",
+   "fault": "passportStatus 'expired' or 'invalid' but the passport is still served without notice, or predecessor points to a non-existent passport.",
+   "detectable_by": "Rule pack over payload sequences; predecessor lookup in the same SUT."
+  },
+  {
+   "layer": "L06",
+   "fault": "Provider connector decommissioned; passport disappears with no backup route.",
+   "detectable_by": "Scheduled re-acquisition over time (persistence.scheduled, not available today)."
+  },
+  {
+   "layer": "L09",
+   "fault": "No upload to the EU registry; registrationIdentifier empty.",
+   "detectable_by": "Presence rule and mock registry comparison."
+  },
+  {
+   "layer": "L11",
+   "fault": "Usage policy lacks UsagePurpose cx.circular.dpp:1 or chains constraints without odrl:and, so certified consumers cannot negotiate.",
+   "detectable_by": "Rule pack on catalog offer samples."
+  },
+  {
+   "layer": "L11",
+   "fault": "Consumer side still runs the archived Tractus-X DPP app with unmaintained dependencies.",
+   "detectable_by": "Not a black-box observable; supply-chain review of the declared SUT components."
+  },
+  {
+   "layer": "L05",
+   "fault": "Provider or consumer tooling validates passports with a 2020-12 or 2019-09 validator against the draft-04 SAMM-generated schema without conversion, so the schema is rejected or the boolean exclusive bounds are ignored and out-of-range values pass.",
+   "detectable_by": "Validate boundary-value payloads (value equal to an exclusive bound) against a reviewed 2020-12 conversion; a SUT that accepts them shows the defect."
+  }
+ ],
+ "sources": [
+  {
+   "id": "new-dsp-spec-2025-1",
+   "title": "Dataspace Protocol Release 2025-1",
+   "issuing_body": "Eclipse Foundation, Eclipse Dataspace Working Group (earlier versions up to 2024-1 governed by IDSA)",
+   "url": "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err2/",
+   "edition_or_version": "2025-1 (errata tag 2025-1-err2)",
+   "publication_date": "tag 2026-09-11 (2025-1 released 2025-08-29)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0; Copyright 2026 The Eclipse Foundation AISBL",
+   "what_it_shows": "Rendered page states the release is stable; root index page redirects with text calling it 'Release Candidate'."
+  },
+  {
+   "id": "new-dsp-github-repo",
+   "title": "eclipse-dataspace-protocol-base/DataspaceProtocol (specification sources, JSON Schemas, JSON-LD contexts, releases)",
+   "issuing_body": "Eclipse Foundation, Eclipse Dataspace Working Group",
+   "url": "https://github.com/eclipse-dataspace-protocol-base/DataspaceProtocol",
+   "edition_or_version": "tags 2025-1, 2025-1-err1 (2025-11-12), 2025-1-RC5 (2026-08-31), 2025-1-err2 (2026-09-11)",
+   "publication_date": "2026-09-11",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Read at tag 2025-1-err2: common.protocol.md (Authorization, version endpoint, DID service discovery), catalog/negotiation/transfer HTTPS bindings (paths, methods, status codes, states), protocol-version-schema.json, example messages; release notes mention editorial alignment with an ISO/IEC FDIS and a JTC 1 PAS submission (bibliographic only)."
+  },
+  {
+   "id": "new-dcp-spec-v1-0-1",
+   "title": "Eclipse Decentralized Claims Protocol",
+   "issuing_body": "Eclipse Foundation, Eclipse Dataspace Working Group",
+   "url": "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0.1/",
+   "edition_or_version": "v1.0.1 (page heading v1.0)",
+   "publication_date": "2025-11-13 (tag)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0; Copyright 2025 The Eclipse Foundation AISBL",
+   "what_it_shows": "Rendered page (status stable) and repository sources at tag v1.0.1: base.protocol.md, verifiable.presentation.protocol.md, credential.issuance.protocol.md, dsp.profile.md, dcp.profiles.md (token claims, validation steps, /presentations/query, /credentials, /offers, profiles, context URI)."
+  },
+  {
+   "id": "new-dsp-tck",
+   "title": "eclipse-dataspacetck/dsp-tck: Technology Compatibility Kit for the Dataspace Protocol",
+   "issuing_body": "Eclipse Foundation (Eclipse Dataspace TCK project)",
+   "url": "https://github.com/eclipse-dataspacetck/dsp-tck",
+   "edition_or_version": "v1.0.2",
+   "publication_date": "2026-09-04",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "README: modules, test groups MET/CAT/CN/CN_C/TP, required configuration, supported DSP 2025-1, bidirectional callback model."
+  },
+  {
+   "id": "new-dcp-tck",
+   "title": "eclipse-dataspacetck/dcp-tck: Technology Compatibility Kit for the Decentralized Claims Protocol",
+   "issuing_body": "Eclipse Foundation (Eclipse Dataspace TCK project)",
+   "url": "https://github.com/eclipse-dataspacetck/dcp-tck",
+   "edition_or_version": "v1.2.1",
+   "publication_date": "2026-09-07",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "README: SUT matrix (Credential Service, Issuer Service, Verifier) and test packages."
+  },
+  {
+   "id": "new-dps-tck",
+   "title": "eclipse-dataspacetck/dps-tck: Technology Compatibility Kit for the Dataplane Signaling Protocol",
+   "issuing_body": "Eclipse Foundation (Eclipse Dataspace TCK project)",
+   "url": "https://github.com/eclipse-dataspacetck/dps-tck",
+   "edition_or_version": "v1.3.0",
+   "publication_date": "2026-08-27",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (declared in NOTICE.md; no LICENSE file, so GitHub API metadata shows none)",
+   "what_it_shows": "README and NOTICE read: scope (DPS control plane and data plane), scenario ids, JUnit and Docker run modes, configuration properties, target spec Data Plane Signaling v1.0-RC4."
+  },
+  {
+   "id": "new-edc-connector",
+   "title": "eclipse-edc/Connector: EDC core services including data plane and control plane",
+   "issuing_body": "Eclipse Foundation (Eclipse Dataspace Components project)",
+   "url": "https://github.com/eclipse-edc/Connector",
+   "edition_or_version": "v0.18.1; v1.0.0-RC4 (pre-release)",
+   "publication_date": "2026-09-25 / 2026-09-29",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Release notes and code search hits for dataspace-protocol-http:2025-1 and TCK system tests."
+  },
+  {
+   "id": "new-tractusx-edc",
+   "title": "eclipse-tractusx/tractusx-edc (documentation: management API walkthrough, decision records, migration guides)",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/tractusx-edc",
+   "edition_or_version": "0.13.0",
+   "publication_date": "2026-08-27",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (code); docs CC-BY-4.0",
+   "what_it_shows": "07_edrs.md (EDR API, refresh, data plane call, consumer proxy), 02_policies.md (constraint table, mandatory FrameworkAgreement + UsagePurpose), 04_catalog.md (connector discovery), decision records 2025-02-12 and 2026-01-07, migration 0.12.x to 0.13.x."
+  },
+  {
+   "id": "new-tractusx-dpp-app",
+   "title": "eclipse-tractusx/digital-product-pass (Digital Product Pass application, deprecated)",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/digital-product-pass",
+   "edition_or_version": "4.0.2 (helm), v4.0.1 (app)",
+   "publication_date": "2024-09-13 (last release); archived, last push 2025-09-18",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 code; CC-BY-4.0 documentation",
+   "what_it_shows": "README deprecation notice and successor; docs/data-retrieval/README.md (discovery, DTR search, twin search, negotiation/transfer; AAS 3.0 twin example); dpp-tutorial/qr-code.md (CX triplet QR text); interoperability guide (model versions for release 24.08)."
+  },
+  {
+   "id": "new-industry-core-hub",
+   "title": "eclipse-tractusx/industry-core-hub (Industry Core Hub)",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/industry-core-hub",
+   "edition_or_version": "main at 2026-10-09; tags v0.6.0-*",
+   "publication_date": "2026-06-30 (latest tags)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "README (provision/consumption orchestration, discovery chain), passport-consumption README and PassportQRScanner.tsx (CX pattern)."
+  },
+  {
+   "id": "new-tractusx-dtr",
+   "title": "eclipse-tractusx/sldt-digital-twin-registry (Digital Twin Registry)",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/sldt-digital-twin-registry",
+   "edition_or_version": "digital-twin-registry-0.13.0",
+   "publication_date": "2026-09-01",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "aas-registry-openapi.yaml (paths, Edc-Bpn header, base64url ids, cursor paging, createdAfter) and docs/architecture/6-crosscutting-concepts.md (RBAC roles, BPN visibility, PUBLIC_READABLE, granular access control)."
+  },
+  {
+   "id": "new-tractusx-discovery-finder",
+   "title": "eclipse-tractusx/sldt-discovery-finder",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/sldt-discovery-finder",
+   "edition_or_version": "discoveryfinder-0.5.1",
+   "publication_date": "2025-02-13",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Repository metadata and releases."
+  },
+  {
+   "id": "new-tractusx-bpn-discovery",
+   "title": "eclipse-tractusx/sldt-bpn-discovery",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/sldt-bpn-discovery",
+   "edition_or_version": "bpndiscovery-0.6.0",
+   "publication_date": "2025-11-12",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Repository metadata and releases."
+  },
+  {
+   "id": "new-tractusx-portal-backend",
+   "title": "eclipse-tractusx/portal-backend",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://github.com/eclipse-tractusx/portal-backend",
+   "edition_or_version": "v2.6.0",
+   "publication_date": "2025-09-29",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Repository metadata; named as EDC Discovery implementation by the DPP app guide."
+  },
+  {
+   "id": "new-tractusx-semantic-models",
+   "title": "eclipse-tractusx/sldt-semantic-models",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project), models contributed by Catena-X members",
+   "url": "https://github.com/eclipse-tractusx/sldt-semantic-models",
+   "edition_or_version": "io.catenax.generic.digital_product_passport 7.0.0 (also 2.0.0-6.1.0); io.catenax.battery.battery_pass 6.1.0",
+   "publication_date": "DPP 7.0.0 commits 2026-02-09 to 2026-02-23; battery 6.1.0 2026-01-26 to 2026-02-23",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0",
+   "what_it_shows": "TTL headers (SAMM 2.1.0 namespaces, aspect properties), metadata.json status release, generated JSON Schema (draft-04; metadata fields and patterns), OpenAPI 3.0.3, gen/ file list."
+  },
+  {
+   "id": "new-idta-smt-semantic-models",
+   "title": "admin-shell-io/smt-semantic-models",
+   "issuing_body": "Industrial Digital Twin Association (admin-shell-io)",
+   "url": "https://github.com/admin-shell-io/smt-semantic-models",
+   "edition_or_version": "main at 2026-10-16",
+   "publication_date": "not determined",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0",
+   "what_it_shows": "Folder list including io.admin-shell.idta.batterypass.* and io.admin-shell.idta.dpp.dpp_metadata."
+  },
+  {
+   "id": "new-esmf-samm-spec",
+   "title": "Semantic Aspect Meta Model (SAMM) specification, Eclipse Semantic Modeling Framework",
+   "issuing_body": "Eclipse Foundation (Eclipse ESMF project)",
+   "url": "https://eclipse-esmf.github.io/samm-specification/snapshot/index.html",
+   "edition_or_version": "2.2.0 latest release (repository tag v2.2.0, 2025-03-11)",
+   "publication_date": "2025-03-11",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MPL-2.0 (repository esmf-semantic-aspect-meta-model); page states no separate licence",
+   "what_it_shows": "Introduction page: RDF/Turtle serialization, SHACL validation, version list 2.2.0/2.1.0/2.0.0."
+  },
+  {
+   "id": "new-esmf-samm-cli",
+   "title": "ESMF developer guide: samm-cli; eclipse-esmf/esmf-sdk",
+   "issuing_body": "Eclipse Foundation (Eclipse ESMF project)",
+   "url": "https://eclipse-esmf.github.io/esmf-developer-guide/tooling-guide/samm-cli.html",
+   "edition_or_version": "samm-cli 2.16.0 example; esmf-sdk release v2.16.1",
+   "publication_date": "2026-10-19 (v2.16.1)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MPL-2.0 (esmf-sdk)",
+   "what_it_shows": "Generators: schema, openapi (3.0.3), asyncapi (3.1.0), json, parquet, jsonld, html, png/svg, sql (Databricks), java, aas (xml/json/aasx); import of JSON Schema and AAS."
+  },
+  {
+   "id": "new-cx-standards-overview",
+   "title": "Catena-X Standard Library overview",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/overview",
+   "edition_or_version": "CX-Titan (current); CX-Neptune preview",
+   "publication_date": "not stated (copyright 2026)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved (Catena-X Legal Notice); repository licence NOASSERTION",
+   "what_it_shows": "Standard ids and versions per release (CX-0018 v4.2, CX-0002 v2.4.0, CX-0003 v1.3.0, CX-0126 2.1.1, CX-0127 2.0.2, CX-0151 1.1.0, CX-0010 3.0.1, CX-0053 1.1.1, CX-0143 1.2.0 as listed, CX-0131 1.1.1, CX-0001 1.2.1, CX-0049 2.3.0, CX-0149 2.0.0, CX-0152 1.0.0)."
+  },
+  {
+   "id": "new-cx-0018",
+   "title": "CX-0018 Dataspace Connectivity",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0018-DataspaceConnectivity",
+   "edition_or_version": "v.4.2 (CX-Titan)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Live page (summarised) and raw Titan source: DSP 2025-1 mandatory, v0.8 key, version endpoint and DID DataService entry, DID as participant id, DCP-based authentication, transfer type profiles and required endpointProperties, framework-agreement-to-credential mapping, dataset conventions."
+  },
+  {
+   "id": "new-cx-0002",
+   "title": "CX-0002 Digital Twins in Catena-X",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0002-DigitalTwinsInCatenaX",
+   "edition_or_version": "v2.4.0 (CX-Titan)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "AAS spec versions (IDTA 01001/01002 v3.2, 01004 v3.1), SSP profiles, 501 rule, DSP catalog representation of DTR and submodels, submodel descriptor rules, $value handling."
+  },
+  {
+   "id": "new-cx-0143",
+   "title": "CX-0143 Use Case Circular Economy - Digital Product Passport",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0143-UseCaseCircularEconomyDigitalProductPassportStandard/introduction",
+   "edition_or_version": "v1.4.0 (page heading; overview lists 1.2.0)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Titan sources introduction.md, CX-0143-UC.md, CX-0143-API.md: list of standalone standards, BPN Discovery registration with type mpn, digitalTwinType rule, data models and idShorts, EDC asset shape, UsagePurpose cx.circular.dpp:1; battery passport moved to a separate standard."
+  },
+  {
+   "id": "new-cx-0160",
+   "title": "CX-0160 Battery Passport Data Management (Base v.1.1.0; CX-0160-1 and CX-0160-3 v1.0.0)",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://github.com/catenax-eV/catenax-ev.github.io/tree/main/docs/standards/CX-0160-BatteryPassport",
+   "edition_or_version": "Base v.1.1.0; parts v1.0.0 (CX-Neptune preview tree only)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Read from the repository 'docs' folder, which the site configuration labels CX-Neptune (Preview); absent from versioned_docs/version-Titan. Shows the seven IDTA/Catena-X battery models, DPP Metadata model, twin keys, cx.circular.dpp:1, CAC ids, bulk retrieval with createdAfter, and the bridging concept to the EU DPP system. Its statements about EN 18223, the JTC 24 standards and DIN DKE SPEC 99100 were not used (secondary_only, fenced)."
+  },
+  {
+   "id": "new-cx-0053",
+   "title": "CX-0053 Discovery Finder and BPN Discovery Service APIs",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0053-BPNDiscoveryServiceAPIs",
+   "edition_or_version": "v1.1.1 (CX-Titan)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Raw Titan source and OpenAPI assets: architecture of discovery services and endpoint paths."
+  },
+  {
+   "id": "new-cx-0001",
+   "title": "CX-0001 Participant Agent Registration",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0001-ParticipantAgentRegistration",
+   "edition_or_version": "v1.2.1 (CX-Titan)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Raw Titan source (partly read): Core Service Provider B registration duty, self-description documents, EDC Discovery API POST /api/administration/connectors/discovery."
+  },
+  {
+   "id": "new-cx-0010",
+   "title": "CX-0010 Business Partner Number",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0010-BusinessPartnerNumber",
+   "edition_or_version": "v3.0.1 (CX-Titan)",
+   "publication_date": "not stated (changelog entries 2024-12-02, 2025-06-01)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "BPN structure, types L/S/A, self-declared conformity; cites ISO/IEC 7064 and ISO/IEC 6523-1 (bibliographic only)."
+  },
+  {
+   "id": "new-cx-0152",
+   "title": "CX-0152 Policy Constraints For Data Exchange",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0152-PolicyConstrainsForDataExchange",
+   "edition_or_version": "v1.0.0 (CX-Titan)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Raw Titan source: constraint conventions, chaining with odrl:and, credential-based validation, policy profile IRI, mandatory usage constraints; asset folder with policy-schema.json and constraint schemas (not downloaded)."
+  },
+  {
+   "id": "new-cx-0050",
+   "title": "CX-0050 Catena-X-specific verifiable credentials",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0050-CXSpecificCredentials",
+   "edition_or_version": "v.2.2.1 (heading in Titan source)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; described in own words",
+   "what_it_shows": "Credential types (Membership, BPN, framework agreement, and others) and JSON Schema with credentialStatus fields (partly read)."
+  },
+  {
+   "id": "new-cx-0003",
+   "title": "CX-0003 SAMM Aspect Meta Model",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0003-SAMMSemanticAspectMetaModel",
+   "edition_or_version": "v1.3.0 (CX-Titan)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved",
+   "what_it_shows": "Heading and version only."
+  },
+  {
+   "id": "new-cx-legal-notice",
+   "title": "Catena-X Legal Notice (catenax-ev.github.io LICENSE.md)",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://github.com/catenax-eV/catenax-ev.github.io/blob/main/LICENSE.md",
+   "edition_or_version": "main at 2026-10-14",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "All rights reserved; no copying, modification or distribution without authorisation",
+   "what_it_shows": "Reuse terms of all Catena-X standards; reason this file paraphrases only."
+  },
+  {
+   "id": "new-cx-certification",
+   "title": "Catena-X certification (catena-x.net ecosystem page) and Catena-X Certification page source (Titan)",
+   "issuing_body": "Catena-X Automotive Network e.V.",
+   "url": "https://catena-x.net/ecosystem/certification/",
+   "edition_or_version": "CAF Handbook release Saturn (minor release Titan) as named on the page",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Roles that must certify, four named CABs, six-step process (graphic not read); Titan certification markdown says 'Coming Soon'; conformity assessment nav entry commented out in the site config."
+  },
+  {
+   "id": "new-tractusx-ecopass-kit",
+   "title": "Eclipse Tractus-X EcoPass KIT, Adoption View",
+   "issuing_body": "Eclipse Foundation (Eclipse Tractus-X project)",
+   "url": "https://eclipse-tractusx.github.io/docs-kits/kits/eco-pass-kit/adoption-view",
+   "edition_or_version": "26.09",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0",
+   "what_it_shows": "Passports and model versions listed (DPP 5.0.0, battery 6.0.0, transmission 3.0.0, electric drive 2.0.0), components, carrier metadata example; no public tier, no EU registry bridge."
+  },
+  {
+   "id": "new-gaiax-ad-25-11",
+   "title": "Gaia-X Architecture Document 25.11: Trust Framework architecture",
+   "issuing_body": "Gaia-X European Association for Data and Cloud AISBL",
+   "url": "https://docs.gaia-x.eu/technical-committee/architecture-document/25.11/trust_framework_architecture/",
+   "edition_or_version": "25.11",
+   "publication_date": "2025-11-28 (page date)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on page (copyright 2024 Gaia-X AISBL)",
+   "what_it_shows": "Context only: compliance engine, registry, notaries, Digital Clearing Houses, wallets and exchange protocols including Eclipse DCP."
+  },
+  {
+   "id": "new-factoryx-edc",
+   "title": "factory-x-contributions/factoryx-edc",
+   "issuing_body": "Factory-X project (factory-x-contributions GitHub organisation)",
+   "url": "https://github.com/factory-x-contributions/factoryx-edc",
+   "edition_or_version": "archived",
+   "publication_date": "last push 2026-06-29",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Context only: Factory-X connector flavour, archived; organisation lists MX-Port prototypes."
+  },
+  {
+   "id": "idta-01002-api",
+   "title": "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces",
+   "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+   "url": "https://industrialdigitaltwin.io/aas-specifications/IDTA-01002/v3.2/specification/interfaces.html",
+   "edition_or_version": "v3.2 (prior record listed the content-hub page)",
+   "publication_date": "not stated on page",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IDTA specifications CC-BY-4.0 per prior record; no licence line seen on this page",
+   "what_it_shows": "Registry interface operations, Basic Discovery interface (GetAll...ByAssetLink deprecated, SearchAll...ByAssetLink), Submodel interface."
+  },
+  {
+   "id": "idta-01001-metamodel",
+   "title": "Specification of the Asset Administration Shell Part 1: Metamodel",
+   "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+   "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-1-metamodel-idta-number-01001",
+   "edition_or_version": "v3.2 as referenced by CX-0002 v2.4.0",
+   "publication_date": "not checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 per prior record",
+   "what_it_shows": "Cited by CX-0002; not re-read this session."
+  },
+  {
+   "id": "idta-01004-security",
+   "title": "Specification of the Asset Administration Shell Part 4: Security",
+   "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+   "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-4-security-idta-number-01004",
+   "edition_or_version": "v3.1 as referenced by CX-0002 v2.4.0",
+   "publication_date": "not checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 per prior record",
+   "what_it_shows": "Cited by CX-0002 for optional access rules; not re-read; URL copied from the prior record id pattern is not verified this session."
+  },
+  {
+   "id": "idta-02035-1-dbp-digital-nameplate",
+   "title": "Digital Battery Passport, Part 1: Digital Nameplate (series IDTA 02035-1 to -7)",
+   "issuing_body": "Industrial Digital Twin Association e.V. (IDTA), with Catena-X and the BatteryPass Consortium",
+   "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-1/1.0/index.html",
+   "edition_or_version": "1.0.x per CX-0160 (parts 1-7)",
+   "publication_date": "2026-02 per prior record",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 per prior record",
+   "what_it_shows": "Named by CX-0160 as the battery passport models (parts 1-7); not re-read this session; content claims rest on the prior substantive record."
+  },
+  {
+   "id": "idta-02099-1-dpp-metadata",
+   "title": "Digital Product Passport - Part 1: Metadata",
+   "issuing_body": "Industrial Digital Twin Association e.V. (IDTA)",
+   "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/index.html",
+   "edition_or_version": "v1.0.x per CX-0160-3",
+   "publication_date": "not checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 per prior record",
+   "what_it_shows": "Named by CX-0160-3 as the DPP Metadata model; not re-read this session."
+  },
+  {
+   "id": "aas-test-engines",
+   "title": "aas-test-engines (Official test tooling for the Asset Administration Shell)",
+   "issuing_body": "Industrial Digital Twin Association (admin-shell-io)",
+   "url": "https://github.com/admin-shell-io/aas-test-engines",
+   "edition_or_version": "main at 2025-08-05",
+   "publication_date": "not checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Repository metadata (licence, last push); reused id from tools-repos.json."
+  },
+  {
+   "id": "espr-reg-2024-1781",
+   "title": "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj",
+   "edition_or_version": "OJ L, 28.6.2024 (as corrected)",
+   "publication_date": "2024-06-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; reuse per Commission Decision 2011/833/EU",
+   "what_it_shows": "Articles 2, 9, 10, 11, 12, 13 cited from the prior substantive record (docs/research/raw/espr.json, 2026-10-13); EUR-Lex returned an empty body on 2026-10-19, so the text was not re-read. Duplicate prior id reg-eu-2024-1781-espr-art-78 exists."
+  },
+  {
+   "id": "reg-eu-2023-1542",
+   "title": "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj",
+   "edition_or_version": "OJ L 191, 28.7.2023 (as amended)",
+   "publication_date": "2023-07-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; reuse per Commission Decision 2011/833/EU",
+   "what_it_shows": "Art. 13(6), 77, 78 and Annex XIII cited from the prior substantive record (docs/research/raw/batteries-regulation.json); EUR-Lex returned an empty body on 2026-10-19."
+  },
+  {
+   "id": "impl-reg-eu-2026-1778-dpp-registry",
+   "title": "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 (DPP registry)",
+   "issuing_body": "European Commission",
+   "url": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj",
+   "edition_or_version": "as recorded on 2026-10-13",
+   "publication_date": "2026-07 (per prior record)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Registry context only; not re-read. Duplicate prior ids cir-2026-1778-dpp-registry and dpp-registry-implementing-regulation-2026-1778 exist."
+  },
+  {
+   "id": "iso-iec-15459-parts-1-6",
+   "title": "ISO/IEC 15459 - Information technology - Automatic identification and data capture techniques - Unique identification (Parts 1 to 6)",
+   "issuing_body": "ISO/IEC JTC 1",
+   "url": "https://webstore.iec.ch/en/publication/10334",
+   "edition_or_version": "Parts 1:2014, 2:2015, 3:2014, 4:2014, 5:2014, 6:2014 as named by Regulation (EU) 2023/1542, Art. 77(3) (per prior record)",
+   "publication_date": "2014-2015",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid, protected; bibliographic only",
+   "what_it_shows": "Bibliographic only. Content not read (rule 5)."
+  },
+  {
+   "id": "new-iso-iec-7064-2003",
+   "title": "ISO/IEC 7064:2003 (check character systems)",
+   "issuing_body": "ISO/IEC JTC 1",
+   "url": "https://www.iso.org/obp/ui/en/#iso:std:iso-iec:7064:ed-1:v1:en",
+   "edition_or_version": "2003 (edition 1) as cited by CX-0010",
+   "publication_date": "2003",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid, protected; bibliographic only",
+   "what_it_shows": "Cited by CX-0010 for BPN check characters. Number and year taken from the CX-0010 reference list; ISO page not opened; algorithm not described (rule 5)."
+  },
+  {
+   "id": "new-iso-iec-6523-1-2023",
+   "title": "ISO/IEC 6523-1:2023 (organization identification schemes, part 1)",
+   "issuing_body": "ISO/IEC JTC 1",
+   "url": "https://www.iso.org/obp/ui/en/#iso:std:iso-iec:6523:-1:ed-2:v1:en",
+   "edition_or_version": "2023 (edition 2) as cited by CX-0010",
+   "publication_date": "2023",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid, protected; bibliographic only",
+   "what_it_shows": "Cited by CX-0010 for BPN issuance. Bibliographic only; not opened."
+  },
+  {
+   "id": "new-iso-iec-fdis-20151-1",
+   "title": "ISO/IEC FDIS 20151-1 (dataspace terminology, as named in DSP release notes)",
+   "issuing_body": "ISO/IEC JTC 1",
+   "url": "https://github.com/eclipse-dataspace-protocol-base/DataspaceProtocol/releases/tag/2025-1-err2",
+   "edition_or_version": "FDIS stage (as named)",
+   "publication_date": "not determined",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Protected; bibliographic only",
+   "what_it_shows": "Number and stage only, from the DSP 2025-1-err2 release note; title not confirmed; catalogue not opened."
+  },
+  {
+   "id": "din-dke-spec-99100-2025-02",
+   "title": "DIN DKE SPEC 99100:2025-02 Requirements for data attributes of the battery passport",
+   "issuing_body": "DIN / DKE",
+   "url": "https://www.dinmedia.de/en/technical-rule/din-dke-spec-99100/385692321",
+   "edition_or_version": "2025-02 (per prior record)",
+   "publication_date": "2025-02",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Protected; bibliographic only",
+   "what_it_shows": "Named by CX-0160 base as an alignment target; claim not used (secondary_only); content not read."
+  },
+  {
+   "id": "en-18223-2026",
+   "title": "Digital Product Passport - System interoperability",
+   "issuing_body": "CEN/CENELEC JTC 24",
+   "url": "https://standards.cencenelec.eu/",
+   "edition_or_version": "2026 (per prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Protected; bibliographic only",
+   "what_it_shows": "Named by CX-0160-3 section 3.1.1 in connection with the DPP Metadata model; the claim is secondary_only and was not used; content not read."
+  },
+  {
+   "id": "new-dps-spec-1-0-rc4",
+   "title": "Data Plane Signaling 1.0-RC4",
+   "issuing_body": "Eclipse Foundation AISBL (Eclipse Dataspace Working Group)",
+   "url": "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/v1.0-RC4",
+   "edition_or_version": "1.0-RC4",
+   "publication_date": "not stated (copyright 2026)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (as linked on the page)",
+   "what_it_shows": "Header only: title, version, status line calling the release stable, Apache-2.0 licence, purpose (signaling between DSP control planes and data planes). Message types and endpoints were not in the fetched content."
+  },
+  {
+   "id": "local-dppce-schema-probe",
+   "title": "dppce src/dppce/adapters/common.py validator() and src/dppce/adapters/data.py (this repository, worktree dpp-methods), run against fetched schemas",
+   "issuing_body": "dpp-conformance-engine project (local code)",
+   "url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/common.py",
+   "edition_or_version": "worktree dpp-methods at 2026-10-19",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "project code",
+   "what_it_shows": "Probe run on 2026-10-19 (exit 0): validator() raised SchemaError ('False is not of type number') for io.catenax.generic.digital_product_passport 6.1.0 and 7.0.0 gen/DigitalProductPassport-schema.json; built a validator for DSP 2025-1-err2 protocol-version-schema.json, data-address-schema.json and context-schema.json; returned None (non-local $ref) for transfer-start-message-schema.json and catalog-request-message-schema.json, which reference https://w3id.org/dspace/2025/1/... schemas. data.py maps SchemaError to blocked DATA.SCHEMA.MALFORMED and None to blocked DATA.SCHEMA.NOT_LOCAL."
+  }
+ ],
+ "open_questions": [
+  "Which generic DPP aspect version should the engine pin: 6.1.0 (mandated by CX-0143 v1.4.0 in CX-Titan), 7.0.0 (latest 'release' in sldt-semantic-models), or 5.0.0 (EcoPass KIT 26.09)? Battery passports move to the seven IDTA/Catena-X models only when CX-0160 leaves preview.",
+  "Is there any Catena-X or Tractus-X specification that maps a CX triplet to a public web URL, or a plan to use GS1 Digital Link or another URL form on the carrier? None was found.",
+  "Can BPN check characters be verified from an open source? CX-0010 delegates the algorithm to a protected ISO/IEC document.",
+  "Should the engine accept a signed DSP TCK or DCP TCK run as evidence through manual.review, given that both TCKs need a bidirectional, credentialed connection the engine does not make?",
+  "How should DSP '404 for unauthorized' be represented in the access-policy model, which treats only 401/403 as refusal?",
+  "What does the DSP tag 2025-1-RC5 (2026-08-31, after 2025-1-err1) mean for the stable 2025-1 line?",
+  "Will the Catena-X conformity assessment criteria for CX-0143 and CX-0160 be published as machine-checkable test cases? Only prose CAC files were seen; the CAF handbook PDF was not read.",
+  "Should the project accept a reviewed, pinned 2020-12 conversion of SAMM-generated draft-04 schemas and a locally bundled copy of the DSP schemas as fixtures? Both need a maintainer decision; neither was made."
+ ],
+ "anomalies": [
+  "DSP root page redirect text calls the target 'the latest Release Candidate', while the target page 2025-1-err2 is titled 'Dataspace Protocol Release 2025-1' and says it is stable.",
+  "DSP tag order: 2025-1-err1 (2025-11-12), then 2025-1-RC5 (2026-08-31, pre-release), then 2025-1-err2 (2026-09-11) with the same terminology change.",
+  "DSP version schema lists '0.8' in its enum, while CX-0018 v4.2 requires the key 'v0.8'; both pass because the schema also allows any string.",
+  "Catena-X overview lists CX-0143 at 1.2.0; the live CX-0143 page and Titan source say v1.4.0.",
+  "CX-0050 has no version on the overview; Titan source heading says v.2.2.1. CX-0001 is now titled 'Participant Agent Registration' but still holds the EDC Discovery API.",
+  "CX-0002 v2.4.0 cites CX-0018 v4.1.1 in its non-normative references while CX-0018 is v4.2.",
+  "CX-0160 exists only in the CX-Neptune preview tree; CX-0143 (Titan) still refers to 'CX-XXXX Battery Passport'.",
+  "CX-0160-3 section 3.1.2 links the DPP Metadata specification artifacts to Digital Nameplate files (apparent copy error).",
+  "EcoPass KIT 26.09 names DPP 5.0.0, battery 6.0.0 and 'SAMM 1.1.0', which conflict with CX-0143 (6.1.0), the model repository (7.0.0) and the SAMM 2.1.0 namespaces in the models.",
+  "Tractus-X DTR OpenAPI is titled 'V3.1.0_SSP-001' while CX-0002 v2.4.0 references IDTA 01002 v3.2.",
+  "SAMM-generated JSON Schema of DPP 7.0.0 declares draft-04 and uses boolean exclusiveMinimum/exclusiveMaximum; the generated OpenAPI is 3.0.3 with server 'catenax.io/api/v7' (no scheme).",
+  "The Tractus-X Digital Product Pass app is archived and deprecated; its docs remain the most detailed public description of the consumer flow.",
+  "Tractus-X EDC multi-dataspace decision record (2026-01-07) cites the Factory-X EDC, which was archived on 2026-06-29.",
+  "Catena-X Titan certification page says 'Coming Soon' and the 'Conformity Assessment' navigation entry is commented out, while catena-x.net lists active CABs and a CAF handbook. One catena-x.net certification URL from search returned HTTP 404.",
+  "DCP dsp.profile.md links the DSP at the former IDSA GitHub location.",
+  "Manoury et al.: Consensus lists 2024 and 'Unknown Journal'; Crossref lists Procedia Computer Science 2025.",
+  "EUR-Lex (ELI /eng and CELEX TXT/HTML) returned empty bodies to WebFetch on 2026-10-19; law citations rely on the prior record of 2026-10-13.",
+  "dps-tck: GitHub API shows no licence (no LICENSE file), while NOTICE.md declares Apache-2.0.",
+  "Data Plane Signaling page for version 1.0-RC4 calls itself a stable release although the version label says release candidate.",
+  "EUR-Lex returned an empty body again on 2026-10-19 for the OJ HTML form (uri=OJ:L_202401781); law citations still rest on the prior records of 2026-10-13."
+ ],
+ "truncation": "Not read or only partly read, by choice of depth and time: full DSP and DCP specification texts beyond the common requirements, HTTPS bindings, token and presentation sections; DCP issuance details; the dps-tck repository; EDC Connector code and management API reference; Tractus-X EDC walkthrough files 01, 03, 05, 06, 08; CX-0049, CX-0126, CX-0127, CX-0131, CX-0151 bodies; CX-0050 beyond the first schema; CX-0152 asset schemas; CX-0143 SEM, BackwardCompatibility and ConformityAssessmentCriteria files; CX-0160 CAC files beyond grep hits; the CAF Handbook PDF; the SAMM specification body (payload mapping rules); IDTA 02035 and 02099 SMT bodies (not re-read; prior record used); Discovery Finder and BPN Discovery source code; portal-backend code; Gaia-X Compliance Document; Manufacturing-X documents. Literature: six search calls (three Consensus, three SciSpace/Consensus mix); abstracts only, no full texts. EU law not re-read (EUR-Lex empty responses). Continuation (2026-10-19): DPS specification read at header level only; DSP schemas probed for five files of 25, not all; SAMM probe ran on the generic DPP schemas only (battery_pass and transmission_pass not probed).",
+ "continuation_note": "Continuation run on 2026-10-19 after the previous agent stopped on HTTP 429. The handoff note showed its last action was a Write of this file, so no half-finished step remained. Changes: (1) Resolved the open question on SAMM schemas by running the engine's own validator() on fetched DPP 6.1.0 and 7.0.0 schemas (SchemaError, so data.jsonschema blocks with DATA.SCHEMA.MALFORMED) and on five DSP 2025-1-err2 schemas (three load; message schemas with absolute w3id.org $ref give DATA.SCHEMA.NOT_LOCAL); updated two conformance implications, added one implication, one failure mode, one open question and source local-dppce-schema-probe. (2) Confirmed all 13 literature DOIs, titles and years via Crossref (11) or DataCite (2) and corrected two venue strings. (3) dps-tck: read README and NOTICE.md; licence Apache-2.0, evidence raised to substantive; added source new-dps-spec-1-0-rc4 (header only). (4) Re-checked licence and last push of aas-test-engines, SAMM spec, smt-semantic-models, Discovery Finder and BPN Discovery (unchanged). (5) Retried EUR-Lex once (empty). Checked: no EN/ISO/IEC/DIN text added; law article numbers cross-checked against the prior espr.json and batteries-regulation.json records. Side effect: an attempted 'uv run' created a git-ignored .venv (no project packages) in the worktree root; removal was denied by the sandbox, so it remains. Still open: EUR-Lex re-read, CAF handbook, CX-0143 CAC and backward-compatibility files, DSP/DCP full texts beyond the parts recorded, full DPS specification, Discovery Finder/BPN Discovery source code."
+}
