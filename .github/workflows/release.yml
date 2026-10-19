@@ -4,15 +4,18 @@
 #
 # It builds the packages and the container image, writes a CycloneDX SBOM, and creates signed
 # build provenance. A gate job checks the tag, the version, the ci result, and the protection of
-# the `release` environment. The attest and image jobs run in the `release` environment. Before
-# the push, a scan job with read permission only scans a build of the same commit with Trivy
-# 0.75.0. The pushed image is a separate build of that commit. The attest and image jobs wait
-# for the scan job. See GOVERNANCE.md.
-# The gate job, the scan job, and the environment were added on 2026-10-18. They have not run.
+# the `release` environment. The attest and image jobs run in the `release` environment and wait
+# for the scan job. The scan job builds the image one time, to an OCI archive with its SBOM and
+# provenance attestations. It scans that archive with Trivy 0.75.0 and records the archive hash
+# and the image digest. The image job pushes that same archive with crane 0.22.1. It signs the
+# provenance only when the pushed digest equals the scanned digest. See GOVERNANCE.md.
+# The gate job, the scan job, and the environment were added on 2026-10-18. The single image
+# build was added on 2026-10-19. They have not run.
 #
 # The build job has read permission only, and every tool that it runs is pinned with hashes in
 # uv.lock. The scan job has read permission only. The attest job runs only the attestation
-# action. The image job can sign: it runs the pinned Docker actions and the attestation action.
+# action. The image job can sign: it runs crane, the pinned Docker login action, and the
+# attestation action. It does not build.
 name: release
 
 on:
@@ -70,35 +73,67 @@ jobs:
             exit 1
           fi
 
-  # No write and no OIDC permission: the Trivy binary and the scan build cannot push or sign.
+  # No write and no OIDC permission: the Trivy binary and the image build cannot push or sign.
+  # This is the only image build. The image job pushes the archive that this job scanned.
   scan:
-    name: Container image vulnerability scan
+    name: Container image build and vulnerability scan
     needs: gate
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
+    outputs:
+      digest: ${{ steps.record.outputs.digest }}
+      sha256: ${{ steps.record.outputs.sha256 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # The default builder image is the mutable tag moby/buildkit:buildx-stable-1. This is its
+      # index digest. The owner resolved it with `docker buildx imagetools inspect` on 2026-10-19.
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: image=moby/buildkit@sha256:cec9f139f45e93c5c69c60f8b07cfad9f43f4ef6b6a6cd917527fea5ff2e3dea
+      # The SBOM and the provenance are attestation manifests in the image index of the archive.
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
-          push: false
-          load: true
-          provenance: false
-          sbom: false
-          tags: dppce-scan:${{ github.sha }}
+          outputs: type=oci,dest=${{ runner.temp }}/dppce-image.tar
+          sbom: true
+          provenance: mode=max
+      # Trivy scans the first image in the layout. The check makes sure that it is the
+      # linux/amd64 image, not an attestation, so the scan cannot pass on the wrong target.
+      # The values are recorded before Trivy runs, so Trivy cannot change them.
+      - id: record
+        name: Record the archive hash and the image digest
+        run: |
+          cd "$RUNNER_TEMP"
+          mkdir oci
+          tar -xf dppce-image.tar -C oci
+          n=$(jq '.manifests | length' oci/index.json)
+          digest=$(jq -r '.manifests[0].digest' oci/index.json)
+          platform=$(jq -r '.manifests[0].platform | "\(.os)/\(.architecture)"' "oci/blobs/sha256/${digest#sha256:}")
+          if [ "$n" != 1 ] || [ "$platform" != linux/amd64 ]; then
+            echo "::error::RELEASE.IMAGE.LAYOUT_UNEXPECTED: the archive has $n entries and the first image is $platform"
+            exit 1
+          fi
+          sha=$(sha256sum dppce-image.tar)
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "sha256=${sha%% *}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image
+          path: ${{ runner.temp }}/dppce-image.tar
+          if-no-files-found: error
       - name: Install Trivy 0.75.0
         run: |
           curl -sSfL -o "$RUNNER_TEMP/trivy.tgz" https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz
           echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  $RUNNER_TEMP/trivy.tgz" | sha256sum --check --strict -
           tar -xzf "$RUNNER_TEMP/trivy.tgz" -C "$RUNNER_TEMP" trivy
-      # Trivy downloads its vulnerability database at run time.
+      # Trivy downloads its vulnerability database at run time. It reads an OCI layout from a
+      # directory, not from a tar file.
       - name: High and critical findings with a fix stop the release
-        run: '"$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress "dppce-scan:$GITHUB_SHA"'
+        run: '"$RUNNER_TEMP/trivy" image --input "$RUNNER_TEMP/oci" --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress'
 
   build:
     name: Build packages and SBOM (no signing permission)
@@ -162,29 +197,47 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          persist-credentials: false
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+          name: image
+          path: ${{ runner.temp }}
+      # The expected hash comes from a job output, which the artifact cannot change.
+      - name: The archive is the one that the scan job scanned
+        env:
+          SCANNED_SHA256: ${{ needs.scan.outputs.sha256 }}
+        run: |
+          if ! echo "$SCANNED_SHA256  $RUNNER_TEMP/dppce-image.tar" | sha256sum --check --strict -; then
+            echo "::error::RELEASE.IMAGE.ARCHIVE_MISMATCH: the downloaded archive is not the scanned archive"
+            exit 1
+          fi
+          mkdir "$RUNNER_TEMP/oci"
+          tar -xf "$RUNNER_TEMP/dppce-image.tar" -C "$RUNNER_TEMP/oci"
+      - name: Install crane 0.22.1
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/crane.tgz" https://github.com/google/go-containerregistry/releases/download/v0.22.1/go-containerregistry_Linux_x86_64.tar.gz
+          echo "0ab7a1d6932a213aed964ce97666c3077fe691c8606413674a8b3e0b9ec4cda0  $RUNNER_TEMP/crane.tgz" | sha256sum --check --strict -
+          tar -xzf "$RUNNER_TEMP/crane.tgz" -C "$RUNNER_TEMP" crane
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # ponytail: this push is a rebuild of the same commit, not the bytes that the scan job
-      # scanned. readiness.md records a byte-identical rebuild of the pinned Dockerfile. Pushing
-      # the scanned bytes needs an OCI-layout push tool (crane, skopeo, oras), not added here.
-      - id: build
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          sbom: true
-          provenance: mode=max
+      # crane pushes the manifests of the OCI layout byte for byte and prints the pushed digest.
+      # `docker load` and `docker push` can compress the layers again and change the digest.
+      # A mismatch stops the job before the attestation step.
+      - name: Push the scanned archive and compare the digests
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}
+          SCANNED_DIGEST: ${{ needs.scan.outputs.digest }}
+        run: |
+          ref=$("$RUNNER_TEMP/crane" push "$RUNNER_TEMP/oci" "$IMAGE:$GITHUB_REF_NAME")
+          if [ -z "$SCANNED_DIGEST" ] || [ "${ref##*@}" != "$SCANNED_DIGEST" ]; then
+            echo "::error::RELEASE.IMAGE.DIGEST_MISMATCH: pushed ${ref##*@}, scanned $SCANNED_DIGEST"
+            exit 1
+          fi
       - name: Signed build provenance for the image
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ needs.scan.outputs.digest }}
           push-to-registry: true
