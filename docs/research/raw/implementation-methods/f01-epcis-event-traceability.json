@@ -1,0 +1,1348 @@
+{
+  "method_id": "f01-epcis-event-traceability",
+  "name": "Event-based traceability with GS1 EPCIS 2.0 and CBV 2.0",
+  "retrieval_date": "2026-10-19",
+  "scope_note": "Covers the GS1 visibility-event route to product traceability as a DPP method family: the EPCIS 2.0 event model (five event types, the what/when/where/why/how dimensions, error declarations), the JSON/JSON-LD binding (JSON Schema draft-07, JSON-LD 1.1 context, SHACL file), the REST capture and query interface and its OpenAPI 3.0.3 description, the custom GS1-* headers, CBV 2.0 vocabularies and the EPCIS Event Hash ID algorithm, the link from a passport to events through the GS1 Web Vocabulary link types gs1:epcis and gs1:traceability, access control and redaction on the query side, and the UNTP Digital Traceability Events 0.7.0 EPCIS profile. Implementations: OpenEPCIS (repository, validators, generators, test resources, hash generator, converter), Oliot EPCIS, FasTnT EPCIS, the RalphTro reference hash generator, and the OpenDPP interop EPCIS validator door. The description of EPCIS and CBV rests only on the GS1 ratified documents and artefacts on ref.gs1.org and the gs1/EPCIS repository. It leaves out: the content of ISO/IEC 19987:2024 and ISO/IEC 19988:2024 (bibliographic metadata only; iso.org returned HTTP 403), and of any EN, IEC or DIN document; the XML/SOAP/AS2 bindings beyond naming them; EPCIS master data in depth; GS1 Digital Link and resolver mechanics (family m02); verifiable credential securing of DTE (family m05); ledger anchoring of event hashes (family m06). No live EPCIS endpoint, sandbox or resolver was contacted.",
+  "summary": "EPCIS is a GS1 standard for recording and sharing visibility events: who did what to which identified objects, when, where, why and, since 2.0, how (sensor data). An event belongs to one of five types: ObjectEvent, AggregationEvent, TransactionEvent, TransformationEvent and AssociationEvent; each carries eventTime, eventTimeZoneOffset, recordTime on query, an optional eventID and an optional errorDeclaration. CBV 2.0 supplies the standard values for business steps, dispositions, business transaction types and source/destination types, plus the rules for identifiers, including the EPCIS Event Hash ID (an RFC 6920 ni: URI over a canonical pre-hash string). EPCIS 2.0 adds a JSON/JSON-LD binding with a published JSON Schema, JSON-LD context and SHACL shapes, and a REST binding described in OpenAPI 3.0.3. The REST interface exposes /capture (asynchronous, 202 plus a capture job), /events (query and synchronous single-event capture), top-level resources such as /epcs/{epc}/events, and named queries under /queries with webhook (mandatory) and WebSocket (optional) subscriptions. Clients and servers negotiate EPCIS and CBV versions, identifier format and extensions through GS1-* headers and OPTIONS discovery; results are paginated through Link rel=next with a default page size of 30; errors use RFC 7807 problem documents typed with epcisException names. EPCIS requires authentication on every call but leaves authorisation rules to the implementation and allows redaction, coarser locations and partitioning by capturing client. A DPP does not contain events; it links to them. The passport identifier (a GS1 Digital Link URI) is resolved, and the linkset can carry a gs1:epcis link to an EPCIS repository or a gs1:traceability link to other traceability information. A consumer then queries the repository for events about that identifier, and follows transformation and aggregation links to the passports of inputs and components. UNTP 0.7.0 profiles EPCIS events as the credential subject of a Digital Traceability Event credential, mapping MakeEvent, MoveEvent and ModifyEvent to TransformationEvent, AggregationEvent and ObjectEvent. Implementations are mature in the supply-chain domain (several open-source repositories, validators and generators), but EPCIS 2.0 has no published GS1 conformance test suite; the draft conformance matrix in the gs1/EPCIS repository is largely empty.",
+  "method_families": [
+    "event-traceability-epcis",
+    "web-resolver-gs1",
+    "linked-data-semantic"
+  ],
+  "maturity": {
+    "spec_status": "EPCIS 2.0 and CBV 2.0 are ratified GS1 standards (June 2022). The ref.gs1.org archive lists EPCIS 2.0.1 (1 July 2025) as the latest release, while the PDF served for 2.0.1 is the same file as the 2.0 PDF and still states 'Release 2.0, Ratified, Jun 2022'; the 2.0.1 change is visible in the artefacts (OpenAPI info.version 2.0.1, JSON Schema $id under /2.0.1/). CBV 2.0.0 (22 June 2022) is the latest CBV release. A 2.1 revision is in preparation: the gs1/EPCIS repository holds a 'public_review_2_1' folder with one draft JSON-LD context (2026-09-04) and the reference hash generator supports a 'draft CBV 2.1' algorithm option. ISO/IEC publishes EPCIS and CBV as ISO/IEC 19987:2024 and ISO/IEC 19988:2024 (protected; bibliographic metadata only, from search results).",
+    "versions_at_retrieval": [
+      {
+        "artifact": "EPCIS Standard (PDF)",
+        "version": "2.0 (cover 'Release 2.0, Ratified, Jun 2022'); served unchanged at /standards/epcis/ and /standards/epcis/2.0.1/",
+        "status": "Ratified",
+        "source_id": "new-gs1-epcis-2-0-pdf"
+      },
+      {
+        "artifact": "EPCIS release list",
+        "version": "2.0.1 published 2025-07-01 (latest); 2.0.0 published 2022-06-22 (archived); 1.2.0 2016-09-29; 1.1.0 2014-05-20; 1.0.1 2007-09-21; 1.0.0 2007-04-12",
+        "status": "2.0.1 latest",
+        "source_id": "new-gs1-epcis-archive"
+      },
+      {
+        "artifact": "CBV Standard (PDF)",
+        "version": "2.0 (cover 'Release 2.0, Ratified, Jun 2022')",
+        "status": "Ratified; archive lists 2.0.0 (2022-06-22) as latest",
+        "source_id": "new-gs1-cbv-2-0-pdf"
+      },
+      {
+        "artifact": "CBV release list",
+        "version": "2.0.0 2022-06-22 (latest); 1.2.2 2017-10-12; 1.1.0 2014-05-20; 1.0.0 2010-01-13",
+        "status": "2.0.0 latest",
+        "source_id": "new-gs1-cbv-archive"
+      },
+      {
+        "artifact": "EPCIS REST bindings OpenAPI (ref.gs1.org openapi.json)",
+        "version": "OpenAPI 3.0.3; info.version 2.0.1; info.license name 'Apache2'",
+        "status": "published artefact",
+        "source_id": "new-gs1-epcis-openapi-ref"
+      },
+      {
+        "artifact": "EPCIS REST bindings OpenAPI (gs1/EPCIS master openapi.yaml)",
+        "version": "OpenAPI 3.0.3; info.version 2.0.0; 30 paths; no securitySchemes",
+        "status": "development copy (repository description says draft files for 2.0 development)",
+        "source_id": "new-gs1-epcis-repo"
+      },
+      {
+        "artifact": "EPCIS JSON Schema (ref.gs1.org)",
+        "version": "draft-07; $id https://ref.gs1.org/standards/epcis/2.0.1/epcis-json-schema.json",
+        "status": "normative per EPCIS 2.0 section 10.3 (which cites the 2.0.0 path)",
+        "source_id": "new-gs1-epcis-json-schema-ref"
+      },
+      {
+        "artifact": "EPCIS JSON-LD context (ref.gs1.org)",
+        "version": "JSON-LD 1.1, @protected, gs1 prefix https://ref.gs1.org/voc/",
+        "status": "published artefact",
+        "source_id": "new-gs1-epcis-context-ref"
+      },
+      {
+        "artifact": "EPCIS JSON-LD context (gs1/EPCIS public_review_2_1)",
+        "version": "draft; imports https://ref.gs1.org/voc/data/GS1-WebVoc-context.jsonld then local terms",
+        "status": "public review draft (folder name); created 2026-09-04",
+        "source_id": "new-gs1-epcis-repo"
+      },
+      {
+        "artifact": "EPCIS and CBV Implementation Guideline",
+        "version": "Release 1.0, Ratified, Oct 2015",
+        "status": "predates EPCIS 2.0",
+        "source_id": "new-gs1-epcis-cbv-guideline-1-0"
+      },
+      {
+        "artifact": "GS1 Web Vocabulary link types gs1:epcis, gs1:traceability",
+        "version": "v1.16 file (sw:term_status stable for both)",
+        "status": "stable",
+        "source_id": "new-gs1-webvoc-github"
+      },
+      {
+        "artifact": "UNTP Digital Traceability Events",
+        "version": "0.7.0",
+        "status": "labelled for pre-production pilots; public review closed, 1.0 expected",
+        "source_id": "new-untp-0-7-0-dte"
+      },
+      {
+        "artifact": "ISO/IEC 19987",
+        "version": "2024, edition 3 (per search excerpt)",
+        "status": "protected; bibliographic only",
+        "source_id": "new-iso-iec-19987-2024"
+      },
+      {
+        "artifact": "ISO/IEC 19988",
+        "version": "2024 (per search excerpt)",
+        "status": "protected; bibliographic only",
+        "source_id": "new-iso-iec-19988-2024"
+      }
+    ],
+    "adoption_evidence": "Open-source servers: OpenEPCIS Community Edition (Quarkus, Kafka, OpenSearch; Apache-2.0), Oliot EPCIS 2.0 (Java, Vert.x, MongoDB; published in SoftwareX 2023), FasTnT EPCIS (.NET 10, EF Core; EPCIS 1.2 and 2.0). Tooling: OpenEPCIS validation service, converter, test data generator, test resources with valid and invalid documents, event hash generators in Java and Python. Academic prototypes 2021-2026 use EPCIS 2.0 for DPP-adjacent traceability, often with ledger anchoring of event hashes (Hyperledger Fabric, IOTA) or knowledge graphs. Commercial DPP platforms recorded in m10 claim EPCIS capture and query (vendor statements, secondary_only). No GS1 conformance programme or test suite for EPCIS 2.0 REST was found; the gs1/EPCIS 'Conformance Requirements' folder is a draft with one filled requirement (M1) and stubs.",
+    "regulatory_alignment": "EU law does not name EPCIS or require event data in a passport. Regulation (EU) 2024/1781, Art. 9(3)(c) says the passport requirements shall improve product traceability along the value chain, and Art. 9(3)(a) that they shall help value chain actors access relevant information; recital 32 expects end-to-end traceability, and recital 36 links the passport to unique operator and facility identifiers. Art. 10(1)(d) asks for open, interoperable, machine-readable data that can move without vendor lock-in, which an open GS1 standard can meet. Art. 9(2)(f)-(g) leaves to the delegated act who may read and who may create or update which data; EPCIS access control can implement such rules but does not define them. Art. 11 (access, storage, service providers, availability) is taken from the sibling record m01 and was not re-read in this session. Event data would enter a DPP only where a delegated act asks for value-chain information that is derived from events (for example origin, transformation steps, recycled content)."
+  },
+  "layers": {
+    "L01_unique_identifiers": {
+      "applies": "yes",
+      "mechanism": "Objects in the what dimension are identified by URIs: EPC URNs (urn:epc:id:sgtin:..., urn:epc:class:lgtin:..., urn:epc:idpat:...) or, since CBV 2.0, a constrained set of GS1 Digital Link URIs; locations, parties and business transactions also take URIs (SGLN, PGLN, business transaction ids). The GS1-EPC-Format request/response header selects the representation; OpenAPI enum No_Preference, Always_GS1_Digital_Link (default when absent), Always_EPC_URN, Never_Translates. Event identifiers: eventID is optional; when present it must be a globally unique URI; CBV-Compliant documents use either a UUID v1/v4 URN (urn:uuid:...) or the EPCIS Event Hash ID ni:///{alg};{digest}?ver=CBV{major}.{minor}, where alg is a name from the IANA Named Information Hash Algorithm Registry (examples use sha-256). For hashing, EPC URNs are converted to canonical Digital Link form on https://id.gs1.org with the query string stripped and only the finest-grained key combination kept (00, 01, 01+21, 01+10, 01+235, 253, 255, 401, 402, 414, 414+254, 417, 8003, 8004, 8006, 8006+21, 8006+10, 8010, 8010+8011, 8017, 8018). correctiveEventID points to eventIDs that correct an erroneous event. Error declaration events reuse the eventID of the erroneous event, so eventID is not unique in that case.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "eventID field table (section 7.4.1); top-level resource /epcs"
+        },
+        {
+          "source_id": "new-gs1-cbv-2-0-pdf",
+          "component": "section 8.9 Event identifiers, 8.9.1 UUID URIs, 8.9.2 EPCIS Event Hash ID rules 16, 17, 21-23"
+        },
+        {
+          "source_id": "new-gs1-epcis-repo",
+          "component": "REST Bindings/openapi.yaml components.parameters GS1-EPC-Format, EventID, EPC"
+        },
+        {
+          "source_id": "new-iso-iec-19987-2024",
+          "component": "bibliographic only"
+        }
+      ],
+      "variants": [
+        "EPC URN identifiers (RFID heritage, TDS)",
+        "GS1 Digital Link URIs on a brand domain or id.gs1.org",
+        "non-GS1 HTTP URIs (CBV-Compatible documents)",
+        "eventID as UUID URN",
+        "eventID as ni: Event Hash ID",
+        "no eventID"
+      ],
+      "observable_black_box": "Identifiers in captured and returned events; whether the server translates identifiers according to GS1-EPC-Format; whether eventID values match the UUID or ni: grammar; whether a hash-form eventID can be recomputed from the event body.",
+      "law_delta": "ESPR Art. 10(1)(a) ties the passport to a persistent unique product identifier; EPCIS adds identifiers for events, locations and business transactions that the law does not ask for. Operator and facility identifiers (ESPR Art. 10(1), last paragraph, and recital 36) can map to PGLN and SGLN in EPCIS events, but the law does not name GS1 keys."
+    },
+    "L02_data_carriers": {
+      "applies": "no",
+      "mechanism": "EPCIS defines no data carrier. Events record identifiers that were read from carriers (barcodes, QR codes with Digital Link, RFID tags with EPC encodings), and readPoint records where the reading happened. Carrier encoding is in the GS1 Digital Link and EPC Tag Data standards (families m02 and m09).",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "where dimension (readPoint, bizLocation)"
+        }
+      ],
+      "variants": [
+        "barcode or QR read",
+        "RFID read (EPC)",
+        "manual entry"
+      ],
+      "observable_black_box": "None specific to EPCIS; carrier tests belong to carrier.qr_decode and carrier.rfid.",
+      "law_delta": "none"
+    },
+    "L03_data_exchange_protocols": {
+      "applies": "yes",
+      "mechanism": "Transport is HTTP(S) REST (EPCIS 2.0) alongside SOAP/WSDL, AS2 and message-queue bindings for XML. Content negotiation: every endpoint SHALL support JSON (application/json) and JSON-LD (application/ld+json) and MAY support XML and HTML; an unsupported Accept gives 406; responses are full EPCIS documents (EPCISDocument or EPCISQueryDocument) with events in epcisBody. Custom headers: GS1-EPCIS-Version, GS1-EPCIS-Min, GS1-EPCIS-Max, GS1-CBV-Version, GS1-EPC-Format, GS1-CBV-XML-Format, GS1-Extensions (CURIE prefix map for non-CBV vocabularies), GS1-Vendor-Version, GS1-EPCIS-Capture-Limit, GS1-EPCIS-Capture-File-Size-Limit, GS1-Capture-Error-Behaviour (rollback default, proceed), GS1-Next-Page-Token-Expires, GS1-Query-Min-Record-Time, GS1-Signature; the OpenAPI also defines GS1-CBV-Min and GS1-CBV-Max. Discovery: OPTIONS on every endpoint returns allowed methods and default values of supported GS1 headers (OpenAPI: 204 with Allow and GS1-* headers). Pagination: perPage query parameter (default 30), next page in a Link header with rel=\"next\" (RFC 8288), nextPageToken, DELETE /nextPageToken/{token} to free a token; events are never split across pages. Errors: RFC 7807 problem documents (application/problem+json or application/problem+xml) with type epcisException:<Name>; mapping ValidationException/QueryValidationException/QueryParameterException/SubscriptionControlsException 400, SecurityException 401/403, NoSuchResourceException 404, NotAcceptableException 406, ResourceAlreadyExistsException 409, CaptureLimitExceededException/QueryTooLargeException/QueryTooComplexException 413, URITooLongException 414, UnsupportedMediaTypeException 415, ImplementationException 500/501. Push: webhook subscriptions (POST to client 'dest' with an EPCISQueryDocument; the client-generated signatureToken is used by the server to sign and the signature travels in GS1-Signature; the algorithm is implementation-specific, HMAC-SHA-256 or JWS given as examples) and optional WebSocket upgrade on GET /queries/{queryName}/events. Passport-to-events link: the passport's Digital Link resolves to a linkset; GS1 Web Vocabulary defines gs1:epcis ('a link to an EPCIS repository of visibility event data', stable) and gs1:traceability (traceability information for humans or machines; the definition says to use gs1:epcis when the target is an EPCIS repository). A client can ask a GS1-conformant resolver for linkType=gs1:epcis (family m02). The vocabulary does not say which EPCIS URL the link should point to (server root, /epcs/{epc}/events, or a named query).",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "sections 12.3 (content negotiation, headers, OPTIONS), 12.5 (pagination), 12.8.3 (subscriptions), 12.10 (exceptions and status codes), 13 (SOAP/AS2), 11 (message queue, HTTP capture)"
+        },
+        {
+          "source_id": "new-gs1-epcis-repo",
+          "component": "REST Bindings/openapi.yaml: components.parameters, components.responses 204DefaultDiscoveryResponse, 401UnauthorizedRequest, schemas RFC7807ProblemResponseBody, GS1-Signature, QueryScheduleSubscription"
+        },
+        {
+          "source_id": "new-gs1-epcis-openapi-ref",
+          "component": "info.version 2.0.1, path list (first part read)"
+        },
+        {
+          "source_id": "new-gs1-webvoc-github",
+          "component": "v1.16 gs1Voc.jsonld nodes gs1:epcis and gs1:traceability"
+        }
+      ],
+      "variants": [
+        "REST JSON/JSON-LD (EPCIS 2.0)",
+        "REST XML",
+        "SOAP query control interface (WSDL)",
+        "AS2 query and callback",
+        "message-queue capture",
+        "webhook vs WebSocket subscription",
+        "gs1:epcis vs gs1:traceability link from the resolver"
+      ],
+      "observable_black_box": "Response media types per Accept; 406 on an unsupported type; presence and values of GS1-* headers on OPTIONS and on responses; Link rel=next chains and page sizes; problem+json bodies with epcisException types and matching status codes; resolver linkset entries with gs1:epcis or gs1:traceability relations; webhook callbacks received at a loopback destination and their GS1-Signature header.",
+      "law_delta": "ESPR Art. 10(1)(d) requires open interoperable formats and transfer without vendor lock-in but names no protocol. EPCIS adds a full query protocol, version negotiation and push subscriptions that the law does not require."
+    },
+    "L04_apis_lifecycle_searchability": {
+      "applies": "yes",
+      "mechanism": "Endpoints (OpenAPI 2.0.0 master, 30 paths): / (OPTIONS, GET); /capture (POST, GET list of capture jobs); /capture/{captureID} (GET job state); /events (GET query; POST synchronous capture of one bare event, 201); /events/{eventID}; /eventTypes, /eventTypes/{eventType}, /eventTypes/{eventType}/events; /epcs, /epcs/{epc}, /epcs/{epc}/events; /bizSteps, /bizLocations, /readPoints, /dispositions, each with /{value} and /{value}/events; /queries (GET list, POST create named query); /queries/{queryName} (GET, DELETE which also ends its subscriptions); /queries/{queryName}/events (GET results or WebSocket upgrade); /queries/{queryName}/subscriptions (GET, POST); /queries/{queryName}/subscriptions/{subscriptionID} (GET, DELETE); /nextPageToken/{token} (DELETE). A server SHALL support /epcs, /events and named queries; /eventTypes, /bizLocations, /bizSteps, /readPoints and /dispositions are optional. Top-level resources are not nested; path values without a prefix are CBV values, others are CURIEs declared in GS1-Extensions. Capture: POST /capture takes an EPCISDocument and returns 202 with a captureID; the capture job document has running, success, captureErrorBehaviour, errors or errorFile, createdAt, finishedAt; with rollback either all events are stored or none; 413 when GS1-EPCIS-Capture-Limit or the file-size limit is exceeded. Query language: SimpleEventQuery parameters as URL query string (EQ_bizStep, GE_eventTime, LT_eventTime, GE_recordTime, MATCH_epc, MATCH_anyEPC, MATCH_inputEPC, MATCH_outputEPC, MATCH_parentID, EQ_eventID, EXISTS_errorDeclaration, EQ_persistentDisposition_set, EQ_sensor fields and others; multiple values separated by '|'; URL limited to 2000 characters, 414 beyond) or as a JSON query document validated by query-schema.json; the same parameter given through path, query string and JSON body gives QueryParameterException. Lifecycle: events are append-only; there is no update or delete of events; a wrong event is retracted by capturing a copy with errorDeclaration (declarationTime, reason, correctiveEventIDs). EPCIS 2.0 removed the Simple Master Data Query and the EPCIS Master Data Document (change log); master data can still travel in the document header.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "Table 12-1, sections 12.6 (capture, capture jobs), 12.7 (events interface, top-level resources), 12.8 (named queries, query language, query in URL), 14.8 (REST server conformance list), 7.4.1.2 (error declaration)"
+        },
+        {
+          "source_id": "new-gs1-epcis-repo",
+          "component": "REST Bindings/openapi.yaml paths and parameters; REST Bindings/query-schema.json"
+        }
+      ],
+      "variants": [
+        "asynchronous bulk capture (/capture)",
+        "synchronous single-event capture (POST /events)",
+        "named queries with scheduled or streaming subscriptions",
+        "vendor-restricted subsets (FasTnT: rollback only, Never_Translates only, synchronous capture)"
+      ],
+      "observable_black_box": "Status codes and bodies for capture, capture job polling, event queries by identifier and by vocabulary value, named query creation and deletion, subscription creation; whether an error declaration appears in queries (EXISTS_errorDeclaration) and whether /events/{eventID} returns both the original and its declaration.",
+      "law_delta": "ESPR Art. 10(1)(d) asks for searchable data where appropriate; EPCIS gives search over events by identifier, time, step and location, which goes beyond what the law specifies. The law's create/update rights (Art. 9(2)(g)-(h)) refer to the passport, not to events; EPCIS has no update operation, only corrective events."
+    },
+    "L05_system_interoperability_data_models": {
+      "applies": "yes",
+      "mechanism": "Event types: ObjectEvent (epcList and/or quantityList, action ADD/OBSERVE/DELETE), AggregationEvent (parentID, childEPCs, childQuantityList), TransactionEvent (bizTransactionList with at least one entry), TransformationEvent (inputEPCList, inputQuantityList, outputEPCList, outputQuantityList, transformationID; the schema's propertyNames list for this type has no action), AssociationEvent (new in 2.0; parentID and children for physical associations). Common fields: eventTime, eventTimeZoneOffset (pattern +/-HH:MM up to 14:00), recordTime, eventID, certificationInfo (URL or list of URLs to certification details, which may use gs1:CertificationDetails terms), errorDeclaration; why dimension: bizStep, disposition, persistentDisposition (set/unset), readPoint, bizLocation, bizTransactionList, sourceList, destinationList; how dimension: sensorElementList with sensorMetadata and sensorReport (type, value, uom, min/max/mean, chemicalSubstance as InChIKey URI, microorganism); ilmd for instance/lot master data. JSON binding: JSON Schema draft-07 (ref.gs1.org $id .../2.0.1/epcis-json-schema.json); top-level required only 'type'; allOf dispatch on type to EPCISDocument, EPCISQueryDocument, the five event types, and an Extended-Event catch-all for other types; EPCISDocument requires @context, type, schemaVersion, creationDate and epcisBody, EPCISQueryDocument requires @context, type and epcisBody; each event type limits its keys through propertyNames to the standard names or any string that is a URI (vocab-uri, format uri), so whether an unknown unprefixed key is rejected depends on the validator asserting format 'uri' (local test with jsonschema 4.26.0: an event with key 'bizstep' passes without a format checker and fails with Draft7Validator.FORMAT_CHECKER); CBV values appear as bare strings (enums for bizStep, disposition and others) or as non-CBV URIs matched by vocab-other-uri, whose pattern rejects strings starting with urn:epcglobal:cbv or http(s)://ns.gs1.org/cbv/. The schema and SHACL follow an open-shape approach: terms from other namespaces are allowed and ignored. JSON-LD binding: context with @version 1.1 and @protected true; prefixes epcis https://ref.gs1.org/epcis/, cbv https://ref.gs1.org/cbv/, gs1 (https://ref.gs1.org/voc/ on ref.gs1.org; https://gs1.org/voc/ in the gs1/EPCIS master copy); bare CBV strings are expanded through scoped contexts (bizStep 'shipping' to cbv:BizStep-shipping). JSON-LD data SHALL validate against epcis-shacl.ttl; JSON data SHALL validate against the JSON Schema. Ontologies: epcis-ontology and cbv-ontology in JSON-LD and Turtle. CBV conformance levels: CBV-Compliant (uses standard values and identifier forms as specified) and CBV-Compatible (may use other URIs meeting EPCIS rules). UNTP DTE 0.7.0 alignment: two equivalent paths, UNTP-native MakeEvent/MoveEvent/ModifyEvent or an EPCIS profile in which an EPCIS event is the credentialSubject of a DigitalTraceabilityEvent verifiable credential; MakeEvent maps to TransformationEvent (and AggregationEvent for aggregation), MoveEvent to ObjectEvent with OBSERVE and shipping/receiving steps, ModifyEvent to ObjectEvent; activityType reuses the bizStep URI; TEV-01 to TEV-13 (for example TEV-01/02 MUST trace to component and input DPPs, TEV-07 MUST record time and location, TEV-12 SHOULD support access control).",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "sections 7.3-7.4 (dimensions, event types), 10.2-10.3 (JSON/JSON-LD expression and validation), 14.7 (JSON/JSON-LD conformance)"
+        },
+        {
+          "source_id": "new-gs1-cbv-2-0-pdf",
+          "component": "change log 2.0 (new bizStep and disposition values, sensor measurement types, Digital Link support), sections 8.9-8.10"
+        },
+        {
+          "source_id": "new-gs1-epcis-json-schema-ref",
+          "component": "$id, required, action enum, vocab-other-uri pattern, allOf dispatch"
+        },
+        {
+          "source_id": "new-gs1-epcis-repo",
+          "component": "EPCIS-JSON-Schema.json definitions; epcis-context.jsonld; public_review_2_1/epcis-context.jsonld; JSON-Schema/test samples"
+        },
+        {
+          "source_id": "new-gs1-epcis-context-ref",
+          "component": "@context object, prefixes, certificationInfo and masterData terms"
+        },
+        {
+          "source_id": "new-gs1-epcis-artefacts",
+          "component": "artefact list (context, OpenAPI, query schema, WSDL, JSON Schema, SHACL, XSDs, SBDH XSDs, ontologies)"
+        },
+        {
+          "source_id": "new-untp-0-7-0-dte",
+          "component": "EPCIS profile, event mapping, TEV-01 to TEV-13"
+        },
+        {
+          "source_id": "new-iso-iec-19988-2024",
+          "component": "bibliographic only"
+        }
+      ],
+      "variants": [
+        "JSON with bare CBV strings",
+        "JSON-LD with @context and URI expansion",
+        "XML (XSD, closed shape)",
+        "UNTP-native DTE vs EPCIS-profile DTE",
+        "CBV-Compliant vs CBV-Compatible",
+        "user extensions in other namespaces (GS1-Extensions header or @context)"
+      ],
+      "observable_black_box": "Captured and returned documents can be validated offline against the pinned JSON Schema and SHACL; @context entries can be compared against an allowlist; enumerated CBV values can be checked; UNTP DTE credentials can be checked for an EPCIS event subject and for links to input and output product identifiers.",
+      "law_delta": "The law requires no event data model. ESPR Art. 10(1)(d) asks for open, interoperable, machine-readable formats. EPCIS adds a detailed event model, a vocabulary standard and two validation artefacts; Annex III of ESPR (not re-read in this session) lists passport data, not events."
+    },
+    "L06_storage_archiving_persistence": {
+      "applies": "partial",
+      "mechanism": "EPCIS defines a repository that stores captured events and returns them with recordTime, but sets no retention period, backup or availability rule. Events are append-only; historical correction is by error declaration, so the repository is effectively a log. Implementations differ: OpenEPCIS CE uses Kafka pipelines and OpenSearch; Oliot uses MongoDB; FasTnT uses EF Core on SQL Server, PostgreSQL or SQLite; the OpenEPCIS S3 module exists (not read). The capture job error log can be an external file (errorFile URL). A passport that links to events depends on the repository staying reachable for as long as the passport must be available.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "recordTime processing (14.3, 14.5); capture jobs (12.6.2)"
+        },
+        {
+          "source_id": "new-openepcis-repository-ce",
+          "component": "README architecture (Quarkus, Kafka, OpenSearch)"
+        },
+        {
+          "source_id": "new-oliot-epcis",
+          "component": "README specification (MongoDB 6.x)"
+        },
+        {
+          "source_id": "new-fastnt-epcis",
+          "component": "README database providers"
+        }
+      ],
+      "variants": [
+        "single-company repository",
+        "third-party hosted repository (service provider)",
+        "off-chain repository with on-chain hashes (family m06)"
+      ],
+      "observable_black_box": "Whether an event captured earlier is still returned with the same body and recordTime; whether the eventID or a recomputed Event Hash ID is stable over time; reachability of the gs1:epcis link target.",
+      "law_delta": "ESPR requires a back-up copy through a service provider and availability for the period set by the delegated act (Art. 10(4), Art. 9(2)(i), per m01). EPCIS has no such rule, so event data that a passport depends on is not covered by the passport back-up unless copied into it."
+    },
+    "L07_access_rights_security_confidentiality": {
+      "applies": "yes",
+      "mechanism": "REST: clients SHALL authenticate on every call; servers SHOULD use the Authorization header; failed authentication gives 401, authenticated but not authorised gives 403 (SecurityException). The gs1/EPCIS master openapi.yaml declares no securitySchemes, so the authentication method is not machine-discoverable from it (components of the ref.gs1.org openapi.json were not read). Authorisation rules are out of scope of the standard; a query service MAY refuse, return fewer events, coarsen locations (aggregate location instead of primitive), hide fields, or restrict results to data captured by the same client identity; hidden data must still leave well-formed events, and an event that would become ambiguous or malformed (for example an AggregationEvent ADD without parentID) should be withheld. Capture authorisation MAY use the authenticated identity. Subscriptions: the server should only push events the client may receive. Webhook callbacks are signed with a client-supplied secret. FasTnT stores a hash of the Authorization value with captured data and by default restricts queries to events captured with the same header (partitioning). UNTP TEV-12 asks for access control on commercially sensitive events and points to its Decentralised Access Control pattern. Implications for DPPs: a public passport tier cannot simply link to an EPCIS endpoint because every EPCIS call needs authentication; public traceability needs either a separate public view or derived data in the passport.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "sections 8.1.1, 8.2.1, 8.2.2 (authorisation and redaction), 12.4, 12.8.3, 14.8"
+        },
+        {
+          "source_id": "new-gs1-epcis-repo",
+          "component": "openapi.yaml: no components.securitySchemes; 401UnauthorizedRequest, 403ClientUnauthorized"
+        },
+        {
+          "source_id": "new-fastnt-epcis",
+          "component": "README HTTP Endpoints (Basic auth, partition by authorization hash)"
+        },
+        {
+          "source_id": "new-untp-0-7-0-dte",
+          "component": "TEV-12 and confidentiality guidance"
+        },
+        {
+          "source_id": "new-gs1-cbv-2-0-pdf",
+          "component": "8.9.2 note on redaction and the Event Hash ID"
+        }
+      ],
+      "variants": [
+        "API key in Authorization",
+        "HTTP Basic",
+        "OAuth 2.0 bearer (vendor)",
+        "partitioning by capturing identity",
+        "field-level redaction",
+        "location coarsening",
+        "UNTP decentralised access control"
+      ],
+      "observable_black_box": "401 without credentials and 403 for an authenticated but unauthorised role, both as problem+json with epcisException:SecurityException; per-role differences in returned events and fields; whether redacted events still validate; whether a webhook to an arbitrary 'dest' is accepted.",
+      "law_delta": "ESPR Art. 9(2)(f) and Art. 11 (per m01) require differentiated access by actor and free access for some actors; EPCIS provides mechanisms but no role model, and its mandatory authentication conflicts with an unauthenticated public tier unless a separate endpoint is offered."
+    },
+    "L08_authentication_reliability_integrity": {
+      "applies": "partial",
+      "mechanism": "EPCIS has no built-in event signature. CBV 2.0 defines the EPCIS Event Hash ID: a canonical pre-hash string built from the event in a fixed property order, values as key=value without separators, trimmed whitespace, numbers without trailing zeros, timestamps in UTC with 'Z' and millisecond precision, lists and child elements sorted by case-sensitive code-point order, type-prefixed values for typed fields, CBV URNs and bare JSON values expanded to https://ref.gs1.org/cbv/... Web URIs, EPC URNs converted to constrained canonical Digital Link URIs on id.gs1.org, ILMD and user extensions written as {namespace}localName=value and sorted; the digest is embedded as ni:///{alg};{value}?ver=CBV2.0 (RFC 6920). The same event in XML or JSON must give the same hash. CBV states limits: error declarations do not get their own hash (they reuse the original eventID); a redacted event does not reproduce the original hash; the hash alone does not prove authorship and must be combined with a signature against man-in-the-middle tampering. Push integrity: GS1-Signature header on webhook calls, algorithm implementation-specific. External patterns: hashes anchored on a ledger (Hyperledger Fabric, IOTA) and events wrapped as W3C verifiable credentials (UNTP DTE; OpenDPP requires a DataIntegrityProof with ecdsa-jcs-2019 on its own event ingest).",
+      "specs": [
+        {
+          "source_id": "new-gs1-cbv-2-0-pdf",
+          "component": "8.9.2 EPCIS Event Hash ID (rules 1-23, limitations)"
+        },
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "Table 12-2 GS1-Signature; 12.8.3 secure the subscription"
+        },
+        {
+          "source_id": "new-epcis-event-hash-generator",
+          "component": "reference implementation, CBV2.0 default, draft CBV2.1, sha256/sha3-256/sha384/sha512"
+        },
+        {
+          "source_id": "new-openepcis-event-hash-generator",
+          "component": "Java implementation, XML and JSON parity"
+        },
+        {
+          "source_id": "new-untp-0-7-0-dte",
+          "component": "DTE as verifiable credential"
+        },
+        {
+          "source_id": "new-opendpp-interop",
+          "component": "CONFORMANCE.md rows on EPCIS I/O and Data Integrity ingest gate"
+        }
+      ],
+      "variants": [
+        "no integrity (plain events)",
+        "Event Hash ID as eventID",
+        "hash anchored on a ledger",
+        "event signed as a VC (JOSE or Data Integrity)",
+        "HMAC or JWS on webhook pushes"
+      ],
+      "observable_black_box": "Recompute the Event Hash ID of each returned event and compare with eventID when it uses the ni: form; compare hashes of the XML and JSON forms of the same event; check GS1-Signature on webhook calls against the shared secret; verify a DTE credential proof.",
+      "law_delta": "ESPR Art. 11 (per m01) asks for security and fraud avoidance without naming a mechanism. EPCIS gives only a fingerprint method; authenticity needs an added signature layer."
+    },
+    "L09_registry_and_customs": {
+      "applies": "no",
+      "mechanism": "EPCIS has no link to the EU DPP registry or to customs systems. The EPCglobal discovery services that once aimed to locate repositories are not part of EPCIS 2.0; discovery of a repository for a product now runs through the Digital Link resolver (gs1:epcis link).",
+      "specs": [
+        {
+          "source_id": "new-gs1-webvoc-github",
+          "component": "gs1:epcis link type"
+        }
+      ],
+      "variants": [],
+      "observable_black_box": "None.",
+      "law_delta": "The registry (ESPR Art. 13, per m01) stores identifiers and links, not events; no EPCIS-specific duty."
+    },
+    "L10_lifecycle_versioning_updates": {
+      "applies": "yes",
+      "mechanism": "Product lifecycle is expressed as a sequence of events: commissioning, packing (AggregationEvent ADD), shipping and receiving (ObjectEvent OBSERVE), transformation (TransformationEvent), repair, replacing, installing and removing (CBV bizSteps), decommissioning and destroying, with disposition and persistentDisposition (set/unset) carrying state such as active, in_transit, recalled, needs_replacement, conformant, non_conformant. Corrections: errorDeclaration with declarationTime, optional reason and correctiveEventIDs; queries can filter with EXISTS_errorDeclaration and EQ_correctiveEventID. Specification versioning: GS1-EPCIS-Version and GS1-CBV-Version headers with min/max ranges; schemaVersion in documents; ni: URIs carry ?ver=CBV2.0; the 2.0 REST binding is semantically backward compatible with 1.2 through adapters. Handover between operators: each operator runs or rents its own repository; ownership and possession are expressed by source and destination types (owning_party, possessing_party) using PGLN.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "7.4.1.2 error declaration; 12.3 version headers; 12.9 backward compatibility; change log 2.0"
+        },
+        {
+          "source_id": "new-gs1-cbv-2-0-pdf",
+          "component": "change log 2.0 (new dispositions, persistent disposition, PGLN preference)"
+        }
+      ],
+      "variants": [
+        "EPCIS 1.2 SOAP clients through adapters",
+        "EPCIS 2.0 REST",
+        "draft 2.1 artefacts"
+      ],
+      "observable_black_box": "Ordered event history for an identifier; presence of correction events; version headers in responses; whether the server refuses an unsupported GS1-EPCIS-Version.",
+      "law_delta": "ESPR rules on updating the passport and keeping versions (per m01) concern passport content; EPCIS histories are a separate, append-only record whose relation to passport versions is not defined by law or by GS1."
+    },
+    "L11_roles_and_governance": {
+      "applies": "yes",
+      "mechanism": "GS1 develops EPCIS and CBV in its Global Standards Management Process; the standards carry the GS1 IP Policy disclaimer (royalty-free or RAND licences to Necessary Claims for GS1 members; no warranty). The work group included Auto-ID Labs (KAIST, Fudan), solution providers and users. ISO/IEC 19987:2024 and ISO/IEC 19988:2024 exist as ISO/IEC editions of EPCIS and CBV (bibliographic only; the correspondence to release 2.0 rests on a search excerpt, secondary_only). Roles in a deployment: capturing applications (brand owners, manufacturers, logistics providers), repository operators (in-house or service providers), accessing applications (trading partners, authorities, DPP front-ends), and identity resolvers that advertise gs1:epcis links. UNTP (UN/CEFACT) adds issuers and verifiers of DTE credentials. No accreditation or certification scheme for EPCIS 2.0 implementations was found.",
+      "specs": [
+        {
+          "source_id": "new-gs1-epcis-2-0-pdf",
+          "component": "contributors list, disclaimer, document summary"
+        },
+        {
+          "source_id": "new-gs1-epcis-repo",
+          "component": "LICENSE (GS1 disclaimer), Conformance Requirements drafts"
+        },
+        {
+          "source_id": "new-iso-iec-19987-2024",
+          "component": "bibliographic only"
+        },
+        {
+          "source_id": "new-iso-iec-19988-2024",
+          "component": "bibliographic only"
+        },
+        {
+          "source_id": "new-untp-0-7-0-dte",
+          "component": "DTE issuer roles"
+        }
+      ],
+      "variants": [
+        "self-hosted repository per operator",
+        "shared or third-party repository",
+        "consortium ledger-backed repository"
+      ],
+      "observable_black_box": "Who operates the repository behind a gs1:epcis link (host name, TLS certificate subject); whether different operators' repositories are linked for one product.",
+      "law_delta": "ESPR names economic operators and DPP service providers (per m01) but not repository operators for events; GS1 adds its own governance and IP terms."
+    }
+  },
+  "end_to_end_flows": [
+    {
+      "name": "Passport links to supply-chain events through the resolver",
+      "actors": [
+        "manufacturer (capturing application)",
+        "EPCIS repository",
+        "GS1-conformant resolver",
+        "DPP consumer (authority or recycler)"
+      ],
+      "steps": [
+        "1. The manufacturer captures commissioning, transformation and shipping events by POST /capture with an EPCISDocument in JSON-LD; the repository answers 202 and a captureID.",
+        "2. The manufacturer polls GET /capture/{captureID} until running is false and success is true.",
+        "3. The manufacturer registers in its resolver linkset a gs1:dpp link to the passport and a gs1:epcis link to the repository.",
+        "4. A consumer scans the Digital Link carrier and asks the resolver with linkType=gs1:epcis (or reads the linkset).",
+        "5. The consumer authenticates and calls GET /epcs/{epc}/events (or /events?MATCH_anyEPC=...) and follows Link rel=next pages.",
+        "6. For each TransformationEvent the consumer reads input identifiers and resolves their passports and repositories in turn (recursive trace)."
+      ]
+    },
+    {
+      "name": "Subscription feeding a passport platform",
+      "actors": [
+        "DPP platform",
+        "supplier EPCIS repository"
+      ],
+      "steps": [
+        "1. The platform creates a named query with POST /queries/{queryName} carrying a JSON query (for example MATCH_outputEPC on its GTIN range).",
+        "2. It subscribes with POST /queries/{queryName}/subscriptions giving dest, signatureToken and stream=true or a schedule.",
+        "3. The repository pushes EPCISQueryDocuments to dest with a GS1-Signature header whenever new matching events are captured.",
+        "4. The platform verifies the signature, validates events against the pinned schema, and updates derived passport fields (for example recycled content inputs)."
+      ]
+    },
+    {
+      "name": "UNTP Digital Traceability Event with EPCIS profile",
+      "actors": [
+        "processor (DTE issuer)",
+        "verifier",
+        "identity resolver"
+      ],
+      "steps": [
+        "1. The processor builds an EPCIS TransformationEvent with input and output product identifiers.",
+        "2. It issues a DigitalTraceabilityEvent verifiable credential whose credentialSubject is that EPCIS event, with contexts for VC 2.0 and EPCIS.",
+        "3. The output product's DPP links to the DTE; the resolver can also advertise the DTE for the product identifier, subject to access control.",
+        "4. The verifier checks the credential proof and status, then follows input identifiers to upstream DPPs (TEV-01, TEV-02)."
+      ]
+    },
+    {
+      "name": "Error correction",
+      "actors": [
+        "capturing application",
+        "EPCIS repository",
+        "accessing application"
+      ],
+      "steps": [
+        "1. A shipping event was captured with a wrong destination.",
+        "2. The capturer submits a copy of the original event with the same eventID plus an errorDeclaration (declarationTime, reason, correctiveEventIDs) and a new corrective event.",
+        "3. Accessing applications see both; GET /events/{eventID} may return the original and its declaration; queries can exclude or select declared events."
+      ]
+    }
+  ],
+  "implementations": [
+    {
+      "name": "OpenEPCIS Repository Community Edition",
+      "url": "https://github.com/openepcis/epcis-repository-ce",
+      "kind": "server",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-01-10",
+      "evidence_level": "substantive",
+      "note": "README read: EPCIS 2.0 repository on Quarkus, Kafka and OpenSearch, REST with JSON-LD, extension schemas, Community and Research editions; container images. Candidate loopback SUT for capture and query tests."
+    },
+    {
+      "name": "Oliot EPCIS 2.0",
+      "url": "https://github.com/JaewookByun/epcis",
+      "kind": "server",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-01-15; README states version oliot-epcis-2.2.0 with 2.1.0 as latest release branch",
+      "evidence_level": "substantive",
+      "note": "README read: Java (JDK 20, Vert.x), MongoDB 6.x; a public server is advertised (not contacted); paper in SoftwareX 2023 (DOI 10.1016/j.softx.2023.101477)."
+    },
+    {
+      "name": "FasTnT EPCIS (louisaxel-ambroise/epcis, formerly FasTnT/epcis-ef-core)",
+      "url": "https://github.com/louisaxel-ambroise/epcis",
+      "kind": "server",
+      "license": "Apache-2.0 per README; GitHub API reports NOASSERTION",
+      "last_activity": "pushed 2026-10-19",
+      "evidence_level": "substantive",
+      "note": "README read: EPCIS 1.2 and 2.0 on .NET 10 with EF Core; HTTP Basic by default; queries partitioned by a hash of the Authorization value; declared restrictions: only rollback for GS1-Capture-Error-Behaviour, only Never_Translates for GS1-EPC-Format, synchronous capture; serves its own OpenAPI at /v2_0/openapi.json; a public sandbox is advertised (not contacted). The older FasTnT/epcis repository is EPCIS 1.2 only (pushed 2023-02-22) and its README publishes a default credential; useful as a failure-mode example, not to be reused."
+    },
+    {
+      "name": "OpenEPCIS document validation service",
+      "url": "https://github.com/openepcis/openepcis-document-validation-service",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-10-17",
+      "evidence_level": "metadata_only",
+      "note": "Repository description: validates EPCIS 2.0 JSON against the official JSON Schema and EPCIS 1.2/2.0 XML against the XSDs, reporting all errors with location; library, REST API, Quarkus extension. Second validator for differential tests."
+    },
+    {
+      "name": "OpenEPCIS event sentry",
+      "url": "https://github.com/openepcis/openepcis-event-sentry",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-09",
+      "evidence_level": "metadata_only",
+      "note": "Builds EPCIS event profiles from reusable JSON Schema snippets; profile checks beyond the base schema."
+    },
+    {
+      "name": "OpenEPCIS test data generator",
+      "url": "https://github.com/openepcis/epcis-testdata-generator",
+      "kind": "test-suite",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-04",
+      "evidence_level": "metadata_only",
+      "note": "Generates valid EPCIS 2.0/CBV 2.0 events in JSON/JSON-LD or XML with Digital Link or EPC URIs and event hash IDs; an online tool also exists (not used)."
+    },
+    {
+      "name": "OpenEPCIS test resources",
+      "url": "https://github.com/openepcis/openepcis-test-resources",
+      "kind": "test-suite",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-10-16",
+      "evidence_level": "substantive",
+      "note": "README read: valid and invalid EPCIS 1.2 and 2.0 documents in XML and JSON/JSON-LD, organised by version, format and capture/query; XML and JSON pairs share names for round-trip and hash tests. Best fixture source for data.jsonschema and hash checks (licence permits vendoring with notice)."
+    },
+    {
+      "name": "EPCIS Event Hash Generator (reference, Python)",
+      "url": "https://github.com/RalphTro/epcis-event-hash-generator",
+      "kind": "validator",
+      "license": "MIT",
+      "last_activity": "pushed 2026-09-25",
+      "evidence_level": "substantive",
+      "note": "README read (via the openepcis fork, which mirrors it): reference implementation of the CBV Event Hash ID for XML and JSON-LD; CBV2.0 default, draft CBV2.1 selectable; sha256, sha3-256, sha384, sha512; prints the pre-hash string; labelled prototypical demo software for testing other implementations. The openepcis/epcis-event-hash-generator fork reports MIT."
+    },
+    {
+      "name": "OpenEPCIS event hash generator (Java)",
+      "url": "https://github.com/openepcis/openepcis-event-hash-generator",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-07",
+      "evidence_level": "metadata_only",
+      "note": "Description: CBV 2.0 and 2.1 pre-hash rules for XML and JSON/JSON-LD with identical results across formats; library, CLI, REST API. Second oracle for differential hash tests."
+    },
+    {
+      "name": "OpenEPCIS document converter",
+      "url": "https://github.com/openepcis/openepcis-document-converter",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-09",
+      "evidence_level": "metadata_only",
+      "note": "Converts EPCIS 2.0 between XML and JSON/JSON-LD and upgrades 1.2 XML to 2.0; source of paired fixtures."
+    },
+    {
+      "name": "OpenEPCIS GS1 Digital Link toolkit",
+      "url": "https://github.com/openepcis/openepcis-epc-digitallink-translator",
+      "kind": "sdk",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-09-13",
+      "evidence_level": "metadata_only",
+      "note": "EPC URN to Digital Link conversion, needed for the hash canonicalisation rule 16; prior record new-openepcis-dl-translator."
+    },
+    {
+      "name": "OpenEPCIS DPP-ready vocabulary framework",
+      "url": "https://github.com/openepcis/openepcis-dpp-ready",
+      "kind": "ontology",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-10-11",
+      "evidence_level": "metadata_only",
+      "note": "Description names GS1, ESPR, UNTP and CEN/CENELEC JTC 24 harmonisation; JTC 24 content not inspected (rule 5). Preview stage per r01."
+    },
+    {
+      "name": "OpenDPP interop kit, EPCIS validator door",
+      "url": "https://github.com/OpenDPP/opendpp-interop",
+      "kind": "validator",
+      "license": "Apache-2.0",
+      "last_activity": "pushed 2026-10-14",
+      "evidence_level": "substantive",
+      "note": "CONFORMANCE.md read: captures native EPCISDocument at POST /api/v1/events/epcis and emits lineage as EPCIS JSON-LD, validated against a vendored copy of the GS1 2.0.1 JSON Schema ($id .../2.0.1/epcis-json-schema.json); states that urn:epcglobal:cbv URNs are rejected by the schema; query interface, XML and TransactionEvent persistence not implemented. Vendor kit, not an authority. Its schema differs from the gs1/EPCIS master copy in seven definitions (eventType added; @context $ref spelling)."
+    },
+    {
+      "name": "GS1 EPCIS development repository",
+      "url": "https://github.com/gs1/EPCIS",
+      "kind": "data-model",
+      "license": "not stated (NOASSERTION; GS1 IP disclaimer)",
+      "last_activity": "pushed 2026-09-04 (public_review_2_1 context); previous commit 2023-05-16",
+      "evidence_level": "substantive",
+      "note": "openapi.yaml/json, query-schema.json, JSON Schema with test samples and validate scripts, JSON-LD contexts, ontology, XSD, WSDL, draft Conformance Requirements (Mandatory matrix with M1, M121 and M122 filled and M123-M127 empty; TCR-53 SensorElement, TCR-54 AssociationEvent test case requirements)."
+    }
+  ],
+  "literature": [
+    {
+      "doi": "10.1109/rfid64926.2025.11015538",
+      "title": "Building Digital Product Passports: EPCIS 2.0 Meets Knowledge Graphs",
+      "year": 2025,
+      "venue": "2025 IEEE International Conference on RFID (RFID)",
+      "found_via": "mcp__consensus__search and mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search (also l01 papers[39])",
+      "relevance": "DPP prototype that links EPCIS 2.0 events by GS1 keys into a knowledge graph so one query returns a product history across transformations and aggregations."
+    },
+    {
+      "doi": "10.3390/logistics10080177",
+      "title": "A DLT- and ZKP-Enabled Framework for Privacy-Preserving Digital Product Passports in Maritime Container Logistics",
+      "year": 2026,
+      "venue": "Logistics",
+      "found_via": "mcp__consensus__search (also l01 papers[40])",
+      "relevance": "Ocean DPP prototype with EPCIS 2.0, oneM2M, IOTA anchoring and Groth16 proofs; reports its own EPCIS compliance figure and failure injection on a single host."
+    },
+    {
+      "doi": "10.1016/j.softx.2023.101477",
+      "title": "Oliot EPCIS: An open-source EPCIS 2.0 system for supply chain transparency",
+      "year": 2023,
+      "venue": "SoftwareX",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org",
+      "relevance": "Describes an open-source EPCIS 2.0 server that aims at full data-format and interface compliance and compares it with other open sources."
+    },
+    {
+      "doi": "10.1109/dapps65174.2025.00015",
+      "title": "Hybrid EPCIS: Integrating GS1/ISO Standards with On-Chain and Off-Chain Distributed Ledger for Supply Chain Traceability",
+      "year": 2025,
+      "venue": "2025 IEEE International Conference on Decentralized Applications and Infrastructures (DAPPS)",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org",
+      "relevance": "Fabric-based EPCIS with full on-chain and hybrid (off-chain repository plus on-chain hashes) modes, evaluated with Hyperledger Caliper."
+    },
+    {
+      "doi": "10.1016/j.procs.2026.03.042",
+      "title": "Supply chain traceability by recording EPCIS data on Hyperledger Fabric",
+      "year": 2026,
+      "venue": "Procedia Computer Science",
+      "found_via": "mcp__consensus__search; metadata checked via api.crossref.org",
+      "relevance": "Dual-channel Fabric design moving EPCIS events from private to public channels by policy; illustrates tiered access to events."
+    },
+    {
+      "doi": "10.1109/blockchain62396.2024.00018",
+      "title": "Decentralized Ledger Technology for EPCIS 2.0: Utilizing NFTs for Enhanced Product Traceability",
+      "year": 2024,
+      "venue": "2024 IEEE International Conference on Blockchain (Blockchain)",
+      "found_via": "mcp__consensus__search and mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+      "relevance": "Maps EPCIS 2.0 events to NFT operations on Fabric with hash mapping and anti-counterfeiting checks."
+    },
+    {
+      "doi": "10.3390/s22228680",
+      "title": "A Blockchain-Based Product Traceability System with Off-Chain EPCIS and IoT Device Authentication",
+      "year": 2022,
+      "venue": "Sensors (Basel, Switzerland)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Off-chain EPCIS with CBV compliance and on-chain device authentication; example of the hybrid pattern."
+    },
+    {
+      "doi": "10.1109/access.2021.3069194",
+      "title": "Towards Interoperability of Entity-Based and Event-Based IoT Platforms: The Case of NGSI and EPCIS Standards",
+      "year": 2021,
+      "venue": "IEEE Access",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Mediation gateway between FIWARE NGSI and EPCIS, applied to a meat supply chain; relevant to dataspace bridging (m04)."
+    },
+    {
+      "doi": "10.48550/arxiv.2204.00317",
+      "title": "A solution approach for the anonymous sharing of sensitive supply chain traceability data",
+      "year": 2022,
+      "venue": "ArXiv",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Prototype protocol on EPCIS data that verifies authenticity and access rights with sanitised data; addresses the confidentiality conflict."
+    },
+    {
+      "doi": "10.3390/logistics10070152",
+      "title": "Who Tracks What, and How Deep? Granular Traceability in Multi-Firm Supply Chains via Blockchain-Based Tokenization",
+      "year": 2026,
+      "venue": "Logistics",
+      "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+      "relevance": "Proof of concept with EPCIS event modelling between ERP middleware and a token layer under RBAC."
+    },
+    {
+      "doi": "10.1007/978-3-540-78731-0_3",
+      "title": "Fine-Grained Access Control for EPC Information Services",
+      "year": 2008,
+      "venue": "not stated in tool output",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Early policy language and query-rewriting enforcement for EPCIS access control; background for L07 (outside 2021-2026 window)."
+    },
+    {
+      "doi": "10.1109/iot.2010.5678447",
+      "title": "Giving RFID a REST: Building a Web-Enabled EPCIS",
+      "year": 2010,
+      "venue": "2010 Internet of Things (IOT)",
+      "found_via": "mcp__consensus__search",
+      "relevance": "Precursor of the EPCIS 2.0 REST binding design; background only."
+    }
+  ],
+  "conformance_implications": [
+    {
+      "layer": "L05",
+      "test_objective": "A captured or returned EPCIS JSON document validates against the pinned GS1 EPCIS JSON Schema.",
+      "observable": "EPCISDocument or EPCISQueryDocument body (sample artifact or response)",
+      "oracle": "EPCIS 2.0 section 10.3 and 14.7(1): JSON SHALL validate against epcis-json-schema.json; pin the ref.gs1.org 2.0.1 copy by digest",
+      "existing_check": "data.jsonschema",
+      "existing_capability": "data.jsonschema",
+      "new_capability_needed": "none, provided data.jsonschema asserts format 'uri' and 'date-time' and resolves the pinned draft-07 schema offline",
+      "fixtures_needed": "OpenEPCIS test resources valid/invalid JSON documents; gs1/EPCIS JSON-Schema/test samples; own negative cases (missing eventTimeZoneOffset, TransactionEvent with empty bizTransactionList, urn:epcglobal:cbv value)",
+      "reusable_suite": "openepcis-test-resources, https://github.com/openepcis/openepcis-test-resources",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "A JSON-LD EPCIS document conforms to the GS1 SHACL shapes.",
+      "observable": "JSON-LD document expanded to RDF",
+      "oracle": "EPCIS 2.0 section 14.7(2): JSON-LD SHALL validate against epcis-shacl.ttl",
+      "existing_check": "none",
+      "existing_capability": "data.shacl (interface_only)",
+      "new_capability_needed": "data.shacl implementation with pinned epcis-shacl.ttl and offline context loading",
+      "fixtures_needed": "pinned epcis-shacl.ttl and epcis-context.jsonld; JSON-LD samples from test resources",
+      "reusable_suite": "none found for SHACL; GS1 artefact https://ref.gs1.org/standards/epcis/epcis-shacl.ttl",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "Every @context entry of an EPCIS document is an allowed EPCIS context URL.",
+      "observable": "@context array of the document",
+      "oracle": "EPCIS 2.0 section 10.3 names the context resource; allowlist must hold the exact URLs accepted (versioned 2.0.0 path, unversioned path) and refuse look-alikes",
+      "existing_check": "data.context",
+      "existing_capability": "data.context",
+      "new_capability_needed": "none; allowlist entries for EPCIS contexts",
+      "fixtures_needed": "documents with the 2.0.0 context URL, the unversioned URL, the namespace URL https://ref.gs1.org/epcis/ (used by UNTP examples) and a foreign context",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L08",
+      "test_objective": "An eventID in ni: form equals the EPCIS Event Hash ID recomputed from the event; the same event in XML and JSON gives the same hash.",
+      "observable": "event body and its eventID",
+      "oracle": "CBV 2.0 section 8.9.2 rules 1-23; differential oracle: RalphTro reference generator and OpenEPCIS Java generator",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "epcis.event_hash (deterministic canonicaliser plus hashlib; offline)",
+      "fixtures_needed": "reference documents and expected hashes from the reference generator's tests/examples; XML/JSON pairs from openepcis-test-resources",
+      "reusable_suite": "epcis-event-hash-generator examples, https://github.com/RalphTro/epcis-event-hash-generator",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L01",
+      "test_objective": "eventID values use one of the CBV-Compliant forms (UUID v1/v4 URN or ni: Event Hash ID with ?ver=CBV<major>.<minor>).",
+      "observable": "eventID strings",
+      "oracle": "CBV 2.0 sections 8.9, 8.9.1, 8.9.2 rules 21-23; EPCIS 2.0 section 14.8 (eventIDs SHALL use CBV formats)",
+      "existing_check": "data.rules (pattern rule)",
+      "existing_capability": "data.rules",
+      "new_capability_needed": "none if data.rules supports regex; otherwise epcis.event_id",
+      "fixtures_needed": "valid UUID v1, v4; invalid UUID v3; ni with unknown algorithm name; ni without ver",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Each REST endpoint negotiates JSON and JSON-LD, returns 406 for an unsupported Accept, and answers OPTIONS with Allow and default GS1-* headers.",
+      "observable": "HTTP status, Content-Type, Allow and GS1-* response headers",
+      "oracle": "EPCIS 2.0 sections 12.3 and 14.8; OpenAPI 204DefaultDiscoveryResponse",
+      "existing_check": "api.contract",
+      "existing_capability": "api.contract",
+      "new_capability_needed": "api.contract extension for OPTIONS and header assertions (epcis.rest_probe)",
+      "fixtures_needed": "pinned GS1 openapi.json 2.0.1 with external $ref targets vendored; loopback EPCIS server (OpenEPCIS CE or FasTnT) as reference SUT",
+      "reusable_suite": "none found (gs1/EPCIS Conformance Requirements is a draft)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L04",
+      "test_objective": "Capture with rollback stores all or none: a document with one invalid event leaves no event stored and the capture job ends with running false, success false.",
+      "observable": "202 and captureID; GET /capture/{captureID}; later query results",
+      "oracle": "EPCIS 2.0 section 12.6.1, 12.6.2 Table 12-3, 14.8",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "epcis.capture_probe (stateful capture, poll and query sequence with bounded waits)",
+      "fixtures_needed": "capture documents: all valid; one invalid among valid; over GS1-EPCIS-Capture-Limit",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L04",
+      "test_objective": "Pagination: default page size 30, Link rel=next chain ends, no event split or repeated across pages.",
+      "observable": "Link headers and event counts per page",
+      "oracle": "EPCIS 2.0 section 12.5 and 14.8",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "epcis.rest_probe (pagination walk with a page limit)",
+      "fixtures_needed": "seeded repository with 75 events for one EPC",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L04",
+      "test_objective": "Query parameters given twice (path and query string) give QueryParameterException 400; URL over 2000 characters gives 414.",
+      "observable": "status and problem+json type",
+      "oracle": "EPCIS 2.0 sections 12.8.4, 12.8.5, 12.10 Table 12-9",
+      "existing_check": "none",
+      "existing_capability": "api.fuzz (interface_only)",
+      "new_capability_needed": "epcis.rest_probe negative cases",
+      "fixtures_needed": "request templates",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L07",
+      "test_objective": "Calls without credentials give 401 and authenticated but unauthorised calls give 403, as problem+json with epcisException:SecurityException; a role sees only the events and fields its policy grants, and redacted events stay schema-valid.",
+      "observable": "status codes, problem bodies, event sets per role",
+      "oracle": "EPCIS 2.0 sections 8.2.2, 12.4, 12.10, 14.8; declared access policy in the IXIT",
+      "existing_check": "access.restricted_fields",
+      "existing_capability": "access.policy",
+      "new_capability_needed": "event-level policy support (withheld events, coarsened locations) in access.restricted_fields",
+      "fixtures_needed": "two role tokens (TEST-ONLY-...), seeded events from two capturing clients, declared policy",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "Webhook subscription pushes carry a GS1-Signature that verifies with the client signatureToken under the declared algorithm, and the server refuses a dest that is not allowed.",
+      "observable": "callback request received by a loopback listener",
+      "oracle": "EPCIS 2.0 section 12.8.3 Table 12-8 for the signature; algorithm and dest allowlist from the IXIT (the standard leaves both open)",
+      "existing_check": "none",
+      "existing_capability": "none",
+      "new_capability_needed": "epcis.subscription_probe (loopback callback listener, HMAC/JWS verification)",
+      "fixtures_needed": "loopback listener, test signatureToken, scheduled and streaming subscription bodies",
+      "reusable_suite": "none",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L03",
+      "test_objective": "The resolver linkset for a passport identifier has a gs1:epcis (or gs1:traceability) link whose target answers as an EPCIS endpoint.",
+      "observable": "linkset entries and the response of OPTIONS / or GET on the target",
+      "oracle": "GS1 Web Vocabulary definitions of gs1:epcis and gs1:traceability; target behaviour per EPCIS 2.0 section 12.3",
+      "existing_check": "identifier.resolve (accept application/linkset+json)",
+      "existing_capability": "identifier.resolve",
+      "new_capability_needed": "link-relation assertion on the linkset (identifier.links) plus epcis.rest_probe on the target",
+      "fixtures_needed": "loopback resolver with linksets carrying gs1:epcis, gs1:traceability, and a wrong relation",
+      "reusable_suite": "GS1 resolver test suite (family m02) for the resolver part",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "A UNTP DTE with EPCIS profile has an EPCIS event as credentialSubject that validates against the EPCIS schema and links input and output products to resolvable identifiers.",
+      "observable": "DTE credential",
+      "oracle": "UNTP DTE 0.7.0 EPCIS profile and TEV-01, TEV-02, TEV-07; EPCIS JSON Schema for the subject",
+      "existing_check": "data.jsonschema (subject) and integrity.jws (if JOSE-secured)",
+      "existing_capability": "data.jsonschema; evidence.untp_dcc (interface_only, DCC not DTE)",
+      "new_capability_needed": "evidence.untp_dte",
+      "fixtures_needed": "DTE samples (UNTP examples once licence is resolved, else own)",
+      "reusable_suite": "UNTP test suite (family m05), licence unresolved",
+      "network_needed": "sample-artifact"
+    },
+    {
+      "layer": "L10",
+      "test_objective": "Error declarations keep the original eventID and are returned by /events/{eventID} together with the original; correctiveEventIDs resolve to stored events.",
+      "observable": "events returned before and after a correction",
+      "oracle": "EPCIS 2.0 section 7.4.1.2 and Table 12-6 (Event ID row); CBV 8.9",
+      "existing_check": "persistence.versions (partial)",
+      "existing_capability": "persistence.versions",
+      "new_capability_needed": "epcis.capture_probe correction scenario",
+      "fixtures_needed": "original event, declaration copy, corrective event",
+      "reusable_suite": "openepcis-test-resources (documents containing errorDeclaration)",
+      "network_needed": "loopback-only"
+    },
+    {
+      "layer": "L05",
+      "test_objective": "CBV values are standard values (CBV-Compliant) or URIs outside the CBV namespaces (CBV-Compatible) as the ICS declares.",
+      "observable": "bizStep, disposition, bizTransaction type, source/destination type values",
+      "oracle": "CBV 2.0 conformance levels; enums in the pinned JSON Schema",
+      "existing_check": "data.rules",
+      "existing_capability": "data.rules",
+      "new_capability_needed": "none; rule pack for CBV value lists",
+      "fixtures_needed": "pinned CBV 2.0 value lists extracted from the schema enums",
+      "reusable_suite": "none",
+      "network_needed": "sample-artifact"
+    }
+  ],
+  "failure_modes": [
+    {
+      "layer": "L05",
+      "fault": "Server emits JSON with legacy urn:epcglobal:cbv:bizstep:shipping URNs instead of bare CBV strings, which the official schema rejects.",
+      "detectable_by": "data.jsonschema on returned documents (vocab-other-uri negative lookahead)."
+    },
+    {
+      "layer": "L05",
+      "fault": "Document embeds a context URL that is not the GS1 context document (for example the ontology namespace https://ref.gs1.org/epcis/ or a vendor copy), so JSON-LD expansion fails or changes meaning.",
+      "detectable_by": "data.context allowlist; JSON-LD expansion with only pinned contexts loaded."
+    },
+    {
+      "layer": "L05",
+      "fault": "Implementation validates with a JSON Schema library that does not assert format 'uri', so a misspelled standard key (bizstep) is accepted as if it were an extension URI.",
+      "detectable_by": "data.jsonschema with format assertion enabled; SHACL validation after expansion."
+    },
+    {
+      "layer": "L08",
+      "fault": "eventID in ni: form computed from the JSON text rather than the canonical pre-hash string (wrong order, timestamps not normalised to UTC milliseconds, URNs not converted), so it differs from the XML form and from other implementations.",
+      "detectable_by": "epcis.event_hash recomputation compared with two reference generators."
+    },
+    {
+      "layer": "L04",
+      "fault": "Capture with rollback stores the valid events of a partly invalid document (proceed behaviour by default).",
+      "detectable_by": "epcis.capture_probe: query after a failed capture job must return none of its events."
+    },
+    {
+      "layer": "L04",
+      "fault": "/capture answers 201 or 200 synchronously without a captureID, or /capture/{captureID} is missing.",
+      "detectable_by": "api.contract against pinned OpenAPI."
+    },
+    {
+      "layer": "L03",
+      "fault": "Server ignores Accept and always returns application/json, or returns 200 with HTML for an unsupported type instead of 406.",
+      "detectable_by": "epcis.rest_probe content negotiation cases."
+    },
+    {
+      "layer": "L03",
+      "fault": "OPTIONS not implemented or returns no GS1-EPCIS-Version/GS1-CBV-Version defaults.",
+      "detectable_by": "epcis.rest_probe OPTIONS assertions."
+    },
+    {
+      "layer": "L04",
+      "fault": "Pagination splits an event or repeats events across pages, or Link header is unquoted / lacks rel=next semantics.",
+      "detectable_by": "Pagination walk comparing event ids across pages."
+    },
+    {
+      "layer": "L07",
+      "fault": "Query endpoint answers without authentication or returns 200 with an empty list instead of 401/403, hiding an authorisation failure.",
+      "detectable_by": "access probe without credentials and with a wrong role; status and problem type check."
+    },
+    {
+      "layer": "L07",
+      "fault": "Redaction removes a required field (parentID of an AggregationEvent ADD) leaving a malformed event instead of withholding it.",
+      "detectable_by": "data.jsonschema on role-specific responses."
+    },
+    {
+      "layer": "L07",
+      "fault": "Partitioning by capturing identity leaks events captured by another client through /epcs/{epc}/events or a named query subscription.",
+      "detectable_by": "Two-client seeded repository; access.restricted_fields with event-level expectations."
+    },
+    {
+      "layer": "L07",
+      "fault": "Deployment keeps a default credential published in the project README.",
+      "detectable_by": "Not testable black-box without trying credentials; record as a manual.review item (the engine must not try guessed passwords against a SUT)."
+    },
+    {
+      "layer": "L03",
+      "fault": "Webhook subscription accepts any dest URL, letting a client make the server call internal addresses.",
+      "detectable_by": "epcis.subscription_probe with a loopback dest outside the allowlist declared in the IXIT; the standard itself does not restrict dest, so the expectation (for example 400 SubscriptionControlsException) comes from the declared policy."
+    },
+    {
+      "layer": "L03",
+      "fault": "Webhook pushes carry no GS1-Signature, or a signature that does not depend on the payload.",
+      "detectable_by": "Loopback listener verifies signature over two different payloads."
+    },
+    {
+      "layer": "L03",
+      "fault": "Resolver advertises gs1:traceability for an EPCIS repository (or a non-vocabulary relation), so clients that ask for linkType=gs1:epcis find nothing.",
+      "detectable_by": "Linkset relation assertion."
+    },
+    {
+      "layer": "L01",
+      "fault": "Server translates EPCs to Digital Link although the client sent GS1-EPC-Format: Never_Translates, or ignores Always_GS1_Digital_Link default.",
+      "detectable_by": "Capture an event with EPC URNs, query with each GS1-EPC-Format value, compare identifiers."
+    },
+    {
+      "layer": "L10",
+      "fault": "Error declaration stored as a new event with a new eventID, breaking the link to the original.",
+      "detectable_by": "Correction scenario: /events/{eventID} must return the original and the declaration."
+    },
+    {
+      "layer": "L06",
+      "fault": "Repository behind the passport's gs1:epcis link is retired while the passport must stay available, so traceability links break.",
+      "detectable_by": "persistence.scheduled (interface_only) re-checking the link target over time."
+    }
+  ],
+  "sources": [
+    {
+      "id": "new-gs1-epcis-2-0-pdf",
+      "title": "EPCIS Standard",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/epcis/",
+      "edition_or_version": "Release 2.0 (cover); same PDF served at https://ref.gs1.org/standards/epcis/2.0.1/",
+      "publication_date": "Jun 2022 (cover)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright GS1 AISBL; GS1 IP Policy disclaimer; own words only",
+      "what_it_shows": "Event types and dimensions, JSON/JSON-LD validation rules, REST endpoints, headers, pagination, capture jobs, named queries, subscriptions, exception-to-status mapping, authentication and redaction, conformance sections 14.1-14.8."
+    },
+    {
+      "id": "new-gs1-epcis-archive",
+      "title": "EPCIS standard archive (release list)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/epcis/archive",
+      "edition_or_version": "lists 1.0.0 to 2.0.1",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 web page",
+      "what_it_shows": "2.0.1 published 1 July 2025 is the latest; 2.0.0 published 22 June 2022."
+    },
+    {
+      "id": "new-gs1-epcis-artefacts",
+      "title": "EPCIS artefacts page",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/epcis/artefacts",
+      "edition_or_version": "links EPCIS 2.0.1 and CBV 2.0.0 documents",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 web page",
+      "what_it_shows": "List of 24 artefacts: context, openapi.json, query-schema.json, WSDL, JSON Schema, SHACL, XSDs, SBDH XSDs, ontologies in JSON-LD and Turtle."
+    },
+    {
+      "id": "new-gs1-cbv-2-0-pdf",
+      "title": "Core Business Vocabulary (CBV) Standard",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/cbv/",
+      "edition_or_version": "Release 2.0",
+      "publication_date": "Jun 2022 (cover)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright GS1 AISBL; GS1 IP Policy disclaimer; own words only",
+      "what_it_shows": "2.0 change log, event identifiers, EPCIS Event Hash ID rules and limits, chemical substance identifiers, conformance levels."
+    },
+    {
+      "id": "new-gs1-cbv-archive",
+      "title": "CBV standard archive (release list)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/cbv/archive",
+      "edition_or_version": "lists 1.0.0 to 2.0.0",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 web page",
+      "what_it_shows": "2.0.0 published 22 June 2022 is the latest."
+    },
+    {
+      "id": "new-gs1-epcis-openapi-ref",
+      "title": "EPCIS 2.0 REST Bindings (openapi.json on ref.gs1.org)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/epcis/openapi.json",
+      "edition_or_version": "OpenAPI 3.0.3; info.version 2.0.1",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "info.license name 'Apache2' (not an SPDX identifier)",
+      "what_it_shows": "Published version label 2.0.1; only the first 100 000 of 351 197 characters were read, so components were not inspected at this location."
+    },
+    {
+      "id": "new-gs1-epcis-repo",
+      "title": "gs1/EPCIS GitHub repository",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://github.com/gs1/EPCIS",
+      "edition_or_version": "master; pushed 2026-09-04",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GitHub NOASSERTION; LICENSE file is the GS1 IP Policy disclaimer",
+      "what_it_shows": "openapi.yaml (info.version 2.0.0, 30 paths, no securitySchemes, parameter and header schemas), EPCIS-JSON-Schema.json, epcis-context.jsonld, public_review_2_1/epcis-context.jsonld, draft conformance requirement files."
+    },
+    {
+      "id": "new-gs1-epcis-json-schema-ref",
+      "title": "EPCIS JSON Schema (epcis-json-schema.json on ref.gs1.org)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/epcis/epcis-json-schema.json",
+      "edition_or_version": "$id https://ref.gs1.org/standards/epcis/2.0.1/epcis-json-schema.json; draft-07",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 artefact; terms not stated in file",
+      "what_it_shows": "Top-level required, action enum, vocab-other-uri pattern, certificationInfo, allOf dispatch over seven types plus Extended-Event (read through a WebFetch summary)."
+    },
+    {
+      "id": "new-gs1-epcis-context-ref",
+      "title": "EPCIS JSON-LD context (epcis-context.jsonld on ref.gs1.org)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/standards/epcis/epcis-context.jsonld",
+      "edition_or_version": "unversioned URL; @version 1.1",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "GS1 artefact; terms not stated in file",
+      "what_it_shows": "Object-form context with @protected; gs1 prefix https://ref.gs1.org/voc/; certificationInfo and masterData terms (read through a WebFetch summary)."
+    },
+    {
+      "id": "new-gs1-epcis-cbv-guideline-1-0",
+      "title": "EPCIS and CBV Implementation Guideline",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://ref.gs1.org/guidelines/epcis-cbv/1.0.0/",
+      "edition_or_version": "Release 1.0",
+      "publication_date": "Oct 2015 (cover)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Copyright GS1 AISBL",
+      "what_it_shows": "Cover and table of contents only (section 6.7 on redaction exists); predates EPCIS 2.0."
+    },
+    {
+      "id": "new-gs1-webvoc-github",
+      "title": "GS1 Web Vocabulary development repository (gs1/WebVoc)",
+      "issuing_body": "GS1 AISBL",
+      "url": "https://github.com/gs1/WebVoc",
+      "edition_or_version": "v1.16 gs1Voc.jsonld",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0 (GitHub API for gs1/WebVoc)",
+      "what_it_shows": "gs1:epcis and gs1:traceability: labels, comments, subPropertyOf gs1:linkType, stable status, equivalentProperty to gs1.org/voc and www.gs1.org/voc."
+    },
+    {
+      "id": "new-untp-0-7-0-dte",
+      "title": "UNTP Digital Traceability Events 0.7.0",
+      "issuing_body": "UNECE, UN/CEFACT",
+      "url": "https://untp.unece.org/docs/0.7.0/specification/DigitalTraceabilityEvents",
+      "edition_or_version": "0.7.0",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Unresolved (prior record); own words only",
+      "what_it_shows": "UNTP-native and EPCIS-profile paths, event mapping, TEV-01 to TEV-13 with levels, product linking fields, confidentiality guidance (read through a WebFetch summary)."
+    },
+    {
+      "id": "reg-eu-2024-1781",
+      "title": "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC",
+      "issuing_body": "European Parliament and Council",
+      "url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "edition_or_version": "OJ L, 28.6.2024",
+      "publication_date": "2024-06-28",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "EU legal text; reuse permitted with attribution",
+      "what_it_shows": "Read in this session: recitals 32-45, 73; Art. 2(10), 2(11), 2(31), 2(33); Art. 9(1)-(4); Art. 10(1). Not read in this session: Art. 10(2)-(4), Art. 11, Art. 13, Annex III (taken from m01)."
+    },
+    {
+      "id": "new-iso-iec-19987-2024",
+      "title": "ISO/IEC 19987:2024 (EPC Information services, per search result titles)",
+      "issuing_body": "ISO/IEC JTC 1",
+      "url": "https://www.iso.org/standard/85557.html",
+      "edition_or_version": "2024, edition 3 (search excerpt)",
+      "publication_date": "2024 (search excerpt)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": true,
+      "license_or_reuse_terms": "Paid ISO publication; bibliographic metadata only",
+      "what_it_shows": "Bibliographic existence of the ISO/IEC edition of EPCIS. iso.org returned HTTP 403; content not read."
+    },
+    {
+      "id": "new-iso-iec-19988-2024",
+      "title": "ISO/IEC 19988:2024 (Core business vocabulary, per search result)",
+      "issuing_body": "ISO/IEC JTC 1",
+      "url": "https://ccn-scc.ca/standardsdb/standards/8185963",
+      "edition_or_version": "2024 (search excerpt)",
+      "publication_date": "2024 (search excerpt)",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": true,
+      "license_or_reuse_terms": "Paid ISO publication; bibliographic metadata only",
+      "what_it_shows": "Bibliographic existence of the ISO/IEC edition of CBV; catalogue page not opened."
+    },
+    {
+      "id": "new-wikipedia-epcis",
+      "title": "EPCIS (Wikipedia article, via search summary)",
+      "issuing_body": "Wikipedia contributors",
+      "url": "https://en.wikipedia.org/wiki/EPCIS",
+      "edition_or_version": "not checked",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "secondary_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "CC BY-SA",
+      "what_it_shows": "Search summary claims EPCIS 2.1 is planned for the end of 2026; not confirmed by GS1."
+    },
+    {
+      "id": "new-openepcis-repository-ce",
+      "title": "OpenEPCIS EPCIS 2.0 Repository Community Edition",
+      "issuing_body": "OpenEPCIS project (GitHub organisation openepcis); legal entity not checked",
+      "url": "https://github.com/openepcis/epcis-repository-ce",
+      "edition_or_version": "pushed 2026-01-10; no GitHub release",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Architecture and REST/JSON-LD support (README)."
+    },
+    {
+      "id": "new-oliot-epcis",
+      "title": "Oliot EPCIS 2.0 (JaewookByun/epcis)",
+      "issuing_body": "Auto-ID Labs Korea / Sejong University (maintainer Jaewook Byun)",
+      "url": "https://github.com/JaewookByun/epcis",
+      "edition_or_version": "README version oliot-epcis-2.2.0; pushed 2026-01-15",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Stack and deployments (README)."
+    },
+    {
+      "id": "new-fastnt-epcis",
+      "title": "FasTnT EPCIS repository (louisaxel-ambroise/epcis; older FasTnT/epcis)",
+      "issuing_body": "Louis-Axel Ambroise",
+      "url": "https://github.com/louisaxel-ambroise/epcis",
+      "edition_or_version": "pushed 2026-10-19; older FasTnT/epcis pushed 2023-02-22",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0 per README; GitHub API NOASSERTION",
+      "what_it_shows": "Endpoints, authentication and partitioning, declared restrictions (README)."
+    },
+    {
+      "id": "new-epcis-event-hash-generator",
+      "title": "EPCIS Event Hash Generator (RalphTro/epcis-event-hash-generator; fork openepcis/epcis-event-hash-generator)",
+      "issuing_body": "GitHub user RalphTro and contributors",
+      "url": "https://github.com/RalphTro/epcis-event-hash-generator",
+      "edition_or_version": "pushed 2026-09-25",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "MIT",
+      "what_it_shows": "Reference implementation status, CBV2.0/CBV2.1 options, hash algorithms (README of the openepcis fork)."
+    },
+    {
+      "id": "new-openepcis-event-hash-generator",
+      "title": "openepcis/openepcis-event-hash-generator",
+      "issuing_body": "OpenEPCIS project",
+      "url": "https://github.com/openepcis/openepcis-event-hash-generator",
+      "edition_or_version": "pushed 2026-09-07",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Repository description only."
+    },
+    {
+      "id": "new-openepcis-test-resources",
+      "title": "openepcis/openepcis-test-resources",
+      "issuing_body": "OpenEPCIS project",
+      "url": "https://github.com/openepcis/openepcis-test-resources",
+      "edition_or_version": "pushed 2026-10-16; no GitHub release found via API",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Fixture organisation and valid/invalid coverage (README)."
+    },
+    {
+      "id": "new-openepcis-org-listing",
+      "title": "openepcis organisation repository listing (GitHub API)",
+      "issuing_body": "GitHub",
+      "url": "https://github.com/openepcis",
+      "edition_or_version": "listing 2026-10-19",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "metadata",
+      "what_it_shows": "Repository names, licences and push dates for validation service, event sentry, test data generator, converter, dpp-ready, client SDKs."
+    },
+    {
+      "id": "new-opendpp-interop",
+      "title": "OpenDPP/opendpp-interop",
+      "issuing_body": "Opendpp UAB (per m07)",
+      "url": "https://github.com/OpenDPP/opendpp-interop",
+      "edition_or_version": "pushed 2026-10-14",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "substantive",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "CONFORMANCE.md EPCIS rows; vendored schemas/epcis-2.0.1.schema.json."
+    },
+    {
+      "id": "new-openepcis-dl-translator",
+      "title": "OpenEPCIS GS1 Digital Link Toolkit (openepcis-epc-digitallink-translator)",
+      "issuing_body": "OpenEPCIS project",
+      "url": "https://github.com/openepcis/openepcis-epc-digitallink-translator",
+      "edition_or_version": "pushed 2026-09-13",
+      "publication_date": "",
+      "retrieval_date": "2026-10-19",
+      "verification_level": "metadata_only",
+      "protected_standard": false,
+      "license_or_reuse_terms": "Apache-2.0",
+      "what_it_shows": "Push date and licence from the org listing; content from prior record m02."
+    }
+  ],
+  "open_questions": [
+    "Which URL should a gs1:epcis link target: the repository root (for OPTIONS discovery), /epcs/{epc}/events for the product, or a named query? GS1 Web Vocabulary does not say.",
+    "Which @context URL do fielded EPCIS 2.0 documents embed: the versioned 2.0.0 path cited in the standard, the unversioned ref.gs1.org path, or the namespace https://ref.gs1.org/epcis/ that UNTP examples use? The data.context allowlist depends on the answer.",
+    "Did release 2.0.1 change any normative text, or only artefacts? The served PDF is unchanged and no change log for 2.0.1 was found.",
+    "How should a public DPP tier expose traceability when EPCIS requires authentication on every call: derived passport fields, a public named query, or UNTP DTE credentials?",
+    "What signature algorithm should a SUT declare for GS1-Signature? The standard leaves it open, so the IXIT must carry it.",
+    "Will the draft CBV 2.1 change the Event Hash ID algorithm in a way that makes CBV2.0 hashes differ? The ver= suffix allows both, but a checker must know which to apply.",
+    "Is there any GS1 or third-party conformance programme for EPCIS 2.0 REST servers? None was found; the gs1/EPCIS conformance folder is a draft."
+  ],
+  "anomalies": [
+    "ref.gs1.org archive lists EPCIS 2.0.1 (1 July 2025) as latest, but the PDF served at /standards/epcis/2.0.1/ is byte-identical to the one at /standards/epcis/ and its cover says 'Release 2.0, Ratified, Jun 2022'.",
+    "The EPCIS 2.0 text cites artefact URLs under /standards/epcis/2.0.0/ (openapi.json, epcis-json-schema.json, epcis-shacl.ttl, epcis-context.jsonld), while the ref.gs1.org JSON Schema $id is under /2.0.1/ and the ref.gs1.org openapi.json says info.version 2.0.1; the gs1/EPCIS master openapi.yaml says 2.0.0.",
+    "JSON-LD context drift: ref.gs1.org context maps gs1 to https://ref.gs1.org/voc/; gs1/EPCIS master copy maps gs1 to https://gs1.org/voc/; the public_review_2_1 draft imports the GS1 WebVoc context and drops the local prefix block (and the inline certificationInfo and masterData terms).",
+    "EPCIS section 12.3 and 14.8 name a header 'GS1-CBV-Format'; Table 12-2 and the OpenAPI name it 'GS1-CBV-XML-Format'. Table 12-2 example values (Always_DL, Always_URL) differ from the OpenAPI enums (Always_GS1_Digital_Link, Always_Web_URI).",
+    "The OpenAPI defines GS1-CBV-Min and GS1-CBV-Max headers that Table 12-2 does not list.",
+    "Table 12-6 of EPCIS 2.0 mentions a '403 Payload Too Large' exception for /epcs/{epc}/events; 413 is the payload-too-large status elsewhere in the standard.",
+    "The EPCIS standard requires authentication on every call, but the gs1/EPCIS master openapi.yaml declares no securitySchemes or security requirement (ref.gs1.org openapi.json components not read).",
+    "The OpenAPI uses external $ref targets on gs1.github.io (for example JSON-Schema-Stub.json and example documents), so a pinned copy is incomplete without vendoring those files.",
+    "The JSON Schema vocab-other-uri pattern excludes urn:epcglobal:cbv and http(s)://ns.gs1.org/cbv/ but not https://ref.gs1.org/cbv/, so a full CBV Web URI passes as an 'other' URI rather than being forced to the bare string form (observed in the gs1/EPCIS master copy and reported by WebFetch for the ref.gs1.org copy).",
+    "Licence labels: gs1/EPCIS is NOASSERTION with a GS1 disclaimer, while openapi info.license says 'Apache2'; louisaxel-ambroise/epcis README says Apache 2.0 while the GitHub API says NOASSERTION.",
+    "The OpenDPP vendored 'verbatim' 2.0.1 schema differs from the gs1/EPCIS master schema in seven definitions (eventType added; @context $ref written '#/definitions/@context' instead of '%40context'); byte parity with the ref.gs1.org 2.0.1 file was not checked.",
+    "The UNTP DTE page (via WebFetch summary) gives https://ref.gs1.org/epcis/ as the EPCIS-profile @context, which is the EPCIS ontology namespace, not the context document URL; not cross-checked against UNTP example files because uncefact/spec-untp search returned nothing.",
+    "The EPCIS and CBV Implementation Guideline on ref.gs1.org is Release 1.0 (Oct 2015) and predates EPCIS 2.0; no 2.0 guideline was located.",
+    "ref.gs1.org/voc/epcis and /voc/traceability returned unrendered templates to WebFetch; definitions were read from the gs1/WebVoc v1.16 file instead.",
+    "EUR-Lex ELI /eng returned an empty page; ESPR was read from the Publications Office cellar URL.",
+    "Schema behaviour depends on format assertion: with jsonschema 4.26.0 the gs1/EPCIS master schema accepts an ObjectEvent carrying a misspelled key 'bizstep' unless the 'uri' format checker is enabled (local test run 2026-10-19); a full CBV Web URI https://ref.gs1.org/cbv/BizStep-shipping as bizStep passed, a urn:epcglobal:cbv value failed."
+  ],
+  "truncation": "Literature: 2 Consensus searches (mcp__consensus__search) plus 1 on the second Consensus server and 2 SciSpace searches; the Consensus quota showed 22 searches left, so no further queries were run; only three DOIs were checked on Crossref (Ahn 2023, Tolcha 2025 DAPPS, Neto 2026); others are as returned by Consensus. Older papers (2008, 2010) are kept as background only. EPCIS PDF: sections 6-8 read selectively (8.1.1, 8.2.2, change log, event field table), section 12 and 14 read fully; XML/SOAP/AS2 bindings (sections 9, 11, 13) only named. CBV PDF: change log and section 8.9-8.10 read; vocabulary value definitions not read in full. ref.gs1.org openapi.json: first 100 000 characters only. JSON Schema and context on ref.gs1.org: read through WebFetch summaries; the gs1/EPCIS master copies were read as raw JSON. SHACL file and ontologies not opened. ESPR: read through Art. 10(1); Art. 10(2)-(4), Art. 11, Art. 13 and Annex III taken from m01 without re-reading. Regulation (EU) 2023/1542 not retrieved in this session and therefore not cited. Implementation READMEs read for OpenEPCIS CE, Oliot, FasTnT (both repos), hash generator, test resources and OpenDPP CONFORMANCE.md; other repositories from GitHub metadata only; no source code was read and no server was run. One local check was run: the gs1/EPCIS master JSON Schema with jsonschema 4.26.0 (Draft7Validator) on three hand-made ObjectEvents."
+}

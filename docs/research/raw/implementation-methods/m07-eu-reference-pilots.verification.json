@@ -1,0 +1,429 @@
+{
+ "target": "m07-eu-reference-pilots",
+ "retrieval_date": "2026-10-19",
+ "method_note": "Picked claims by impact on a test oracle: legal articles and dates (2026/1778, ESPR, Batteries), user guide limits, repository licence/push/release metadata, mock-registry endpoints, schemas, status codes and roles, D3.2/D4.1 section content and algorithm order, Zenodo records and checksums, DOIs (Crossref/DataCite), and engine mapping claims. Each was re-fetched from the primary source (gh api, Cellar PDFs, Zenodo, Crossref, repository files). PDFs were downloaded through WebFetch and read locally; MD5 and SHA-256 matched the file's stated values. EN, ISO, IEC and DIN documents were not opened. Entries merge related claims, so 'checked' counts verification units.",
+ "checked": [
+  {
+   "claim_ref": "sources[0] / maturity.versions_at_retrieval[0]",
+   "claim": "Implementing Regulation (EU) 2026/1778, dated 16 July 2026, OJ L of 17.7.2026, registry implementing act, in force 2026-08-06.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Cellar text gives the title, signing date 16 July 2026 and OJ date 17 July 2026. Final article sets entry into force on the twentieth day after publication, which is 2026-08-06.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L08.mechanism; implementations (registry)",
+   "claim": "Art. 9: proof of registration with Commission timestamp, passport-version hash, qualified electronic seal, downloadable for 90 days.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Art. 9 text read: proof includes registration date/time, Commission timestamp, hash of the passport version, qualified seal; available 90 calendar days.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L11.mechanism; maturity.versions_at_retrieval[0].status",
+   "claim": "Art. 7 national administrators by 2027-02-18; helpdesk 08:00-20:00 Brussels time; automated 24-hour support tool by February 2029.",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Art. 7(1) gives 18 February 2027. Helpdesk hours and the February 2029 tool are in Art. 13. The file cites Art. 12, 13, 16, 21 together, which includes Art. 13, so no error; Art. 16 itself concerns security and audits.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L06.mechanism",
+   "claim": "Registration data deleted 10 years after registration unless Union law sets another period (Art. 10(3)); outage records five years.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Art. 10(3) read as stated. Recital 27 supports five-year outage records and recital 23 the five-year administrative log average.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L09.mechanism; end_to_end_flows[5]",
+   "claim": "Customs: ESPR Art. 15(1)-(3), EU CSW-CERTEX interconnection operational within four years of entry into force of the Art. 13(5) implementing act (computed 2030-08-06); release is not proof of compliance.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Consolidated ESPR PDF text read locally (pdftotext). Art. 15(3) says four years from entry into force of the Art. 13(5) implementing act; Art. 15(1) applies from registry operation; Art. 15(2) electronic verification applies once the interconnection runs. 2026-08-06 plus four years is 2030-08-06.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L02/L06/L07 specs (ESPR Art. 10, 11)",
+   "claim": "ESPR Art. 10(1)(b),(d),(g), 10(3) five working days, 10(4) back-up copy through a service provider, 11(a)-(h).",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+   "evidence": "Letters (b) physical presence, (d) open standards/machine-readable, (g) access regulation; 10(3)(b) five working days; 10(4) back-up through a DPP service provider; Art. 11 letters (a)-(h) match the roles cited.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L07.mechanism; layers.L10 (Batteries Art. 77/78)",
+   "claim": "Regulation (EU) 2023/1542 Art. 77(1) from 2027-02-18, 77(2) three access groups, 77(3) QR code to unique identifier, 77(7)-(8), 77(10) upload to ESPR registry; Art. 78 requirements.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "evidence": "Consolidated text Art. 77 and 78 read (offset 400000). All cited paragraphs match. Art. 77(9) is the legitimate-interest implementing act with a deadline of 18 August 2026; the file says only that it was not located (see missed_items).",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[3] (ec-dpp-registry-user-guide)",
+   "claim": "User guide PDF 'Last Published 2026-09-16 v1.03'; UPI mandatory URL form, max 2000 chars, https; file upload max 100 DPPs and 1 GB; statuses PROCESSING/SUCCESS/FAILURE; battery registration not yet possible; test site printed with http://; 'URI' abbreviation for Unique Registration Identifier.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf",
+   "evidence": "Downloaded PDF has the SHA-256 recorded in the file (1ca1d444...c9d446). Text shows each value: 2000-char limit, 'Invalid URL format. Enter a URL starting with https://', 100 requests per file, 1 GB, the three statuses, the note that battery DPP registration cannot yet succeed, http://registry.acc... and the 'URI' glossary entry.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[3].version",
+   "claim": "Resources page labels the guide 'V3, 14 September 2026, changes to pages 22, 23, 41'.",
+   "risk": "version",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/dpp-registry_en",
+   "evidence": "The Commission DPP Registry page I fetched shows the guide with no version label and no date. The PDF label (v1.03, 2026-09-16) is confirmed; the 'V3 / 14 September' label was not found on the page I could read. It may sit on a different resources page.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.spec_status; open_questions[0]",
+   "claim": "The registry API specification ('DPP Registry technical guidelines') is announced but not published as of 2026-10-19.",
+   "risk": "status",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/dpp-registry_en",
+   "evidence": "The registry page has no section named technical guidelines and gives no status for one. The absence of an API document is plausible but the 'announced' part could not be seen.",
+   "correction": null
+  },
+  {
+   "claim_ref": "summary; sources[0]",
+   "claim": "Registry operational since 2026-07-20.",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en",
+   "evidence": "Commission DPP page states the registry became operational on 20 July 2026 with a testing environment. Note that 2026/1778 only applies from 6 August 2026.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[0..6,10..14]",
+   "claim": "Repository metadata: CIRPASS-2 repos (mock-eu-registry, dpp-validator, dpp-data-extractor, dpp-renderer-be/fe, deploy-resources, ontologies-battery) Apache-2.0, not archived, push dates 2026-08-04 / 06-11 / 09-23 / 06-10 / 10-06; ontologie-textiles no licence; ontologies-core 404; mock-eu-registry releases 1.1.1-* on 2026-07-01; renderer-fe 1.1.0.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2",
+   "evidence": "gh api: licences, archived=false and pushed_at match every value; mock-eu-registry 1.1.1-pgsql-oidc and -mariadb-oidc published 2026-07-01; renderer-fe release 1.1.0 on 2026-09-23; ontologies-core returns 404; org has 13 repos. Also org listing for ontologies-tyre 10-13, documentation-battery 10-06, ontologies-docs 10-15, textiles 09-28 match.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations (Cir4Fun, OpenDPP, TRACE4EU, BaSyx, open-dpp, batterypass)",
+   "claim": "Licences and push dates: java-dpp-sdk Apache-2.0 push 2026-09-29; python-dpp-sdk Apache-2.0 push 2026-09-03; edc-client no licence push 2026-10-18; opendpp-interop Apache-2.0 v1.18.0 2026-10-13 push 2026-10-14; BatteryPassDataModel no GitHub licence push 2026-09-14; TRACE4EU seven repos EUPL-1.2, did-web none; BaSyx go MIT; open-dpp AGPL-3.0.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIR4FUN-EU",
+   "evidence": "gh api values match: Cir4Fun 8 repos; opendpp-interop created 2026-06-16, release v1.18.0 2026-10-13; trace4eu 8 repos, 7 with EUPL-1.2 and did-web without licence, push range 2024-11-21 to 2025-07-10; eclipse-basyx/basyx-go-components MIT; open-dpp AGPL-3.0.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[14] (java-dpp-sdk)",
+   "claim": "java-dpp-sdk version 0.5.1 (README) with no tag; last main commit 2026-08-10.",
+   "risk": "repo_metadata",
+   "verdict": "refuted",
+   "evidence_url": "https://github.com/CIR4FUN-EU/java-dpp-sdk",
+   "evidence": "README lists artifacts at 0.5.1 and last commit is 2026-08-10, but the repository has one git tag, v0.3.0 (no GitHub releases). 'No tag' is wrong; 'no tag for 0.5.1 and no release' is right.",
+   "correction": "Say: no GitHub release; only tag v0.3.0, which does not match README version 0.5.1."
+  },
+  {
+   "claim_ref": "layers.L09.mechanism (mock schema granularity rules)",
+   "claim": "Mock registry schema: ITEM needs deactivated, modelUpi, batchUpi; BATCH needs modelUpi and forbids batchUpi; MODEL forbids both.",
+   "risk": "technical_mechanism",
+   "verdict": "refuted",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry/blob/main/main/src/main/resources/json-schema/default-schema.json",
+   "evidence": "The default schema 'then' branch for ITEM requires only deactivated and modelUpi; batchUpi is optional for ITEM (property text says supply it only if a batch tier exists). BATCH: modelUpi required, batchUpi forbidden in the constraint, although the batchUpi property description says 'Required when BATCH' (internal contradiction). MODEL forbids modelUpi and batchUpi. Non-ITEM forbids deactivated.",
+   "correction": "ITEM: deactivated + modelUpi required, batchUpi optional."
+  },
+  {
+   "claim_ref": "failure_modes[4]",
+   "claim": "Detectable fault: item-level record without modelUpi/batchUpi, or batch record carrying batchUpi.",
+   "risk": "technical_mechanism",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry/blob/main/main/src/main/resources/json-schema/default-schema.json",
+   "evidence": "Batch-with-batchUpi is rejected by the schema. An item record without batchUpi is valid under that schema, so the first half of the fault is wrong. Missing modelUpi is rejected.",
+   "correction": "Reword: item record without modelUpi or deactivated."
+  },
+  {
+   "claim_ref": "layers.L01.mechanism / L09 (mock field limits)",
+   "claim": "upi 1-200 chars, reoId 1-50, facilitiesId array up to 250 chars, commodityCode ^[0-9]{4,10}$, liveURL/backupURL ^http, JSON Schema 2020-12.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "README schema section shows draft 2020-12, minLength/maxLength 1/200 and 1/50, facilitiesId item maxLength 250, pattern ^http, commodityCode pattern ^[0-9]{4,10}$.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L04/L08.mechanism (mock endpoints and codes)",
+   "claim": "POST /metadata/v1 and /metadata/v1/registerDPP; GET /metadata/v1/{registryId}/proof produces application/jwt; GET /.well-known/jwks.json; 201 on successful validation, 400 on validation failure; no GET/search endpoint for records.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "Resource interface shows @Path /metadata/v1, POST, POST /registerDPP and GET /{registryId}/proof with @Produces application/jwt. README states 201 Created and 400 for validation outcomes. No record GET or search route exists in the interface.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L08.mechanism (detached JWS)",
+   "claim": "Optional detached RS256 JWS in header x-jws-signature; key fetched from the JWKS URI in the caller's JWT claim jwksUri; 400 if header missing, 401 if invalid.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "README section Detached JWS Verification gives exactly these defaults and status codes.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L08.mechanism; anomalies[-1]",
+   "claim": "Proof JWT RS256 with claims iss, registryId, registeredAt, commodityCode, reoId, reoName, dppHash; README kid 'mock-eu-registry-key-1' while application.properties sets 'mock-eu-registry-key'.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "README claim list and RS256 match; README default registry.key-id is mock-eu-registry-key-1; main application.properties has smallrye.jwt.sign.key.id=mock-eu-registry-key. Anomaly is real.",
+   "correction": null
+  },
+  {
+   "claim_ref": "anomalies[4]; failure_modes[5]",
+   "claim": "README example dppHash has 63 hex digits, lacks the 'sha256:' prefix, and one example shows contentType 'application/json+ld'.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "Counted the example value: 63 characters (the real empty-input SHA-256 has 64 and differs at one position). README example shows contentType application/json+ld; the note says dppHash is sha256:<hex>. DB column dpp_hash is VARCHAR(71), which fits the prefix plus 64 digits.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L07.mechanism (path policies)",
+   "claim": "/metadata/v1* allows admin,eo,eu; /schema/v1* allows admin,eu; /q/openapi and /.well-known/* public.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "main application.properties lines match all four policies.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L10.mechanism (update strategies)",
+   "claim": "Duplicate-UPI strategies MODIFY (default), APPEND_WITH_NEW_ID, APPEND_WITH_SAME_ID, NONE (400).",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "README configuration table and update-strategy section list the four values, MODIFY default, NONE returns 400.",
+   "correction": null
+  },
+  {
+   "claim_ref": "anomalies[7]; failure_modes[11]; layers.L04 (renderer search)",
+   "claim": "Extractor DDL declares upi VARCHAR(36); renderer POST /search/v1 filter ops EQ|LT|LTE|GT|GTE|LIKE; GET /fetch/v1?url=.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/dpp-data-extractor",
+   "evidence": "Extractor pgsql schema v1_0_0 has 'upi VARCHAR(36) UNIQUE NOT NULL'. dpp-renderer-be README lists the six operators and the GET /fetch/v1 and POST /comparison/v1 endpoints. Validator README lists payloadType values json, json_ld, turtle, rdf_xml, rdf_json, n3, n_triples, n_quads and weighted Jaccard matching.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[8] new-cirpass2-d41-reference-architecture",
+   "claim": "D4.1 V1.1, Zenodo 20720002, 2026-06-16, concept DOI 10.5281/zenodo.15388412, CC-BY-4.0, MD5 b6b9b1f9...",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://zenodo.org/records/20720002",
+   "evidence": "Zenodo API: title D4.1 Reference Architecture, publication date 2026-06-16, concept DOI 10.5281/zenodo.15388412, CC BY 4.0, file 'D4.1 REFERENCE ARCHITECTURE V1.1.pdf' md5 b6b9b1f97d7433bf096f1a4b2c38a909 (I recomputed the same MD5 on my download). Creators are 15 people; Lazrak is not among them, as the file says.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03/L08.mechanism (D4.1 content)",
+   "claim": "D4.1: application/ld+json versus application/vc+jwt; JOSE proof with cty vc; algorithms ES256, then ES384, then EdDSA; Bitstring Status List; /.well-known/dppdata proposal while a figure shows /.well-known/dpp.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://zenodo.org/records/20720002",
+   "evidence": "PDF text: Accept values listed; 'listed in order of preference' ES256, ES384, EdDSA; cty: vc stated; Bitstring Status List recommended; section 3.18 text 'https://<operator_website>/.well-known/dppdata' and a figure label '/.well-known/dpp'; text says the endpoint should be registered with IANA, so it is not registered now. Draft watermark text present.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L04.specs (D4.1 3.3)",
+   "claim": "D4.1 3.3 'recommends adopting the standard lifecycle API'.",
+   "risk": "spec_reference",
+   "verdict": "refuted",
+   "evidence_url": "https://zenodo.org/records/20720002",
+   "evidence": "Section 3.3 is titled 'Enrich the standard lifecycle API specification proposed by JTC24': it recommends enriching a JTC 24 proposal, not adopting it as is. Also a rule 5 adjacency (see rule5_findings).",
+   "correction": "Write: 'D4.1 3.3 proposes additions to the JTC 24 lifecycle API proposal; content not recorded'."
+  },
+  {
+   "claim_ref": "layers.L01/L03/L06 specs (CIRPASS D3.2)",
+   "claim": "D3.2 v1.9 (Zenodo 12206138, 2024-05) section numbers 3.1.4, 3.1.5(.1), 3.1.6, 3.1.9, 3.1.10(.1,.2), 3.1.11, 3.1.12, 3.1.13, 3.2.1.2, 4.3; RFC 9110/8288/9264 use; DID variant did:method:REO-DID?UUID=; earlier record 10.5281/zenodo.10949842 dated 2024-03-26.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://zenodo.org/records/12206138",
+   "evidence": "Table of contents and text match each cited section. RFC 9110, 8288 and 9264 appear in the resolver sections; the DID example with a UUID query is on the Product DID page. Zenodo shows 12206138 as version 1.9 (2024-05, concept 10.5281/zenodo.10949841, md5 9bf8cbdd matches) and 10949842 as V1.8 dated 2024-03-26 (file does not say it is V1.8).",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.adoption_evidence; layers.L03/L07 (test environment report)",
+   "claim": "CIRPASS-2 test environment report v1.0 2026-06-16 (Zenodo 20749604, CC-BY-4.0): 49 partners, pilots in textiles/electronics/construction/automotive, OIDC chosen over OIDC4VC, content negotiation design assumption, report says registry exposes a search API.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://zenodo.org/records/20749604",
+   "evidence": "Zenodo metadata and MD5 bf8ba8f0... match. PDF text lists partners numbered to 49, the pilot sectors, OIDC as 'pragmatic baseline' with OIDC4VC as long-term direction, the Accept-header design assumption (POST excluded) and the mock registry 'exposes a search API' sentence.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[11] bp-technical-guidance; layers.L03/L05/L07/L08",
+   "claim": "Battery Pass Technical Guidance Version 1.0 / March 2024; sections 4.4, 4.5, 4.6, 4.7, 4.9, 5.1, 5.3, 6.1; GraphQL used in the demonstrator; Gaia-X Trust Framework recommended.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP3%20Battery%20Passport%20Technical%20Guidance",
+   "evidence": "PDF contents list gives these section numbers and titles; title page says Version 1.0 / March 2024; text says the demonstrator implements GraphQL; Gaia-X Trust Framework row present in section 4.5. Repository also lists 4.10 Unique identifiers and 4.11 Data carriers.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[12]; implementations (Battery Pass Data Model v1.2.0)",
+   "claim": "Battery Pass Data Model v1.2.0: concluded April 2025, reference-only, last commit 2026-09-14 pointing to successor, CC-BY-4.0 by README only (GitHub licence null), aligned to DIN DKE SPEC 99100:2025-02.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/batterypass/BatteryPassDataModel",
+   "evidence": "README banner: concluded April 2025, no longer maintained. Last commit 2026-09-14 'Reference notification to the new BatteryPassReady Data Model'. GitHub API licence empty. README states alignment to the DIN spec and gives per-data-point chapter references (see missed_items).",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[13]; implementations (BatteryPass-Ready); sources[14]",
+   "claim": "BatteryPass-Ready README: version 2.0 WIP vs v2.0.1 current release; JSON Schema 2020-12 and XSD; Feb27 variants; 12 conditional elements; CC-BY-4.0; no SAMM/JSON-LD/SHACL. Resources page: test environment public, longlist v2.0 Aug 2026 and v1.3 Mar 2026, user stories v1.0 Jun 2026.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads",
+   "evidence": "README fetch confirms each point (note XSD only for v1.3 and v2.0, not v2.0.1). Resources page at thebatterypass.eu confirms test environment link, longlist dates and the user stories PDF link.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[6] new-cirpass2-ontologies-battery; L05/L07",
+   "claim": "Battery ontology umbrella 0.4.0 DRAFT pinned to P_DPP v2.1.0 and MAT v1.1.0; namespaces https://w3id.org/eudpp/battery#...; no owl:imports; status values; test counts 27/23/29; view counts 52/26/4/4 from 28 September files.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2/ontologies-battery",
+   "evidence": "README contains all the listed items. The 27-check, 23/29-check and 52/26/4/4 figures are the repository's own statements, not engine results.",
+   "correction": null
+  },
+  {
+   "claim_ref": "sources[17..18]; maturity (PyPI dpp-sdk, OSS4DPP)",
+   "claim": "PyPI dpp-sdk 0.4.0 uploaded 2026-08-11, Apache-2.0, project_urls on Fraunhofer GitLab; OSS4DPP page 'Sources checked 24 July 2026', no working group/project, meetings 17 and 24 September 2026, conformance testing a proposed idea.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://pypi.org/pypi/dpp-sdk/json",
+   "evidence": "PyPI JSON lists 0.1.0, 0.1.1 (2026-06-09), 0.2.1 (2026-06-11), 0.4.0 (2026-08-11) and the GitLab URLs. dpp.eclipse.org shows the 24 July 2026 date, no project, two meetings and a modular test engine idea.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations (OpenDPP); anomalies[14]",
+   "claim": "OpenDPP kit: doors aas/untp/semanticids/registry/shacl/sdjwt/en18223/en18223-expanded/epcis/gs1; registry pointer sample sets backupURL equal to the GS1 URL of upi; vendors CIRPASS-2 registry schema, AAS v3, UNTP 0.7.0, EPCIS 2.0.1 schemas; GET /passport/{id} with Accept aas+json, vc+jwt, vc+ld+json.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/OpenDPP/opendpp-interop",
+   "evidence": "README door table and validate.mjs list match; sample JSON has upi and backupURL both https://id.gs1.org/01/09521234543213; schemas/ includes cirpass2-eu-registry-pointer, aas-v3, untp-dpp-v0.7.0, epcis-2.0.1 and also two EN 18223 schema files (see missed_items).",
+   "correction": null
+  },
+  {
+   "claim_ref": "literature[0..15]",
+   "claim": "All 16 DOIs and titles; venue for records the file lists as 'Unknown Journal'.",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1016/j.procs.2026.02.077",
+   "evidence": "Crossref: 10.1016/j.procs.2026.02.077, .334, .364, .330, .274 are Procedia Computer Science 2026 with the exact titles. CNSM 2025, ISSE 2025 (2025 IEEE International Symposium on Systems Engineering), WETICE 2025, ICHCAI 2026, Procedia CIRP 2024, Open Research Europe 2026 and the ESWC 2024 satellite LNCS chapter (2025) match. 10.18420/inf2025_03 is not in Crossref (404) but DataCite gives title and publisher Gesellschaft fuer Informatik, 2025. arXiv 2410.15758 matches via DataCite. DaCapo Zenodo 20848510 is dated 2026-06-25 with grant 101091780 (project DaCapo).",
+   "correction": "Venue fixes: the five procs DOIs are Procedia Computer Science (verified); ISSE is the 2025 IEEE International Symposium on Systems Engineering (verified); inf2025_03 is a GI publication (DataCite)."
+  },
+  {
+   "claim_ref": "conformance_implications[5] (layer L09 registry record)",
+   "claim": "data.jsonschema can validate a registry metadata record; new capability 'none'.",
+   "risk": "engine_mapping",
+   "verdict": "refuted",
+   "evidence_url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "evidence": "In the repository, data.jsonschema takes document in {item, model} only (DocumentKind = Literal item, model in src/dppce/adapters/data.py; capabilities.md parameter table). The resource name registry_record exists only for api.contract. So the check cannot validate a registry record today.",
+   "correction": "new_capability_needed: extend data.jsonschema (and data.rules) document kinds with registry_record; needs a contract change in a file this task does not own."
+  },
+  {
+   "claim_ref": "conformance_implications[0,1,3,4] (identifier.resolve / identifier.parse / api.contract)",
+   "claim": "identifier.resolve has accept and accepted_media_types parameters; identifier.parse only parses gs1-digital-link; api.contract supports GET only; data.shacl, integrity.cose, evidence.qualified_seal, registry.official are interface_only.",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/docs/reference/capabilities.md",
+   "evidence": "Parameter table lists accept and accepted_media_types (default final JSON object only) and api.contract method get only; identifier.py rejects any scheme other than gs1-digital-link with a 'no parser' result; capability table marks the four as interface_only. The mapping of access.restricted_fields to capability access.policy and registry.consistency to registry.mock is also correct.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[0]; sources (Zenodo CIRPASS-2 results page)",
+   "claim": "CIRPASS-2 results page: 29 items, newest 2026-10-12, consultation response 2026-05-27 DOI 10.5281/zenodo.20417510.",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://cirpass2.eu/project-results/",
+   "evidence": "Page lists 29 result items; newest is the ontologies documentation item dated 12 Oct 2026; the registry consultation response is dated 27 May 2026 with the stated DOI.",
+   "correction": null
+  }
+ ],
+ "rule5_findings": [
+  {
+   "claim_ref": "layers.L04_apis_lifecycle_searchability.specs[7] (new-cirpass2-d41, component 3.3)",
+   "problem": "The phrase 'recommends adopting the standard lifecycle API' states what a secondary source says about an EN 18222-related proposal and is also inaccurate (D4.1 3.3 says enrich).",
+   "fix": "Write only: 'D4.1 3.3 discusses additions to the JTC 24 lifecycle API proposal; content not recorded' and tag the source secondary_only."
+  },
+  {
+   "claim_ref": "conformance_implications[11] (L05 SHACL profile oracle)",
+   "problem": "Oracle says battery-shapes.ttl is 'derived from Regulation (EU) 2023/1542 Annex XIII and long list v1.3'. The ontologies-battery README also names prEN 18223 Table 1 as a third input to the profile, so the shapes embed requirements taken from a protected draft standard.",
+   "fix": "State all three inputs; note the shapes are a third-party Apache-2.0 artefact to pin unchanged, not a source for the engine to paraphrase; do not describe the Table 1 content."
+  },
+  {
+   "claim_ref": "layers.L05_system_interoperability_data_models.mechanism (passport status values)",
+   "problem": "Active/Archived/Inactive/Invalid are reported without saying the ontology README ties these values to the prEN 18223 vote text. The value list is taken from an open ontology, so low risk.",
+   "fix": "Cite only the ontologies-battery README as source for the values and add 'README links them to a JTC 24 draft; draft content not read'."
+  },
+  {
+   "claim_ref": "conformance_implications[14] (Battery Pass v1.2.0 schemas as fixtures) and implementations[9]",
+   "problem": "File recommends pinning Battery Pass v1.2.0 generated schemas, whose data point descriptions carry chapter references to DIN DKE SPEC 99100 (README says so). Vendoring them copies text keyed to a protected document.",
+   "fix": "Add a note that descriptions must be stripped or the use cleared by the owner before they enter engine fixtures; prefer BatteryPass-Ready v2.0.1 schemas if the owner confirms the licence."
+  }
+ ],
+ "missed_items": [
+  {
+   "topic": "Batteries Art. 77(9) implementing act deadline",
+   "fact": "Art. 77(9) required the Commission to adopt, by 18 August 2026, an implementing act on persons with a legitimate interest and their data rights. The file only says the act was 'not located'. Secondary sources say it was still pending in October 2026; this is secondary_only.",
+   "source_url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1"
+  },
+  {
+   "topic": "OpenDPP vendored EN 18223 schemas",
+   "fact": "The opendpp-interop repository ships schemas/en18223-compressed.schema.json and en18223-expanded.schema.json, authored by the vendor from a protected EN. The engine must not copy or reference their content as an oracle.",
+   "source_url": "https://github.com/OpenDPP/opendpp-interop"
+  },
+  {
+   "topic": "Battery Pass v1.2.0 DIN chapter references",
+   "fact": "Each data point description in the v1.2.0 data model carries a chapter reference to DIN DKE SPEC 99100:2025-02, and the README names that spec as the base.",
+   "source_url": "https://github.com/batterypass/BatteryPassDataModel"
+  },
+  {
+   "topic": "Mock schema internal contradiction",
+   "fact": "In the mock registry default schema the batchUpi description says 'required when BATCH' but the allOf constraint forbids batchUpi for BATCH. A test oracle must pick the constraint, not the prose.",
+   "source_url": "https://github.com/CIRPASS-2/mock-eu-registry"
+  },
+  {
+   "topic": "Cir4Fun java tag",
+   "fact": "java-dpp-sdk has git tag v0.3.0 although the README version is 0.5.1.",
+   "source_url": "https://github.com/CIR4FUN-EU/java-dpp-sdk"
+  },
+  {
+   "topic": "D3.2 earlier record is V1.8",
+   "fact": "Zenodo 10949842 is version V1.8 (2024-03-26) and 12206138 is v1.9; both share concept DOI 10.5281/zenodo.10949841.",
+   "source_url": "https://zenodo.org/records/10949842"
+  },
+  {
+   "topic": "D4.1 well-known endpoint is unregistered",
+   "fact": "D4.1 3.18 cites RFC 8615 and says the exact well-known name must still be defined and registered with IANA, so /.well-known/dppdata is only a placeholder.",
+   "source_url": "https://zenodo.org/records/20720002"
+  },
+  {
+   "topic": "Registry page lacks guide version label",
+   "fact": "The Commission DPP Registry page shows the user guide without a version or date; only the PDF cover text carries v1.03 / 2026-09-16.",
+   "source_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/dpp-registry_en"
+  }
+ ],
+ "overall": "The file is highly reliable on facts that can be checked against primary sources: legal articles and dates, repository metadata, endpoints, role policies, DOIs, checksums and section numbers all matched. I found three real errors: the mock schema rule for ITEM batchUpi (optional, not required), the 'no tag' statement for java-dpp-sdk (tag v0.3.0 exists), and the D4.1 3.3 wording (enrich, not adopt). One engine-mapping error matters for the conformance engine: data.jsonschema cannot take a registry record today. Two statements about the Commission resources page (guide 'V3, 14 September', unpublished technical guidelines) could not be confirmed. Rule 5 risk is low but the SHACL oracle and the Battery Pass schemas have protected-document provenance that the file should flag.",
+ "counts": {
+  "checked": 39,
+  "confirmed": 32,
+  "refuted": 4,
+  "not_confirmed": 3
+ }
+}

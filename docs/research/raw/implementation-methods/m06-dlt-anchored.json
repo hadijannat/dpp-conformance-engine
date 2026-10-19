@@ -1,0 +1,2249 @@
+{
+ "method_id": "m06-dlt-anchored",
+ "name": "Distributed-ledger family: blockchain-based and ledger-anchored DPPs",
+ "retrieval_date": "2026-10-19",
+ "scope_note": "Covers DPP designs that use a distributed ledger as a store, an integrity anchor, an identity registry, or an access-control and lifecycle engine: permissioned ledgers (Hyperledger Fabric, Besu and GoQuorum consortia), public chains (Ethereum and EVM chains such as Polygon; for Algorand only a non-DPP traceability prototype was located), IOTA (MoveVM objects, notarization, IOTA Identity), and EBSI (Timestamp and Track and Trace services). Records seven design patterns (full data on chain, hash anchoring of an off-chain document, content-addressed storage referenced from chain, token per product, smart-contract lifecycle state machine, confidential or selective disclosure, oracles), the EU legal position, evaluation figures reported in papers, and what a black-box conformance test can verify offline versus with a live node. Leaves out: verifiable-credential mechanics that do not depend on a ledger (method m05), GS1 resolver mechanics (web-resolver family), AAS and dataspace transport, and any content of EN, ISO, IEC, ETSI EN or DIN documents (bibliographic metadata only). Vendor statements are recorded as secondary_only. No live node, wallet, gateway, registry or EBSI endpoint was contacted; only documentation pages, specifications, source code and papers were read.",
+ "summary": "A ledger-based DPP splits a passport into a small trust anchor on a shared ledger and, in almost all practical designs, a larger document held off chain. The economic operator (or a service provider) serialises the passport, computes a digest, and writes the digest, a pointer, or both into a ledger transaction or smart-contract state; the ledger then provides ordering, a block time, and tamper evidence for that digest. Five storage variants recur: full passport data on chain (rare, costly), a hash imprint of an off-chain document (EBSI Timestamp, Arianee imprint, Fabric private-data hashes), an IPFS content identifier whose multihash is itself the integrity check, a non-fungible token per product item whose tokenURI points to metadata, and a consortium ledger whose chaincode holds structured product records. Smart contracts add a lifecycle state machine (mint or create, update, transfer custody, destroy or deactivate) and on-ledger access rules such as whitelisted issuer DIDs, per-document write and delegate permissions, or federated authority hierarchies. Confidential data stays off chain, inside private data collections, or behind zero-knowledge proofs and selective disclosure; the EDPB guidelines of 2026 advise against plain personal data on chain and describe erasure by deleting off-chain data, salts or keys. A verifier checks integrity by re-hashing the retrieved document and comparing it with the anchored value, then checking that the anchoring transaction is included in a final block of the expected chain; inclusion can be shown offline with a portable proof (OpenTimestamps receipts to a Bitcoin block header, IOTA Proof of Inclusion against a trusted committee, EIP-1186 Merkle proofs against a state root) when the verifier pins a trusted root. Current state, such as the latest tokenURI, the owner, or a revocation flag, needs a live ledger read. EU law is technology-neutral here: the ESPR and the Batteries Regulation ask for a decentralised data system run by economic operators, open interoperable formats, a back-up copy at a DPP service provider and a central Commission registry, but name no ledger; eIDAS 2 gives qualified electronic ledgers a legal presumption of ordering and integrity. The academic literature is dominated by prototypes and conceptual frameworks; reported performance ranges from single-digit transactions per second on public EVM chains to above one thousand on tuned Fabric clusters, and reviews flag cost, scalability, governance, interoperability and GDPR tension as the main problems. For the conformance engine, the anchor-hash comparison and pinned-root inclusion proofs are deterministic offline checks; ledger state queries require a new, explicitly allowlisted ledger-read transport.",
+ "method_families": [
+  "dlt-anchored",
+  "hybrid",
+  "verifiable-credentials-ssi"
+ ],
+ "maturity": {
+  "spec_status": "No DPP-specific ledger specification exists in EU law or in an open specification read in this session. The building blocks are mature and openly specified: ERC-721, ERC-1155 and ERC-4906 are Final Ethereum standards; CAIP-2 chain identifiers are Final; the IPFS CID specification is marked Permanent; W3C DID 1.1 is a Candidate Recommendation Snapshot (5 March 2026). Some pieces are weaker: EIP-1186 (eth_getProof) is Stagnant; the Ethereum execution-apis JSON-RPC specification is at v1.0.0-beta.7; EBSI service APIs are versioned with a non-backward-compatible version in test; the IOTA Notarization Toolkit is pre-1.0 (v0.1.27; Proof of Inclusion poi-v0.1.0).",
+  "versions_at_retrieval": [
+   {
+    "artifact": "ERC-721 Non-Fungible Token Standard",
+    "version": "EIP-721 (created 2018-01-24)",
+    "status": "Final",
+    "source_id": "new-eip-721"
+   },
+   {
+    "artifact": "ERC-1155 Multi Token Standard",
+    "version": "EIP-1155 (created 2018-06-17)",
+    "status": "Final",
+    "source_id": "new-eip-1155"
+   },
+   {
+    "artifact": "ERC-4906 EIP-721 Metadata Update Extension",
+    "version": "EIP-4906 (created 2022-03-13)",
+    "status": "Final",
+    "source_id": "new-eip-4906"
+   },
+   {
+    "artifact": "EIP-1186 eth_getProof",
+    "version": "EIP-1186 (created 2018-06-24)",
+    "status": "Stagnant",
+    "source_id": "new-eip-1186"
+   },
+   {
+    "artifact": "Ethereum execution-apis (JSON-RPC specification)",
+    "version": "v1.0.0-beta.7 (released 2026-06-10)",
+    "status": "beta",
+    "source_id": "new-ethereum-execution-apis"
+   },
+   {
+    "artifact": "CAIP-2 Blockchain ID Specification",
+    "version": "CAIP-2 (created 2019-12-05)",
+    "status": "Final",
+    "source_id": "new-caip-2"
+   },
+   {
+    "artifact": "IPFS CID specification",
+    "version": "page dated 26 June 2026",
+    "status": "Permanent",
+    "source_id": "new-ipfs-cid-spec"
+   },
+   {
+    "artifact": "IPFS Trustless Gateway specification",
+    "version": "last updated 5 March 2026",
+    "status": "reliable (status badge)",
+    "source_id": "new-ipfs-trustless-gateway"
+   },
+   {
+    "artifact": "W3C Decentralized Identifiers (DIDs) v1.1",
+    "version": "CR-did-1.1-20260305",
+    "status": "Candidate Recommendation Snapshot",
+    "source_id": "new-w3c-did-1-1"
+   },
+   {
+    "artifact": "IOTA DID Method Specification",
+    "version": "v2.0 (page last updated 2024-08-23)",
+    "status": "published in IOTA documentation",
+    "source_id": "new-iota-did-method-spec"
+   },
+   {
+    "artifact": "IOTA Notarization Toolkit",
+    "version": "v0.1.27 (2026-08-20); trails-v0.1.5 (2026-08-20); poi-v0.1.0 (2026-09-24)",
+    "status": "pre-1.0 releases",
+    "source_id": "new-iota-notarization"
+   },
+   {
+    "artifact": "EBSI Timestamp service documentation",
+    "version": "pages last updated 2026-09-30; create-timestamp guide shows paths under /v1/timestamp/; API hub lists pilot v3 and test v5 (search excerpts)",
+    "status": "conflicting version labels, see anomalies",
+    "source_id": "new-ebsi-timestamp-docs"
+   },
+   {
+    "artifact": "EBSI Track and Trace documentation",
+    "version": "page last updated 2026-09-30; search excerpt shows v1.0.0 stable and v2 in test",
+    "status": "stable v1 per excerpt; v2 not backward compatible per excerpt",
+    "source_id": "new-ebsi-track-and-trace-docs"
+   },
+   {
+    "artifact": "EDPB Guidelines 02/2025 on processing of personal data through blockchain technologies",
+    "version": "v2 (final, after public consultation), page dated 07 July 2026; v1 consultation 14 April to 9 June 2025",
+    "status": "final",
+    "source_id": "new-edpb-guidelines-02-2025"
+   },
+   {
+    "artifact": "Arianee protocol contracts (arianee-contracts)",
+    "version": "repository HEAD; Solidity 0.8.28; last push 2026-06-17",
+    "status": "open source (MIT); deployment status not verified",
+    "source_id": "new-arianee-contracts"
+   },
+   {
+    "artifact": "OpenTimestamps python library",
+    "version": "latest tag python-opentimestamps-v0.4.5; latest GitHub release object v0.4.3 (2022-11-20)",
+    "status": "maintained at low cadence (last push 2025-03-18)",
+    "source_id": "new-python-opentimestamps"
+   }
+  ],
+  "adoption_evidence": "Academic: reviews report blockchain as the most frequently proposed DPP enabler but with limited empirical validation and a drift to hybrid architectures (10.1007/s43615-026-00927-x, 225 studies; 10.3390/digital6020043; 10.1016/j.spc.2025.01.014 found blockchain the most adopted security solution among 25 frameworks). Prototypes exist on Hyperledger Fabric, Ethereum and Polygon, GoQuorum, Waves, IOTA, Secret Network and EBSI (see literature). Public pilots: TRACE4EU battery materials traceability on EBSI (official EBSI page; page contains unfinished placeholder text), the IOTA DPP demonstrator (its README states it is a reference showcase and not a regulation-compliant DPP), and the EU Blockchain Observatory and Forum report of 3 May 2024 that interviews Circularise, Circulor, Spherity, nChain, IOTA and DYNE. Commercial: Arianee publishes ERC-721 passport contracts under MIT; Circularise and Minespider describe blockchain-based passports in marketing material only (secondary_only). No production deployment of a ledger-based DPP for a product group regulated by an ESPR delegated act was located; no ESPR delegated act requiring a DPP was located as adopted in the prior record.",
+  "regulatory_alignment": "Neutral to permissive; never required. Regulation (EU) 2024/1781, recital 41, says the DPP should rest on a decentralised data system set up and managed by economic operators, with a Commission registry that stores unique identifiers; recital 42 links the Commission web portal to data held in the operator's decentralised DPP. No recital or article read names blockchain, ledger or any storage technology (recitals 1 to 122 and Arts 1 to 26 scanned this session). Art. 10(1)(d) requires open standards, interoperable formats and transfer without vendor lock-in, which constrains proprietary chains. Art. 10(4) (and Art. 27(1)(c), prior record) require a back-up copy through a DPP service provider; Art. 11 points (c), (d), (e), (g), (h) require storage by the operator or service providers, linking a new DPP to the original, availability after insolvency, liquidation or cessation of Union activity, data authentication, reliability and integrity, and high security and privacy with fraud avoidance. Art. 13 has the Commission run a central registry of unique identifiers; it is not described as a ledger. Regulation (EU) 2023/1542, recital 126, likewise asks for a decentralised data system maintained by economic operators and names no technology. Regulation (EU) 2024/1183 inserts electronic ledgers as a trust service into Regulation (EU) No 910/2014: Art. 3(52) and (53) define electronic and qualified electronic ledgers, Art. 45k gives ledgers non-discrimination as evidence and a presumption of unique chronological ordering and integrity for qualified ones, and Art. 45l(1)(a)-(d) sets the qualified-ledger requirements; recital 68 asks for technological neutrality between centralised and distributed ledgers; Implementing Regulation (EU) 2025/2531 lists the reference standards that give qualified ledgers a presumption of compliance. Regulation (EU) 2023/2854, Art. 36, applies only where a smart contract executes a data-sharing agreement: it requires robustness and access control, safe termination and interruption, archiving of transaction data and code, governance-layer access control, and consistency with the agreement, plus an EU declaration of conformity. GDPR obligations apply in full; the EDPB Guidelines 02/2025 v2 favour permissioned ledgers and off-chain storage of personal data. ESPR Art. 10(1)(e) bars customer personal data in the DPP without explicit consent, which reduces but does not remove the GDPR tension."
+ },
+ "layers": {
+  "L01_unique_identifiers": {
+   "applies": "partial",
+   "mechanism": "Ledgers add identifiers of their own; they do not replace the persistent unique product identifier that the law requires. Four ledger-native identifier kinds recur. (1) Token reference: a chain identifier in CAIP-2 form namespace:reference (for example eip155:1 for Ethereum mainnet; namespace [-a-z0-9]{3,8}, reference [-_a-zA-Z0-9]{1,32}, case-sensitive), plus a 20-byte contract address, plus a uint256 tokenId (ERC-721) or token type id (ERC-1155; a type with supply 1 is non-fungible; the optional split-ID scheme puts the set in high bits and the item in low bits). (2) Decentralized identifiers for operators, issuers, and sometimes product items: did:method:method-specific-id per W3C DID 1.1; did:iota:<8-hex network id>:0x<64 hex object id>, mainnet network id 6364aad5 may be omitted; did:ebsi for EBSI legal entities (did:ebsi:z<base58btc of version byte 1 plus 16 random bytes>, network segment omitted on the EBSI chain, resolved through the EBSI DID Registry with an optional valid-at time; new-ebsi-did-method); did:ethr resolved from Ethereum addresses. (3) Content identifiers for documents (not products): CIDv1 = varint version 0x01, content-type multicodec, multihash; text form = multibase prefix plus encoding (b = base32, z = base58btc, f = base16, k = base36); CIDv0 = bare 34-byte sha2-256 multihash (0x12 0x20...), shown as 46-character Qm... base58btc. (4) Hash-derived record identifiers: EBSI Track and Trace documents are identified by an id derived from a hash of their content; an EBSI timestampId is computed locally as the multibase base64url encoding of the multihash of the SHA-256 of the anchored hash. Prototypes also map a GS1 or vendor serial to a tokenId inside the contract, or mint a DID per product (cheqd in 10.3390/app14114874).",
+   "specs": [
+    {
+     "source_id": "new-caip-2",
+     "component": "chain ID syntax"
+    },
+    {
+     "source_id": "new-eip-721",
+     "component": "tokenId, ownerOf, metadata extension"
+    },
+    {
+     "source_id": "new-eip-1155",
+     "component": "token type id, split ID, {id} substitution"
+    },
+    {
+     "source_id": "new-w3c-did-1-1",
+     "component": "DID syntax; verifiable data registry"
+    },
+    {
+     "source_id": "new-iota-did-method-spec",
+     "component": "did:iota syntax"
+    },
+    {
+     "source_id": "new-ipfs-cid-spec",
+     "component": "CIDv0/CIDv1 layout and decoding"
+    },
+    {
+     "source_id": "new-ebsi-create-timestamp",
+     "component": "timestampId derivation"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-docs",
+     "component": "document id from content hash"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 10(1)(a)-(c) persistent unique product identifier"
+    },
+    {
+     "source_id": "gs1-digital-link-uri-syntax-1-7-0",
+     "component": "GS1 Digital Link URI as the carrier-facing identifier"
+    },
+    {
+     "source_id": "iso-iec-15459-1-2014",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "en-18219-2026",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "new-ebsi-did-method",
+     "component": "did:ebsi syntax and method-specific identifier"
+    }
+   ],
+   "variants": [
+    "chain-qualified token reference (CAIP-2 chain id + contract + tokenId) as the item identity",
+    "product DID registered on a ledger (did:iota, cheqd, did:ethr)",
+    "GS1 Digital Link or vendor serial as the legal identifier, mapped to a tokenId or record id in contract state",
+    "content hash or CID as document identity only, with the product identifier carried inside the document",
+    "EBSI hash-derived document and timestamp identifiers"
+   ],
+   "observable_black_box": "Identifier strings in the carrier payload, in the resolved passport and in anchor receipts can be parsed offline: CAIP-2 regex, 0x-prefixed 20-byte address, decimal or hex tokenId, DID syntax and method-specific syntax, CID decode rules (34-byte 0x12 0x20 check, version varint, trailing-byte rejection). Agreement between the carrier identifier, the passport id and the ledger reference is observable without a node when the passport carries the reference; ownership or existence of the token on chain needs a live read.",
+   "law_delta": "ESPR Art. 10(1)(a)-(c) requires a persistent unique product identifier connected through a data carrier and compliant with Annex III standards or harmonised standards. Token ids, contract addresses and DIDs are not identifiers of that kind; a ledger DPP must still carry a compliant product identifier and map it to the ledger reference. A token burned or a contract self-destructed or upgraded can break persistence of the ledger reference, which law does not address."
+  },
+  "L02_data_carriers": {
+   "applies": "partial",
+   "mechanism": "The ledger does not change the physical carrier. The carrier holds a URL (typically a GS1 Digital Link or an operator URL) that resolves to a web page or API, which in turn exposes or embeds the ledger reference; some prototypes encode a tokenId, DID or transaction hash directly in the QR payload. One automotive prototype uses a lazy-minted ERC-721 on Polygon that is minted only when the customer redeems it through a passkey flow (10.1109/compsac69091.2026.00308). No ledger-specific carrier specification was found.",
+   "specs": [
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 10(1)(a)-(b) data carrier physically present"
+    },
+    {
+     "source_id": "gs1-digital-link-uri-syntax-1-7-0",
+     "component": "URI syntax"
+    },
+    {
+     "source_id": "en-18220-2026",
+     "component": "bibliographic only"
+    }
+   ],
+   "variants": [
+    "QR with GS1 Digital Link; ledger reference found after resolution",
+    "QR with a DID or a token reference directly",
+    "QR with a wallet deep link or redemption code (lazy minting)"
+   ],
+   "observable_black_box": "Decoded carrier payload; whether it is an HTTPS URL or a bare ledger reference; whether a bare ledger reference can be resolved without a wallet. Existing carrier.qr_decode and identifier.parse cover only the GS1 /01/<GTIN>/21/<serial> form.",
+   "law_delta": "Law requires a carrier that connects to the persistent unique product identifier; a QR that holds only a wallet deep link or a chain reference, without a compliant identifier, would not meet Art. 10(1) as summarised. unknown for product-specific carrier rules (set by delegated acts)."
+  },
+  "L03_data_exchange_protocols": {
+   "applies": "yes",
+   "mechanism": "Reads and writes use ledger-specific protocols next to ordinary HTTPS. Ethereum family: JSON-RPC 2.0 over HTTP POST with Content-Type application/json; methods eth_getTransactionReceipt (fields include blockHash, blockNumber, logs, status 0x1 for success, transactionHash), eth_getTransactionByHash, eth_call for contract views such as tokenURI or tokenImprint, eth_getLogs for events, eth_getProof (EIP-1186, address, storage keys, block) returning accountProof and storageProof as RLP-encoded Merkle Patricia Trie nodes; block parameter tags earliest, finalized, safe, latest, pending, where finalized means crypto-economically secure and latest can be re-orged. Writes are raw signed transactions (eth_sendRawTransaction). EBSI: REST reads such as GET /v1/timestamp/timestamps/{timestampId} and /v1/timestamp/records/{recordId}[/versions[/{versionId}]]; writes are built by the service (methods timestampHashes, timestampRecordHashes, timestampRecordVersionHashes, appendRecordVersionHashes), signed by the client and submitted (eth_sendRawTransaction per the guide), after obtaining an access token with scope 'openid timestamp:write' by presenting a verifiable presentation to a DCQL query; Track and Trace exposes list/get documents, events, accesses, contract details and ABI. IPFS: GET /ipfs/{cid} on a trustless gateway with Accept application/vnd.ipld.raw (single block) or application/vnd.ipld.car (CAR stream), or format=raw|car (format wins over Accept); IPNS records as application/vnd.ipfs.ipns-record. IOTA: gRPC ledger requests by the Proof of Inclusion source; resolvers query objects through an indexer node. Fabric: Gateway API with endorsement, ordering, validation and commit notification (10.1109/access.2025.3650525); private data travels peer-to-peer by gossip.",
+   "specs": [
+    {
+     "source_id": "new-ethereum-execution-apis",
+     "component": "eth namespace: transaction.yaml (eth_getTransactionReceipt), state.yaml (eth_getProof with accountProof, storageHash, storageProof), block tags"
+    },
+    {
+     "source_id": "new-eip-1186",
+     "component": "eth_getProof"
+    },
+    {
+     "source_id": "new-ebsi-create-timestamp",
+     "component": "token scope, write methods, read endpoints"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-api",
+     "component": "endpoint list"
+    },
+    {
+     "source_id": "new-ipfs-trustless-gateway",
+     "component": "path form, media types, format parameter"
+    },
+    {
+     "source_id": "new-iota-notarization",
+     "component": "poi-rs Source boundary, gRPC"
+    },
+    {
+     "source_id": "new-fabric-private-data-docs",
+     "component": "gossip distribution of private data"
+    },
+    {
+     "source_id": "en-18216-2026",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "new-ebsi-create-tnt-doc",
+     "component": "token scopes and eth_sendRawTransaction submission"
+    }
+   ],
+   "variants": [
+    "operator HTTPS API that hides the ledger and returns anchor receipts",
+    "direct public RPC reads by the verifier",
+    "IPFS trustless gateway retrieval with client-side hash check",
+    "EBSI REST reads with token-protected writes",
+    "consortium-internal gRPC (Fabric Gateway) with no public read path"
+   ],
+   "observable_black_box": "HTTP status, media type and body of the operator API; for public ledgers, JSON-RPC responses (receipt status, block number, logs); for IPFS, whether the returned bytes hash to the requested CID; for EBSI, the timestamp record fields. Any direct ledger or gateway read is a live network call, which current engine transport policy does not cover.",
+   "law_delta": "ESPR Art. 10(1)(d) requires transfer through an open interoperable data exchange network without vendor lock-in; a passport readable only through a proprietary chain client or a consortium-internal gRPC endpoint is in tension with that. Law names no protocol."
+  },
+  "L04_apis_lifecycle_searchability": {
+   "applies": "partial",
+   "mechanism": "Lifecycle operations map onto contract or service calls rather than onto a DPP API. Create: mint (ERC-721 Transfer from the zero address; ERC-1155 TransferSingle with zero-address sender), Arianee reserveToken then hydrateToken(tokenId, bytes32 imprint, uri, ...), EBSI createDocument or timestampRecordHashes, IOTA single notarization or audit-trail creation, Fabric chaincode create. Read: tokenURI(tokenId), uri(id) with {id} replaced by the 64-character lowercase hex id, ownerOf, tokenImprint(tokenId), EBSI GET timestamps or records, IOTA object reads. Update: updateTokenURI (issuer only in Arianee), new metadata behind an unchanged URI signalled by ERC-4906 MetadataUpdate or BatchMetadataUpdate, EBSI timestampRecordVersionHashes or appendRecordVersionHashes, Track and Trace events written to a document. Deactivate: burn (Transfer to zero address) or destroy, EBSI record revocation status, did:iota deactivation (empty document or deactivated flag) or deletion (deleted_did flag, irreversible). Search: event log filtering (eth_getLogs), EBSI list documents, list events, list accesses; no standard query by product attributes. EBSI Track and Trace REST shapes per the create guide: HEAD /v1/track-and-trace/accesses?creator={did} returns 204 when the DID may create documents and 404 otherwise; GET /v1/track-and-trace/documents/{documentId}, .../accesses and .../events read state; writes need scope openid track-and-trace:create or :write and call createDocument, grantAccess or writeEvent, submitted by eth_sendRawTransaction (new-ebsi-create-tnt-doc).",
+   "specs": [
+    {
+     "source_id": "new-eip-721",
+     "component": "Transfer event; tokenURI"
+    },
+    {
+     "source_id": "new-eip-1155",
+     "component": "TransferSingle, TransferBatch, URI events; uri(uint256)"
+    },
+    {
+     "source_id": "new-eip-4906",
+     "component": "MetadataUpdate, BatchMetadataUpdate"
+    },
+    {
+     "source_id": "new-arianee-contracts",
+     "component": "ArianeeSmartAsset.sol: reserveToken, hydrateToken, updateTokenURI, destroy, tokenImprint"
+    },
+    {
+     "source_id": "new-ebsi-create-timestamp",
+     "component": "timestamp write and read methods"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-api",
+     "component": "list and get operations"
+    },
+    {
+     "source_id": "new-iota-did-method-spec",
+     "component": "update, deactivation, deletion"
+    },
+    {
+     "source_id": "en-18222-2026",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "new-ebsi-create-tnt-doc",
+     "component": "Create a TnT Doc guide: access check, document, accesses and events reads"
+    }
+   ],
+   "variants": [
+    "token lifecycle (mint, update URI, transfer, burn)",
+    "append-only record and version lifecycle (EBSI Timestamp records, IOTA audit trails)",
+    "document-plus-events lifecycle (EBSI Track and Trace)",
+    "chaincode CRUD on a consortium ledger (Fabric)"
+   ],
+   "observable_black_box": "Through an operator API: create, read, update, deactivate responses and the version history. On chain (live): emitted events, contract view results, supportsInterface answers (0x80ac58cd for ERC-721, 0x5b5e139f for its metadata extension, 0xd9b67a26 for ERC-1155, 0x0e89341c for its metadata extension, 0x49064906 for ERC-4906).",
+   "law_delta": "ESPR Art. 9(2)(g)-(h) leaves to delegated acts who may create or update data and how; Art. 11(f) restricts rights to introduce, modify or update data according to access rights. Ledger permission models (issuer-only update, whitelisted creators, delegates) are one way to enforce this but law does not require them. EN 18222 content not used."
+  },
+  "L05_system_interoperability_data_models": {
+   "applies": "partial",
+   "mechanism": "On-chain state is minimal and technology-specific: a bytes32 imprint and a URI string per token (Arianee), a hash plus submitter, block number and block time per timestamp (EBSI), a hash, sender DID, origin, metadata and timestamp per Track and Trace event, a byte-packed DID document with type marker, version and encoding in an IOTA Identity object. Off-chain metadata follows the token standard: ERC-721 metadata JSON (name, description, image) or ERC-1155 metadata JSON (name, decimals, description, image, properties, localization with uri pattern, default and locales). Passport content itself is free-form JSON in most prototypes; some papers model entities (Product, Manufacturer, Supplier, Material) in chaincode (10.3390/app14114874), wrap data as W3C VCs (TRACE4EU battery pilot; 10.1016/j.procs.2026.02.145), use GS1 EPCIS 2.0 events (10.3390/logistics10080177), or AAS submodels exchanged through a Secret Network contract (10.20944/preprints202402.1194.v2). One pipeline maps sensor data to JSON with an LLM before storing it on the Waves chain (10.1016/j.digbus.2026.100167). No common DPP vocabulary is defined on chain.",
+   "specs": [
+    {
+     "source_id": "new-eip-721",
+     "component": "metadata JSON schema"
+    },
+    {
+     "source_id": "new-eip-1155",
+     "component": "metadata JSON schema and localization"
+    },
+    {
+     "source_id": "new-ebsi-timestamp-docs",
+     "component": "on-chain fields"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-docs",
+     "component": "document and event fields"
+    },
+    {
+     "source_id": "new-iota-did-method-spec",
+     "component": "Identity object encoding"
+    },
+    {
+     "source_id": "w3c-vcdm-2-0",
+     "component": "credential data model (where VCs are used)"
+    },
+    {
+     "source_id": "en-18223-2026",
+     "component": "bibliographic only"
+    }
+   ],
+   "variants": [
+    "token metadata JSON as the passport",
+    "token metadata JSON that links to a separate passport document",
+    "W3C VC per claim, anchored or with issuer keys on a ledger",
+    "EPCIS event stream with anchored batch roots",
+    "chaincode-native records"
+   ],
+   "observable_black_box": "The off-chain document is a normal JSON (or JSON-LD) artifact and can be schema-checked; the on-chain record shape is fixed by the contract ABI or service API and can be checked against a captured response or ABI file.",
+   "law_delta": "ESPR Art. 10(1)(d) requires open standards and interoperable, machine-readable, structured, searchable data; ERC metadata schemas are open but carry no DPP semantics, so a ledger DPP still needs a DPP data model. Annex III content is set per product group by delegated act."
+  },
+  "L06_storage_archiving_persistence": {
+   "applies": "yes",
+   "mechanism": "Seven storage placements: (a) full data on chain: every node replicates the passport; high cost and size limits (EUBOF report table; gas figures in 10.1109/icces67310.2025.11336296 and 10.1109/blockchain67634.2025.00025, where each extra 32-byte EVM storage slot costs about 20,000 gas); (b) hash imprint on chain and document off chain: integrity is anchored, availability depends on the off-chain host; (c) IPFS or Filecoin content addressing: the CID guarantees integrity of whatever bytes are returned, but availability depends on pinning; (d) Fabric private data collections: actual data in the private state database of authorised peers, its hash on every channel peer's ledger; automatic purge after a configured number of blocks and explicit PurgePrivateData remove the data but leave the hash as evidence; (e) EBSI: the Timestamp service stores only hashes, never the data; (f) IOTA: notarization objects can hold arbitrary data, a document hash, or latest-state records, with locked or dynamic variants; (g) hybrid: critical fields on chain, bulk data off chain. Ledger replication gives durability of the anchor itself, not of the off-chain document. Link rot is a known risk: one study found 45% of ERC-721 tokens in its six-month Ethereum corpus failed a basic permanence criterion (10.48550/arxiv.2209.14517).",
+   "specs": [
+    {
+     "source_id": "new-fabric-private-data-docs",
+     "component": "private data collections, purge"
+    },
+    {
+     "source_id": "new-ebsi-timestamp-docs",
+     "component": "hash-only storage"
+    },
+    {
+     "source_id": "new-iota-notarization",
+     "component": "single notarization, audit trails"
+    },
+    {
+     "source_id": "new-ipfs-cid-spec",
+     "component": "content addressing"
+    },
+    {
+     "source_id": "new-eubof-dpp-report-2024",
+     "component": "Chapter 3.1.1 storage options table"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 9(2)(i), Art. 10(4), Art. 11(c),(e); recital 38, 41"
+    },
+    {
+     "source_id": "en-18221-2026",
+     "component": "bibliographic only"
+    }
+   ],
+   "variants": [
+    "full on chain",
+    "hash imprint + operator storage",
+    "CID + IPFS pinning service",
+    "private data collections",
+    "hybrid critical-on-chain"
+   ],
+   "observable_black_box": "Whether the off-chain document is retrievable now; whether retrieved bytes match the anchored hash or CID; whether the passport names a back-up service provider (Annex III point (l) field, when the delegated act requires it). Long-term availability cannot be observed in one run; persistence.scheduled is interface_only.",
+   "law_delta": "ESPR requires availability for at least the expected product lifetime (Art. 9(2)(i)), availability after insolvency (Art. 11(e)), storage by the operator or service providers (Art. 11(c)) and a back-up copy through a DPP service provider (Art. 10(4); recital 38). The text read does not say whether replication on a ledger can serve as that back-up; ledger durability covers only the anchor, not the document. EN 18221 content not used."
+  },
+  "L07_access_rights_security_confidentiality": {
+   "applies": "yes",
+   "mechanism": "Public ledgers expose every transaction to everyone, so confidentiality is built around the ledger: (1) keep restricted data off chain behind an authenticated API and anchor only a salted or keyed hash; (2) permissioned ledgers with channel membership and Fabric private data collections (non-members can read only the hash, via GetPrivateDataHash, and verify data shared out of band); (3) on-ledger permission models: EBSI Track and Trace permissions creator, write and delegate per document, with creators restricted to legal entities whose DID is whitelisted in the DID Registry; IOTA Hierarchies authorisation chain Root of Authority to Manufacturer to Repairer (IOTA DPP demonstrator); Arianee issuer-only updates and hashed access tokens per token; NFT ownership as access right (soulbound ERC-721 in 10.1109/blockchain67634.2025.00025); (4) zero-knowledge proofs: Groth16 proofs over EPCIS sensor predicates with 304 ms mean proving and 9.8 ms verification (10.3390/logistics10080177); wallet, NFT and ZKP textile prototype (10.24251/hicss.2025.527); vendor claims of ZKP-based selective querying (Circularise, secondary_only); (5) multi-party computation and on-premise nodes (Re|Source per EUBOF report). GDPR: EDPB Guidelines 02/2025 v2 discourage plain personal data on chain, treat salted or keyed hashes and encrypted data as still personal data, recommend permissioned designs and a DPIA, and describe erasure by deleting off-chain data, keys or salts; redactable-chain research uses chameleon hashes (10.1109/access.2025.3594656) and dual-layer redaction (10.1109/brains67003.2025.11302930); crypto-shredding audit framework (10.1109/brains67003.2025.11302955).",
+   "specs": [
+    {
+     "source_id": "new-edpb-guidelines-02-2025",
+     "component": "on-chain vs off-chain, hashes, erasure, permissioned preference, DPIA"
+    },
+    {
+     "source_id": "new-fabric-private-data-docs",
+     "component": "private data, GetPrivateDataHash"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-docs",
+     "component": "creator/write/delegate permissions; whitelist"
+    },
+    {
+     "source_id": "new-iota-dpp-demonstrator",
+     "component": "authorisation chain via IOTA Hierarchies"
+    },
+    {
+     "source_id": "new-arianee-contracts",
+     "component": "isIssuer modifier, tokenHashedAccess"
+    },
+    {
+     "source_id": "new-circularise-faq",
+     "component": "vendor ZKP claim (secondary_only)"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 10(1)(e),(g); Art. 11(b),(f),(h)"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "recital 124 restricted information"
+    },
+    {
+     "source_id": "en-18239-2026",
+     "component": "bibliographic only"
+    }
+   ],
+   "variants": [
+    "off-chain restricted data with public anchor",
+    "consortium channels and private collections",
+    "on-ledger permission registries",
+    "ZKP predicate proofs",
+    "encryption with key destruction for erasure"
+   ],
+   "observable_black_box": "Restricted fields leaking through public channels: the operator API (access.restricted_fields), public token metadata, and on-chain calldata or event data (needs a captured transaction or log sample). Whether hashes on chain are unsalted digests of low-entropy personal fields (a dictionary test on a sample). Refusal of writes by non-whitelisted identities is observable only on a test network or a loopback mock.",
+   "law_delta": "ESPR requires access per delegated-act access rights, restricted update rights and high security and privacy (Art. 10(1)(g), Art. 11(f),(h)); it bars customer personal data without explicit consent (Art. 10(1)(e)). GDPR Art. 17 erasure and the EDPB guidance add design constraints that ordinary web-hosted DPPs do not face: immutable public data must not contain personal data. EN 18239 content not used."
+  },
+  "L08_authentication_reliability_integrity": {
+   "applies": "yes",
+   "mechanism": "This is the core contribution of the family. Integrity chain for a hash-anchored passport: (1) canonicalise the passport (raw bytes, or JSON canonicalised per RFC 8785 when the design says so) and hash it with a declared algorithm (multihash code, or an algorithm id such as SHA-256; the EBSI create-timestamp guide shows SHA-256 wrapped in a multihash and encoded multibase base64url with prefix u, new-ebsi-create-timestamp); (2) the anchor holds that digest: EBSI timestamp hash, Arianee bytes32 imprint, Fabric private-data hash, IOTA notarization payload, or a Merkle root over a batch (Merkle-tree batching cuts anchoring cost in 10.3390/logistics10080177); (3) the anchor is included in the ledger: a transaction hash in a block of a given chain; on EVM chains the receipt status must be 0x1 and the block should be at or below the finalized tag; EBSI records the block number and block timestamp under Proof of Authority consensus; (4) the anchor's author is authenticated: the transaction sender account, an EBSI whitelisted legal-entity DID, a did:iota controller, or an issuer DID in a VC. Portable inclusion evidence lets a verifier skip a live node: an OpenTimestamps .ots receipt carries the hash path from the document digest to a Bitcoin block header (verification needs the header, from a local node or a pinned copy; pending receipts need a calendar server); an IOTA Proof of Inclusion bundles the transaction, effects, events, user signatures and a checkpoint summary, verified locally against a committee that the caller anchors from a trusted genesis blob or trusted node; an EIP-1186 account and storage proof walks the Merkle Patricia Trie from a trusted block stateRoot to a contract storage slot. Legal trust: qualified electronic ledgers under eIDAS 2 (Art. 45l(1): created and managed by one or more qualified trust service providers, origin of records established, unique sequential chronological order, changes immediately detectable) enjoy a presumption of ordering and integrity (Art. 45k(2)); Implementing Regulation (EU) 2025/2531 lists the reference standards and, in its annex, asks for record origin through advanced electronic signatures or seals based on qualified certificates, ordering through cryptographic hash links or qualified timestamps, automatic ledger reports, and extra architecture and governance references for DLT-based providers. Credential layer: W3C VCs whose issuer DIDs and status lists are held on EBSI (TRACE4EU) are covered by method m05.",
+   "specs": [
+    {
+     "source_id": "rfc-8785",
+     "component": "JSON canonicalization (bibliographic in prior record)"
+    },
+    {
+     "source_id": "new-ebsi-timestamp-docs",
+     "component": "hash-only anchoring, on-chain fields"
+    },
+    {
+     "source_id": "new-arianee-contracts",
+     "component": "idToImprint, tokenImprint"
+    },
+    {
+     "source_id": "new-opentimestamps-client",
+     "component": "stamp, verify, block header requirement"
+    },
+    {
+     "source_id": "new-python-opentimestamps",
+     "component": "proof creation and verification library"
+    },
+    {
+     "source_id": "new-iota-notarization",
+     "component": "poi-rs ProofBuilder, ProofVerifier, CommitteeResolution"
+    },
+    {
+     "source_id": "new-eip-1186",
+     "component": "accountProof, storageProof"
+    },
+    {
+     "source_id": "new-ethereum-execution-apis",
+     "component": "receipt status; finalized and safe tags"
+    },
+    {
+     "source_id": "new-eidas2-reg-2024-1183",
+     "component": "Art. 3(52)-(53), Art. 45k, Art. 45l; recitals 68-69"
+    },
+    {
+     "source_id": "new-impl-reg-2025-2531",
+     "component": "Annex: record origin, ordering by hash links or qualified timestamps, change detection, DLT point 3(b)"
+    },
+    {
+     "source_id": "new-ebsi-trace4eu-battery",
+     "component": "issuer verification against the EBSI ledger"
+    },
+    {
+     "source_id": "new-iso-23257-2022",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "rfc-9162",
+     "component": "Merkle audit paths in transparency logs (non-ledger comparator)"
+    },
+    {
+     "source_id": "en-18246-2026",
+     "component": "bibliographic only"
+    }
+   ],
+   "variants": [
+    "single-document hash anchor (EBSI Timestamp, IOTA single notarization)",
+    "batched Merkle-root anchor with per-document audit path",
+    "token imprint (hash stored in NFT contract state)",
+    "CID as both pointer and integrity check",
+    "anchor in a public chain via a calendar aggregator (OpenTimestamps to Bitcoin)",
+    "qualified electronic ledger under eIDAS 2"
+   ],
+   "observable_black_box": "Offline: recomputed digest of the sample document versus the digest in the receipt; Merkle audit path from digest to batch root; inclusion proof from root to a pinned block header, state root or committee-certified checkpoint; consistency of chain id, transaction hash and block number fields. Live only: that the transaction exists on the canonical chain now, its confirmation depth or finality, and the current contract state.",
+   "law_delta": "ESPR Art. 11(g) requires data authentication, reliability and integrity without naming a mechanism. A ledger anchor gives tamper evidence and a time order; it does not prove the data were true when written (garbage-in), which reviews and the EUBOF report flag and which oracles or multi-party review only partly address. Only qualified electronic ledgers get the eIDAS 2 legal presumption; an ordinary chain anchor has evidential value but no presumption. EN 18246 content not used."
+  },
+  "L09_registry_and_customs": {
+   "applies": "partial",
+   "mechanism": "The ESPR splits storage (decentralised, operator-run) from a central Commission registry of unique identifiers that national authorities and customs can access (recitals 41, 42, 44). A ledger DPP does not replace that registry. Art. 13 (re-read this session): the Commission sets up the registry by 19 July 2026; it stores at least the unique identifiers, the commodity code for goods released for free circulation, and battery unique identifiers; delegated acts may add data; operators upload the data; the registry returns a unique registration identifier that is not proof of compliance (13(5)); the Commission, national authorities and customs have access (13(6)). Implementing Regulation (EU) 2026/1778 (prior record, not re-read) has verified operators register passports through a user interface or API, receive a persistent registration identifier, and can obtain a proof of registration with a Commission timestamp, a hash and a qualified electronic seal; changes are logged and versioned with Commission timestamps. Nothing read says that the registry uses a distributed ledger. EBSI is an EU-level ledger infrastructure, but no source read links it to the DPP registry.",
+   "specs": [
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "recitals 41, 42, 44; Art. 13(1)-(6)"
+    },
+    {
+     "source_id": "dpp-registry-implementing-regulation-2026-1778",
+     "component": "Arts 8-10 (prior record)"
+    }
+   ],
+   "variants": [
+    "operator registers identifiers in the EU registry and anchors passports on a ledger separately",
+    "registry record references the back-up service provider, not a ledger"
+   ],
+   "observable_black_box": "Agreement between the identifier registered (mock registry) and the passport identifier, independent of the ledger; the engine's registry.consistency works against a mock only.",
+   "law_delta": "Ledger anchoring adds nothing to the registry duty and does not discharge it. unknown whether future acts will accept ledger references as registry data."
+  },
+  "L10_lifecycle_versioning_updates": {
+   "applies": "yes",
+   "mechanism": "Versioning is append-only by construction: EBSI Timestamp records hold an ordered sequence of version hashes with owners and a revocation status; Track and Trace events cannot be modified or deleted after writing; IOTA audit trails hold sequential entries with role-based access, locking and tagging; Fabric keeps history even after DelPrivateData, and PurgePrivateData leaves the hash. Token designs differ: ERC-721 allows tokenURI to be mutable (rationale section), so a metadata change can happen without a new on-chain record unless the contract implements ERC-4906, which then MUST emit MetadataUpdate or BatchMetadataUpdate when the JSON metadata changes (the event carries no metadata). Arianee lets the issuer change the URI (updateTokenURI) and keeps one imprint per token. Handover between operators maps to token transfer (Transfer event), to EBSI grant of write or delegate access, or to a new controller of a did:iota identity (threshold voting). Deactivation and end of life: burn to the zero address, destroy, EBSI record revocation, did:iota deactivation or irreversible deletion; the IOTA Identity object persists after its DID is deleted. Smart-contract state machines encode statuses such as PRODUCED, SHIPPED, RECEIVED BY RETAILER, SOLD, RECYCLED (ChromaWay example in the EUBOF report) or the Batteries Regulation status values.",
+   "specs": [
+    {
+     "source_id": "new-ebsi-timestamp-docs",
+     "component": "records and versions"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-docs",
+     "component": "append-only events"
+    },
+    {
+     "source_id": "new-iota-notarization",
+     "component": "audit trails, locking"
+    },
+    {
+     "source_id": "new-eip-721",
+     "component": "mutable URI rationale; Transfer"
+    },
+    {
+     "source_id": "new-eip-4906",
+     "component": "metadata update events"
+    },
+    {
+     "source_id": "new-arianee-contracts",
+     "component": "updateTokenURI, destroy, recoverTokenToIssuer"
+    },
+    {
+     "source_id": "new-iota-did-method-spec",
+     "component": "deactivation and deletion"
+    },
+    {
+     "source_id": "new-eubof-dpp-report-2024",
+     "component": "section 3.7 status sequence"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 9(1) up to date; Art. 9(2)(g)-(i); Art. 11(d),(e)"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "recital 125 update by authorised third party"
+    }
+   ],
+   "variants": [
+    "append-only versions with hash per version",
+    "mutable pointer with update events",
+    "mutable pointer without events (anti-pattern)",
+    "state-machine status field",
+    "token transfer as custody handover"
+   ],
+   "observable_black_box": "Version lists and their order (operator API or captured EBSI record); whether each version hash matches the corresponding archived document; whether a metadata change is accompanied by an update event (needs a log sample or live read); whether a deactivated passport stays retrievable with a status marker.",
+   "law_delta": "ESPR requires data to be up to date (Art. 9(1)), a new DPP for a product that already has one to be linked to the original (Art. 11(d)) and availability for the set period (Art. 11(e)). Immutability is not a legal requirement; the EUBOF report notes that immutability is not a prerequisite of the EU DPP. A burn or delete on chain must not make the passport unavailable before the retention period ends."
+  },
+  "L11_roles_and_governance": {
+   "applies": "yes",
+   "mechanism": "Governance models: (1) private consortium ledgers (Fabric, Besu with QBFT, GoQuorum) where members run nodes and admit participants; a national Besu rootchain reached about 800 write transactions per second with p99 finality under 3 s on 5 to 14 validators (10.1109/access.2026.3726043); (2) public permissionless chains (Ethereum, Polygon, Bitcoin via OpenTimestamps) where anyone validates and writers pay fees; (3) public permissioned infrastructure run by public bodies (EBSI: Proof of Authority, creators whitelisted by an authorised authority or the support office); (4) DAG ledgers with sponsored fees (IOTA Gas Station in the demonstrator) and federated authority hierarchies; (5) trust frameworks over the ledger: DIDs and VCs, Root of Authority accreditation, multi-signature reviewers and oracles (EUBOF table). Legal roles: the EDPB treats nodes on permissionless chains as possible controllers or joint controllers and encourages a consortium or legal entity to take that role; eIDAS 2 makes qualified trust service providers responsible for qualified ledgers; Data Act Art. 36 places conformity duties on vendors or deployers of smart contracts that execute data-sharing agreements; ESPR service providers may not reuse DPP data beyond the service (Art. 11, second subparagraph).",
+   "specs": [
+    {
+     "source_id": "new-edpb-guidelines-02-2025",
+     "component": "controllership, permissioned preference"
+    },
+    {
+     "source_id": "new-eidas2-reg-2024-1183",
+     "component": "Art. 45l(1)(a)"
+    },
+    {
+     "source_id": "new-data-act-reg-2023-2854",
+     "component": "Art. 2(39), Art. 36"
+    },
+    {
+     "source_id": "new-ebsi-track-and-trace-docs",
+     "component": "whitelisting of legal-entity DIDs"
+    },
+    {
+     "source_id": "new-iota-dpp-demonstrator",
+     "component": "Root of Authority, Gas Station"
+    },
+    {
+     "source_id": "new-eubof-dpp-report-2024",
+     "component": "trust enhancement options"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "recital 40 roles; Art. 11 second subparagraph"
+    }
+   ],
+   "variants": [
+    "consortium",
+    "public permissionless",
+    "public permissioned (EBSI)",
+    "federated hierarchy on a DAG ledger",
+    "hybrid dual-chain (private manufacturing chain plus public customer chain)"
+   ],
+   "observable_black_box": "Declared governance appears in documentation and ICS answers, not in protocol traffic; a tester can observe which chain id is used, whether issuer identities resolve to accredited entries (live or pinned registry snapshot), and whether a qualified-ledger claim names a provider on a trusted list.",
+   "law_delta": "ESPR assigns responsibility to the economic operator and DPP service providers, not to ledger validators. When validators or node operators process personal data, GDPR roles apply to them (EDPB). Qualified-ledger status and Data Act Art. 36 conformity are separate legal regimes that a DPP law does not require."
+  }
+ },
+ "end_to_end_flows": [
+  {
+   "name": "Hash-anchored off-chain passport on EBSI Timestamp",
+   "actors": [
+    "economic operator",
+    "EBSI Authorisation service",
+    "EBSI Ledger service and Timestamp contract",
+    "operator DPP host",
+    "verifier"
+   ],
+   "steps": [
+    "1. The operator serialises the passport document and computes its digest with the algorithm it declares.",
+    "2. The operator obtains an access token with scope openid timestamp:write by answering a DCQL query with a verifiable presentation.",
+    "3. The operator asks the Timestamp API to build a transaction (timestampHashes, or timestampRecordHashes for a versioned record), signs it locally and submits it (eth_sendRawTransaction per the guide).",
+    "4. The contract records the hash, the submitting account, the block number and the block timestamp; the data itself is never sent.",
+    "5. The operator publishes the passport at its own host and states the timestampId (multibase base64url of the multihash of SHA-256 of the hash) or record id in the passport or its metadata.",
+    "6. For an update, the operator adds a version with timestampRecordVersionHashes or appendRecordVersionHashes.",
+    "7. The verifier fetches the passport, recomputes the digest, derives the timestampId and reads GET /v1/timestamp/timestamps/{timestampId}, then compares hash, timestampedBy and block data."
+   ]
+  },
+  {
+   "name": "Token-per-product passport with hash imprint (ERC-721)",
+   "actors": [
+    "brand or issuer",
+    "protocol store contract",
+    "SmartAsset (ERC-721) contract",
+    "metadata host or privacy gateway",
+    "owner wallet",
+    "verifier"
+   ],
+   "steps": [
+    "1. The issuer reserves a tokenId and hydrates it with a bytes32 imprint of the passport JSON, a URI, and access keys.",
+    "2. The passport JSON is hosted off chain at the URI; private parts sit behind a gateway that checks hashed access rights.",
+    "3. Custody changes are ERC-721 transfers; Transfer events form the ownership history.",
+    "4. The issuer can change the URI (updateTokenURI); a contract that implements ERC-4906 must emit MetadataUpdate when the JSON changes.",
+    "5. A verifier reads tokenURI and tokenImprint for the tokenId on the declared chain, downloads the JSON, hashes it and compares it with the imprint.",
+    "6. End of life uses destroy or burn; the passport document should remain available for the retention period."
+   ]
+  },
+  {
+   "name": "CID-referenced passport (IPFS plus on-chain pointer)",
+   "actors": [
+    "operator",
+    "IPFS pinning service",
+    "smart contract or token",
+    "trustless gateway",
+    "verifier"
+   ],
+   "steps": [
+    "1. The operator adds the passport (or a DAG of files) to IPFS and obtains a CIDv1.",
+    "2. The CID is written to chain, in a token URI (ipfs://<cid>) or in contract storage; content-addressed storage needs active pinning to stay available.",
+    "3. The verifier requests GET /ipfs/{cid}?format=raw (or car) from any gateway.",
+    "4. The verifier hashes each received block and checks that the digest equals the CID multihash; a CAR stream must be complete.",
+    "5. An update produces a new CID; the on-chain pointer changes and, for ERC-721 with ERC-4906, an update event is emitted."
+   ]
+  },
+  {
+   "name": "Consortium ledger with private data (Hyperledger Fabric)",
+   "actors": [
+    "member organisations (manufacturer, supplier, recycler)",
+    "endorsing peers",
+    "ordering service",
+    "non-member auditor"
+   ],
+   "steps": [
+    "1. A member submits a chaincode transaction; restricted fields go into a private data collection.",
+    "2. Authorised peers store the private data and gossip it; the hash of the private data is ordered and written to every channel peer's ledger.",
+    "3. Other members query public chaincode state; a non-member receives private data out of band and checks it against the on-chain hash via GetPrivateDataHash.",
+    "4. Private data is purged after the configured block count or by PurgePrivateData; the hash stays as evidence."
+   ]
+  },
+  {
+   "name": "Offline verification of an anchor receipt with a portable inclusion proof",
+   "actors": [
+    "operator or SUT",
+    "conformance engine",
+    "trust-root custodian (pinned headers, genesis blob, or committee)"
+   ],
+   "steps": [
+    "1. The SUT supplies a sample bundle: the passport bytes, an anchor receipt (digest, algorithm, chain id, transaction or checkpoint reference) and an inclusion proof (.ots file, IOTA PoI proof, or EIP-1186 proof plus block header).",
+    "2. The engine recomputes the digest from the passport bytes and compares it with the receipt.",
+    "3. The engine verifies the Merkle path from the digest (or batch leaf) to the root committed in the block header, state root or certified checkpoint.",
+    "4. The engine authenticates the header, state root or checkpoint against a trust root pinned in the test pack (Bitcoin headers, IOTA genesis-derived committee, Ethereum finalized header).",
+    "5. The engine reports digest match, path validity and root trust as separate findings; anything that needs current chain state is reported as not run."
+   ]
+  },
+  {
+   "name": "Credential-centred battery passport anchored on EBSI (TRACE4EU pilot)",
+   "actors": [
+    "audit firm",
+    "certification body",
+    "mine and suppliers",
+    "battery manufacturer",
+    "EBSI ledger (issuer registry)",
+    "verifier or consumer"
+   ],
+   "steps": [
+    "1. An audit firm issues a product-carbon-footprint verifiable credential; a certification body issues responsible-mining credentials; participants hold legal-identity and Catena-X membership credentials.",
+    "2. The manufacturer issues a Battery Passport credential tied to the serial number that links to the PCF credential, a due diligence report, and an access point for confidential data.",
+    "3. Verifiers check issuer credentials against the EBSI ledger; a consumer scans the serial number to view and verify the passport."
+   ]
+  }
+ ],
+ "implementations": [
+  {
+   "name": "IOTA Notarization Toolkit (single notarization, audit trails, Proof of Inclusion)",
+   "url": "https://github.com/iotaledger/notarization",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-09-24; release poi-v0.1.0 2026-09-24, v0.1.27 2026-08-20",
+   "evidence_level": "substantive",
+   "note": "README and poi-rs README read. Proof of Inclusion builds portable evidence that a transaction, event or object version is in a certified checkpoint and verifies it locally against a committee anchored from a trusted genesis blob or a trusted node; it is the closest open-source analogue to an offline anchor-receipt verifier."
+  },
+  {
+   "name": "IOTA DPP demonstrator",
+   "url": "https://github.com/iotaledger/dpp-demonstrator",
+   "kind": "pilot",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-03-10 (created 2025-04-07)",
+   "evidence_level": "substantive",
+   "note": "README read. Orchestrates IOTA Identity, Hierarchies (Root of Authority to Manufacturer to Repairer), custom notarization, Gas Station and an NFT reward system. README states it is a reference showcase, not a fully functional or regulation-compliant DPP."
+  },
+  {
+   "name": "IOTA Identity (did:iota)",
+   "url": "https://github.com/iotaledger/identity",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-09-30",
+   "evidence_level": "metadata_only",
+   "note": "Repository metadata only; method behaviour taken from the IOTA DID Method Specification v2.0 (new-iota-did-method-spec)."
+  },
+  {
+   "name": "IOTA Hierarchies",
+   "url": "https://github.com/iotaledger/hierarchies",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-08-20",
+   "evidence_level": "metadata_only",
+   "note": "On-ledger federated authorisation used by the DPP demonstrator."
+  },
+  {
+   "name": "Arianee protocol smart contracts",
+   "url": "https://github.com/Arianee/arianee-contracts",
+   "kind": "other",
+   "license": "MIT",
+   "last_activity": "pushed 2026-06-17",
+   "evidence_level": "substantive",
+   "note": "ArianeeSmartAsset.sol read: OpenZeppelin ERC-721 upgradeable, bytes32 imprint per token (hydrateToken, tokenImprint), issuer-only updateTokenURI, destroy, recoverTokenToIssuer, hashed access per token. Which chains carry live deployments and adoption claims are vendor statements (secondary_only)."
+  },
+  {
+   "name": "Arianee SDK",
+   "url": "https://github.com/Arianee/arianee-sdk",
+   "kind": "sdk",
+   "license": "not stated (GitHub API license field null, checked 2026-10-19)",
+   "last_activity": "pushed 2026-10-17",
+   "evidence_level": "metadata_only",
+   "note": "GitHub reports no licence."
+  },
+  {
+   "name": "OpenTimestamps client",
+   "url": "https://github.com/opentimestamps/opentimestamps-client",
+   "kind": "validator",
+   "license": "not stated (GitHub reports NOASSERTION)",
+   "last_activity": "pushed 2026-02-07",
+   "evidence_level": "substantive",
+   "note": "README read: ots stamp and ots verify; verification needs a Bitcoin block header from a local node; pending receipts complete through calendar servers."
+  },
+  {
+   "name": "python-opentimestamps",
+   "url": "https://github.com/opentimestamps/python-opentimestamps",
+   "kind": "sdk",
+   "license": "LGPL-3.0-or-later",
+   "last_activity": "pushed 2025-03-18; latest tag python-opentimestamps-v0.4.5",
+   "evidence_level": "substantive",
+   "note": "Library for creating and verifying OpenTimestamps proofs; LICENSE file read (LGPL version 3 or later)."
+  },
+  {
+   "name": "EBSI Timestamp service",
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/timestamp-introduction",
+   "kind": "platform",
+   "license": "not stated",
+   "last_activity": "documentation last updated 2026-09-30",
+   "evidence_level": "substantive",
+   "note": "Hash-only anchoring with records and versions; documentation read, no endpoint called."
+  },
+  {
+   "name": "EBSI Track and Trace service",
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/track-and-trace/track-and-trace-introduction",
+   "kind": "platform",
+   "license": "not stated",
+   "last_activity": "documentation last updated 2026-09-30 (introduction) and 2026-10-01 (create guide)",
+   "evidence_level": "substantive",
+   "note": "Documents plus append-only events with creator, write and delegate permissions; a search excerpt claimed EUPL-1.2 for the API page, the fetched page showed no licence. Create guide read: access check, read paths, scopes and contract write methods recorded under L04."
+  },
+  {
+   "name": "TRACE4EU Battery Materials Traceability pilot",
+   "url": "https://ebsi.eu/projects/trace4eu-battery-materials-traceability",
+   "kind": "pilot",
+   "license": "not stated",
+   "last_activity": "not checked (page undated)",
+   "evidence_level": "substantive",
+   "note": "Official EBSI page read; it contains leftover placeholder text. Credential flow for PCF, mining certifications, due diligence and a battery passport credential; no repository linked."
+  },
+  {
+   "name": "ethr-did-resolver",
+   "url": "https://github.com/decentralized-identity/ethr-did-resolver",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-10-19",
+   "evidence_level": "metadata_only",
+   "note": "DID resolver for Ethereum addresses; relevant for issuer keys anchored on EVM chains."
+  },
+  {
+   "name": "Ethereum execution-apis",
+   "url": "https://github.com/ethereum/execution-apis",
+   "kind": "other",
+   "license": "CC0-1.0",
+   "last_activity": "pushed 2026-10-17; release v1.0.0-beta.7 2026-06-10",
+   "evidence_level": "substantive",
+   "note": "OpenRPC specification of the JSON-RPC interface; block tag definitions, eth_getTransactionReceipt example, and eth_getProof (src/eth/state.yaml) read. The maintained specification carries eth_getProof although EIP-1186 is Stagnant."
+  },
+  {
+   "name": "Hyperledger Fabric",
+   "url": "https://github.com/hyperledger/fabric",
+   "kind": "platform",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-10-14; latest release v3.1.5 (2026-06-18)",
+   "evidence_level": "metadata_only",
+   "note": "Permissioned ledger used by most consortium DPP prototypes (10.3390/app14114874, 10.1109/platcon63925.2024.10830745, RecAl); private-data behaviour from the documentation (new-fabric-private-data-docs)."
+  },
+  {
+   "name": "Hyperledger Besu",
+   "url": "https://github.com/besu-eth/besu",
+   "kind": "platform",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-10-19; latest release 26.10.0 (2026-10-16)",
+   "evidence_level": "metadata_only",
+   "note": "Ethereum client used for permissioned EVM consortia (QBFT rootchain in 10.1109/access.2026.3726043). The GitHub API resolved hyperledger/besu to besu-eth/besu."
+  },
+  {
+   "name": "Circularise platform",
+   "url": "https://circularise.com/faq",
+   "kind": "platform",
+   "license": "not stated",
+   "last_activity": "not checked",
+   "evidence_level": "secondary_only",
+   "note": "Vendor claims only: public blockchain, patented Smart Questioning with zero-knowledge proofs. The FAQ page read gave no chain, hash or storage facts."
+  },
+  {
+   "name": "Minespider platform",
+   "url": "https://eitrawmaterials.eu/success-stories/minespider-revolutionising-traceability-product-passports",
+   "kind": "platform",
+   "license": "not stated",
+   "last_activity": "success story dated 2024-11-26",
+   "evidence_level": "secondary_only",
+   "note": "Third-party success story; describes blockchain-based passports linked shipment to shipment; ledger architecture not described. Search excerpts mention a public permissioned chain and three visibility layers (not verified)."
+  }
+ ],
+ "literature": [
+  {
+   "doi": "10.1080/00207543.2025.2464161",
+   "title": "Blockchain-based digital product passport: design principles and demonstration",
+   "year": 2025,
+   "venue": "International Journal of Production Research",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Two-year design-science end-to-end blockchain DPP prototype in textiles; eleven design principles; upstream traceability and downstream event access."
+  },
+  {
+   "doi": "10.1109/dcoss-iot58021.2023.00067",
+   "title": "Digital Product Passports: Use Cases Framework and Technical Architecture Using DLT and Smart Contracts",
+   "year": 2023,
+   "venue": "2023 19th International Conference on Distributed Computing in Smart Systems and the Internet of Things (DCOSS-IoT)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Generic DPP use-case framework and DLT plus smart-contract reference architecture with prototype code (repository not located)."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.101",
+   "title": "Trustworthy Digital Product Passports based on Distributed Ledgers- A Review and Guidelines",
+   "year": 2026,
+   "venue": "Procedia Computer Science (listed as Unknown Journal by the tool)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Review of academic and industrial DLT DPP initiatives; three benefits (tamper-proof integrity, peer-to-peer private sharing, decentralised lifecycle from creation to deactivation) and design guidelines."
+  },
+  {
+   "doi": "10.3390/app14114874",
+   "title": "Digital Product Passport Implementation Based on Multi-Blockchain Approach with Decentralized Identifier Provider",
+   "year": 2024,
+   "venue": "Applied Sciences",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Hyperledger Fabric DPP with cheqd DIDs for product identity; data model entities; CRUD performance tests."
+  },
+  {
+   "doi": "10.3390/logistics10080177",
+   "title": "A DLT- and ZKP-Enabled Framework for Privacy-Preserving Digital Product Passports in Maritime Container Logistics",
+   "year": 2026,
+   "venue": "Logistics",
+   "found_via": "mcp__consensus__search",
+   "relevance": "EPCIS 2.0 + oneM2M + IOTA + Groth16; Merkle batching of anchors; p95 latency 48 ms without and 500 ms with proofs, 7 events/s per host, 304 ms proving, 9.8 ms verification on a single-host local IOTA testbed."
+  },
+  {
+   "doi": "10.1109/compsac69091.2026.00308",
+   "title": "From Factory Floor to Digital Product Passport: A Dual-Chain NFT Architecture for Automotive Traceability",
+   "year": 2026,
+   "venue": "2026 IEEE 50th Annual Computers, Software, and Applications Conference (COMPSAC)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Private GoQuorum manufacturing chain plus lazy-minted ERC-721 on Polygon redeemed by passkey; 17-indicator comparison with Polygon and Ethereum mainnet."
+  },
+  {
+   "doi": "10.1016/j.sftr.2025.100847",
+   "title": "Using composable NFTs and blockchain for the creation of EV battery digital passports with sustainability and traceability features",
+   "year": 2025,
+   "venue": "Sustainable Futures",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Composable NFTs per battery component with off-chain storage; cost and security analysis; simulation only; Layer 2 scaling suggested; code said to be on GitHub (not located)."
+  },
+  {
+   "doi": "10.1109/eee-am58328.2023.10395342",
+   "title": "Blockchain and Nested Tokens for Tracking, Reusing, and Recycling Batteries",
+   "year": 2023,
+   "venue": "2023 Asia Meeting on Environment and Electrical Engineering (EEE-AM)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Nested tokens plus IPFS; regulator-issued certifications gate operations; gas cost comparison on Ethereum and Polygon."
+  },
+  {
+   "doi": "10.1080/00207543.2025.2518262",
+   "title": "Blockchain-enabled sustainability of Li-ion batteries supply chain: tracking and sourcing eco-friendly materials",
+   "year": 2025,
+   "venue": "International Journal of Production Research",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "ERC-721 per item with IPFS metadata and ten smart contracts for a Li-ion supply chain."
+  },
+  {
+   "doi": "10.1016/j.autcon.2023.104783",
+   "title": "A blockchain non-fungible token-enabled ‘passport’ for construction waste material cross-jurisdictional trading",
+   "year": 2023,
+   "venue": "Automation in Construction",
+   "found_via": "mcp__consensus__search",
+   "relevance": "NFT identifiers prevent duplicate passport issuance; prototype and simulated case study."
+  },
+  {
+   "doi": "10.1109/3scea68071.2026.11603125",
+   "title": "Enabling Fine-Grained Traceability in Digital Product Passports Through Extended Fractional NFTs",
+   "year": 2026,
+   "venue": "2026 IEEE International Conference on Smart Sustainable Systems for Computer and Engineering Applications (3SCEA)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Extended fractional NFTs for component-level traceability; self-deployable system with selective sharing."
+  },
+  {
+   "doi": "10.24251/hicss.2025.527",
+   "title": "Human-Centric Digital Product Passports: Enabling Verifiable Information Sharing for Sustainable Consumption through Wallet-Based Identity Management and Zero-Knowledge Proofs",
+   "year": 2025,
+   "venue": "HICSS (listed as Unknown Journal by the tool)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Textile DPP prototype with wallet identities, NFTs and ZKPs for verifiable sharing of sensitive supply-chain data."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.145",
+   "title": "Enhancing Digital Product Passports with Material Fingerprinting and Decentralized Non-Conformity Signals: Application to Critical Raw Materials",
+   "year": 2026,
+   "venue": "Procedia Computer Science (listed as Unknown Journal by the tool)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Ma-DiTraCe: SSI and VCs with an optional blockchain anchoring layer; signed material fingerprints."
+  },
+  {
+   "doi": "10.1016/j.digbus.2026.100167",
+   "title": "LLM-based JSON mapping and blockchain integration for Digital Product Passports",
+   "year": 2026,
+   "venue": "Digital Business",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Stores standardised JSON DPP records via smart contracts on the Waves blockchain; batch-level deployment."
+  },
+  {
+   "doi": "10.20944/preprints202402.1194.v2",
+   "title": "Collaborative Smart Production Supply Chains with Blockchain Based Digital Product Passports",
+   "year": 2024,
+   "venue": "Preprints (preprint)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Secret Network confidential contracts with Gaia-X functions exchanging AAS digital nameplate and carbon footprint data."
+  },
+  {
+   "doi": "10.1109/platcon63925.2024.10830745",
+   "title": "Blockchain-Based Digital Product Passport for the Circular Economy",
+   "year": 2024,
+   "venue": "PlatCon 2024 (journal article per tool)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Fabric channels per lifecycle stage plus DIDs for unified cross-channel queries."
+  },
+  {
+   "doi": "10.5281/zenodo.15745203",
+   "title": "RecAl Digital Product Passport: Enhancing Traceability and Transparency in the Aluminum Supply Chain",
+   "year": 2025,
+   "venue": "Zenodo (repository)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Permissioned Fabric DPP design for aluminium with recycled-content verification."
+  },
+  {
+   "doi": "10.5281/zenodo.16534672",
+   "title": "OMEGA: Report on developed tools and technical documentation",
+   "year": 2025,
+   "venue": "Zenodo (repository)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Project deliverable on DLT-based DPP tools (content not read)."
+  },
+  {
+   "doi": "10.1016/j.spc.2025.01.014",
+   "title": "Enabling a dynamic information flow in digital product passports during product use phase: A literature review and proposed framework",
+   "year": 2025,
+   "venue": "Sustainable Production and Consumption",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Review of 25 DPP frameworks: blockchain is the most adopted data-security solution; proposes verified third-party updates in the use phase."
+  },
+  {
+   "doi": "10.1007/s43615-026-00927-x",
+   "title": "A Comprehensive Review of Digital Product Passports in Sustainable Manufacturing: Current State, Challenges, and Future Directions",
+   "year": 2026,
+   "venue": "Circular Economy and Sustainability",
+   "found_via": "mcp__consensus__search",
+   "relevance": "225-study review: blockchain most frequently proposed, with scalability, cost and energy concerns; trend to hybrid architectures."
+  },
+  {
+   "doi": "10.3390/digital6020043",
+   "title": "Digital Product Passports: A Systematic Literature Review on Framework Design and Validation",
+   "year": 2026,
+   "venue": "Digital",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Validation of DPP frameworks (including blockchain-anchored archetypes) is mostly illustrative; few evaluate scalability or lifecycle operation."
+  },
+  {
+   "doi": "10.1109/dapps65174.2025.00018",
+   "title": "A Seafood Supply Chain Application Built on European Blockchain Services Infrastructure",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on Decentralized Applications and Infrastructures (DAPPS)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "EBSI track and trace with W3C VCs, eIDAS signatures and qualified timestamps; zero transaction fees; legacy integration hard."
+  },
+  {
+   "doi": "10.3390/bdcc7020079",
+   "title": "Verification of Education Credentials on European Blockchain Services Infrastructure (EBSI): Action Research in a Cross-Border Use Case between Belgium and Italy",
+   "year": 2023,
+   "venue": "Big Data Cogn. Comput.",
+   "found_via": "mcp__consensus__search",
+   "relevance": "EBSI pilot evidence on governance onboarding, wallet conformance and identity interoperability barriers."
+  },
+  {
+   "doi": "10.18420/oid2025_02",
+   "title": "The role of EBSI in eIDAS - how qualified ledger with governmental trust anchor could shape eIDAS ecosystem",
+   "year": 2025,
+   "venue": "Open Identity Summit 2025 (listed as Unknown Journal by the tool)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Links EBSI to the eIDAS 2 qualified electronic ledger trust service."
+  },
+  {
+   "doi": "10.1109/access.2026.3726043",
+   "title": "A Rootchain-Centric Hierarchical Multichain Architecture for National Blockchain Infrastructures: Design Rationale and Empirical Evaluation for Mid-Sized Nations With Consolidated Digital Governance",
+   "year": 2026,
+   "venue": "IEEE Access",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Besu QBFT rootchain with DID/VC gating: about 800 write TPS and p99 finality under 3 s on 5 to 14 validators; governance key scheme."
+  },
+  {
+   "doi": "10.1109/access.2025.3650525",
+   "title": "Hyperledger-Based Blockchain System for Peer-to-Peer Energy Trading in Electromobility Systems",
+   "year": 2026,
+   "venue": "IEEE Access",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Fabric Gateway with hashed meter evidence and private data collections; about 1.6 to 1.7 thousand TPS, p99 submit-to-commit near 1 s in a tuned testbed."
+  },
+  {
+   "doi": "10.3390/su151813738",
+   "title": "Hyperledger Fabric-Based Tea Supply Chain Production Data Traceable Scheme",
+   "year": 2023,
+   "venue": "Sustainability",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Fabric plus IPFS with only hash and traceability code on chain; Caliper write latency 0.97 to 6.26 s, read 0.1 to 4.62 s."
+  },
+  {
+   "doi": "10.1109/icces67310.2025.11336296",
+   "title": "A Decentralized System for NFT Metadata Generation Using IPFS",
+   "year": 2025,
+   "venue": "2025 10th International Conference on Communication and Electronics Systems (ICCES)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "ERC721A plus IPFS: about 185,324 gas per transaction, 13.5 s latency, 9.3 TPS, 99% IPFS retrieval."
+  },
+  {
+   "doi": "10.1109/blockchain67634.2025.00025",
+   "title": "A Blockchain-Based Access Control Architecture Using Non-Transferable NFTs and Gas-Efficient IPFS URI Management",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on Blockchain (Blockchain)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Soulbound ERC-721 access tiers; base32 CIDs save about 6% storage gas over base58; extra EVM storage slots cost about 20,000 gas each."
+  },
+  {
+   "doi": "10.48550/arxiv.2209.14517",
+   "title": "The Fungibility of Non-Fungible Tokens: A Quantitative Analysis of ERC-721 Metadata",
+   "year": 2022,
+   "venue": "ArXiv",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "45% of ERC-721 tokens in a six-month corpus fail a basic metadata permanence criterion: evidence for link-rot failure modes."
+  },
+  {
+   "doi": "10.1109/access.2022.3226128",
+   "title": "NFT-Based Traceability and Ownership Management of Medical Devices",
+   "year": 2022,
+   "venue": "IEEE Access",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "NFT as digital twin of a device with decentralised storage; smart-contract functions, cost and security analysis."
+  },
+  {
+   "doi": "10.1016/j.bcra.2023.100129",
+   "title": "A Systematic Literature Review of the Tension between the GDPR and Public Blockchain Systems",
+   "year": 2022,
+   "venue": "Blockchain: research and applications",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "114-paper review: right to be forgotten, controller identification and jurisdiction issues on public chains, and mitigation approaches."
+  },
+  {
+   "doi": "10.1109/brains67003.2025.11302955",
+   "title": "Privacy-Preserving “Right to Be Forgotten” in Configurable Blockchain Tokenization: A Cryptographic Audit Framework",
+   "year": 2025,
+   "venue": "BRAINS 2025 (proceedings)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Key destruction (crypto-shredding) with ZK audit proofs and on-chain references to off-chain sensitive data."
+  },
+  {
+   "doi": "10.1109/brains67003.2025.11302930",
+   "title": "Redacting Without Regret: A Dual-Layer Framework for Policy-Compliant Blockchains",
+   "year": 2025,
+   "venue": "BRAINS 2025 (proceedings)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Local and global, reversible redaction for permissioned chains."
+  },
+  {
+   "doi": "10.1109/access.2025.3594656",
+   "title": "Enabling Secure and Scalable GDPR-Compliant Blockchain-based e-KYC with Efficient Redaction",
+   "year": 2025,
+   "venue": "IEEE Access",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Redactable chain with chameleon hashes and threshold key rotation; an alternative to off-chain erasure."
+  },
+  {
+   "doi": "10.1007/s43615-026-01102-y",
+   "title": "Data Governance for Compliance with the European Digital Product Passport: a Systematic Literature Review",
+   "year": 2026,
+   "venue": "Circular Economy and Sustainability",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Compares data trusts, data cooperatives and blockchain-based governance against interoperability, security, data-owner control and competitiveness."
+  },
+  {
+   "doi": "10.1016/j.rser.2022.112078",
+   "title": "Blockchain review for battery supply chain monitoring and battery trading",
+   "year": 2022,
+   "venue": "Renewable and Sustainable Energy Reviews",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Systematic review supporting blockchain battery tracking platforms across production, reuse and recycling."
+  },
+  {
+   "doi": "10.3390/su14063321",
+   "title": "Traceability Platform Based on Green Blockchain: An Application Case Study in Dairy Supply Chain",
+   "year": 2022,
+   "venue": "Sustainability",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Only Algorand evidence located: an EU-funded (Typicalp) PDO cheese traceability platform on Algorand pure proof-of-stake; traceability, not a DPP."
+  },
+  {
+   "doi": "10.3390/engproc2026150004",
+   "title": "A Governance-Aware, Privacy-Preserving, Event-Driven Conceptual Model for Supply Chain Traceability",
+   "year": 2026,
+   "venue": "TechSys 2026 (Engineering Proceedings)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Conceptual model: compact signed event headers on ledger, off-ledger payloads and governance policy anchored by hash, outputs a product passport and an audit pack."
+  },
+  {
+   "doi": "10.14569/ijacsa.2026.0170602",
+   "title": "Zero-Disclosure Material Passports for Verifiable Provenance in Multi-Tier Supply Networks",
+   "year": 2026,
+   "venue": "International Journal of Advanced Computer Science and Applications",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Non-ledger comparator: aggregate-signature provenance proof of fixed 192 bytes with commitment-based selective disclosure, compared against blockchain approaches."
+  }
+ ],
+ "conformance_implications": [
+  {
+   "layer": "L08",
+   "test_objective": "The digest anchored for a passport equals the digest of the passport bytes that the SUT serves or supplies.",
+   "observable": "Passport bytes (sample or fetched) and an anchor receipt naming digest, algorithm or multihash code, chain id, and transaction or record reference.",
+   "oracle": "Recomputed digest under the receipt's declared algorithm and canonicalisation (raw bytes, or RFC 8785 when declared) must equal the receipt digest. Basis: ESPR Art. 11(g) integrity objective; EBSI Timestamp stores only the hash; Arianee imprint is a hash of the asset data.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "integrity.anchor_hash",
+   "fixtures_needed": "Pairs of passport documents and receipts: matching, one byte changed, JSON reordered (canonicalisation trap), unknown algorithm id, multihash length mismatch. EBSI-style multibase base64url multihash strings (prefix u, sha2-256 code 0x12, length 0x20) and a variant with the wrong prefix.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "The anchoring record is included in a ledger block or checkpoint that chains to a trust root pinned in the test pack.",
+   "observable": "Portable inclusion proof: OpenTimestamps .ots receipt plus Bitcoin block headers; IOTA Proof of Inclusion plus genesis blob or committee; EIP-1186 accountProof/storageProof plus a block header with stateRoot.",
+   "oracle": "Merkle path or trie walk from the leaf to the root succeeds and the root is authenticated by the pinned trust root (OpenTimestamps verify semantics; IOTA ProofVerifier checks; EIP-1186 proof structure). Digest match, path validity and root trust are separate findings.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "integrity.inclusion_proof",
+   "fixtures_needed": "Valid and tampered .ots files with pinned headers; IOTA PoI proofs with a test genesis blob; EIP-1186 proofs from a local dev chain with its header; a proof against an unpinned root.",
+   "reusable_suite": "IOTA poi-rs ProofVerifier (https://github.com/iotaledger/notarization, Apache-2.0); python-opentimestamps (LGPL-3.0-or-later) as reference implementations, not as dependencies",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "The anchoring transaction succeeded and is final on the declared chain at evaluation time.",
+   "observable": "Receipt status, block number, block hash, and the finalized or safe block number from a ledger node.",
+   "oracle": "eth_getTransactionReceipt status 0x1 and block number at or below the finalized tag (execution-apis BlockTag definitions); for EBSI, a timestamp record with blockNumber and transactionHash.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "ledger.read (allowlisted read-only ledger transport; needs a transport-policy contract change)",
+   "fixtures_needed": "Loopback JSON-RPC mock returning success, reverted (0x0), unknown transaction, and re-orged block answers.",
+   "reusable_suite": "Ethereum execution-apis OpenRPC specification (https://github.com/ethereum/execution-apis) for response shapes",
+   "network_needed": "live-sut"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Token metadata served at tokenURI or uri(id) is valid against the token standard's metadata schema and the declared passport schema.",
+   "observable": "Metadata JSON document.",
+   "oracle": "ERC-721 metadata JSON schema (name, description, image) or ERC-1155 metadata schema; passport JSON Schema pinned in the profile.",
+   "existing_check": "data.jsonschema",
+   "existing_capability": "data.jsonschema",
+   "new_capability_needed": "none",
+   "fixtures_needed": "Pinned ERC-721 and ERC-1155 metadata schemas transcribed from the EIPs (CC0); valid and invalid metadata samples.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L06",
+   "test_objective": "Bytes retrieved for a CID hash to that CID.",
+   "observable": "CID string and the returned raw block or CAR stream.",
+   "oracle": "Multihash digest in the CID equals the digest of each received block; incomplete CAR stream is a retrieval failure (IPFS Trustless Gateway specification).",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "storage.cid_verify",
+   "fixtures_needed": "Raw blocks and CAR files for CIDv0 and CIDv1, a truncated CAR, a block that does not match.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L01",
+   "test_objective": "Ledger references in the carrier, passport or receipt are syntactically valid.",
+   "observable": "CID strings, CAIP-2 chain ids, contract addresses, tokenIds, DIDs.",
+   "oracle": "IPFS CID decoding rules (34-byte 0x12 0x20 CIDv0; version varint 0x01; reject reserved versions and trailing bytes); CAIP-2 regexes; W3C DID 1.1 syntax; IOTA DID method syntax. did:ebsi syntax per the EBSI DID method page (base58btc multibase, starts with z, decodes to 17 bytes with version byte 1 for legal entities).",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "identifier.ledger_ref",
+   "fixtures_needed": "Valid and malformed CIDs (base32, base58btc, multibase-prefixed CIDv0), chain ids, did:iota strings with and without network id. did:ebsi strings: valid, wrong multibase prefix, wrong decoded length, wrong version byte.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "The carrier identifier resolves to a passport whose declared ledger reference points to the same product.",
+   "observable": "Resolved passport, its id, its ledger reference, and the item document at the ledger reference target (when the target is an HTTPS URL).",
+   "oracle": "Carrier identifier equals passport id (identifier.consistency); compare_item against the document behind tokenURI or the anchored document.",
+   "existing_check": "identifier.resolve, identifier.consistency",
+   "existing_capability": "identifier.resolve, identifier.consistency",
+   "new_capability_needed": "none (ledger-side existence needs ledger.read)",
+   "fixtures_needed": "Loopback resolver and passport host that embed a token reference and serve the tokenURI document.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "Version history is append-only and each version hash matches its archived document.",
+   "observable": "Ordered version list from the operator API or a captured EBSI record (version hashes, block data) and archived documents.",
+   "oracle": "Declared update rule in the profile; no version removed or reordered; each archived version hashes to its listed hash.",
+   "existing_check": "persistence.versions",
+   "existing_capability": "persistence.versions",
+   "new_capability_needed": "none for the order rule; integrity.anchor_hash for per-version hash checks",
+   "fixtures_needed": "Captured record with three versions, one with a reordered list, one with a rewritten version.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "A contract that claims ERC-4906 signals every metadata change.",
+   "observable": "supportsInterface(0x49064906) answer and a captured log set covering a metadata change.",
+   "oracle": "ERC-4906: MetadataUpdate or BatchMetadataUpdate MUST be emitted when token JSON metadata changes.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "ledger.events",
+   "fixtures_needed": "Captured logs with and without the update event around a metadata change.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "After an on-ledger deactivation (burn, destroy, record revocation, DID deactivation), the passport stays available with a clear status for the retention period.",
+   "observable": "Resolver and passport responses after the deactivation event.",
+   "oracle": "ESPR Art. 9(2)(i) and Art. 11(e) availability for the period set in the delegated act; profile-declared status field.",
+   "existing_check": "identifier.resolve (availability only)",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "lifecycle.deactivation",
+   "fixtures_needed": "Loopback SUT that burns a token and either keeps or drops the passport.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "No restricted field and no personal data appears in public on-chain payloads or public token metadata.",
+   "observable": "Captured transaction calldata, event data, and public metadata JSON.",
+   "oracle": "Profile access policy (restricted paths and canaries); ESPR Art. 10(1)(e); EDPB Guidelines 02/2025 v2 advice against plain personal data on chain.",
+   "existing_check": "access.restricted_fields (HTTP channels only)",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "access.onchain_leak",
+   "fixtures_needed": "Captured payloads with and without canary values; a payload holding an unsalted hash of a low-entropy field.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "Restricted passport data held off chain obeys the access policy per role.",
+   "observable": "Operator API answers per role.",
+   "oracle": "Declared access policy (dppce.accesspolicy/1).",
+   "existing_check": "access.restricted_fields",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "none",
+   "fixtures_needed": "Reuse existing access fixtures; add a passport that embeds a ledger reference.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L06",
+   "test_objective": "The passport names a back-up DPP service provider where the profile requires it, independent of ledger replication.",
+   "observable": "Passport field for the back-up provider reference.",
+   "oracle": "ESPR Annex III point (l) and Art. 10(4) via the profile rule pack (applies only when a delegated act requires the field).",
+   "existing_check": "data.rules",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "none",
+   "fixtures_needed": "Passport with and without the reference.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "The anchor author is the declared economic operator or its authorised service provider.",
+   "observable": "Transaction sender or timestampedBy, issuer DID, and a pinned DID document or registry snapshot.",
+   "oracle": "Sender key or DID controller equals the key bound to the operator identifier in the pinned DID document; did:iota not deleted or deactivated.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "integrity.issuer_binding",
+   "fixtures_needed": "Pinned DID documents (did:iota, did:ethr, did:ebsi) and receipts signed by matching and non-matching keys; a deleted DID.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "A claim that the ledger is a qualified electronic ledger is backed by a provider on an EU trusted list.",
+   "observable": "Declared qualified trust service provider and service identifier.",
+   "oracle": "Regulation (EU) No 910/2014 as amended, Art. 45l(1) and Art. 45k(2); trusted-list entry.",
+   "existing_check": "none",
+   "existing_capability": "evidence.qualified_seal (interface_only, related)",
+   "new_capability_needed": "evidence.qualified_ledger",
+   "fixtures_needed": "Pinned trusted-list snapshot with and without the service.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L09",
+   "test_objective": "The identifier in the mock EU registry matches the passport identifier, whatever the ledger reference.",
+   "observable": "Mock registry record and passport id.",
+   "oracle": "Registry consistency rule of the engine; ESPR recital 41 split between decentralised storage and central registry.",
+   "existing_check": "registry.consistency",
+   "existing_capability": "registry.mock",
+   "new_capability_needed": "none",
+   "fixtures_needed": "Mock registry entries for ledger-anchored passports.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L04",
+   "test_objective": "A token contract declares the interfaces it claims.",
+   "observable": "supportsInterface answers or a pinned ABI and interface manifest.",
+   "oracle": "ERC-165 ids: 0x80ac58cd (ERC-721), 0x5b5e139f (ERC-721 metadata), 0xd9b67a26 (ERC-1155), 0x0e89341c (ERC-1155 metadata), 0x49064906 (ERC-4906).",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "ledger.contract_interface",
+   "fixtures_needed": "Captured eth_call answers from a local dev chain.",
+   "reusable_suite": "none",
+   "network_needed": "live-sut"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "After an erasure request, personal data held off chain is gone while the on-chain anchor no longer links to a person.",
+   "observable": "Off-chain endpoint answer for the erased record; remaining on-chain value.",
+   "oracle": "EDPB Guidelines 02/2025 v2 erasure approaches (delete off-chain data, salts or keys); profile-declared erasure behaviour.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "persistence.erasure",
+   "fixtures_needed": "Loopback SUT with an erasure endpoint; captured salted-hash anchor.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "An EBSI Track and Trace document creator is an allow-listed DID before it writes.",
+   "observable": "HEAD /v1/track-and-trace/accesses?creator={did} status code from a loopback mock of the EBSI read API, or a recorded response as a sample artifact.",
+   "oracle": "204 means the DID may create documents, 404 means it is not listed (new-ebsi-create-tnt-doc); a passport whose anchor creator DID gets 404 fails the issuer-binding objective.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "integrity.issuer_binding (with a ledger.read transport for the live variant)",
+   "fixtures_needed": "Recorded 204 and 404 responses; a passport naming an anchor creator DID.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  }
+ ],
+ "failure_modes": [
+  {
+   "layer": "L08",
+   "fault": "The anchor hash is computed over a non-canonical JSON serialisation, so a semantically identical re-served document no longer matches.",
+   "detectable_by": "integrity.anchor_hash with a reordered-key fixture and the receipt's declared canonicalisation."
+  },
+  {
+   "layer": "L08",
+   "fault": "The receipt names no hash algorithm or a multihash code that does not match the digest length.",
+   "detectable_by": "Receipt parsing in integrity.anchor_hash; multihash length check."
+  },
+  {
+   "layer": "L08",
+   "fault": "The receipt points to a reverted transaction (status 0x0) or a block that was re-orged out.",
+   "detectable_by": "ledger.read against a mock or live node; finalized tag comparison."
+  },
+  {
+   "layer": "L08",
+   "fault": "An inclusion proof verifies against a root that the verifier never authenticated (for example a self-supplied block header).",
+   "detectable_by": "integrity.inclusion_proof requires a pinned trust root and reports root trust as a separate finding."
+  },
+  {
+   "layer": "L01",
+   "fault": "A CID string fails CIDv0 or CIDv1 decoding (wrong multibase, trailing bytes, reserved version).",
+   "detectable_by": "identifier.ledger_ref decode rules from the IPFS CID specification."
+  },
+  {
+   "layer": "L01",
+   "fault": "The receipt states a bare numeric chain id or a chain name instead of a namespaced chain id, so the anchor is ambiguous across chains.",
+   "detectable_by": "CAIP-2 syntax check in identifier.ledger_ref."
+  },
+  {
+   "layer": "L06",
+   "fault": "The off-chain document behind an anchor or CID is no longer pinned or hosted (link rot).",
+   "detectable_by": "Retrieval failure in identifier.resolve or storage.cid_verify; repeated over time needs persistence.scheduled (interface_only)."
+  },
+  {
+   "layer": "L06",
+   "fault": "A gateway returns bytes that do not hash to the requested CID.",
+   "detectable_by": "storage.cid_verify block digest comparison."
+  },
+  {
+   "layer": "L10",
+   "fault": "tokenURI or the JSON behind it changes without a MetadataUpdate event although the contract claims ERC-4906.",
+   "detectable_by": "ledger.events on captured logs plus supportsInterface(0x49064906)."
+  },
+  {
+   "layer": "L10",
+   "fault": "The token is burned or destroyed and the resolver drops the passport before the retention period ends, or keeps serving it with no deactivated marker.",
+   "detectable_by": "lifecycle.deactivation on a loopback SUT; identifier.resolve availability."
+  },
+  {
+   "layer": "L10",
+   "fault": "A version is silently replaced instead of appended (mutable pointer with no history).",
+   "detectable_by": "persistence.versions comparing successive captures; per-version hash checks."
+  },
+  {
+   "layer": "L07",
+   "fault": "Restricted or personal data is written in clear to calldata, event data or public token metadata.",
+   "detectable_by": "access.onchain_leak canary search on captured payloads."
+  },
+  {
+   "layer": "L07",
+   "fault": "An unsalted hash of a low-entropy personal field is anchored on a public chain, which allows dictionary reversal.",
+   "detectable_by": "access.onchain_leak dictionary test over declared low-entropy fields."
+  },
+  {
+   "layer": "L07",
+   "fault": "After an erasure request the off-chain endpoint still returns the record (200) while the operator claims erasure.",
+   "detectable_by": "persistence.erasure on a loopback SUT."
+  },
+  {
+   "layer": "L08",
+   "fault": "The issuer DID (for example did:iota with deleted_did set, or a deactivated document) is still presented as a live issuer.",
+   "detectable_by": "integrity.issuer_binding against a pinned DID document with the deletion flag."
+  },
+  {
+   "layer": "L08",
+   "fault": "The anchor was written by a key not bound to the declared economic operator.",
+   "detectable_by": "integrity.issuer_binding comparison of sender key and pinned DID document."
+  },
+  {
+   "layer": "L03",
+   "fault": "The passport is only readable through a proprietary chain client or wallet, with no open HTTP read path.",
+   "detectable_by": "identifier.resolve fails to reach a JSON passport from the carrier payload; manual.review of the ICS."
+  },
+  {
+   "layer": "L08",
+   "fault": "An anchor receipt gives a raw hex SHA-256 digest where the ledger stores a multibase base64url multihash (or the reverse), so a correct document fails comparison or a wrong one is compared against the wrong bytes.",
+   "detectable_by": "integrity.anchor_hash decodes the declared encoding, checks the multihash code and length, and reports an encoding mismatch separately from a digest mismatch."
+  }
+ ],
+ "sources": [
+  {
+   "id": "espr-reg-2024-1781",
+   "title": "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC (Text with EEA relevance)",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "https://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Original OJ text, OJ L, 2024/1781, 28.6.2024 (read this session: recitals 1 to 122 and Arts 1 to 26); Art. 27(1)(c) and Annex III from the 2026-10-13 record (consolidated 02024R1781-20240628)",
+   "publication_date": "2024-06-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; reuse terms not re-read this session",
+   "what_it_shows": "Recital 41: DPP rests on a decentralised data system set up and managed by economic operators, plus a Commission registry of identifiers; recital 38: back-up copy via an independent DPP service provider; Art. 9, Art. 10(1)-(4), Art. 11 points (a)-(h) and second to fourth subparagraphs, Art. 12, Art. 13 (registry by 19 July 2026 storing at least unique identifiers, commodity codes, battery identifiers; 13(5) registration identifier is not proof of compliance), Art. 14 web portal. No storage technology, ledger, blockchain or the word decentralised appears in the articles read; 'decentralised' appears only in recitals 41 and 42."
+  },
+  {
+   "id": "reg-eu-2023-1542",
+   "title": "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries, amending Directive 2008/98/EC and Regulation (EU) 2019/1020 and repealing Directive 2006/66/EC",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "https://publications.europa.eu/resource/cellar/d0065c31-2ce3-11ee-95a2-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Original OJ text, OJ L 191, 28.7.2023 (recitals 123 to 127 read this session)",
+   "publication_date": "2023-07-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; reuse terms not re-read this session",
+   "what_it_shows": "Recital 126: battery passport relies on a decentralised data system set up and maintained by economic operators; no ledger technology named; recital 124 restricted information; recital 125 authorised third-party updates."
+  },
+  {
+   "id": "dpp-registry-implementing-regulation-2026-1778",
+   "title": "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementing rules for the digital product passport registry (title as in prior record, truncated there)",
+   "issuing_body": "European Commission",
+   "url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "OJ L, 2026/1778 (from the 2026-10-13 record; not re-read)",
+   "publication_date": "2026-07-17",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Registry duties: API or UI registration, persistent registration identifier, proof of registration with Commission timestamp, hash and qualified electronic seal, versioned logging (prior record). No ledger named in the prior summary."
+  },
+  {
+   "id": "new-eidas2-reg-2024-1183",
+   "title": "Regulation (EU) 2024/1183 of the European Parliament and of the Council of 11 April 2024 amending Regulation (EU) No 910/2014 as regards establishing the European Digital Identity Framework",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "https://publications.europa.eu/resource/cellar/459993a1-068e-11ef-a251-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Original OJ text, OJ L, 2024/1183, 30.4.2024",
+   "publication_date": "2024-04-30",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; reuse terms not read",
+   "what_it_shows": "Recitals 68 and 69 on electronic ledgers and technological neutrality; Art. 3(52) and (53) definitions; Art. 45k legal effects and presumption for qualified ledgers; Art. 45l(1)(a)-(d) requirements, (2) presumption via standards, (3) implementing acts by 21 May 2025."
+  },
+  {
+   "id": "new-impl-reg-2025-2531",
+   "title": "Commission Implementing Regulation (EU) 2025/2531 laying down rules for the application of Regulation (EU) No 910/2014 as regards reference standards and specifications for qualified electronic ledgers",
+   "issuing_body": "European Commission",
+   "url": "https://publications.europa.eu/resource/cellar/cbd048d0-daeb-11f0-8da2-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Adopted 16 December 2025; OJ L series dated 17.12.2025; ELI http://data.europa.eu/eli/reg_impl/2025/2531/oj",
+   "publication_date": "2025-12-17",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Implements Art. 45l(3) of Regulation (EU) No 910/2014. Annex (paraphrased): ledger reports generated automatically; record origin through advanced electronic signatures or seals based on qualified certificates; chronological order through cryptographic hash links or qualified timestamps; integrity with immediate change detection; keys in certified secure cryptographic devices; practice statement, security, logging, vulnerability scanning and termination plans; extra reference architecture and governance guidance for providers that use distributed ledger technology (point 3(b)). Annex reference list includes ETSI EN 319 401, ETSI EN 319 122-1, ETSI EN 319 132-1, ETSI TS 119 182-1, ISO/IEC 15408:2022, ISO 23257:2022, ISO/TS 23635:2022, IETF RFC 7515, FIPS PUB 140-3 (numbers only; content of those documents not read). Entry into force on the twentieth day after publication."
+  },
+  {
+   "id": "new-etsi-en-319-401",
+   "title": "ETSI EN 319 401 (number and version only, as listed in the annex of Implementing Regulation (EU) 2025/2531)",
+   "issuing_body": "ETSI",
+   "url": "not retrieved",
+   "edition_or_version": "V3.1.1 (2024-06) as listed in the annex",
+   "publication_date": "2024-06 (as listed)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "not checked; bibliographic only",
+   "what_it_shows": "Bibliographic only. Content not opened or summarised."
+  },
+  {
+   "id": "new-iso-23257-2022",
+   "title": "ISO 23257:2022 (number only, as listed in the annex of Implementing Regulation (EU) 2025/2531)",
+   "issuing_body": "ISO",
+   "url": "not retrieved",
+   "edition_or_version": "2022 (as listed)",
+   "publication_date": "2022",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only. The implementing regulation adds DLT reference-architecture and governance references for DLT-based qualified ledgers; which listed documents fall under point 3(b) was not confirmed. Content not opened or summarised."
+  },
+  {
+   "id": "new-iso-ts-23635-2022",
+   "title": "ISO/TS 23635:2022 (number only, as listed in the annex of Implementing Regulation (EU) 2025/2531)",
+   "issuing_body": "ISO",
+   "url": "not retrieved",
+   "edition_or_version": "2022 (as listed)",
+   "publication_date": "2022",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only. Content not opened or summarised."
+  },
+  {
+   "id": "new-data-act-reg-2023-2854",
+   "title": "Regulation (EU) 2023/2854 (Data Act)",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "https://publications.europa.eu/resource/cellar/ef51c6ab-a06c-11ee-b164-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Original OJ text (Art. 2(39), recital 104, Arts 24 to 36 read)",
+   "publication_date": "not captured this session",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Art. 2(39) defines smart contract; Art. 36(1)(a)-(e) essential requirements for smart contracts executing data-sharing agreements; Art. 36(2)-(5) conformity assessment, declaration, presumption via harmonised standards."
+  },
+  {
+   "id": "new-edpb-guidelines-02-2025",
+   "title": "Guidelines 02/2025 on processing of personal data through blockchain technologies",
+   "issuing_body": "European Data Protection Board",
+   "url": "https://www.edpb.europa.eu/documents/guideline/guidelines-022025-on-processing-of-personal-data-through-blockchain_en",
+   "edition_or_version": "v2 (final after public consultation); PDF /system/files/2026-07/edpb_guidelines_202502_blockchain_v2_en.pdf; v1 consultation 14 April to 9 June 2025",
+   "publication_date": "2026-07-07 (date listed on the page)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the page read",
+   "what_it_shows": "Avoid personal data on chain; salted or keyed hashes and encrypted data remain personal data; erasure by deleting off-chain data, keys or salts; preference for permissioned chains; nodes as possible controllers; DPIA content."
+  },
+  {
+   "id": "new-eubof-dpp-report-2024",
+   "title": "Digital Product Passports: A Blockchain-based Perspective",
+   "issuing_body": "EU Blockchain Observatory and Forum (DG CONNECT); authors Ioannis Vlachos, Tonia Damvakeraki",
+   "url": "https://blockchain-observatory.ec.europa.eu/document/download/b6e3c85c-43c1-405b-aba8-e49a71249ef7_en?filename=EUBOF_DPP_report.pdf",
+   "edition_or_version": "53-page PDF; pp. 1-8 and 10-29 read; appendix interviews pp. 32-53 not read",
+   "publication_date": "2024-05-03",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Disclaimer: views of the authors, not the Commission; reuse terms not read",
+   "what_it_shows": "Implementation options table (tokenisation, VCs, full on-chain, hybrid IPFS/Filecoin storage, multi-reviewer, oracles, decentralised oracles); TRACE4EU and Re|Source descriptions; vendor interviews; footnote that immutability is not a prerequisite of the EU DPP."
+  },
+  {
+   "id": "new-eip-721",
+   "title": "ERC-721: Non-Fungible Token Standard",
+   "issuing_body": "Ethereum Improvement Proposals (authors William Entriken, Dieter Shirley, Jacob Evans, Nastassia Sachs)",
+   "url": "https://eips.ethereum.org/EIPS/eip-721",
+   "edition_or_version": "Final; created 2018-01-24; requires EIP-165",
+   "publication_date": "2018-01-24",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC0",
+   "what_it_shows": "Required functions and events; interface ids 0x80ac58cd and 0x5b5e139f; metadata JSON fields; URI may be mutable."
+  },
+  {
+   "id": "new-eip-1155",
+   "title": "ERC-1155: Multi Token Standard",
+   "issuing_body": "Ethereum Improvement Proposals",
+   "url": "https://eips.ethereum.org/EIPS/eip-1155",
+   "edition_or_version": "Final; created 2018-06-17; requires EIP-165",
+   "publication_date": "2018-06-17",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC0",
+   "what_it_shows": "Interface ids 0xd9b67a26, 0x4e2312e0 (receiver), 0x0e89341c (metadata); TransferSingle, TransferBatch, URI events; {id} substitution; metadata JSON with properties and localization; supply 1 for non-fungible types."
+  },
+  {
+   "id": "new-eip-4906",
+   "title": "EIP-721 Metadata Update Extension (ERC-4906)",
+   "issuing_body": "Ethereum Improvement Proposals",
+   "url": "https://eips.ethereum.org/EIPS/eip-4906",
+   "edition_or_version": "Final; created 2022-03-13; requires EIP-165 and EIP-721",
+   "publication_date": "2022-03-13",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC0",
+   "what_it_shows": "MetadataUpdate and BatchMetadataUpdate events; interface id 0x49064906; MUST emit on JSON metadata change."
+  },
+  {
+   "id": "new-eip-1186",
+   "title": "RPC-Method to get Merkle Proofs - eth_getProof (EIP-1186)",
+   "issuing_body": "Ethereum Improvement Proposals",
+   "url": "https://eips.ethereum.org/EIPS/eip-1186",
+   "edition_or_version": "Stagnant; created 2018-06-24",
+   "publication_date": "2018-06-24",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC0",
+   "what_it_shows": "Parameters and returned account and storage proofs; offline verification against a trusted block for devices that cannot run a light client."
+  },
+  {
+   "id": "new-ethereum-execution-apis",
+   "title": "Ethereum execution-apis (Execution Layer JSON-RPC specification)",
+   "issuing_body": "Ethereum (github.com/ethereum)",
+   "url": "https://github.com/ethereum/execution-apis",
+   "edition_or_version": "v1.0.0-beta.7 (2026-06-10); repository pushed 2026-10-17",
+   "publication_date": "2026-06-10",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC0-1.0",
+   "what_it_shows": "BlockTag definitions (earliest, finalized, safe, latest, pending) in src/schemas/block.yaml; eth_getTransactionReceipt and transaction methods in src/eth/transaction.yaml."
+  },
+  {
+   "id": "new-caip-2",
+   "title": "CAIP-2: Blockchain ID Specification",
+   "issuing_body": "Chain Agnostic Standards Alliance (ChainAgnostic/CAIPs)",
+   "url": "https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md",
+   "edition_or_version": "Final; created 2019-12-05",
+   "publication_date": "2019-12-05",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC0",
+   "what_it_shows": "namespace:reference syntax, character classes, 41-character maximum, examples eip155:1 and bip122:..."
+  },
+  {
+   "id": "new-ipfs-cid-spec",
+   "title": "CID (Content IDentifier)",
+   "issuing_body": "IPFS specifications (editors Marcin Rataj, Robin Berjon)",
+   "url": "https://specs.ipfs.tech/cid/",
+   "edition_or_version": "Permanent; dated 26 June 2026",
+   "publication_date": "2026-06-26",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the page",
+   "what_it_shows": "CIDv1 binary layout, multibase string forms, decoding algorithm and rejection rules. The older github.com/multiformats/cid repository declares itself outdated and points here."
+  },
+  {
+   "id": "new-ipfs-trustless-gateway",
+   "title": "Trustless Gateway Specification",
+   "issuing_body": "IPFS specifications",
+   "url": "https://specs.ipfs.tech/http-gateways/trustless-gateway/",
+   "edition_or_version": "status badge 'reliable'; last updated 5 March 2026",
+   "publication_date": "2026-03-05",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the page",
+   "what_it_shows": "/ipfs/{cid} path, application/vnd.ipld.raw and application/vnd.ipld.car, format parameter precedence, client-side block verification against the CID multihash."
+  },
+  {
+   "id": "new-w3c-did-1-1",
+   "title": "Decentralized Identifiers (DIDs) v1.1",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/did-1.1/",
+   "edition_or_version": "Candidate Recommendation Snapshot, 05 March 2026 (https://www.w3.org/TR/2026/CR-did-1.1-20260305/)",
+   "publication_date": "2026-03-05",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence (not re-read)",
+   "what_it_shows": "DID syntax; verifiable data registry concept with distributed ledgers as one example; resolution delegated to DID Resolution v0.3."
+  },
+  {
+   "id": "new-iota-did-method-spec",
+   "title": "IOTA DID Method Specification v2.0",
+   "issuing_body": "IOTA Foundation (IOTA Documentation)",
+   "url": "https://docs.iota.org/developer/iota-identity/references/iota-did-method-spec",
+   "edition_or_version": "v2.0; page last updated 2024-08-23",
+   "publication_date": "2024-08-23",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the page read",
+   "what_it_shows": "did:iota syntax, Identity object storage on the MoveVM ledger, resolution via indexer, controller voting, deactivation and irreversible deletion (deleted_did)."
+  },
+  {
+   "id": "new-iota-notarization",
+   "title": "IOTA Notarization Toolkit (repository README and poi-rs README)",
+   "issuing_body": "IOTA Foundation (github.com/iotaledger)",
+   "url": "https://github.com/iotaledger/notarization",
+   "edition_or_version": "v0.1.27 (2026-08-20), trails-v0.1.5 (2026-08-20), poi-v0.1.0 (2026-09-24)",
+   "publication_date": "2026-09-24",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Single notarization, audit trails, and Proof of Inclusion with offline verification against a committee anchored from a trusted genesis blob or trusted node; list of verification checks."
+  },
+  {
+   "id": "new-iota-dpp-demonstrator",
+   "title": "IOTA DPP Showcase (dpp-demonstrator) README",
+   "issuing_body": "IOTA Foundation (github.com/iotaledger)",
+   "url": "https://github.com/iotaledger/dpp-demonstrator",
+   "edition_or_version": "main branch; pushed 2026-03-10",
+   "publication_date": "2025-04-07 (repository created)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Component map (Identity, Hierarchies, custom notarization, Gas Station, NFT rewards), authorisation chain, setup steps; disclaimer that it is not a regulation-compliant DPP."
+  },
+  {
+   "id": "new-ebsi-timestamp-docs",
+   "title": "EBSI Timestamp Introduction",
+   "issuing_body": "EBSI (European Blockchain Services Infrastructure), hub.ebsi.eu",
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/timestamp-introduction",
+   "edition_or_version": "Last updated 2026-09-30; no API version on the page",
+   "publication_date": "2026-09-30",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Hash-only anchoring; records with ordered version hashes, owners and revocation status; on-chain fields hash, timestampedBy, block number, block timestamp; Proof of Authority."
+  },
+  {
+   "id": "new-ebsi-create-timestamp",
+   "title": "EBSI Create Timestamp guide",
+   "issuing_body": "EBSI, hub.ebsi.eu",
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/create-timestamp",
+   "edition_or_version": "paths under /v1/timestamp/ shown on the page",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Token scope openid timestamp:write via DCQL query and presentation; write methods timestampHashes, timestampRecordHashes, timestampRecordVersionHashes, appendRecordVersionHashes; submission by eth_sendRawTransaction; GET /v1/timestamp/timestamps/{timestampId} and /v1/timestamp/records/{recordId}[/versions[/{versionId}]] with response fields; timestampId derivation; hashes given as SHA-256 wrapped in a multihash and encoded multibase base64url (prefix u). Re-fetched 2026-10-19 by the continuation agent; no DID method is named on this page."
+  },
+  {
+   "id": "new-ebsi-track-and-trace-docs",
+   "title": "EBSI Track and Trace Introduction",
+   "issuing_body": "EBSI, hub.ebsi.eu",
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/track-and-trace/track-and-trace-introduction",
+   "edition_or_version": "Last updated 2026-09-30",
+   "publication_date": "2026-09-30",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the page (a search excerpt claimed EUPL-1.2 for the API page)",
+   "what_it_shows": "Smart contract plus REST API; hash-derived document ids; event fields; creator, write and delegate permissions; whitelisted legal-entity DIDs; append-only events."
+  },
+  {
+   "id": "new-ebsi-track-and-trace-api",
+   "title": "EBSI Track and Trace API page",
+   "issuing_body": "EBSI, hub.ebsi.eu",
+   "url": "https://hub.ebsi.eu/api/track-and-trace",
+   "edition_or_version": "no version shown on the fetched page; search excerpt: v1.0.0 stable, v2 in test not backward compatible",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the fetched page",
+   "what_it_shows": "Endpoint names only (list/get documents, events, accesses, check access, contract details, ABI); no methods, paths or auth details on the fetched page. A search excerpt from the pilot API reference (hub.ebsi.eu/apis/pilot/track-and-trace/v1/...) shows GET /track-and-trace/v1/documents/:documentId/events and a tnt_write scope; these differ from the create-tnt-doc guide, see anomalies."
+  },
+  {
+   "id": "new-ebsi-trace4eu-battery",
+   "title": "TRACE4EU Battery Materials Traceability",
+   "issuing_body": "EBSI (ebsi.eu project page)",
+   "url": "https://ebsi.eu/projects/trace4eu-battery-materials-traceability",
+   "edition_or_version": "undated page with placeholder text",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Credential flow for a battery passport on EBSI: PCF, mining certification, due diligence, battery passport credential, legal identity and Catena-X membership; verification against the EBSI ledger."
+  },
+  {
+   "id": "new-fabric-private-data-docs",
+   "title": "Hyperledger Fabric documentation: Private data",
+   "issuing_body": "Hyperledger Fabric project (LF Decentralized Trust)",
+   "url": "https://hyperledger-fabric.readthedocs.io/en/latest/private-data/private-data.html",
+   "edition_or_version": "'latest' documentation; no version label on the page",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not checked",
+   "what_it_shows": "Private data collections, on-chain hashes, GetPrivateDataHash (since v1.4.2), automatic purge by block count, PurgePrivateData leaves hash as evidence."
+  },
+  {
+   "id": "new-opentimestamps-client",
+   "title": "OpenTimestamps client README",
+   "issuing_body": "OpenTimestamps project (github.com/opentimestamps)",
+   "url": "https://github.com/opentimestamps/opentimestamps-client",
+   "edition_or_version": "repository pushed 2026-02-07",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "GitHub reports NOASSERTION; not stated",
+   "what_it_shows": "ots stamp and verify; calendar aggregation; Bitcoin block header needed for verification; complete versus incomplete timestamps."
+  },
+  {
+   "id": "new-python-opentimestamps",
+   "title": "python-opentimestamps",
+   "issuing_body": "OpenTimestamps project",
+   "url": "https://github.com/opentimestamps/python-opentimestamps",
+   "edition_or_version": "latest tag python-opentimestamps-v0.4.5; pushed 2025-03-18",
+   "publication_date": "2025-03-18",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "LGPL-3.0-or-later (LICENSE file)",
+   "what_it_shows": "Library for creating and verifying OpenTimestamps proofs; consensus-critical core modules separated."
+  },
+  {
+   "id": "new-arianee-contracts",
+   "title": "arianee-contracts (Foundry project with Arianee Protocol smart contracts)",
+   "issuing_body": "Arianee (github.com/Arianee)",
+   "url": "https://github.com/Arianee/arianee-contracts",
+   "edition_or_version": "HEAD; src/V0/ArianeeSmartAsset.sol, Solidity 0.8.28; pushed 2026-06-17",
+   "publication_date": "2026-06-17",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MIT (SPDX header and repository licence)",
+   "what_it_shows": "ERC-721 SmartAsset with per-token imprint, issuer-only URI update, destroy, recovery and hashed access."
+  },
+  {
+   "id": "new-arianee-docs",
+   "title": "Arianee Protocol documentation (v2.0 index page) and search excerpts",
+   "issuing_body": "Arianee",
+   "url": "https://docs.arianee.org/v2.0/docs",
+   "edition_or_version": "v2.0 path; excerpts say v2.1 is current and v2.0 'not live yet'",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Vendor description: passports represented as NFTs deployed on several chains; chain names only in search excerpts (POA, Polygon)."
+  },
+  {
+   "id": "new-circularise-faq",
+   "title": "Circularise FAQ and search excerpts on Smart Questioning",
+   "issuing_body": "Circularise B.V.",
+   "url": "https://circularise.com/faq",
+   "edition_or_version": "page as of retrieval",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Vendor claims of public-blockchain passports and patented Smart Questioning with ZKPs; no technical detail on the page read."
+  },
+  {
+   "id": "new-minespider-eit-story",
+   "title": "Minespider success story (EIT RawMaterials)",
+   "issuing_body": "EIT RawMaterials",
+   "url": "https://eitrawmaterials.eu/success-stories/minespider-revolutionising-traceability-product-passports",
+   "edition_or_version": "published 2024-11-26",
+   "publication_date": "2024-11-26",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Blockchain-based passports linking shipments; no ledger architecture detail."
+  },
+  {
+   "id": "new-iota-identity-repo",
+   "title": "iotaledger/identity repository metadata",
+   "issuing_body": "IOTA Foundation",
+   "url": "https://github.com/iotaledger/identity",
+   "edition_or_version": "pushed 2026-09-30",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "W3C DID and VC implementation for the IOTA MoveVM."
+  },
+  {
+   "id": "new-ethr-did-resolver",
+   "title": "ethr-did-resolver repository metadata",
+   "issuing_body": "Decentralized Identity Foundation (github.com/decentralized-identity)",
+   "url": "https://github.com/decentralized-identity/ethr-did-resolver",
+   "edition_or_version": "pushed 2026-10-19",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "DID resolver for Ethereum addresses with key management."
+  },
+  {
+   "id": "rfc-8785",
+   "title": "JSON Canonicalization Scheme (JCS)",
+   "issuing_body": "IETF (RFC Editor)",
+   "url": "https://www.rfc-editor.org/info/rfc8785",
+   "edition_or_version": "RFC 8785, June 2020 (prior record, not re-read)",
+   "publication_date": "2020-06",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust terms (not re-read)",
+   "what_it_shows": "Canonical JSON serialisation usable before hashing an anchored passport."
+  },
+  {
+   "id": "rfc-9162",
+   "title": "Certificate Transparency Version 2.0",
+   "issuing_body": "IETF (RFC Editor)",
+   "url": "https://www.rfc-editor.org/info/rfc9162",
+   "edition_or_version": "RFC 9162, December 2021 (prior record, not re-read)",
+   "publication_date": "2021-12",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust terms (not re-read)",
+   "what_it_shows": "Non-ledger comparator: Merkle-tree append-only log with inclusion proofs."
+  },
+  {
+   "id": "w3c-vcdm-2-0",
+   "title": "Verifiable Credentials Data Model v2.0",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/vc-data-model-2.0/",
+   "edition_or_version": "2.0 (Recommendation snapshot of 15 May 2025; prior record, not re-read)",
+   "publication_date": "2025-05-15",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence (not re-read)",
+   "what_it_shows": "Credential model used by ledger-anchored VC designs (TRACE4EU)."
+  },
+  {
+   "id": "gs1-digital-link-uri-syntax-1-7-0",
+   "title": "GS1 Digital Link Standard: URI Syntax",
+   "issuing_body": "GS1",
+   "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "edition_or_version": "Release 1.7.0 (prior record, not re-read)",
+   "publication_date": "not re-read",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "GS1 IP policy (prior record)",
+   "what_it_shows": "Carrier-facing product URI that a ledger DPP still needs."
+  },
+  {
+   "id": "iso-iec-15459-1-2014",
+   "title": "ISO/IEC 15459-1:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 1 (title as in prior record)",
+   "issuing_body": "ISO/IEC",
+   "url": "https://www.iso.org/standard/54779.html",
+   "edition_or_version": "Edition 3 (prior record)",
+   "publication_date": "2014",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only: named in ESPR Annex III for identifiers."
+  },
+  {
+   "id": "en-18216-2026",
+   "title": "Digital product passport - Data exchange protocols",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L03."
+  },
+  {
+   "id": "en-18219-2026",
+   "title": "Digital product passport - Unique identifiers",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L01."
+  },
+  {
+   "id": "en-18220-2026",
+   "title": "Digital product passport - Data carriers",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L02."
+  },
+  {
+   "id": "en-18221-2026",
+   "title": "Digital product passport - Data storage, archiving, and data persistence",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L06."
+  },
+  {
+   "id": "en-18222-2026",
+   "title": "Digital Product Passport - Application Programming Interfaces (APIs) for the product passport (title truncated in prior record)",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L04."
+  },
+  {
+   "id": "en-18223-2026",
+   "title": "Digital Product Passport - System interoperability",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L05."
+  },
+  {
+   "id": "en-18239-2026",
+   "title": "Digital product passport - Access rights management, information system security, and business confidentiality (title truncated in prior record)",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L07."
+  },
+  {
+   "id": "en-18246-2026",
+   "title": "Digital product passport - Data authentication, reliability and integrity",
+   "issuing_body": "CEN/CENELEC",
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "edition_or_version": "2026 (prior record)",
+   "publication_date": "2026",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Paid standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; title used as neutral layer label L08."
+  },
+  {
+   "id": "new-ebsi-did-method",
+   "title": "The did:ebsi DID method | DevHub",
+   "issuing_body": "EBSI, hub.ebsi.eu",
+   "url": "https://hub.ebsi.eu/vc-framework/did/legal-entities",
+   "edition_or_version": "no version on the page; last updated 2026-09-30",
+   "publication_date": "2026-09-30",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "did:ebsi syntax with optional network segment (omitted for the EBSI chain); method-specific id = version byte (1 for legal entities) plus 16 random bytes, multibase base58btc so it starts with z; resolution over HTTPS through the DID Registry, with a valid-at parameter to resolve at credential issuance time; ES256 is the minimum algorithm, JsonWebKey2020 recommended."
+  },
+  {
+   "id": "new-ebsi-create-tnt-doc",
+   "title": "Create a TnT Doc",
+   "issuing_body": "EBSI, hub.ebsi.eu",
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/track-and-trace/create-tnt-doc",
+   "edition_or_version": "paths under /v1/track-and-trace/; last updated 2026-10-01",
+   "publication_date": "2026-10-01",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "HEAD /v1/track-and-trace/accesses?creator={did} (204 allowed, 404 not listed); GET documents/{documentId}, /accesses, /events; scopes openid track-and-trace:create and openid track-and-trace:write; contract methods createDocument, grantAccess (write or delegate), writeEvent(documentHash, externalHash, sender, origin, metadata, optional timestamp and timestampProof); submission by eth_sendRawTransaction. documentId derivation not stated on this page."
+  }
+ ],
+ "open_questions": [
+  "Can replication on a distributed ledger, or a ledger operated by a DPP service provider, satisfy the ESPR Art. 10(4) back-up copy duty? The texts read do not say; the Art. 11 delegated act on service providers is not adopted (prior record).",
+  "Will product delegated acts or the Art. 11 service-provider act mention ledgers, anchoring or qualified electronic ledgers at all? Nothing located.",
+  "Does the EU DPP registry (Implementing Regulation (EU) 2026/1778) use any ledger for its timestamps or logs? Not stated in the prior summary; not re-read.",
+  "Contract change needed in the engine: section 9 transport policy has no notion of a read-only ledger endpoint (JSON-RPC node, IPFS gateway, EBSI read API). A ledger.read capability needs an allowlist, a pinned chain id, a finality rule, and recording of responses for replay. Report to the owner; do not edit architecture.md.",
+  "How should ICS and IXIT express a chain-qualified anchor (chain id, contract, token or record id, algorithm, canonicalisation) and the pinned trust root for inclusion proofs?",
+  "Should the engine accept EIP-1186 proofs as evidence given the EIP is Stagnant? The maintained execution-apis specification does carry eth_getProof (src/eth/state.yaml), so the response shape is specified; the owner should decide which reference the oracle cites.",
+  "Would an operator that anchors on a qualified electronic ledger (eIDAS 2, Art. 45l; Implementing Regulation (EU) 2025/2531) gain any presumption relevant to ESPR Art. 11(g)? No link between the two regimes was found in the texts read.",
+  "The EUBOF report states that the Battery Pass platform relies on a private permissioned blockchain; this was not checked against the Battery Pass technical guidance and may be a mischaracterisation.",
+  "Partly resolved 2026-10-19: the EBSI create-timestamp guide shows SHA-256 digests as multihash in multibase base64url (prefix u). Still open: whether the Timestamp API accepts other multihash codes, and how Track and Trace derives documentId (the create-tnt-doc guide does not say).",
+  "Which algorithm must a conformance engine assume when a receipt does not declare canonicalisation? Proposal: treat as raw bytes and report the assumption."
+ ],
+ "anomalies": [
+  "EUR-Lex ELI addresses ending in /eng returned empty content to WebFetch for Regulation (EU) 2024/1781, 2023/1542, 2024/1183 and Implementing Regulation (EU) 2025/2531 on 2026-10-19, contrary to the task note; the Publications Office cellar DOC_1 manifestations (found through publications.europa.eu/resource/celex/<CELEX> redirects) were used instead.",
+  "ESPR Art. 27(1)(c) and Annex III are cited from the 2026-10-13 record (consolidated 02024R1781-20240628); recitals 1 to 122 and Arts 1 to 26 of the original OJ text were re-read this session and agree with the prior record on Arts 9 to 13.",
+  "Regulation (EU) No 910/2014 as amended required the qualified-ledger implementing act by 21 May 2025 (Art. 45l(3)); Implementing Regulation (EU) 2025/2531 was adopted on 16 December 2025.",
+  "The GitHub API resolved hyperledger/besu to besu-eth/besu (repository moved organisation); Fabric remains at hyperledger/fabric.",
+  "EBSI version labels conflict: the create-timestamp guide shows /v1/timestamp/ paths, search excerpts list Timestamp API pilot v3 (marked to be unsupported) and test v5 (not backward compatible); Track and Trace excerpts show v1.0.0 stable and v2 in test. Recorded as of 2026-10-19.",
+  "A search excerpt attributed an EUPL-1.2 licence to the EBSI Track and Trace API page; the fetched page showed no licence.",
+  "The official TRACE4EU battery page contains placeholder text (lorem ipsum), so its content may be unfinished.",
+  "The multiformats/cid GitHub repository declares itself outdated; the maintained specification is specs.ipfs.tech/cid (Permanent, 26 June 2026).",
+  "EIP-1186 is Stagnant, but the maintained execution-apis specification (v1.0.0-beta.7) defines eth_getProof; offline Merkle-proof tests should cite both with their status.",
+  "Arianee documentation path v2.0 is labelled as not live in a search excerpt while v2.1 is said to be current; chain deployments not verified.",
+  "IOTA DPP demonstrator README disclaims regulation compliance; it is a showcase, not a reference implementation of the law.",
+  "The EDPB page lists 07 July 2026 for the final v2 without a separate adoption date; secondary sources agree on 7 July 2026, one older article confuses it with the 8 April 2025 draft.",
+  "SciSpace returned the Belen Saglam SLR (DOI 10.1016/j.bcra.2023.100129) with date 2022-10-10 although the DOI suggests 2023; the year is recorded as returned (2022).",
+  "Nowacki et al. (2023) and Hasan et al. (2025) state that code is public on GitHub; the repositories were not located in this session.",
+  "OpenTimestamps python library: latest tag is v0.4.5 while the latest GitHub release object is v0.4.3 (2022-11-20).",
+  "EBSI Track and Trace path and scope labels conflict: the create-tnt-doc guide (updated 2026-10-01) uses /v1/track-and-trace/... and scopes track-and-trace:create and track-and-trace:write, while a search excerpt of the pilot API reference shows /track-and-trace/v1/documents/:documentId/events and a tnt_write scope. The guide was fetched; the API reference text is a search excerpt only."
+ ],
+ "truncation": "EUBOF report: appendix interviews (pp. 32-53) and pp. 9 not read. ESPR: articles after Art. 26 and the annexes not re-read this session (Art. 27(1)(c) and Annex III from the prior record). Implementing Regulation (EU) 2025/2531: annex summarised from one read; the standards it lists were recorded by number only. Data Act: only Art. 2(39), recital 104 and Arts 24 to 36 read. EDPB guidelines: summary of the final page read, PDF not opened. Literature: abstracts from Consensus and SciSpace only; no full text read; performance numbers are as stated in abstracts. hub.ebsi.eu API reference pages returned endpoint names but no paths or schemas. Circularise whitepaper PDF and Minespider technical pages not read. No Algorand-based DPP pilot was located (one Consensus search and one web search); only an Algorand food-traceability platform (10.3390/su14063321) is recorded. Polygon appears only through prototypes (lazy-minted ERC-721, gas comparisons) and vendor excerpts. Hyperledger Fabric and Besu: repository metadata only; their documentation beyond Fabric private data was not read. Continuation 2026-10-19: EBSI DID Registry API reference and Track and Trace API reference pages were not fetched (search excerpts only); literature DOIs were spot-checked against Crossref for 3 of 40 entries, the rest are as returned by the search tools.",
+ "continuation_note": "Continuation agent, 2026-10-19. Finished the previous agent's last step: re-fetched the EBSI create-timestamp guide and confirmed eth_sendRawTransaction, the /v1/timestamp/ paths and the openid timestamp:write scope; the page names no DID method, so the did:ebsi statement in L01 now cites the EBSI DID method page (new source new-ebsi-did-method, fetched). The guide also names the hash form (SHA-256 multihash, multibase base64url prefix u), which partly resolves an open question and was added to L08. Checked the throughput figures in the summary against the literature entries (Fabric 1.6 to 1.7 thousand TPS in 10.1109/access.2025.3650525; Besu about 800 TPS; ERC721A 9.3 TPS): consistent. Fetched the EBSI Track and Trace create guide (new source new-ebsi-create-tnt-doc) and added its paths, scopes and contract methods to L04 and L03; recorded a path and scope conflict with a pilot API reference excerpt as an anomaly. Crossref confirmed title, venue and year for 10.1109/access.2026.3726043, 10.1007/s43615-026-00927-x and 10.3390/logistics10080177. Added one conformance implication (EBSI creator allow-list check) and one failure mode (digest encoding mismatch); extended two fixtures lists. Open: remaining 37 DOIs not re-checked; EBSI API reference pages and Track and Trace documentId derivation; Fabric and Besu documentation; Circularise and Minespider remain secondary_only; no Algorand DPP pilot located. Rule 5 flags re-checked after the rewrite: all 12 EN, ISO, ISO/IEC and ETSI EN sources have protected_standard true and bibliographic-only components. Arianee SDK licence re-checked with gh api: null."
+}

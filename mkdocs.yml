@@ -57,6 +57,7 @@ nav:
   - Project:
       - Readiness and limitations: readiness.md
       - Source audit: research/source-audit.md
+      - DPP implementation methods: research/dpp-implementation-methods.md
       - Tool and model routing: research/tool-model-routing.md
       - Open questions: open-questions.md
       - Backlog: backlog.md

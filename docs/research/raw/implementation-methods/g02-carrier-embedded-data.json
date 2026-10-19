@@ -1,0 +1,1651 @@
+{
+ "method_id": "g02-carrier-embedded-data",
+ "name": "Data stored on the carrier and offline access (embedded data, control hashes, signed carrier payloads, multi-carrier products)",
+ "retrieval_date": "2026-10-19",
+ "scope_note": "Extends m09-identification-carriers.json; it does not repeat the identifier schemes, the SGTIN-96 bit layout, the NDEF URI prefix table, NTAG 424 DNA SUN or the resolver behaviour recorded there. Covers: data that travels in the carrier itself (GS1 Digital Link query-string data attributes, GS1 compressed Digital Link URIs including the 2025 'eh'/'ex' EPC forms, NDEF messages with several records, UHF RFID user memory and '+AIDC data' in the EPC bank as defined by the GS1 EPC Tag Data Standard 2.3, the ISO/IEC 20248 DigSig only as TDS encodes it via AI 8030); the optional offline basic data and control hash of the draft DPP standardisation request; signed 2D-code payload precedents (EU Digital COVID Certificate HCERT, ICAO visible digital seals, SMART Health Cards, BSI TR-03137 metadata); products with more than one carrier (linear plus 2D, QR plus NFC, label plus RFID); carrier placement and durability in EU law; and what an engine can and cannot verify offline from a sample artifact. Leaves out: passport payload data models, resolver conformance and online access control (other method files), print-quality grading, and the content of every EN, ISO, IEC, DIN and AFNOR document (bibliographic metadata only, rule 5). NFC Forum specifications (including the Signature RTD) were not opened. The Apple Core NFC page returned no body, so iOS behaviour is not recorded.",
+ "summary": "In this family the carrier is not only a pointer: it also carries data that a reader can use without a network. Three placements exist. First, an optical code holds a URL plus extra content, either GS1 Digital Link data attributes in the query string (for example expiry date AI 17 or a digital signature AI 8030) or a whole signed and compressed payload, as in the EU Digital COVID Certificate (CBOR, COSE_Sign1, zlib, Base45, prefix 'HC1:') and in ICAO visible digital seals (binary header, TLV message zone, raw ECDSA signature, usually in a Data Matrix). Second, an NFC tag holds an NDEF message with several records, for example a URI record first (which phones use for dispatch) followed by a media-type record with embedded data, or a hybrid UHF/NFC tag that outputs a compressed GS1 Digital Link URI with the EPC binary string after an 'eh' or 'ex' marker. Third, a UHF RFID tag holds the EPC in bank 01, optionally followed by '+AIDC data', and further attributes in user memory (bank 11) behind a Data Storage Format Identifier, where TDS 2.3 also places an AI 8030 digital signature in a 352-bit Data Format 17 structure. The EU baseline is thin: ESPR requires a carrier linked to a persistent unique identifier and allows one or more carriers per delegated act, and the Batteries Regulation requires a visible, legible and indelible QR code with high contrast; neither binding text asks for offline data or a control hash. Only the 2024 draft standardisation request lists optional control data (a hash of the registered passport, a counterfeit-information link) and six optional cross-sectoral basic data elements for offline consultation, and asks for offline and online integrity verification. The only binding passport hash in EU law today is in the registry's proof of registration (Implementing Regulation (EU) 2026/1778, Arts 2(16) and 9), with no algorithm, canonical form or file format published. End to end, an issuer serialises the embedded data, signs or hashes it, encodes it into one or more carriers that must agree on the identifier, and a verifier decodes, parses, checks the signature against a pinned trust list, compares the embedded hash or attributes with the online passport when it is reachable, and checks cross-carrier consistency. A conformance engine can do all of this offline from sample artifacts (images, NDEF dumps, EPC hex) with pinned keys, but it cannot prove that the carrier is attached to the genuine product, that a static signed code was not copied, or that print and durability rules hold.",
+ "method_families": [
+  "web-resolver-gs1",
+  "law-baseline",
+  "hybrid",
+  "other"
+ ],
+ "maturity": {
+  "spec_status": "Mixed. The GS1 parts are ratified open standards, but GS1 limits compressed Digital Link URIs to closed systems. The DCC HCERT specification is stable but archived since July 2023 after the EU regulation expired; its trust framework continues under the WHO Global Digital Health Certification Network. ICAO visible digital seals are in force in Doc 9303 (8th edition, Amendment 1 of 14 June 2024). The DPP-specific offline data and control hash exist only as optional items in a 2024 draft Commission text; the adopted request and the resulting EN 18220 and EN 18246 were not read (protected).",
+  "versions_at_retrieval": [
+   {
+    "artifact": "GS1 Digital Link Standard: URI Syntax",
+    "version": "1.7.0",
+    "status": "Ratified Aug 2026",
+    "source_id": "gs1-digital-link-uri-syntax-1-7-0"
+   },
+   {
+    "artifact": "GS1 Digital Link URI: Compression Technical Standard for EPC binary strings",
+    "version": "Release 1.0.0",
+    "status": "Ratified, Jul 2025; not approved for open supply chain standards",
+    "source_id": "new-gs1-dl-compression-epc-1-0-0"
+   },
+   {
+    "artifact": "GS1 Digital Link Standard (legacy, holds the general compression algorithm)",
+    "version": "1.1.4",
+    "status": "PDF cover 'Ratified, Dec 2025'; hub page 'Published January 2026'; legacy, no further updates",
+    "source_id": "new-gs1-dl-1-1-4-legacy"
+   },
+   {
+    "artifact": "EPC Tag Data Standard (TDS)",
+    "version": "2.3",
+    "status": "Ratified, Oct 2025",
+    "source_id": "new-gs1-tds-2-3"
+   },
+   {
+    "artifact": "GS1 Application Identifiers JSON-LD",
+    "version": "owl:versionInfo 1.2; dc:lastModified 2026-01-26",
+    "status": "published dataset",
+    "source_id": "new-gs1-ai-dataset"
+   },
+   {
+    "artifact": "2D Barcodes at Retail Point-of-Sale Implementation Guideline",
+    "version": "Release 1.1",
+    "status": "Ratified, Dec 2025",
+    "source_id": "new-gs1-2d-retail-pos-1-1"
+   },
+   {
+    "artifact": "Electronic Health Certificate Specification (EU DCC HCERT)",
+    "version": "1.0.8 (2023-02-13)",
+    "status": "repository archived 2023-07-11",
+    "source_id": "new-ehn-hcert-spec-1-0-8"
+   },
+   {
+    "artifact": "EU DCC Technical Specifications Volumes 1-5",
+    "version": "not stated on the publication page (Volume 1 file dated 1 Dec 2021)",
+    "status": "page published 22 Feb 2022",
+    "source_id": "new-ec-dcc-techspecs-page"
+   },
+   {
+    "artifact": "Base45 Data Encoding",
+    "version": "RFC 9285 (2022)",
+    "status": "Informational",
+    "source_id": "new-rfc-9285-base45"
+   },
+   {
+    "artifact": "COSE Structures and Process",
+    "version": "RFC 9052 (2022)",
+    "status": "Internet Standard, STD 96; obsoletes RFC 8152 with RFC 9053",
+    "source_id": "new-rfc-9052-cose"
+   },
+   {
+    "artifact": "ICAO Doc 9303 Part 13 Visible Digital Seals",
+    "version": "Eighth Edition 2021; Amendment 1 (14/6/24) and Corrigendum 1 (11/12/20) recorded in the consolidated PDF",
+    "status": "in force",
+    "source_id": "new-icao-9303-p13"
+   },
+   {
+    "artifact": "BSI TR-03137 Part 1 Digital Seal / Part 2 JAB Code",
+    "version": "Part 1 Version 3.0; Part 2 Version 1.0 (no dates on page); a search excerpt showed Part 1 Version 2.5 of 03.12.2021",
+    "status": "published technical guideline",
+    "source_id": "new-bsi-tr-03137"
+   },
+   {
+    "artifact": "SMART Health Cards Framework",
+    "version": "1.4.0",
+    "status": "stable release",
+    "source_id": "new-shc-spec-1-4-0"
+   },
+   {
+    "artifact": "NFC Forum Signature RTD",
+    "version": "2.0 (PDF reportedly dated 2020-02-20)",
+    "status": "not opened; metadata from search only",
+    "source_id": "new-nfc-forum-sig-rtd-2-0"
+   },
+   {
+    "artifact": "Standardisation request M/604 (C(2024) 5423)",
+    "version": "adopted 2024-07-31 (text not read); amendment drafted 2025-09-23 (read); adopted amendment C(2025) 8024 of 2025-11-28 (date from m01, text not read)",
+    "status": "Adopted 2024. The amendment was adopted on 2025-11-28 according to m01; only the September 2025 draft was read here. The draft sets the standards deadline to March 2026 and expiry to March 2028. The ETSI page recorded in m01 shows expiry 2026-06-26.",
+    "source_id": "new-m604-amd-draft-2025-09"
+   },
+   {
+    "artifact": "zxing-cpp (engine QR decoder)",
+    "version": "v3.1.1 (latest release, 2026-07-29); master 2c3dcfeffa (2026-10-06)",
+    "status": "active",
+    "source_id": "new-zxing-cpp-python-binding"
+   }
+  ],
+  "adoption_evidence": "Signed carrier payloads have mass-scale precedent: the EU DCC (HCERT) ran from 1 July 2021 until the regulation expired on 30 June 2023, and the WHO took up the system on 1 July 2023 (new-ec-dcc-page); a dark-web study shows forged certificates that official apps accepted, which shows that issuer key compromise defeats offline checks (10.1145/3530877). ICAO visible digital seals are used on visas and emergency travel documents (new-icao-9303-p13). GS1 2D-in-retail guidance shows linear plus 2D dual marking is the current retail practice, with co-location tests (new-gs1-2d-retail-pos-1-1). For DPPs no deployment of embedded offline basic data or a control hash was located; literature shows QR and RFID as the common DPP carriers (10.1016/j.spc.2025.01.014) and prototypes comparing QR and NFC with DIDs (10.1108/ci-02-2025-0074). Compressed EPC Digital Link URIs for hybrid UHF/NFC tags are ratified but restricted to closed systems (new-gs1-dl-compression-epc-1-0-0).",
+  "regulatory_alignment": "Binding law requires a carrier linked to a persistent unique product identifier, physically present on the product, packaging or accompanying documents (Regulation (EU) 2024/1781, Art. 10(1)(a)-(b)); each delegated act names one or more carriers, their layout and position (Art. 9(2)(b)-(c)) and the granularity (Art. 9(2)(d)); a digital copy of the carrier or identifier goes to dealers and marketplaces free of charge within five working days (Art. 10(3)). Batteries: from 18 February 2027 a QR code per Annex VI Part C, linking LMT, industrial above 2 kWh and EV batteries to the passport (Regulation (EU) 2023/1542, Art. 13(6)), printed or engraved visibly, legibly and indelibly, or on packaging and documents where that is not possible (Art. 13(7)); alternative smart labels by delegated act (Art. 13(8)); new markings after re-use, repurposing or remanufacturing (Art. 13(9)); Annex VI Part C asks only for high contrast and a size that common hand-held readers decode. No binding text asks for offline data, an embedded hash or a signed carrier payload. The draft standardisation request (new-m604-draft-sr-2024-02, Annex II Part B points 2.4-2.6, 2.10 and 7.1-7.2) is the only EU text that names them, as optional items. The registry proof of registration carries a passport-version hash (Implementing Regulation (EU) 2026/1778, Arts 2(16) and 9(2)(e)), which is the natural reference for a carrier control hash, but the algorithm and input are unpublished."
+ },
+ "layers": {
+  "L01_unique_identifiers": {
+   "applies": "yes",
+   "mechanism": "The embedded payload must name the same identifier as the carrier link. GS1 Digital Link: the primary key and qualifiers stay in the path (/01/{GTIN-14}/10/{lot}/21/{serial}); embedded data attributes go in the query string as AI=value pairs and must not repeat the path identity (URI Syntax 1.7.0, sec. 4.10). A compressed EPC Digital Link holds no visible identifier: https://{stem}/eh{lower-case hex EPC binary} or https://{stem}/ex{base64url EPC binary}; the identifier appears only after decoding with TDS (worked example https://example.com/eh30164596f40c0e5cbe991a83 = SGTIN-96, header 0x30, filter 0, partition 5, company prefix 9528765, item reference 012345, serial 123456789123 = (01)09528765123457(21)123456789123; this session recomputed the decode and the base64url form 'MBZFlvQMDly-mRqD' with the standard library and both match the standard). DCC: identity of the signed object is inside the CBOR (claim -260 key 1), not in a URL; the key identifier kid is the first 8 bytes of the SHA-256 of the signer certificate in DER. ICAO VDS: header carries issuing country (C40, 2 bytes), signer identifier (2-letter country + 2 alphanumerics) and certificate reference (5 hex characters in header version 3; length-prefixed in version 4); certificate reference 0...0 is reserved for tests. TDS user memory: the DigSig domain authority identifier equals the GS1 Party GLN (AI 417) of the accountable organisation.",
+   "specs": [
+    {
+     "source_id": "gs1-digital-link-uri-syntax-1-7-0",
+     "component": "sec. 4.9 path order, sec. 4.10 data attributes, sec. 4.12 canonical form"
+    },
+    {
+     "source_id": "new-gs1-dl-compression-epc-1-0-0",
+     "component": "sec. 4.2.1 Option A 'eh', sec. 4.2.2 Option B 'ex', worked examples"
+    },
+    {
+     "source_id": "new-gs1-tds-2-3",
+     "component": "sec. 17 (DAID = PGLN AI 417); Table 9-x Bank 11 DSFID row"
+    },
+    {
+     "source_id": "new-ehn-hcert-spec-1-0-8",
+     "component": "CWT claims, kid derivation"
+    },
+    {
+     "source_id": "new-icao-9303-p13",
+     "component": "sec. 2.2 Table 1 header, sec. 2.2.1 signer identifier and certificate reference"
+    },
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Art. 10(1)(a)"
+    },
+    {
+     "source_id": "new-gs1-2d-retail-pos-1-1",
+     "component": "role table (same GTIN in all GS1 symbologies); exact match of attributes across symbols"
+    }
+   ],
+   "variants": [
+    "identity in URL path plus attributes in query",
+    "identity only inside a compressed EPC binary string",
+    "identity only inside a signed binary payload (CBOR or VDS TLV)",
+    "identity in EPC bank, attributes in user memory"
+   ],
+   "observable_black_box": "From a decoded sample: the identifier in the path, the identifier after decompression or EPC decoding, the identifier inside a signed payload, and whether they are equal. Check digits and AI syntax are checkable offline.",
+   "law_delta": "Law requires only a persistent unique identifier reachable through the carrier (ESPR Art. 10(1)(a)); it says nothing about identifiers inside embedded payloads or their equality across encodings."
+  },
+  "L02_data_carriers": {
+   "applies": "yes",
+   "mechanism": "Optical: QR Code or Data Matrix with a GS1 Digital Link URI and query attributes, for example https://id.example/01/09528765123457/21/ABC?17=271231&8030={base64url DigSig up to 90 chars}; AI 17 format N2+N6 YYMMDD and validAsDataAttribute true; AI 8030 'DIGSIG' format N4+Z..90, regex [0-9A-Za-z_-]{1,90}, requires a serialised key such as 01+21, 8006+21, 8010+8011, 8003, 8004, 8017, 8018, 00, 253 or 255 (AI JSON-LD 1.2). Extension (non-GS1) query keys must not be all-numeric; linkType and context are reserved (URI Syntax 4.10.1). Signed binary payload in QR: DCC chain JSON -> CBOR (CWT) -> COSE_Sign1 (CBOR tag 18) -> zlib (RFC 1950/1951) -> Base45 (RFC 9285) -> prefix 'HC1:' -> QR alphanumeric mode, error correction Q recommended, printed diagonal 35-60 mm. SMART Health Cards: compact JWS (ES256, header zip 'DEF', raw DEFLATE payload) -> 'shc:/' plus two decimal digits per character (ASCII minus 45) in QR numeric mode, up to QR version 22; multi-QR chunking 'shc:/2/3/' deprecated. ICAO VDS: magic 0xDC, version byte (0x02 = version 3, 0x03 = version 4), country, signer and certificate reference, issue date and signature date (3 bytes each, MMDDYYYY as integer), feature definition reference (1-254), document type category (odd values reserved for ICAO); message zone of tag|length|value features (tags 0-254, DER-TLV length 1-5 bytes, strings C40-encoded, upper case only); signature zone marker 0xFF; ISO-standardised 2D symbologies only (Data Matrix, Aztec, QR named); recommended module size at least 0.3386 mm on inkjet. NFC: one NDEF message, several records; header octet MB 0x80, ME 0x40, CF 0x20, SR 0x10 (payload length 1 byte when under 256 bytes, else 4 bytes), IL 0x08, TNF in the low 3 bits (0 empty, 1 well-known, 2 media type, 3 absolute URI, 4 external, 5 unknown, 6 unchanged; 7 rejected); media-type records carry an RFC 2046 type string (ndeflib checks the pattern [a-zA-Z0-9-]+/[a-zA-Z0-9-+.]+). Android uses only the first record for dispatch, so a DPP tag puts the URI record first and embedded data (for example an application/json or application/cbor record) after it; an Android Application Record should not be first; from Android 16 http(s) URI tags trigger ACTION_VIEW and from Android 17 need an explicit open-link action. For iOS background reading (iPhone XS and later), Apple's page says that the first URI record found is used and states no position requirement; with http(s) universal links or a fixed scheme list only (new-apple-corenfc-background), so a URI record at index 0 satisfies both platforms. Hybrid UHF/NFC tag: the NFC interface outputs a compressed EPC Digital Link URI ('eh'/'ex') and software decodes it. UHF RFID: EPC bank may hold '+AIDC data' after the EPC when the '+AIDC data toggle bit' (bit after the 8-bit header of the new schemes) is 1 (TDS sec. 14.5.1, 15.3); user memory bank 11 starts with an 8-bit DSFID: two MSBs Access Method ('10' Packed Objects per TDS Annex I-M, '00' No-Directory), one extension bit, five-bit Data Format ('01001' = GS1 Data Format 9 for AIs); DSFID 00010001 selects Access Method 17 for an AI 8030 DigSig: DAID 8 bits '11111110' + 44 bits PGLN, CID 16 bits, signature and timestamp 256+20 bits (one-year signing period at minute resolution), total 352 bits; the EPC is covered by the signature and including the TID is recommended for copy detection. The User Memory Indicator (Gen2v2) or Read User Memory indicator (Gen2v3) in the PC bits flags user memory content. Durability and placement: battery QR printed or engraved visibly, legibly, indelibly (Batteries Art. 13(7)); high contrast and readable size (Annex VI Part C).",
+   "specs": [
+    {
+     "source_id": "gs1-digital-link-uri-syntax-1-7-0",
+     "component": "sec. 4.10, 4.10.1, 4.10.2 queryStringParam"
+    },
+    {
+     "source_id": "new-gs1-ai-dataset",
+     "component": "entries 17, 10, 21, 8030"
+    },
+    {
+     "source_id": "new-ehn-hcert-spec-1-0-8",
+     "component": "transport encoding, QR recommendations"
+    },
+    {
+     "source_id": "new-rfc-9285-base45",
+     "component": "whole document"
+    },
+    {
+     "source_id": "new-rfc-9052-cose",
+     "component": "COSE_Sign1, tag 18"
+    },
+    {
+     "source_id": "new-shc-spec-1-4-0",
+     "component": "QR encoding, chunking"
+    },
+    {
+     "source_id": "new-icao-9303-p13",
+     "component": "sec. 2.1-2.6"
+    },
+    {
+     "source_id": "new-ndeflib",
+     "component": "ndef.html and record.py header encoding"
+    },
+    {
+     "source_id": "new-android-nfc-basics",
+     "component": "Tag dispatch, Tables 1-2, AAR"
+    },
+    {
+     "source_id": "new-apple-corenfc-background",
+     "component": "background tag reading: URI record selection, supported schemes, devices"
+    },
+    {
+     "source_id": "new-zxing-cpp-python-binding",
+     "component": "Barcode properties and BarcodeFormat table (decoder capability, not a rule)"
+    },
+    {
+     "source_id": "new-m604-amd-draft-2025-09",
+     "component": "Art. 1 points (38)-(39): Annex II Part B points 2 and 2.1 change only by inserting 'harmonised' (draft)"
+    },
+    {
+     "source_id": "new-gs1-tds-2-3",
+     "component": "sec. 9.2-9.3 (Bank 11, UMI/RUM), sec. 14.5.1, sec. 15.3, sec. 17, Annex I-M"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 13(6)-(9); Annex VI Part C"
+    },
+    {
+     "source_id": "new-iso-iec-20248",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "new-iso-iec-15962",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "reg-eu-2024-1781",
+     "component": "Arts 9(2)(b)-(c), 10(1)(b)-(c), 10(3)"
+    },
+    {
+     "source_id": "new-gs1-2d-retail-pos-1-1",
+     "component": "sec. 4.1.2, 4.7.2, 5.6.3"
+    },
+    {
+     "source_id": "new-gs1-dl-compression-epc-1-0-0",
+     "component": "sec. 1 (hybrid UHF/NFC tags)"
+    }
+   ],
+   "variants": [
+    "QR with GS1 Digital Link and query attributes",
+    "QR with signed compressed binary payload (HCERT-style)",
+    "Data Matrix visible digital seal (VDS-style)",
+    "QR with JWS numeric mode (SHC-style)",
+    "NFC multi-record NDEF (URI first, data record after)",
+    "NFC hybrid tag with compressed EPC Digital Link",
+    "UHF EPC bank with +AIDC data",
+    "UHF user memory with Packed Objects or Data Format 17 DigSig"
+   ],
+   "observable_black_box": "From sample artifacts: the decoded text or bytes of each symbol, the symbology, the NDEF record list with TNF, type and payload, the EPC bank and user memory hex dumps, the payload size against carrier capacity. Not observable from a file: print contrast, module size on the physical item, indelibility, placement and tag read range.",
+   "law_delta": "Law fixes presence, visibility, legibility, indelibility and contrast only for battery QR codes and leaves carrier type to delegated acts; embedded data, multi-record layouts, RFID user memory and signed payloads are beyond law. The draft request asked standards to cover symbology, encoding, error correction, reference decoding, print and production quality and durability (new-m604-draft-sr-2024-02, Part B 2.2) and optional control and offline data (2.4-2.6)."
+  },
+  "L03_data_exchange_protocols": {
+   "applies": "partial",
+   "mechanism": "Offline path: no protocol; the reader decodes the carrier locally. Online path where the carrier also holds a URL: a GS1 Digital Link carrier is followed by HTTP GET (resolver behaviour in m09); the whole query string, including embedded attributes, is passed on to the redirect target per the GS1 resolver standard as recorded in m09 (not re-read here). Compressed URIs: GS1 states that decompression happens in external software, that a compressed URI in an optical carrier counts as 'any URL', and that only applying the decompression algorithm and validating the result against the URI syntax shows whether a URL holds GS1 identifiers; GS1-conformant resolvers can decompress. The 'eh'/'ex' compression string is appended to a URI stem with no query or fragment and exactly one slash before it. Legacy compression (1.1.4) distinguishes partially compressed URIs (primary key uncompressed, final path segment compressed) from fully compressed ones by counting path components (primary key at odd position 3 from the right versus even positions in uncompressed URIs). Trust material for offline signature checks is fetched ahead of time: DCC trust list (CSCA and DSC lists aggregated by a Secretariat, daily download, 24-hour update target), SHC JWKS at {iss}/.well-known/jwks.json and CRL at /.well-known/crl/{kid}.json, ICAO signer certificate acquired out of band (it is not in the barcode).",
+   "specs": [
+    {
+     "source_id": "new-gs1-dl-compression-epc-1-0-0",
+     "component": "sec. 1, sec. 2"
+    },
+    {
+     "source_id": "new-gs1-dl-1-1-4-legacy",
+     "component": "sec. 2.1-2.3, sec. 2.8"
+    },
+    {
+     "source_id": "new-ehn-hcert-spec-1-0-8",
+     "component": "trust list distribution"
+    },
+    {
+     "source_id": "new-shc-spec-1-4-0",
+     "component": "key discovery, revocation"
+    },
+    {
+     "source_id": "new-icao-9303-p13",
+     "component": "sec. 2.2.1"
+    }
+   ],
+   "variants": [
+    "pure offline decode",
+    "online resolution with embedded attributes forwarded",
+    "server-side decompression of compressed URIs",
+    "pre-fetched trust list or JWKS for offline verification"
+   ],
+   "observable_black_box": "Whether the embedded data are usable with no network; whether a resolver accepts and decompresses 'eh'/'ex' URIs (loopback test only); whether query attributes reach the redirect target.",
+   "law_delta": "None in law. The draft request names offline consultation when the reader is offline, the link is broken, the page is invalid or the server is down (new-m604-draft-sr-2024-02, Part B 2.5(a)-(d))."
+  },
+  "L04_apis_lifecycle_searchability": {
+   "applies": "no",
+   "mechanism": "Embedded carrier data has no API: it is written once at printing or tag encoding. Updates need a new label, a tag rewrite (if not locked) or, for batteries, new markings after re-use or remanufacturing (Batteries Art. 13(9)). Searchability stays with the online passport and the registry.",
+   "specs": [
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 13(9)"
+    }
+   ],
+   "variants": [],
+   "observable_black_box": "None beyond comparing embedded data with the online passport version.",
+   "law_delta": "none"
+  },
+  "L05_system_interoperability_data_models": {
+   "applies": "partial",
+   "mechanism": "Embedded data needs a compact, self-describing model. GS1: AIs as keys with format strings and regexes from the AI JSON-LD (machine-readable oracle: formatString, regex, requires, excludes, validAsDataAttribute); in user memory, Packed Objects with an ID table registered as Data Format 9 (TDS Annex F, I-M). DCC: JSON schema (eu-dcc-schema, archived 2023-07-26) mapped to CBOR; test vectors compare decoded CBOR and JSON by decoding and re-encoding both sides because key order is not fixed. ICAO VDS: per document type a feature definition (tags, mandatory and optional features, length ranges); unknown tags may be present and must not affect validity if the signature verifies. NFC: media type of each record (RFC 2046) names the payload model. Draft DPP request lists six optional cross-sectoral basic data elements for offline use: passport owner (operator that created the passport), unique operator identifier (main manufacturer if different), facility identifier (main manufacturing stage), unique product identifier (as registered), an optional additional product identifier, and product group; no encoding is named.",
+   "specs": [
+    {
+     "source_id": "new-gs1-ai-dataset",
+     "component": "AI entries"
+    },
+    {
+     "source_id": "new-gs1-tds-2-3",
+     "component": "Annex F Packed Objects ID table, Annex I-M"
+    },
+    {
+     "source_id": "new-dgc-testdata",
+     "component": "README comparison rules"
+    },
+    {
+     "source_id": "new-icao-9303-p13",
+     "component": "sec. 2.2.2, 2.3"
+    },
+    {
+     "source_id": "new-m604-draft-sr-2024-02",
+     "component": "Annex II Part B 2.6"
+    }
+   ],
+   "variants": [
+    "GS1 AI key-value",
+    "CBOR claims map",
+    "TLV with per-profile feature table",
+    "NDEF media-type record (JSON or CBOR)",
+    "Packed Objects in RFID user memory"
+   ],
+   "observable_black_box": "Embedded fields parse against the declared model; field values equal the corresponding passport fields; unknown fields are tolerated or rejected as the profile states.",
+   "law_delta": "No binding model for embedded data. The six-element list is a draft, non-binding text; its numbering in the draft runs (2)-(7) with no item (1)."
+  },
+  "L06_storage_archiving_persistence": {
+   "applies": "partial",
+   "mechanism": "The carrier is itself a persistent copy of the embedded data for the life of the label or tag; durability depends on the marking method (Batteries Art. 13(7) printed or engraved, indelible). The draft request motivates offline basic data as a fallback when the passport host is unreachable. Embedded data become stale when the online passport is updated; a control hash ties the carrier to one registered version only. Tag memory can be permalocked (TDS sec. 16.2.5 BlockPermaLock segment, not read in detail).",
+   "specs": [
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 13(7)"
+    },
+    {
+     "source_id": "new-m604-draft-sr-2024-02",
+     "component": "Annex II Part B 2.5, 2.10"
+    }
+   ],
+   "variants": [
+    "printed or engraved optical code",
+    "locked versus rewritable tag memory"
+   ],
+   "observable_black_box": "Whether embedded data still match the current passport version; whether the embedded hash matches any registered version.",
+   "law_delta": "Law gives no persistence role to embedded data; ESPR back-up copy rules concern hosted passports."
+  },
+  "L07_access_rights_security_confidentiality": {
+   "applies": "partial",
+   "mechanism": "Anything in a carrier is public to whoever reads it: query attributes, NDEF records, user memory (unless access-password protected at tag level) and signed payloads are readable without authentication; signing gives integrity, not confidentiality. The DCC places personal health data in the QR and relies on the holder controlling the paper; DPP offline data in the draft request are cross-sectoral basic elements, not restricted data. The draft request also asks the carrier to reference both public and restricted passport data (Part B 2.3, 2.9). Literature shows NDEF signature records can still be misused (signature not covering all records, or apps not enforcing it) (10.1109/nfc.2011.9, 10.1109/rfid-ta.2012.6404492).",
+   "specs": [
+    {
+     "source_id": "new-m604-draft-sr-2024-02",
+     "component": "Annex II Part B 2.3, 2.9"
+    },
+    {
+     "source_id": "new-ehn-hcert-spec-1-0-8",
+     "component": "validation guidance"
+    }
+   ],
+   "variants": [
+    "public embedded data only",
+    "embedded pointer to restricted data behind access control"
+   ],
+   "observable_black_box": "Whether a sample carrier embeds data that the declared access policy marks as restricted (leak check against the passport's restricted field list).",
+   "law_delta": "Law restricts access to some passport data (for example battery Annex XIII points 2-4 per m01); embedding such data in a carrier would bypass that, and no law text addresses it."
+  },
+  "L08_authentication_reliability_integrity": {
+   "applies": "yes",
+   "mechanism": "Three integrity patterns. (1) Signed embedded payload: DCC COSE_Sign1 with alg ES256 (primary) or PS256 (RSASSA-PSS 2048, SHA-256), kid in protected (preferred) or unprotected header, verify signature before reading content, enforce exp (claim 4), check iat (claim 6) against the signer certificate validity, try every certificate whose truncated kid matches, check extended key usage OIDs against the certificate type; revocation by absence from the latest trust list, CRLs not assumed. ICAO VDS: signature over header plus message zone (excluding marker and length), ECDSA at least 256-bit with SHA-256 recommended, raw r||s each padded to key length, hash algorithm not encoded but deduced from the bit length of the curve order (SHA-224 up to 224, SHA-256 up to 256, and so on); algorithms per Doc 9303 Part 12. SHC: ES256 with P-256, kid = base64url SHA-256 JWK thumbprint, optional x5c chain whose SAN must match iss, revocation identifier rid (up to 24 base64url chars) and per-key CRL. GS1: AI 8030 DigSig in a Digital Link query or in user memory (TDS sec. 17; signature scheme defined in ISO/IEC 20248, bibliographic only). (2) Control hash: the draft request suggests a hash of the passport registered in the registry; the only binding hash is the registry's 'hash of a passport version' in the proof of registration, sealed with a qualified electronic seal and time-stamped (2026/1778 Arts 2(16), 9); no algorithm, canonicalisation or format is published, so a carrier hash cannot yet be compared deterministically with it. (3) Tag-bound authenticity: TID inclusion in the DigSig (TDS), public-key challenge-response tags with an NDEF tag authentication record (Saeed and Walter 2012) or SUN messages (m09). Limits: a valid signature on a static code proves origin of the data, not that the code is on the genuine item; copied QR codes and DigSigs verify everywhere; issuer key compromise lets forged payloads verify (dark-web DCC forgeries accepted by official apps, 10.1145/3530877).",
+   "specs": [
+    {
+     "source_id": "new-ehn-hcert-spec-1-0-8",
+     "component": "signature, kid, validation steps, trust lists"
+    },
+    {
+     "source_id": "new-rfc-9052-cose",
+     "component": "COSE_Sign1"
+    },
+    {
+     "source_id": "new-icao-9303-p13",
+     "component": "sec. 2.4 signature zone, Appendix B"
+    },
+    {
+     "source_id": "new-shc-spec-1-4-0",
+     "component": "signing, revocation"
+    },
+    {
+     "source_id": "new-gs1-tds-2-3",
+     "component": "sec. 17 DigSig"
+    },
+    {
+     "source_id": "new-gs1-ai-dataset",
+     "component": "AI 8030"
+    },
+    {
+     "source_id": "impl-reg-eu-2026-1778",
+     "component": "Arts 2(16), 9"
+    },
+    {
+     "source_id": "new-m604-draft-sr-2024-02",
+     "component": "Annex II Part B 2.4, 2.10, 7.1-7.2"
+    },
+    {
+     "source_id": "new-iso-iec-20248",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "new-nfc-forum-sig-rtd-2-0",
+     "component": "bibliographic only (not opened)"
+    },
+    {
+     "source_id": "sreq-m-604-dpp",
+     "component": "adopted text not read"
+    },
+    {
+     "source_id": "new-m604-amd-draft-2025-09",
+     "component": "Art. 1 points (49)-(50): Annex II Part B points 7 and 7.1 change only by inserting 'harmonised' (draft)"
+    }
+   ],
+   "variants": [
+    "COSE_Sign1 in QR",
+    "VDS raw ECDSA in Data Matrix",
+    "JWS in QR numeric mode",
+    "AI 8030 DigSig in DL query or RFID user memory",
+    "NDEF Signature RTD",
+    "embedded hash of a registered passport version",
+    "TID-bound or dynamic tag authentication"
+   ],
+   "observable_black_box": "Offline from a sample with pinned trust material: signature valid or not, signer certificate chain and validity at the evaluation time, expiry, key usage, revocation against a pinned list snapshot, embedded hash equal or not to a hash of a declared passport version (once the hash input is declared). Not observable: whether the physical item is genuine, whether the tag was moved, whether a static code was copied.",
+   "law_delta": "Adds integrity mechanisms that law does not require. Law has a sealed passport-version hash only in the registry's proof of registration (2026/1778 Art. 9), with the algorithm unspecified; the draft request asked standards for offline and online originality and integrity checks and 'electronically signed encoded data set' schemes (Part B 7.1)."
+  },
+  "L09_registry_and_customs": {
+   "applies": "partial",
+   "mechanism": "The registry checks granularity and links item to batch and model identifiers (2026/1778 Art. 8) and issues a proof of registration with a passport-version hash (Art. 9). A carrier control hash in the draft request is defined as a hash of the passport registered in the registry, so the registry is the intended reference for offline integrity. No registry API for hash lookup was located.",
+   "specs": [
+    {
+     "source_id": "impl-reg-eu-2026-1778",
+     "component": "Arts 8, 9"
+    },
+    {
+     "source_id": "new-m604-draft-sr-2024-02",
+     "component": "Annex II Part B 2.10"
+    }
+   ],
+   "variants": [],
+   "observable_black_box": "With an operator-supplied proof of registration: whether its hash equals the hash embedded in the carrier (both opaque until an algorithm is declared).",
+   "law_delta": "Law does not link carriers to the registry hash; that link is only in the draft request."
+  },
+  "L10_lifecycle_versioning_updates": {
+   "applies": "partial",
+   "mechanism": "Embedded data and hashes pin one passport version; every passport update makes a control hash stale unless the carrier is re-marked or the hash refers to an immutable first registration. Signed payloads carry their own validity window (DCC exp; VDS document issue and signature dates; SHC exp). Battery status changes need new markings that make the change reachable through the QR code (Batteries Art. 13(9)). DCC test-vector context carries a VALIDATIONCLOCK so expiry checks are deterministic. ICAO VDS lets signer certificates rotate through the certificate reference in the header; SHC asks issuers to rotate keys at least yearly.",
+   "specs": [
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 13(9)"
+    },
+    {
+     "source_id": "new-dgc-testdata",
+     "component": "TESTCTX.VALIDATIONCLOCK"
+    },
+    {
+     "source_id": "new-shc-spec-1-4-0",
+     "component": "key rotation"
+    }
+   ],
+   "variants": [
+    "hash of first registered version",
+    "hash refreshed with re-marking",
+    "time-limited signed payload"
+   ],
+   "observable_black_box": "Embedded version or hash against the passport version history; signature dates against the evaluation clock.",
+   "law_delta": "Law does not say which version a carrier hash should reference; the registry proof covers the latest version only and lasts 90 days (2026/1778 Art. 9)."
+  },
+  "L11_roles_and_governance": {
+   "applies": "partial",
+   "mechanism": "Signed carriers need a trust framework: DCC used national CSCAs, DSC lists, an EU gateway and a Secretariat-aggregated trust list, now continued by the WHO network; ICAO uses CSCA-signed signer certificates exchanged bilaterally or via download (Appendix A workflow: signer certificate generation, seal generation, validation); SHC uses issuer JWKS plus optional directories; GS1 DigSig makes the GLN owner (PGLN, AI 417) the accountable domain authority. For DPPs no trust framework for carrier signatures exists in law; the ESPR implementing act on credentials is not located (m01). Compressed EPC Digital Link use needs a GS1 Policy B11 assessment and GSMP application standard before open supply chain use.",
+   "specs": [
+    {
+     "source_id": "new-ehn-hcert-spec-1-0-8",
+     "component": "trust lists"
+    },
+    {
+     "source_id": "new-ec-dcc-page",
+     "component": "WHO takeover"
+    },
+    {
+     "source_id": "new-icao-9303-p13",
+     "component": "Appendix A"
+    },
+    {
+     "source_id": "new-gs1-tds-2-3",
+     "component": "sec. 17"
+    },
+    {
+     "source_id": "new-gs1-dl-1-1-4-legacy",
+     "component": "sec. 2.1 note on Policy B11"
+    }
+   ],
+   "variants": [
+    "state PKI (CSCA/DSC)",
+    "issuer-published JWKS",
+    "GS1 PGLN-accountable DigSig"
+   ],
+   "observable_black_box": "Whether the signer chains to the declared trust anchor in a pinned bundle; whether the declared trust framework exists.",
+   "law_delta": "No DPP trust framework for carrier-level signatures in binding law."
+  }
+ },
+ "end_to_end_flows": [
+  {
+   "name": "Offline verification of a signed QR payload (HCERT-style profile applied to a DPP sample)",
+   "actors": [
+    "issuer (economic operator or service provider)",
+    "trust list operator",
+    "verifier or conformance engine"
+   ],
+   "steps": [
+    "1. The issuer builds the embedded data as a CBOR claims map (identifier, issue time, expiry, data elements).",
+    "2. The issuer signs it as COSE_Sign1 (tag 18) with ES256 and a kid derived from the signer certificate.",
+    "3. The issuer compresses with zlib, encodes Base45, adds a context prefix and prints a QR code in alphanumeric mode.",
+    "4. The trust list operator publishes signer certificates; the verifier downloads a snapshot ahead of time.",
+    "5. Offline, the verifier decodes the QR, checks and strips the prefix, Base45-decodes, inflates, parses COSE.",
+    "6. The verifier finds certificates by kid, verifies the signature, checks validity, expiry and key usage at the evaluation time.",
+    "7. Only then the verifier parses the claims and compares the identifier with the carrier URL or the passport, when reachable."
+   ]
+  },
+  {
+   "name": "Hybrid UHF/NFC tag with compressed EPC Digital Link",
+   "actors": [
+    "brand owner",
+    "tag encoder",
+    "consumer phone",
+    "GS1-conformant resolver or app"
+   ],
+   "steps": [
+    "1. The encoder writes an SGTIN (or SGTIN+ with +AIDC data) into the EPC bank.",
+    "2. The NFC interface exposes https://{stem}/eh{hex EPC} or /ex{base64url EPC} as an NDEF URI record.",
+    "3. A phone reads the URI and opens it; the resolver decodes the EPC with TDS or TDT and serves the uncompressed Digital Link context.",
+    "4. An offline app can decode the EPC itself and rebuild https://{stem}/01/{GTIN}/21/{serial}.",
+    "5. A UHF reader reads the same EPC over the air; both identifiers must be equal."
+   ]
+  },
+  {
+   "name": "Multi-record NFC tag with offline basic data",
+   "actors": [
+    "economic operator",
+    "tag encoder",
+    "reader"
+   ],
+   "steps": [
+    "1. The encoder writes an NDEF message: record 1 well-known URI with the passport link; record 2 media-type record with offline basic data (for example the six draft elements); optional signature record.",
+    "2. A phone dispatches on record 1 and opens the link when online.",
+    "3. An offline app reads record 2 and displays the basic data.",
+    "4. A verifier checks that the identifier in record 2 equals the identifier in the URI and that any signature covers both records."
+   ]
+  },
+  {
+   "name": "Linear plus 2D dual-marked pack (retail transition)",
+   "actors": [
+    "brand owner",
+    "printer",
+    "POS scanner",
+    "consumer"
+   ],
+   "steps": [
+    "1. The pack carries an EAN/UPC and a 2D code (GS1 DataMatrix or QR with Digital Link) with the same GTIN.",
+    "2. The 2D code sits within 50 mm of the linear code centre so a POS scanner can treat both as one item.",
+    "3. Attributes that appear in both symbols and in human-readable text match exactly.",
+    "4. The consumer scans the 2D code to reach the passport or other content."
+   ]
+  },
+  {
+   "name": "Control hash check against a registered passport version",
+   "actors": [
+    "economic operator",
+    "EU DPP registry",
+    "verifier"
+   ],
+   "steps": [
+    "1. The operator registers the passport; the registry can issue a sealed proof of registration with a passport-version hash.",
+    "2. The operator embeds a control hash in the carrier (draft request concept).",
+    "3. The verifier reads the hash offline; online, it fetches the passport, computes the hash with the declared algorithm and canonical form, and compares.",
+    "4. Today step 3 is not decidable: no algorithm, canonical form or file format is published."
+   ]
+  }
+ ],
+ "implementations": [
+  {
+   "name": "eu-dcc-hcert-spec",
+   "url": "https://github.com/ehn-dcc-development/eu-dcc-hcert-spec",
+   "kind": "other",
+   "license": "CC-BY-4.0 (stated in the document; GitHub license field null)",
+   "last_activity": "archived; pushed 2023-07-11",
+   "evidence_level": "substantive",
+   "note": "HCERT 1.0.8 specification; precedent profile for a signed compressed QR payload."
+  },
+  {
+   "name": "eu-dcc-schema",
+   "url": "https://github.com/ehn-dcc-development/eu-dcc-schema",
+   "kind": "data-model",
+   "license": "Apache-2.0",
+   "last_activity": "archived; pushed 2023-07-26",
+   "evidence_level": "metadata_only",
+   "note": "JSON schema of the DCC payload."
+  },
+  {
+   "name": "dgc-testdata",
+   "url": "https://github.com/eu-digital-green-certificates/dgc-testdata",
+   "kind": "test-suite",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2022-04-13",
+   "evidence_level": "substantive",
+   "note": "Per-layer test vectors (JSON, CBOR, COSE, COMPRESSED, BASE45, PREFIX, 2DCODE) with EXPECTED* flags and a VALIDATIONCLOCK; the format is reusable for carrier-payload fixtures."
+  },
+  {
+   "name": "dcc-testdata",
+   "url": "https://github.com/ehn-dcc-development/dcc-testdata",
+   "kind": "test-suite",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2021-06-11",
+   "evidence_level": "metadata_only",
+   "note": "Earlier test data repository in the ehn-dcc-development organisation."
+  },
+  {
+   "name": "ehn-sign-verify-python-trivial",
+   "url": "https://github.com/ehn-dcc-development/ehn-sign-verify-python-trivial",
+   "kind": "validator",
+   "license": "EUPL-1.2",
+   "last_activity": "pushed 2022-01-19",
+   "evidence_level": "metadata_only",
+   "note": "Minimal Python sign and verify of HCERT."
+  },
+  {
+   "name": "python-hcert",
+   "url": "https://github.com/ehn-dcc-development/python-hcert",
+   "kind": "sdk",
+   "license": "BSD-2-Clause",
+   "last_activity": "pushed 2021-10-28",
+   "evidence_level": "metadata_only",
+   "note": "Python HCERT library (repository metadata only)."
+  },
+  {
+   "name": "dgc-business-rules-testdata",
+   "url": "https://github.com/eu-digital-green-certificates/dgc-business-rules-testdata",
+   "kind": "test-suite",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2025-11-21",
+   "evidence_level": "metadata_only",
+   "note": "Only repository of that organisation with activity after 2024 in the listing."
+  },
+  {
+   "name": "python-base45",
+   "url": "https://github.com/kirei/python-base45",
+   "kind": "sdk",
+   "license": "BSD-2-Clause",
+   "last_activity": "pushed 2026-02-20",
+   "evidence_level": "metadata_only",
+   "note": "Base45 codec; RFC 9285 is small enough to implement with the standard library instead."
+  },
+  {
+   "name": "cbor2",
+   "url": "https://github.com/agronholm/cbor2",
+   "kind": "sdk",
+   "license": "MIT",
+   "last_activity": "pushed 2026-10-09",
+   "evidence_level": "metadata_only",
+   "note": "CBOR codec; not a current engine dependency (rule 10: report before adding)."
+  },
+  {
+   "name": "pycose",
+   "url": "https://github.com/TimothyClaeys/pycose",
+   "kind": "sdk",
+   "license": "NOASSERTION (GitHub)",
+   "last_activity": "pushed 2025-10-09",
+   "evidence_level": "metadata_only",
+   "note": "COSE in Python; licence not asserted by GitHub API."
+  },
+  {
+   "name": "ndeflib",
+   "url": "https://github.com/nfcpy/ndeflib",
+   "kind": "sdk",
+   "license": "ISC",
+   "last_activity": "pushed 2020-09-07",
+   "evidence_level": "substantive",
+   "note": "NDEF encode and decode; record.py read for header layout."
+  },
+  {
+   "name": "zxing-cpp",
+   "url": "https://github.com/zxing-cpp/zxing-cpp",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2026-10-06",
+   "evidence_level": "substantive",
+   "note": "The engine's QR decoder (qr extra). In the continuation, the master-branch Python binding was read (new-zxing-cpp-python-binding). It decodes and encodes Data Matrix and exposes symbology_identifier, ec_level and content_type GS1. This makes carrier.datamatrix and a symbology-identifier check feasible without a new dependency. The PyPI release was not tested locally. Latest release v3.1.1 (2026-07-29)."
+  },
+  {
+   "name": "GS1DigitalLinkCompressionPrototype",
+   "url": "https://github.com/gs1/GS1DigitalLinkCompressionPrototype",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "pushed 2025-12-03",
+   "evidence_level": "metadata_only",
+   "note": "Experimental lossless compression of Digital Link URIs."
+  },
+  {
+   "name": "smart-on-fhir/health-cards",
+   "url": "https://github.com/smart-on-fhir/health-cards",
+   "kind": "other",
+   "license": "NOASSERTION (GitHub); specification states CC-BY 4.0",
+   "last_activity": "pushed 2023-06-22",
+   "evidence_level": "metadata_only",
+   "note": "SMART Health Cards implementation guide sources."
+  },
+  {
+   "name": "WorldHealthOrganization/smart-trust",
+   "url": "https://github.com/WorldHealthOrganization/smart-trust",
+   "kind": "other",
+   "license": "NOASSERTION (GitHub)",
+   "last_activity": "pushed 2026-10-12",
+   "evidence_level": "metadata_only",
+   "note": "WHO trust network implementation guide; active, successor context for the DCC trust framework."
+  }
+ ],
+ "literature": [
+  {
+   "doi": "10.48550/arxiv.2607.08383",
+   "title": "Secure QR Codes: Authenticity Verification via EdDSA Signatures and CBOR Certificates",
+   "year": 2026,
+   "venue": "ArXiv",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Offline QR proof of concept with Ed25519, CBOR certificates and zlib, plus a hybrid JWKS model to handle revocation; shows the offline-revocation trade-off."
+  },
+  {
+   "doi": "10.1145/3530877",
+   "title": "COVID-19 Vaccination Certificates in the Darkweb",
+   "year": 2021,
+   "venue": "Digital Threats: Research and Practice",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Forged EU DCCs that official apps accepted: offline signature checks fail when issuer keys or issuance are compromised."
+  },
+  {
+   "doi": "10.56553/popets-2023-0113",
+   "title": "Privacy-Preserving Outsourced Certificate Validation",
+   "year": 2023,
+   "venue": "IACR Cryptol. ePrint Arch.",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Analyses the EU outsourced DCC validation design and finds it meets only part of its goals; relevant if DPP verification is delegated to a service."
+  },
+  {
+   "doi": "10.1109/access.2021.3117781",
+   "title": "A Survey on Digital Certificates Approaches for the COVID-19 Pandemic",
+   "year": 2021,
+   "venue": "IEEE Access",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Survey of certificate schemes, mostly asymmetric signatures or blockchain; context for signed-carrier precedents."
+  },
+  {
+   "doi": "10.1016/j.jisa.2019.102369",
+   "title": "Usable security for QR code",
+   "year": 2019,
+   "venue": "J. Inf. Secur. Appl.",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Compares signature schemes inside QR codes by size and scan performance; capacity limits for embedded signatures."
+  },
+  {
+   "doi": "10.1016/j.spc.2025.01.014",
+   "title": "Enabling a dynamic information flow in digital product passports during product use phase: A literature review and proposed framework",
+   "year": 2025,
+   "venue": "Sustainable Production and Consumption",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Review of 25 DPP frameworks: QR and RFID are the common carriers; flags data-carrier security."
+  },
+  {
+   "doi": "10.1108/ci-02-2025-0074",
+   "title": "Decentralized phygital identifier systems for digital passports in circular construction: a design science evaluation",
+   "year": 2025,
+   "venue": "Construction Innovation",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Prototype comparing QR and NFC carriers with DIDs and tokens; QR easier and faster in tests."
+  },
+  {
+   "doi": "10.23919/cnsm67658.2025.11297523",
+   "title": "Exploring the Design Space and Research Directions for Digital Product Passport Systems",
+   "year": 2025,
+   "venue": "2025 21st International Conference on Network and Service Management (CNSM)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Names the data carrier as one of three technical dimensions and counterfeiting as a key challenge."
+  },
+  {
+   "doi": "10.1007/s43615-025-00500-y",
+   "title": "Smart Tags as Enablers for Digital Product Passports in Circular Electronics Value Chains",
+   "year": 2025,
+   "venue": "Circular Economy and Sustainability",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Smart tags that add condition data to item identification; carrier-borne dynamic data beyond a link."
+  },
+  {
+   "doi": "10.1109/nfc.2011.9",
+   "title": "Security Vulnerabilities of the NDEF Signature Record Type",
+   "year": 2011,
+   "venue": "2011 Third International Workshop on Near Field Communication",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Weaknesses of the first NFC Forum signature record; motivates checks that a signature covers every record."
+  },
+  {
+   "doi": "10.1109/rfid-ta.2012.6404492",
+   "title": "Handling the NDEF signature record type in a secure manner",
+   "year": 2012,
+   "venue": "2012 IEEE International Conference on RFID-Technologies and Applications (RFID-TA)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Shows signed tags are not enough if apps mishandle the data."
+  },
+  {
+   "doi": "10.1109/trustcom.2015.396",
+   "title": "Integrity Protection of NDEF Message with Flexible and Enhanced NFC Signature Records",
+   "year": 2015,
+   "venue": "2015 IEEE Trustcom/BigDataSE/ISPA",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Prototype of extended signature records and timing overheads on tags and phones."
+  },
+  {
+   "doi": "10.1109/nfc.2010.10",
+   "title": "Digital Signature Records for the NFC Data Exchange Format",
+   "year": 2010,
+   "venue": "2010 Second International Workshop on Near Field Communication",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Design options for signing NDEF records."
+  },
+  {
+   "doi": "10.1109/smartcomp.2016.7501715",
+   "title": "Securing Pharmaceutical and High-Value Products against Tag Reapplication Attacks Using NFC Tags",
+   "year": 2016,
+   "venue": "2016 IEEE International Conference on Smart Computing (SMARTCOMP)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Tag reapplication is undetectable by data checks alone; offline protocol plus online read counting."
+  },
+  {
+   "doi": "10.1007/978-3-662-44736-9_36",
+   "title": "A Lifecycle Data Management System Based on RFID Technology of EPC Class1 Gen2 v2",
+   "year": 2014,
+   "venue": "International Conference on Advances in Production Management Systems",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Uses large Gen2 user memory with hierarchical models to keep lifecycle data on the tag (pre-2021, kept as the only user-memory prototype found)."
+  },
+  {
+   "doi": "10.1007/978-3-642-37377-0_8",
+   "title": "The SemProM Data Format",
+   "year": 2013,
+   "venue": "Book chapter (Springer)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Earlier product-memory format storing lifecycle data on the item; precedent for on-product data, pre-2021."
+  },
+  {
+   "doi": "not returned by the tool",
+   "title": "Off-line NFC Tag Authentication",
+   "year": 2012,
+   "venue": "2012 International Conference for Internet Technology and Secured Transactions",
+   "found_via": "mcp__consensus__search; mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Public-key challenge-response with a new NDEF Tag Authentication Record to tell cloned from legitimate tags offline; pre-2021 precedent for tag-bound (not data-bound) authenticity."
+  },
+  {
+   "doi": "10.1002/pts.2781",
+   "title": "Durable and sustainable smart tags for identity management and condition monitoring: Case study for reusable packaging and recyclable data carriers",
+   "year": 2023,
+   "venue": "Packaging Technology and Science",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Empirical durability tests of laser-engraved and printed 2D codes, printed NFC and RFID labels under repeated washing and heating. It is evidence that carrier durability is a physical property, which only lab or manual review can test, not a sample-artifact check."
+  },
+  {
+   "doi": "10.1515/aut-2024-0002",
+   "title": "An overview of technological challenges in implementing the digital product passport in the textile and clothing industry",
+   "year": 2024,
+   "venue": "AUTEX Research Journal",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Compares garment carrier technologies, with interviews of Baltic producers. It finds QR-based tags the most direct first step for DPPs, which supports QR as the primary carrier and NFC or RFID as secondary carriers."
+  },
+  {
+   "doi": "10.24018/ejeng.2026.11.3.63302",
+   "title": "Invisible Optical Tags Printed on Textiles",
+   "year": 2026,
+   "venue": "European Journal of Engineering and Technology Research",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Discusses 2D codes printed into fabric, repeated across the item, so that the carrier lasts as long as the product. This is a multi-copy carrier pattern, where every copy must encode the same identifier."
+  },
+  {
+   "doi": "10.1109/saci66288.2025.11030179",
+   "title": "Testing NFC Tags in Laboratory Environment",
+   "year": 2025,
+   "venue": "2025 IEEE 19th International Symposium on Applied Computational Intelligence and Informatics (SACI)",
+   "found_via": "mcp__consensus__search",
+   "relevance": "Lab tests of NFC tag communication reliability show manufacturing defects that end-of-line tests miss. RF-level quality is outside a sample-artifact engine and needs a physical test bench."
+  },
+  {
+   "doi": "10.1016/j.procir.2026.01.056",
+   "title": "Protected QR Code-based Anti-counterfeit System for Pharmaceutical Manufacturing",
+   "year": 2024,
+   "venue": "ArXiv (DOI as returned points to Procedia CIRP)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Protected QR codes whose product data generic scanners cannot read. This is the confidentiality variant of embedded data: an engine could only check structure unless it holds the key. The year reported by the tool (2024) and the Procedia DOI may refer to different versions."
+  },
+  {
+   "doi": "10.3390/s25133855",
+   "title": "Innovative QR Code System for Tamper-Proof Generation and Fraud-Resistant Verification",
+   "year": 2025,
+   "venue": "Sensors (Basel, Switzerland)",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search",
+   "relevance": "Watermarks embedded in QR codes and a neural-network verifier, evaluated on 5000 samples, to detect substituted codes. It is not deterministic (rule 4), so it is out of scope for engine checks. It is context for the physical-authenticity gap."
+  },
+  {
+   "doi": "10.5281/zenodo.18711539",
+   "title": "MaDiTraCe: D3.3 Guidelines for Methodology implementation",
+   "year": 2025,
+   "venue": "Zenodo (project deliverable; a second record has DOI 10.5281/zenodo.18711538)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers",
+   "relevance": "Deliverable of an EU project (CEA, Spherity) on critical raw materials DPPs. Abstract: QR code integration, DIDs and verifiable credentials, and a notarisation module with cryptographic hashes and Merkle trees. It is a pilot precedent for a passport hash that is anchored outside the carrier. Abstract only."
+  }
+ ],
+ "conformance_implications": [
+  {
+   "layer": "L02",
+   "test_objective": "A GS1 Digital Link carrier with query-string data attributes parses: each key is a known AI valid as a data attribute, each value matches the AI regex, requires/excludes rules hold, no attribute repeats the path identity, linkType and context are absent from the carrier, extension keys are not all-numeric.",
+   "observable": "Decoded URI text from a QR or Data Matrix sample.",
+   "oracle": "GS1 Digital Link URI Syntax 1.7.0 sec. 4.10-4.12; GS1 AI JSON-LD 1.2 fields regex, requires, excludes, validAsDataAttribute.",
+   "existing_check": "identifier.parse (refuses any query use beyond character check today)",
+   "existing_capability": "identifier.parse",
+   "new_capability_needed": "identifier.parse scheme gs1-dl-attributes (pinned AI JSON-LD)",
+   "fixtures_needed": "Valid and invalid URIs: bad date in AI 17, AI 8030 over 90 chars, AI 8030 without serial, all-numeric extension key, linkType in carrier.",
+   "reusable_suite": "GS1 Barcode Syntax Engine test data (gs1/gs1-syntax-engine, recorded in m09) - not re-checked",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L01",
+   "test_objective": "A compressed EPC Digital Link ('eh' hex or 'ex' base64url) decodes to an EPC binary string, the EPC decodes per TDS, and the rebuilt uncompressed URI equals the declared identifier.",
+   "observable": "URI from an NDEF URI record or QR sample.",
+   "oracle": "GS1 DL Compression TS 1.0.0 sec. 4.2.1-4.2.2 (worked examples reproduced in this session); TDS 2.3 decoding.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "identifier.parse scheme gs1-dl-compressed-epc (depends on carrier.epc_decode from m09)",
+   "fixtures_needed": "The two worked examples; upper-case hex (invalid for 'eh'); stem with query string (invalid); unknown EPC header.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L01",
+   "test_objective": "Every carrier on one product carries the same identifier: linear GTIN, 2D Digital Link, NFC URI (after decompression), EPC bank (after decoding) and any identifier inside a signed payload are equivalent.",
+   "observable": "Set of decoded samples declared as one product in the IXIT.",
+   "oracle": "GS1 2D-in-Retail 1.1 role table (same GTIN in all GS1 symbologies) and attribute exact-match rule; TDS and DL equivalence; ESPR Art. 10(1)(a) single persistent identifier.",
+   "existing_check": "identifier.consistency (exact text, one QR sample)",
+   "existing_capability": "identifier.consistency",
+   "new_capability_needed": "identifier.cross_carrier (equivalence after normalisation to GS1 element strings)",
+   "fixtures_needed": "Consistent set; set with a different serial in the NFC tag; set with a different lot in the 2D code than on the linear add-on; compressed versus uncompressed pair.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L02",
+   "test_objective": "An NDEF message dump is well formed (MB on first, ME on last, SR consistent with length, TNF not 7, chunking consistent) and its first record is a URI record that carries the passport link; embedded data records have a declared media type.",
+   "observable": "Binary NDEF dump file.",
+   "oracle": "ndeflib header rules (open-source reading of NDEF; NFC Forum spec not read); Android first-record dispatch rule and iOS first-URI-record rule with https or a listed scheme (platform documentation, not a standard; new-android-nfc-basics, new-apple-corenfc-background).",
+   "existing_check": "none",
+   "existing_capability": "carrier.nfc (interface_only, needs a reader)",
+   "new_capability_needed": "carrier.ndef_sample extended to multi-record messages",
+   "fixtures_needed": "URI+JSON message; JSON-first message (warn); truncated message; SR flag with long payload; TNF 7.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L02",
+   "test_objective": "The identifier in an embedded data record equals the identifier in the URI record of the same NDEF message.",
+   "observable": "NDEF dump.",
+   "oracle": "Declared profile; ESPR Art. 10(1)(a).",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "carrier.ndef_sample + identifier.cross_carrier",
+   "fixtures_needed": "Matching and mismatching two-record messages.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "A signed compressed QR payload (HCERT-style profile) verifies offline: prefix, Base45, zlib, COSE_Sign1 tag 18, alg in allowlist, kid lookup over all matching certificates, signature, exp and iat at the context clock, key usage.",
+   "observable": "QR image or decoded text sample; pinned trust bundle.",
+   "oracle": "HCERT 1.0.8; RFC 9052; RFC 9285; per-step expected results as in dgc-testdata EXPECTED* flags.",
+   "existing_check": "none",
+   "existing_capability": "integrity.cose (interface_only)",
+   "new_capability_needed": "integrity.cose with a carrier profile (needs a CBOR decoder: cbor2 MIT would be a new dependency; zlib and Base45 are stdlib-sized)",
+   "fixtures_needed": "TEST-ONLY keys and certificates; valid, expired, tampered, wrong-kid, truncated-kid-collision, PS256 and ES256 vectors; layer-by-layer files in the dgc-testdata layout.",
+   "reusable_suite": "dgc-testdata format, https://github.com/eu-digital-green-certificates/dgc-testdata (Apache-2.0; vectors are health-specific, reuse the structure, generate own TEST-ONLY vectors)",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "A visible digital seal verifies offline: magic 0xDC, supported header version, C40 fields decode, TLV message zone well formed, 0xFF signature zone, raw r||s length equals key length, hash chosen from curve order, signer certificate matched by signer id and certificate reference, test reference 0...0 rejected in production profile.",
+   "observable": "Data Matrix image or binary seal sample; pinned signer certificate.",
+   "oracle": "ICAO Doc 9303 Part 13 (8th ed., Amendment 1) sec. 2.1-2.6, Appendix B.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "integrity.vds (needs carrier.datamatrix from m09)",
+   "fixtures_needed": "TEST-ONLY P-256 signer; valid seal; flipped message byte; wrong certificate reference; C40 edge cases from Appendix C.",
+   "reusable_suite": "none located",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "A JWS-in-QR payload (SHC-style numeric encoding) decodes ('shc:/' prefix, digit pairs plus 45), inflates raw DEFLATE, and verifies ES256 against a pinned JWKS; kid equals the JWK thumbprint.",
+   "observable": "QR sample; pinned JWKS.",
+   "oracle": "SMART Health Cards 1.4.0 (signing, key discovery and QR encoding sections).",
+   "existing_check": "integrity.jws (JWS verification exists; no numeric QR or DEFLATE handling)",
+   "existing_capability": "integrity.jws",
+   "new_capability_needed": "integrity.jws carrier profile 'jws-numeric-qr'",
+   "fixtures_needed": "TEST-ONLY JWKS; valid, expired, chunked (deprecated) and odd-digit-count samples.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "An AI 8030 DigSig in a Digital Link query or RFID user memory is present only with a permitted key and is structurally valid; cryptographic verification is not run.",
+   "observable": "URI or user memory hex.",
+   "oracle": "GS1 AI JSON-LD (AI 8030 requires/regex); TDS 2.3 sec. 17 (Data Format 17, 352 bits, DAID 0xFE + PGLN). The signature scheme itself is in ISO/IEC 20248 (protected), so verification is 'not run'.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "identifier.parse gs1-dl-attributes; carrier.rfid_user_memory (structure only)",
+   "fixtures_needed": "Synthetic 352-bit structures with valid and invalid DSFID; URI with AI 8030 on a GTIN without serial.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L02",
+   "test_objective": "An RFID user memory dump starts with a DSFID whose Access Method is Packed Objects ('10') or No-Directory ('00'), whose data format is declared, and whose UMI/RUM bit in the PC word agrees with the presence of user memory content; EPC bank '+AIDC data' toggle bit agrees with trailing data.",
+   "observable": "EPC bank and user memory hex dumps.",
+   "oracle": "TDS 2.3 sec. 9.3, 14.5.1, 15.3, 17, 18.1.2 (no data beyond the EPC in the EPC bank except +AIDC data).",
+   "existing_check": "none",
+   "existing_capability": "carrier.rfid (interface_only)",
+   "new_capability_needed": "carrier.epc_decode extended with DSFID header and toggle checks (full Packed Objects decoding, TDS Annex I-M, is out of scope until requested)",
+   "fixtures_needed": "Dumps with and without user memory, wrong toggle bit, extra bits after the EPC.",
+   "reusable_suite": "GS1 TDT artefacts (gs1/TDT, recorded in m09) for EPC decoding only",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L06",
+   "test_objective": "Embedded offline basic data equal the corresponding fields of the resolved passport (unique product identifier, operator, facility, product group).",
+   "observable": "Decoded embedded record and resolved passport JSON.",
+   "oracle": "Draft request Annex II Part B 2.6 lists the elements but no encoding; the declared profile must map them. Non-binding.",
+   "existing_check": "none",
+   "existing_capability": "identifier.resolve for the passport side",
+   "new_capability_needed": "carrier.offline_basic_data (field mapping per declared profile)",
+   "fixtures_needed": "Embedded record matching and drifting from a loopback passport.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L09",
+   "test_objective": "An embedded control hash equals the hash of the declared passport version computed with the declared algorithm and canonical form, and equals the hash in an operator-supplied proof of registration.",
+   "observable": "Embedded hash bytes; passport version document; proof of registration file.",
+   "oracle": "Draft request Part B 2.10 (concept only); 2026/1778 Arts 2(16), 9(2)(e) (hash exists, algorithm unspecified). Without a declared algorithm and input the verdict is 'not run'.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "carrier.control_hash (with a declared hash profile, for example SHA-256 over RFC 8785 JCS, which the engine already uses for its own bodies)",
+   "fixtures_needed": "Passport, its JCS hash, a stale hash after an update, a hash over non-canonical JSON.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "No field that the declared access policy marks as restricted appears in any carrier-embedded data.",
+   "observable": "All embedded records from samples; declared restricted field list.",
+   "oracle": "Declared policy; draft request Part B 2.3 and 2.9 (carrier references restricted data, does not embed it).",
+   "existing_check": "access.restricted_fields (online roles only)",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "access.carrier_leak",
+   "fixtures_needed": "Embedded record with a restricted battery field.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L02",
+   "test_objective": "The battery QR code is on the battery (or packaging and documents where justified), visible, legible, indelible, high contrast and of a size common hand-held readers decode.",
+   "observable": "Physical product; photographs.",
+   "oracle": "Regulation (EU) 2023/1542 Art. 13(6)-(7), Annex VI Part C.",
+   "existing_check": "manual.review",
+   "existing_capability": "manual.review",
+   "new_capability_needed": "none (physical inspection; the engine does not grade print quality)",
+   "fixtures_needed": "Manual review template.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "A signed or hashed carrier payload references a passport version that exists in the version history, and its validity window covers the evaluation time.",
+   "observable": "Embedded version/hash/dates; version history from the SUT.",
+   "oracle": "Declared update rule; signature validity fields (DCC exp, VDS dates).",
+   "existing_check": "persistence.versions",
+   "existing_capability": "persistence.versions",
+   "new_capability_needed": "none beyond integrity.cose / carrier.control_hash outputs",
+   "fixtures_needed": "History with three versions; carrier pinned to version 1.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  }
+ ],
+ "failure_modes": [
+  {
+   "layer": "L02",
+   "fault": "A multi-record NDEF message puts a media-type data record (or an Android Application Record) before the URI record. iOS may still find the link, because Apple's page states no position requirement for the URI record, but Android dispatches on record 1 and does not open the passport. The defect appears on one platform only.",
+   "detectable_by": "Parse the NDEF dump from a sample and check that record index 0 has TNF 1 and type 'U' with an https URI (new-android-nfc-basics; new-apple-corenfc-background)."
+  },
+  {
+   "layer": "L02",
+   "fault": "The NFC URI record uses a custom URL scheme (for example an app scheme) instead of an https link, so iOS background reading ignores it and the phone shows no passport.",
+   "detectable_by": "Check the scheme of the decoded URI record against https, from the sample artifact (new-apple-corenfc-background)."
+  },
+  {
+   "layer": "L01",
+   "fault": "The NFC tag of a product encodes a different serial than its printed QR code (tags encoded from a different batch file).",
+   "detectable_by": "Cross-carrier equivalence over the declared sample set."
+  },
+  {
+   "layer": "L01",
+   "fault": "A compressed 'eh' URI uses upper-case hex or carries a query string on the stem, so resolvers or apps fail to decompress.",
+   "detectable_by": "Strict parse against Compression TS sec. 4.2.1."
+  },
+  {
+   "layer": "L02",
+   "fault": "The embedded data record is placed first in the NDEF message, so phones do not open the passport link.",
+   "detectable_by": "First-record check in the NDEF sample."
+  },
+  {
+   "layer": "L02",
+   "fault": "Query attributes duplicate the path identity or use an AI not valid as a data attribute (for example AI 21 in the query).",
+   "detectable_by": "AI JSON-LD validAsDataAttribute and path/query overlap check."
+  },
+  {
+   "layer": "L02",
+   "fault": "Payload too large for the chosen symbol version, forcing low error correction or tiny modules that fail in the field.",
+   "detectable_by": "Decoded symbol version and error-correction level from the sample (where the decoder exposes them); otherwise manual review."
+  },
+  {
+   "layer": "L02",
+   "fault": "Extra application data written after the EPC in the EPC bank without the +AIDC toggle bit.",
+   "detectable_by": "TDS 18.1.2 check on the EPC bank dump."
+  },
+  {
+   "layer": "L08",
+   "fault": "Verifier reads the payload before verifying the signature, or accepts an unprotected kid that conflicts with the protected one.",
+   "detectable_by": "Tampered vectors whose content is valid but whose signature fails must give fail, not partial pass."
+  },
+  {
+   "layer": "L08",
+   "fault": "Truncated kid collision: verifier tries only the first matching certificate and rejects a valid payload.",
+   "detectable_by": "Fixture with two certificates sharing the 8-byte kid."
+  },
+  {
+   "layer": "L08",
+   "fault": "VDS signature stored DER-encoded instead of raw r||s, or r/s not left-padded to key length.",
+   "detectable_by": "Length check of the signature zone against the key length."
+  },
+  {
+   "layer": "L08",
+   "fault": "A static signed QR or DigSig copied onto a counterfeit product verifies as valid.",
+   "detectable_by": "Not detectable from data alone; the report must state the limit. TID-bound signatures or dynamic tags reduce it."
+  },
+  {
+   "layer": "L08",
+   "fault": "Issuer key leak or rogue issuance produces forged payloads that verify (as observed for DCC).",
+   "detectable_by": "Only through trust-list revocation in the pinned snapshot; offline checks cannot detect it otherwise."
+  },
+  {
+   "layer": "L09",
+   "fault": "Control hash computed over a non-canonical serialisation, so it never matches the registry hash.",
+   "detectable_by": "Recompute with the declared canonical form; report mismatch with the computed value."
+  },
+  {
+   "layer": "L10",
+   "fault": "Passport updated after printing; carrier hash or offline basic data now stale and contradict the online passport.",
+   "detectable_by": "Compare embedded data with the current version and the version history."
+  },
+  {
+   "layer": "L07",
+   "fault": "Restricted data (for example dismantling or test results) embedded in a public NFC record.",
+   "detectable_by": "Carrier leak check against the declared restricted field list."
+  }
+ ],
+ "sources": [
+  {
+   "id": "reg-eu-2024-1781",
+   "title": "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Original OJ text (Cellar manifestation); consolidation status as in m01, not re-checked here",
+   "publication_date": "2024-06-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; EUR-Lex reuse policy",
+   "what_it_shows": "Read at offset 380000: Art. 9(2)(b) 'one or more data carriers', 9(2)(c) layout and position, 9(2)(d) granularity; Art. 10(1)(a)-(c) carrier linked to a persistent identifier, physically present, standards per Annex III; Art. 10(3) digital copy within five working days. No offline data or hash."
+  },
+  {
+   "id": "reg-eu-2023-1542",
+   "title": "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries, amending Directive 2008/98/EC and Regulation (EU) 2019/1020 and repealing Directive 2006/66/EC",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "edition_or_version": "Consolidated text (label 02023R1542-20260813 per m01; identifier not visible in the windows read here)",
+   "publication_date": "2023-07-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; EUR-Lex reuse policy",
+   "what_it_shows": "Read at offsets 95000 and 495000: Art. 13(6)(a)-(c) QR code from 18 Feb 2027 and what it links to; 13(7) printed or engraved visibly, legibly, indelibly, else packaging and documents; 13(8) alternative smart labels by delegated act; 13(9) new markings after re-use, repurposing, remanufacturing; Annex VI Part C high contrast and readable size, no symbology named."
+  },
+  {
+   "id": "impl-reg-eu-2026-1778",
+   "title": "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry (title as in m01/m09 records)",
+   "issuing_body": "European Commission",
+   "url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Original OJ text",
+   "publication_date": "not re-checked in this session (see m01)",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; EUR-Lex reuse policy",
+   "what_it_shows": "Art. 2(16) hash of a passport version via a cryptographic algorithm; Art. 8 registration checks and granularity links; Art. 9 proof of registration with identifier, commodity code, operator, Commission time stamp, passport-version hash, qualified electronic seal (Reg. 910/2014 Art. 38), 90 days. No hash algorithm, canonicalisation or file format; nothing on carriers or offline verification."
+  },
+  {
+   "id": "new-m604-draft-sr-2024-02",
+   "title": "Draft Commission Implementing Decision on a standardisation request to the European Committee for Standardisation, the European Committee for Electrotechnical Standardisation, and the European Telecommunications Standards Institute as regards digital product passports in support of Union policy on ecodesign requirements for sustainable products and on batteries and waste batteries, with Annexes 1 to 2",
+   "issuing_body": "European Commission (DG GROW)",
+   "url": "https://ec.europa.eu/transparency/comitology-register/core/api/integration/ers/414796/096100/1/attachment",
+   "edition_or_version": "Draft; the PDF carries Ref. Ares(2024)1502512 - 27/02/2024 and Ref. Ares(2024)2138468 - 21/03/2024; file names dated 2024_02_21",
+   "publication_date": "2024-02-27",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Commission document in the comitology register; reuse terms not stated",
+   "what_it_shows": "Annex II Part B point 2: carrier construction rules (2.2 a-j), links to public and restricted data (2.3, 2.9), optional control data for carrier and product authenticity (2.4), optional cross-sectoral basic data for offline consultation with four failure cases (2.5) and six elements (2.6), trade-off assessment (2.7), visual identity (2.8), control data example: counterfeit-information link and hash of the registered passport (2.10), look-up and link persistence across resolvers (2.11), existing-standards list (2.12, bibliographic only). Point 7: offline and online originality and integrity verification, electronically signed encoded data set schemes (7.1), elements a-h (7.2), standards list (7.3, bibliographic only). Draft only; adopted text not read."
+  },
+  {
+   "id": "sreq-m-604-dpp",
+   "title": "Commission Implementing Decision C(2024) 5423 of 31 July 2024 on a standardisation request to CEN, CENELEC and ETSI as regards digital product passports (M/604), as amended by C(2025) 8024",
+   "issuing_body": "European Commission",
+   "url": "https://ec.europa.eu/growth/tools-databases/enorm/mandate/604_en",
+   "edition_or_version": "Adopted text not retrieved. The identity and date (31 July 2024) are confirmed by the title and Art. 2 of the Sept 2025 amendment draft (new-m604-amd-draft-2025-09), whose recital 1 names C(2024)5423, and by m01.",
+   "publication_date": "2024-07-31",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not checked",
+   "what_it_shows": "The eNorm page rendered only its heading again in the continuation run. It is not known whether the adopted request kept points 2.4-2.6 and 2.10 of the draft. The amendment draft refers to Annex II Part B points 2, 2.1, 3.2(b), 7, 7.1 and 8.4, so the adopted annex keeps the Part B point structure of the draft at least that far."
+  },
+  {
+   "id": "gs1-digital-link-uri-syntax-1-7-0",
+   "title": "GS1 Digital Link Standard: URI Syntax",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "edition_or_version": "Release 1.7.0, Ratified Aug 2026",
+   "publication_date": "2026-08",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "GS1 standard, free to download; reuse terms not re-read",
+   "what_it_shows": "Sec. 4.10 data attributes in the query as key=value; 4.10.1 extension parameters (not all-numeric) and reserved linkType/context; 4.10.2 queryStringParam list (AI 17, 3100-3105, 3900 series and others); exclusions (8200, 03, 8014); 4.12 canonical form sorts keys lexically; sec. 3 last repeated key wins; sec. 6.1.2 compressed forms RE2/RE3; 4.11 informational equivalence with element strings. Last 20374 characters of the page not read."
+  },
+  {
+   "id": "new-gs1-dl-hub-page",
+   "title": "GS1 Digital Link (standards hub page)",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/standards/digital-link/",
+   "edition_or_version": "no page date",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Lists URI Syntax, Resolver, Compression TS for EPC binary strings, and legacy DL 1.1.4 'Published January 2026' with no further updates expected; original DL ratified August 2018."
+  },
+  {
+   "id": "new-gs1-dl-compression-epc-1-0-0",
+   "title": "GS1 Digital Link URI: Compression Technical Standard for EPC binary strings",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/standards/digital-link/compression/",
+   "edition_or_version": "Release 1.0.0, Ratified, Jul 2025 (document version 1.0, issue 0)",
+   "publication_date": "2025-07",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "(c) 2025 GS1 AISBL; free download",
+   "what_it_shows": "Full PDF read via pdftotext. Sec. 1: technical standard, not approved for open supply chain standards (Policy B11); aimed at hybrid UHF Gen2/NFC tags. Sec. 2: compressed URIs in optical carriers are 'any URL', closed systems only; receiver must decompress and validate. Sec. 4.1 base64url table; 4.2 headers 7A/7B give 'eh'/'ex'; 4.2.1 lower-case hex; 4.2.2 base64url; stem without query or fragment; worked examples (verified in this session)."
+  },
+  {
+   "id": "new-gs1-dl-1-1-4-legacy",
+   "title": "GS1 Digital Link Standard (legacy standard serving as an archive and reference point)",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/standards/digital-link/1.1.4/",
+   "edition_or_version": "Release 1.1.4, Ratified, Dec 2025 (PDF cover)",
+   "publication_date": "2025-12",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "(c) 2025 GS1 AISBL",
+   "what_it_shows": "Read sec. 2.1-2.5.1, part of 2.6, 2.8-2.8.1: general compression algorithm is legacy, not maintained after 1.1.4, not for open supply chains; reserved headers 7A/7B now used by the EPC compression TS; business requirement of identifier extraction without online lookup; partially versus fully compressed URIs and the odd/even path-position rule; length indicator must not exceed AI maximum."
+  },
+  {
+   "id": "new-gs1-tds-2-3",
+   "title": "EPC Tag Data Standard (TDS)",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/standards/tds/",
+   "edition_or_version": "Release 2.3, Ratified, Oct 2025",
+   "publication_date": "2025-10",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "(c) 2025 GS1 AISBL",
+   "what_it_shows": "Read via pdftotext: change log (2.1: DigSig with AI 8030 in sec. 17, RUM indicator in Gen2v3), Bank 11 DSFID table row incl. Access Method 17 DigSig layout, sec. 14.5.1 +AIDC data toggle bit, sec. 17 User Memory Bank Contents, sec. 18.1.2 EPC bank conformance. Annex I-M Packed Objects not read in detail."
+  },
+  {
+   "id": "new-gs1-ai-dataset",
+   "title": "GS1 Application Identifiers (JSON-LD dataset)",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/ai/GS1_Application_Identifiers.jsonld",
+   "edition_or_version": "owl:versionInfo 1.2; dc:lastModified 2026-01-26; key 'dc:issued:' (stray colon) 2024-01-24",
+   "publication_date": "2024-01-24",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated in the windows read",
+   "what_it_shows": "Entries 17 (N2+N6, validAsDataAttribute true), 10 (X..20, data attribute true), 21 (X..20, data attribute false, excludes 235), 8030 DIGSIG (N4+Z..90, regex [0-9A-Za-z_-]{1,90}, requires serialised keys, data attribute true), 8200 partial. m09 recorded 'dc:modified'; the file has 'dc:lastModified'."
+  },
+  {
+   "id": "new-gs1-2d-retail-pos-1-1",
+   "title": "2D Barcodes at Retail Point-of-Sale Implementation Guideline",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://ref.gs1.org/guidelines/2d-in-retail/1.1.0/GS1-2DRetailPOS-Guideline-i1.1-r-2025-12-15",
+   "edition_or_version": "Release 1.1, Ratified, Dec 2025",
+   "publication_date": "2025-12-15",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "(c) 2025 GS1 AISBL",
+   "what_it_shows": "Sec. 4.1.2 multiple barcodes and 50 mm co-location for POS throughput (40-70 items per minute); 4.1.3 human readable text; 4.7.2 same GTIN in EAN/UPC and 2D code; 5.6.3 adjacent sides and double-scan risk; exact match of attributes in both symbols when a linear RCN code and a 2D code coexist; role table: ensure same GTIN in all GS1 symbologies on the package."
+  },
+  {
+   "id": "new-ehn-hcert-spec-1-0-8",
+   "title": "Electronic Health Certificate Specification (hcert_spec.md)",
+   "issuing_body": "eHealth Network / ehn-dcc-development",
+   "url": "https://github.com/ehn-dcc-development/eu-dcc-hcert-spec/blob/main/hcert_spec.md",
+   "edition_or_version": "Version 1.0.8, 2023-02-13",
+   "publication_date": "2023-02-13",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC BY 4.0 stated in the document; GitHub API license field null",
+   "what_it_shows": "CWT claims iss 1, exp 4, iat 6, hcert -260 with key 1; ES256 and PS256; kid in protected or unprotected header, first 8 bytes of SHA-256 of the DSC DER; zlib, Base45, prefix HC1: with versioned character; QR alphanumeric mode, ECC Q, 35-60 mm; trust lists of CSCA and DSC, daily refresh, no CRL assumption; validation order. QR symbology reference ISO/IEC 18004:2015 bibliographic only."
+  },
+  {
+   "id": "new-ec-dcc-techspecs-page",
+   "title": "Technical specifications for EU Digital COVID Certificates Volumes 1-5",
+   "issuing_body": "European Commission, DG SANTE (eHealth Network documents)",
+   "url": "https://health.ec.europa.eu/publications/technical-specifications-eu-digital-covid-certificates-volumes-1-5_en",
+   "edition_or_version": "Volume versions not stated on the page; Volume 1 file dated 1 Dec 2021",
+   "publication_date": "2022-02-22",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not checked",
+   "what_it_shows": "Volume titles: 1 formats and trust management, 2 gateway, 3 2D barcode specifications, 4 applications, 5 public key certificate governance; plus validation rules document. PDFs not opened. Search excerpts named Volume 4 v1.5 (2022-06-15) and Volume 5 V1.2 (2022-02-23) (secondary only)."
+  },
+  {
+   "id": "new-ec-dcc-page",
+   "title": "EU Digital COVID Certificate (Commission web page)",
+   "issuing_body": "European Commission",
+   "url": "https://commission.europa.eu/strategy-and-policy/coronavirus-response/safe-covid-19-vaccines-europeans/eu-digital-covid-certificate_en",
+   "edition_or_version": "no update date shown",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Commission website reuse policy (not re-read)",
+   "what_it_shows": "Regulation applied from 1 July 2021 and expired 30 June 2023; WHO took up the EU system on 1 July 2023 (Global Digital Health Certification Network, voluntary); Council Recommendation of 27 June 2023."
+  },
+  {
+   "id": "new-dgc-testdata",
+   "title": "dgc-testdata (EU Digital Green Certificate test data)",
+   "issuing_body": "eu-digital-green-certificates (GitHub organisation)",
+   "url": "https://github.com/eu-digital-green-certificates/dgc-testdata",
+   "edition_or_version": "main; pushed 2022-04-13",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (GitHub API)",
+   "what_it_shows": "Test-case JSON with RAW layers (JSON, CBOR, COSE, COMPRESSED, BASE45, PREFIX, 2DCODE), TESTCTX (VERSION, SCHEMA, CERTIFICATE, VALIDATIONCLOCK, GATEWAY-ENV) and EXPECTED* flags; unset flag = step not tested; layout COMMON/2DCode/raw and per-country folders; compare CBOR/JSON after decode and re-encode."
+  },
+  {
+   "id": "new-ehn-dcc-github-metadata",
+   "title": "GitHub repository listings of ehn-dcc-development and eu-digital-green-certificates, and related libraries",
+   "issuing_body": "GitHub API (read-only gh api)",
+   "url": "https://api.github.com/orgs/ehn-dcc-development/repos",
+   "edition_or_version": "listing of 2026-10-19",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "per repository",
+   "what_it_shows": "Archived flags, last push dates and SPDX ids for the DCC repositories and for cbor2, pycose, kirei/python-base45, nfcpy/ndeflib, zxing-cpp, gs1/GS1DigitalLinkCompressionPrototype, smart-on-fhir/health-cards, WorldHealthOrganization/smart-trust."
+  },
+  {
+   "id": "new-rfc-9285-base45",
+   "title": "RFC 9285: The Base45 Data Encoding",
+   "issuing_body": "IETF",
+   "url": "https://www.rfc-editor.org/info/rfc9285",
+   "edition_or_version": "RFC 9285",
+   "publication_date": "2022",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust legal provisions",
+   "what_it_shows": "Authors Faltstrom, Ljunggren, van Gulik; Informational; no obsoletes or updates."
+  },
+  {
+   "id": "new-rfc-9052-cose",
+   "title": "RFC 9052: CBOR Object Signing and Encryption (COSE): Structures and Process",
+   "issuing_body": "IETF",
+   "url": "https://www.rfc-editor.org/info/rfc9052",
+   "edition_or_version": "RFC 9052, STD 96",
+   "publication_date": "2022",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "IETF Trust legal provisions",
+   "what_it_shows": "Internet Standard; with RFC 9053 obsoletes RFC 8152 (which HCERT cites); COSE_Sign1 identified by CBOR tag 18."
+  },
+  {
+   "id": "new-icao-9303-p13",
+   "title": "Doc 9303 Machine Readable Travel Documents, Part 13: Visible Digital Seals",
+   "issuing_body": "International Civil Aviation Organization",
+   "url": "https://www.icao.int/sites/default/files/publications/DocSeries/9303_p13_cons_en.pdf",
+   "edition_or_version": "Eighth Edition, 2021 (consolidated; Amendment 1 dated 14/6/24 and Corrigendum 1 dated 11/12/20 recorded)",
+   "publication_date": "2021",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "(c) ICAO 2020, all rights reserved; free online copy",
+   "what_it_shows": "Sec. 2.1 ISO-standardised 2D symbologies, print guidance; Table 1 header (0xDC, version, country, signer and certificate reference, dates, feature definition reference, document type category); 2.2.1 certificate fetched out of band; 2.3 TLV features, C40, dates; 2.4 0xFF signature zone, ECDSA recommended, raw r||s, hash from curve order; 2.6 C40; Appendix A workflow; Appendix B signature format conversion. ISO/IEC 16022, 24778, 18004, 15415 cited: bibliographic only."
+  },
+  {
+   "id": "new-icao-store-9303-13",
+   "title": "Machine Readable Travel Documents - Part 13 - Visible Digital Seals (Doc 9303-13) (ICAO Store)",
+   "issuing_body": "ICAO",
+   "url": "https://store.icao.int/en/machine-readable-travel-documents-part-13-visible-digital-seals-doc-9303-part-13",
+   "edition_or_version": "8th Edition, 2021; SKU DOC-09303-008-13",
+   "publication_date": "2021",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "paid copy single-user, no printing; store notes all parts free online",
+   "what_it_shows": "Edition and licence terms of the sold copy; confirms a free online version exists."
+  },
+  {
+   "id": "new-bsi-tr-03137",
+   "title": "BSI TR-03137 Optically Verifiable Cryptographic Protection of non-electronic Documents (Digital Seal); Part 2 JAB Code",
+   "issuing_body": "Bundesamt fuer Sicherheit in der Informationstechnik (German Federal Office for Information Security)",
+   "url": "https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Technische-Richtlinien/TR-nach-Thema-sortiert/tr03137/tr-03137.html",
+   "edition_or_version": "Part 1 Version 3.0, Part 2 Version 1.0 (no dates on page)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated",
+   "what_it_shows": "Page metadata and short description only; PDFs not opened. A search excerpt showed Part 1 Version 2.5 dated 03.12.2021 and an older 2.3 copy stating the seal encoding moved into the ICAO specification (secondary only). Page says JAB Code was published as ISO/IEC 23634 (bibliographic only)."
+  },
+  {
+   "id": "new-shc-spec-1-4-0",
+   "title": "SMART Health Cards Framework",
+   "issuing_body": "SMART Health Cards (HL7/SMART community specification site)",
+   "url": "https://spec.smarthealth.cards/",
+   "edition_or_version": "1.4.0, stable",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY 4.0 (stated on the page)",
+   "what_it_shows": "ES256/P-256, JWKS at .well-known, kid = JWK thumbprint, x5c optional, zip DEF raw DEFLATE, shc:/ numeric mode, QR version 22, chunking deprecated, rid and CRL per kid, exp."
+  },
+  {
+   "id": "new-ndeflib",
+   "title": "ndeflib - NFC Data Exchange Format library (nfcpy/ndeflib)",
+   "issuing_body": "nfcpy project",
+   "url": "https://github.com/nfcpy/ndeflib",
+   "edition_or_version": "docs 'stable' build at commit 6492038cd485f82b54f16b803fc82b90e919855e; repository pushed 2020-09-07",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "ISC (GitHub API)",
+   "what_it_shows": "ndef.html: message of records with MB/ME, TNF 0-6 semantics, ID up to 255 Latin-1 chars, 1 MB default payload cap, decoder error modes. record.py: header bits MB 0x80, ME 0x40, CF 0x20, SR 0x10, IL 0x08, TNF mask 0x07, TNF 7 rejected, MIME type pattern."
+  },
+  {
+   "id": "new-android-nfc-basics",
+   "title": "NFC basics (Android Developers)",
+   "issuing_body": "Google (Android Developers)",
+   "url": "https://developer.android.com/develop/connectivity/nfc/nfc",
+   "edition_or_version": "page last updated 2026-07-30 UTC",
+   "publication_date": "2026-07-30",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Android documentation terms (not re-read)",
+   "what_it_shows": "First NDEF record decides dispatch; TNF and RTD mapping tables; createMime and createUri examples; AAR anywhere but preferably not first; Android 16 http(s) tags trigger ACTION_VIEW, Android 17 needs explicit open-link action; ACTION_TAG_DISCOVERED deprecated in Android 17."
+  },
+  {
+   "id": "new-apple-corenfc-background",
+   "title": "Adding Support for Background Tag Reading (Apple Developer Documentation)",
+   "issuing_body": "Apple",
+   "url": "https://developer.apple.com/documentation/corenfc/adding-support-for-background-tag-reading",
+   "edition_or_version": "not shown; content read in the continuation through the documentation JSON endpoint https://developer.apple.com/tutorials/data/documentation/corenfc/adding-support-for-background-tag-reading.json",
+   "publication_date": "not shown",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apple developer documentation terms; not checked",
+   "what_it_shows": "iOS background tag reading needs an NDEF URI record (TNF well-known, type 'U'). The system takes the first such record found and does not require it at index 0. Allowed URIs are universal links or a fixed list of schemes: http(s), mailto, sms, tel, facetime, facetime-audio, Apple Maps links and X-HM HomeKit setup codes. Custom schemes are not supported. The device must be iPhone XS or later. Background reading is blocked before the first unlock, during a Core NFC session, while Wallet or the camera is in use, and in airplane mode. The app receives the whole NDEF message as an NSUserActivity of type browsing-web."
+  },
+  {
+   "id": "new-zxing-cpp-python-binding",
+   "title": "zxing-cpp: wrappers/python/zxing.cpp and core/src/BarcodeFormat.h (master branch)",
+   "issuing_body": "zxing-cpp project (GitHub)",
+   "url": "https://github.com/zxing-cpp/zxing-cpp/blob/master/wrappers/python/zxing.cpp",
+   "edition_or_version": "master at commit 2c3dcfeffa (2026-10-06); latest release v3.1.1 published 2026-07-29 (gh api releases/latest)",
+   "publication_date": "2026-10-06",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (GitHub license API)",
+   "what_it_shows": "The Python Barcode object exposes valid, text, bytes, format, symbology, symbology_identifier, ec_level, content_type (Text, Binary, Mixed, GS1, ISO15434, UnknownECI), position, orientation, error and an 'extra' JSON property. Text modes include Plain, ECI, HRI, Escaped and Hex. The format table lists QRCode, MicroQRCode, RMQRCode and DataMatrix as readable and lists QRCode and DataMatrix as writable, with GS1 support. write_barcode takes an ec_level for QR. The source code was read; nothing was run."
+  },
+  {
+   "id": "new-m604-amd-draft-2025-09",
+   "title": "Draft standardisation request to the European Committee for Standardisation, the European Committee for Electrotechnical Standardisation and the European Telecommunications Standards Institute on amending Implementation Decision C(2024)5423 of 31 July 2024 as regards digital product passports (notification under Article 12 of Regulation (EU) No 1025/2012, with the draft Commission Implementing Decision attached)",
+   "issuing_body": "European Commission, DG GROW (Standards Policy)",
+   "url": "https://webgate.ec.europa.eu/circabc-ewpp/d/d/workspace/SpacesStore/8ee064ee-4352-4502-af57-9db78208a3fc/download",
+   "edition_or_version": "Draft, notification dated Brussels 23.9.2025; status 'Draft'; feedback deadline 4.10.2025; 8-page PDF",
+   "publication_date": "2025-09-23",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Commission document; the notification states that it is a draft, not adopted or endorsed; reuse terms not stated",
+   "what_it_shows": "Draft only, not the adopted C(2025) 8024. Art. 1 makes Regulation (EU) 2024/1781 the legal basis for all products and deletes the batteries reference from the title. It inserts 'harmonised' throughout, moves the standards deadline from December 2025 to March 2026 (Art. 1(1), Art. 3(2), Annex I) and the expiry from June 2026 to March 2028 (Art. 4(2)). It replaces several Annex II Part A definitions (manufacturer, upgrading, refurbishment, remanufacturing, maintenance, repair, unique operator and facility identifiers). It adds Part A point 3.1: a harmonised standard must state which essential requirements it does not cover. Annex II Part B points 2, 2.1, 7 and 7.1 change only by inserting 'harmonised'. Point 3.2(b) is aligned with ESPR access rights. Point 8.4 changes the accessibility standard reference. Art. 2: if an ESO rejects the amendment, the 31 July 2024 version continues to apply to it. Text extracted locally with pdftotext."
+  },
+  {
+   "id": "new-nfc-forum-sig-rtd-2-0",
+   "title": "Signature Record Type Definition Technical Specification (RTD_SIG) 2.0",
+   "issuing_body": "NFC Forum",
+   "url": "https://nfc-forum.org/uploads/specifications/60-NFCForum-TS-RTD_SIG-2.0.pdf",
+   "edition_or_version": "2.0 (date 2020-02-20 per search excerpt; a 2015 press report gives 2015 approval)",
+   "publication_date": "not verified",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "NFC Forum licence terms not read; not opened (consistent with m09)",
+   "what_it_shows": "Existence and version only, from WebSearch results; content not read."
+  },
+  {
+   "id": "new-2d-doc-search",
+   "title": "Web search on the French 2D-Doc / cachet electronique visible (CEV)",
+   "issuing_body": "various (solutions-numeriques.com, AFNOR boutique listings)",
+   "url": "https://www.solutions-numeriques.com/?p=4011",
+   "edition_or_version": "not applicable",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not applicable",
+   "what_it_shows": "2D-Doc is a signed Data Matrix used on French proofs of address, managed with ANTS; related AFNOR XP Z42-101 to -105 and ISO 22376 are protected (bibliographic only). The ANTS specification itself was not located."
+  },
+  {
+   "id": "new-iso-iec-20248",
+   "title": "ISO/IEC 20248: Information technology - Automatic identification and data capture techniques - Digital signature data structure schema",
+   "issuing_body": "ISO/IEC JTC 1",
+   "url": "not opened (title as listed in new-m604-draft-sr-2024-02 point 7.3 and referenced as [ISO20248] in TDS 2.3)",
+   "edition_or_version": "not checked",
+   "publication_date": "not checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "protected standard; bibliographic only",
+   "what_it_shows": "Bibliographic only. Content not read; this file describes only how TDS 2.3 encodes the DigSig via AI 8030."
+  },
+  {
+   "id": "new-iso-iec-15962",
+   "title": "ISO/IEC 15962 (RFID for item management - data protocol: data encoding rules and logical memory functions) and ISO/IEC 15961 (data protocol)",
+   "issuing_body": "ISO/IEC JTC 1",
+   "url": "not opened (cited as [ISO15961], [ISO15962] in TDS 2.3)",
+   "edition_or_version": "not checked",
+   "publication_date": "not checked",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "protected standard; bibliographic only",
+   "what_it_shows": "Bibliographic only; the titles given here are as TDS cites them and were not checked on a catalogue page. The DSFID and No-Directory method are described only from TDS sec. 17 and its Bank 11 table."
+  },
+  {
+   "id": "new-dppce-engine-source",
+   "title": "dppce engine: architecture section 8, capability manifest",
+   "issuing_body": "this repository",
+   "url": "docs/explanation/architecture.md; docs/reference/capabilities.md; pyproject.toml",
+   "edition_or_version": "worktree at branch base b290791",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "repository licence",
+   "what_it_shows": "Registered checks and capability states; identifier.parse accepts only /01/{GTIN}/21/{serial}; identifier.consistency is exact text; integrity.cose, carrier.nfc, carrier.rfid are interface_only; core deps include cryptography, joserfc, rfc8785 and asn1crypto; no CBOR library."
+  }
+ ],
+ "open_questions": [
+  "Did the adopted standardisation request C(2024) 5423 keep the optional control data, the counterfeit-information link and the six offline basic data elements of the February 2024 draft? The adopted text was still not read. The September 2025 draft of the amendment (new-m604-amd-draft-2025-09) changes Annex II Part B point 2 only by inserting the word 'harmonised', so if the adopted 2024 text kept these items, the amendment as drafted would not remove them; the adopted amendment C(2025) 8024 itself was not read.",
+  "Which hash algorithm, canonical form and file format does the registry use for the passport-version hash (2026/1778 Arts 2(16), 9)? Without them a carrier control hash cannot be compared deterministically.",
+  "Should a carrier control hash reference the first registered version or the latest version, given that passports change and the proof of registration covers the latest version only?",
+  "May the engine add a CBOR decoder (cbor2, MIT) to support integrity.cose carrier profiles, or should it implement a minimal deterministic CBOR subset? Owner decision under rule 10.",
+  "Does the zxing-cpp release that the engine's qr extra installs expose the same Barcode properties as the master-branch binding read in the continuation (symbology_identifier, ec_level, content_type, bytes, extra)? Is the QR version available, perhaps inside the 'extra' JSON? Not verified: no local test was run, and the release tag was not compared with master.",
+  "Will GS1 approve compressed EPC Digital Link URIs for open supply chains through an application standard, and will DPP delegated acts allow hybrid UHF/NFC tags as the carrier?",
+  "Which trust framework would anchor carrier-level signatures for DPPs (eIDAS seals, GS1 PGLN DigSig, issuer JWKS)? The ESPR credentials implementing act was not located (m01).",
+  "Is there an open specification of the ISO/IEC 20248 DigSig verification that the engine could use, or must AI 8030 checks stay structural ('not run' for crypto)?",
+  "Android dispatches on the first NDEF record. Apple's page says that iOS background reading uses the first well-known 'U' record found and states no position requirement. Should a DPP multi-record profile require the URI record at position 0, so that both platforms agree? The profile would be engine-defined, because no DPP rule on this was located."
+ ],
+ "anomalies": [
+  "GS1 DL Compression TS 1.0.0 sec. 4.2.2 says to append the base64 characters to 'eh' when building an 'ex' URI and says '6 bits per hexadecimal character'; both read as editorial errors (the worked example uses 'ex' and base64url).",
+  "GS1 DL 1.1.4: hub page says 'Published January 2026', the PDF cover says 'Ratified, Dec 2025'.",
+  "Compression TS 1.0.0 references DL 1.1.2 (Nov 2022) and the resolver as of February 2024 although 1.1.4 and resolver 1.2.1 exist.",
+  "GS1 AI JSON-LD uses 'dc:lastModified' and a misspelled 'dc:issued:' key; m09 recorded 'modified 2026-01-26'.",
+  "Draft standardisation request numbers the six basic data elements (2)-(7), with no item (1); two Ares references (27/02/2024 and 21/03/2024) appear on the PDF.",
+  "eu-dcc-hcert-spec: GitHub license field is null while the document states CC BY 4.0. HCERT 1.0.8 cites RFC 8152, which RFC 9052/9053 obsoleted in 2022.",
+  "A 2023 ICAO TRIP presentation (search excerpt) says amendments mandate ECDSA for VDS signers, but the consolidated Part 13 text read here (with Amendment 1 recorded) only recommends ECDSA and defers to Doc 9303 Part 12; Part 12 was not read.",
+  "ICAO Doc 9303 Part 13 header text says versions are identified by byte values 0x02/0x03 while naming them version 3 and 4 (value n means version n+1); consistent but easy to misread.",
+  "Old ICAO URLs (www.icao.int/publications/Documents/9303_p13_cons_en.pdf and the publication.aspx page) return 404; the current path is under /sites/default/files/publications/DocSeries/.",
+  "BSI TR-03137 Part 1 version: page shows 3.0, a search excerpt showed 2.5 of 03.12.2021.",
+  "The DCC volumes page states no version numbers; versions seen only in search excerpts.",
+  "WebSearch result about the Council Recommendation gave two different deadlines for joining the WHO network (30 September 2023 versus 31 December 2023); not resolved, not used.",
+  "The worktree .venv lacks zxingcpp and cryptography, so no local decoding test was run.",
+  "Continuation: the eNorm mandate page for M/604 again rendered only the heading 'eNorm Platform' to WebFetch. The adopted C(2024) 5423 text was not found by two web searches either. The September 2025 amendment draft calls the base act 'Implementation Decision', while the OJ decision (EU) 2026/1736 cited in m01 calls it 'Implementing Decision'. This is an editorial difference only.",
+  "Continuation: the amendment draft (Sept 2025) moves the deadline for the standards from December 2025 to March 2026 and the expiry of the request from June 2026 to March 2028. The ETSI mandates page recorded in m01 still shows expiry 2026-06-26. The adopted C(2025) 8024 was not read, so the final dates are unconfirmed.",
+  "Continuation: one web search result listed an iTeh catalogue page and a vendor page that describe the scope of EN 18220:2026. They were not opened or used (rule 5)."
+ ],
+ "truncation": "Did not read: GS1 DL URI Syntax characters 100000-120374; GS1 DL 1.1.4 compression tables beyond sec. 2.6 fragments and flowcharts (sec. 2.9-2.10); TDS Annex I-M (Packed Objects) and sec. 15.3 in detail; GS1 General Specifications (dual marking sec. 4.15 and 5.5.1 referenced by the 2D guideline; file too large in m09); DCC Volumes 1-5 PDFs; BSI TR-03137 PDFs; ICAO Doc 9303 Parts 7 and 12; the NFC Forum Signature RTD (licence-gated, not opened); the ANTS 2D-Doc specification (not located). Literature: Consensus quota nearly exhausted (2 and 3 searches left on the two servers), so only three Consensus calls and two SciSpace calls were made; pre-2021 product-memory papers were kept only where no newer source covered on-tag user memory. Implementations list is capped to repositories met in this session; national DCC apps and VDS libraries (for example a hex.pm ex_icao_vds package seen in a search result) were not examined. Continuation: Consensus is now exhausted on both servers (0 searches left on mcp__consensus__search; 1 left on the second server, kept unused). The continuation made one call to each Consensus server and one SciSpace call. Of 50 results, 7 were added, chosen for carrier durability, carrier choice, signed or protected QR payloads, or DPP hash anchoring. Blockchain-only QR anti-counterfeiting papers were skipped because m06 covers ledger anchoring. The literature records rest on abstracts only.",
+ "continuation_note": "Continuation run on 2026-10-19 after an API usage limit stopped the first agent. Kept all supported draft content. Changes: (1) Retrieved and read the Commission's Article 12 notification of 23.9.2025 with the draft amendment of C(2024) 5423 (new source new-m604-amd-draft-2025-09). As drafted, it changes the legal basis, the deadlines (Dec 2025 to Mar 2026; expiry Jun 2026 to Mar 2028) and some definitions. It touches Annex II Part B point 2 (carriers) and point 7 (integrity) only by inserting 'harmonised'. Updated L02 and L08 specs, maturity and open questions to match. sreq-m-604-dpp moved from not_located to metadata_only because the amendment draft confirms its identity (recital 1) and date (title and Art. 2). The adopted 2024 text and the adopted C(2025) 8024 are still not read. (2) Read Apple's background tag reading documentation through its JSON data endpoint (new-apple-corenfc-background, now substantive). It shows that iOS uses the first well-known URI record found, with no stated position requirement, that only http(s), mailto, sms, tel, facetime and a few other schemes are supported, and that the device must be iPhone XS or later. Recorded the Android/iOS difference in L02, a failure mode and an open question. (3) Read the zxing-cpp master-branch Python binding and format table with gh api (new-zxing-cpp-python-binding). Data Matrix read and write, symbology_identifier, ec_level and content_type (GS1) are exposed; latest release v3.1.1 of 2026-07-29. This closes most of the earlier open question; the PyPI-release check remains. (4) Added 7 literature records from one SciSpace and two Consensus searches. Remaining gaps: the adopted standardisation request text; DCC Volumes 1-5 and BSI TR-03137 PDFs; ICAO Doc 9303 Part 12; the ANTS 2D-Doc specification; GS1 General Specifications dual-marking sections; no local decode or signature test (the worktree venv lacks zxingcpp and cryptography)."
+}

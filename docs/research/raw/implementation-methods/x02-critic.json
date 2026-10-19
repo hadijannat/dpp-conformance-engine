@@ -1,0 +1,194 @@
+{
+  "id": "x02-critic",
+  "retrieval_date": "2026-10-19",
+  "method_note": "Desk critique of the 14 sweep files (m01-m10, l01-l03, r01); m02-gs1-web-resolver.verification.json appeared during the run and was excluded. Tabulated with python3 -I over method_families, maturity, layers (applies, mechanism length, specs count), end_to_end_flows, anomalies, open_questions, truncation, and the literature classification_scheme fields. No web retrieval was made in this critique, so no new source is recorded and every claim below points to a JSON path in a sweep file. Thin-layer heuristic per file: applies is not 'yes' and the mechanism text is under 1300 characters, or applies is 'no'. Capability names follow docs/reference/capabilities.md; the brief's 'access.restricted_fields' is registered there as access.policy, and 'carrier.qr_decode' as carrier.qr.",
+  "coverage_table": [
+    {"file": "m01-law-baseline.json", "families": ["law-baseline"], "thin_layers": []},
+    {"file": "m02-gs1-web-resolver.json", "families": ["web-resolver-gs1", "linked-data-semantic", "event-traceability-epcis", "hybrid"], "thin_layers": ["L04", "L06", "L07", "L08", "L09", "L10"]},
+    {"file": "m03-aas-digital-twin.json", "families": ["aas-digital-twin"], "thin_layers": ["L01", "L02", "L06", "L08", "L09", "L10", "L11"]},
+    {"file": "m04-dataspace-federated.json", "families": ["dataspace-federated", "aas-digital-twin", "linked-data-semantic", "verifiable-credentials-ssi"], "thin_layers": ["L02", "L06", "L08", "L09", "L10"]},
+    {"file": "m05-verifiable-credentials.json", "families": ["verifiable-credentials-ssi", "web-resolver-gs1", "linked-data-semantic", "event-traceability-epcis"], "thin_layers": ["L02", "L04", "L09"]},
+    {"file": "m06-dlt-anchored.json", "families": ["dlt-anchored", "hybrid", "verifiable-credentials-ssi"], "thin_layers": ["L02", "L05", "L09"]},
+    {"file": "m07-eu-reference-pilots.json", "families": ["law-baseline", "web-resolver-gs1", "linked-data-semantic", "verifiable-credentials-ssi", "dataspace-federated", "aas-digital-twin", "hybrid"], "thin_layers": ["L02"]},
+    {"file": "m08-linked-data-semantic.json", "families": ["linked-data-semantic", "hybrid"], "thin_layers": ["L02", "L04", "L06", "L07", "L08", "L09", "L10"]},
+    {"file": "m09-identification-carriers.json", "families": ["law-baseline", "web-resolver-gs1", "aas-digital-twin", "dataspace-federated", "verifiable-credentials-ssi", "event-traceability-epcis", "hybrid"], "thin_layers": ["L04", "L05", "L06", "L07", "L08", "L10"]},
+    {"file": "m10-platforms-sectors.json", "families": ["platform-saas", "hybrid", "web-resolver-gs1", "event-traceability-epcis", "verifiable-credentials-ssi", "dlt-anchored", "dataspace-federated", "aas-digital-twin", "linked-data-semantic", "law-baseline"], "thin_layers": []},
+    {"file": "l01-reviews-taxonomies.json", "families": ["hybrid (17 papers)", "aas-digital-twin (11)", "dlt-anchored (10)", "other (10)", "linked-data-semantic (9)", "dataspace-federated (7)", "law-baseline (6)", "web-resolver-gs1 (5)", "verifiable-credentials-ssi (4)", "event-traceability-epcis (2)"], "thin_layers": []},
+    {"file": "l02-prototypes-pilots.json", "families": ["hybrid (13 papers)", "dlt-anchored (12)", "aas-digital-twin (9)", "linked-data-semantic (9)", "platform-saas (8)", "other (8)", "dataspace-federated (7)", "verifiable-credentials-ssi (6)", "web-resolver-gs1 (4)", "event-traceability-epcis (3)", "law-baseline (2)"], "thin_layers": []},
+    {"file": "l03-testing-conformance.json", "families": ["other (15 papers)", "aas-digital-twin (9)", "verifiable-credentials-ssi (7)", "linked-data-semantic (6)", "dlt-anchored (4)", "hybrid (3)", "dataspace-federated (3)", "law-baseline (2)", "web-resolver-gs1 (2)", "platform-saas (1)", "event-traceability-epcis (1)"], "thin_layers": []},
+    {"file": "r01-repositories.json", "families": ["aas-digital-twin (19 repos)", "linked-data-semantic (17)", "verifiable-credentials-ssi (16)", "event-traceability-epcis (11)", "web-resolver-gs1 (10)", "platform-saas (9)", "dataspace-federated (8)", "other (7)", "dlt-anchored (5)", "hybrid (3)"], "thin_layers": []}
+  ],
+  "missing_families": [
+    {
+      "name": "event-traceability-epcis (GS1 EPCIS 2.0 events with CBV 2.0 vocabulary: capture and query interfaces, event lineage feeding a passport)",
+      "evidence": "Confirmed. m02 $.scope_note defers 'EPCIS event semantics (family m-event-traceability)' and m08 $.scope_note defers 'EPCIS event semantics (event-traceability-epcis)', but no m-file for this family exists. The family tag appears in m02/m05/m09/m10 $.method_families, on 11 repositories in r01 (for example $.repos[50] an EPCIS 2.0 and CBV 2.0 test-event generator, $.repos[51] Oliot EPCIS), and l01 $.conformance_implications[9] (CI-10) calls it a distinct family. m10 $.summary says platforms often take lifecycle data as EPCIS 2.0 events; m10 $.end_to_end_flows[3] (Digimarc EPCIS plus IOTA anchoring) and m10 $.layers.L03 variants[2] (EPCIS capture and query REST). m02 $.layers.L05 lists the link types gs1:epcis and gs1:traceability. CBV is named only in r01. No EPCIS record exists in the 2026-10-13 prior research (grep of docs/research/raw/*.json and catalogue/sources.yaml found none).",
+      "materiality": "high",
+      "existing_checks": "data.jsonschema (only with a pinned EPCIS 2.0 JSON schema); data.context (EPCIS JSON-LD context on the allowlist); api.contract (only with a pinned EPCIS query interface OpenAPI); persistence.versions (partial, event history).",
+      "new_capability": "event lineage and consistency check over a recorded event set (aggregation and transformation chains, identifier agreement with the passport); EPCIS interface probe on loopback fixtures."
+    },
+    {
+      "name": "hybrid stacks as a defined composition (for example GS1 Digital Link carrier, AAS submodels, dataspace transport, as in Battery Pass and Catena-X)",
+      "evidence": "Confirmed as a gap of definition. 'hybrid' is a tag in 7 of 10 m-files ($.method_families) but no file defines it or gives a composition rule. l02 $.cross_paper_observations[3] says hybrids are the norm; l01 $.papers[26].classification_scheme gives a four-block stack (dataspace, AAS, CIRPASS vocabularies, GS1). Composition fragments only: m03 $.end_to_end_flows[0] (ID Link and linkset), m04 $.end_to_end_flows[2] (Catena-X to EU bridge, preview concept), m04 $.open_questions[1] (no Catena-X mapping of the CX triplet to a public web URL found), m07 $.end_to_end_flows[7] (BatteryPass-Ready module chain). m06 $.open_questions[7] (EUBOF claims Battery Pass uses a private permissioned blockchain) is unresolved against the Battery Pass technical guidance read in m02 and m07.",
+      "materiality": "high",
+      "existing_checks": "Each layer check applies separately (identifier.resolve, aas.validate, data.jsonschema, integrity.jws); none checks the hand-over between families.",
+      "new_capability": "applicability rule for a system under test that declares several families (ICS multi-family profile) and a cross-family identifier.consistency mode (carrier URI to globalAssetId or specificAssetIds to passport id)."
+    },
+    {
+      "name": "plain web passport without a framework (static file hosting or operator REST/JSON with content negotiation, no resolver standard, AAS, dataspace or credential)",
+      "evidence": "Confirmed as mentioned only as variants: m05 $.layers.L04_apis_lifecycle_searchability.variants[3] (static hosting of signed credential files, no API) and $.layers.L06_storage_archiving_persistence.variants[0]; m07 $.layers.L03 (CIRPASS-2 design assumption: one URL, HTML for browsers, JSON or JSON-LD on Accept) and $.conformance_implications[19] (/.well-known/dppdata); m09 $.layers.L02.variants[1] (QR with a plain HTTPS URL); m01 $.failure_modes[8] (passport only as PDF or HTML). l01 $.cross_paper_observations[10] says no paper treats platform or SaaS as its own architecture class. m02 $.open_questions[9] notes identifier.resolve still accepts any JSON object at the end of the chain as a passport.",
+      "materiality": "medium",
+      "existing_checks": "identifier.resolve, identifier.consistency, data.jsonschema, data.context, data.rules, access.policy, api.contract (only if the operator publishes an OpenAPI contract).",
+      "new_capability": "content-negotiation probe (Vary, 406, media-type and profile parameters, HTML-to-JSON parity) as parameters of identifier.resolve, or a separate check."
+    },
+    {
+      "name": "renderers and human-readable passport views as a conformance target",
+      "evidence": "Confirmed as implementations only: m07 $.scope_note and $.layers.L03 (CIRPASS-2 dpp-renderer-be and fe), m10 $.implementations[24] (single-page renderer with in-browser Data Integrity verification), m05 $.layers.L05 (renderMethod with RenderTemplate2024 and digestMultibase, WIP), m04 $.implementations[7], r01 6 repos with dpp_role renderer. No file treats the HTML view as a layer; m10 $.failure_modes[13] (restricted fields leak through the HTML page) is the only test hook.",
+      "materiality": "medium",
+      "existing_checks": "access.policy (HTML channel); manual.review.",
+      "new_capability": "HTML-view consistency check against the machine-readable passport (field presence, identifier, version) and render-template digest check for credentials."
+    },
+    {
+      "name": "data stored on the carrier itself (offline basic data, control hash, compressed payload in QR, NFC or RFID user memory)",
+      "evidence": "Confirmed as thin. m01 $.layers.L02_data_carriers.mechanism (M/604 draft annex asked for optional control data such as a hash of the registered passport and optional offline basic data elements; the adopted request and its 2025 amendment were not retrieved, m01 $.anomalies[10]); m03 $.layers.L02_data_carriers.variants[3] and $.literature[16] (offline QR with compressed AAS JSON, research prototype); m02 $.implementations[17] (Battery Pass guidance contrasts URL carriers with UID plus offline data). m09 covers NDEF URI records and NFC secure dynamic messages, not data payloads; NFC Forum specifications are licence-gated (m09 $.scope_note).",
+      "materiality": "medium",
+      "existing_checks": "carrier.qr (decode only); identifier.parse; carrier.nfc and carrier.rfid are interface_only.",
+      "new_capability": "carrier payload versus online passport consistency check; control-hash check of the carrier against the resolved or registered passport version."
+    },
+    {
+      "name": "BIM-based construction product and material passports",
+      "evidence": "Mentioned only in literature: l02 $.papers[35].classification_scheme (BIM-based, platform-based, QR or RFID based approaches to material passports), l02 $.papers[34] (BIM testbed), m10 $.literature[18] and [19]. m01 covers the CPR 2024/3110 passport duty but no file covers BIM or IFC data as a passport format.",
+      "materiality": "low",
+      "existing_checks": "none unless exported to JSON (l02 $.papers[34].conformance_relevance).",
+      "new_capability": "none proposed until a CPR delegated act fixes a format."
+    },
+    {
+      "name": "EU web portal and customs interaction",
+      "evidence": "Covered as far as public facts allow: m01 $.layers.L04 and L09, $.implementations[3]; m07 $.end_to_end_flows[5] (customs release via EU CSW-CERTEX, future) and $.layers.L09. The portal is not launched and the registry API guidelines are not published (m01 $.open_questions[2], m07 $.open_questions[0]). Not a research gap now; it is blocked on publication.",
+      "materiality": "low",
+      "existing_checks": "registry.mock (supported); registry.official is interface_only.",
+      "new_capability": "none until the technical guidelines are published."
+    },
+    {
+      "name": "platform or IoT digital twins other than AAS (for example DTDL, vendor IoT twins, NGSI-LD, oneM2M, OPC UA)",
+      "evidence": "DTDL and vendor IoT twin services are not mentioned in any of the 14 files. Neighbours are mentioned only in passing: m07 $.layers.L03_data_exchange_protocols.mechanism (NGSI-LD, Web of Things and FIWARE connector as co-existing APIs), m03 $.scope_note and $.layers.L03.variants[5] (OPC UA and MQTT bindings left out), l02 $.papers[28] (oneM2M in an EPCIS plus IOTA stack). l01 $.papers[9] lists IoT use as a taxonomy dimension.",
+      "materiality": "low",
+      "existing_checks": "data.context and data.jsonschema would apply to NGSI-LD JSON-LD bodies served over HTTP.",
+      "new_capability": "none proposed; the engine tests the passport interface, not the twin platform."
+    }
+  ],
+  "thin_layers": [
+    {"layer": "all", "detail": "No layer in any m-file is marked 'unknown'. All 110 layer entries are 'yes' or 'partial'; only m04 L09 is 'no'. Thinness shows as 'partial' plus a short mechanism or few specs."},
+    {"layer": "L09", "detail": "Partial or no in 6 of 10 m-files (m02, m03, m04 'no', m05, m06, m08); m02 L09 has 454 characters and 2 specs. Root cause is outside the sweep: the 'DPP Registry technical guidelines' (registry API) are unpublished (m01 $.open_questions[2], m07 $.open_questions[0]); the hash input of the proof of registration is unknown (m01 $.open_questions[1], m07 $.open_questions[1]); UPI dereference thresholds are unknown (m07 $.open_questions[2]). Engine: registry.mock applies; registry.official stays interface_only."},
+    {"layer": "L08", "detail": "Partial in 7 of 10 (m01, m02, m03, m04, m08, m09, m10). m10 $.layers.L08 says many vendor pages state no integrity mechanism. Only m05 and m06 (and m07 for the mock registry) give mechanisms deep enough for oracles. Engine: integrity.jws covers typ dpp+jws with x5c only (m05 $.open_questions[1]); integrity.cose and integrity.status_list are interface_only; no anchor-proof check exists (m10 $.conformance_implications[12])."},
+    {"layer": "L06", "detail": "Partial in 6 of 10 (m02, m03, m04, m05, m08, m09). The ESPR back-up copy (Art. 10(4)) and availability after cessation (Art. 11(e)) have no mechanism in any technology family: m03 $.layers.L06 (no IDTA replication or third-party backup), m04 $.layers.L06 (no Catena-X central copy; only a backupReference field), m02 $.layers.L06 (GS1 in Europe failover proposals only). The CIRPASS-2 backup redirection options report was read by title only (m07 $.truncation); m10 $.end_to_end_flows[4] uses its option 1. Engine: persistence.scheduled is interface_only; registry checks of the back-up link (m07 $.summary) cannot be tested yet."},
+    {"layer": "L10", "detail": "Partial in 5 of 10 (m02, m03, m04, m08, m09); m02 L10 has 1 spec. Update by third parties in the use phase (repairers, service providers) appears only in m07 $.end_to_end_flows[6] (D4.1 recommendation) and l01 $.papers[2]."},
+    {"layer": "L02", "detail": "Partial in 6 of 10 (m03 to m08); m08 L02 has 248 characters. Carrier-embedded data and multi-carrier products are thin (see missing_families). Engine: carrier.qr only; carrier.nfc and carrier.rfid are interface_only."},
+    {"layer": "none (cross-cutting)", "detail": "Two dimensions have no layer in the L01-L11 grid: (1) the human-readable view and its parity with the machine-readable passport; (2) data source and change rate (static single-source, static aggregated, dynamic or sensor data), which l01 $.papers[23] and l01 $.papers[12] use as a primary axis."}
+  ],
+  "contradictions": [
+    {
+      "files": ["m04-dataspace-federated.json", "m10-platforms-sectors.json"],
+      "paths": ["$.maturity.spec_status; $.maturity.versions_at_retrieval[13].status", "$.maturity.spec_status; $.maturity.versions_at_retrieval[6].version; $.layers.L05_system_interoperability_data_models.mechanism"],
+      "topic": "Catena-X CX-0143 and CX-0160 versions and status",
+      "detail": "m04 reads CX-0143 v1.4.0 in the current CX-Titan release (mandating DPP aspect 6.1.0) and says CX-0160 v1.1.0 exists only in the CX-Neptune preview. m10 cites CX-0143 v1.3 (optional) and CX-0160 v1.0 (mandatory) from the unreleased 'next' EcoPass KIT documentation (source new-tractusx-ecopass-kit). m04 $.anomalies[3] adds a third value (overview page lists CX-0143 1.2.0). The engine must not pin m10's values."
+    },
+    {
+      "files": ["m04-dataspace-federated.json", "m10-platforms-sectors.json"],
+      "paths": ["$.anomalies[8]", "$.maturity.versions_at_retrieval[6].version"],
+      "topic": "Catena-X aspect model versions named by the EcoPass KIT",
+      "detail": "m04 says EcoPass KIT 26.09 names DPP 5.0.0, battery 6.0.0 and SAMM 1.1.0; m10 says the KIT ('next' docs) names digital_product_passport 6.1.0 and battery_pass 6.1.0. Both may be right for different KIT versions; neither file names both. m04 $.open_questions[0] (5.0.0 versus 6.1.0 versus 7.0.0) is unresolved."
+    },
+    {
+      "files": ["m03-aas-digital-twin.json", "m09-identification-carriers.json", "m10-platforms-sectors.json"],
+      "paths": ["$.maturity.versions_at_retrieval[6]; $.maturity.versions_at_retrieval[7]; $.conformance_implications[14].oracle", "$.maturity.versions_at_retrieval[8]", "$.maturity.versions_at_retrieval[12]; $.layers.L05_system_interoperability_data_models.mechanism"],
+      "topic": "IDTA 02099-1 and IDTA 02035 template versions",
+      "detail": "m03: content hub shows 1.0; repository folders 1.0.0, 1.0.1, 1.0.2; its oracle pins 1.0.2; 02035 parts at 1.1, 1.0.2 or 1.0.1 by part. m09: 02099-1 1.0.1 'published (bugfix, July 2026)'. m10: 02099-1 1.0.1 from the prior record, not re-verified; 02035 'versions 1.0.0 to 1.0.1' per the Catena-X EcoPass page. Same source id idta-02099-1-dpp-metadata in all three."
+    },
+    {
+      "files": ["m02-gs1-web-resolver.json", "m08-linked-data-semantic.json"],
+      "paths": ["$.maturity.versions_at_retrieval[4]", "$.maturity.versions_at_retrieval[15]; $.summary; $.layers.L03_data_exchange_protocols.mechanism; $.layers.L05_system_interoperability_data_models.mechanism"],
+      "topic": "GS1 Web Vocabulary current version",
+      "detail": "m02 records 1.18.0 (published 2026-06-01) as current per the ref.gs1.org archive (source new-gs1-webvoc-archive). m08 uses 1.16 (lastModified 2025-08-01) from GitHub as 'the ratified version' (source new-gs1-webvoc) throughout. m02 also used the v1.16 file for link types ($.layers.L05). An engine vocabulary pin needs one version."
+    },
+    {
+      "files": ["m05-verifiable-credentials.json", "m09-identification-carriers.json"],
+      "paths": ["$.layers.L03_data_exchange_protocols.mechanism", "$.layers.L03_data_exchange_protocols.mechanism; $.anomalies[5]; $.open_questions[7]"],
+      "topic": "Redirect status code of the UNTP Identity Resolver",
+      "detail": "m05 says neither the GS1 standard nor the UNTP page fixes the 3xx code. m09 says the UNTP Identity Resolver (GitLab main, read 2026-10-19) specifies 307. The difference is probably 0.7.0 page versus WIP main; neither file states the version it read for this point."
+    },
+    {
+      "files": ["m05-verifiable-credentials.json", "m09-identification-carriers.json"],
+      "paths": ["$.layers.L03_data_exchange_protocols.mechanism", "$.anomalies[2]"],
+      "topic": "UNTP linkType=all",
+      "detail": "m05 records linkType=all as used by UNTP and its playground; m09 says GitLab main now makes linkType=all a deprecated alias. m02 $.anomalies[6] adds that the GS1 test suite still tests it although GS1 removed it."
+    },
+    {
+      "files": ["m02-gs1-web-resolver.json", "m07-eu-reference-pilots.json"],
+      "paths": ["$.sources[23].license_or_reuse_terms; $.anomalies[15]", "$.sources[12].license_or_reuse_terms"],
+      "topic": "Licence of the Battery Pass Technical Guidance v1.0 (same source id bp-technical-guidance)",
+      "detail": "m02 read the acatech PDF and found an in-file CC BY-NC 4.0 statement. m07 read the copy in the batterypass GitHub repository and records acatech copyright, cite-and-link only, with a repository README stating CC BY 4.0 of unclear scope. m07 $.open_questions[6] is still open. Reuse of any Battery Pass deliverable as a fixture depends on this."
+    },
+    {
+      "files": ["m06-dlt-anchored.json", "m07-eu-reference-pilots.json"],
+      "paths": ["$.open_questions[7]", "$.layers.L09_registry_and_customs.mechanism"],
+      "topic": "Does the Battery Pass architecture use a blockchain?",
+      "detail": "m06 carries the EUBOF report claim that the Battery Pass platform relies on a private permissioned blockchain, unverified. m07 describes Battery Pass TG 5.1 central services (portal, registry, routing and resolver, validation) without a ledger. Unresolved; it affects whether Battery Pass is a dlt-anchored hybrid."
+    },
+    {
+      "files": ["l01-reviews-taxonomies.json", "l02-prototypes-pilots.json"],
+      "paths": ["$.papers[9].verification_level; $.papers[9].classification_scheme; $.papers[9].notes", "$.papers[45].content_read; $.papers[45].classification_scheme"],
+      "topic": "Access to the full text of the DPP taxonomy paper 10.18420/inf2025_141",
+      "detail": "l01 read the full text from the open GI repository PDF and records 21 dimensions (substantive). l02 says the full text was not accessible and the dimensions are not in the abstract. The l01 record is the stronger one; l02 should be corrected."
+    },
+    {
+      "files": ["m01-law-baseline.json; m03; m05; m07; m09; m10", "m02-gs1-web-resolver.json; m04; m06; m08; l01"],
+      "paths": ["$.sources[*].id = reg-eu-2024-1781 and impl-dec-eu-2026-1736 (m01, m09, m10)", "$.sources[*].id = espr-reg-2024-1781 and cid-2026-1736-dpp-harmonised-standards (m02)"],
+      "topic": "Source-id aliases for the same legal acts (rule F reuse)",
+      "detail": "Regulation (EU) 2024/1781 has two ids across the sweep and Implementing Decision (EU) 2026/1736 has at least two in these files (m02 $.anomalies[20] lists four across records). A merge into catalogue/sources.yaml needs one canonical id each."
+    },
+    {
+      "files": ["task brief (rule E)", "m01-law-baseline.json; m02; m03; m04; m05; m06; m07; m08; m09; m10"],
+      "paths": ["brief: 'EUR-Lex addresses that end in /eng return content'", "$.anomalies (for example m01 $.anomalies[0], m02 $.anomalies[18], m06 $.anomalies[0])"],
+      "topic": "EUR-Lex /eng availability",
+      "detail": "Every m-file reports that EUR-Lex /eng addresses returned empty content to WebFetch on 2026-10-19; law was read from Publications Office Cellar DOC_1 manifestations or from the 2026-10-13 records. Several files (m02, m03, m04) therefore cite law only from prior records. The brief's statement should be updated for later tasks."
+    }
+  ],
+  "literature_schemes_not_reflected": [
+    {"paper_doi": "10.18420/inf2025_141", "scheme": "Morphological taxonomy, 21 dimensions in 4 meta-dimensions, including deployment model (cloud, hybrid, on-premises), API integration (standardized or custom), IoT use, security measures (tamper detection, digital watermarks) (l01 $.papers[9]).", "gap": "The m-files classify by technology family only. Deployment model and standardized-versus-custom API are not recorded per method, although they decide whether api.contract has a public contract to pin."},
+    {"paper_doi": "10.1007/978-3-031-59465-6_19", "scheme": "Data classes by source and change rate: static single-source, static aggregated, dynamic (l01 $.papers[23]).", "gap": "No m-file layer or field records change rate; 'dynamic data' is nearly absent outside m10. persistence.versions and data.rules freshness rules need the declared change class as an ICS value."},
+    {"paper_doi": "10.23919/cnsm67658.2025.11297523", "scheme": "Design space of three dimensions: data carrier, online storage, updating dynamic data (l01 $.papers[12]).", "gap": "The update dimension (who updates in the use phase and how) is only partly in L10; third-party update flows appear only in m07 $.end_to_end_flows[6]."},
+    {"paper_doi": "10.18420/inf2025_03", "scheme": "Three decentralisation levels: identifier minting, data storage, distributed storage (l02 $.papers[46]).", "gap": "No m-file classifies a method by its decentralisation level; the term has no hits in the m-files. It would separate central-resolver, operator-hosted and replicated methods for L01 and L06 test selection."},
+    {"paper_doi": "10.1109/dcoss-iot58021.2023.00067", "scheme": "Nested passports from raw material to final product, visible by access layer (l01 $.papers[29]).", "gap": "Composition and nesting (component passports, bill of materials links) appear only in passing (m03, m04, m06, m08). ESPR Art. 11(d) links a new passport to the original; no family gives a link mechanism a check could verify (m03 $.open_questions[9])."},
+    {"paper_doi": "10.1017/pds.2026.10518", "scheme": "Five layers plus a seven-layer communication stack (data sources, integrity and provenance, identifiers and links, secure transport, access control, format and schema, applications) and lifecycle and granularity axes (l01 $.papers[24]).", "gap": "Mostly reflected by L01-L11; the 'data sources' layer and the lifecycle-phase axis are not."}
+  ],
+  "followups": [
+    {
+      "id": "f01-epcis-event-traceability",
+      "title": "Event-based traceability method family (GS1 EPCIS 2.0 and CBV 2.0)",
+      "scope": "Write the missing m-file for the event-traceability-epcis family with the same schema as m01-m10 (layers L01-L11, flows, conformance_implications, failure_modes). Describe EPCIS and CBV only from the ratified GS1 standards on ref.gs1.org and open source; ISO/IEC 19987 and 19988 are protected, bibliographic metadata only. Cover: event types and JSON/JSON-LD binding, the REST capture and query interface and its OpenAPI, CBV vocabulary versions, how a passport links to events (gs1:epcis and gs1:traceability link types, m02 $.layers.L05), access control of query interfaces, and alignment with UNTP traceability events (m05). Starting points: m02 $.scope_note, m10 $.end_to_end_flows[3] and $.layers.L03, r01 $.repos[44] to [51] (OpenEPCIS, FasTnT, test-event generator, Oliot), m07 $.implementations[15] (OpenDPP epcis validator door), l01 $.papers[39] and [40], l01 $.conformance_implications[9]. Read-only gh api allowed; no live EPCIS endpoint.",
+      "model": "opus",
+      "why": "The family is in the sweep's own taxonomy and two files defer to it, yet no file covers it. Engine: data.jsonschema and data.context apply with a pinned EPCIS schema and context; api.contract applies with a pinned query OpenAPI; a new event-lineage capability is needed for aggregation and transformation chains and identifier agreement with the passport."
+    },
+    {
+      "id": "f02-hybrid-stack-composition",
+      "title": "Composition rules for hybrid DPP stacks",
+      "scope": "Define the hybrid family: a per-layer matrix of which family supplies L01-L11 in the main real stacks, and the hand-over points between families. Cases: Battery Pass Technical Guidance and BatteryPass-Ready (GS1 Digital Link, routing services, data model); Catena-X with the CX-0160-3 section 5.2 bridge to the EU system (preview); IDTA ID Link from a carrier URL to AAS discovery; GS1 resolver plus VC (UNTP); operator API plus ledger anchor. Resolve m06 $.open_questions[7] (Battery Pass blockchain claim) from the Battery Pass guidance itself. Starting points: l01 $.papers[26], l02 $.cross_paper_observations[3], m03 $.end_to_end_flows[0], m04 $.end_to_end_flows[2] and $.open_questions[1], m07 $.end_to_end_flows[7] and $.layers.L09, m10 $.end_to_end_flows. Describe AAS only from IDTA texts, identification links only from GS1 texts, battery attributes only from Regulation (EU) 2023/1542 Annex XIII and the open Battery Pass models.",
+      "model": "opus",
+      "why": "Literature and pilots say hybrids are the norm, but the engine's applicability has no rule for a system that declares several families. Output feeds an ICS multi-family profile and a cross-family identifier.consistency mode; existing layer checks (identifier.resolve, aas.validate, data.jsonschema, integrity.jws) apply per layer but none tests the hand-over."
+    },
+    {
+      "id": "f03-backup-failover-availability",
+      "title": "Back-up copy, failover and availability-after-cessation mechanisms",
+      "scope": "Collect every concrete mechanism for the ESPR back-up copy (Regulation (EU) 2024/1781, Art. 10(4)) and availability after insolvency or cessation (Art. 11(e); Regulation (EU) 2023/1542, Art. 78(e)), and how the registry checks the back-up link (Implementing Regulation (EU) 2026/1778 and the registry user guide). Sources to read in full: the CIRPASS-2 backup redirection options report (Zenodo; title only in m07 $.truncation), CIRPASS D3.2 fallback flow (m07 $.end_to_end_flows[4]), CIRPASS-2 D4.1 recommendations on back-up, GS1 in Europe failover proposal (m02 $.end_to_end_flows[6]), the Catena-X backupReference field (m04 $.layers.L06), the mock registry liveURL and backupURL (m07 $.layers.L06), and the service-provider consultation status (m10 $.open_questions). State per mechanism what a black-box tester can observe and over what time.",
+      "model": "opus",
+      "why": "The duty is binding law, yet every technology family reports no mechanism (L06 thin in 6 of 10 files). Engine: identifier.resolve and registry.mock apply partly; persistence.scheduled (interface_only) and registry.official (interface_only) are the capabilities this research would specify; a new back-up equivalence check (primary versus back-up copy digest) may be needed."
+    },
+    {
+      "id": "f04-oracle-version-reconciliation",
+      "title": "Reconcile and pin oracle versions across the sweep",
+      "scope": "For each artifact with conflicting versions in the sweep, re-read the official location on one date and record version, status, date, licence and a digest of the file the engine would pin: IDTA 02099-1 and 02035 parts (content hub versus repository folders), Catena-X CX-0143, CX-0160 and the generic DPP aspect (5.0.0, 6.1.0, 7.0.0), GS1 Web Vocabulary (1.16 versus 1.18.0), UNTP Identity Resolver redirect code and linkType=all (0.7.0 versus WIP), Battery Pass Technical Guidance licence, and canonical source ids for Regulation (EU) 2024/1781 and Implementing Decision (EU) 2026/1736. Output: one table of pinned values plus the list of file paths in m02, m03, m04, m05, m08, m09, m10 and l02 that need correction (see contradictions in x02-critic.json). Read-only gh api and documentation pages only.",
+      "model": "sonnet",
+      "why": "The engine pins oracles by version and digest; today three files give three versions for the same template and two give different Catena-X release states. data.jsonschema, aas.validate, identifier.resolve and data.context oracles cannot be pinned until these are settled."
+    }
+  ]
+}

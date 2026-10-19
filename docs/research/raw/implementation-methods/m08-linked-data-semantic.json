@@ -1,0 +1,2018 @@
+{
+ "method_id": "m08-linked-data-semantic",
+ "name": "Linked-data and semantic-web DPP implementation (JSON-LD, RDF, OWL, SHACL, SAMM, vocabularies, knowledge graphs, Solid)",
+ "retrieval_date": "2026-10-19",
+ "scope_note": "Covers DPPs whose data meaning is carried by RDF semantics: JSON-LD 1.1 documents with @context, RDF graphs and their serializations, OWL ontologies and SKOS code lists (CIRPASS-2 EU DPP CORE and sector ontologies, GS1 Web Vocabulary, schema.org, UNTP context, QUDT, UN/CEFACT Rec 20 units), SHACL shapes as validation and access-view specifications, the Eclipse SAMM meta model as used by the Battery Pass data model, LinkML-generated artifacts (CE-RISE), DCAT/DCAT-AP metadata, Linked Data Platform, Solid and the W3C Linked Web Storage drafts, RDF Dataset Canonicalization and VC Data Integrity as they touch integrity. It also covers validation tooling (pySHACL, rdflib, PyLD, jsonld.js, Titanium, Apache Jena SHACL, TopBraid SHACL, the EC ITB SHACL validator, the CIRPASS-2 dpp-validator, CE-RISE DP-AWB). Left out: AAS internals (method aas-digital-twin), GS1 resolver internals beyond linkset media types (web-resolver-gs1), VC/SSI trust frameworks (verifiable-credentials-ssi), EPCIS event semantics (event-traceability-epcis). Protected EN/ISO/IEC/DIN documents appear only as bibliographic metadata. No live DPP system, resolver, SPARQL endpoint, Solid pod, registry or test environment was contacted; only specifications, repositories, package indexes and paper metadata were read.",
+ "summary": "In this family a passport is a set of RDF statements about a product and its passport record, identified by HTTP(S) IRIs and usually serialized as JSON-LD 1.1, sometimes as Turtle or N-Quads. A JSON-LD @context maps every JSON key to an IRI in a shared vocabulary or ontology, for example the CIRPASS-2 EU DPP CORE ontology (namespace https://w3id.org/eudpp#) with sector modules for batteries, tyres and textiles, the GS1 Web Vocabulary 1.16, schema.org, the UNTP 0.7.0 context, QUDT units or UN/CEFACT Rec 20 unit codes. Constraints are written as SHACL shapes and are checked on the RDF graph that JSON-LD expansion and RDF conversion produce, not on the JSON tree; CIRPASS-2 also uses SHACL view shapes to state what a public, legitimate-interest or authority view must carry and must not disclose. A second variant, Eclipse SAMM, keeps the semantics in an RDF/Turtle aspect model and generates JSON Schema, OpenAPI and sample payloads; the Battery Pass model v1.2.0 follows it, so its instance payloads are plain JSON tied to the model only by a URN. A third variant, LinkML (CE-RISE), generates JSON Schema, OWL and SHACL from one YAML source, and a service resolves these artifacts from a versioned catalog at validation time. End to end, a data carrier holds an HTTP URI such as a GS1 Digital Link; a web server or GS1-conformant resolver answers with content negotiation (application/ld+json, text/turtle, text/html) or with a linkset that can contain the gs1:dpp link type; the client loads the referenced contexts, expands the document to RDF, validates it against pinned shapes and may verify a Data Integrity proof that uses RDF Dataset Canonicalization (RDFC-1.0). Storage ranges from document stores that serve JSON-LD to triplestores with SPARQL and LDP/Solid pods with WAC or ACP access control. EU law names none of RDF, JSON-LD, OWL or SHACL; it requires open-standard, interoperable, machine-readable, structured and searchable passport data (Regulation (EU) 2024/1781, Art. 10(1)(d); Regulation (EU) 2023/1542, Art. 77(5)), and the registry act requires passports to follow common versioned data models held in a Commission semantic repository whose metadata conforms to DCAT-AP, with a semantic conformity check at registration (Commission Implementing Regulation (EU) 2026/1778, Art. 8(7)(a), Art. 11, Art. 12). For a black-box conformance engine the method is attractive because SHACL gives a declarative, inspectable oracle, but determinism needs pinned contexts, pinned shapes, a frozen document loader, a fixed inference mode and pinned processor versions. The main hazards found are silent remote-context loading in common parsers, JSON number typing that turns fractional numbers into xsd:double, namespace variants that defeat class targeting without reasoning, terms that expansion drops without error, and vacuous conformance when no focus node matches. The engine today covers only the context allowlist (data.context); data.shacl is interface_only and integrity covers JOSE only.",
+ "method_families": [
+  "linked-data-semantic",
+  "hybrid"
+ ],
+ "maturity": {
+  "spec_status": "The core W3C stack is stable: JSON-LD 1.1 and its API (Recommendations, 16 July 2020), SHACL (Recommendation, 20 July 2017), OWL 2 Second Edition (Recommendation, 11 December 2012), LDP 1.0 (Recommendation, 26 February 2015), DCAT 3 (Recommendation, 22 August 2024), RDF Dataset Canonicalization RDFC-1.0 (Recommendation, 21 May 2024) and VC Data Integrity 1.0 (Recommendation, 15 May 2025). Successor work is in progress and not final: RDF 1.2 Concepts is a Candidate Recommendation Snapshot (7 April 2026), SHACL 1.2 Core is a Working Draft (14 October 2026), Content Negotiation by Profile is a Working Draft (21 September 2026), and Linked Web Storage Protocol 1.0 is a Working Draft (16 October 2026). The Solid Protocol 0.11.0 is a Draft Community Group Report, not on the W3C standards track. DPP-specific ontologies are drafts: CIRPASS-2 CORE 2.0.7 with modules, battery ontology 0.4.0 DRAFT, all with a disclaimer that they are not official. SAMM 2.2.0 is released; Battery Pass v1.2.0 is unmaintained and marked draft by its authors.",
+  "versions_at_retrieval": [
+   {
+    "artifact": "JSON-LD 1.1",
+    "version": "REC-json-ld11-20200716",
+    "status": "W3C Recommendation (errata page exists; no 1.2 named on the TR page)",
+    "source_id": "new-w3c-json-ld-11"
+   },
+   {
+    "artifact": "JSON-LD 1.1 Processing Algorithms and API",
+    "version": "REC-json-ld11-api-20200716",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-json-ld-11-api"
+   },
+   {
+    "artifact": "RDF Dataset Canonicalization",
+    "version": "RDFC-1.0, REC-rdf-canon-20240521",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-rdf-canon"
+   },
+   {
+    "artifact": "RDF 1.2 Concepts and Abstract Data Model",
+    "version": "CR-rdf12-concepts-20260407",
+    "status": "W3C Candidate Recommendation Snapshot; RDF 1.1 Concepts remains the latest Recommendation",
+    "source_id": "new-w3c-rdf12-concepts"
+   },
+   {
+    "artifact": "SHACL",
+    "version": "REC-shacl-20170720",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-shacl"
+   },
+   {
+    "artifact": "SHACL 1.2 Core",
+    "version": "WD-shacl12-core-20261014",
+    "status": "W3C Working Draft (Data Shapes WG); companion drafts: Node Expressions, SPARQL-Related Features, Inference Rules, Profiling, User Interfaces (WD); Overview, Compact Syntax (ED)",
+    "source_id": "new-w3c-shacl12-core"
+   },
+   {
+    "artifact": "OWL 2 Document Overview (Second Edition)",
+    "version": "REC-owl2-overview-20121211",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-owl2-overview"
+   },
+   {
+    "artifact": "Linked Data Platform 1.0",
+    "version": "REC-ldp-20150226",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-ldp"
+   },
+   {
+    "artifact": "DCAT Version 3",
+    "version": "REC-vocab-dcat-3-20240822",
+    "status": "W3C Recommendation",
+    "source_id": "new-w3c-dcat-3"
+   },
+   {
+    "artifact": "Content Negotiation by Profile",
+    "version": "WD-dx-prof-conneg-20260921",
+    "status": "W3C Working Draft",
+    "source_id": "new-w3c-dx-prof-conneg"
+   },
+   {
+    "artifact": "Linked Web Storage Protocol 1.0",
+    "version": "WD-lws10-core-20261016",
+    "status": "W3C Working Draft (Linked Web Storage WG)",
+    "source_id": "new-w3c-lws10-core"
+   },
+   {
+    "artifact": "Solid Protocol",
+    "version": "0.11.0 (protocol-20240512)",
+    "status": "Draft Community Group Report, not a W3C Standard",
+    "source_id": "new-solid-protocol"
+   },
+   {
+    "artifact": "Verifiable Credential Data Integrity",
+    "version": "1.0, REC-vc-data-integrity-20250515",
+    "status": "W3C Recommendation (matches prior record of 2026-10-13)",
+    "source_id": "w3c-vc-data-integrity-1-0"
+   },
+   {
+    "artifact": "CIRPASS-2 EU DPP CORE ontology",
+    "version": "2.0.7 (modules: P_DPP 2.1.0, ACTOR 2.1.3, IDENT 1.2.0, MAT 1.1.0, SOC 2.0.0, COMP 1.0.0, EVENT 1.0.0, LCA 3.0.0, CONNECTOR 2.2.0)",
+    "status": "Project draft, documentation generated with WIDOCO on 2026-10-12; source repository of the CORE not publicly reachable",
+    "source_id": "new-cirpass2-ontologies-docs"
+   },
+   {
+    "artifact": "CIRPASS-2 EU DPP Battery Ontology",
+    "version": "0.4.0 DRAFT (umbrella); access tiers 0.1.0; public view shapes 0.2.0",
+    "status": "Draft, 'not an official ontology' per README disclaimer",
+    "source_id": "new-cirpass2-ontologies-battery"
+   },
+   {
+    "artifact": "GS1 Web Vocabulary",
+    "version": "1.16 (owl:versionInfo; dc:lastModified 2025-08-01; uploaded to GitHub 2025-09-21)",
+    "status": "Ratified version published at ref.gs1.org/voc per repository README",
+    "source_id": "new-gs1-webvoc"
+   },
+   {
+    "artifact": "schema.org",
+    "version": "30.1 (2026-09-16)",
+    "status": "Released",
+    "source_id": "new-schemaorg"
+   },
+   {
+    "artifact": "UNTP vocabulary and JSON-LD context",
+    "version": "0.7.0 (only version on the landing page)",
+    "status": "Unchanged since the prior record of 2026-10-13",
+    "source_id": "untp-vocabulary-context-0-7-0"
+   },
+   {
+    "artifact": "Eclipse SAMM meta model",
+    "version": "v2.2.0 latest GitHub release (2025-03-11); 2.3.0 meta-model folders present on main",
+    "status": "Released 2.2.0; 2.3.0 unreleased at retrieval",
+    "source_id": "new-eclipse-samm"
+   },
+   {
+    "artifact": "Eclipse ESMF SDK (samm-cli)",
+    "version": "v2.16.1 (2026-10-19)",
+    "status": "Released",
+    "source_id": "new-esmf-sdk"
+   },
+   {
+    "artifact": "Battery Pass Data Model",
+    "version": "v1.2.0 (SAMM 2.1.0 namespaces)",
+    "status": "Unmaintained reference, draft per prior record",
+    "source_id": "bp-data-model-github-v1-2-0"
+   },
+   {
+    "artifact": "pySHACL",
+    "version": "0.40.1 (2026-07-28); requires rdflib[html] >=7.3.0,<8.0 and owlrl >=7.6.2,<8",
+    "status": "Released; matches prior record",
+    "source_id": "pypi-pyshacl"
+   },
+   {
+    "artifact": "rdflib",
+    "version": "7.6.0 (2026-02-13)",
+    "status": "Released",
+    "source_id": "new-rdflib"
+   },
+   {
+    "artifact": "PyLD",
+    "version": "3.3.0 (2026-09-02); 4.0.0 unreleased with RDFC-1.0",
+    "status": "Released",
+    "source_id": "new-pyld"
+   },
+   {
+    "artifact": "jsonld.js (npm jsonld)",
+    "version": "9.0.0",
+    "status": "Released",
+    "source_id": "new-jsonld-js"
+   },
+   {
+    "artifact": "Titanium JSON-LD",
+    "version": "v1.7.0 (2025-10-05)",
+    "status": "Released",
+    "source_id": "new-titanium-json-ld"
+   },
+   {
+    "artifact": "TopBraid SHACL API",
+    "version": "v1.5.0 (2026-03-23)",
+    "status": "Released",
+    "source_id": "new-topbraid-shacl"
+   },
+   {
+    "artifact": "EC ITB SHACL validator",
+    "version": "1.13.0 (2026-09-25)",
+    "status": "Released",
+    "source_id": "new-itb-shacl-validator"
+   },
+   {
+    "artifact": "DCAT-AP",
+    "version": "3.0.1 (2026-06-04); ships dcat-ap-SHACL.ttl and a JSON-LD context",
+    "status": "Released",
+    "source_id": "new-dcat-ap"
+   },
+   {
+    "artifact": "CE-RISE product-profile model",
+    "version": "v0.2.0 (2026-08-31), LinkML",
+    "status": "Project model, CC BY-NC 4.0",
+    "source_id": "new-ce-rise"
+   }
+  ],
+  "adoption_evidence": "Public, inspectable DPP artifacts of this family exist mainly in EU research projects: CIRPASS-2 publishes Apache-2.0 OWL/Turtle ontologies, SHACL shapes, worked examples and a pySHACL test script for batteries, plus a Java validation service (Jena SHACL, Titanium JSON-LD) that accepts JSON-LD payloads; CE-RISE publishes LinkML models, a SHACL-based model assessment workbench and a validation core; the Battery Pass project published SAMM aspect models with generated JSON Schema. GS1 added a gs1:dpp link type to its Web Vocabulary. The literature from 2024 to 2026 is dominated by ontology proposals and small prototypes (CIRPASS-2 CORE critiques, RePlanIT for ICT, an ontology network with SHACL, EPCIS 2.0 plus knowledge graph, a SHACL-based explainable validation prototype); reviews report few empirical, multi-organisation validations. No production DPP system that publishes passports as linked data with SHACL validation was located, and no Solid-pod DPP prototype was located.",
+  "regulatory_alignment": "No EU act retrieved names RDF, JSON-LD, OWL, SHACL or SPARQL. Regulation (EU) 2024/1781, Art. 10(1)(d) requires DPP data to rest on open standards, use an interoperable format and be, as appropriate, machine-readable, structured, searchable and transferable over an open interoperable network without vendor lock-in; Art. 11 point (a) requires full technical, semantic and organisational interoperability between passports. Regulation (EU) 2023/1542, Art. 77(5) sets the same open-standard, machine-readable, structured and searchable demands for the battery passport, and Art. 78 point (a) requires semantic interoperability with ecodesign passports. Commission Implementing Regulation (EU) 2026/1778 comes closest to this family: Art. 2(8) defines a semantic repository of data models, vocabularies and the associated ontology; Art. 2(12) defines semantic conformity as completeness, structural and value-type conformance including controlled vocabularies, and consistent interpretation by reference to the repository; Art. 8(7)(a) makes the registry check semantic conformity automatically on submission; Art. 11(3)-(4) requires passport data to follow common, versioned data models; Art. 12(2)-(3) requires typed and resolvable links, multilingual labels and DCAT-AP metadata. The act names no serialization, shape language or hash algorithm. A linked-data implementation therefore satisfies the law only if its graph also conforms to whatever data models the Commission semantic repository publishes; that repository was not located in this session."
+ },
+ "layers": {
+  "L01_unique_identifiers": {
+   "applies": "yes",
+   "mechanism": "Every node in the passport graph is named by an absolute IRI (JSON-LD '@id', often aliased to 'id') or is a blank node. Typical patterns: (1) the product IRI is an HTTP(S) URI that the data carrier encodes, for example a GS1 Digital Link of the form https://<host>/01/<GTIN>/21/<serial>, so the identifier is also the lookup address; (2) separate nodes for the product and for the passport record, linked by an object property (CIRPASS-2 battery examples link the battery node to its passport node with eudpp:hasDPP and model identifiers as their own nodes typed by the IDENT module); (3) model-level semantics named by URNs, e.g. SAMM element URNs of the form urn:samm:<namespace>:<version>#<element>, and ECLASS IRDI strings used as semantic identifiers of properties. JSON-LD resolves a relative '@id' against the document base (the retrieval URL unless '@base' or the 'base' option overrides it), and the RDF conversion drops statements whose subject or object is not a well-formed IRI. Ontologies themselves are identified by persistent w3id.org IRIs (CIRPASS-2) or vendor namespaces (https://ref.gs1.org/voc/, with owl:equivalentClass links to https://gs1.org/voc/ and https://www.gs1.org/voc/ variants).",
+   "specs": [
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "@id, @base, IRI resolution against the document location"
+    },
+    {
+     "source_id": "new-w3c-json-ld-11-api",
+     "component": "Object to RDF conversion: nodes and literals that are not well formed produce no triple"
+    },
+    {
+     "source_id": "new-cirpass2-ontologies-battery",
+     "component": "Examples/example-ev-battery.ttl: product, passport and identifier nodes; IDENT module"
+    },
+    {
+     "source_id": "new-gs1-webvoc",
+     "component": "gs1:Product and namespace equivalences in gs1Voc.ttl v1.16"
+    },
+    {
+     "source_id": "bp-data-model-github-v1-2-0",
+     "component": "SAMM aspect URNs, e.g. urn:samm:io.BatteryPass.CarbonFootprint:1.2.0#"
+    },
+    {
+     "source_id": "new-eclass-terms-of-use",
+     "component": "IRDI per structural element (the IRDI scheme itself rests on an ISO document: bibliographic only)"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 10(1)(a)-(b) persistent unique product identifier connected through a data carrier"
+    }
+   ],
+   "variants": [
+    "Product IRI equals the GS1 Digital Link URI",
+    "Product IRI on the operator domain, GS1 Digital Link only in the carrier, linked by owl:sameAs or a GS1 key property",
+    "Passport node distinct from product node (CIRPASS-2 pattern)",
+    "Blank-node passport with identifier literals only (weak; not dereferenceable)",
+    "URN-identified semantic model elements with plain JSON instances (SAMM)",
+    "IRDI-identified properties (ECLASS)"
+   ],
+   "observable_black_box": "From outside a tester sees the '@id' values (or the aliased key), whether they are absolute, whether the subject equals the carrier URI or the resolved URL, whether the product and passport are distinct nodes, and whether IRIs dereference. After expansion with pinned contexts the tester can list subjects and count blank nodes.",
+   "law_delta": "Law requires a persistent unique product identifier connected through a data carrier (Regulation (EU) 2024/1781, Art. 10(1)(a)-(b); Annex III) and globally unique, verifiable identifiers (Art. 12). It does not require that the identifier be an IRI that dereferences; linked data adds that expectation and adds IRIs for every attribute and code value."
+  },
+  "L02_data_carriers": {
+   "applies": "partial",
+   "mechanism": "The family defines no carrier. The carrier (usually a QR code) holds an HTTP(S) URI; in this family that URI is also the RDF subject of the product or leads to a document whose subject it is. No RDF is encoded in the carrier in any source examined.",
+   "specs": [
+    {
+     "source_id": "gs1-conformant-resolver-1-2-1",
+     "component": "Resolution of a GS1 Digital Link URI read from a carrier"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 10(1)(b)-(c) data carrier physically present; Annex III standards"
+    }
+   ],
+   "variants": [
+    "QR with GS1 Digital Link URI",
+    "QR with operator-domain URI"
+   ],
+   "observable_black_box": "Decoded carrier payload; whether it is an absolute HTTP(S) IRI that matches the graph subject.",
+   "law_delta": "none"
+  },
+  "L03_data_exchange_protocols": {
+   "applies": "yes",
+   "mechanism": "Transport is plain HTTP(S) GET on the IRI. (1) Media-type negotiation: Accept: application/ld+json, optionally with a profile parameter (JSON-LD registers http://www.w3.org/ns/json-ld#expanded, #compacted, #flattened, #frame, #framed and #context); Accept: text/turtle or application/n-quads; Accept: text/html for people. (2) A server that returns plain application/json or another +json type can attach the context with an HTTP Link header rel='http://www.w3.org/ns/json-ld#context'; more than one such header is an error ('multiple context link headers'); the header is ignored for application/ld+json and HTML. (3) An HTML page can embed <script type='application/ld+json'> or point to JSON-LD with Link rel='alternate' type='application/ld+json'. (4) JSON-LD documentUrl follows redirects except 303 See Other, which matters when a product IRI answers 303 to a data document. (5) Contexts are loaded through a documentLoader callback (LoadDocumentOptions: extractAllScripts, profile, requestProfile; RemoteDocument: contentType, contextUrl, document, documentUrl, profile); a context request asks for the http://www.w3.org/ns/json-ld#context profile. (6) GS1-conformant resolvers return a linkset as application/linkset+json (RFC 9264), also for application/json, JSON-LD on explicit request, HTML for people; linkType=<type> redirects to a typed link, linkType=linkset returns the set, and /.well-known/gs1resolver describes the resolver; the GS1 Web Vocabulary 1.16 defines gs1:dpp as a link type for a passport link. (7) Profile negotiation (Accept-Profile, Link rel='profile', query arguments _profile and _mediatype) is a Working Draft. (8) Solid servers must answer GET for text/turtle and application/ld+json on RDF resources they created. (9) SPARQL endpoints are a common variant; the SPARQL protocol was not retrieved in this session.",
+   "specs": [
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "IANA considerations for application/ld+json, profile URIs; Link header context; security and privacy considerations on remote contexts"
+    },
+    {
+     "source_id": "new-w3c-json-ld-11-api",
+     "component": "Remote Document and Context Retrieval; LoadDocumentCallback; error codes"
+    },
+    {
+     "source_id": "gs1-conformant-resolver-1-2-1",
+     "component": "Linkset media types, linkType parameter, /.well-known/gs1resolver"
+    },
+    {
+     "source_id": "new-gs1-webvoc",
+     "component": "gs1:dpp link type (subPropertyOf gs1:linkType)"
+    },
+    {
+     "source_id": "new-w3c-dx-prof-conneg",
+     "component": "Accept-Profile, _profile, _mediatype (Working Draft)"
+    },
+    {
+     "source_id": "new-solid-protocol",
+     "component": "Representations required for RDF sources"
+    }
+   ],
+   "variants": [
+    "Direct JSON-LD at the product IRI",
+    "303 from product IRI to data document",
+    "GS1 resolver linkset with gs1:dpp link",
+    "application/json plus Link context header",
+    "HTML with embedded JSON-LD script",
+    "Turtle via content negotiation",
+    "SPARQL endpoint",
+    "Solid pod resource",
+    "Profile negotiation (draft)"
+   ],
+   "observable_black_box": "Status codes, redirect chain (including 303), Content-Type with profile parameter, Link headers (context, alternate, describedby), Vary header, whether different Accept values give isomorphic graphs, linkset contents and link types, resolver description at /.well-known/gs1resolver.",
+   "law_delta": "Law requires transfer through an open interoperable data exchange network without vendor lock-in (Regulation (EU) 2024/1781, Art. 10(1)(d)) but names no protocol or media type. Content negotiation, Link headers and linksets are additions of this family and of GS1."
+  },
+  "L04_apis_lifecycle_searchability": {
+   "applies": "partial",
+   "mechanism": "Read is HTTP GET. Write operations depend on the variant: LDP 1.0 requires GET, HEAD and OPTIONS on resources and defines POST to containers (Accept-Post on OPTIONS), PUT with ETag and If-Match (412 on mismatch, 428 when the precondition is missing) and PATCH (Accept-Patch); containers advertise Link rel='type' with ldp:BasicContainer, DirectContainer or IndirectContainer. Solid requires GET, HEAD, OPTIONS, PUT, POST, PATCH and DELETE, and N3 Patch bodies (text/n3) listed in Accept-Patch. Linked Web Storage 1.0 (Working Draft) defines containers, operations, notifications and a JSON-LD context. Project services expose ordinary REST APIs: the CIRPASS-2 dpp-validator has POST /validate/v1 (auto-matching by @type, @context URI or vocabulary), POST /validate/v1/{name}/{version}, and /resource/v1/... to upload, search, get and delete JSON Schemas and SHACL templates. Search is SPARQL (variant, not retrieved) or a REST search. Deactivation is usually a status property in the graph (CIRPASS-2 CORE carries a passport status property on dpp:DPP) rather than an HTTP delete.",
+   "specs": [
+    {
+     "source_id": "new-w3c-ldp",
+     "component": "LDP-RS, LDP-NR, containers, ETag/If-Match, Accept-Post, Accept-Patch"
+    },
+    {
+     "source_id": "new-solid-protocol",
+     "component": "Required methods; N3 Patch text/n3"
+    },
+    {
+     "source_id": "new-w3c-lws10-core",
+     "component": "Containers, Operations, Notifications (Working Draft)"
+    },
+    {
+     "source_id": "new-cirpass2-dpp-validator",
+     "component": "REST API /validate/v1 and /resource/v1"
+    }
+   ],
+   "variants": [
+    "Read-only JSON-LD publication",
+    "LDP container per product group",
+    "Solid pod with N3 Patch",
+    "SPARQL Update to a triplestore",
+    "Project REST API with JSON-LD bodies"
+   ],
+   "observable_black_box": "OPTIONS Allow, Accept-Post, Accept-Patch, ETag on GET, 412/428 behaviour with If-Match, Link rel='type'. Most of these are write operations that need a separate authorization and are out of scope for passive tests.",
+   "law_delta": "Law requires data to be searchable and specifies who may create or update which data in delegated acts (Regulation (EU) 2024/1781, Art. 9(2)(g)-(h), Art. 10(1)(d)). It defines no API. The registry act provides its own user interface and API (Commission Implementing Regulation (EU) 2026/1778, Art. 8(6)) which this family does not define."
+  },
+  "L05_system_interoperability_data_models": {
+   "applies": "yes",
+   "mechanism": "This is the core of the family. (A) Syntax: JSON-LD 1.1 documents with '@context' (string URL, array, or inline object). Contexts may declare '@version': 1.1, '@protected': true (terms cannot be redefined; redefinition raises 'protected term redefinition'), '@vocab', '@import', property- and type-scoped contexts. Processing mode defaults to json-ld-1.1. (B) Graph production: expansion maps keys to IRIs; in RDF conversion, statements whose subject, predicate or object is not a well-formed IRI are dropped, so a JSON key without an IRI mapping yields no triple and no error (the toRdf rule was read; the corresponding expansion step was not read). In RDF conversion a JSON number with a non-zero fraction (or magnitude of 1e21 or more) gets the canonical xsd:double lexical form and type xsd:double; integral numbers become xsd:integer; a coerced '@type' such as xsd:decimal is kept while the lexical form is still the double form (a reading of the algorithm steps, not tested here); booleans become xsd:boolean. (C) Vocabularies: CIRPASS-2 EU DPP CORE 2.0.7 (https://w3id.org/eudpp/ with modules P_DPP, ACTOR, IDENT, MAT, SOC, COMP, EVENT, LCA, CONNECTOR) and sector ontologies (battery 0.4.0 DRAFT under https://w3id.org/eudpp/battery#, tyre, textile); GS1 Web Vocabulary 1.16 (https://ref.gs1.org/voc/, gs1:Product declared skos:exactMatch schema:Product and owl:equivalentClass to the gs1.org/voc variants; 63 lines of the Turtle file mention gs1:linkType); schema.org 30.1; UNTP 0.7.0 context (protected terms); QUDT units (http://qudt.org/vocab/unit) and UN/CEFACT Rec 20 unit codes (SAMM's unit catalogue is based on Rec 20 by design decision); ECLASS IRDIs; SKOS concept schemes for closed code lists (e.g. battery categories and statuses); DCAT/DCAT-AP for catalogue metadata. (D) Constraints: SHACL Core shapes (targets, property paths, sh:datatype, sh:minCount/maxCount, sh:in, sh:pattern, sh:closed, sh:not, logical components) and optionally SHACL-SPARQL; the report is sh:ValidationReport with sh:conforms and sh:result items carrying sh:focusNode, sh:resultPath, sh:value, sh:sourceShape, sh:sourceConstraintComponent, sh:resultMessage and sh:resultSeverity (sh:Violation default, sh:Warning, sh:Info). SHACL does not require RDFS inference; sh:entailment can request a regime and a processor that lacks it must fail. CIRPASS-2 battery shapes include a profile (battery-shapes.ttl, carbon-footprint shapes with sh:deactivated items) and three tier views (public, legitimate-interest, authorities) where withheld paths carry sh:maxCount 0. (E) SAMM variant: aspect models in Turtle using urn:samm:org.eclipse.esmf.samm:meta-model:<version># with characteristics, entities and units; samm-cli 'aspect to' generates json, jsonld, schema (JSON Schema), openapi, asyncapi, aas, sql, html, java and more; Battery Pass v1.2.0 ships per aspect a Turtle model, a JSON-LD serialization of the model (-ld.json), a draft-04 JSON Schema carrying x-samm-aspect-model-urn, a sample payload and OpenAPI. Instance payloads carry no @context. (F) LinkML variant: CE-RISE model.yaml with prefixes (including gs1: https://ref.gs1.org/voc/ and an EU country authority table) and remote, tag-pinned imports, generating JSON Schema, OWL and SHACL; the hex-core-service reads a catalog with schema_url, shacl_url, owl_url and openapi_url per model version. (G) Three validation levels: syntactic validation checks the JSON tree against JSON Schema (structure, types, required keys) and is blind to meaning; semantic validation expands to RDF with the declared contexts and checks the graph against SHACL shapes, so it judges IRIs, datatypes, classes, cardinalities over the graph and is sensitive to context content; rule validation (the engine's data.rules) evaluates versioned rule packs on JSON values (completeness, units, ranges, relationships, freshness) with exact decimals and applicability conditions, and can express cross-field and applicability logic that neither JSON Schema nor SHACL Core states simply.",
+   "specs": [
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "Contexts, @protected, @version, @vocab, @import, scoped contexts"
+    },
+    {
+     "source_id": "new-w3c-json-ld-11-api",
+     "component": "Expansion, Deserialize JSON-LD to RDF, Object to RDF conversion, JsonLdOptions (documentLoader, base, expandContext, processingMode)"
+    },
+    {
+     "source_id": "new-w3c-shacl",
+     "component": "SHACL Core constraint components; validation report vocabulary; sh:entailment"
+    },
+    {
+     "source_id": "new-w3c-shacl12-core",
+     "component": "SHACL 1.2 Core (Working Draft)"
+    },
+    {
+     "source_id": "new-w3c-rdf12-concepts",
+     "component": "Triple terms, version announcement, base direction (CR)"
+    },
+    {
+     "source_id": "new-w3c-owl2-overview",
+     "component": "OWL 2 profiles EL, QL, RL; syntaxes"
+    },
+    {
+     "source_id": "new-cirpass2-ontologies-docs",
+     "component": "CORE 2.0.7 module list and versions"
+    },
+    {
+     "source_id": "new-cirpass2-ontologies-battery",
+     "component": "Ontology modules, SHACL Shapes folder, tests/run_tests.py"
+    },
+    {
+     "source_id": "new-gs1-webvoc",
+     "component": "gs1Voc.ttl v1.16"
+    },
+    {
+     "source_id": "new-schemaorg",
+     "component": "Release 30.1; licence"
+    },
+    {
+     "source_id": "untp-vocabulary-context-0-7-0",
+     "component": "Context URL https://vocabulary.uncefact.org/untp/0.7.0/context/"
+    },
+    {
+     "source_id": "new-qudt",
+     "component": "Units vocabulary base URI"
+    },
+    {
+     "source_id": "new-unece-rec20",
+     "component": "bibliographic only in this session (official page unreachable)"
+    },
+    {
+     "source_id": "new-eclipse-samm",
+     "component": "Meta model, characteristic shapes per version, unit catalogue decision record 0006"
+    },
+    {
+     "source_id": "new-esmf-sdk",
+     "component": "samm-cli aspect to/validate commands"
+    },
+    {
+     "source_id": "bp-data-model-github-v1-2-0",
+     "component": "SAMM aspects and generated artifacts"
+    },
+    {
+     "source_id": "new-ce-rise",
+     "component": "LinkML model.yaml; hex-core-service catalog"
+    },
+    {
+     "source_id": "new-iec-61360-1",
+     "component": "bibliographic only"
+    },
+    {
+     "source_id": "cir-2026-1778-dpp-registry",
+     "component": "Art. 2(8), 2(12), 2(13), Art. 11, Art. 12"
+    }
+   ],
+   "variants": [
+    "JSON-LD with project ontology (CIRPASS-2 CORE + sector)",
+    "JSON-LD with GS1 Web Vocabulary and schema.org",
+    "UNTP-style credential subject with protected context",
+    "Turtle-native knowledge graph",
+    "SAMM model with plain JSON payloads",
+    "LinkML single source generating JSON Schema, OWL and SHACL",
+    "OWL with reasoning versus SHACL closed-world checking"
+   ],
+   "observable_black_box": "The served document and its @context references; the expanded graph under pinned contexts; the SHACL report under pinned shapes (conforms flag, results per focus node, path, component, severity); the number of focus nodes per shape; datatypes of literals; JSON keys that produced no triple; namespace variants used for classes.",
+   "law_delta": "Law requires open standards, interoperable format, machine-readable and structured data (Regulation (EU) 2024/1781, Art. 10(1)(d); Regulation (EU) 2023/1542, Art. 77(5)), full semantic interoperability (Art. 11(a); Art. 78(a)) and conformance with common versioned models in the Commission semantic repository (Commission Implementing Regulation (EU) 2026/1778, Art. 11(3)-(4)). It does not mandate RDF, JSON-LD, OWL or SHACL; the attribute content comes from delegated acts and, for batteries, Annex XIII."
+  },
+  "L06_storage_archiving_persistence": {
+   "applies": "partial",
+   "mechanism": "Passport graphs live in document stores that serve JSON-LD, in RDF triplestores (often with named graphs per passport version) or in LDP/Solid pods. Project services keep their validation artifacts in relational databases (CIRPASS-2 dpp-validator stores JSON Schemas and SHACL templates with name, version and context URI in PostgreSQL; CE-RISE dp-storage-jsondb stores DPP records as JSON). A family-specific persistence need is that the vocabularies and contexts a passport references stay resolvable for the passport lifetime; CIRPASS-2 uses w3id.org persistent IRIs, GS1 hosts at ref.gs1.org, UNECE at vocabulary.uncefact.org. Ontologies declare owl:versionIRI so old versions can stay addressable.",
+   "specs": [
+    {
+     "source_id": "new-cirpass2-dpp-validator",
+     "component": "PostgreSQL tables json_schemas, shacl_templates, shacl_shapes"
+    },
+    {
+     "source_id": "new-cirpass2-ontologies-battery",
+     "component": "owl:versionIRI on shape and vocabulary files"
+    },
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "Privacy and security considerations: cache contexts or use a documentLoader with local copies"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 10(4) back-up copy through a DPP service provider"
+    }
+   ],
+   "variants": [
+    "Static JSON-LD files behind HTTP",
+    "Triplestore with SPARQL",
+    "Solid pod",
+    "Relational store with JSON-LD rendering"
+   ],
+   "observable_black_box": "Whether a passport and every referenced context remain retrievable over repeated acquisitions; ETag/Last-Modified stability; whether old version IRIs still answer.",
+   "law_delta": "Law requires a back-up copy through a DPP service provider (Regulation (EU) 2024/1781, Art. 10(4)) and availability for the period set in delegated acts (Art. 9(2)(i)); the registry checks the back-up link where relevant (Commission Implementing Regulation (EU) 2026/1778, Art. 8(7)(e)). Persistence of external contexts and vocabularies is an extra dependency that the law does not address."
+  },
+  "L07_access_rights_security_confidentiality": {
+   "applies": "partial",
+   "mechanism": "Two distinct mechanisms. (1) Enforcement: Solid uses Solid-OIDC for authentication and Web Access Control and/or Access Control Policy for authorization; Linked Web Storage drafts define authentication, authorization and access requests and grants; project services use OpenID Connect bearer tokens with roles (CIRPASS-2: admin, eo, eu). Research adds ODRL-based policies and UMA on Solid. (2) Specification and test of tiered views: CIRPASS-2 battery access tiers are a SKOS scheme (batacc:Public, batacc:LegitimateInterest, batacc:Authorities) derived from Regulation (EU) 2023/1542, Art. 77, and three SHACL view files state what each view must carry and must not disclose; non-disclosure is written as property shapes with sh:maxCount 0 on restricted paths (33 such constraints counted in the public view). The README states that SHACL enforces nothing: the service decides, and the shapes are the specification and the test.",
+   "specs": [
+    {
+     "source_id": "new-solid-protocol",
+     "component": "Solid-OIDC, WAC, ACP"
+    },
+    {
+     "source_id": "new-w3c-lws10-core",
+     "component": "Authentication, Authorization, Access Requests and Grants (Working Draft)"
+    },
+    {
+     "source_id": "new-cirpass2-ontologies-battery",
+     "component": "SHACL Shapes/battery-access-tiers.ttl, battery-view-public.ttl, battery-view-legitimate-interest.ttl, battery-view-authorities.ttl"
+    },
+    {
+     "source_id": "new-cirpass2-dpp-validator",
+     "component": "OIDC role-based access (admin/eo/eu)"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Art. 77(2) three audiences; Annex XIII points 1-4"
+    }
+   ],
+   "variants": [
+    "Public graph plus authenticated restricted graph",
+    "One graph filtered per role",
+    "Solid pod ACLs per resource",
+    "ODRL policies"
+   ],
+   "observable_black_box": "Per role, the graph returned on each channel; whether restricted predicates appear under any path; SHACL view report per role.",
+   "law_delta": "Battery law defines the audiences (Regulation (EU) 2023/1542, Art. 77(2), Annex XIII); ESPR delegates the actor-access matrix to delegated acts (Regulation (EU) 2024/1781, Art. 9(2)(f), Art. 10(1)(g)). Expressing tiers as SHACL views is a project choice, not a legal requirement."
+  },
+  "L08_authentication_reliability_integrity": {
+   "applies": "partial",
+   "mechanism": "Integrity in this family attaches to the graph, not the bytes. RDF Dataset Canonicalization (RDFC-1.0) labels blank nodes deterministically and serializes canonical N-Quads; SHA-256 is the default hash and SHA-384 must also be supported; implementations must stop early on poison graphs. VC Data Integrity proofs (properties proof, type, cryptosuite, verificationMethod, proofPurpose, proofValue, created, previousProof) use RDFC-1.0 in the *-rdfc-* suites (e.g. ecdsa-rdfc-2019) and JCS (RFC 8785) in the *-jcs-* suites (eddsa-jcs-2022). Because the graph depends on the contexts, a changed remote context changes the canonical form and breaks the proof; JSON-LD 1.1 has no subresource integrity for contexts and advises vetting and caching. For PyLD, RDFC-1.0 and a maxPermutations work limit appear only under the unreleased 4.0.0 in the CHANGELOG; the tagged 3.3.0 source accepts URDNA2015 and URGNA2012 and defaults to the legacy URGNA2012, so a caller that does not name the algorithm gets a non-RDFC canonical form. The registry proof of registration contains a hash of the passport version without naming the algorithm (Commission Implementing Regulation (EU) 2026/1778, Art. 2(16), Art. 9(2)).",
+   "specs": [
+    {
+     "source_id": "new-w3c-rdf-canon",
+     "component": "RDFC-1.0, canonical N-Quads, SHA-256 default, dataset poisoning"
+    },
+    {
+     "source_id": "w3c-vc-data-integrity-1-0",
+     "component": "Proof properties; ecdsa-rdfc-2019; eddsa-jcs-2022"
+    },
+    {
+     "source_id": "new-w3c-json-ld-11",
+     "component": "Security considerations: insecure transport of contexts; vet and cache"
+    },
+    {
+     "source_id": "new-pyld",
+     "component": "normalize() algorithms, FrozenDocumentLoader"
+    },
+    {
+     "source_id": "cir-2026-1778-dpp-registry",
+     "component": "Art. 2(16), Art. 9(2)-(3)"
+    }
+   ],
+   "variants": [
+    "Unsigned linked data",
+    "JWS over JSON bytes (JOSE)",
+    "Data Integrity proof with RDFC-1.0",
+    "Data Integrity proof with JCS",
+    "Registry hash of passport version"
+   ],
+   "observable_black_box": "Presence and type of proof; whether verification succeeds with pinned contexts; whether canonical N-Quads hash matches a published hash.",
+   "law_delta": "ESPR foresees implementing acts on digital credentials of actors (Regulation (EU) 2024/1781, Art. 11, fourth subparagraph) and requires accurate, complete and up-to-date data (Art. 9(1)); no signature format is named. Graph-level canonicalization is an addition of this family."
+  },
+  "L09_registry_and_customs": {
+   "applies": "partial",
+   "mechanism": "The EU registry act is the main place where semantics become a legal check: on submission the Commission reads the passport content and automatically confirms semantic conformity, data coherence, granularity, commodity code validity and the back-up link (Commission Implementing Regulation (EU) 2026/1778, Art. 8(7)(a)-(e)); semantic conformity means required elements present, structure, format, value type and controlled vocabularies respected, and consistent interpretation by reference to the semantic repository (Art. 2(12)). The repository holds attribute semantics, typed and resolvable links between passports, data models and formats, metadata, role semantics and multilingual labels, with DCAT-AP metadata, search and public APIs (Art. 12). DCAT-AP 3.0.1 ships SHACL shapes and a JSON-LD context that could test such metadata. The act names no serialization. Customs aspects (commodity code) are not linked-data specific.",
+   "specs": [
+    {
+     "source_id": "cir-2026-1778-dpp-registry",
+     "component": "Art. 2(8), 2(11)-(13), Art. 8(7), Art. 10(2), Art. 11, Art. 12"
+    },
+    {
+     "source_id": "new-dcat-ap",
+     "component": "releases/3.0.1/shacl/dcat-ap-SHACL.ttl; context folder"
+    },
+    {
+     "source_id": "new-w3c-dcat-3",
+     "component": "Versioning properties"
+    }
+   ],
+   "variants": [
+    "Registry consumes JSON-LD and validates against repository models",
+    "Registry validates against JSON Schema derived from repository models"
+   ],
+   "observable_black_box": "Only through the registry interface (out of scope: registry.official is interface_only). A tester can pre-check a passport against the published repository models once those are available.",
+   "law_delta": "The obligation itself is law (Art. 8(7)(a), Art. 11(3)); the format of the repository models is not stated in the act."
+  },
+  "L10_lifecycle_versioning_updates": {
+   "applies": "partial",
+   "mechanism": "Versioning appears at three levels. (1) Vocabulary and context versions: owl:versionIRI and owl:versionInfo in ontologies (e.g. battery access tiers 0.1.0, public view 0.2.0), versioned context URLs (UNTP /0.7.0/context/), version-bearing SAMM URNs (urn:samm:io.BatteryPass.CarbonFootprint:1.2.0#), LinkML model versions with tag-pinned imports. (2) Passport record versions: a schema-version property on the passport (CIRPASS-2 dpp:dppSchemaVersion, required by the battery profile and views since P_DPP 2.1.0), a passport status property (dpp:dppStatus), links to previous and next passports (dpp:linkToPreviousDPP plus object properties added in P_DPP 2.1.0) for remanufactured or repurposed batteries, and DCAT versioning properties (previous version, has version, current version, replaces, version, version notes, status). (3) Product state: the battery status of Annex XIII point 4(c) is modelled separately (bat:hasBatteryStatus with a SKOS scheme closed by sh:in in the shapes). Updates arrive as new graph versions, named graphs, PUT/PATCH on LDP/Solid resources or new documents.",
+   "specs": [
+    {
+     "source_id": "new-cirpass2-ontologies-battery",
+     "component": "README sections on battery status versus passport status; dppSchemaVersion fixtures"
+    },
+    {
+     "source_id": "new-w3c-dcat-3",
+     "component": "Section 6.4 versioning properties; Section 11 Versioning"
+    },
+    {
+     "source_id": "untp-vocabulary-context-0-7-0",
+     "component": "Versioned context URL"
+    },
+    {
+     "source_id": "cir-2026-1778-dpp-registry",
+     "component": "Art. 10(1)-(2) logged changes and versioned registry data; Art. 11(4) versioned data models"
+    },
+    {
+     "source_id": "reg-eu-2023-1542",
+     "component": "Annex XIII point 4(c) battery status values"
+    },
+    {
+     "source_id": "espr-reg-2024-1781",
+     "component": "Art. 11 point (d) new passport linked to the original"
+    }
+   ],
+   "variants": [
+    "New passport per lifecycle change linked to the previous",
+    "Same passport IRI with versioned named graphs",
+    "Version via DCAT properties",
+    "Version only in context URL"
+   ],
+   "observable_black_box": "Schema-version value; context URL version; consistency between them; status property value; previous/next links resolvable; old versions retrievable.",
+   "law_delta": "Law requires that a new passport created for a product that already has one be linked to the original (Regulation (EU) 2024/1781, Art. 11 point (d)); the CIRPASS-2 linkToPreviousDPP property implements this as a graph link. Law also requires accurate and up-to-date data (Regulation (EU) 2024/1781, Art. 9(1); Regulation (EU) 2023/1542, Art. 77(4)), status information for batteries (Annex XIII point 4(c)) and versioned registry data and data models (Commission Implementing Regulation (EU) 2026/1778, Art. 10(2), Art. 11(4)). Context and vocabulary version management is an extra concern of this family."
+  },
+  "L11_roles_and_governance": {
+   "applies": "yes",
+   "mechanism": "Meaning is delegated to whoever governs the vocabulary and the context file, so governance is part of the technical contract. Observed owners and terms: CIRPASS-2 consortium (Apache-2.0, w3id.org IRIs, explicit 'not official' disclaimer); GS1 (Web Vocabulary under Apache-2.0 with GS1 IP-policy text); schema.org sponsors (CC BY-SA 3.0); QUDT (CC BY 4.0); UNECE for UNTP (no vocabulary licence stated on the landing page); ECLASS e.V. (licensed content; IRDIs obtainable through shop, authorized providers, web service or indirectly from business partners, with limits on modification and reuse); CE-RISE (models CC BY-NC 4.0, software EUPL-1.2); Eclipse ESMF (MPL-2.0); W3C for the base standards. The Commission becomes the authoritative maintainer of DPP data models and semantic definitions through the semantic repository (Commission Implementing Regulation (EU) 2026/1778, Art. 12(1)). Context hosting, version policy, and licence of each context are therefore conformance-relevant inputs.",
+   "specs": [
+    {
+     "source_id": "cir-2026-1778-dpp-registry",
+     "component": "Art. 12(1) authoritative repository maintained by the Commission"
+    },
+    {
+     "source_id": "new-gs1-webvoc",
+     "component": "schema:license statement in gs1Voc.ttl"
+    },
+    {
+     "source_id": "new-schemaorg",
+     "component": "terms page: CC BY-SA 3.0"
+    },
+    {
+     "source_id": "new-qudt",
+     "component": "CC BY 4.0"
+    },
+    {
+     "source_id": "new-eclass-terms-of-use",
+     "component": "Sections 2 to 4 (sources of supply, licence, rights of use)"
+    },
+    {
+     "source_id": "new-cirpass2-ontologies-battery",
+     "component": "DISCLAIMER; Apache-2.0"
+    },
+    {
+     "source_id": "new-ce-rise",
+     "component": "model licence CC BY-NC 4.0"
+    }
+   ],
+   "variants": [
+    "Project-governed ontology",
+    "Standards-body vocabulary (GS1, UNECE, schema.org)",
+    "Commission semantic repository (expected)",
+    "Industrial dictionary with licensed content (ECLASS)"
+   ],
+   "observable_black_box": "Hosts of all referenced contexts and vocabularies, whether they are versioned and persistent, and the licence statements embedded in vocabulary files.",
+   "law_delta": "Law makes the Commission repository authoritative for registry purposes (Art. 12(1)) and requires no vendor lock-in (Regulation (EU) 2024/1781, Art. 10(1)(d)). Restrictive vocabulary licences (ECLASS, CC BY-NC) may conflict with open-standard expectations; this is an interpretation, not a stated rule."
+  }
+ },
+ "end_to_end_flows": [
+  {
+   "name": "Publish and resolve a JSON-LD passport via an HTTP URI with content negotiation",
+   "actors": [
+    "economic operator or DPP service provider",
+    "resolver or web server",
+    "client (consumer app, recycler, tester)",
+    "context and vocabulary hosts"
+   ],
+   "steps": [
+    "1. The operator mints a product IRI, typically a GS1 Digital Link https://<host>/01/<GTIN>/21/<serial>, and prints it in a QR code.",
+    "2. The operator publishes a JSON-LD document whose '@id' is that IRI (or a passport IRI linked to it) and whose '@context' points to versioned contexts of the chosen vocabularies.",
+    "3. The client decodes the QR code and sends GET with Accept: application/ld+json (or receives a linkset from a GS1 resolver and follows the gs1:dpp or default link).",
+    "4. The server answers 200 with Content-Type application/ld+json, or 303 to a data document, or application/json plus a Link context header.",
+    "5. The client loads each referenced context through its document loader (ideally from a local pinned copy), expands the document and converts it to RDF.",
+    "6. The client reads, queries or merges the graph with other graphs; a person receives text/html for the same IRI."
+   ]
+  },
+  {
+   "name": "Deterministic semantic validation (operator pipeline or conformance engine)",
+   "actors": [
+    "validator",
+    "shapes maintainer",
+    "context maintainer"
+   ],
+   "steps": [
+    "1. Pin inputs: shapes files, ontology files used as ont_graph, every context file, processor versions (e.g. PyLD, rdflib, pySHACL), inference mode 'none', severity policy.",
+    "2. Acquire the passport document and record it.",
+    "3. Check every @context reference against the allowlist (data.context exists today).",
+    "4. Expand and convert to RDF with a frozen document loader that serves only pinned contexts and refuses others (PyLD FrozenDocumentLoader or equivalent); network access of the RDF parser is blocked.",
+    "5. Run SHACL with the pinned shapes; record sh:conforms, every result and the number of focus nodes per shape.",
+    "6. Map Violation results to fail, record Warning and Info results without failing, treat zero focus nodes for a mandatory target as blocked or fail rather than pass.",
+    "7. Store the canonical form (RDFC-1.0 N-Quads) of the data graph and of the report so a replay can compare them."
+   ]
+  },
+  {
+   "name": "Tiered views checked with SHACL view shapes (CIRPASS-2 battery pattern)",
+   "actors": [
+    "passport service",
+    "public user",
+    "legitimate-interest user",
+    "authority",
+    "tester"
+   ],
+   "steps": [
+    "1. The service holds one full battery graph.",
+    "2. For each audience it returns a filtered view after authentication.",
+    "3. The tester validates each returned view against the matching view file alone (not together with the full profile).",
+    "4. A sh:maxCount 0 violation on a restricted path shows a leak; a minCount violation shows a missing entitled field."
+   ]
+  },
+  {
+   "name": "SAMM model-first passport (Battery Pass v1.2.0 pattern)",
+   "actors": [
+    "model author",
+    "samm-cli",
+    "operator",
+    "consumer"
+   ],
+   "steps": [
+    "1. The model author writes an aspect model in Turtle with SAMM meta-model namespaces and units.",
+    "2. samm-cli validates the model against the SAMM shapes and generates JSON Schema, OpenAPI, sample payloads and a JSON-LD serialization of the model.",
+    "3. The operator serves plain JSON payloads that validate against the generated JSON Schema; the semantic link is the aspect URN (x-samm-aspect-model-urn) or an AAS semanticId.",
+    "4. A consumer that wants RDF must map the payload to the model itself; no instance-level @context is provided."
+   ]
+  },
+  {
+   "name": "Registry registration with a semantic conformity check (EU law)",
+   "actors": [
+    "verified economic operator",
+    "EU DPP registry",
+    "Commission semantic repository"
+   ],
+   "steps": [
+    "1. The operator submits the passport registration through the registry interface or API (Commission Implementing Regulation (EU) 2026/1778, Art. 8(6)).",
+    "2. The registry reads the passport content and automatically checks semantic conformity against the applicable common data model, data coherence, granularity, commodity code and back-up link (Art. 8(7)).",
+    "3. On success it issues a unique persistent registration identifier (Art. 8(8)-(10)); the operator can download a sealed proof with a hash of the passport version (Art. 9)."
+   ]
+  },
+  {
+   "name": "Pod-hosted passport (Solid / Linked Web Storage, specification level only)",
+   "actors": [
+    "operator pod",
+    "client app",
+    "identity provider"
+   ],
+   "steps": [
+    "1. The operator stores the passport as an RDF resource in a pod container.",
+    "2. Clients authenticate with Solid-OIDC; the server enforces WAC or ACP rules per resource.",
+    "3. Public parts are readable without authentication as text/turtle or application/ld+json; updates use PUT or N3 Patch.",
+    "4. No DPP prototype of this flow was located; the flow is assembled from the Solid Protocol 0.11.0 only."
+   ]
+  }
+ ],
+ "implementations": [
+  {
+   "name": "CIRPASS-2 EU DPP CORE ontology and modules (documentation site and files)",
+   "url": "https://github.com/CIRPASS-2/ontologies-docs",
+   "kind": "ontology",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-15 (pushed)",
+   "evidence_level": "substantive",
+   "note": "WIDOCO pages generated 2026-10-12; CORE 2.0.7 with nine modules; per-module ontology.ttl/.jsonld/.nt/.owl under CORE/<module>/. The CORE source repository (CIRPASS-2/ontologies-core) returned 404."
+  },
+  {
+   "name": "CIRPASS-2 EU DPP Battery Ontology with SHACL profile, tier views and pySHACL tests",
+   "url": "https://github.com/CIRPASS-2/ontologies-battery",
+   "kind": "ontology",
+   "license": "Apache-2.0",
+   "last_activity": "2026-10-06 (pushed)",
+   "evidence_level": "substantive",
+   "note": "Umbrella 0.4.0 DRAFT, ten Turtle modules, six shape files, worked examples, tests/run_tests.py calling pyshacl.validate(..., inference='none', advanced=True). Disclaimer: not an official battery DPP ontology."
+  },
+  {
+   "name": "CIRPASS-2 tyre and textile ontology repositories",
+   "url": "https://github.com/CIRPASS-2/ontologies-tyre",
+   "kind": "ontology",
+   "license": "Apache-2.0 (tyre); textiles repository shows no licence",
+   "last_activity": "2026-10-13 (tyre), 2026-09-28 (textiles)",
+   "evidence_level": "metadata_only",
+   "note": "Folder names only (tyre: eto, guideline-resources; textiles: ontology, ref-data, background-data-models). Contents not examined."
+  },
+  {
+   "name": "CIRPASS-2 dpp-validator",
+   "url": "https://github.com/CIRPASS-2/dpp-validator",
+   "kind": "validator",
+   "license": "Apache-2.0",
+   "last_activity": "2026-08-04 (pushed)",
+   "evidence_level": "substantive",
+   "note": "Quarkus service using Titanium JSON-LD and Apache Jena (jena-core, jena-iri 5.6.0, jena-arq, jena-shacl); validates JSON by JSON Schema and JSON-LD by SHACL templates, auto-matching templates by @type, context URI or vocabulary; OIDC roles admin/eo/eu. Self-deployed only."
+  },
+  {
+   "name": "GS1 Web Vocabulary",
+   "url": "https://github.com/gs1/WebVoc",
+   "kind": "ontology",
+   "license": "Apache-2.0",
+   "last_activity": "2026-01-29 (repo pushed); v1.16 files uploaded 2025-09-21",
+   "evidence_level": "substantive",
+   "note": "gs1Voc.ttl and gs1Voc.jsonld per version folder; namespace https://ref.gs1.org/voc/; gs1:dpp link type present. Repository also holds an early PACT extension draft."
+  },
+  {
+   "name": "schema.org",
+   "url": "https://schema.org/docs/releases.html",
+   "kind": "ontology",
+   "license": "CC-BY-SA-3.0",
+   "last_activity": "2026-09-16 (release 30.1)",
+   "evidence_level": "metadata_only",
+   "note": "Release number and licence read; Product class page not read."
+  },
+  {
+   "name": "Battery Pass Data Model (SAMM)",
+   "url": "https://github.com/batterypass/BatteryPassDataModel",
+   "kind": "data-model",
+   "license": "CC-BY-4.0",
+   "last_activity": "2026-09-14 (latest commit on default branch)",
+   "evidence_level": "substantive",
+   "note": "Seven io.BatteryPass.* aspect namespaces with 1.0.0 and 1.2.0 folders; Turtle aspect models with SAMM 2.1.0 prefixes; generated -ld.json (model in JSON-LD), -schema.json (JSON Schema draft-04), payload samples, OpenAPI. Model descriptions embed references to a DIN SPEC (not recorded). Licence re-read 2026-10-19 in the README License section (CC-BY-4.0); the GitHub API reports no detected licence."
+  },
+  {
+   "name": "Eclipse Semantic Aspect Meta Model (SAMM)",
+   "url": "https://github.com/eclipse-esmf/esmf-semantic-aspect-meta-model",
+   "kind": "ontology",
+   "license": "MPL-2.0",
+   "last_activity": "2026-10-09 (pushed)",
+   "evidence_level": "substantive",
+   "note": "Meta model and characteristic SHACL shapes per version (1.0.0 to 2.3.0 folders); latest release v2.2.0; unit catalogue decision based on UNECE Rec 20."
+  },
+  {
+   "name": "Eclipse ESMF SDK / samm-cli",
+   "url": "https://github.com/eclipse-esmf/esmf-sdk",
+   "kind": "sdk",
+   "license": "MPL-2.0",
+   "last_activity": "2026-10-19 (release v2.16.1)",
+   "evidence_level": "substantive",
+   "note": "Command classes for aspect validate and aspect to json, jsonld, schema, openapi, asyncapi, aas, sql, html, java, parquet, png, svg; no instance-level SHACL generator found."
+  },
+  {
+   "name": "pySHACL",
+   "url": "https://github.com/RDFLib/pySHACL",
+   "kind": "validator",
+   "license": "Apache-2.0",
+   "last_activity": "2026-07-28 (v0.40.1)",
+   "evidence_level": "substantive",
+   "note": "Options inference none|rdfs|owlrl|both (default none), ont_graph, imports (owl:imports, off unless set), advanced, js, allow_warnings, allow_infos, meta_shacl, abort_on_first; parses data with rdflib."
+  },
+  {
+   "name": "rdflib",
+   "url": "https://github.com/RDFLib/rdflib",
+   "kind": "sdk",
+   "license": "BSD-3-Clause",
+   "last_activity": "2026-10-16 (pushed); release 7.6.0 2026-02-13",
+   "evidence_level": "substantive",
+   "note": "Its security documentation states that JSON-LD parsing loads @context network or file resources; blocking requires OS measures, Python audit hooks (urllib.Request, open) or a custom URL opener."
+  },
+  {
+   "name": "PyLD",
+   "url": "https://github.com/digitalbazaar/pyld",
+   "kind": "sdk",
+   "license": "BSD-3-Clause",
+   "last_activity": "2026-09-02 (3.3.0); pushed 2026-10-13",
+   "evidence_level": "substantive",
+   "note": "3.1.0 added FrozenDocumentLoader (allowlist, refuses others with 'loading document failed') and max_context_urls; 3.2.0 changed numeric conversions; 3.3.0 added FileDocumentLoader; default loader uses requests or aiohttp (network). Tagged v3.3.0 source (lib/pyld/jsonld.py) accepts normalize algorithms URDNA2015 and URGNA2012 only and defaults to URGNA2012; the name RDFC-1.0 does not appear."
+  },
+  {
+   "name": "jsonld.js",
+   "url": "https://github.com/digitalbazaar/jsonld.js",
+   "kind": "sdk",
+   "license": "BSD-3-Clause (npm metadata; GitHub API reports NOASSERTION)",
+   "last_activity": "2026-03-04 (pushed); npm latest 9.0.0",
+   "evidence_level": "metadata_only",
+   "note": "Depends on rdf-canonize ^5.0.0 and canonicalize ^2.1.0."
+  },
+  {
+   "name": "Titanium JSON-LD",
+   "url": "https://github.com/filip26/titanium-json-ld",
+   "kind": "sdk",
+   "license": "Apache-2.0",
+   "last_activity": "2025-10-05 (v1.7.0); pushed 2026-07-27",
+   "evidence_level": "substantive",
+   "note": "Java JSON-LD 1.1 processor used by the CIRPASS-2 validator. Source on main (src/main/java/com/apicatalog/jsonld/tordf/JsonLdToQuads.java, read 2026-10-19) converts a non-integral native number to the xsd:double lexical form and assigns xsd:double when no datatype is coerced; a coerced datatype is kept. The equivalent code in the v1.7.0 tag was not located (package layout differs)."
+  },
+  {
+   "name": "Apache Jena SHACL",
+   "url": "https://jena.apache.org/documentation/shacl/",
+   "kind": "validator",
+   "license": "Apache-2.0 (GitHub API for apache/jena)",
+   "last_activity": "2026-10-19 (apache/jena pushed)",
+   "evidence_level": "substantive",
+   "note": "Implements SHACL Core and SHACL-SPARQL constraints, reads and writes SHACL Compact Syntax; command 'shacl validate --shapes SHAPES --data DATA'; page states nothing on inference."
+  },
+  {
+   "name": "TopBraid SHACL API",
+   "url": "https://github.com/TopQuadrant/shacl",
+   "kind": "validator",
+   "license": "Apache-2.0",
+   "last_activity": "2026-03-23 (v1.5.0)",
+   "evidence_level": "substantive",
+   "note": "Jena-based; SHACL Core, SHACL-SPARQL and Advanced Features (rules); dropped Compact Syntax after 1.4.0 and SHACL-JS after 1.3.2; used inside the EC ITB SHACL validators."
+  },
+  {
+   "name": "EC Interoperability Test Bed SHACL validator",
+   "url": "https://github.com/ISAITB/shacl-validator",
+   "kind": "validator",
+   "license": "EUPL-1.2",
+   "last_activity": "2026-09-25 (1.13.0); pushed 2026-10-09",
+   "evidence_level": "metadata_only",
+   "note": "Web and command-line RDF validation supported by the Commission's DIGIT; configurable with domain shapes; a candidate reusable harness, not a DPP oracle."
+  },
+  {
+   "name": "CE-RISE models (LinkML) and hex-core-service",
+   "url": "https://github.com/CE-RISE-software/hex-core-service",
+   "kind": "server",
+   "license": "models CC BY-NC 4.0 (model.yaml); hex-core-service NOASSERTION; SDKs EUPL-1.2",
+   "last_activity": "product-profile v0.2.0 2026-08-31; hex-core 2026-03-27",
+   "evidence_level": "substantive",
+   "note": "LinkML model with gs1 prefix and remote tag-pinned imports; service resolves schema_url, shacl_url, owl_url, openapi_url from a catalog per model version and validates payloads."
+  },
+  {
+   "name": "CE-RISE Digital Passport Model Assessment Workbench (dpawb)",
+   "url": "https://github.com/CE-RISE-software/dp-assessment-workbench",
+   "kind": "validator",
+   "license": "EUPL-1.2",
+   "last_activity": "2026-04-27 (pushed)",
+   "evidence_level": "metadata_only",
+   "note": "Deterministic model-level metrics from SHACL specifications (paper DOI 10.12688/openreseurope.24195.1); assesses models, not instances."
+  },
+  {
+   "name": "DCAT-AP 3.0.1",
+   "url": "https://github.com/SEMICeu/DCAT-AP",
+   "kind": "data-model",
+   "license": "CC-BY-4.0",
+   "last_activity": "2026-06-04 (3.0.1)",
+   "evidence_level": "substantive",
+   "note": "Release folder contains shacl/dcat-ap-SHACL.ttl, shacl/ranges.ttl and a context folder; required metadata profile for the Commission semantic repository."
+  },
+  {
+   "name": "UNTP vocabulary and context 0.7.0",
+   "url": "https://vocabulary.uncefact.org/untp/0.7.0/context/",
+   "kind": "data-model",
+   "license": "not stated",
+   "last_activity": "not checked",
+   "evidence_level": "metadata_only",
+   "note": "Landing page re-read today: only 0.7.0 listed; terms link /untp/terms."
+  },
+  {
+   "name": "QUDT",
+   "url": "https://www.qudt.org/",
+   "kind": "ontology",
+   "license": "CC-BY-4.0",
+   "last_activity": "2026-09-15 (site updated)",
+   "evidence_level": "metadata_only",
+   "note": "Units vocabulary base http://qudt.org/vocab/unit; release number not shown."
+  }
+ ],
+ "literature": [
+  {
+   "doi": "10.1007/978-3-031-78955-7_19",
+   "title": "Designing an Ontology Network for Digital Product Passports",
+   "year": 2025,
+   "venue": "The Semantic Web: ESWC 2024 Satellite Events (LNCS), Springer",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref",
+   "relevance": "Proposes a cross-sector DPP core as an ontology network plus SHACL shapes for data quality; the closest academic precursor of the CIRPASS-2 CORE style."
+  },
+  {
+   "doi": "10.12688/openreseurope.24195.1",
+   "title": "Digital Passport Model Assessment Workbench: SHACL-based assessment, use-case coverage, and integration guidance for digital passport model ecosystems",
+   "year": 2026,
+   "venue": "Open Research Europe",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata confirmed via Crossref",
+   "relevance": "Open-source tool computing deterministic metrics from SHACL models; compares CE-RISE with Battery Pass v1.2.0 through inferred SHACL proxies. Shows SHACL as a stable, machine-assessable model specification."
+  },
+  {
+   "doi": "10.1109/ichcai70183.2026.11607563",
+   "title": "Explainability-Oriented Semantic Validation for Digital Product Passports in Industrial Systems",
+   "year": 2026,
+   "venue": "2026 1st International Conference on Human Centric Artificial Intelligence (ICHCAI)",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Minimal SHACL prototype over RDF product instances with an explanation layer mapping SHACL results to violations and actions; uses CIRPASS datasets."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.077",
+   "title": "Ontology Requirements for Digital Product Passports based on the Ecodesign for Sustainable Products Regulation",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Derives requirements for an ESPR-only upper-level DPP core ontology; useful for mapping law articles to ontology concepts."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.364",
+   "title": "From Conceptual Silos to a Circular Economy: The BFO-Based Framework for the Digital Product Passport",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Analyses the CIRPASS-2 Core Ontology and reports modelling ambiguities; evidence that the reference ontology is still moving."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.334",
+   "title": "Achieving Semantic Interoperability for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Position paper on why and how semantic interoperability between DPP systems can be achieved."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.353",
+   "title": "Semantic Data Integration for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Semantic Integration Patterns combining AAS and domain ontologies, demonstrated on ski equipment lifecycle data."
+  },
+  {
+   "doi": "10.1177/22104968251361274",
+   "title": "RePlanIT Ontology for Digital Product Passports of ICT: Laptops and Data Servers",
+   "year": 2025,
+   "venue": "Semantic Web: – Interoperability, Usability, Applicability",
+   "found_via": "mcp__consensus__search; mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Sector ontology and knowledge graph for ICT DPPs validated in a public-procurement case."
+  },
+  {
+   "doi": "10.1109/rfid64926.2025.11015538",
+   "title": "Building Digital Product Passports: EPCIS 2.0 Meets Knowledge Graphs",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on RFID (RFID)",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref",
+   "relevance": "Prototype linking EPCIS 2.0 events by GS1 keys into a knowledge graph to answer full product history with one query."
+  },
+  {
+   "doi": "10.1016/j.ifacol.2025.09.110",
+   "title": "Creating a Digital Product Passport Using Data Spaces and Ontologies: A Case Study at a Furniture Dealer",
+   "year": 2025,
+   "venue": "IFAC-PapersOnLine",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Industrial case building a DPP as a knowledge graph from a metadata schema, combined with data spaces and decentralized identifiers."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.321",
+   "title": "From Specification to Compliance: A Semantic Approach to Validating Industrial Supply Chains",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Ontologies plus SHACL to validate sourced supplies against specifications, framed as support for verifiable DPPs."
+  },
+  {
+   "doi": "10.5381/jot.2026.25.3.a21",
+   "title": "Product Digital Twin Ontology: A Pivot for Bridging Asset Administration Shell-based and Ontology-based Digital Product Passports.",
+   "year": 2026,
+   "venue": "The Journal of Object Technology",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Ontology used as pivot to convert between AAS/ECLASS-based and ontology-based DPP representations (hybrid with aas-digital-twin)."
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.153",
+   "title": "A Design Study on Integrating UNTP Semantics into AAS Submodels for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Embeds UNTP DPP semantics as an AAS submodel; shows cross-family semantic alignment."
+  },
+  {
+   "doi": "10.1016/j.websem.2026.100877",
+   "title": "BPO - A battery production ontology for traceable, transparent, and sustainable electric vehicle batteries",
+   "year": 2026,
+   "venue": "Journal of Web Semantics",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Battery production ontology aligned with battery passport requirements; an alternative to the CIRPASS-2 battery ontology.",
+   "title_note": "Crossref gives the title with an em dash: 'BPO—A battery production ontology ...'; the title field keeps the search-tool form."
+  },
+  {
+   "doi": "10.1016/j.compind.2026.104465",
+   "title": "A Material Passport Ontology for a circular economy",
+   "year": 2026,
+   "venue": "Computers in Industry",
+   "found_via": "mcp__f11045f8-3372-484c-8ebd-25d8b1d6cacf__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Material passport knowledge graph with constraints for identifier syntax and mass values; relevant to rule versus shape validation."
+  },
+  {
+   "doi": "10.5281/zenodo.18433713",
+   "title": "Design and Implementation of a Digital Product Passport Prototype for a Coffee Machine in the Circular Economy",
+   "year": 2026,
+   "venue": "ISA Publisher (DataCite record, resource type JournalArticle, deposited on Zenodo)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; metadata confirmed via DataCite on 2026-10-19 (Crossref returned 404, as expected for a DataCite DOI)",
+   "relevance": "Prototype with FastAPI endpoints and a JSON-LD data format for a small appliance; example of JSON-LD without a published shape set."
+  },
+  {
+   "doi": "10.1007/s43615-026-00927-x",
+   "title": "A Comprehensive Review of Digital Product Passports in Sustainable Manufacturing: Current State, Challenges, and Future Directions",
+   "year": 2026,
+   "venue": "Circular Economy and Sustainability",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Review of 225 studies; reports limited empirical validation and recommends harmonized open standards including RDF/OWL."
+  },
+  {
+   "doi": "10.1007/978-3-030-49461-2_29",
+   "title": "Astrea: Automatic Generation of SHACL Shapes from Ontologies.",
+   "year": 2020,
+   "venue": "Lecture Notes in Computer Science; The Semantic Web (ESWC 2020)",
+   "found_via": "mcp__bfbf9916-50c7-4305-a44f-7f7bf719d666__search-papers; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Tool to derive SHACL shapes from OWL ontologies; relevant when a DPP ontology ships without shapes (older than the preferred window)."
+  },
+  {
+   "doi": "10.1145/3672608.3707971",
+   "title": "Bringing the Digital Product Passport to Life: Requirements Analysis for a Carbon Footprint Tracking System using Knowledge Graphs and Data Spaces",
+   "year": 2025,
+   "venue": "Proceedings of the 40th ACM/SIGAPP Symposium on Applied Computing",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Requirements analysis that pairs knowledge graphs with data spaces for carbon-footprint data in a DPP; a hybrid of this family with dataspace-federated. Requirements only, no conformance oracle."
+  },
+  {
+   "doi": "10.3390/digital6020043",
+   "title": "Digital Product Passports: A Systematic Literature Review on Framework Design and Validation",
+   "year": 2026,
+   "venue": "Digital (MDPI)",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Systematic review that finds knowledge graphs among the frequent enabling technologies, and validation mostly limited to illustrative cases and prototypes; supports the adoption statement in maturity."
+  },
+  {
+   "doi": "10.1007/978-3-032-25156-5_12",
+   "title": "From RDF Graph Validation to RDF Dataset Validation with SHACL-DS",
+   "year": 2026,
+   "venue": "Lecture Notes in Computer Science; The Semantic Web",
+   "found_via": "mcp__consensus__search (listed as 2025); metadata confirmed via Crossref on 2026-10-19 (published year 2026)",
+   "relevance": "SHACL 1.0 validates one graph only; SHACL-DS adds a vocabulary to target named graphs in a dataset. Relevant when passport versions are kept as named graphs (L10) and an oracle must check across versions."
+  },
+  {
+   "doi": "10.1007/978-3-030-30793-6_9",
+   "title": "Validating Shacl Constraints over a Sparql Endpoint",
+   "year": 2019,
+   "venue": "Lecture Notes in Computer Science; The Semantic Web – ISWC 2019",
+   "found_via": "mcp__consensus__search; metadata confirmed via Crossref on 2026-10-19",
+   "relevance": "Algorithms to validate SHACL against a graph reachable only through a SPARQL endpoint; relevant to the SPARQL-endpoint variant, but a black-box engine should validate acquired documents, not a live endpoint. Older than the preferred window."
+  }
+ ],
+ "conformance_implications": [
+  {
+   "layer": "L05",
+   "test_objective": "Every JSON-LD @context reference of the passport is on a pinned allowlist, and no inline context object is used.",
+   "observable": "@context values at top level and in nested nodes of the served document.",
+   "oracle": "Pinned allowlist chosen for the product group; JSON-LD 1.1 security considerations advise vetting and caching contexts.",
+   "existing_check": "data.context",
+   "existing_capability": "data.context",
+   "new_capability_needed": "none for body contexts; extension needed for Link-header contexts and @import inside allowed contexts",
+   "fixtures_needed": "Documents with allowed, unknown, inline, nested-scoped and @import contexts.",
+   "reusable_suite": "W3C JSON-LD API test suite, https://github.com/w3c/json-ld-api/tree/main/tests (to validate the engine's own handling)",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "A JSON (not JSON-LD) response that carries its context in an HTTP Link header names an allowlisted context, and only one such header is present.",
+   "observable": "Content-Type and Link rel='http://www.w3.org/ns/json-ld#context' headers on the passport response.",
+   "oracle": "JSON-LD 1.1 API remote document retrieval: one context Link header for JSON types; several give 'multiple context link headers'.",
+   "existing_check": "none",
+   "existing_capability": "data.context (body only)",
+   "new_capability_needed": "data.context extension reading recorded response headers",
+   "fixtures_needed": "Recorded responses with zero, one and two context Link headers.",
+   "reusable_suite": "W3C JSON-LD API test suite (remote-doc tests), https://github.com/w3c/json-ld-api/tree/main/tests",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The document expands and converts to RDF using only pinned contexts, without any network fetch, and without JSON-LD processing errors.",
+   "observable": "Expansion result or JSON-LD error code (loading document failed, invalid remote context, protected term redefinition, invalid context nullification, context overflow).",
+   "oracle": "JSON-LD 1.1 API algorithms and error codes; a frozen loader that serves only pinned context files (PyLD FrozenDocumentLoader pattern).",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "data.jsonld_expand (pinned context store plus frozen loader; possibly part of data.shacl)",
+   "fixtures_needed": "Pinned context files with digests; documents that redefine protected terms; documents referencing unpinned contexts.",
+   "reusable_suite": "W3C JSON-LD API expand and toRdf manifests, https://github.com/w3c/json-ld-api/tree/main/tests",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "No JSON key of the passport is silently dropped during expansion.",
+   "observable": "Set of JSON keys versus set of expanded properties; keys with no IRI mapping.",
+   "oracle": "JSON-LD 1.1 API: values that do not yield a well-formed IRI produce no triple. A dropped key means the data has no defined meaning for a consumer.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "data.jsonld_dropped_terms",
+   "fixtures_needed": "Documents with typos in keys, keys outside the context, @vocab present and absent.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The RDF graph of the passport conforms to the pinned SHACL shapes of the product group.",
+   "observable": "sh:conforms, sh:result entries (focus node, path, value, source shape, component, severity).",
+   "oracle": "SHACL Recommendation semantics with pinned shapes and ont_graph, inference 'none', allow_warnings false, advanced flag pinned, owl:imports not followed; Violation fails, Warning and Info are recorded only.",
+   "existing_check": "none",
+   "existing_capability": "data.shacl (interface_only)",
+   "new_capability_needed": "data.shacl implementation (pySHACL optional extra, pinned shapes, frozen context loader, blocked rdflib network access)",
+   "fixtures_needed": "CIRPASS-2 battery examples and fixtures (Apache-2.0) as positive cases; mutated copies as negative cases; recorded expected reports.",
+   "reusable_suite": "W3C SHACL test suite, https://github.com/w3c/data-shapes (folder data-shapes-test-suite; for the validator itself)",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Each mandatory shape actually selects at least one focus node, so a conforming report is not vacuous.",
+   "observable": "Number of focus nodes per targeted shape; rdf:type values and namespaces of the passport subjects.",
+   "oracle": "SHACL target semantics: a shape with no focus node produces no result, so conformance is trivially true. The test plan must state the expected target class (e.g. bat:Battery).",
+   "existing_check": "none",
+   "existing_capability": "data.shacl (interface_only)",
+   "new_capability_needed": "data.shacl focus-node coverage finding",
+   "fixtures_needed": "Document typed with an equivalent-but-different namespace (gs1.org/voc versus ref.gs1.org/voc), and one with no type.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Numeric values keep the datatype that the shapes and the law expect (decimal versus double versus integer).",
+   "observable": "Literal datatypes and lexical forms after toRdf; JSON number form in the source.",
+   "oracle": "JSON-LD 1.1 API Object to RDF conversion rules for native numbers; shapes using sh:datatype xsd:decimal. A fractional JSON number becomes xsd:double unless sent as a typed string. Titanium JSON-LD (main branch source) behaves the same way.",
+   "existing_check": "data.rules (on JSON values with exact decimals)",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "data.shacl datatype-fidelity finding",
+   "fixtures_needed": "Same value as JSON number, as string with @type xsd:decimal, and as coerced term.",
+   "reusable_suite": "W3C JSON-LD API toRdf tests (number conversion cases)",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Every class and property IRI used in the graph is defined in the pinned vocabularies (closed-world vocabulary check).",
+   "observable": "Predicates and rdf:type objects in the graph.",
+   "oracle": "Pinned vocabulary files (e.g. CIRPASS-2 CORE 2.0.7 modules, GS1 Web Vocabulary 1.16). A term absent from them is an unknown term.",
+   "existing_check": "none",
+   "existing_capability": "none",
+   "new_capability_needed": "data.vocab_terms",
+   "fixtures_needed": "Pinned vocabulary snapshots with digests; documents using deprecated or invented terms.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "Units of measure are expressed with identifiers from a pinned unit list (QUDT IRIs or UN/CEFACT Rec 20 codes) consistent with the attribute.",
+   "observable": "Unit property values in the graph or JSON.",
+   "oracle": "Pinned unit code list; rule packs per attribute. Rec 20 content not verified in this session.",
+   "existing_check": "data.rules",
+   "existing_capability": "data.rules",
+   "new_capability_needed": "none (rule pack with pinned unit list)",
+   "fixtures_needed": "Pinned unit list snapshot; documents with symbol-only units and wrong units.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "Different representations of the same passport (JSON-LD, Turtle, embedded HTML JSON-LD) describe the same graph.",
+   "observable": "Responses for several Accept values; Content-Type and Vary headers.",
+   "oracle": "Graph isomorphism checked by comparing RDFC-1.0 canonical N-Quads (RDF Dataset Canonicalization, Recommendation 2024-05-21). The canonicalization algorithm must be named explicitly (RDFC-1.0); PyLD 3.3.0 defaults to the legacy URGNA2012.",
+   "existing_check": "identifier.resolve (accept parameter only)",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "data.rdf_isomorphism (RDFC-1.0 with a work limit)",
+   "fixtures_needed": "Recorded JSON-LD/Turtle pairs, equal and unequal; a poison-graph sample for the work limit.",
+   "reusable_suite": "W3C RDF canonicalization tests, https://github.com/w3c/rdf-canon/tree/main/tests",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L01",
+   "test_objective": "The passport subject IRI equals the carrier identifier (or its declared canonical form) and is absolute.",
+   "observable": "@id (or aliased id) of the passport or product node after expansion; decoded carrier payload.",
+   "oracle": "Declared IXIT binding rule; JSON-LD base resolution rules for relative @id.",
+   "existing_check": "identifier.consistency",
+   "existing_capability": "identifier.consistency",
+   "new_capability_needed": "identifier.consistency must read JSON-LD '@id' or an alias; today it reads the key 'id' only",
+   "fixtures_needed": "Passports with 'id', with '@id', with relative '@id', with blank-node subject.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L03",
+   "test_objective": "A GS1-conformant resolver linkset for the product contains a passport link of the expected link type and media type.",
+   "observable": "Linkset (application/linkset+json) entries and link types, e.g. gs1:dpp or the declared type.",
+   "oracle": "GS1-Conformant Resolver Standard 1.2.1 linkset rules; GS1 Web Vocabulary 1.16 link-type definitions.",
+   "existing_check": "identifier.resolve (partial)",
+   "existing_capability": "identifier.resolve",
+   "new_capability_needed": "identifier.linkset",
+   "fixtures_needed": "Recorded linksets with and without a gs1:dpp link.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L07",
+   "test_objective": "Each role's view carries its entitled data and none of the withheld data, judged on the graph.",
+   "observable": "Graph returned per role and channel.",
+   "oracle": "Declared access policy derived from Regulation (EU) 2023/1542, Art. 77(2) and Annex XIII; view shapes with sh:maxCount 0 on restricted paths (CIRPASS-2 pattern) used as test data, not as law.",
+   "existing_check": "access.restricted_fields",
+   "existing_capability": "access.policy",
+   "new_capability_needed": "data.shacl view mode (validate a role's response against that role's view shapes only)",
+   "fixtures_needed": "Synthetic canary graphs per tier; pinned view shapes.",
+   "reusable_suite": "CIRPASS-2 battery tests/run_tests.py pattern, https://github.com/CIRPASS-2/ontologies-battery",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L08",
+   "test_objective": "A Data Integrity proof on a JSON-LD passport verifies with pinned contexts and an allowlisted cryptosuite.",
+   "observable": "proof object (type, cryptosuite, verificationMethod, proofPurpose, proofValue).",
+   "oracle": "VC Data Integrity 1.0 and the cryptosuite specification; RDFC-1.0 for *-rdfc-* suites, JCS for *-jcs-* suites.",
+   "existing_check": "none",
+   "existing_capability": "integrity.jws (JOSE only)",
+   "new_capability_needed": "integrity.data_integrity",
+   "fixtures_needed": "TEST-ONLY keys; signed sample passports; same sample after a context change.",
+   "reusable_suite": "none located in this session",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "The declared schema version, the context URL version and the shapes version are consistent across successive passport versions.",
+   "observable": "Schema-version property, context URLs, owl:versionIRI of shapes referenced, previous/next passport links.",
+   "oracle": "Declared update rule in the ICS; Commission Implementing Regulation (EU) 2026/1778, Art. 11(4) requires versioned data models.",
+   "existing_check": "persistence.versions",
+   "existing_capability": "persistence.versions (experimental)",
+   "new_capability_needed": "none (rule in persistence.versions or data.rules)",
+   "fixtures_needed": "Version histories with a silent context change.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  },
+  {
+   "layer": "L09",
+   "test_objective": "Pre-check the passport against the Commission's published common data model before registration.",
+   "observable": "Passport graph or JSON.",
+   "oracle": "Semantic conformity as defined in Commission Implementing Regulation (EU) 2026/1778, Art. 2(12) and checked under Art. 8(7)(a); the repository models themselves were not located.",
+   "existing_check": "registry.consistency (mock only)",
+   "existing_capability": "registry.mock",
+   "new_capability_needed": "data.repository_model (pinned snapshot of the semantic repository model, format unknown)",
+   "fixtures_needed": "Snapshot of repository models once published.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L05",
+   "test_objective": "The shapes used as oracle are themselves well formed and their results agree with the JSON Schema path on shared fixtures, with every disagreement recorded.",
+   "observable": "Shapes graph; SHACL and JSON Schema verdicts per fixture.",
+   "oracle": "SHACL meta-shapes (pySHACL meta_shacl) or the EC ITB shape validator; the data.shacl acceptance criterion in the capability manifest.",
+   "existing_check": "data.jsonschema",
+   "existing_capability": "data.jsonschema; data.shacl (interface_only)",
+   "new_capability_needed": "differential fixture runner for data.shacl versus data.jsonschema",
+   "fixtures_needed": "Shared fixtures where the two must agree and fixtures where they diverge by design (context-dependent meaning).",
+   "reusable_suite": "EC ITB SHACL validator, https://github.com/ISAITB/shacl-validator",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L11",
+   "test_objective": "All referenced contexts and vocabularies are hosted at persistent, versioned locations with a stated licence.",
+   "observable": "Hosts and paths of context URLs; licence statements in vocabulary files.",
+   "oracle": "Test plan declaration; no legal rule names such a check (interpretation).",
+   "existing_check": "data.context (allowlist only)",
+   "existing_capability": "data.context",
+   "new_capability_needed": "none (a manual.review step for licence and governance evidence)",
+   "fixtures_needed": "Allowlist entries annotated with host, version and licence.",
+   "reusable_suite": "none",
+   "network_needed": "sample-artifact"
+  },
+  {
+   "layer": "L10",
+   "test_objective": "When passport versions are kept as named graphs or as separate documents, each version graph conforms to the shapes of the model version it declares, and the link to the previous version resolves to a graph that also conforms.",
+   "observable": "Successive acquired passport versions; declared schema-version per version; previous-version links.",
+   "oracle": "Pinned shapes per declared model version; Regulation (EU) 2024/1781, Art. 11 point (d) for the link to the original passport. SHACL 1.0 validates one graph at a time, so the engine validates each version separately; cross-graph targeting (SHACL-DS) is research only.",
+   "existing_check": "persistence.versions",
+   "existing_capability": "persistence.versions (experimental); data.shacl (interface_only)",
+   "new_capability_needed": "data.shacl per-version mode keyed by declared model version",
+   "fixtures_needed": "Two-version history where version 2 changes model version; a broken previous link.",
+   "reusable_suite": "none",
+   "network_needed": "loopback-only"
+  }
+ ],
+ "failure_modes": [
+  {
+   "layer": "L05",
+   "fault": "The passport references an unversioned remote context that the publisher later edits; the same JSON now yields a different graph.",
+   "detectable_by": "Allowlist of exact versioned context URLs (data.context) plus digest-pinned local copies; replay with the pinned copy shows a different graph than the publisher's current one only if the SUT-hosted context is recorded."
+  },
+  {
+   "layer": "L05",
+   "fault": "A key is misspelled or not in the context, so expansion drops it and the attribute silently disappears for every RDF consumer while JSON Schema still passes.",
+   "detectable_by": "Compare JSON keys with expanded properties (data.jsonld_dropped_terms); SHACL minCount fails on the missing path."
+  },
+  {
+   "layer": "L05",
+   "fault": "Fractional values are sent as JSON numbers, so they become xsd:double (or an ill-typed xsd:decimal under coercion) and fail decimal-typed shapes or lose precision.",
+   "detectable_by": "Datatype-fidelity finding after toRdf; SHACL sh:datatype violations."
+  },
+  {
+   "layer": "L05",
+   "fault": "The product is typed with a namespace variant (https://gs1.org/voc/Product instead of https://ref.gs1.org/voc/Product, or http versus https schema.org) so shapes that target one IRI select no focus node and report conformance.",
+   "detectable_by": "Focus-node coverage check per mandatory shape; vocabulary term check against pinned files."
+  },
+  {
+   "layer": "L05",
+   "fault": "A document redefines a protected term from an included context, which a JSON-LD 1.1 processor rejects but a lax consumer accepts with a different meaning.",
+   "detectable_by": "Expansion with a conformant processor reports 'protected term redefinition'."
+  },
+  {
+   "layer": "L05",
+   "fault": "Validation results differ between runs or tools because inference, owl:imports or processor version differ (e.g. PyLD before and after 3.2.0 numeric changes).",
+   "detectable_by": "Pin processor versions and options in the evidence record; replay comparison of canonical report."
+  },
+  {
+   "layer": "L03",
+   "fault": "The server ignores Accept and always returns HTML, or returns application/json without a context Link header, so clients get no linked data.",
+   "detectable_by": "Content-Type and Link header checks on recorded responses for each Accept value."
+  },
+  {
+   "layer": "L03",
+   "fault": "JSON-LD and Turtle representations of the same IRI drift apart because they are generated by different code paths.",
+   "detectable_by": "RDFC-1.0 canonical comparison of the two graphs."
+  },
+  {
+   "layer": "L01",
+   "fault": "The passport uses a relative '@id' or a blank node, so its identity depends on the retrieval URL or is not dereferenceable, and the subject does not match the carrier URI.",
+   "detectable_by": "Absolute-IRI check on subjects after expansion; identifier.consistency with JSON-LD id handling."
+  },
+  {
+   "layer": "L07",
+   "fault": "A restricted attribute leaks into the public view under a nested path or an equivalent property that the JSON field list does not cover.",
+   "detectable_by": "Validate the public response graph against public view shapes with sh:maxCount 0 on restricted paths; closed shapes for the public view."
+  },
+  {
+   "layer": "L08",
+   "fault": "A Data Integrity proof made over a graph built with one context version fails after the context host changes the context, or verifies only because the verifier fetched the changed context.",
+   "detectable_by": "Verify with pinned contexts only; record the context digests used."
+  },
+  {
+   "layer": "L10",
+   "fault": "The schema-version label on the passport says one model version while the context URL and the shape set belong to another.",
+   "detectable_by": "Cross-check schema-version value, context URL version and shape owl:versionIRI in persistence.versions or a rule pack."
+  },
+  {
+   "layer": "L09",
+   "fault": "The passport conforms to a project ontology but not to the Commission repository model version that applies, so registration is refused on semantic conformity.",
+   "detectable_by": "Pre-check against a pinned snapshot of the repository model once available."
+  },
+  {
+   "layer": "L06",
+   "fault": "A vocabulary or context host disappears or changes domain during the passport lifetime, so consumers can no longer interpret the passport.",
+   "detectable_by": "Scheduled acquisition of referenced contexts (persistence.scheduled, interface_only) with recorded status codes."
+  },
+  {
+   "layer": "L11",
+   "fault": "The passport embeds licensed dictionary content (e.g. ECLASS definitions) or non-commercial model content beyond the licence terms.",
+   "detectable_by": "Manual review of embedded definitions and licence statements; not decidable automatically."
+  },
+  {
+   "layer": "L08",
+   "fault": "Producer and verifier canonicalize with different algorithms (for example PyLD 3.3.0 default URGNA2012 versus RDFC-1.0), so a hash or proof over the graph fails although the data is unchanged.",
+   "detectable_by": "Record the canonicalization algorithm in evidence; recompute with RDFC-1.0 named explicitly and compare with the published hash; flag proofs whose cryptosuite implies RDFC-1.0 when the hash only matches under URGNA2012."
+  },
+  {
+   "layer": "L05",
+   "fault": "A passport kept in a triplestore is validated through a SPARQL endpoint with a different graph scope (default graph versus named graph union) than the published document, so the endpoint result and the document result differ.",
+   "detectable_by": "Validate the acquired published document with pinned shapes, not the endpoint; compare canonical N-Quads of the document graph with an endpoint CONSTRUCT result recorded as an artifact."
+  }
+ ],
+ "sources": [
+  {
+   "id": "new-w3c-json-ld-11",
+   "title": "JSON-LD 1.1",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/json-ld11/",
+   "edition_or_version": "W3C Recommendation 16 July 2020 (https://www.w3.org/TR/2020/REC-json-ld11-20200716/); errata page linked",
+   "publication_date": "2020-07-16",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence (copyright-software-and-document 2015)",
+   "what_it_shows": "Status; profile URIs of application/ld+json; Link-header context; security and privacy considerations on remote contexts (vet, cache, documentLoader with local copies; resource consumption; no code evaluation). Pages read in three windows: 0-100000, 440000-573572."
+  },
+  {
+   "id": "new-w3c-json-ld-11-api",
+   "title": "JSON-LD 1.1 Processing Algorithms and API",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/json-ld11-api/",
+   "edition_or_version": "W3C Recommendation 16 July 2020 (https://www.w3.org/TR/2020/REC-json-ld11-api-20200716/)",
+   "publication_date": "2020-07-16",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Context processing of remote contexts; LoadDocumentOptions and RemoteDocument members; content-type and Link handling of the default loader; 303 exclusion for documentUrl; JsonLdOptions; error codes; Object to RDF conversion of numbers, booleans; dropping of non-well-formed IRIs. Read windows 0-100000, 200000-400000."
+  },
+  {
+   "id": "new-w3c-rdf-canon",
+   "title": "RDF Dataset Canonicalization",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/rdf-canon/",
+   "edition_or_version": "W3C Recommendation 21 May 2024 (https://www.w3.org/TR/2024/REC-rdf-canon-20240521/)",
+   "publication_date": "2024-05-21",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Algorithm RDFC-1.0; SHA-256 default, SHA-384 required; canonical N-Quads; early termination against poison graphs."
+  },
+  {
+   "id": "new-w3c-rdf12-concepts",
+   "title": "RDF 1.2 Concepts and Abstract Data Model",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/rdf12-concepts/",
+   "edition_or_version": "Candidate Recommendation Snapshot 7 April 2026 (https://www.w3.org/TR/2026/CR-rdf12-concepts-20260407/)",
+   "publication_date": "2026-04-07",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Status; names triple terms, version announcement and base direction; RDF 1.1 Concepts still listed as latest Recommendation."
+  },
+  {
+   "id": "new-w3c-shacl",
+   "title": "Shapes Constraint Language (SHACL)",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/shacl/",
+   "edition_or_version": "W3C Recommendation 20 July 2017 (https://www.w3.org/TR/2017/REC-shacl-20170720/)",
+   "publication_date": "2017-07-20",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "SHACL Core and SHACL-SPARQL components; validation report vocabulary; severities; sh:entailment and optional entailment support."
+  },
+  {
+   "id": "new-w3c-shacl12-core",
+   "title": "SHACL 1.2 Core",
+   "issuing_body": "W3C Data Shapes Working Group",
+   "url": "https://www.w3.org/TR/shacl12-core/",
+   "edition_or_version": "Working Draft 14 October 2026 (https://www.w3.org/TR/2026/WD-shacl12-core-20261014/)",
+   "publication_date": "2026-10-14",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Status and the list of companion SHACL 1.2 drafts."
+  },
+  {
+   "id": "new-w3c-owl2-overview",
+   "title": "OWL 2 Web Ontology Language Document Overview (Second Edition)",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/owl2-overview/",
+   "edition_or_version": "W3C Recommendation 11 December 2012",
+   "publication_date": "2012-12-11",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Profiles EL, QL, RL; syntaxes RDF/XML, OWL/XML, Functional, Manchester, Turtle."
+  },
+  {
+   "id": "new-w3c-ldp",
+   "title": "Linked Data Platform 1.0",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/ldp/",
+   "edition_or_version": "W3C Recommendation 26 February 2015",
+   "publication_date": "2015-02-26",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Resource and container types, required methods, Link rel=type, Accept-Post, Accept-Patch, ETag and If-Match with 412/428."
+  },
+  {
+   "id": "new-w3c-dcat-3",
+   "title": "Data Catalog Vocabulary (DCAT) - Version 3",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/vocab-dcat-3/",
+   "edition_or_version": "W3C Recommendation 22 August 2024",
+   "publication_date": "2024-08-22",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Versioning properties (previous version, has version, current version, replaces, version, version notes, status)."
+  },
+  {
+   "id": "new-w3c-dx-prof-conneg",
+   "title": "Content Negotiation by Profile",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/dx-prof-conneg/",
+   "edition_or_version": "Working Draft 21 September 2026",
+   "publication_date": "2026-09-21",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Accept-Profile, Link rel=profile, query arguments _profile and _mediatype."
+  },
+  {
+   "id": "new-w3c-lws10-core",
+   "title": "Linked Web Storage Protocol 1.0",
+   "issuing_body": "W3C Linked Web Storage Working Group",
+   "url": "https://www.w3.org/TR/lws10-core/",
+   "edition_or_version": "Working Draft 16 October 2026 (https://www.w3.org/TR/2026/WD-lws10-core-20261016/)",
+   "publication_date": "2026-10-16",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Status and table of contents (authentication, authorization, containers, operations, notifications, access requests and grants, media type, JSON-LD context)."
+  },
+  {
+   "id": "new-solid-protocol",
+   "title": "Solid Protocol",
+   "issuing_body": "W3C Solid Community Group",
+   "url": "https://solidproject.org/TR/protocol",
+   "edition_or_version": "Version 0.11.0 (protocol-20240512), Draft Community Group Report",
+   "publication_date": "2024-05-12",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not checked",
+   "what_it_shows": "Solid-OIDC; WAC and/or ACP; required methods; N3 Patch text/n3; text/turtle and application/ld+json for RDF sources; not a W3C standard."
+  },
+  {
+   "id": "w3c-vc-data-integrity-1-0",
+   "title": "Verifiable Credential Data Integrity 1.0",
+   "issuing_body": "W3C",
+   "url": "https://www.w3.org/TR/vc-data-integrity/",
+   "edition_or_version": "W3C Recommendation 15 May 2025 (https://www.w3.org/TR/2025/REC-vc-data-integrity-20250515/)",
+   "publication_date": "2025-05-15",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C document licence",
+   "what_it_shows": "Proof properties; RDFC-1.0 named for ecdsa-rdfc-2019; JCS for eddsa-jcs-2022. Status re-checked; unchanged from the prior record."
+  },
+  {
+   "id": "new-gs1-webvoc",
+   "title": "GS1 Web Vocabulary (development site gs1/WebVoc and ref.gs1.org/voc)",
+   "issuing_body": "GS1 AISBL",
+   "url": "https://github.com/gs1/WebVoc",
+   "edition_or_version": "v1.16 (owl:versionInfo '1.16'; dc:lastModified 2025-08-01; files uploaded 2025-09-21); tags v1.1 to v1.16",
+   "publication_date": "2025-08-01",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 per README and the schema:license literal in gs1Voc.ttl, which also carries GS1 IP-policy and disclaimer text",
+   "what_it_shows": "Namespace https://ref.gs1.org/voc/ with equivalents at gs1.org/voc and www.gs1.org/voc; gs1:Product exactMatch schema:Product; gs1:dpp link type; other link types (pip, sustainabilityInfo, certificationInfo, epcis, traceability, instructions, defaultLink). The ref.gs1.org/voc page rendered template placeholders to the fetch tool."
+  },
+  {
+   "id": "new-schemaorg",
+   "title": "schema.org releases and terms of service",
+   "issuing_body": "schema.org sponsors",
+   "url": "https://schema.org/docs/releases.html",
+   "edition_or_version": "Release 30.1 (2026-09-16)",
+   "publication_date": "2026-09-16",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC BY-SA 3.0 for the schemas (https://schema.org/docs/terms.html)",
+   "what_it_shows": "Current release number and licence."
+  },
+  {
+   "id": "untp-vocabulary-context-0-7-0",
+   "title": "UNTP Core Types vocabulary and JSON-LD context 0.7.0",
+   "issuing_body": "UNECE, UN/CEFACT",
+   "url": "https://vocabulary.uncefact.org/untp/",
+   "edition_or_version": "0.7.0 only on landing page (re-checked 2026-10-19; same as 2026-10-13)",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "No licence on the landing page; copyright UNECE; terms link now /untp/terms (prior record saw /home/terms)",
+   "what_it_shows": "Context URL https://vocabulary.uncefact.org/untp/0.7.0/context/; no newer version listed."
+  },
+  {
+   "id": "new-qudt",
+   "title": "QUDT home page",
+   "issuing_body": "QUDT.org",
+   "url": "https://www.qudt.org/",
+   "edition_or_version": "Page last updated 2026-09-15; catalog release number not shown (link to 'Release 2.1' present)",
+   "publication_date": "2026-09-15",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC BY 4.0",
+   "what_it_shows": "Units vocabulary base URI http://qudt.org/vocab/unit; no Rec 20 mapping statement on the page."
+  },
+  {
+   "id": "new-unece-rec20",
+   "title": "UNECE Recommendation 20 (unit codes; full title not verified, official pages unreachable)",
+   "issuing_body": "UNECE, UN/CEFACT",
+   "url": "https://unece.org/trade/uncefact/cl-recommendations",
+   "edition_or_version": "not verified",
+   "publication_date": "not verified",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not checked",
+   "what_it_shows": "Official pages (unece.org and tfig.unece.org) returned HTTP 403. Existence and role as SAMM unit catalogue basis known only from the Eclipse SAMM decision record 0006."
+  },
+  {
+   "id": "new-eclass-terms-of-use",
+   "title": "Terms of Use for the ECLASS Standard",
+   "issuing_body": "ECLASS e.V.",
+   "url": "https://eclass.eu/fileadmin/Redaktion/pdf-Dateien/Sonstige_Dateien/ECLASS_terms-of-use_4-3.pdf",
+   "edition_or_version": "Version 4.3 as of March 22, 2022",
+   "publication_date": "2022-03-22",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Proprietary terms; pages 1 to 6 read",
+   "what_it_shows": "Each ECLASS structural element has an IRDI; content obtainable only from the shop, authorized providers, the web service or indirectly from business partners; indirect recipients may store and use unaltered work results within the business relationship but may not modify or extend them; licensees get non-transferable rights to describe products. Whether these 2022 terms govern Release 15 was not confirmed."
+  },
+  {
+   "id": "new-eclass-15-shop",
+   "title": "ECLASS 15.0 shop listings (search excerpt)",
+   "issuing_body": "ECLASS e.V.",
+   "url": "https://eclass.eu/shop/en/product/eclass-15-0",
+   "edition_or_version": "Release 15.0 (released 2024-11-29 per search excerpt)",
+   "publication_date": "2024-11-29",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Paid full licence; a zero-price 'Asset' variant in English and German per search excerpt",
+   "what_it_shows": "Search-result summary only; shop pages not opened."
+  },
+  {
+   "id": "new-iec-61360-1",
+   "title": "IEC 61360-1:2017 (Standard data element types with associated classification scheme, Part 1)",
+   "issuing_body": "IEC",
+   "url": "https://webstore.iec.ch/publication/28560",
+   "edition_or_version": "Edition 4.0, 2017-07-27 (per search excerpt); replaces edition 3.0 of 2009",
+   "publication_date": "2017-07-27",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "secondary_only",
+   "protected_standard": true,
+   "license_or_reuse_terms": "Protected IEC publication; bibliographic metadata only",
+   "what_it_shows": "Bibliographic metadata from search results only; the IEC Common Data Dictionary was not opened. Content not read."
+  },
+  {
+   "id": "new-eclipse-samm",
+   "title": "Semantic Aspect Meta Model (SAMM) specification and repository",
+   "issuing_body": "Eclipse Foundation (Eclipse ESMF project)",
+   "url": "https://github.com/eclipse-esmf/esmf-semantic-aspect-meta-model",
+   "edition_or_version": "Latest release v2.2.0 (2025-03-11); folders up to 2.3.0 on main; spec site lists snapshot, 2.2.0, 2.1.0, 2.0.0",
+   "publication_date": "2025-03-11",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MPL-2.0 (repository); specification text licence not stated on the page read",
+   "what_it_shows": "Meta model specified in RDF/Turtle with SHACL validation rules (characteristic-shapes.ttl per version); decision record 0006 selects UNECE Rec 20 for the unit catalogue after considering QUDT."
+  },
+  {
+   "id": "new-esmf-sdk",
+   "title": "Eclipse ESMF SDK (samm-cli)",
+   "issuing_body": "Eclipse Foundation (Eclipse ESMF project)",
+   "url": "https://github.com/eclipse-esmf/esmf-sdk",
+   "edition_or_version": "v2.16.1 (2026-10-19); v2.16.0 (2026-08-13)",
+   "publication_date": "2026-10-19",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "MPL-2.0",
+   "what_it_shows": "samm-cli command classes for aspect validate and aspect to json/jsonld/schema/openapi/asyncapi/aas/sql/html/java/parquet/png/svg. The tooling-guide page returned 404."
+  },
+  {
+   "id": "bp-data-model-github-v1-2-0",
+   "title": "Battery Pass Data Model repository (GitHub, Battery Pass project, v1.2.0)",
+   "issuing_body": "Battery Pass project",
+   "url": "https://github.com/batterypass/BatteryPassDataModel",
+   "edition_or_version": "v1.2.0 folders per aspect; SAMM 2.1.0 namespaces",
+   "publication_date": "2025-01-14",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0 per README License section (re-read 2026-10-19); GitHub API detects no licence file",
+   "what_it_shows": "Tree listing and files of io.BatteryPass.CarbonFootprint 1.2.0: Turtle aspect model, JSON-LD serialization of the model, JSON Schema draft-04 with x-samm-aspect-model-urn, payload, OpenAPI."
+  },
+  {
+   "id": "cirpass2-github-repositories",
+   "title": "CIRPASS-2 GitHub repositories",
+   "issuing_body": "CIRPASS-2 Consortium",
+   "url": "https://github.com/CIRPASS-2",
+   "edition_or_version": "13 public repositories on 2026-10-19 (same set as 2026-10-13); ontologies-docs pushed 2026-10-15",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 except ontologie-textiles and assets (no licence)",
+   "what_it_shows": "Organisation listing with push dates and licences; CIRPASS-2/ontologies-core returns 404."
+  },
+  {
+   "id": "new-cirpass2-ontologies-battery",
+   "title": "CIRPASS-2 ontologies-battery (EU DPP Battery Ontology, SHACL shapes, examples, tests)",
+   "issuing_body": "CIRPASS-2 Consortium",
+   "url": "https://github.com/CIRPASS-2/ontologies-battery",
+   "edition_or_version": "Umbrella 0.4.0 DRAFT; access tiers 0.1.0 (2026-08-28); public view shapes 0.2.0; pushed 2026-10-06",
+   "publication_date": "2026-10-06",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0 (LICENSE.txt; dcterms:license in files); disclaimer: not an official ontology",
+   "what_it_shows": "Module and namespace table; status modelling; carbon-footprint binding with deactivated shapes; access tiers as SKOS; view shapes using sh:maxCount 0; tests using pyshacl with inference none and advanced true; fixtures in JSON-LD. README content that cites a draft protected standard was not recorded."
+  },
+  {
+   "id": "new-cirpass2-ontologies-docs",
+   "title": "CIRPASS-2 ontologies-docs (EU DPP ontologies documentation)",
+   "issuing_body": "CIRPASS-2 Consortium",
+   "url": "https://github.com/CIRPASS-2/ontologies-docs",
+   "edition_or_version": "Generated with WIDOCO on 2026-10-12; CORE 2.0.7",
+   "publication_date": "2026-10-12",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Ontology list with IRIs and versions (CORE https://w3id.org/eudpp/ 2.0.7; P_DPP 2.1.0; ACTOR 2.1.3; IDENT 1.2.0; MAT 1.1.0; SOC 2.0.0; COMP 1.0.0; EVENT 1.0.0; LCA 3.0.0; CONNECTOR 2.2.0; battery modules 0.1.1 to 0.4.0 DRAFT); per-module ontology.ttl/jsonld/nt/owl files."
+  },
+  {
+   "id": "new-cirpass2-dpp-validator",
+   "title": "CIRPASS-2 dpp-validator README and pom.xml",
+   "issuing_body": "CIRPASS-2 Consortium",
+   "url": "https://github.com/CIRPASS-2/dpp-validator",
+   "edition_or_version": "main branch, pushed 2026-08-04",
+   "publication_date": "2026-08-04",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "REST API, auto-matching algorithm, database tables, SHACL formats accepted, dependencies Titanium JSON-LD and Jena SHACL; example report with a datatype message."
+  },
+  {
+   "id": "pypi-pyshacl",
+   "title": "pySHACL (Python SHACL validator)",
+   "issuing_body": "RDFLib project",
+   "url": "https://pypi.org/project/pyshacl/",
+   "edition_or_version": "0.40.1 (GitHub release 2026-07-28)",
+   "publication_date": "2026-07-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "requires_dist (rdflib[html] >=7.3.0,<8.0; owlrl >=7.6.2,<8; optional js, oxigraph, http extras); README options (inference default none, imports, advanced, js, allow_warnings, meta_shacl). Matches prior record version."
+  },
+  {
+   "id": "new-rdflib",
+   "title": "rdflib repository and Security Considerations document",
+   "issuing_body": "RDFLib project",
+   "url": "https://github.com/RDFLib/rdflib/blob/main/docs/security_considerations.md",
+   "edition_or_version": "Release 7.6.0 (2026-02-13); docs on main",
+   "publication_date": "2026-02-13",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "BSD-3-Clause",
+   "what_it_shows": "JSON-LD parsing loads network or file resources named in @context; mitigations: OS sandboxing, Python audit hooks on urllib.Request and open, custom URL opener. JSON-LD util module reads Link context headers."
+  },
+  {
+   "id": "new-pyld",
+   "title": "PyLD (PyPI metadata, README, CHANGELOG)",
+   "issuing_body": "Digital Bazaar and contributors",
+   "url": "https://github.com/digitalbazaar/pyld",
+   "edition_or_version": "3.3.0 (2026-09-02); 3.2.0 (2026-08-17); 3.1.0 (2026-06-19); 3.0.0 (2026-04-02); 4.0.0 unreleased",
+   "publication_date": "2026-09-02",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "BSD-3-Clause",
+   "what_it_shows": "Default loader uses requests or aiohttp; FrozenDocumentLoader and BUNDLED_CONTEXTS (3.1.0); numeric conversion fixes (3.2.0); FileDocumentLoader (3.3.0); RDFC-1.0 and maxPermutations listed for unreleased 4.0.0; requires_python not declared. Continuation 2026-10-19: tag v3.3.0 lib/pyld/jsonld.py read; normalize() options algorithm URDNA2015 or URGNA2012, default URGNA2012."
+  },
+  {
+   "id": "new-jsonld-js",
+   "title": "jsonld (npm package metadata)",
+   "issuing_body": "Digital Bazaar",
+   "url": "https://registry.npmjs.org/jsonld/latest",
+   "edition_or_version": "9.0.0",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "BSD-3-Clause (npm); GitHub API NOASSERTION",
+   "what_it_shows": "Version and runtime dependencies (rdf-canonize ^5.0.0, canonicalize ^2.1.0, lru-cache, @digitalbazaar/http-client)."
+  },
+  {
+   "id": "new-titanium-json-ld",
+   "title": "Titanium JSON-LD repository metadata",
+   "issuing_body": "filip26 (maintainer)",
+   "url": "https://github.com/filip26/titanium-json-ld",
+   "edition_or_version": "v1.7.0 (2025-10-05)",
+   "publication_date": "2025-10-05",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Java JSON-LD 1.1 processor; release dates. Continuation 2026-10-19: main-branch JsonLdToQuads.java number conversion read (xsd:double for non-integral numbers, coerced datatype kept)."
+  },
+  {
+   "id": "new-jena-shacl",
+   "title": "Apache Jena SHACL documentation",
+   "issuing_body": "Apache Software Foundation",
+   "url": "https://jena.apache.org/documentation/shacl/",
+   "edition_or_version": "Page footer 2011-2026; no version stated",
+   "publication_date": "not stated",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "not stated on the page; the apache/jena repository is Apache-2.0 per the GitHub API (2026-10-19)",
+   "what_it_shows": "SHACL Core and SPARQL constraints; SHACL-C; command shacl validate; no statement on inference."
+  },
+  {
+   "id": "new-topbraid-shacl",
+   "title": "TopBraid SHACL API README",
+   "issuing_body": "TopQuadrant (maintained with Knowledge Pixels contact)",
+   "url": "https://github.com/TopQuadrant/shacl",
+   "edition_or_version": "v1.5.0 (2026-03-23)",
+   "publication_date": "2026-03-23",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Apache-2.0",
+   "what_it_shows": "Coverage (Core, SPARQL, Advanced Features), dropped SHACL-C and SHACL-JS, use inside the EC ITB validators."
+  },
+  {
+   "id": "new-itb-shacl-validator",
+   "title": "ISAITB shacl-validator repository metadata",
+   "issuing_body": "European Commission DIGIT (Interoperability Test Bed)",
+   "url": "https://github.com/ISAITB/shacl-validator",
+   "edition_or_version": "1.13.0 (2026-09-25)",
+   "publication_date": "2026-09-25",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EUPL-1.2",
+   "what_it_shows": "Web and command-line RDF validation application; module layout."
+  },
+  {
+   "id": "new-w3c-test-suites",
+   "title": "W3C test suites for JSON-LD API, SHACL and RDF canonicalization",
+   "issuing_body": "W3C",
+   "url": "https://github.com/w3c/json-ld-api/tree/main/tests",
+   "edition_or_version": "json-ld-api pushed 2026-10-07; data-shapes pushed 2026-10-19 (data-shapes-test-suite folder); rdf-canon tests with manifest.jsonld/ttl, pushed 2026-02-24",
+   "publication_date": "not applicable",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "W3C licences (LICENSE.md, not read)",
+   "what_it_shows": "Existence and location of reusable conformance suites for the processors the engine would embed. Also https://github.com/w3c/data-shapes and https://github.com/w3c/rdf-canon."
+  },
+  {
+   "id": "new-ce-rise",
+   "title": "CE-RISE software and models (hex-core-service, product-profile, dp-assessment-workbench)",
+   "issuing_body": "CE-RISE project",
+   "url": "https://github.com/CE-RISE-software",
+   "edition_or_version": "product-profile v0.2.0 (2026-08-31); hex-core-service pushed 2026-03-27; dp-assessment-workbench pushed 2026-04-27",
+   "publication_date": "2026-08-31",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "Model CC BY-NC 4.0 (model.yaml); SDKs and services EUPL-1.2; hex-core-service NOASSERTION",
+   "what_it_shows": "LinkML model with GS1 prefix and remote imports; validation core resolving schema, SHACL, OWL and OpenAPI URLs from a catalog per version. GitHub repos are mirrors (Codeberg origin)."
+  },
+  {
+   "id": "new-dcat-ap",
+   "title": "DCAT-AP (SEMICeu repository)",
+   "issuing_body": "European Commission SEMIC",
+   "url": "https://github.com/SEMICeu/DCAT-AP",
+   "edition_or_version": "3.0.1 (2026-06-04); 3.0.0 (2023-07-18); HVD variants",
+   "publication_date": "2026-06-04",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "metadata_only",
+   "protected_standard": false,
+   "license_or_reuse_terms": "CC-BY-4.0",
+   "what_it_shows": "Release 3.0.1 contains shacl/dcat-ap-SHACL.ttl, shacl/ranges.ttl and a context folder."
+  },
+  {
+   "id": "gs1-conformant-resolver-1-2-1",
+   "title": "GS1-Conformant Resolver Standard",
+   "issuing_body": "GS1",
+   "url": "https://ref.gs1.org/standards/resolver/",
+   "edition_or_version": "Release 1.2.1, ratified August 2026 (PDF dated 2026-08-07)",
+   "publication_date": "2026-08-07",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "GS1 standard (IP policy per prior record gs1-ip-policy-and-disclaimer)",
+   "what_it_shows": "Linkset media types (application/linkset+json, application/json, application/ld+json on request, text/html); linkType parameter; /.well-known/gs1resolver. Does not mention gs1:dpp. Read window 0-100000 of 107148."
+  },
+  {
+   "id": "espr-reg-2024-1781",
+   "title": "Regulation (EU) 2024/1781 (Ecodesign for Sustainable Products Regulation)",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "Consolidated text 02024R1781 - EN - 28.06.2024 - 000.001 (PDF page headers), incorporating corrigendum C2 for Art. 10(1)(d)",
+   "publication_date": "2024-06-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; consolidated version is a documentation tool without legal effect",
+   "what_it_shows": "Re-read today (PDF pages 22-23): Art. 10(1)(a)-(g), Art. 10(4) back-up copy, Art. 11 points (a)-(d) including (d) linking a new passport to the original. Art. 9, 12 and 13 are cited from the prior record espr.json of 2026-10-13 and were not re-read. EUR-Lex /eng returned empty content to the fetch tool."
+  },
+  {
+   "id": "reg-eu-2023-1542",
+   "title": "Regulation (EU) 2023/1542 concerning batteries and waste batteries",
+   "issuing_body": "European Parliament and Council of the European Union",
+   "url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "edition_or_version": "Consolidated English text (02023R1542-20260813 per prior record; header not visible in the window read)",
+   "publication_date": "2023-07-28",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text; consolidated version is a documentation tool without legal effect",
+   "what_it_shows": "Re-read today (characters 400000-500000): Art. 77(2) three access tiers and Annex XIII content, Art. 77(5) open standards, interoperable, machine-readable, structured, searchable, Art. 78(a) technical, semantic and organisational interoperability. Art. 77(4) and Annex XIII point 4(c) are cited from prior records of 2026-10-13."
+  },
+  {
+   "id": "cir-2026-1778-dpp-registry",
+   "title": "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry set up under Regulation (EU) 2024/1781",
+   "issuing_body": "European Commission",
+   "url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "edition_or_version": "OJ L, 2026/1778, 17.7.2026 (original)",
+   "publication_date": "2026-07-17",
+   "retrieval_date": "2026-10-19",
+   "verification_level": "substantive",
+   "protected_standard": false,
+   "license_or_reuse_terms": "EU legal text",
+   "what_it_shows": "Re-read today in two windows: Art. 2(8) semantic repository, 2(11) semantic specification, 2(12) semantic conformity, 2(13) data model, 2(16) hash of a passport version; Art. 8(7)(a)-(e) automatic checks; Art. 9(2)-(3) proof with hash, seal and timestamp; Art. 10(1)-(3); Art. 11(1)-(4); Art. 12(1)-(7) with DCAT-AP in 12(3). JSON-LD, RDF, SHACL, OWL and JSON Schema are not named. EUR-Lex /eng returned empty content to the fetch tool."
+  }
+ ],
+ "open_questions": [
+  "Where and in what format will the Commission semantic repository of Commission Implementing Regulation (EU) 2026/1778, Art. 12 publish its data models (OWL, SHACL, JSON Schema, JSON-LD contexts)? It was not located; the conformance engine's L05 and L09 oracles depend on it.",
+  "data.context checks body contexts only. Should it also read the Link-header context of JSON responses and the targets of @import inside allowed contexts? This needs a change to the data adapter (not owned by this task).",
+  "identifier.consistency reads the key 'id' only (src/dppce/adapters/identifier.py). A JSON-LD passport that uses '@id' without an alias will look like a missing id. Should the check accept '@id' or an IXIT-declared alias? Contract change to report, not made here.",
+  "Architecture section 2 rule 5 forbids fetching any JSON-LD context. How should the engine detect drift of a SUT-hosted context? One option: acquire the context through the Acquirer as part of the SUT, record it, and compare its digest with the pinned copy. This needs a contract decision.",
+  "Which JSON-LD processor should data.shacl use? rdflib's parser loads contexts from the network by default; PyLD offers a FrozenDocumentLoader; graphs can differ between PyLD versions (3.2.0 changed number handling). The capability needs a pinned processor and version.",
+  "The data.shacl acceptance criterion asks for agreement with JSON Schema on shared fixtures. Disagreement is expected by design when the same JSON yields a different graph under a different context, or when a key is dropped. How should expected disagreements be declared?",
+  "Should the engine ever enable RDFS or OWL RL inference (for example to treat https://gs1.org/voc/Product and https://ref.gs1.org/voc/Product as the same class)? It stays deterministic but harder to audit; 'none' plus explicit namespace rules may be preferable.",
+  "Licences: UNTP context reuse is unresolved; schema.org is CC BY-SA 3.0 (share-alike if bundled); ECLASS content cannot be bundled without a licence; CE-RISE models are CC BY-NC 4.0. Which vocabularies may the engine vendor as pinned files?",
+  "Which datatype do Titanium (released v1.7.0) and Jena produce for a fractional JSON number in the CIRPASS-2 dpp-validator pipeline? Titanium main-branch source gives xsd:double; the released tag and the validator's actual input were not examined, and no processor was run.",
+  "Will DPP data use RDF 1.2 triple terms (for statement-level provenance), and will SHACL 1.2 change the validation report? Both are drafts at retrieval.",
+  "No Solid-pod or LDP-based DPP prototype was located. Is pod hosting a realistic method for EU passports, or only a research option? Two further Consensus searches on 2026-10-19 (Solid pod DPP; SPARQL/knowledge-graph DPP with SHACL) returned Solid access-control and storage work and DPP knowledge-graph requirements papers, but still no Solid-hosted DPP prototype.",
+  "Can the CIRPASS-2 battery examples and fixtures (Apache-2.0) be vendored as engine test vectors, given the disclaimer that the ontology is not official and the README's reliance on a draft protected standard for some values?"
+ ],
+ "anomalies": [
+  "https://ref.gs1.org/voc/ rendered unfilled template placeholders (version, date, licence) to the fetch tool; https://www.gs1.org/voc/ returned HTTP 403. Version and licence were taken from the GS1 GitHub repository files instead.",
+  "UNECE pages for Recommendation 20 (unece.org and tfig.unece.org) returned HTTP 403.",
+  "The CIRPASS-2 battery README links issues of CIRPASS-2/ontologies-core, but that repository returned HTTP 404 through the GitHub API (private or moved).",
+  "The CIRPASS-2 dpp-validator README example reports 'Expected xsd:double, got xsd:decimal' for a fractional JSON number, which conflicts with a reading of the JSON-LD 1.1 API Object to RDF conversion. Continuation 2026-10-19: Titanium JSON-LD main-branch source produces xsd:double for a non-integral native number, in line with the spec reading. The README message may stem from a shape that expects xsd:double meeting a value typed as xsd:decimal, so it is not proof of a processor deviation; the input of that example was not examined.",
+  "Eclipse SAMM: latest GitHub release is v2.2.0 (2025-03-11) but main already contains 2.3.0 meta-model folders; Battery Pass v1.2.0 uses SAMM 2.1.0 namespaces.",
+  "jsonld.js: npm metadata gives BSD-3-Clause while the GitHub API reports NOASSERTION.",
+  "PyLD README on main describes RDFC-1.0 as the normalize default, but the CHANGELOG places RDFC-1.0 under the unreleased 4.0.0; the released 3.3.0 should not be assumed to implement RDFC-1.0. Confirmed 2026-10-19 from the v3.3.0 tag source: default algorithm URGNA2012, options URDNA2015 and URGNA2012.",
+  "rdflib security page on readthedocs (stable) returned 404; the same document was read from the repository docs folder.",
+  "EUR-Lex /eng for Commission Implementing Regulation (EU) 2026/1778 returned empty content to the fetch tool; the Cellar manifestation was read instead.",
+  "The ESMF samm-cli tooling-guide page returned 404; command names were taken from source file names in esmf-sdk.",
+  "The GS1-Conformant Resolver Standard 1.2.1 text read does not mention gs1:dpp, while GS1 Web Vocabulary 1.16 defines it as a link type.",
+  "QUDT states the units base URI without a trailing slash (http://qudt.org/vocab/unit).",
+  "Freshness against 2026-10-13 records: UNTP context still 0.7.0 only (unchanged); pySHACL 0.40.1 (unchanged); CIRPASS-2 still 13 repositories, ontologies-docs pushed again 2026-10-15; VC Data Integrity 1.0 status unchanged; GS1 resolver 1.2.1 unchanged; UNTP terms link observed at /untp/terms instead of /home/terms.",
+  "SHACL-DS paper: Consensus lists the year as 2025; Crossref gives 2026. The Crossref year is recorded.",
+  "Zenodo DOI 10.5281/zenodo.18433713 is a DataCite DOI; Crossref returned 404 and DataCite returned the record (publisher 'ISA Publisher')."
+ ],
+ "truncation": "Caps chosen in advance: about 40 sources, 18 literature items, 22 implementations, 18 conformance implications, 15 failure modes. Long W3C pages were read in windows (JSON-LD 1.1: 0-100000 and 440000-573572; JSON-LD API: 0-100000 and 200000-400000; SHACL, RDF canon, RDF 1.2, SHACL 1.2, LDP, DCAT 3, LWS: first 100000 characters only). The GS1 resolver page was read to 100000 of 107148 characters. CIRPASS-2 tyre and textile ontologies, the CORE module Turtle files, Battery Pass aspects other than CarbonFootprint 1.2.0, the BatteryPass-Ready v2 model, the SPARQL 1.1 Protocol, PROV-O, schema.org Product page, the Commission semantic repository and the CIRPASS-2 test environment report were not read. Literature: four Consensus searches (two per Consensus server) and three SciSpace searches, plus two web searches for Solid DPP prototypes and ECLASS/IEC metadata; abstracts only, no full texts; three DOIs confirmed through Crossref (10.12688/openreseurope.24195.1, 10.1007/978-3-031-78955-7_19, 10.1109/rfid64926.2025.11015538), the rest are as returned by the search tools. No processor or validator was executed, so no behaviour claim is a test result. Continuation 2026-10-19: two more Consensus searches (mcp__consensus__search); 18 literature DOIs checked through Crossref (14 earlier items, 4 new items) and one through DataCite; four literature items added; GitHub API metadata read for apache/jena, batterypass/BatteryPassDataModel, digitalbazaar/pyld, ISAITB/shacl-validator, filip26/titanium-json-ld; PyLD v3.3.0 jsonld.py and Titanium main JsonLdToQuads.java read; the Titanium v1.7.0 number-conversion code was not located.",
+ "continuation_note": "Continuation on 2026-10-19. The previous agent stopped on HTTP 429; its last recorded action was a Bash edit applying advisor provenance fixes. The file was valid JSON on resume, so that edit is treated as applied and no section was rewritten. Edits in this continuation were made with a Python script run through Bash, not the Write tool. Changed: all 18 earlier literature DOIs are now metadata-confirmed (14 checked through Crossref and 1 through DataCite in this continuation, 3 confirmed by the previous agent); the six 'Unknown Journal' venues are now Procedia Computer Science per Crossref; four Crossref-confirmed papers added (KG plus data spaces requirements, a 2026 DPP systematic review, SHACL-DS, SHACL over SPARQL endpoints). Implementations: Apache Jena licence and activity, Battery Pass last commit and README licence, ITB push date filled; Titanium raised to substantive after reading its number-to-RDF code; PyLD 3.3.0 default canonicalization confirmed as URGNA2012 from the tagged source, which updates L08, one conformance implication, one anomaly and adds a failure mode. The dpp-validator xsd:decimal anomaly is softened: Titanium main agrees with the spec reading. Added one L10 conformance implication (per-version SHACL) and two failure modes. Checked engine facts: capabilities.md lists data.context supported, data.shacl interface_only, access.policy supported; identifier.py line 262 reads document.get('id'). Still open: Commission semantic repository not located; UNTP licence; Rec 20 official page (403 earlier, not retried); no processor executed, so no behaviour claim is a test result; no Solid-hosted DPP prototype found."
+}

@@ -1,0 +1,461 @@
+{
+  "target": "m01-law-baseline",
+  "retrieval_date": "2026-10-19",
+  "method_note": "I read the whole target file, then chose 42 claims (above the 25-35 target because several pin-cites shared one source window) with the highest legal or engine risk: every article pin-cite that carries a date, a number, a tier or a deadline; every 'adopted / not adopted / not located' status; every date of application; the registry user guide rules that the conformance implications rely on; two engine-mapping claims; and five literature DOIs. I re-read the primary texts on 2026-10-19 from the Publications Office Cellar copies (EUR-Lex ELI /eng URLs again returned empty content to WebFetch), read the Commission DPP page, the battery FAQ page, the ETSI mandate page, the registry user guide PDF (pages 1-6, 25-29, 47-63) and the general DPP FAQ PDF (text extracted with pdftotext), and ran one read-only Cellar SPARQL query for CELEX 32026* acts dated from 2026-07-01 whose English title contains 'passport', '2023/1542', '2024/1781' or 'harmonised standard'. Cellar texts were read through WebFetch, which returns a model paraphrase of 100 000-character windows; pin-cites below rest on those paraphrases plus short quotes. No EN, ISO, IEC or DIN text was opened. No live registry, resolver or test environment was contacted.",
+  "checked": [
+    {
+      "claim_ref": "layers.L01_unique_identifiers.mechanism",
+      "claim": "ESPR Art. 2 defines the unique product identifier in point (30), the unique operator identifier in (31), the DPP service provider in (32) and the unique facility identifier in (33); point (30) says the identifier also enables a web link to the passport.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 2 window (offset 200000) gives (28) digital product passport, (29) data carrier, (30) unique product identifier with the web-link element, (31) unique operator identifier, (32) DPP service provider as an independent third party authorised by the placing operator, (33) unique facility identifier. Point (46) defines economic operator as manufacturer, authorised representative, importer, distributor, dealer or fulfilment service provider.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L01_unique_identifiers.mechanism",
+      "claim": "ESPR Arts 10(1)(c) and 12(1) and Annex III second paragraph tie the carrier and the product, operator and facility identifiers to ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014, -6:2014 or equivalent until harmonised-standard references are published; Annex III point (c) names the GTIN and point (j) the importer EORI number.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 10(1)(c) covers the carrier and product identifier, Art. 12(1) covers operator and facility identifiers, both with the fallback 'until harmonised standards are published'. Annex III second paragraph lists the six parts with those edition years and applies them to points (b), (g), (h), (i), (k) and the carrier. Point (c) is the GTIN (with a reference to part 6 or equivalent); point (j) includes the EORI number. Only edition years were recorded, not content.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L02_data_carriers.mechanism",
+      "claim": "ESPR Art. 10(3): the placing operator gives dealers and online marketplaces a digital copy of the carrier or identifier free of charge within five working days of a request; Art. 10(4): a back-up copy is made available through a DPP service provider.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Window at offset 360000: 10(3)(a)-(b) state the digital copy or web link, free of charge, within five working days; 10(4) states the back-up through a DPP service provider.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L07_access_rights_security_confidentiality.mechanism",
+      "claim": "ESPR Art. 10(1)(e) bars customer personal data in the passport without explicit consent under GDPR Art. 6; toys Art. 20(10) and CPR Art. 77(1)(e) carry the same rule.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "ESPR 10(1)(e) confirmed; Regulation (EU) 2025/2509 Art. 20(10) adds the consent rule to the no-tracking rule; Regulation (EU) 2024/3110 Art. 77(1)(e) has the same consent rule (Cellar a860ee13..., offset 560000).",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L11_roles_and_governance.mechanism",
+      "claim": "ESPR Art. 11 has points (a)-(h) plus a second subparagraph (providers may not sell or re-use data), a third (delegated act on service-provider requirements, possibly certification) and a fourth (implementing acts on digital credentials).",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 11 (a) interoperability, (b) free access by rights, (c) storage by operator or provider, (d) link to original passport, (e) availability after insolvency, (f) restricted write rights, (g) authentication, reliability, integrity, (h) security, privacy, fraud. Subparagraphs 2-4 as claimed; the fourth uses the Art. 73(3) examination procedure.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L09_registry_and_customs.mechanism",
+      "claim": "ESPR Art. 13: registry by 19 July 2026 storing at least unique identifiers, commodity code for goods released for free circulation and battery identifiers of Batteries Art. 77(3); registration identifier returned automatically and is not proof of compliance; access for Commission, national authorities and customs.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "13(1) date 19 July 2026 and the three data items; 13(3) Commission is controller under Regulation (EU) 2018/1725; 13(4) placing operator uploads; 13(5) automatic identifier, not proof of compliance, arrangements by implementing act; 13(6) access rights as claimed.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L09_registry_and_customs.mechanism",
+      "claim": "ESPR Art. 15: customs release only after verifying the registration identifier and commodity code against the registry; CSW-CERTEX interconnection operational within four years of the entry into force of the registry implementing act (computed 2030-08-06).",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "15(2) verification before release, automatic once interconnected, release not proof of compliance; 15(3) four years from entry into force of the Art. 13(5) implementing act. Regulation (EU) 2026/1778 was published in OJ L on 17.7.2026 and enters into force on the twentieth day (Art. 24), which gives 2026-08-06 and a deadline of 2030-08-06. The Commission DPP FAQ footnote 11 expects the link around 2029.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L11_roles_and_governance.mechanism",
+      "claim": "Manufacturer and importer must ensure the passport and back-up exist (ESPR Arts 27(1)(c), 29(2)(c)); Art. 28(1) excludes these duties from an authorised representative's mandate; distributors verify the passport link (Art. 30(2)(a)); dealers make the passport easily accessible including at a distance (Art. 31(2)); digital instructions stay online for the expected lifetime and at least 10 years (Art. 27(7)).",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Window at offset 460000 confirms each point; 30(2)(a) applies the passport check only where relevant; 27(6)(a) and 29(3)(a) put manufacturer and importer contact data on the public part.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.regulatory_alignment",
+      "claim": "ESPR Art. 41(2) gives presumption of conformity with Arts 10 and 11 to passports conforming to cited harmonised standards; Art. 42 common specifications are a fallback.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "41(2) names Arts 10 and 11 'to the extent' covered; 42(1) allows implementing acts on common specifications for Arts 10 and 11 only if a request failed or no reference is published or expected; 42(6) repeals overlapping specifications once a reference is published.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[3]",
+      "claim": "Implementing Decision (EU) 2026/1736 (14 July 2026, OJ 15.7.2026) cites six DPP standards (EN 18216, 18219, 18220, 18221, 18222, 18223, all :2026) and is in force from publication; EN 18239 and EN 18246 are not cited.",
+      "risk": "status",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Annex rows 1-6 list the six references in that order; Art. 2 sets entry into force on the day of publication; neither EN 18239 nor EN 18246 appears. Recital 2 names C(2024) 5423 of 31 July 2024 amended by C(2025) 8024 of 28 November 2025.",
+      "correction": "The decision's legal basis is Regulation (EU) No 1025/2012, Art. 10(6); it is drafted in support of Regulation (EU) 2024/1781 and refers to its Art. 41(2). 'Adopted under the ESPR only' (maturity.regulatory_alignment) should read 'adopted under Regulation (EU) No 1025/2012 in support of the ESPR only'. The conclusion (no presumption for battery passports under Regulation (EU) 2023/1542) still holds."
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[4]",
+      "claim": "No second implementing decision citing EN 18239:2026 and EN 18246:2026 exists; the Commission timeline now says November 2026.",
+      "risk": "status",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en",
+      "evidence": "Timeline item 3 reads November 2026 for the decision on the remaining two standards. The Cellar SPARQL query (CELEX 32026*, dated from 2026-07-01, title filter) returned 14 rows; none is a second DPP standards decision.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[5]",
+      "claim": "The Batteries Art. 77(9) implementing act on persons with a legitimate interest is not adopted; the statutory deadline 18 August 2026 passed; the battery FAQ expects a draft for feedback in October or November 2026.",
+      "risk": "status",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/eu-digital-product-passport-faq-batteries_en",
+      "evidence": "Consolidated Batteries Regulation Art. 77(9) sets 18 August 2026. Battery FAQ Q1.4 (1st edition, manuscript completed September 2026) expects the draft on 'Have your say' in October or November 2026. The DPP timeline lists the act under Q4 2026. The SPARQL query found no such act.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[9]",
+      "claim": "No ESPR Art. 4 product delegated act is adopted; timeline: iron and steel Q4 2026, textiles, aluminium and tyres Q3-Q4 2027, furniture 2028, mattresses and recycled content 2029; service-provider delegated act listed under both Q2 2027 and Q3 2027.",
+      "risk": "status",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en",
+      "evidence": "Timeline items match, including the duplicate service-provider entry. The SPARQL query found no act whose title references 2024/1781 other than 2026/1736 and 2026/1778. Seven collapsed timeline items were not visible to me either.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.spec_status",
+      "claim": "Registry operational since 2026-07-20 per the Commission; registry act in force since 2026-08-06 (computed).",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en",
+      "evidence": "Timeline item 2: registry operational 20 July 2026. Regulation (EU) 2026/1778 header shows L series, 17.7.2026; Art. 24: twentieth day after publication, so 2026-08-06.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L02_data_carriers.mechanism",
+      "claim": "Batteries Art. 13(6): from 18 February 2027 every battery bears a QR code per Annex VI Part C, which for LMT, industrial above 2 kWh and EV batteries gives access to the passport; 13(7) placement on the battery or else packaging and documents; 13(8) smart labels by delegated act; 13(9) new markings after re-use, repurposing or remanufacturing; Annex VI Part C names no symbology standard.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "evidence": "Consolidated text 02023R1542 of 13.08.2026 (M1 2024/1781, M2 2025/1561, M3 2026/1738; C1-C4). Art. 13(6)-(9) as claimed. Annex VI Part C asks only for strong contrast and a size readable by a common hand-held QR reader; no standard is named.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L01_unique_identifiers.mechanism",
+      "claim": "Batteries Art. 3(1)(66) defines the unique identifier as a string identifying the battery that enables a web link to the battery passport; Art. 77(3) has the operator attribute it and keeps its own reference to ISO/IEC 15459 parts 1-6 or equivalent.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "evidence": "Art. 3(1)(66) read in the first window; Art. 77(3) read at offset 380000, including a delegated power to update the standards list. The target marked 3(1)(66) as 'not re-read'; it is now re-read.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L10_lifecycle_versioning_updates.mechanism",
+      "claim": "Batteries Art. 77(4) written authorisation; 77(7) after re-use preparation, repurposing or remanufacturing the duties pass to the operator placing the resulting battery, which issues a new passport linked to the original; on becoming waste they pass to the producer, PRO or selected waste management operator; 77(8) passport ceases after recycling; 77(10) operator uploads the unique identifier to the ESPR registry.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "evidence": "Art. 77(1)-(10) read at offset 380000; each element matches. 77(1) start date 18 February 2027 for LMT, industrial above 2 kWh and EV batteries.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L07_access_rights_security_confidentiality.mechanism",
+      "claim": "Battery access tiers: public gets Annex XIII point 1; notified bodies, market surveillance authorities and the Commission get points 2 and 3; persons with a legitimate interest get points 2 and 4.",
+      "risk": "legal_citation",
+      "verdict": "refuted",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "evidence": "Annex XIII headings: point 2 is model information accessible only to persons with a legitimate interest and the Commission; point 3 only to notified bodies, market surveillance authorities and the Commission; point 4 only to persons with a legitimate interest. Notified bodies and market surveillance authorities are not named for point 2. Battery FAQ Q6.3 says the same split (point 3 for authorities; points 2 and 4 wait for the Art. 77(9) act).",
+      "correction": "Public: point 1. Notified bodies and market surveillance authorities: point 3. Commission: points 2 and 3 (and point 1). Persons with a legitimate interest: points 2 and 4. The access-policy fixture for the authority role must not entitle point 2 paths."
+    },
+    {
+      "claim_ref": "conformance_implications[9].oracle",
+      "claim": "Annex XIII point 1 has items (a)-(s); 1(c) is carbon footprint and 1(e) recycled content; 1(k) applies only to EV batteries; point 4(c) status values are original, repurposed, re-used, remanufactured, waste.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+      "evidence": "Point 1 runs (a)-(s); (c) carbon footprint under Art. 7(1)-(2); (e) recycled content under Art. 8(1); (k) capacity threshold for exhaustion, EV only. Point 4(c) lists the five status values exactly. Whether the acts behind 1(c) and 1(e) are still unadopted was not re-checked by me (not run).",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L06_storage_archiving_persistence.mechanism",
+      "claim": "The Batteries Regulation has no back-up duty and no service-provider concept (battery FAQ Q10.3).",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/eu-digital-product-passport-faq-batteries_en",
+      "evidence": "Q10.3 says the Regulation does not define solution providers as a distinct actor; it says nothing about back-ups. Art. 78(a)-(h) has no back-up element (storage by the responsible operator or operators it authorises, 78(c)).",
+      "correction": "Attribute 'no service-provider concept' to Q10.3 and 'no back-up duty' to the absence of one in Batteries Arts 77-78, not to Q10.3."
+    },
+    {
+      "claim_ref": "layers.L09_registry_and_customs.mechanism",
+      "claim": "Implementing Regulation (EU) 2026/1778 Art. 3 lists nine registry components (a)-(i); Art. 1(1) covers ESPR products, batteries, construction products, toys, detergents and other products; Art. 2(12) defines semantic conformity; Art. 2(16) defines the passport-version hash without naming an algorithm.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 3(a) secure web interface, (b) API, (c) verification platform, (d) registration-identifier scheme, (e) storage of identifiers and commodity codes, (f) list of verified service providers, (g) semantic repository, (h) log system, (i) identification and authorisation schemes. 2(12) three-part definition; 2(16) output of a cryptographic algorithm over the version data.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L08_authentication_reliability_integrity.mechanism",
+      "claim": "Registry verification uses qualified electronic signatures or seals, electronic identification at assurance level high, or electronic attestations of attributes; verified status lasts until the means expire and at most three years (2026/1778, Arts 4-5).",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 4 sets the means and the three-year cap; after expiry the operator cannot register or modify until re-verified. Art. 4(1)(a) offers eID at level high only to sole traders that must be established in the Union; non-EU sole traders use a QES or an attestation; legal persons (4(2)) use a qualified seal or qualified attestation.",
+      "correction": "State that eID at assurance level high is available only to EU-established sole traders; legal persons verify with a qualified electronic seal or a qualified electronic attestation of attributes."
+    },
+    {
+      "claim_ref": "layers.L09_registry_and_customs.variants[4]",
+      "claim": "2026/1778 contains an Article 6a on transfer of registered passports to another verified operator or value chain actor that takes over the obligations from a stated date.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Article 6a 'Transfer of registered digital product passports' is present in the original OJ text between Arts 6 and 7; it has no numbered paragraphs.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L09_registry_and_customs.mechanism",
+      "claim": "2026/1778 Art. 8: granularity per delegated act; most granular level wins; item links to batch and model, batch to model; registration by interface or API; automatic checks of semantic conformity, mandatory-data consistency, granularity, commodity code and back-up link; persistent registration identifier returned through the same channel.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 8(1)-(10) read at offset 100000 match the claim, including third-party registration where Union law allows (8(2)) and storage of identifiers, commodity code, service-provider reference, registrant data, date, time and integrity evidence (8(9)).",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L08_authentication_reliability_integrity.mechanism",
+      "claim": "Proof of registration (2026/1778 Art. 9) holds the product identifier, commodity code where relevant, responsible operator, date and time of the latest version with a Commission time stamp and a hash of that version; it carries a qualified electronic seal and is available for 90 calendar days from generation.",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 9 matches. Art. 9(3) refers to the qualified electronic seal 'as provided for in Article 38 of Regulation (EU) No 910/2014'.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L09_registry_and_customs.mechanism",
+      "claim": "2026/1778: national administrators by 18 February 2027 (Art. 7); retention 10 years unless Union law sets a period (Art. 10(3)); semantic repository with DCAT-AP metadata, search and free public APIs (Art. 12); helpdesk 08:00-20:00 and a 24-hour tool by February 2029 (Art. 13); log retention six months / five years / registration lifetime (Art. 14); outage records five years (Art. 15).",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "All values match. Art. 13(1) says the helpdesk operates 'year-round from 08:00 to 20:00 Brussels time'.",
+      "correction": null
+    },
+    {
+      "claim_ref": "end_to_end_flows[3].steps[4]",
+      "claim": "Toy passport applies from 2030-08-01 (Regulation (EU) 2025/2509, Art. 59) with 10-year availability (Art. 19(2)(g)) and back-up (Art. 19(13)); DPP delegated powers apply from 2026-01-01.",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/f2294563-d703-11f0-8da2-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 59: general application 1 August 2030; Arts 28-44 and 49-55 from 1 January 2026. OJ header date 12.12.2025 (the target left the OJ date as 'not captured'). Art. 19 applies with the general date, which answers open question 10.",
+      "correction": "Add OJ date 12.12.2025 to source new-reg-eu-2025-2509-toys. Open question 10 is answered: Art. 19 is not in the early-application list, so it applies from 2030-08-01."
+    },
+    {
+      "claim_ref": "layers.L03_data_exchange_protocols.mechanism",
+      "claim": "Toy passports: no registration or password for consumers (Art. 20(4)); no tracking beyond strict need (20(10)); identical product, operator and registration identifiers where another act also needs a passport (21(3)); upload of product and operator identifiers before placing (22); customs check (23).",
+      "risk": "legal_citation",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/f2294563-d703-11f0-8da2-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Arts 20(4)-(10), 21(1)-(4), 22(1)-(3), 23(1)-(6) read at offset 245000 match. 23(4): automatic check from the later of interconnection or the application date. Art. 24 asks for SME guidelines by 1 August 2029.",
+      "correction": null
+    },
+    {
+      "claim_ref": "end_to_end_flows[3].steps[4]",
+      "claim": "Detergent passport rules: Art. 21 (10-year availability, back-up, indelible machine-readable carrier with a scan statement, refill stations), Art. 22 (no registration or password), Art. 23 (identical identifiers), Art. 24 (registry), Art. 25 (customs automated from 2029-09-23 or interconnection, whichever is later); application from 2029-09-23.",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/886a72ea-15d9-11f1-8870-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Headings Arts 19-25 and content match; Art. 37: application from 23 September 2029 except Art. 4(3)-(4). Signed at Strasbourg 11 February 2026.",
+      "correction": null
+    },
+    {
+      "claim_ref": "summary",
+      "claim": "The vehicle circularity passport starts in 2032 (Regulation (EU) 2026/1738, Art. 13), with the Art. 13(2) list: removal information, derogated substances, recycled content declaration, spare parts catalogue.",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/394bc298-86fd-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 13(1): from 1 September 2032 each vehicle placed on the market has a Digital Circularity Vehicle Passport; 13(2)(a)-(d) as claimed; 13(5) open, interoperable, machine-readable format; 13(6) implementing acts by 14 August 2030.",
+      "correction": "Give the exact date 2032-09-01 and note that Art. 2(3)-(5) exclude Art. 13 for categories M2, M3, N2, N3, O, L and special-purpose vehicles."
+    },
+    {
+      "claim_ref": "layers.L06_storage_archiving_persistence.mechanism",
+      "claim": "Construction products: the passport system stays accessible 25 years after the last product of a type is placed on the market and operators keep passports at least 10 years (CPR Art. 75(2)(i)); access levels in CPR Art. 75(2)(b)-(c); lifecycle in Art. 75(2)(c)-(d); storage in 75(2)(e)-(f).",
+      "risk": "legal_citation",
+      "verdict": "refuted",
+      "evidence_url": "http://publications.europa.eu/resource/cellar/a860ee13-bce2-11ef-91ed-01aa75ed71a1.0006.03/DOC_1",
+      "evidence": "Art. 75(2) has points (a)-(j): (b) functions for passports, (c) who may see which information with IP, trade-secret and safety protection, (d) who may add or change information, (e) update procedures, (f) availability after insolvency with back-up by service providers, (g) service-provider requirements, (h) identifier, carrier, credential and registry rules, (i) 25 and 10 years, (j) reuse and remanufacturing. A second call asked for the opening words of each point: (b) opens with the functionalities to implement and manage passports, (c) and (d) both open with 'determine the actors', (e) with arrangements for updating information, (f) with procedures to ensure availability. The 75(2)(i) periods are right; three neighbouring pin-cites are shifted by one letter.",
+      "correction": "Access levels: CPR Art. 75(2)(c) (not (b)-(c)). Create and update rights and procedures: Art. 75(2)(d)-(e) (not (c)-(d)). Availability and back-up: Art. 75(2)(f) (not (e)-(f)). Art. 78 letters (a), (c), (f), (g), (h) as cited are correct."
+    },
+    {
+      "claim_ref": "layers.L03_data_exchange_protocols.mechanism",
+      "claim": "Registry user guide v1.03: UPI is an https URL of at most 2000 characters that resolves to the hosted data; errors 'The UPI URL is invalid' (format, protocol, domain, port) and NOT_RESOLVABLE_UPI; excessive redirects, redirects to a less secure protocol or oversized responses also fail; file upload up to 100 passports and 1 GB; one error rejects the whole file; statuses PROCESSING, SUCCESS, FAILURE; only 'Batteries' and only item level; battery registration not yet possible.",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf",
+      "evidence": "Cover 'Last Published 2026-09-16 v1.03'. Printed pp. 48-56 confirm each element. Two details differ: (1) redirects, protocol downgrade and oversized responses are reported under the generic error 'The system is unable to process your request at this time', not as NOT_RESOLVABLE_UPI (which appears only in a screenshot); (2) the guide says the UPI must be a URL format 'compliant with JTC 24 standards' (p. 50 and glossary p. 61), which the target omits.",
+      "correction": "Failure mode L03[0] should say the registry reports a redirect chain, downgrade or oversized response as a technical failure ('unable to process'), not as 'not resolvable'. Add that the guide ties the UPI format to JTC 24 standards (bibliographic pointer only; content not consulted)."
+    },
+    {
+      "claim_ref": "layers.L08_authentication_reliability_integrity.mechanism",
+      "claim": "Guide enrolment: Commission-sealed PDF declaration signed or sealed in PAdES Baseline B, T, LT or LTA with a QSeal (legal person) or QES (natural person) on a qualified device or remote service; .p12/.pfx software certificates rejected; subject OIDs 2.5.4.10, 2.5.4.6, 2.5.4.97 or 2.5.4.42, 2.5.4.4, 2.5.4.6, 2.5.4.5.",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf",
+      "evidence": "Printed pp. 24-27 match each element exactly; the test environment on p. 58 is printed as http://registry.acc.product-passport.ec.europa.eu/ with a 'MOCK' logo and the same verification as production.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L02_data_carriers.mechanism",
+      "claim": "Commission DPP FAQ v1.0 (manuscript February 2026, CC BY 4.0): Q26 says QR codes and NFC are under assessment; Q25 no general third-party certification; Q4 web portal planned for coming years and all eight standards expected by mid-2026; Q19 registry links identifiers to passport locations; detergents row 'awaiting signature'.",
+      "risk": "other",
+      "verdict": "confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/document/download/8748f8dc-3d48-4862-8153-e1165fb6be99_en?filename=Digital+Product+Passport+-+Frequently+Asked+Questions+%28FAQ%29.pdf",
+      "evidence": "Extracted text shows 'Version 1.0', '1st Edition', 'Manuscript completed in February 2026', CC BY 4.0, and each answer as claimed.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[11].version",
+      "claim": "The Commission DPP FAQ v1.0 carries the reference Ares(2026)5136906 of 20/05/2026.",
+      "risk": "version",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://single-market-economy.ec.europa.eu/document/download/8748f8dc-3d48-4862-8153-e1165fb6be99_en?filename=Digital+Product+Passport+-+Frequently+Asked+Questions+%28FAQ%29.pdf",
+      "evidence": "pdftotext output of the PDF retrieved today has no 'Ares' string. The reference may sit in an image or a stamp layer that text extraction does not read; I did not render the pages to check.",
+      "correction": null
+    },
+    {
+      "claim_ref": "sources[new-etsi-ec-efta-mandates]",
+      "claim": "ETSI lists M/604 as addressed 2024-07-31, accepted 2024-08-30, expiry 2026-06-26, lead body TC EE, results to be updated.",
+      "risk": "date",
+      "verdict": "confirmed",
+      "evidence_url": "https://portal.etsi.org/EC-EFTA-Mandates",
+      "evidence": "The M/604 entry matches all values; page footer dated 2026-10-05.",
+      "correction": null
+    },
+    {
+      "claim_ref": "conformance_implications[0].existing_check",
+      "claim": "identifier.parse accepts only the GS1 Digital Link /01/<GTIN>/21/<serial> form and rejects other https URLs that the registry accepts.",
+      "risk": "engine_mapping",
+      "verdict": "confirmed",
+      "evidence_url": "docs/explanation/architecture.md",
+      "evidence": "Architecture section 8 (lines 383-389) allows one GS1 Digital Link form. It also accepts http:// and HTTP:// URLs, which the registry refuses ('Enter a URL starting with https://'). The target does not mention this second gap.",
+      "correction": "Add: identifier.parse passes http:// GS1 Digital Link URLs that the registry rejects, so an https-only profile is needed in both directions (accept other https URLs, refuse http)."
+    },
+    {
+      "claim_ref": "conformance_implications[1].existing_check",
+      "claim": "Architecture section 9 bounds redirects, checks every hop, ends an out-of-scope hop with redirect_out_of_scope, and has no rule that fails an https-to-http downgrade inside the policy.",
+      "risk": "engine_mapping",
+      "verdict": "confirmed",
+      "evidence_url": "docs/explanation/architecture.md",
+      "evidence": "Section 9 lists hop checks, redirect_out_of_scope, origin confirmation and a maximum-redirect limit; there is no scheme-downgrade rule. Section 8.2 confirms that a 401 or 403 on fetch to a role with an entitled path fails (ACCESS.ENTITLEMENT.REFUSED), as conformance_implications[5] states.",
+      "correction": null
+    },
+    {
+      "claim_ref": "literature[1]",
+      "claim": "DOI 10.18420/inf2025_03, 'Legal Challenges and Technical Solutions to Decentralised Digital Product Passports', 2025; author conflict between Consensus (Sasdelli) and SciSpace (Schmid) unresolved.",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.openalex.org/works/doi:10.18420/inf2025_03",
+      "evidence": "Crossref returns HTTP 404 for this DOI (not Crossref-registered). OpenAlex gives the same title, year 2025, source Gesellschaft fuer Informatik (GI), authors Diogo Campos Sasdelli and Verena Schmid.",
+      "correction": "Resolve the anomaly: both are co-authors (Diogo Campos Sasdelli; Verena Schmid). Venue per OpenAlex: Gesellschaft fuer Informatik (GI), not 'Unknown Journal'. (That it is an INFORMATIK 2025 proceedings paper is only my inference from the DOI suffix; not verified.)"
+    },
+    {
+      "claim_ref": "literature[4]",
+      "claim": "DOI 10.1016/j.procs.2026.02.221, 'Towards a Modular Testing Environment for Digital Battery Passports', 2026, venue unknown.",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.crossref.org/works/10.1016/j.procs.2026.02.221",
+      "evidence": "Crossref: same title, Procedia Computer Science vol. 277, pp. 1828-1837, 2026; authors Patrick Gering, Thomas Knothe, Huy Viet Schulz. No abstract in Crossref, so the relevance summary was not checked against an abstract.",
+      "correction": "Venue is Procedia Computer Science, vol. 277 (2026)."
+    },
+    {
+      "claim_ref": "literature[7]",
+      "claim": "DOI 10.1007/s11740-026-01420-y, Production Engineering 2026, proposes a minimal ESPR data model using AAS submodel templates and concludes current law can be met while future acts need changes.",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.crossref.org/works/10.1007/s11740-026-01420-y",
+      "evidence": "Crossref title, venue and year match; abstract states the AAS submodel-template basis and the same conclusion. Authors Engel, Karnapp, Weber, Fuhrlaender-Voelker, Metternich, Weigold.",
+      "correction": null
+    },
+    {
+      "claim_ref": "literature[0], literature[2], literature[12]",
+      "claim": "DOIs 10.1007/s12525-026-00877-0 (Digital product passports, Electronic Markets 2026), 10.54648/bula2024009 (Business Law Review 2024) and 10.3390/digital6020043 (DPP SLR on framework design and validation, 2026) match their titles, years and venues, and the relevance notes match the abstracts.",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.crossref.org/works/10.3390/digital6020043",
+      "evidence": "Crossref: Petrik et al., Electronic Markets, first online 2026-02-27, multivocal review with a conceptual framework; Mittwoch, Business Law Review 45(3), 2024, DPP after the trilogue; Lyse and Huang, Digital 6(2) art. 43, 2026, finds validation limited mostly to case studies and prototypes. All consistent with the target.",
+      "correction": null
+    }
+  ],
+  "rule5_findings": [
+    {
+      "claim_ref": "layers.L03_data_exchange_protocols.mechanism; layers.L04_apis_lifecycle_searchability.mechanism; layers.L06_storage_archiving_persistence.mechanism",
+      "problem": "Each paragraph paraphrases what the M/604 draft asked the standardisers for and then says 'EN 182xx:2026 is the cited result'. The juxtaposition implies that the standard contains what the request asked for, which is a claim about standard content resting on no reading of it. Low severity: the request text is a Commission document and the standard is marked bibliographic only.",
+      "fix": "Replace 'is the cited result' with 'is the standard later cited in the OJ for this topic (bibliographic only; whether it covers the requested items was not checked)'."
+    },
+    {
+      "claim_ref": "layers.L04_apis_lifecycle_searchability.variants[3]",
+      "problem": "The variant text says the operator-side passport API is 'standardised in EN 18222:2026', which states the standard's scope beyond its title. Low severity.",
+      "fix": "Write 'operator-side passport API (not regulated by law; EN 18222:2026 has a title on DPP APIs; content not consulted)'."
+    }
+  ],
+  "missed_items": [
+    {
+      "topic": "Registry act verification means",
+      "fact": "Electronic identification at assurance level high is a verification route only for sole traders that must be established in the Union; legal persons use a qualified electronic seal or a qualified electronic attestation of attributes (2026/1778, Art. 4(1)-(2)).",
+      "source_url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1"
+    },
+    {
+      "topic": "Registry helpdesk hours",
+      "fact": "Art. 13(1) of 2026/1778 requires the helpdesk year-round 08:00-20:00 Brussels time, while the user guide v1.03 (p. 62) offers email and phone support Monday to Friday 08:00-20:00 CET. The act names no days; whether 'year-round' admits a weekday-only service is unclear. The anomalies list does not record this difference.",
+      "source_url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf"
+    },
+    {
+      "topic": "UPI format pointer",
+      "fact": "The registry user guide states that the UPI must be a URL format compliant with JTC 24 standards (p. 50; glossary p. 61). That links the registry rule to the CEN/CLC JTC 24 deliverables; the engine can only record this bibliographically.",
+      "source_url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf"
+    },
+    {
+      "topic": "Registry semantic validation availability",
+      "fact": "The guide lists the error 'Semantic validation failed due to its unavailability', meaning the semantic validation service is not yet available. This supports the target's point that no Commission data model can be pinned yet.",
+      "source_url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf"
+    },
+    {
+      "topic": "Engine gap: http accepted",
+      "fact": "identifier.parse accepts http:// GS1 Digital Link URLs (architecture section 8), but the registry refuses non-https UPIs. A registry-aligned profile must refuse http, not only accept more https forms.",
+      "source_url": "docs/explanation/architecture.md"
+    },
+    {
+      "topic": "Construction products timing",
+      "fact": "CPR Art. 80(1): the construction passport system must be fully operational six months after the Art. 75 delegated act enters into force, and the Art. 22(7) passport duty applies 18 months after that. The Commission timeline lists the CPR delegated act for Q2 2027.",
+      "source_url": "http://publications.europa.eu/resource/cellar/a860ee13-bce2-11ef-91ed-01aa75ed71a1.0006.03/DOC_1"
+    },
+    {
+      "topic": "Vehicle passport implementing acts and scope",
+      "fact": "Regulation (EU) 2026/1738 Art. 13(6) requires implementing acts by 14 August 2030 on the access solution, technical design, third-party updates, access conditions and carrier location; Art. 2(3)-(5) exclude Art. 13 for M2, M3, N2, N3, O, L and special-purpose vehicles.",
+      "source_url": "http://publications.europa.eu/resource/cellar/394bc298-86fd-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1"
+    },
+    {
+      "topic": "Toy regulation OJ date and SME guidelines",
+      "fact": "Regulation (EU) 2025/2509 was published in OJ L on 12.12.2025; Art. 24 requires Commission guidelines for SMEs on the toy passport by 1 August 2029.",
+      "source_url": "http://publications.europa.eu/resource/cellar/f2294563-d703-11f0-8da2-01aa75ed71a1.0006.03/DOC_1"
+    },
+    {
+      "topic": "Detergent digital labels",
+      "fact": "Regulation (EU) 2026/405 Art. 19 sets separate digital-label rules (10-year availability, no location-based language choice, no tracking beyond strict need, information by other means on request or outage). These are observable on the HTML channel and differ from the passport rules in Art. 21.",
+      "source_url": "http://publications.europa.eu/resource/cellar/886a72ea-15d9-11f1-8870-01aa75ed71a1.0006.03/DOC_1"
+    },
+    {
+      "topic": "Batteries Annex XIII point 2 audience",
+      "fact": "Annex XIII point 2 (detailed composition, part numbers, dismantling information, safety measures) is for persons with a legitimate interest and the Commission only; market surveillance authorities are not named for it. Until the Art. 77(9) act exists, no role other than the Commission has a defined entitlement to point 2.",
+      "source_url": "http://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1"
+    },
+    {
+      "topic": "Battery harmonised standard decision",
+      "fact": "Cellar SPARQL lists CELEX 32026D2048 dated 2026-09-14, a decision on the harmonised standard for batteries under Regulation (EU) 2023/1542 (title only seen). It is not a DPP standard decision; the target records it at metadata level, which is consistent.",
+      "source_url": "https://publications.europa.eu/webapi/rdf/sparql"
+    }
+  ],
+  "overall": "The target is a careful and mostly accurate legal baseline. Of 42 claims checked, 39 were confirmed and one (the FAQ Ares reference) could not be confirmed against the Official Journal texts, the Commission pages and the registry user guide, and every adoption status I re-checked (Art. 77(9) act, second standards decision, Art. 4 delegated acts) still holds on 2026-10-19. Two claims are wrong: the battery access-tier mapping gives market surveillance authorities and notified bodies Annex XIII point 2, which the Annex reserves to persons with a legitimate interest and the Commission, and three CPR Art. 75(2) pin-cites are shifted by one letter. Several confirmed claims need small corrections (legal basis of Decision 2026/1736, eID level high limited to EU sole traders, registry error mapping for redirects, toy OJ date). Rule 5 handling is clean apart from a low-severity pattern that implies standard content by pairing request text with 'the cited result'. The access-policy fixture for the authority role should be fixed before use.",
+  "counts": {
+    "checked": 42,
+    "confirmed": 39,
+    "refuted": 2,
+    "not_confirmed": 1
+  }
+}

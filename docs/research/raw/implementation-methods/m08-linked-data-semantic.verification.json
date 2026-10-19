@@ -1,0 +1,340 @@
+{
+ "target": "m08-linked-data-semantic",
+ "retrieval_date": "2026-10-19",
+ "method_note": "Read the whole target file (2018 lines; the sources block from line 1516 onward was scanned by grep and partial reads). Picked 32 high-risk claims: W3C status/dates of eight drafts and Recommendations, repository licence/archived/push/release metadata via read-only gh api, version strings of PyLD, pySHACL, rdflib, jsonld.js, ESMF, DCAT-AP, ISAITB, the PyLD default canonicalization algorithm (read from the v3.3.0 tag source), the Titanium number conversion (main source), the GS1 Web Vocabulary 1.16 file, JSON-LD API mechanisms (303 exclusion, Link header, 10^21 threshold), SHACL entailment failure rule, Commission Implementing Regulation 2026/1778 articles (read from a PDF copy fetched from afec.es, which is a secondary host of the OJ text), literature DOIs via Crossref/OpenAlex, and the engine mapping claims against src/dppce/adapters. EUR-Lex returned empty content to WebFetch for 2024/1781 and 2023/1542, so those article citations stay not_confirmed. No protected standard was opened. No live DPP system was contacted.",
+ "checked": [
+  {
+   "claim_ref": "maturity.versions_at_retrieval[SHACL 1.2 Core]",
+   "claim": "SHACL 1.2 Core is a W3C Working Draft dated 14 October 2026.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/shacl12-core/",
+   "evidence": "Page shows Working Draft of the Data Shapes WG, 14 October 2026, dated URL /TR/2026/WD-shacl12-core-20261014/.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[RDF 1.2 Concepts]",
+   "claim": "RDF 1.2 Concepts is a Candidate Recommendation Snapshot of 7 April 2026.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/rdf12-concepts/",
+   "evidence": "Candidate Recommendation Snapshot, 7 April 2026, dated URL /TR/2026/CR-rdf12-concepts-20260407/.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[Linked Web Storage Protocol 1.0]",
+   "claim": "LWS Protocol 1.0 is a Working Draft of 16 October 2026.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/lws10-core/",
+   "evidence": "Working Draft of the Linked Web Storage WG, 16 October 2026, dated URL /TR/2026/WD-lws10-core-20261016/.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[Content Negotiation by Profile] and layers.L03.mechanism (7)",
+   "claim": "Content Negotiation by Profile is a Working Draft of 21 September 2026 and defines Accept-Profile, Link rel=profile and the query arguments _profile and _mediatype.",
+   "risk": "status",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/dx-prof-conneg/",
+   "evidence": "Working Draft 21 September 2026 of the Dataset Exchange WG. Section 8 uses Accept-Profile (full definition deferred), Link rel=profile, and defines _profile and _mediatype (section 8.3).",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[VC Data Integrity] and layers.L08.mechanism",
+   "claim": "VC Data Integrity 1.0 is a Recommendation of 15 May 2025 with proof properties proof, type, cryptosuite, verificationMethod, proofPurpose, proofValue, created, previousProof; ecdsa-rdfc-2019 uses RDFC and eddsa-jcs-2022 uses JCS.",
+   "risk": "spec_reference",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/vc-data-integrity/ ; https://www.w3.org/TR/vc-di-ecdsa/ ; https://www.w3.org/TR/vc-di-eddsa/",
+   "evidence": "Data Integrity: Recommendation 15 May 2025, section 2.1 defines all named properties. ECDSA suite section 3.2 defines ecdsa-rdfc-2019 with RDF canonicalization. EdDSA suite section 3.3 defines eddsa-jcs-2022 with JCS (RFC 8785); REC 15 May 2025.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L08.mechanism (RDFC-1.0)",
+   "claim": "RDFC-1.0 is a Recommendation of 21 May 2024, SHA-256 is the default hash, SHA-384 must also be supported, implementations must stop early on poison graphs.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/rdf-canon/",
+   "evidence": "Recommendation 21 May 2024; default SHA-256; implementations MUST support SHA-256 and SHA-384; MUST defend against denial of service by terminating early (section 7.1 body itself was past the read window).",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[DCAT Version 3]",
+   "claim": "DCAT 3 is a Recommendation of 22 August 2024.",
+   "risk": "date",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/vocab-dcat-3/",
+   "evidence": "W3C Recommendation, 22 August 2024, /TR/2024/REC-vocab-dcat-3-20240822/.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[Solid Protocol] and layers.L03/L04",
+   "claim": "Solid Protocol 0.11.0 is a Draft Community Group Report (12 May 2024) outside the W3C standards track; servers must serve text/turtle and application/ld+json for RDF sources they created, support GET/HEAD/OPTIONS/PUT/POST/PATCH/DELETE, and accept N3 Patch (text/n3).",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://solidproject.org/TR/protocol",
+   "evidence": "Page states version 0.11.0, Draft Community Group Report dated 12 May 2024, not a W3C Standard. It requires Turtle/JSON-LD GET, the listed methods, and N3 Patch with text/n3 in Accept-Patch.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L04.mechanism (LDP)",
+   "claim": "LDP 1.0 is a Recommendation of 26 February 2015; PUT uses ETag/If-Match with 412 on mismatch and 428 when the precondition is missing.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/ldp/",
+   "evidence": "Recommendation 26 February 2015. Section 4.2.4.5: 412 on ETag mismatch; 428 when a required precondition is the only problem. Note the spec says servers SHOULD require If-Match, so 428 applies only to servers that require it.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism (2),(4)",
+   "claim": "A context Link header (rel http://www.w3.org/ns/json-ld#context) is ignored for application/ld+json and HTML; more than one such header gives 'multiple context link headers'; documentUrl follows redirects except 303; alternate Link with type application/ld+json is followed.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/json-ld11-api/ (source: github.com/w3c/json-ld-api index.html lines 6490-6600)",
+   "evidence": "The API text says the Link header is ignored for application/ld+json, text/html, application/xhtml+xml; several context Link headers reject with 'multiple context link headers'; documentUrl excludes 303 redirects; alternate Link rule present. Syntax spec lines 11018-11073 confirm the rel URI.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L05.mechanism (B) numbers",
+   "claim": "In RDF conversion a native number with a fraction, or magnitude 10^21 or more, becomes xsd:double in canonical form; integers become xsd:integer.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/json-ld11-api/ (source index.html lines 4960-4995, 5520-5545)",
+   "evidence": "Object to RDF conversion applies canonical double form to non-integral numbers and to absolute values of at least 10^21; integers below that threshold use the integer form.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L05.mechanism (B) dropping of keys",
+   "claim": "A JSON key with no IRI mapping yields no triple and no error (expansion step not read by the target author).",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/json-ld11/ (source github.com/w3c/json-ld-syntax index.html line 2300)",
+   "evidence": "Syntax spec states that terms not mapped to an IRI are ignored in RDF-relevant processing. The target author hedged correctly; this closes the gap.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L05.mechanism (D)",
+   "claim": "SHACL does not require entailment; a processor that does not support an sh:entailment regime named in the shapes must signal failure.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.w3.org/TR/shacl/ (source github.com/w3c/data-shapes shacl/index.html lines 735-741)",
+   "evidence": "Implementations MAY support entailment; if the shapes graph has sh:entailment E and E is unsupported, the processor MUST signal a failure.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L08.mechanism and implementations[PyLD].note",
+   "claim": "PyLD tagged v3.3.0 accepts normalize algorithms URDNA2015 and URGNA2012 only, defaults to URGNA2012; RDFC-1.0 and maxPermutations appear only under unreleased 4.0.0; latest release 3.3.0 on 2026-09-02.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/digitalbazaar/pyld (tag v3.3.0 lib/pyld/jsonld.py lines 888-953; CHANGELOG.md)",
+   "evidence": "Source at the tag: default 'URGNA2012', check against ['URDNA2015','URGNA2012']; no RDFC string. CHANGELOG lists 3.3.0 dated 2026-09-02 and 4.0.0 unreleased with RDFC10 and maxPermutations (default 10000). gh release latest v3.3.0, 2026-09-02. Repo pushed 2026-10-13.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[Titanium JSON-LD].note",
+   "claim": "Titanium main-branch JsonLdToQuads converts a non-integral native number to the xsd:double lexical form, assigns xsd:double when no datatype is coerced, and keeps a coerced datatype; v1.7.0 released 2025-10-05, repo pushed 2026-07-27, Apache-2.0.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/filip26/titanium-json-ld",
+   "evidence": "Source lines 296-312 do exactly this (also 10^21 rule). gh api: Apache-2.0, not archived, pushed 2026-07-27, latest release v1.7.0 on 2025-10-05.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[GS1 Web Vocabulary] and layers.L03/L05",
+   "claim": "GS1 Web Vocabulary v1.16 has owl:versionInfo 1.16, dc:lastModified 2025-08-01; gs1:dpp is a link type (subPropertyOf gs1:linkType); gs1:Product has owl:equivalentClass to gs1.org/voc and www.gs1.org/voc and skos:exactMatch schema:Product; 63 lines mention gs1:linkType; licence text is Apache-2.0 with GS1 IP-policy text; repo Apache-2.0, pushed 2026-01-29.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/gs1/WebVoc/blob/master/v1.16/gs1Voc.ttl",
+   "evidence": "File read via gh api: versionInfo 1.16 line 50, lastModified 2025-08-01 line 43, gs1:dpp at line 2019 with rdfs:subPropertyOf gs1:linkType and a comment about a digital product passport link, equivalentClass and exactMatch at lines 433-435, 63 occurrences of gs1:linkType, Apache-2.0 text in schema:license. Repo API: Apache-2.0, not archived, pushed 2026-01-29T13:11:46Z. Folder v1.16 exists.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L03.mechanism (6) and sources[gs1-conformant-resolver-1-2-1]",
+   "claim": "GS1-Conformant Resolver Standard 1.2.1 returns a linkset as application/linkset+json (RFC 9264), supports linkType=linkset and a description file at /.well-known/gs1resolver.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://ref.gs1.org/standards/resolver/",
+   "evidence": "Version 1.2.1, ratified August 2026 (page header and PDF name 2026-08-07). Resolver SHALL return the RFC 9264 linkset for application/linkset+json; linkType=linkset returns the set; description file SHALL be at /.well-known/gs1resolver. Page also says a missing requested link type now gives 404, not the default link (see missed_items).",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[schema.org]",
+   "claim": "schema.org release 30.1 dated 2026-09-16, licence CC BY-SA 3.0.",
+   "risk": "licence",
+   "verdict": "confirmed",
+   "evidence_url": "https://schema.org/docs/releases.html ; https://schema.org/docs/terms.html",
+   "evidence": "Release list top entry 30.1, 2026-09-16. Terms page: sponsors license the schema under CC Attribution-ShareAlike 3.0.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[CIRPASS-2 *] licence/last_activity",
+   "claim": "ontologies-docs (pushed 2026-10-15), ontologies-battery (2026-10-06), dpp-validator (2026-08-04), ontologies-tyre (2026-10-13) are Apache-2.0 and not archived; the textiles repository shows no licence (pushed 2026-09-28).",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/CIRPASS-2",
+   "evidence": "gh api orgs/CIRPASS-2/repos and repos/...: all four Apache-2.0, archived false, push dates match. Textiles repository is actually named ontologie-textiles (singular, no 's' after ontologi), pushed 2026-09-28, no licence field. Org shows 13 repos.",
+   "correction": "Name the textiles repository correctly: CIRPASS-2/ontologie-textiles. The target gives no URL for it, only the tyre URL, so no wrong URL is recorded; the tyre-and-textile record's url field points to ontologies-tyre only."
+  },
+  {
+   "claim_ref": "implementations[CIRPASS-2 ontologies-docs].note and anomalies[ontologies-core]",
+   "claim": "CORE 2.0.7 with modules P_DPP 2.1.0, ACTOR 2.1.3, IDENT 1.2.0, MAT 1.1.0, SOC 2.0.0, COMP 1.0.0, EVENT 1.0.0, LCA 3.0.0, CONNECTOR 2.2.0; WIDOCO pages generated 2026-10-12; battery umbrella 0.4.0 DRAFT; CIRPASS-2/ontologies-core is not reachable (404).",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://cirpass-2.github.io/ontologies-docs/ontologies.html",
+   "evidence": "The ontologies page lists exactly these versions and the WIDOCO date 2026-10-12; battery umbrella 0.4.0 and sectoral modules marked DRAFT. gh api repos/CIRPASS-2/ontologies-core returns 404. The battery README states the ontologies are not an official battery DPP ontology and calls the umbrella 0.4.0 DRAFT; tests/run_tests.py calls pyshacl validate with inference='none', advanced=True.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[Battery Pass Data Model (SAMM)].license",
+   "claim": "Repo has no GitHub-detected licence but its README states CC-BY-4.0; repo is unmaintained and the model is marked draft; last push 2026-09-14.",
+   "risk": "licence",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/batterypass/BatteryPassDataModel",
+   "evidence": "gh api: license null, archived false, pushed 2026-09-14T09:46:09Z. README: project concluded April 2025, repo not actively maintained; data model 'still in draft mode'; License section names CC-BY-4.0.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[Eclipse SAMM] and [ESMF SDK]",
+   "claim": "SAMM latest release v2.2.0 (2025-03-11) with a 2.3.0 meta-model folder on main; ESMF SDK v2.16.1 released 2026-10-19; both MPL-2.0.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/eclipse-esmf/esmf-semantic-aspect-meta-model ; https://github.com/eclipse-esmf/esmf-sdk",
+   "evidence": "gh releases/latest: v2.2.0 2025-03-11T13:45:13Z and v2.16.1 2026-10-19T06:13:07Z. meta-model folder lists 1.0.0, 2.0.0, 2.1.0, 2.2.0, 2.3.0. API licence MPL-2.0 for both; SDK pushed 2026-10-19.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[pySHACL] and implementations[pySHACL]",
+   "claim": "pySHACL 0.40.1 released 2026-07-28, Apache-2.0, requires rdflib[html] >=7.3.0,<8.0 and owlrl >=7.6.2,<8.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/RDFLib/pySHACL",
+   "evidence": "pyproject.toml: version 0.40.1, rdflib[html]>=7.3.0,<8.0, owlrl>=7.6.2,<8. Release v0.40.1 on 2026-07-28; licence Apache-2.0.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[rdflib]",
+   "claim": "rdflib 7.6.0 released 2026-02-13, BSD-3-Clause; its security docs state JSON-LD @context resources are loaded from network or file, mitigated by audit hooks or custom URL openers.",
+   "risk": "technical_mechanism",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/RDFLib/rdflib/blob/main/docs/security_considerations.md",
+   "evidence": "Doc says JSON-LD processing loads network or file resources referenced by @context, and lists Python runtime audit hooks (urllib.Request, open) and custom URL openers. Release 7.6.0 on 2026-02-13; repo pushed 2026-10-16. The readthedocs URL gives 404 as the target's anomaly note says.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[jsonld.js]",
+   "claim": "npm jsonld latest is 9.0.0, BSD-3-Clause per npm, GitHub API says NOASSERTION; depends on rdf-canonize ^5.0.0 and canonicalize ^2.1.0; repo pushed 2026-03-04.",
+   "risk": "version",
+   "verdict": "confirmed",
+   "evidence_url": "https://registry.npmjs.org/jsonld/latest",
+   "evidence": "npm: 9.0.0, BSD-3-Clause, the two dependency ranges match. gh api: license NOASSERTION, pushed 2026-03-04T16:43:23Z.",
+   "correction": null
+  },
+  {
+   "claim_ref": "implementations[TopBraid SHACL API].last_activity",
+   "claim": "TopBraid SHACL API v1.5.0 released 2026-03-23, Apache-2.0.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/TopQuadrant/shacl",
+   "evidence": "Release v1.5.0 on 2026-03-23, Apache-2.0, not archived. The repository was pushed later, on 2026-06-30, so 'last_activity' shows the release date, not the push date used for other rows.",
+   "correction": "State both: release v1.5.0 2026-03-23; repo pushed 2026-06-30."
+  },
+  {
+   "claim_ref": "implementations[EC ITB SHACL validator] and [DCAT-AP]",
+   "claim": "ISAITB/shacl-validator 1.13.0 (2026-09-25), EUPL-1.2, pushed 2026-10-09; DCAT-AP 3.0.1 released 2026-06-04, CC-BY-4.0.",
+   "risk": "repo_metadata",
+   "verdict": "confirmed",
+   "evidence_url": "https://github.com/ISAITB/shacl-validator ; https://github.com/SEMICeu/DCAT-AP",
+   "evidence": "gh api: EUPL-1.2, pushed 2026-10-09T12:23:04Z, release 1.13.0 on 2026-09-25T12:43:49Z. DCAT-AP: CC-BY-4.0, release 3.0.1 on 2026-06-04T09:51:00Z (repo pushed 2026-10-19).",
+   "correction": null
+  },
+  {
+   "claim_ref": "metadata.regulatory_alignment, layers.L09, layers.L10, layers.L08 (Commission Implementing Regulation (EU) 2026/1778)",
+   "claim": "Art. 2(8) defines the semantic repository; Art. 2(12) semantic conformity; Art. 2(16) hash of a passport version; Art. 8(6) registration by UI or API; Art. 8(7)(a)-(e) automatic checks incl. semantic conformity and back-up link; Art. 8(8)-(10) registration identifier; Art. 9(2)-(3) proof with hash, seal and timestamp; Art. 10(2) versioning; Art. 11(3)-(4) common versioned data models; Art. 12(1)-(3) authoritative repository, typed resolvable links, multilingual labels, DCAT-AP.",
+   "risk": "legal_citation",
+   "verdict": "confirmed",
+   "evidence_url": "https://www.afec.es/documentos/english/regulation-2026-1778.pdf (OJ L, 17.7.2026 copy; EUR-Lex /eng gave no content)",
+   "evidence": "Text extracted locally: all cited articles and paragraph numbers match. Art. 12(2)(a) typed and resolvable links, 12(2)(e) multilingual labels, 12(3) DCAT-AP, 11(4) 'Data models shall be versioned', 8(7)(e) back-up link, 9(3) qualified electronic seal under Regulation (EU) No 910/2014, 2(16) hash of a passport version with an unnamed cryptographic algorithm. The act names no RDF/JSON-LD/SHACL. Source is a secondary host of the OJ text, so verification is substantive in content but not from an official URL.",
+   "correction": null
+  },
+  {
+   "claim_ref": "layers.L01/L03/L06/L10 and maturity.regulatory_alignment (Regulation (EU) 2024/1781 Art. 10(1)(d), 11(a),(d), 10(4), 9(1); Regulation (EU) 2023/1542 Art. 77(2),(4),(5), 78(a), Annex XIII 4(c))",
+   "claim": "ESPR Art. 10(1)(d) open-standard / interoperable / machine-readable demands; Art. 11 points (a) and (d); Regulation (EU) 2023/1542 Art. 77(5) and Art. 78(a).",
+   "risk": "legal_citation",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng",
+   "evidence": "EUR-Lex returned empty content to WebFetch for both acts (HTML and PDF endpoints). The prior record espr.json confirms Art. 10(1)(d) exists (corrigendum on 'vendor' lock-in) and batteries-regulation.json mentions 77(5)-(6), but point letters of Art. 11 and Art. 78(a) were not independently re-read here. No contradiction found.",
+   "correction": null
+  },
+  {
+   "claim_ref": "conformance_implications[0] and [11] (engine mapping data.context, identifier.consistency)",
+   "claim": "data.context covers body contexts including nested scoped contexts and treats inline contexts as not allowlisted; identifier.consistency reads the key 'id' only, not '@id'.",
+   "risk": "engine_mapping",
+   "verdict": "confirmed",
+   "evidence_url": "/Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/data.py ; identifier.py",
+   "evidence": "data.py line 192 reads top-level @context; lines 194-209 walk nested nodes and mark inline objects as '<inline context>' outside the allowlist. identifier.py line 262 uses document.get('id'). capabilities.md lists data.shacl as interface_only and data.context as 'No context is fetched'. Capability name for access is access.policy and registry is registry.mock, as the target says. The Link-header gap in data.context is real (no Link/header handling found).",
+   "correction": null
+  },
+  {
+   "claim_ref": "literature[*] (DOIs and metadata)",
+   "claim": "Titles, years, and venues of the literature entries match Crossref; abstracts support the stated relevance (225 studies and RDF/OWL recommendation; knowledge graphs as enabler and limited validation; CIRPASS-2 CORE modelling ambiguities).",
+   "risk": "doi",
+   "verdict": "confirmed",
+   "evidence_url": "https://api.crossref.org/works/10.1007/978-3-031-78955-7_19 (and 12 more Crossref/OpenAlex lookups)",
+   "evidence": "Checked 10.1007/978-3-031-78955-7_19 (2025, ESWC 2024 Satellite Events), 10.12688/openreseurope.24195.1 (2026), 10.1109/ichcai70183.2026.11607563 (2026), 10.1016/j.procs.2026.02.364 (2026), 10.1007/978-3-032-25156-5_12 (2026, SHACL-DS), 10.3390/digital6020043 (2026), 10.1007/s43615-026-00927-x (2026), 10.1177/22104968251361274 (2025), 10.1016/j.websem.2026.100877 (2026, title uses em dash as the target notes), 10.5381/jot.2026.25.3.a21 (2026), 10.1016/j.ifacol.2025.09.110 (2025), 10.1145/3672608.3707971 (2025). OpenAlex abstracts: 225 peer-reviewed studies and RDF/OWL named among open standards; Digital review names knowledge graphs and says validation is limited to illustrative cases, stakeholder assessments or prototypes; procs.2026.02.364 finds modelling problems in the CIRPASS-2 Core Ontology. The remaining six DOIs were not re-fetched.",
+   "correction": null
+  },
+  {
+   "claim_ref": "maturity.versions_at_retrieval[UNTP vocabulary and JSON-LD context] and implementations[UNTP]",
+   "claim": "UNTP context 0.7.0 is the only version on the landing page; no licence stated; terms link at /untp/terms.",
+   "risk": "version",
+   "verdict": "not_confirmed",
+   "evidence_url": "https://vocabulary.uncefact.org/untp/0.7.0/context/",
+   "evidence": "The fetched page showed the JSON-LD @version 1.1 and namespaces but no list of other versions and no licence in the first 100000 characters. It does not contradict the target, but the 'only version' claim concerns a different landing page that was not re-fetched here.",
+   "correction": null
+  }
+ ],
+ "rule5_findings": [],
+ "missed_items": [
+  {
+   "topic": "GS1 resolver linkType behaviour changed from Digital Link 1.1",
+   "fact": "In GS1-Conformant Resolver 1.2.1, a request with linkType=<type> for a type that does not exist gives 404 (possibly with the linkset), whereas GS1 Digital Link 1.1 redirected to the default link. A passport tester using gs1:dpp must expect 404 for an absent link type. The target describes the redirect but not the 404.",
+   "source_url": "https://ref.gs1.org/standards/resolver/"
+  },
+  {
+   "topic": "Proof of registration availability and seal",
+   "fact": "Regulation 2026/1778 Art. 9(3) says the proof of registration is guaranteed by a qualified electronic seal (Regulation (EU) No 910/2014, Art. 38) with a Commission time stamp, and Art. 9(4) keeps it available 90 calendar days. This ties L08 to the engine capabilities evidence.qualified_seal and evidence.rfc3161. Art. 10(3) sets automatic deletion of registration data 10 years after registration unless Union law sets another period.",
+   "source_url": "https://www.afec.es/documentos/english/regulation-2026-1778.pdf"
+  },
+  {
+   "topic": "Registration level and API",
+   "fact": "Art. 8(1)-(5) require registration at model, batch or item level, with batch and model identifiers linked to an item-level passport where they exist; Art. 3(b) provides an API. This matters for identifier checks that the target treats only through L01.",
+   "source_url": "https://www.afec.es/documentos/english/regulation-2026-1778.pdf"
+  },
+  {
+   "topic": "Semantic repository features",
+   "fact": "Art. 12(5)-(7) require a search service, publicly documented APIs with machine-readable semantic assets, and free access. A pinned snapshot for data.repository_model could be fetched through these APIs once published.",
+   "source_url": "https://www.afec.es/documentos/english/regulation-2026-1778.pdf"
+  },
+  {
+   "topic": "CIRPASS-2 repository name",
+   "fact": "The textiles ontology repository is CIRPASS-2/ontologie-textiles (not ontologies-textiles); the org also has documentation-battery, dpp-renderer-be, dpp-renderer-fe, dpp-data-extractor and mock-eu-registry, the last of which is a possible comparison fixture for registry.mock.",
+   "source_url": "https://github.com/CIRPASS-2"
+  },
+  {
+   "topic": "Sectoral battery module versions",
+   "fact": "The CIRPASS-2 docs list battery modules Performance 0.3.0, Materials 0.3.0, Labeling 0.2.1, Categories/Chemistries/Statuses 0.1.1, Extinguisher Classes 0.1.1, Locations and Metals 0.1.0; textile ontology 1.1.2 with 14 pages; all marked draft or not official.",
+   "source_url": "https://cirpass-2.github.io/ontologies-docs/ontologies.html"
+  },
+  {
+   "topic": "CE-RISE hex-core-service release",
+   "fact": "hex-core-service latest GitHub release is v0.0.9 and the product-profile model release is v0.2.0 (2026-08-31); licence NOASSERTION on hex-core-service.",
+   "source_url": "https://github.com/CE-RISE-software/hex-core-service"
+  }
+ ],
+ "overall": "The file is reliable on the points checked. All but two of the 32 re-checked claims on W3C statuses and dates, repository licences, archived flags, push and release dates, versions, the PyLD and Titanium behaviours, JSON-LD API mechanisms, the GS1 vocabulary contents, the Regulation 2026/1778 article numbers, the engine mapping, and the literature metadata matched the primary sources. Two small precision issues: the TopBraid row gives a release date in a field used elsewhere for push dates (the repo was pushed 2026-06-30), and the textiles repository name is ontologie-textiles. The ESPR and Battery Regulation point letters (Art. 10(1)(d), 11(a),(d), 77(5), 78(a)) and the UNTP 'only version' statement could not be independently re-read in this session, so they stay not_confirmed without any sign of error. No rule 5 problem was found: IEC 61360 and the ECLASS IRDI scheme appear as bibliographic or licence metadata only, and the DIN SPEC is mentioned as a reference without content.",
+ "counts": {
+  "checked": 32,
+  "confirmed": 30,
+  "refuted": 0,
+  "not_confirmed": 2
+ }
+}

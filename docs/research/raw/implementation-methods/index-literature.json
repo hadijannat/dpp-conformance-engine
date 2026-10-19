@@ -1,0 +1,3134 @@
+{
+ "note": "Generated from the evidence files in this folder on 2026-10-19. Deduplicated by URL (sources) and by DOI (papers). Where agents gave different verification levels, all levels are listed.",
+ "count": 273,
+ "papers": [
+  {
+   "doi": "10.1002/9783527851027",
+   "title": "Battery Passport",
+   "year": 2026,
+   "venue": "Wiley eBooks (OpenAlex type: book, dated 2026-07-10)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.1002/bse.4346",
+   "title": "Digital Product Passports as Information Providers for Consumers—The Case of Digital Battery Passports",
+   "year": 2025,
+   "venue": "Business Strategy and the Environment",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1002/pts.2781",
+   "title": "Durable and sustainable smart tags for identity management and condition monitoring: Case study for reusable packaging and recyclable data carriers",
+   "year": 2023,
+   "venue": "Packaging Technology and Science",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1002/stvr.1808",
+   "title": "Automated black‐box testing of nominal and error scenarios in RESTful APIs",
+   "year": 2022,
+   "venue": "Software Testing, Verification and Reliability",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1002/suco.202400398",
+   "title": "Digital threads for sustainable concrete: A prototype traceability system",
+   "year": 2024,
+   "venue": "Structural Concrete",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1007/11430230_24",
+   "title": "Content-Level Conformance Testing: An Information Mapping Case Study",
+   "year": 2005,
+   "venue": "Lecture Notes in Computer Science; Testing of Communicating Systems (book chapter)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-030-30793-6_9",
+   "title": "Validating Shacl Constraints over a Sparql Endpoint",
+   "year": 2019,
+   "venue": "Lecture Notes in Computer Science; The Semantic Web – ISWC 2019",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-030-49461-2_29",
+   "title": "Astrea: Automatic Generation of SHACL Shapes from Ontologies.",
+   "year": 2020,
+   "venue": "Lecture Notes in Computer Science; The Semantic Web (ESWC 2020)",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-030-93975-5_24",
+   "title": "FIWARE for Data Spaces",
+   "year": 2022,
+   "venue": "book chapter (venue not given by tool)",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-030-95481-9_6",
+   "title": "A Review of SHACL: From Data Validation to Schema Reasoning for RDF Graphs",
+   "year": 2022,
+   "venue": "Lecture Notes in Computer Science (conference paper)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-031-48930-3_28",
+   "title": "STVgoDigital: A Digital Product Passport Solution",
+   "year": 2023,
+   "venue": "Communications in Computer and Information Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-031-49339-3_6",
+   "title": "Approach of a Ticket-Based Test Strategy for Industry 4.0 Components with Asset Administration Shells",
+   "year": 2023,
+   "venue": "Communications in Computer and Information Science; Innovative Intelligent Industrial Production and Logistics (book chapter)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-031-59465-6_19",
+   "title": "A Reference Architecture for Digital Product Passports at Batch Level to Support Manufacturing Supply Chains",
+   "year": 2024,
+   "venue": "Research Challenges in Information Science (RCIS 2024), Lecture Notes in Business Information Processing 513",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-031-78955-7_19",
+   "title": "Designing an Ontology Network for Digital Product Passports",
+   "year": 2025,
+   "venue": "book chapter (listed on the CIRPASS-2 results page)",
+   "doi_check_results": [],
+   "files": [
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-032-25156-5_12",
+   "title": "From RDF Graph Validation to RDF Dataset Validation with SHACL-DS",
+   "year": 2026,
+   "venue": "Lecture Notes in Computer Science; The Semantic Web",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-032-26363-6_29",
+   "title": "Blockchain-Based Digital Product Passports and Their Feasibility in Steelmaking",
+   "year": 2026,
+   "venue": "Lecture Notes in Business Information Processing (Business Information Systems)",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-319-13704-9_38",
+   "title": "A Knowledge Driven Approach towards the Validation of Externally Acquired Traceability Datasets in Supply Chain Business Processes",
+   "year": 2014,
+   "venue": "Lecture Notes in Computer Science (book chapter)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-540-78731-0_3",
+   "title": "Fine-Grained Access Control for EPC Information Services",
+   "year": 2008,
+   "venue": "not stated in tool output",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-540-78917-8_10",
+   "title": "The Test Technology TTCN-3",
+   "year": 2008,
+   "venue": "Lecture Notes in Computer Science; Formal Methods and Testing (book chapter)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-642-37377-0_8",
+   "title": "The SemProM Data Format",
+   "year": 2013,
+   "venue": "Book chapter (Springer)",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1007/978-3-662-44736-9_36",
+   "title": "A Lifecycle Data Management System Based on RFID Technology of EPC Class1 Gen2 v2",
+   "year": 2014,
+   "venue": "International Conference on Advances in Production Management Systems",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1007/s00799-021-00315-w",
+   "title": "An extended analysis of the persistence of persistent identifiers of the scholarly web",
+   "year": 2021,
+   "venue": "International Journal on Digital Libraries",
+   "doi_check_results": [],
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "doi": "10.1007/s10209-025-01263-x",
+   "title": "Coverage of web accessibility guidelines provided by automated checking tools",
+   "year": 2025,
+   "venue": "Universal Access in the Information Society",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1007/S11219-013-9216-0",
+   "title": "Testing of PolPA-based usage control systems",
+   "year": 2013,
+   "venue": "Software Quality Journal",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1007/s11235-024-01104-x",
+   "title": "Digital product passports as enablers of digital circular economy: a framework based on technological perspective",
+   "year": 2024,
+   "venue": "Telecommunication Systems",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1007/s11740-026-01420-y",
+   "title": "Technical interoperability and legal compliance with the Ecodesign for Sustainable Products Regulation: proposal for a minimal digital product passport data model",
+   "year": 2026,
+   "venue": "Production Engineering",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f04",
+    "l03",
+    "m01",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1007/s12525-024-00690-7",
+   "title": "Enhancing trust in global supply chains: Conceptualizing Digital Product Passports for a low-carbon hydrogen market",
+   "year": 2024,
+   "venue": "Electronic Markets",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.1007/s12525-026-00877-0",
+   "title": "Digital product passports",
+   "year": 2026,
+   "venue": "Electronic Markets",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m01",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1007/s12599-021-00722-y",
+   "title": "Digital Identities and Verifiable Credentials",
+   "year": 2021,
+   "venue": "Business & Information Systems Engineering",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.1007/s42486-023-00127-8",
+   "title": "Web accessibility automatic evaluation tools: to what extent can they be automated?",
+   "year": 2023,
+   "venue": "CCF Transactions on Pervasive Computing and Interaction",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1007/s43615-025-00500-y",
+   "title": "Smart Tags as Enablers for Digital Product Passports in Circular Electronics Value Chains",
+   "year": 2025,
+   "venue": "Circular Economy and Sustainability",
+   "doi_check_results": [],
+   "files": [
+    "g02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1007/s43615-026-00927-x",
+   "title": "A Comprehensive Review of Digital Product Passports in Sustainable Manufacturing: Current State, Challenges, and Future Directions",
+   "year": 2026,
+   "venue": "Circular Economy and Sustainability",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "l02",
+    "m06",
+    "m08",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1007/s43615-026-01102-y",
+   "title": "Data Governance for Compliance with the European Digital Product Passport: a Systematic Literature Review",
+   "year": 2026,
+   "venue": "Circular Economy and Sustainability",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m01",
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.autcon.2023.104783",
+   "title": "A blockchain non-fungible token-enabled ‘passport’ for construction waste material cross-jurisdictional trading",
+   "year": 2023,
+   "venue": "Automation in Construction",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.bcra.2023.100129",
+   "title": "A Systematic Literature Review of the Tension between the GDPR and Public Blockchain Systems",
+   "year": 2022,
+   "venue": "Blockchain: research and applications",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.cesys.2025.100354",
+   "title": "Digital Product Passport in support of Data-Driven End-of-Use Strategies–a systems design perspective",
+   "year": 2025,
+   "venue": "Cleaner Environmental Systems",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.clpl.2025.100118",
+   "title": "The quest for more circular battery value chains: Implementing the EU digital battery passport and remaining challenges",
+   "year": 2025,
+   "venue": "Cleaner Production Letters",
+   "doi_check_results": [],
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.clscn.2025.100275",
+   "title": "Stakeholder perspectives on digital product passports for construction products",
+   "year": 2025,
+   "venue": "Cleaner Logistics and Supply Chain",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.compind.2026.104465",
+   "title": "A Material Passport Ontology for a circular economy",
+   "year": 2026,
+   "venue": "Computers in Industry",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.cscm.2025.e04267",
+   "title": "Current methodologies of creating Material Passports: A Systematic Literature Review",
+   "year": 2025,
+   "venue": "Case Studies in Construction Materials",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "g03",
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.1016/j.digbus.2026.100167",
+   "title": "LLM-based JSON mapping and blockchain integration for Digital Product Passports",
+   "year": 2026,
+   "venue": "Digital Business",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.ifacol.2025.09.109",
+   "title": "A Multiple Case Study Providing Insights Into Applying Digital Product Passport in Several Industries",
+   "year": 2025,
+   "venue": "IFAC-PapersOnLine",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.ifacol.2025.09.110",
+   "title": "Creating a Digital Product Passport Using Data Spaces and Ontologies: A Case Study at a Furniture Dealer",
+   "year": 2025,
+   "venue": "IFAC-PapersOnLine",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.indic.2026.101514",
+   "title": "A framework for evaluating the traceability of primary data elements for textile digital product passports",
+   "year": 2026,
+   "venue": "Environmental and Sustainability Indicators",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.infsof.2026.108048",
+   "title": "Empirical insights on interoperability in digital twins: Challenges & LCIM perspectives",
+   "year": 2026,
+   "venue": "Information and Software Technology",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.jclepro.2021.128702",
+   "title": "Material Passports for the end-of-life stage of buildings: Challenges and potentials",
+   "year": 2021,
+   "venue": "Journal of Cleaner Production",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.jclepro.2022.135538",
+   "title": "A proposed universal definition of a Digital Product Passport Ecosystem (DPPE): Worldviews, discrete capabilities, stakeholder requirements and concerns",
+   "year": 2023,
+   "venue": "Journal of Cleaner Production",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.jisa.2019.102369",
+   "title": "Usable security for QR code",
+   "year": 2019,
+   "venue": "J. Inf. Secur. Appl.",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1016/j.jobe.2021.103233",
+   "title": "Digitizing material passport for sustainable construction projects using BIM",
+   "year": 2021,
+   "venue": "Journal of Building Engineering",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2023.09.160",
+   "title": "Product-specific Identifiers and Data Aggregation for Enabling Traceability in Battery Cell Production",
+   "year": 2023,
+   "venue": "Procedia CIRP",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2024.01.040",
+   "title": "End of life focused data model for a digital battery passport",
+   "year": 2024,
+   "venue": "Procedia CIRP",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2024.02.026",
+   "title": "Connecting Producers and Recyclers: A Digital Product Passport Concept and Implementation Suitable for End-of-Life Management",
+   "year": 2024,
+   "venue": "Procedia CIRP",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2024.07.039",
+   "title": "An Asset Administration Shell-Based Digital Product Passport as a Gaia-X Service",
+   "year": 2024,
+   "venue": "Procedia CIRP",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "l02",
+    "m03",
+    "m04",
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2026.01.056",
+   "title": "Protected QR Code-based Anti-counterfeit System for Pharmaceutical Manufacturing",
+   "year": 2024,
+   "venue": "ArXiv (DOI as returned points to Procedia CIRP)",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2026.05.011",
+   "title": "Configurable Agile Digital Product Passports for Circular Businesses",
+   "year": 2026,
+   "venue": "Procedia CIRP",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procir.2026.05.053",
+   "title": "Digital Product Passport as a Digital Twin? Analyzing Conceptual Intersections and Deriving Design Elements",
+   "year": 2026,
+   "venue": "Procedia CIRP",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2024.09.251",
+   "title": "A Digital Twin-Based Digital Product Passport",
+   "year": 2024,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2024.09.517",
+   "title": "Digital Product Passport: A Review and Research Agenda",
+   "year": 2024,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2025.01.099",
+   "title": "Supporting Changes in Digital Ownership and Data Sovereignty Across the Automotive Value Chain with Catena-X",
+   "year": 2025,
+   "venue": "Procedia Computer Science (Crossref 2026-10-19 gives issued 2025; the search tool gave 2024 and Unknown Journal)",
+   "doi_check_results": [],
+   "files": [
+    "m03",
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2025.02.022",
+   "title": "Digital Product Passport (DPP) technological advancement and adoption framework: A systematic literature review",
+   "year": 2025,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2025.02.059",
+   "title": "A trust implementation model for cross-domain decentralized identity ecosystems: architecture, use case, and implementation",
+   "year": 2025,
+   "venue": "Procedia Computer Science (Elsevier; per Crossref)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.077",
+   "title": "Ontology Requirements for Digital Product Passports based on the Ecodesign for Sustainable Products Regulation",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m01",
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.101",
+   "title": "Trustworthy Digital Product Passports based on Distributed Ledgers- A Review and Guidelines",
+   "year": 2026,
+   "venue": "Procedia Computer Science (listed as Unknown Journal by the tool)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.145",
+   "title": "Enhancing Digital Product Passports with Material Fingerprinting and Decentralized Non-Conformity Signals: Application to Critical Raw Materials",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "l02",
+    "l03",
+    "m05",
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.153",
+   "title": "A Design Study on Integrating UNTP Semantics into AAS Submodels for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science (Consensus: Unknown Journal)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "f04",
+    "l01",
+    "m04",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.212",
+   "title": "Made2Verify: A Scalable GS1-Compliant Resolver and Fallback Dashboard for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science (Consensus: Unknown Journal)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "f03",
+    "l01",
+    "l02",
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.221",
+   "title": "Towards a Modular Testing Environment for Digital Battery Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "l03",
+    "m01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.274",
+   "title": "Bridging the Gaps Towards a Unified Architecture for Digital Product Passports: A Data Space Perspective on Existing Standards and Initiatives",
+   "year": 2026,
+   "venue": "Procedia Computer Science (per prior record l01; Consensus shows 'Unknown Journal')",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "f04",
+    "l01",
+    "l02",
+    "m02",
+    "m07"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.321",
+   "title": "From Specification to Compliance: A Semantic Approach to Validating Industrial Supply Chains",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.330",
+   "title": "A General-Purpose Tool to Convert Asset Administration Shell Templates to RDFS/OWL",
+   "year": 2026,
+   "venue": "Procedia Computer Science (Consensus: Unknown Journal)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "f04",
+    "g03",
+    "l02",
+    "m07"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.334",
+   "title": "Achieving Semantic Interoperability for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science (venue field returned as 'Unknown Journal')",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f04",
+    "l03",
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.353",
+   "title": "Semantic Data Integration for Digital Product Passports",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.364",
+   "title": "From Conceptual Silos to a Circular Economy: The BFO-Based Framework for the Digital Product Passport",
+   "year": 2026,
+   "venue": "Procedia Computer Science (confirmed by OpenAlex)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.02.383",
+   "title": "Handling Authorization and Access Control for Asset Administration Shells in Dataspaces",
+   "year": 2026,
+   "venue": "Procedia Computer Science (confirmed by Crossref 2026-10-19; the search tool listed Unknown Journal)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.03.018",
+   "title": "A Structured Methodology for Semantic Integration of Physical and Cyber Assets in Industrial Digital Twins",
+   "year": 2026,
+   "venue": "Procedia Computer Science (venue per tool: Unknown Journal)",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1016/j.procs.2026.03.042",
+   "title": "Supply chain traceability by recording EPCIS data on Hyperledger Fabric",
+   "year": 2026,
+   "venue": "Procedia Computer Science",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.rcradv.2023.200131",
+   "title": "The anatomy of a passport for the circular economy: a conceptual definition, vision and structured literature review",
+   "year": 2023,
+   "venue": "Resources, Conservation & Recycling Advances",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.rser.2022.112078",
+   "title": "Blockchain review for battery supply chain monitoring and battery trading",
+   "year": 2022,
+   "venue": "Renewable and Sustainable Energy Reviews",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.sftr.2025.100847",
+   "title": "Using composable NFTs and blockchain for the creation of EV battery digital passports with sustainability and traceability features",
+   "year": 2025,
+   "venue": "Sustainable Futures",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1016/j.softx.2023.101477",
+   "title": "Oliot EPCIS: An open-source EPCIS 2.0 system for supply chain transparency",
+   "year": 2023,
+   "venue": "SoftwareX",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.spc.2025.01.014",
+   "title": "Enabling a dynamic information flow in digital product passports during product use phase: A literature review and proposed framework",
+   "year": 2025,
+   "venue": "Sustainable Production and Consumption",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "g01",
+    "g02",
+    "l01",
+    "l02",
+    "m02",
+    "m06",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1016/j.websem.2012.02.001",
+   "title": "An empirical survey of Linked Data conformance",
+   "year": 2012,
+   "venue": "Journal of Web Semantics",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1016/j.websem.2026.100877",
+   "title": "BPO - A battery production ontology for traceable, transparent, and sustainable electric vehicle batteries",
+   "year": 2026,
+   "venue": "Journal of Web Semantics",
+   "doi_check_results": [],
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1017/pds.2026.10518",
+   "title": "Towards a reference architecture for digital product passports in engineering",
+   "year": 2026,
+   "venue": "Proceedings of the Design Society",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1049/icp.2024.3501",
+   "title": "Material passport for modular construction",
+   "year": 2024,
+   "venue": "IET Conference Proceedings",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "g03",
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.1080/00207543.2025.2464161",
+   "title": "Blockchain-based digital product passport: design principles and demonstration",
+   "year": 2025,
+   "venue": "International Journal of Production Research",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "l01",
+    "l02",
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1080/00207543.2025.2518262",
+   "title": "Blockchain-enabled sustainability of Li-ion batteries supply chain: tracking and sourcing eco-friendly materials",
+   "year": 2025,
+   "venue": "International Journal of Production Research",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1080/13675567.2024.2374256",
+   "title": "Digital product passport for sustainable and circular supply chain management: a structured review of use cases",
+   "year": 2024,
+   "venue": "International Journal of Logistics Research and Applications",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1080/15623599.2026.2642423",
+   "title": "Material passports for circular economy in the construction industry: state-of-art-review",
+   "year": 2026,
+   "venue": "International Journal of Construction Management",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1088/1755-1315/1568/1/012026",
+   "title": "Integrating Digital Product Passports and BIM for Circular Construction: A Review of Challenges and Opportunities for Data-Driven Material Reuse and Sustainability Assessment",
+   "year": 2025,
+   "venue": "IOP Conference Series: Earth and Environmental Science",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1108/ajim-05-2025-0286",
+   "title": "Link rot in LIS literature: a 20-year study of web citation decay, recovery and preservation challenges",
+   "year": 2026,
+   "venue": "Aslib Journal of Information Management",
+   "doi_check_results": [],
+   "files": [
+    "f03",
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1108/ci-02-2025-0074",
+   "title": "Decentralized phygital identifier systems for digital passports in circular construction: a design science evaluation",
+   "year": 2025,
+   "venue": "Construction Innovation",
+   "doi_check_results": [],
+   "files": [
+    "g02",
+    "m02",
+    "m05",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1108/ci-12-2025-0538",
+   "title": "Unlocking sustainability futures: a framework for digital product passports and material banks in a circular built environment",
+   "year": 2026,
+   "venue": "Construction Innovation",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1108/ecam-08-2024-1020",
+   "title": "Cloud-based BIM for data sharing and collaboration to foster circular economy in construction",
+   "year": 2025,
+   "venue": "Engineering, Construction and Architectural Management",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1109/3scea68071.2026.11603125",
+   "title": "Enabling Fine-Grained Traceability in Digital Product Passports Through Extended Fractional NFTs",
+   "year": 2026,
+   "venue": "2026 IEEE International Conference on Smart Sustainable Systems for Computer and Engineering Applications (3SCEA)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2021.3069194",
+   "title": "Towards Interoperability of Entity-Based and Event-Based IoT Platforms: The Case of NGSI and EPCIS Standards",
+   "year": 2021,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2021.3117781",
+   "title": "A Survey on Digital Certificates Approaches for the COVID-19 Pandemic",
+   "year": 2021,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2022.3226128",
+   "title": "NFT-Based Traceability and Ownership Management of Medical Devices",
+   "year": 2022,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2023.3312286",
+   "title": "Overview and Comparison of Asset Information Model Standards",
+   "year": 2023,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2023.3313723",
+   "title": "Toward Interoperable Self-Sovereign Identities",
+   "year": 2023,
+   "venue": "IEEE Access",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2025.3584842",
+   "title": "A Maturity Model for Digital Product Passports: A Design Science Study",
+   "year": 2025,
+   "venue": "IEEE Access",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2025.3594656",
+   "title": "Enabling Secure and Scalable GDPR-Compliant Blockchain-based e-KYC with Efficient Redaction",
+   "year": 2025,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2025.3594826",
+   "title": "Decentralized Digital Product Passport Building Blocks for Enhancing Supply Chain Sovereignty and Circular Economy Practices",
+   "year": 2025,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2025.3633736",
+   "title": "Interoperability of Digital Twins for Automation With Digital Twin Schema",
+   "year": 2025,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2025.3650525",
+   "title": "Hyperledger-Based Blockchain System for Peer-to-Peer Energy Trading in Electromobility Systems",
+   "year": 2026,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2026.3724250",
+   "title": "Research on Information Dynamic Traceability Methods and Systems for Lithium Battery Production Processes",
+   "year": 2026,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/access.2026.3726043",
+   "title": "A Rootchain-Centric Hierarchical Multichain Architecture for National Blockchain Infrastructures: Design Rationale and Empirical Evaluation for Mid-Sized Nations With Consolidated Digital Governance",
+   "year": 2026,
+   "venue": "IEEE Access",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/blockchain62396.2024.00018",
+   "title": "Decentralized Ledger Technology for EPCIS 2.0: Utilizing NFTs for Enhanced Product Traceability",
+   "year": 2024,
+   "venue": "2024 IEEE International Conference on Blockchain (Blockchain)",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1109/blockchain67634.2025.00025",
+   "title": "A Blockchain-Based Access Control Architecture Using Non-Transferable NFTs and Gas-Efficient IPFS URI Management",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on Blockchain (Blockchain)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/brains67003.2025.11302930",
+   "title": "Redacting Without Regret: A Dual-Layer Framework for Policy-Compliant Blockchains",
+   "year": 2025,
+   "venue": "BRAINS 2025 (proceedings)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/brains67003.2025.11302955",
+   "title": "Privacy-Preserving “Right to Be Forgotten” in Configurable Blockchain Tokenization: A Cryptographic Audit Framework",
+   "year": 2025,
+   "venue": "BRAINS 2025 (proceedings)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/ccnc51664.2024.10454685",
+   "title": "ZION: A Scalable W3C Web of Things Directory",
+   "year": 2024,
+   "venue": "2024 IEEE 21st Consumer Communications & Networking Conference (CCNC)",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.1109/CLOUDCOM2018.2018.00060",
+   "title": "Validating Data Integrity with Blockchain",
+   "year": 2018,
+   "venue": "2018 IEEE International Conference on Cloud Computing Technology and Science (CloudCom)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/compsac69091.2026.00308",
+   "title": "From Factory Floor to Digital Product Passport: A Dual-Chain NFT Architecture for Automotive Traceability",
+   "year": 2026,
+   "venue": "2026 IEEE 50th Annual Computers, Software, and Applications Conference (COMPSAC)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/comst.2025.3543197",
+   "title": "A Survey on Decentralized Identifiers and Verifiable Credentials",
+   "year": 2024,
+   "venue": "IEEE Communications Surveys & Tutorials, vol. 27, issue 6 (per Crossref)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.1109/dapps65174.2025.00015",
+   "title": "Hybrid EPCIS: Integrating GS1/ISO Standards with On-Chain and Off-Chain Distributed Ledger for Supply Chain Traceability",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on Decentralized Applications and Infrastructures (DAPPS)",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1109/dapps65174.2025.00018",
+   "title": "A Seafood Supply Chain Application Built on European Blockchain Services Infrastructure",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on Decentralized Applications and Infrastructures (DAPPS)",
+   "doi_check_results": [],
+   "files": [
+    "m05",
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/dcoss-iot58021.2023.00067",
+   "title": "Digital Product Passports: Use Cases Framework and Technical Architecture Using DLT and Smart Contracts",
+   "year": 2023,
+   "venue": "2023 19th International Conference on Distributed Computing in Smart Systems and the Internet of Things (DCOSS-IoT)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1109/dcoss-iot65416.2025.00163",
+   "title": "From Static Records to Smart Passports: Evolving Digital Product Passports Toward Product-Service System Integration",
+   "year": 2025,
+   "venue": "2025 21st International Conference on Distributed Computing in Smart Systems and the Internet of Things (DCOSS-IoT)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1109/EDOC.2018.00031",
+   "title": "Automatic Generation of Test Cases for REST APIs: A Specification-Based Approach",
+   "year": 2018,
+   "venue": "2018 IEEE 22nd International Enterprise Distributed Object Computing Conference (EDOC)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/eee-am58328.2023.10395342",
+   "title": "Blockchain and Nested Tokens for Tracking, Reusing, and Recycling Batteries",
+   "year": 2023,
+   "venue": "2023 Asia Meeting on Environment and Electrical Engineering (EEE-AM)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa52439.2022.9921521",
+   "title": "Towards an Asset Administration Shell Integrity Verification Scheme",
+   "year": 2022,
+   "venue": "2022 IEEE 27th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa52439.2022.9921584",
+   "title": "FA<sup>3</sup>ST Service – An Open Source Implementation of the Reactive Asset Administration Shell",
+   "year": 2022,
+   "venue": "2022 IEEE 27th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa54631.2023.10275629",
+   "title": "Am I in Good Shape? Flexible Way to Validate Asset Administration Shell Data Entry via Shapes Constraint Language",
+   "year": 2023,
+   "venue": "IEEE International Conference on Emerging Technologies and Factory Automation (ETFA), 2023 (venue confirmed by OpenAlex)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "l03",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa54631.2023.10275715",
+   "title": "A Multi-Stakeholder Digital Product Passport Based on the Asset Administration Shell",
+   "year": 2023,
+   "venue": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa61755.2024.10710924",
+   "title": "Model-Driven Realization of IDTA Submodel Specifications: The Good, the Bad, the Incompatible?",
+   "year": 2024,
+   "venue": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa61755.2024.10710957",
+   "title": "Towards a Test Framework for Reactive (Type 2) Asset Administration Shell Implementations",
+   "year": 2024,
+   "venue": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa61755.2024.10711027",
+   "title": "Generate Digital Product Passports by Integrating Production Data into the Asset Administration Shell",
+   "year": 2024,
+   "venue": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa61755.2024.10711067",
+   "title": "An Approach for Sovereign Data Exchange of AAS Digital Twins Through the International Data Space Network",
+   "year": 2024,
+   "venue": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [],
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa65518.2025.11205665",
+   "title": "Event-Driven Method for Automated Compliance Testing of Submodels",
+   "year": 2025,
+   "venue": "2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03",
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/etfa65518.2025.11205801",
+   "title": "Access Control for Asset Administration Shell Applications",
+   "year": 2025,
+   "venue": "2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/exp.at2565440.2025.11348357",
+   "title": "Demonstration of a Digital Product Passport System for Second-Hand Electronic Devices",
+   "year": 2025,
+   "venue": "not stated by SciSpace (DOI prefix 10.1109)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "g01",
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.1109/ficloud70576.2026.00057",
+   "title": "A Semantic Platform for the Management and Search of Digital Product Passports (DPPs)",
+   "year": 2026,
+   "venue": "2026 13th International Conference on Future Internet of Things and Cloud (FiCloud)",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1109/icarc64760.2025.10963173",
+   "title": "Assessing the Limits of Automated Accessibility Testing: Insights for QA Engineers and Tool Developers",
+   "year": 2025,
+   "venue": "ICARC 2025",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1109/icces67310.2025.11336296",
+   "title": "A Decentralized System for NFT Metadata Generation Using IPFS",
+   "year": 2025,
+   "venue": "2025 10th International Conference on Communication and Electronics Systems (ICCES)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/ice/itmc65658.2025.11106630",
+   "title": "A Review on Digital Product Passports as Drivers of Digital Transformation in Industry",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on Engineering, Technology, and Innovation (ICE/ITMC)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1109/ichcai70183.2026.11607563",
+   "title": "Explainability-Oriented Semantic Validation for Digital Product Passports in Industrial Systems",
+   "year": 2026,
+   "venue": "2026 1st International Conference on Human Centric Artificial Intelligence (ICHCAI)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "l03",
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1109/icicyta64807.2024.10913245",
+   "title": "Gap Analysis on Interoperability of Blockchain Enabled Traceability Tools for Digital Product Passports",
+   "year": 2024,
+   "venue": "2024 International Conference on Intelligent Cybernetics Technology & Applications (ICICyTA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/icps65515.2025.11087888",
+   "title": "Quick Response Code-Integrated Digital Twin with Asset Administration Shells",
+   "year": 2025,
+   "venue": "2025 IEEE 8th International Conference on Industrial Cyber-Physical Systems (ICPS) (per Crossref 2026-10-19)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/icps65515.2025.11087912",
+   "title": "An Automated Approach to Compliance Testing of Standardized Submodel Templates",
+   "year": 2025,
+   "venue": "2025 IEEE 8th International Conference on Industrial Cyber-Physical Systems (ICPS)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/icps70486.2026.11567955",
+   "title": "Automatic Generation of JSON Schemas for Industry 4.0 Digital Twin Templates",
+   "year": 2026,
+   "venue": "2026 IEEE 9th International Conference on Industrial Cyber-Physical Systems (ICPS)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1109/icsa-c68850.2026.00075",
+   "title": "Model-Driven Development of Data Space-Enabled Asset Administration Shell Digital Twins",
+   "year": 2026,
+   "venue": "2026 IEEE 23rd International Conference on Software Architecture Companion (ICSA-C)",
+   "doi_check_results": [],
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.1109/ICSECOMPANION.2007.73",
+   "title": "Testing and Analysis of Access Control Policies",
+   "year": 2007,
+   "venue": "29th International Conference on Software Engineering (ICSE'07 Companion)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/icstcc66753.2025.11240327",
+   "title": "Digital Product Passport Data Transfer via Dataspace Connector: Technical Implementation and Analysis",
+   "year": 2025,
+   "venue": "2025 29th International Conference on System Theory, Control and Computing (ICSTCC)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.1109/iot.2010.5678447",
+   "title": "Giving RFID a REST: Building a Web-Enabled EPCIS",
+   "year": 2010,
+   "venue": "2010 Internet of Things (IOT)",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.1109/ippr66507.2025.11198388",
+   "title": "Research on the Design of a Multi-Code Identifier Platform and Cross-Regional Node Resolution Test Method",
+   "year": 2025,
+   "venue": "2025 2nd International Conference on Intelligent Perception and Pattern Recognition (IPPR)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/isse65546.2025.11370080",
+   "title": "From Regulation to Realisation: Architecting a Digital Battery Passport System",
+   "year": 2025,
+   "venue": "not shown by SciSpace; DOI prefix suggests IEEE ISSE 2025 proceedings (unverified)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "l01",
+    "m01",
+    "m07"
+   ]
+  },
+  {
+   "doi": "10.1109/iv68685.2025.00061",
+   "title": "DPPviewer: A Visual Analytics Approach for Optimizing Production Chains on Digital Product Passports",
+   "year": 2025,
+   "venue": "not stated by SciSpace (DOI prefix 10.1109)",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1109/iwast.2013.6595793",
+   "title": "Access control enforcement testing",
+   "year": 2013,
+   "venue": "2013 8th International Workshop on Automation of Software Test (AST)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/jiot.2025.3605841",
+   "title": "Model-Agnostic Uncertainty Quantification for Fast NFC Tag Identification Using RF Fingerprinting",
+   "year": 2025,
+   "venue": "IEEE Internet of Things Journal",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/metroautomotive57488.2023.10219134",
+   "title": "An RFID System Enabling Battery Lifecycle Traceability",
+   "year": 2023,
+   "venue": "2023 IEEE International Workshop on Metrology for Automotive (MetroAutomotive)",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/nfc.2010.10",
+   "title": "Digital Signature Records for the NFC Data Exchange Format",
+   "year": 2010,
+   "venue": "2010 Second International Workshop on Near Field Communication",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1109/nfc.2011.9",
+   "title": "Security Vulnerabilities of the NDEF Signature Record Type",
+   "year": 2011,
+   "venue": "2011 Third International Workshop on Near Field Communication",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1109/platcon63925.2024.10830745",
+   "title": "Blockchain-Based Digital Product Passport for the Circular Economy",
+   "year": 2024,
+   "venue": "PlatCon 2024 (journal article per tool)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1109/rfid-ta.2012.6404492",
+   "title": "Handling the NDEF signature record type in a secure manner",
+   "year": 2012,
+   "venue": "2012 IEEE International Conference on RFID-Technologies and Applications (RFID-TA)",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1109/rfid-ta63091.2025.11265834",
+   "title": "LLM-Powered Digital Link Agent",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+   "doi_check_results": [],
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "doi": "10.1109/rfid-ta63091.2025.11265909",
+   "title": "From Tag to Digital Twin: Unlocking Service Resolution Through GS1 Digital Link",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "l01",
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/rfid-ta64374.2024.10965188",
+   "title": "Next-Generation Battery Management Systems: Integrating RFID for Battery Passport Applications",
+   "year": 2024,
+   "venue": "2024 IEEE International Conference on RFID Technology and Applications (RFID-TA)",
+   "doi_check_results": [],
+   "files": [
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/rfid64926.2025.11015538",
+   "title": "Building Digital Product Passports: EPCIS 2.0 Meets Knowledge Graphs",
+   "year": 2025,
+   "venue": "2025 IEEE International Conference on RFID (RFID)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f01",
+    "l01",
+    "l02",
+    "m02",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1109/saci66288.2025.11030179",
+   "title": "Testing NFC Tags in Laboratory Environment",
+   "year": 2025,
+   "venue": "2025 IEEE 19th International Symposium on Applied Computational Intelligence and Informatics (SACI)",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1109/SIIT.2003.1251206",
+   "title": "Experience within ETSI of the combined roles of conformance testing and interoperability testing",
+   "year": 2003,
+   "venue": "SIIT 2003 per the DOI string; Crossref lists the container as ESSDERC 2003 (a metadata discrepancy)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1109/smartcomp.2016.7501715",
+   "title": "Securing Pharmaceutical and High-Value Products against Tag Reapplication Attacks Using NFC Tags",
+   "year": 2016,
+   "venue": "2016 IEEE International Conference on Smart Computing (SMARTCOMP)",
+   "doi_check_results": [],
+   "files": [
+    "g02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/sose62363.2024.00015",
+   "title": "DLT-Based Verifiable Receipt Credentials for Traceability in EV Battery Supply Chains",
+   "year": 2024,
+   "venue": "2024 IEEE International Conference on Service-Oriented System Engineering (SOSE)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.1109/sose69681.2026.11622330",
+   "title": "From Product Data to Circular Infrastructure: A System-of-Systems Analysis of Digital Product Passports Ecosystem",
+   "year": 2026,
+   "venue": "2026 21st Annual System of Systems Engineering Conference (SoSE)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.1109/tdsc.2023.3235951",
+   "title": "DID We Miss Anything?: Towards Privacy-Preserving Decentralized ID Architecture",
+   "year": 2023,
+   "venue": "IEEE Transactions on Dependable and Secure Computing",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.1109/trustcom.2015.396",
+   "title": "Integrity Protection of NDEF Message with Flexible and Enhanced NFC Signature Records",
+   "year": 2015,
+   "venue": "2015 IEEE Trustcom/BigDataSE/ISPA",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1109/wetice67341.2025.11092048",
+   "title": "Design and Implementation of a Software System for Digital Product Passport",
+   "year": 2025,
+   "venue": "2025 33rd International Conference on Enabling Technologies: Infrastructure for Collaborative Enterprises (WETICE)",
+   "doi_check_results": [],
+   "files": [
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1109/wf-iot64238.2025.11270730",
+   "title": "Decentralized Authorization for Asset Administration Shell-Based Ecosystems",
+   "year": 2025,
+   "venue": "2025 IEEE 11th World Forum on Internet of Things (WF-IoT)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.1145/2461121.2461124",
+   "title": "Benchmarking web accessibility evaluation tools: measuring the harm of sole reliance on automated tests",
+   "year": 2013,
+   "venue": "Unknown Journal (as returned by Consensus)",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1145/3510454.3528637",
+   "title": "Deriving semantics-aware fuzzers from web API schemas",
+   "year": 2022,
+   "venue": "ACM/IEEE International Conference on Software Engineering: Companion Proceedings (ICSE-Companion)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1145/3530877",
+   "title": "COVID-19 Vaccination Certificates in the Darkweb",
+   "year": 2021,
+   "venue": "Digital Threats: Research and Practice",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.1145/3589334.3645426",
+   "title": "SSI, from Specifications to Protocol? Formally Verify Security!",
+   "year": 2024,
+   "venue": "Proceedings of the ACM Web Conference 2024",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1145/3597205",
+   "title": "Open Problems in Fuzzing RESTful APIs: A Comparison of Tools",
+   "year": 2023,
+   "venue": "ACM Transactions on Software Engineering and Methodology",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1145/3598469.3598527",
+   "title": "AgInTeF: Agile Interoperability Testing Framework for Orchestrating Overarching Procedures in Verifying Digital Public Services",
+   "year": 2023,
+   "venue": "Conference on Digital Government Research",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.1145/3672608.3707971",
+   "title": "Bringing the Digital Product Passport to Life: Requirements Analysis for a Carbon Footprint Tracking System using Knowledge Graphs and Data Spaces",
+   "year": 2025,
+   "venue": "Proceedings of the 40th ACM/SIGAPP Symposium on Applied Computing",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1145/3813822.3814036",
+   "title": "Battery Passport Generation Method Based on Trusted Data Space",
+   "year": 2026,
+   "venue": "Proceedings of the 2026 7th International Conference on Computer Information and Big Data Applications",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f02",
+    "l02",
+    "m04",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1145/3828534.3828537",
+   "title": "Automated Contract Negotiation in Data Spaces: Practitioner Needs Assessment and Negotiation Framework",
+   "year": 2026,
+   "venue": "ACM SIGAPP Applied Computing Review",
+   "doi_check_results": [],
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.1145/3849476",
+   "title": "URL Rot in Software Engineering Scholarly Works",
+   "year": 2026,
+   "venue": "ACM Transactions on Software Engineering and Methodology",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.1177/17835917231152799",
+   "title": "Data governance: Digital product passports as a case study",
+   "year": 2023,
+   "venue": "Competition and Regulation in Network Industries",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1177/22104968251361274",
+   "title": "RePlanIT Ontology for Digital Product Passports of ICT: Laptops and Data Servers",
+   "year": 2025,
+   "venue": "Semantic Web",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1186/1751-0473-3-2",
+   "title": "LSID Tester, a tool for testing Life Science Identifier resolution services",
+   "year": 2008,
+   "venue": "Source Code for Biology and Medicine",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.12688/openreseurope.24195.1",
+   "title": "Digital Passport Model Assessment Workbench: SHACL-based assessment, use-case coverage, and integration guidance for digital passport model ecosystems",
+   "year": 2026,
+   "venue": "Open Research Europe",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.1371/journal.pone.0115253",
+   "title": "Scholarly Context Not Found: One in Five Articles Suffers from Reference Rot",
+   "year": 2014,
+   "venue": "PLoS ONE",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.14569/ijacsa.2026.0170602",
+   "title": "Zero-Disclosure Material Passports for Verifiable Provenance in Multi-Tier Supply Networks",
+   "year": 2026,
+   "venue": "International Journal of Advanced Computer Science and Applications",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.1515/aut-2024-0002",
+   "title": "An overview of technological challenges in implementing the digital product passport in the textile and clothing industry",
+   "year": 2024,
+   "venue": "AUTEX Research Journal",
+   "doi_check_results": [],
+   "files": [
+    "g02",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.1515/auto-2024-0150",
+   "title": "Test engines for the asset administration shell",
+   "year": 2025,
+   "venue": "at - Automatisierungstechnik",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.15488/17776",
+   "title": "Architectures and Systems for Identifying Assets in Circular Supply Chains Using Digital Product Passports and the Asset Administration Shell",
+   "year": 0,
+   "venue": "not stated by the tool (year not returned)",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.17487/rfc9943",
+   "title": "An Architecture for Trustworthy and Transparent Digital Supply Chains",
+   "year": 2026,
+   "venue": "RFC Editor (Crossref type report, published 2026-06)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.17560/atp.v66i4.2707",
+   "title": "Shared Digital Product Passport for holistic lifecycle assessment",
+   "year": 2024,
+   "venue": "atp magazin",
+   "doi_check_results": [],
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "doi": "10.17560/atp.v67i3.2769",
+   "title": "Bestimmung des Product Carbon Footprint des DPP4.0",
+   "year": 2025,
+   "venue": "atp magazin (per Crossref 2026-10-19; the search tool listed Atp-Edition)",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.18420/inf2022_127",
+   "title": "Requirements for a Digital Product Passport to Boost the Circular Economy",
+   "year": 2022,
+   "venue": "Conference paper in a repository record (TUbilio, Technical University of Darmstadt per OpenAlex); the DOI prefix suggests the GI INFORMATIK 2022 volume, not verified",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.18420/inf2025_03",
+   "title": "Legal Challenges and Technical Solutions to Decentralised Digital Product Passports",
+   "year": 2025,
+   "venue": "Gesellschaft für Informatik (conference paper per DataCite and OpenAlex)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m01",
+    "m05",
+    "m07"
+   ]
+  },
+  {
+   "doi": "10.18420/inf2025_141",
+   "title": "Under The Industrial Hood: A Taxonomy for Digital Product Passports",
+   "year": 2025,
+   "venue": "INFORMATIK 2025, Lecture Notes in Informatics (Gesellschaft für Informatik)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "l02",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.18420/inf2025_142",
+   "title": "A Reference Architecture for Digital Twin-Based Supply Chain Information Exchange: The PURIS Case",
+   "year": 2025,
+   "venue": "INFORMATIK 2025 (GI) proceedings (DataCite: publisher Gesellschaft fuer Informatik e.V., conference paper; container field empty)",
+   "doi_check_results": [],
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.18420/oid2025_02",
+   "title": "The role of EBSI in eIDAS - how qualified ledger with governmental trust anchor could shape eIDAS ecosystem",
+   "year": 2025,
+   "venue": "Open Identity Summit 2025 (listed as Unknown Journal by the tool)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.18461/pfsd.2020.2008",
+   "title": "Empowering Organizations in the Food Sector to Provide Potentially Unknown Parties Easy Access to Trusted Data. Discussion of a Web-based, Globally Applicable Solution Based on Well-established Standards and Technologies",
+   "year": 2020,
+   "venue": "Proceedings in Food System Dynamics (OpenAlex source: International Center for Food Chain and Network Research, University of Bonn)",
+   "doi_check_results": [],
+   "files": [
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.20944/preprints202402.1194.v2",
+   "title": "Collaborative Smart Production Supply Chains with Blockchain Based Digital Product Passports",
+   "year": 2024,
+   "venue": "Preprints (preprint)",
+   "doi_check_results": [],
+   "files": [
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.21256/zhaw-37448",
+   "title": "Automatic quality assessment of asset administration shell submodel templates",
+   "year": 2026,
+   "venue": "Conference paper in the ZHAW digital collection (the conference name is not stated in the text read)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.21741/9781644904336-45",
+   "title": "Integrating BIM, Virtual Reality, and Material Passports for Early-Stage Circular and Low-Carbon Material Selection",
+   "year": 2026,
+   "venue": "Materials Research Proceedings",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.2218/ijdc.v19i1.1091",
+   "title": "Hope for the best, plan for the worst: Reducing risks associated with repository cessation",
+   "year": 2026,
+   "venue": "International Journal of Digital Curation",
+   "doi_check_results": [],
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "doi": "10.23919/cnsm67658.2025.11297456",
+   "title": "Compliance-by-Design: Validating Decentralised Architectures for Digital Product Passports under the EU Data Governance Act",
+   "year": 2025,
+   "venue": "CNSM 2025 (per DOI prefix; journal field empty in result)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f03",
+    "f04",
+    "l01",
+    "l02",
+    "l03",
+    "m01",
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.23919/cnsm67658.2025.11297523",
+   "title": "Exploring the Design Space and Research Directions for Digital Product Passport Systems",
+   "year": 2025,
+   "venue": "2025 21st International Conference on Network and Service Management (CNSM)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "g02",
+    "l01",
+    "l02",
+    "l03",
+    "m02"
+   ]
+  },
+  {
+   "doi": "10.24018/ejeng.2026.11.3.63302",
+   "title": "Invisible Optical Tags Printed on Textiles",
+   "year": 2026,
+   "venue": "European Journal of Engineering and Technology Research",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.24251/hicss.2025.527",
+   "title": "Human-Centric Digital Product Passports: Enabling Verifiable Information Sharing for Sustainable Consumption through Wallet-Based Identity Management and Zero-Knowledge Proofs",
+   "year": 2025,
+   "venue": "Hawaii International Conference on System Sciences (HICSS) proceedings (confirmed by OpenAlex)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.24251/hicss.2026.508",
+   "title": "Exploring the Oppositional Forces In Digital Product Passport Implementation",
+   "year": 2026,
+   "venue": "Proceedings of the Annual Hawaii International Conference on System Sciences",
+   "doi_check_results": [],
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "doi": "10.24406/publica-9335",
+   "title": "Architecture for a Digital Product Passport System based on the Ecodesign for Sustainable Products Regulation and the corresponding Standardisation Request",
+   "year": 2024,
+   "venue": "Fraunhofer-Publica (conference paper record)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.2760/4511279",
+   "title": "Methodology for defining data requirements for the Digital Product Passport under the ESPR framework",
+   "year": 2026,
+   "venue": "Joint Research Centre (European Commission) report",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.31881/tlr.2026.1234",
+   "title": "A Sustainable Product Tracking System under the Combination of Textile Label Regulations and Digital Product Passport",
+   "year": 2026,
+   "venue": "Textile & Leather Review",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3233/sw-233396",
+   "title": "ConSolid: A federated ecosystem for heterogeneous multi-stakeholder projects",
+   "year": 2023,
+   "venue": "Semantic Web",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.32604/cmc.2025.061560",
+   "title": "A Holistic Anti-Counterfeiting Platform Using NFC and Blockchain Technologies",
+   "year": 2025,
+   "venue": "Comput. Mater. Continua",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.3390/app14114874",
+   "title": "Digital Product Passport Implementation Based on Multi-Blockchain Approach with Decentralized Identifier Provider",
+   "year": 2024,
+   "venue": "Applied Sciences",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m05",
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3390/app152111623",
+   "title": "Integration Approaches for Digital Twins in Dataspaces",
+   "year": 2025,
+   "venue": "Applied Sciences",
+   "doi_check_results": [],
+   "files": [
+    "m03",
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.3390/bdcc7020079",
+   "title": "Verification of Education Credentials on European Blockchain Services Infrastructure (EBSI): Action Research in a Cross-Border Use Case between Belgium and Italy",
+   "year": 2023,
+   "venue": "Big Data and Cognitive Computing",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03",
+    "m05",
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.3390/buildings15234323",
+   "title": "Application of Materials Passport to the Wood Frame Construction System Using Revit and Dynamo",
+   "year": 2025,
+   "venue": "Buildings",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.3390/buildings16030658",
+   "title": "Blockchain-Based Material Passports: A Review of Managing Built Asset Information for Material Circularity",
+   "year": 2026,
+   "venue": "Buildings",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.3390/digital6020043",
+   "title": "Digital Product Passports: A Systematic Literature Review on Framework Design and Validation",
+   "year": 2026,
+   "venue": "Digit.",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f04",
+    "l01",
+    "l02",
+    "l03",
+    "m01",
+    "m06",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.3390/electronics10030320",
+   "title": "An Anti-Counterfeiting Architecture for Traceability System Based on Modified Two-Level Quick Response Codes",
+   "year": 2021,
+   "venue": "Electronics",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.3390/electronics15040745",
+   "title": "Zero-Knowledge Proof Extensions for Digital Product Passports in Sustainability Claims Reporting and Verifications",
+   "year": 2026,
+   "venue": "Electronics",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.3390/en14082289",
+   "title": "Towards a Digital Product Passport Fit for Contributing to a Circular Economy",
+   "year": 2021,
+   "venue": "Energies",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01"
+   ]
+  },
+  {
+   "doi": "10.3390/engproc2026150004",
+   "title": "A Governance-Aware, Privacy-Preserving, Event-Driven Conceptual Model for Supply Chain Traceability",
+   "year": 2026,
+   "venue": "TechSys 2026 (Engineering Proceedings)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.3390/logistics10070152",
+   "title": "Who Tracks What, and How Deep? Granular Traceability in Multi-Firm Supply Chains via Blockchain-Based Tokenization",
+   "year": 2026,
+   "venue": "Logistics",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.3390/logistics10080177",
+   "title": "A DLT- and ZKP-Enabled Framework for Privacy-Preserving Digital Product Passports in Maritime Container Logistics",
+   "year": 2026,
+   "venue": "Logistics",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f01",
+    "g03",
+    "l01",
+    "l02",
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3390/metrology5040070",
+   "title": "Traceability in Data Spaces: From Individual Measurements to a Digital Product Passport",
+   "year": 2025,
+   "venue": "Metrology",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.3390/polym16101420",
+   "title": "How the Digital Product Passport Can Lead the Plastics Industry towards a Circular Economy—A Case Study from Bottle Caps to Frisbees",
+   "year": 2024,
+   "venue": "Polymers",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.3390/s22228680",
+   "title": "A Blockchain-Based Product Traceability System with Off-Chain EPCIS and IoT Device Authentication",
+   "year": 2022,
+   "venue": "Sensors (Basel, Switzerland)",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.3390/s23031619",
+   "title": "Reading Direct-Part Marking Data Matrix Code in the Context of Polymer-Based Additive Manufacturing",
+   "year": 2023,
+   "venue": "Sensors",
+   "doi_check_results": [],
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "doi": "10.3390/s23115229",
+   "title": "Open-Source Implementations of the Reactive Asset Administration Shell: A Survey",
+   "year": 2023,
+   "venue": "Sensors",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.3390/s23177601",
+   "title": "On the Role of Digital Twins in Data Spaces",
+   "year": 2023,
+   "venue": "Sensors (Crossref container title; Consensus listed Sensors (Basel, Switzerland))",
+   "doi_check_results": [],
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.3390/s23187742",
+   "title": "Increasing Interoperability between Digital Twin Standards and Specifications: Transformation of DTDL to AAS",
+   "year": 2023,
+   "venue": "Sensors (Basel, Switzerland)",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.3390/s25133855",
+   "title": "Innovative QR Code System for Tamper-Proof Generation and Fraud-Resistant Verification",
+   "year": 2025,
+   "venue": "Sensors (Basel, Switzerland)",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.3390/s25185653",
+   "title": "Design of a Sensor-Based Digital Product Passport for Low-Tech Manufacturing: Traceability and Environmental Monitoring in Bio-Block Production",
+   "year": 2025,
+   "venue": "Sensors (Basel, Switzerland)",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3390/s26041193",
+   "title": "Interacting with IoT Data Spaces Using LLMs and the Model Context Protocol",
+   "year": 2026,
+   "venue": "Sensors (Basel, Switzerland)",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.3390/su14063321",
+   "title": "Traceability Platform Based on Green Blockchain: An Application Case Study in Dairy Supply Chain",
+   "year": 2022,
+   "venue": "Sustainability",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.3390/su15097187",
+   "title": "Empowering End-of-Life Vehicle Decision Making with Cross-Company Data Exchange and Data Sovereignty via Catena-X",
+   "year": 2023,
+   "venue": "Sustainability",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m04",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3390/su151813738",
+   "title": "Hyperledger Fabric-Based Tea Supply Chain Production Data Traceable Scheme",
+   "year": 2023,
+   "venue": "Sustainability",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.3390/su16010082",
+   "title": "A Traceability Platform for Monitoring Environmental and Social Sustainability in the Textile and Clothing Value Chain: Towards a Digital Passport for Textiles and Clothing",
+   "year": 2023,
+   "venue": "Sustainability",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3390/su17030969",
+   "title": "Digital Product Passport Design Supporting the Circular Economy Based on the Asset Administration Shell",
+   "year": 2025,
+   "venue": "Sustainability",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "f04",
+    "l01",
+    "l02",
+    "m03",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.3390/systems11030123",
+   "title": "Stop Guessing in the Dark: Identified Requirements for Digital Product Passport Systems",
+   "year": 2023,
+   "venue": "Systems",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "m01"
+   ]
+  },
+  {
+   "doi": "10.34657/28443",
+   "title": "COBALT-P - Offene Kreislaufwirtschaftsplattform für optimierte Lebenszyklen und den prädiktiven Handel von Batterien; Teilprojekt: Entwicklung eines sicheren Datenaustauschs und Weitergabe von Batterieinformationen für eine dezentrale Plattform auf Basis von Blockchain und digitalen Zwilling",
+   "year": 2026,
+   "venue": "RENATE repository, OpenAlex type: report (project report)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.35490/ec3.2025.361",
+   "title": "Leveraging Blockchain for Circular Economy: a Digital Product Passport Platform for BIM-based Design",
+   "year": 2025,
+   "venue": "Computing in Construction",
+   "doi_check_results": [],
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "doi": "10.35490/ec3.2026.311",
+   "title": "Usage Policies for Fragmented Digital Product Passport Data Retrieval in AECO Data Spaces",
+   "year": 2026,
+   "venue": "Computing in Construction",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "g03",
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.48506/opus-7940",
+   "title": "Overcoming information asymmetry in the plastics value chain with digital product passports : how decentralised identifiers and verifiable credentials can enable a circular economy for plastics",
+   "year": 2022,
+   "venue": "Report (OpenAlex type report; source listed as Social Science Open Access Repository, GESIS)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.1003.3661",
+   "title": "An HTTP-Based Versioning Mechanism for Linked Data",
+   "year": 2010,
+   "venue": "arXiv",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2204.00317",
+   "title": "A solution approach for the anonymous sharing of sensitive supply chain traceability data",
+   "year": 2022,
+   "venue": "ArXiv",
+   "doi_check_results": [],
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2204.10097",
+   "title": "Content negotiation on the Web: State of the art",
+   "year": 2022,
+   "venue": "arXiv",
+   "doi_check_results": [],
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2209.14517",
+   "title": "The Fungibility of Non-Fungible Tokens: A Quantitative Analysis of ERC-721 Metadata",
+   "year": 2022,
+   "venue": "ArXiv",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2309.11282",
+   "title": "A Survey of Dataspace Connector Implementations",
+   "year": 2023,
+   "venue": "arXiv (preprint)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03",
+    "m04"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2401.08196",
+   "title": "On Cryptographic Mechanisms for the Selective Disclosure of Verifiable Credentials",
+   "year": 2024,
+   "venue": "arXiv preprint; OpenAlex links it to a Journal of Information Security and Applications version",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2410.15758",
+   "title": "Digital Product Passport Management with Decentralised Identifiers and Verifiable Credentials",
+   "year": 2024,
+   "venue": "arXiv",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l01",
+    "l02",
+    "m01",
+    "m05",
+    "m07",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2602.14871",
+   "title": "interID - An Ecosystem-agnostic Verifier-as-a-Service with OpenID Connect Bridge",
+   "year": 2026,
+   "venue": "arXiv preprint (OpenAlex)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2604.26986",
+   "title": "BatteryPass-12K: The First Dataset for the Novel Digital Battery Passport Conformance Task",
+   "year": 2026,
+   "venue": "ArXiv",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2607.08383",
+   "title": "Secure QR Codes: Authenticity Verification via EdDSA Signatures and CBOR Certificates",
+   "year": 2026,
+   "venue": "ArXiv",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2609.00340",
+   "title": "OreProof: Verifiable Provenance with Limited Disclosure for Critical-Minerals Supply Chains Using Zero-Knowledge Proofs",
+   "year": 2026,
+   "venue": "arXiv preprint (OpenAlex)",
+   "doi_check_results": [],
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "doi": "10.48550/arxiv.2609.17062",
+   "title": "A Set-Theoretic Evaluation Framework for Assessing Asset Administration Shell Instances: Towards Comparability and Suitability",
+   "year": 2026,
+   "venue": "arXiv preprint",
+   "doi_check_results": [],
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "doi": "10.5220/0012732900003690",
+   "title": "Data Quality Assessment for the Textile and Clothing Value-Chain Digital Product Passport",
+   "year": 2024,
+   "venue": "International Conference on Enterprise Information Systems (confirmed by OpenAlex)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.10949842",
+   "title": "DPP System Architecture",
+   "year": 2024,
+   "venue": "Zenodo (CIRPASS deliverable D3.2, record dated 2024-03-26)",
+   "doi_check_results": [],
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.15745203",
+   "title": "RecAl Digital Product Passport: Enhancing Traceability and Transparency in the Aluminum Supply Chain",
+   "year": 2025,
+   "venue": "Zenodo (repository)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.16534672",
+   "title": "OMEGA: Report on developed tools and technical documentation",
+   "year": 2025,
+   "venue": "Zenodo (repository)",
+   "doi_check_results": [],
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.17776989",
+   "title": "CE-RISE Digital Product and Material Passport (DPP & DMP) data-model architecture",
+   "year": 2026,
+   "venue": "Zenodo (documentation record)",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.18433712",
+   "title": "Design and Implementation of a Digital Product Passport Prototype for a Coffee Machine in the Circular Economy",
+   "year": 2026,
+   "venue": "Zenodo repository record (OpenAlex type: article; not shown to be peer reviewed)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.18433713",
+   "title": "Design and Implementation of a Digital Product Passport Prototype for a Coffee Machine in the Circular Economy",
+   "year": 2026,
+   "venue": "Zenodo (repository record)",
+   "doi_check_results": [],
+   "files": [
+    "g01",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.18711539",
+   "title": "MaDiTraCe: D3.3 Guidelines for Methodology implementation",
+   "year": 2025,
+   "venue": "Zenodo (project deliverable)",
+   "doi_check_results": [],
+   "files": [
+    "f02",
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.20848510",
+   "title": "Full-Stack Digital Product Passport Architecture Supporting Interoperability and AI-Enabled Use",
+   "year": 2026,
+   "venue": "Zenodo conference proceeding (DaCapo, Horizon Europe GA 101091780)",
+   "doi_check_results": [],
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "doi": "10.5281/zenodo.21825739",
+   "title": "REECO DIGITAL PRODUCT PASSPORT Conformance Report",
+   "year": 2026,
+   "venue": "Zenodo (preprint, CC-BY-4.0); deposited 2026-08-06",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.5334/dsj-2017-034",
+   "title": "Distributed Persistent Identifiers System Design",
+   "year": 2017,
+   "venue": "Data Sci. J.",
+   "doi_check_results": [],
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "doi": "10.5334/dsj-2017-039",
+   "title": "Persistence Statements: Describing Digital Stickiness",
+   "year": 2017,
+   "venue": "Data Sci. J.",
+   "doi_check_results": [],
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "doi": "10.5381/jot.2026.25.3.a21",
+   "title": "Product Digital Twin Ontology: A Pivot for Bridging Asset Administration Shell-based and Ontology-based Digital Product Passports.",
+   "year": 2026,
+   "venue": "The Journal of Object Technology",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l02",
+    "m03",
+    "m08"
+   ]
+  },
+  {
+   "doi": "10.54648/bula2024009",
+   "title": "The Digital Product Passport of the Ecodesign Regulation - Passport to a Successful Twin Transformation in Product Law?",
+   "year": 2024,
+   "venue": "Business Law Review",
+   "doi_check_results": [],
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "doi": "10.54941/ahfe1004559",
+   "title": "APPEND: A Blockchain-Based Model of Digital Product Passport for Furniture Industry",
+   "year": null,
+   "venue": "not returned by the tool (year also not returned)",
+   "doi_check_results": [],
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "doi": "10.56553/popets-2023-0113",
+   "title": "Privacy-Preserving Outsourced Certificate Validation",
+   "year": 2023,
+   "venue": "IACR Cryptol. ePrint Arch.",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "doi": "10.59350/xhypb-nwy69",
+   "title": "Validating an Identifier Service",
+   "year": 2022,
+   "venue": "Blog post (posted content with a blog-archive DOI; no container title)",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "10.5957/tos-2024-004",
+   "title": "Guidance on the Verification and Validation of Digital Twins",
+   "year": 2024,
+   "venue": "SNAME 29th Offshore Symposium",
+   "doi_check_results": [
+    "match"
+   ],
+   "files": [
+    "l03"
+   ]
+  },
+  {
+   "doi": "not returned by the tool",
+   "title": "Off-line NFC Tag Authentication",
+   "year": 2012,
+   "venue": "2012 International Conference for Internet Technology and Secured Transactions",
+   "doi_check_results": [],
+   "files": [
+    "g02"
+   ]
+  }
+ ]
+}

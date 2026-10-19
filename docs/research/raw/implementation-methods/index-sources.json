@@ -1,0 +1,7698 @@
+{
+ "note": "Generated from the evidence files in this folder on 2026-10-19. Deduplicated by URL (sources) and by DOI (papers). Where agents gave different verification levels, all levels are listed.",
+ "count": 460,
+ "sources": [
+  {
+   "url": "https://ref.gs1.org/guidelines/2d-in-retail/1.1.0/GS1-2DRetailPOS-Guideline-i1.1-r-2025-12-15",
+   "ids": [
+    "new-gs1-2d-retail-pos-1-1"
+   ],
+   "titles": [
+    "2D Barcodes at Retail Point-of-Sale Implementation Guideline"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/guidelines/2d-in-retail/",
+   "ids": [
+    "new-gs1-2d-retail-pos-guideline"
+   ],
+   "titles": [
+    "2D Barcodes at Retail Point-of-Sale Implementation Guideline"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://arxiv.org/abs/2609.17062",
+   "ids": [
+    "new-arxiv-2609-17062"
+   ],
+   "titles": [
+    "A Set-Theoretic Evaluation Framework for Assessing Asset Administration Shell Instances: Towards Comparability and Suitability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-test-engines",
+   "ids": [
+    "aas-test-engines"
+   ],
+   "titles": [
+    "aas-test-engines (Official test tooling for the Asset Administration Shell)"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03",
+    "m04"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/act-rules-format-1.1/",
+   "ids": [
+    "new-w3c-act-rules-format-1-1"
+   ],
+   "titles": [
+    "Accessibility Conformance Testing (ACT) Rules Format 1.1"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://developer.apple.com/documentation/corenfc/adding-support-for-background-tag-reading",
+   "ids": [
+    "new-apple-corenfc-background"
+   ],
+   "titles": [
+    "Adding Support for Background Tag Reading (Apple Developer Documentation)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/smt-semantic-models",
+   "ids": [
+    "new-idta-smt-semantic-models"
+   ],
+   "titles": [
+    "admin-shell-io/smt-semantic-models"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates",
+   "ids": [
+    "new-idta-submodel-templates-repo",
+    "idta-submodel-templates-repo"
+   ],
+   "titles": [
+    "admin-shell-io/submodel-templates (GitHub repository, published/ tree)",
+    "IDTA Submodel Templates for AAS (repository admin-shell-io/submodel-templates)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m03"
+   ]
+  },
+  {
+   "url": "https://www.nxp.com/docs/en/application-note/AN12196.pdf",
+   "ids": [
+    "new-nxp-an12196"
+   ],
+   "titles": [
+    "AN12196 NTAG 424 DNA and NTAG 424 DNA TagTamper features and hints"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://jena.apache.org/documentation/shacl/",
+   "ids": [
+    "new-jena-shacl"
+   ],
+   "titles": [
+    "Apache Jena SHACL documentation"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://ceur-ws.org/Vol-4167/paper23.pdf",
+   "ids": [
+    "new-gering-ceur-dpp-architecture"
+   ],
+   "titles": [
+    "Architecture for a Digital Product Passport System based on the Ecodesign for Sustainable Products Regulation and the corresponding Standardisation Request"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://www.arianee.com/en/platform/api",
+   "ids": [
+    "new-vendor-arianee"
+   ],
+   "titles": [
+    "Arianee documentation v2.2, Enterprise API page and protocol page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://docs.arianee.org/v2.0/docs",
+   "ids": [
+    "new-arianee-docs"
+   ],
+   "titles": [
+    "Arianee Protocol documentation (v2.0 index page) and search excerpts"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/Arianee/arianee-contracts",
+   "ids": [
+    "new-arianee-contracts"
+   ],
+   "titles": [
+    "arianee-contracts (Foundry project with Arianee Protocol smart contracts)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://webstore.iec.ch/en/publication/65628",
+   "ids": [
+    "iec-63278-1-2023"
+   ],
+   "titles": [
+    "Asset Administration Shell for industrial applications - Part 1: Asset Administration Shell structure"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://www.averydennison.com/na/en/industries/apparel/products/data-management-applications",
+   "ids": [
+    "new-vendor-atma-io"
+   ],
+   "titles": [
+    "Avery Dennison atma.io data management applications page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/Azure/opendigitaltwins-dtdl",
+   "ids": [
+    "new-dtdl-repo"
+   ],
+   "titles": [
+    "Azure/opendigitaltwins-dtdl"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP4%20Battery%20Passport%20Demonstrator",
+   "ids": [
+    "new-bp-state-of-play-2024",
+    "new-bp-closing-event-2025"
+   ],
+   "titles": [
+    "Battery Pass State of Play (slides)",
+    "From Concept to Demonstration (Battery Pass closing event slides)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "https://opcfoundation.org/news/press-releases/battery-passport-proof-of-concept-based-on-opc-ua/",
+   "ids": [
+    "new-opc-press-battery-poc"
+   ],
+   "titles": [
+    "Battery Passport Proof of Concept based on OPC UA"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/batterypass/BatteryPassDataModel/tree/main/docs/Battery%20Pass%20Deliverables/WP3%20Battery%20Passport%20Technical%20Guidance",
+   "ids": [
+    "bp-technical-guidance",
+    "new-bp-standard-stack-pdf"
+   ],
+   "titles": [
+    "Battery Passport Technical Guidance",
+    "Battery Pass Technical Standard Stack (PDF)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://www.acatech.de/publikation/battery-passport-technical-guidance/",
+   "ids": [
+    "bp-technical-guidance"
+   ],
+   "titles": [
+    "Battery Passport Technical Guidance (acatech publication page)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04"
+   ]
+  },
+  {
+   "url": "https://www.acatech.de/publikation/battery-passport-technical-guidance/download-pdf/?lang=en",
+   "ids": [
+    "bp-technical-guidance"
+   ],
+   "titles": [
+    "Battery Passport Technical Guidance (Battery Pass consortium)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/raw/main/README.md?ref_type=heads",
+   "ids": [
+    "bp-ready-data-model-v2"
+   ],
+   "titles": [
+    "BatteryPass-Ready Data Model (README)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://git.gefeg.com/bp/BatteryPassDataModel/-/tree/main/BatteryPass-Ready?ref_type=heads",
+   "ids": [
+    "bp-ready-data-model-v2"
+   ],
+   "titles": [
+    "BatteryPass-Ready Data Model (v2.0)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://thebatterypass.eu/battery-pass-ready/",
+   "ids": [
+    "new-bpr-project-page"
+   ],
+   "titles": [
+    "BatteryPass-Ready project page"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "https://thebatterypass.eu/battery-pass-ready/resources/",
+   "ids": [
+    "new-bpr-resources-page",
+    "new-batterypass-ready-resources"
+   ],
+   "titles": [
+    "BatteryPass-Ready resources",
+    "BatteryPass-Ready resources and project pages"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/batterypass/BatteryPassDataModel",
+   "ids": [
+    "new-batterypass-datamodel-repo",
+    "bp-data-model-github-v1-2-0"
+   ],
+   "titles": [
+    "batterypass/BatteryPassDataModel (GitHub), Technical Guidance PDF",
+    "Battery Pass Data Model repository (GitHub)",
+    "Battery Pass Data Model repository (GitHub, v1.2.0)",
+    "Battery Pass Data Model repository (GitHub, Battery Pass project, v1.2.0)"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m01",
+    "m07",
+    "m08",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vc-bitstring-status-list/",
+   "ids": [
+    "w3c-bitstring-status-list-1-0"
+   ],
+   "titles": [
+    "Bitstring Status List v1.0"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/boebe24/boebe-DPP-Viewer",
+   "ids": [
+    "new-boebe-dpp-viewer"
+   ],
+   "titles": [
+    "boebe24/boebe-DPP-Viewer repository metadata"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Technische-Richtlinien/TR-nach-Thema-sortiert/tr03137/tr-03137.html",
+   "ids": [
+    "new-bsi-tr-03137"
+   ],
+   "titles": [
+    "BSI TR-03137 Optically Verifiable Cryptographic Protection of non-electronic Documents (Digital Seal); Part 2 JAB Code"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://github.com/buildingSMART/bSDD",
+   "ids": [
+    "new-bsdd-github"
+   ],
+   "titles": [
+    "buildingSMART/bSDD"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md",
+   "ids": [
+    "new-caip-2"
+   ],
+   "titles": [
+    "CAIP-2: Blockchain ID Specification"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://ec.europa.eu/info/law/better-regulation/api/download/090166e5148f8f59",
+   "ids": [
+    "new-hys-14382-call-for-evidence"
+   ],
+   "titles": [
+    "Call for evidence for an impact assessment: Digital product passport – rules for service providers"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "url": "catalogue/sources.yaml",
+   "ids": [
+    "new-catalogue-sources-yaml"
+   ],
+   "titles": [
+    "catalogue/sources.yaml (repository, 2026-10-13 records)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04"
+   ]
+  },
+  {
+   "url": "https://catena-x.net/ecosystem/certification/",
+   "ids": [
+    "new-cx-certification"
+   ],
+   "titles": [
+    "Catena-X certification (catena-x.net ecosystem page) and Catena-X Certification page source (Titan)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/catenax-eV/catenax-ev.github.io/blob/main/LICENSE.md",
+   "ids": [
+    "new-cx-legal-notice"
+   ],
+   "titles": [
+    "Catena-X Legal Notice (catenax-ev.github.io LICENSE.md)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/overview",
+   "ids": [
+    "new-cx-standards-overview"
+   ],
+   "titles": [
+    "Catena-X standards overview",
+    "Catena-X Standard Library overview"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/catenax-eV/catenax-ev.github.io/blob/main/docusaurus.config.ts",
+   "ids": [
+    "new-catenax-site-config"
+   ],
+   "titles": [
+    "catenax-ev.github.io docusaurus.config.ts and versions.json"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "https://github.com/catenax-eV/catenax-ev.github.io",
+   "ids": [
+    "new-cx-github-repo"
+   ],
+   "titles": [
+    "catenax-eV/catenax-ev.github.io, docs/standards (GitHub main)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/cbv/archive",
+   "ids": [
+    "new-gs1-cbv-archive"
+   ],
+   "titles": [
+    "CBV standard archive (release list)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/CE-RISE-software",
+   "ids": [
+    "new-ce-rise"
+   ],
+   "titles": [
+    "CE-RISE software and models (hex-core-service, product-profile, dp-assessment-workbench)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/info/rfc9162",
+   "ids": [
+    "rfc-9162"
+   ],
+   "titles": [
+    "Certificate Transparency Version 2.0"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://specs.ipfs.tech/cid/",
+   "ids": [
+    "new-ipfs-cid-spec"
+   ],
+   "titles": [
+    "CID (Content IDentifier)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://cir4fun.eu/",
+   "ids": [
+    "new-cir4fun-project-site"
+   ],
+   "titles": [
+    "Cir4Fun project home page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/CIR4FUN-EU",
+   "ids": [
+    "cir4fun-eu-github-org"
+   ],
+   "titles": [
+    "CIR4FUN-EU GitHub organization"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://circularise.com/use-case/consumer-product-passports",
+   "ids": [
+    "new-vendor-circularise"
+   ],
+   "titles": [
+    "Circularise consumer passport and compliance pages; Circularise GitHub organisation"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://circularise.com/faq",
+   "ids": [
+    "new-circularise-faq"
+   ],
+   "titles": [
+    "Circularise FAQ and search excerpts on Smart Questioning"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://www.lfdecentralizedtrust.org/case-studies/materials-traceability-leader-circulor-expands-hyperledger-fabric-based-solution-to-underpin-digital-battery-passports",
+   "ids": [
+    "new-vendor-circulor"
+   ],
+   "titles": [
+    "Circulor case study (LF Decentralized Trust) and Cofinity-X listing"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://cirpassproject.eu/project-results/",
+   "ids": [
+    "new-cirpass1-results-page"
+   ],
+   "titles": [
+    "CIRPASS project results"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://github.com/CIRPASS-2/dpp-validator",
+   "ids": [
+    "new-cirpass2-dpp-validator"
+   ],
+   "titles": [
+    "CIRPASS-2 dpp-validator README and pom.xml"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/CIRPASS-2",
+   "ids": [
+    "cirpass2-github-repositories"
+   ],
+   "titles": [
+    "CIRPASS-2 GitHub repositories (dpp-renderer-be, dpp-renderer-fe read in this session)",
+    "CIRPASS-2 GitHub repositories",
+    "CIRPASS-2 GitHub repositories (mock-eu-registry, dpp-validator, dpp-data-extractor, dpp-renderer-be, dpp-renderer-fe, deploy-resources, ontologies)"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m02",
+    "m07",
+    "m08",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/CIRPASS-2/mock-eu-registry",
+   "ids": [
+    "cirpass2-github-repositories"
+   ],
+   "titles": [
+    "CIRPASS-2 GitHub repositories (mock-eu-registry)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "url": "https://cirpass2.eu/lighthouse-pilots/",
+   "ids": [
+    "new-cirpass2-lighthouse-pilots"
+   ],
+   "titles": [
+    "CIRPASS-2 lighthouse pilots",
+    "CIRPASS-2 lighthouse pilots (index and pilot pages PA1, PA2, PA3, PA4, PA6, PB1, PB2, PB4, PC1, PC2)"
+   ],
+   "levels": [
+    "substantive",
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/CIRPASS-2/ontologies-docs",
+   "ids": [
+    "new-cirpass2-ontologies-docs"
+   ],
+   "titles": [
+    "CIRPASS-2 ontologies-docs (EU DPP ontologies documentation)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/20749604",
+   "ids": [
+    "cirpass2-test-environment-description"
+   ],
+   "titles": [
+    "CIRPASS-2 OPEN SOURCE TEST ENVIRONMENT",
+    "CIRPASS-2 Open Source Test Environment (description report)"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://cirpass2.eu/project-results/",
+   "ids": [
+    "new-cirpass2-results-page",
+    "new-cirpass2-project-results"
+   ],
+   "titles": [
+    "CIRPASS-2 project results",
+    "CIRPASS-2 project results list"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://cobuilder.com/en/digitalisation-2/eu-funded-project-digital-product-passports/",
+   "ids": [
+    "new-vendor-cobuilder"
+   ],
+   "titles": [
+    "Cobuilder CIRPASS-2 pilot page (search excerpts)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.cofinity-x.com/products/manufacturing-x-dataspace-saas-platform",
+   "ids": [
+    "new-vendor-cofinity-x"
+   ],
+   "titles": [
+    "Cofinity-X ECOPASS use case and Manufacturing-X Dataspace SaaS platform pages"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601736",
+   "ids": [
+    "cid-2026-1736-dpp-harmonised-standards"
+   ],
+   "titles": [
+    "Commission Implementing Decision (EU) 2026/1736 on harmonised standards for digital product passports"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/dec_impl/2026/1736/oj",
+   "ids": [
+    "impl-dec-eu-2026-1736"
+   ],
+   "titles": [
+    "Commission Implementing Decision (EU) 2026/1736 on harmonised standards for digital product passports"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/0fe00734-8013-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "impl-dec-eu-2026-1736"
+   ],
+   "titles": [
+    "Commission Implementing Decision (EU) 2026/1736 on harmonised standards for digital product passports (Cellar DOC_1)",
+    "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026 on harmonised standards for digital product passports drafted in support of Regulation (EU) 2024/1781 of the European Parliament and of the Council",
+    "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026 on harmonised standards for digital product passports drafted in support of Regulation (EU) 2024/1781"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m01",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://ec.europa.eu/growth/tools-databases/enorm/mandate/604_en",
+   "ids": [
+    "sreq-m-604-dpp"
+   ],
+   "titles": [
+    "Commission Implementing Decision C(2024) 5423 of 31 July 2024 on a standardisation request to CEN, CENELEC and ETSI as regards digital product passports (M/604), as amended by C(2025) 8024"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02",
+    "m01"
+   ]
+  },
+  {
+   "url": "https://publications.europa.eu/resource/cellar/cbd048d0-daeb-11f0-8da2-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-impl-reg-2025-2531"
+   ],
+   "titles": [
+    "Commission Implementing Regulation (EU) 2025/2531 laying down rules for the application of Regulation (EU) No 910/2014 as regards reference standards and specifications for qualified electronic ledgers"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj",
+   "ids": [
+    "impl-reg-eu-2026-1778",
+    "impl-reg-eu-2026-1778-dpp-registry"
+   ],
+   "titles": [
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry",
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 (DPP registry)",
+    "Commission Implementing Regulation (EU) 2026/1778 laying down the implementation arrangements for the digital product passport registry"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03",
+    "m04",
+    "m10"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/56aaf918-8178-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "impl-reg-eu-2026-1778",
+    "dpp-registry-implementing-regulation-2026-1778",
+    "cir-2026-1778-dpp-registry"
+   ],
+   "titles": [
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry set up under Regulation (EU) 2024/1781 of the European Parliament and of the Council",
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry (title as in m01/m09 records)",
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 (DPP registry implementation arrangements)",
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementing rules for the digital product passport registry (title as in prior record, truncated there)",
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry set up under Regulation (EU) 2024/1781 of the European Parliament and of the Council (Text with EEA relevance)",
+    "Commission Implementing Regulation (EU) 2026/1778 of 16 July 2026 laying down the implementation arrangements for the digital product passport registry set up under Regulation (EU) 2024/1781"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "g02",
+    "m01",
+    "m05",
+    "m06",
+    "m07",
+    "m08",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/odal-node/dpp-engine",
+   "ids": [
+    "new-community-dpp-repos-metadata"
+   ],
+   "titles": [
+    "Community DPP repositories found by GitHub search (odal-node, bsv-blockchain, OwnYourData)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/dx-prof-conneg/",
+   "ids": [
+    "new-w3c-dx-prof-conneg"
+   ],
+   "titles": [
+    "Content Negotiation by Profile"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/cid-1.0/",
+   "ids": [
+    "w3c-cid-1-0"
+   ],
+   "titles": [
+    "Controlled Identifiers v1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/cbv/",
+   "ids": [
+    "new-gs1-cbv-2-0-pdf"
+   ],
+   "titles": [
+    "Core Business Vocabulary (CBV) Standard"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/track-and-trace/create-tnt-doc",
+   "ids": [
+    "new-ebsi-create-tnt-doc"
+   ],
+   "titles": [
+    "Create a TnT Doc"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://api.crossref.org/works/10.1007/978-3-032-26363-6_29",
+   "ids": [
+    "new-springer-steel-dpp-crossref"
+   ],
+   "titles": [
+    "Crossref record for 10.1007/978-3-032-26363-6_29"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://api.crossref.org/works",
+   "ids": [
+    "new-crossref-doi-check-m03"
+   ],
+   "titles": [
+    "Crossref REST API works records for the 23 non-arXiv DOIs in this file"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0001-ParticipantAgentRegistration",
+   "ids": [
+    "new-cx-0001"
+   ],
+   "titles": [
+    "CX-0001 Participant Agent Registration"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0002-DigitalTwinsInCatenaX",
+   "ids": [
+    "new-cx-0002"
+   ],
+   "titles": [
+    "CX-0002 Digital Twins in Catena-X"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0003-SAMMSemanticAspectMetaModel",
+   "ids": [
+    "new-cx-0003"
+   ],
+   "titles": [
+    "CX-0003 SAMM Aspect Meta Model"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0010-BusinessPartnerNumber",
+   "ids": [
+    "new-cx-0010",
+    "new-catenax-cx-0010"
+   ],
+   "titles": [
+    "CX-0010 Business Partner Number"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0018-DataspaceConnectivity",
+   "ids": [
+    "new-cx-0018"
+   ],
+   "titles": [
+    "CX-0018 Dataspace Connectivity"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0050-CXSpecificCredentials",
+   "ids": [
+    "new-cx-0050"
+   ],
+   "titles": [
+    "CX-0050 Catena-X-specific verifiable credentials"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0053-BPNDiscoveryServiceAPIs",
+   "ids": [
+    "new-cx-0053"
+   ],
+   "titles": [
+    "CX-0053 Discovery Finder and BPN Discovery Service APIs"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0143-UseCaseCircularEconomyDigitalProductPassportStandard/introduction",
+   "ids": [
+    "new-cx-0143"
+   ],
+   "titles": [
+    "CX-0143 Use Case Circular Economy - Digital Product Passport (published site page)",
+    "CX-0143 Use Case Circular Economy - Digital Product Passport"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m04"
+   ]
+  },
+  {
+   "url": "https://catenax-ev.github.io/docs/standards/CX-0152-PolicyConstrainsForDataExchange",
+   "ids": [
+    "new-cx-0152"
+   ],
+   "titles": [
+    "CX-0152 Policy Constraints For Data Exchange"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/catenax-eV/catenax-ev.github.io/tree/main/docs/standards/CX-0160-BatteryPassport",
+   "ids": [
+    "new-cx-0160"
+   ],
+   "titles": [
+    "CX-0160 Battery Passport Data Management (base v1.1.0; CX-0160-1 v1.0.0; CX-0160-3 v1.0.0; Changelog; CAC files)",
+    "CX-0160 Battery Passport Data Management Base (GitHub main, preview)",
+    "CX-0160 Battery Passport Data Management (Base v.1.1.0; CX-0160-1 and CX-0160-3 v1.0.0)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "f04",
+    "m04"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/20720002",
+   "ids": [
+    "new-cirpass2-d41-reference-architecture"
+   ],
+   "titles": [
+    "D4.1 Reference Architecture"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "g01",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/15388412",
+   "ids": [
+    "new-cirpass2-d4-1-reference-architecture"
+   ],
+   "titles": [
+    "D4.1 Reference Architecture (CIRPASS-2)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/architecture/findings/data-carriers-and-gs1",
+   "ids": [
+    "new-gs1-data-carriers-finding"
+   ],
+   "titles": [
+    "Data Carriers and GS1 (GS1 Architecture Group Finding)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vocab-dcat-3/",
+   "ids": [
+    "new-w3c-dcat-3"
+   ],
+   "titles": [
+    "Data Catalog Vocabulary (DCAT) - Version 3"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vc-di-ecdsa/",
+   "ids": [
+    "w3c-vc-di-ecdsa-1-0"
+   ],
+   "titles": [
+    "Data Integrity ECDSA Cryptosuites v1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vc-di-eddsa/",
+   "ids": [
+    "w3c-vc-di-eddsa-1-0"
+   ],
+   "titles": [
+    "Data Integrity EdDSA Cryptosuites v1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/v1.0-RC4",
+   "ids": [
+    "new-dps-spec-1-0-rc4"
+   ],
+   "titles": [
+    "Data Plane Signaling 1.0-RC4"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err2/",
+   "ids": [
+    "new-dsp-spec-2025-1"
+   ],
+   "titles": [
+    "Dataspace Protocol Release 2025-1"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/SEMICeu/DCAT-AP",
+   "ids": [
+    "new-dcat-ap"
+   ],
+   "titles": [
+    "DCAT-AP (SEMICeu repository)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/did-1.1/",
+   "ids": [
+    "new-w3c-did-1-1"
+   ],
+   "titles": [
+    "Decentralized Identifiers (DIDs) v1.1"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05",
+    "m06",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14382-Digital-product-passport-rules-for-service-providers_en",
+   "ids": [
+    "dpp-service-providers-delegated-act"
+   ],
+   "titles": [
+    "Delegated act under Art. 11, third subparagraph, of Regulation (EU) 2024/1781 on requirements for DPP service providers"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/dequelabs/axe-core",
+   "ids": [
+    "new-axe-core"
+   ],
+   "titles": [
+    "dequelabs/axe-core repository and README"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://doi.org/10.5281/zenodo.18433713",
+   "ids": [
+    "new-kroell-coffee-dpp-zenodo"
+   ],
+   "titles": [
+    "Design and Implementation of a Digital Product Passport Prototype for a Coffee Machine in the Circular Economy"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://github.com/eu-digital-green-certificates/dgc-testdata",
+   "ids": [
+    "new-dgc-testdata"
+   ],
+   "titles": [
+    "dgc-testdata (EU Digital Green Certificate test data)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://w3c-ccg.github.io/did-method-web/",
+   "ids": [
+    "new-ccg-did-web",
+    "new-did-web-method"
+   ],
+   "titles": [
+    "did:web Method Specification"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.digimarc.com/blog/decentralized-blueprint-digital-product-passports",
+   "ids": [
+    "new-vendor-digimarc"
+   ],
+   "titles": [
+    "Digimarc decentralized blueprint for digital product passports"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/document/download/cd1e5e6c-4a4a-4b99-995a-49eb6916187e_en?filename=Digital%20Batteries%20Passport%20-%20data%20point%20by%20category.pdf",
+   "ids": [
+    "ec-guidance-battery-passport-data-points"
+   ],
+   "titles": [
+    "Digital Batteries Passport - data point by category"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/1_Digital%20Nameplate",
+   "ids": [
+    "idta-02035-1-dbp-digital-nameplate"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 1: Digital Nameplate"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02035-1/1.0/index.html",
+   "ids": [
+    "idta-02035-1-dbp-digital-nameplate"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 1: Digital Nameplate (series IDTA 02035-1 to -7)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/2_Handover%20Documentation",
+   "ids": [
+    "idta-02035-2-dbp-handover-documentation"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 2: Handover Documentation"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/3_Product%20Carbon%20Footprint",
+   "ids": [
+    "idta-02035-3-dbp-product-carbon-footprint"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 3: Product Carbon Footprint"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/4_Technical%20Data",
+   "ids": [
+    "idta-02035-4-dbp-technical-data"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 4: Technical Data"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/5_Product%20Condition",
+   "ids": [
+    "idta-02035-5-dbp-product-condition"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 5: Product Condition"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/6_Material%20Composition",
+   "ids": [
+    "idta-02035-6-dbp-material-composition"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 6: Material Composition"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/7_Circularity",
+   "ids": [
+    "idta-02035-7-dbp-circularity"
+   ],
+   "titles": [
+    "Digital Battery Passport, Part 7: Circularity"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport_en",
+   "ids": [
+    "ec-dpp-batteries-webpage-and-timeline",
+    "espr-art-4-product-delegated-acts",
+    "batteries-art-77-9-implementing-act"
+   ],
+   "titles": [
+    "Digital Product Passport (Commission web page with DPP timeline)",
+    "Digital Product Passport (Commission hub page and timeline)",
+    "Product-specific delegated acts under Art. 4 of Regulation (EU) 2024/1781",
+    "Implementing act(s) under Art. 77(9) of Regulation (EU) 2023/1542 on access to battery passport information"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only",
+    "not_located"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://ec.europa.eu/info/law/better-regulation/brpapi/groupInitiatives/14382",
+   "ids": [
+    "new-hys-14382-brpapi"
+   ],
+   "titles": [
+    "Digital Product Passport (DPP) service providers (Have Your Say initiative 14382, API record)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81494",
+   "ids": [
+    "en-18239-2026"
+   ],
+   "titles": [
+    "Digital product passport - Access rights management, information system security, and business confidentiality"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81494&cs=1C97AB3E731BCF82E3BD2A04D9D8DC8CD",
+   "ids": [
+    "en-18239-2026"
+   ],
+   "titles": [
+    "Digital product passport - Access rights management, information system security, and business confidentiality"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80713",
+   "ids": [
+    "en-18222-2026"
+   ],
+   "titles": [
+    "Digital Product Passport - Application Programming Interfaces (APIs) for the product passport lifecycle management and searchability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80713&cs=1B0801E994815A4E35E2BABB2A3460C05",
+   "ids": [
+    "en-18222-2026"
+   ],
+   "titles": [
+    "Digital Product Passport - Application Programming Interfaces (APIs) for the product passport lifecycle management and searchability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81495",
+   "ids": [
+    "en-18246-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data authentication, reliability and integrity"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:81495&cs=1C627F97280D3E45FBBBED053BCCA88A9",
+   "ids": [
+    "en-18246-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data authentication, reliability and integrity"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80081&cs=1EEB1FD069281C804EC0A5EEDB8295A77",
+   "ids": [
+    "en-18220-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data carriers"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "not re-retrieved (see commission-2026-acts record)",
+   "ids": [
+    "en-18216-2026",
+    "en-18219-2026",
+    "en-18220-2026",
+    "en-18221-2026",
+    "en-18222-2026",
+    "en-18223-2026",
+    "en-18239-2026",
+    "en-18246-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data exchange protocols",
+    "Digital product passport - Unique identifiers",
+    "Digital product passport - Data carriers",
+    "Digital product passport - Data storage, archiving, and data persistence",
+    "Digital Product Passport - Application Programming Interfaces (APIs) for the product passport (title truncated in prior record)",
+    "Digital Product Passport - System interoperability",
+    "Digital product passport - Access rights management, information system security, and business confidentiality (title truncated in prior record)",
+    "Digital product passport - Data authentication, reliability and integrity"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80427&cs=1606A2E7E589E0185CCA83A6D82E1C78E",
+   "ids": [
+    "en-18216-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data exchange protocols"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80715",
+   "ids": [
+    "en-18221-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data storage, archiving, and data persistence"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80715&cs=150B8E8F03843B9CC9F4CAD8E01C34DE6",
+   "ids": [
+    "en-18221-2026"
+   ],
+   "titles": [
+    "Digital product passport - Data storage, archiving, and data persistence"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://opcfoundation.org/developer-tools/documents/view/406",
+   "ids": [
+    "new-opc-30450-1-listing"
+   ],
+   "titles": [
+    "Digital Product Passport - Information Model (OPC 30450-1)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1",
+   "ids": [
+    "idta-02099-1-dpp-metadata"
+   ],
+   "titles": [
+    "Digital Product Passport - Part 1: Metadata"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/resources-documentation_en",
+   "ids": [
+    "new-ec-dpp-resources-page",
+    "ec-dpp-registry-user-guide"
+   ],
+   "titles": [
+    "Digital Product Passport - Resources and documentation (Commission web page)",
+    "DPP Registry - User Guide for Economic Operators"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80714&cs=1B90D9",
+   "ids": [
+    "en-18223-2026"
+   ],
+   "titles": [
+    "Digital Product Passport - System interoperability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80714",
+   "ids": [
+    "en-18223-2026"
+   ],
+   "titles": [
+    "Digital Product Passport - System interoperability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/",
+   "ids": [
+    "en-18223-2026"
+   ],
+   "titles": [
+    "Digital Product Passport - System interoperability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:80714&cs=1B90D92069253E3C80D47ECEFE6CC7FAD",
+   "ids": [
+    "en-18223-2026"
+   ],
+   "titles": [
+    "Digital Product Passport - System interoperability"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:79954&cs=14DC1F74D7E9F9DD3EA30959F19526334",
+   "ids": [
+    "en-18219-2026"
+   ],
+   "titles": [
+    "Digital product passport - Unique identifiers"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/document/download/8748f8dc-3d48-4862-8153-e1165fb6be99_en?filename=Digital+Product+Passport+-+Frequently+Asked+Questions+%28FAQ%29.pdf",
+   "ids": [
+    "new-ec-dpp-faq-general-v1"
+   ],
+   "titles": [
+    "Digital Product Passport: Frequently Asked Questions (FAQ)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "https://blockchain-observatory.ec.europa.eu/document/download/b6e3c85c-43c1-405b-aba8-e49a71249ef7_en?filename=EUBOF_DPP_report.pdf",
+   "ids": [
+    "new-eubof-dpp-report-2024"
+   ],
+   "titles": [
+    "Digital Product Passports: A Blockchain-based Perspective"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v4/DTDL.Specification.v4.md",
+   "ids": [
+    "new-dtdl-v4-spec"
+   ],
+   "titles": [
+    "Digital Twins Definition Language (DTDL) Specification v4"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://www.dinmedia.de/en/technical-rule/din-dke-spec-99100/385692321",
+   "ids": [
+    "din-dke-spec-99100-2025-02"
+   ],
+   "titles": [
+    "DIN DKE SPEC 99100:2025-02 Requirements for data attributes of the battery passport; Text in English",
+    "DIN DKE SPEC 99100:2025-02 Requirements for data attributes of the battery passport"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03",
+    "m04",
+    "m10"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/6eb3ceb5-8905-11e9-9369-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-eaa-dir-2019-882"
+   ],
+   "titles": [
+    "Directive (EU) 2019/882 of the European Parliament and of the Council of 17 April 2019 on the accessibility requirements for products and services"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/cb5af945-9d9f-40e6-acee-bd0c5bb4ed0a.0008.01/DOC_1",
+   "ids": [
+    "new-eprivacy-dir-2002-58"
+   ],
+   "titles": [
+    "Directive 2002/58/EC of the European Parliament and of the Council of 12 July 2002 concerning the processing of personal data and the protection of privacy in the electronic communications sector"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://hadea.ec.europa.eu/news/discover-hadea-managed-projects-field-blockchain-2025-12-02_en",
+   "ids": [
+    "new-hadea-blockchain-projects-2025-12"
+   ],
+   "titles": [
+    "Discover HaDEA-managed projects in the field of blockchain (news, 2 December 2025)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.icao.int/sites/default/files/publications/DocSeries/9303_p13_cons_en.pdf",
+   "ids": [
+    "new-icao-9303-p13"
+   ],
+   "titles": [
+    "Doc 9303 Machine Readable Travel Documents, Part 13: Visible Digital Seals"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://www.doi.org/doi_handbook/2_Numbering.html",
+   "ids": [
+    "new-doi-handbook"
+   ],
+   "titles": [
+    "DOI Handbook"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://ZVEI.ORG/fileadmin/user_upload/Themen/Industrie/PCF%40ControlCabinet/20230411_Discussion_Paper_DPP40.pdf",
+   "ids": [
+    "new-zvei-dpp40-discussion-paper-2023"
+   ],
+   "titles": [
+    "DPP 4.0: An Architecture Proposal for a DPP-System to implement the EU Digital Product Passport for Industrial Products"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/dpp-registry_en",
+   "ids": [
+    "new-ec-dpp-registry-page"
+   ],
+   "titles": [
+    "DPP Registry (Commission web page)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/document/download/a71b5d30-ed8b-4c27-809d-757cf5e6030f_en?filename=dpp_registry_user_guide_for_economic_operators.pdf",
+   "ids": [
+    "ec-dpp-registry-user-guide"
+   ],
+   "titles": [
+    "DPP Registry User Guide for Economic Operators",
+    "DPP Registry - User Guide for Economic Operators"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "m01",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://infodpp.eu/en/knowledge-base/dpp-service-provider-requirements-explained/",
+   "ids": [
+    "new-infodpp-service-provider-explainer"
+   ],
+   "titles": [
+    "DPP Service Provider Requirements (explainer on infodpp.eu)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/12206138",
+   "ids": [
+    "new-cirpass1-d32-system-architecture"
+   ],
+   "titles": [
+    "DPP System Architecture"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/?p=6973",
+   "ids": [
+    "new-idta-dpp40-page"
+   ],
+   "titles": [
+    "DPP4.0 - IDTA"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "docs/explanation/architecture.md; docs/reference/capabilities.md; pyproject.toml",
+   "ids": [
+    "new-dppce-engine-source"
+   ],
+   "titles": [
+    "dppce engine: architecture section 8, capability manifest"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "docs/explanation/architecture.md; docs/reference/capabilities.md; src/dppce/adapters/identifier.py",
+   "ids": [
+    "new-dppce-engine-source"
+   ],
+   "titles": [
+    "dppce engine: architecture section 8, capability manifest, src/dppce/adapters/carrier.py and identifier.py"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/src/dppce/adapters/common.py",
+   "ids": [
+    "local-dppce-schema-probe"
+   ],
+   "titles": [
+    "dppce src/dppce/adapters/common.py validator() and src/dppce/adapters/data.py (this repository, worktree dpp-methods), run against fetched schemas"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://ec.europa.eu/transparency/comitology-register/core/api/integration/ers/414796/096100/1/attachment",
+   "ids": [
+    "new-m604-draft-sr-2024-02"
+   ],
+   "titles": [
+    "Draft Commission Implementing Decision on a standardisation request to the European Committee for Standardisation, the European Committee for Electrotechnical Standardisation, and the European Telecommunications Standards Institute as regards digital product passports in support of Union policy on ecodesign requirements for sustainable products and on batteries and waste batteries, with Annexes 1 to 2"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02",
+    "m01"
+   ]
+  },
+  {
+   "url": "https://webgate.ec.europa.eu/circabc-ewpp/d/d/workspace/SpacesStore/8ee064ee-4352-4502-af57-9db78208a3fc/download",
+   "ids": [
+    "new-m604-amd-draft-2025-09"
+   ],
+   "titles": [
+    "Draft standardisation request to the European Committee for Standardisation, the European Committee for Electrotechnical Standardisation and the European Telecommunications Standards Institute on amending Implementation Decision C(2024)5423 of 31 July 2024 as regards digital product passports (notification under Article 12 of Regulation (EU) No 1025/2012, with the draft Commission Implementing Decision attached)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/create-timestamp",
+   "ids": [
+    "new-ebsi-create-timestamp"
+   ],
+   "titles": [
+    "EBSI Create Timestamp guide"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://ebsi.eu/",
+   "ids": [
+    "new-ebsi-portal"
+   ],
+   "titles": [
+    "EBSI portal (European trust infrastructure)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/timestamp/timestamp-introduction",
+   "ids": [
+    "new-ebsi-timestamp-docs"
+   ],
+   "titles": [
+    "EBSI Timestamp - introduction",
+    "EBSI Timestamp Introduction"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m06"
+   ]
+  },
+  {
+   "url": "https://hub.ebsi.eu/api/track-and-trace",
+   "ids": [
+    "new-ebsi-track-and-trace-api"
+   ],
+   "titles": [
+    "EBSI Track and Trace API page"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://hub.ebsi.eu/docs/use-cases/anchoring/track-and-trace/track-and-trace-introduction",
+   "ids": [
+    "new-ebsi-track-and-trace-docs"
+   ],
+   "titles": [
+    "EBSI Track and Trace Introduction"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://eclass.eu/shop/en/product/eclass-15-0",
+   "ids": [
+    "new-eclass-15-shop"
+   ],
+   "titles": [
+    "ECLASS 15.0 shop listings (search excerpt)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-aas4j/aas4j",
+   "ids": [
+    "new-aas4j"
+   ],
+   "titles": [
+    "Eclipse AAS4J (eclipse-aas4j/aas4j)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-aaspe/package-explorer",
+   "ids": [
+    "new-aaspe-package-explorer"
+   ],
+   "titles": [
+    "Eclipse AASX Package Explorer (eclipse-aaspe/package-explorer)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-aaspe/server",
+   "ids": [
+    "new-aaspe-server"
+   ],
+   "titles": [
+    "Eclipse AASX Server (eclipse-aaspe/server)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-basyx/basyx-aas-web-ui",
+   "ids": [
+    "new-basyx-aas-web-ui"
+   ],
+   "titles": [
+    "Eclipse BaSyx AAS Web UI (eclipse-basyx/basyx-aas-web-ui)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-basyx/basyx-java-server-sdk",
+   "ids": [
+    "new-basyx-java-server-sdk"
+   ],
+   "titles": [
+    "Eclipse BaSyx Java Server SDK (eclipse-basyx/basyx-java-server-sdk)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-basyx/basyx-python-sdk",
+   "ids": [
+    "new-basyx-python-sdk"
+   ],
+   "titles": [
+    "Eclipse BaSyx Python SDK (eclipse-basyx/basyx-python-sdk)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0.1/",
+   "ids": [
+    "new-dcp-spec-v1-0-1"
+   ],
+   "titles": [
+    "Eclipse Decentralized Claims Protocol"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-esmf/esmf-sdk",
+   "ids": [
+    "new-esmf-sdk"
+   ],
+   "titles": [
+    "Eclipse ESMF SDK (samm-cli)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://eclipse-tractusx.github.io/docs-kits/next/kits/eco-pass-kit/adoption-view",
+   "ids": [
+    "new-tractusx-ecopass-kit"
+   ],
+   "titles": [
+    "Eclipse Tractus-X EcoPass KIT adoption view (docs-kits, 'next')"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-aascw",
+   "ids": [
+    "new-eclipse-aascw-org"
+   ],
+   "titles": [
+    "eclipse-aascw GitHub organisation (formerly aas-core-works)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-basyx/basyx-go-components",
+   "ids": [
+    "new-basyx-go-components"
+   ],
+   "titles": [
+    "eclipse-basyx/basyx-go-components"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-dataspace-protocol-base/DataspaceProtocol",
+   "ids": [
+    "new-dsp-github-repo"
+   ],
+   "titles": [
+    "eclipse-dataspace-protocol-base/DataspaceProtocol (specification sources, JSON Schemas, JSON-LD contexts, releases)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-dataspacetck/dcp-tck",
+   "ids": [
+    "new-dcp-tck"
+   ],
+   "titles": [
+    "eclipse-dataspacetck/dcp-tck: Technology Compatibility Kit for the Decentralized Claims Protocol"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-dataspacetck/dps-tck",
+   "ids": [
+    "new-dps-tck"
+   ],
+   "titles": [
+    "eclipse-dataspacetck/dps-tck: Technology Compatibility Kit for the Dataplane Signaling Protocol"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-dataspacetck/dsp-tck",
+   "ids": [
+    "new-dsp-tck"
+   ],
+   "titles": [
+    "eclipse-dataspacetck/dsp-tck: Technology Compatibility Kit for the Dataspace Protocol"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-edc/Connector",
+   "ids": [
+    "new-edc-connector"
+   ],
+   "titles": [
+    "eclipse-edc/Connector: EDC core services including data plane and control plane"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-thingweb/node-wot",
+   "ids": [
+    "new-node-wot"
+   ],
+   "titles": [
+    "eclipse-thingweb/node-wot"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/digital-product-pass",
+   "ids": [
+    "new-tractusx-dpp-app",
+    "new-tractusx-dpp-repo",
+    "new-tractusx-digital-product-pass-repo"
+   ],
+   "titles": [
+    "eclipse-tractusx/digital-product-pass (Digital Product Pass application, deprecated)",
+    "Eclipse Tractus-X Digital Product Pass",
+    "eclipse-tractusx/digital-product-pass (deprecated, archived)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/industry-core-hub",
+   "ids": [
+    "new-industry-core-hub",
+    "new-tractusx-industry-core-hub"
+   ],
+   "titles": [
+    "eclipse-tractusx/industry-core-hub (Industry Core Hub)",
+    "eclipse-tractusx/industry-core-hub"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/portal-backend",
+   "ids": [
+    "new-tractusx-portal-backend"
+   ],
+   "titles": [
+    "eclipse-tractusx/portal-backend"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/sldt-bpn-discovery",
+   "ids": [
+    "new-tractusx-bpn-discovery"
+   ],
+   "titles": [
+    "eclipse-tractusx/sldt-bpn-discovery"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/sldt-digital-twin-registry",
+   "ids": [
+    "new-tractusx-dtr"
+   ],
+   "titles": [
+    "eclipse-tractusx/sldt-digital-twin-registry (Digital Twin Registry)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/sldt-discovery-finder",
+   "ids": [
+    "new-tractusx-discovery-finder"
+   ],
+   "titles": [
+    "eclipse-tractusx/sldt-discovery-finder"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/sldt-semantic-models",
+   "ids": [
+    "new-tractusx-semantic-models",
+    "new-tractusx-sldt-semantic-models"
+   ],
+   "titles": [
+    "eclipse-tractusx/sldt-semantic-models",
+    "eclipse-tractusx/sldt-semantic-models (io.catenax.generic.digital_product_passport)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "f04",
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-tractusx/tractusx-edc",
+   "ids": [
+    "new-tractusx-edc"
+   ],
+   "titles": [
+    "eclipse-tractusx/tractusx-edc (documentation: management API walkthrough, decision records, migration guides)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export-0/customs-procedures/economic-operators-registration-and-identification-number-eori_en",
+   "ids": [
+    "new-ec-eori-page"
+   ],
+   "titles": [
+    "Economic operators registration and identification (EORI) number"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/CIR4FUN-EU/edc-client",
+   "ids": [
+    "cir4fun-edc-client"
+   ],
+   "titles": [
+    "edc-client (Cir4Fun)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://eips.ethereum.org/EIPS/eip-4906",
+   "ids": [
+    "new-eip-4906"
+   ],
+   "titles": [
+    "EIP-721 Metadata Update Extension (ERC-4906)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/ehn-dcc-development/eu-dcc-hcert-spec/blob/main/hcert_spec.md",
+   "ids": [
+    "new-ehn-hcert-spec-1-0-8"
+   ],
+   "titles": [
+    "Electronic Health Certificate Specification (hcert_spec.md)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://standards.cencenelec.eu/ords/f?cs=1FC22FDE02FD51137ADC6BE8CA4E10E8F&p=205%3A32%3A%3A%3A%3A%3AFSP_ORG_ID%2CFSP_LANG_ID%3A3342699%2C25",
+   "ids": [
+    "en-18216-2026",
+    "en-18219-2026",
+    "en-18220-2026",
+    "en-18221-2026",
+    "en-18222-2026",
+    "en-18223-2026",
+    "en-18239-2026",
+    "en-18246-2026"
+   ],
+   "titles": [
+    "EN 18216:2026 Digital product passport - Data exchange protocols",
+    "EN 18219:2026 Digital product passport - Unique identifiers",
+    "EN 18220:2026 Digital product passport - Data carriers",
+    "EN 18221:2026 Digital product passport - Data storage, archiving, and data persistence (OJ title: '... and persistence')",
+    "EN 18222:2026 Digital Product Passport - Application Programming Interfaces (APIs) for the product passport lifecycle management and searchability",
+    "EN 18223:2026 Digital Product Passport - System interoperability",
+    "EN 18239:2026 Digital product passport - Access rights management, information system security, and business confidentiality",
+    "EN 18246:2026 Digital product passport - Data authentication, reliability and integrity",
+    "Digital product passport - Unique identifiers",
+    "Digital product passport - Data carriers"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m01",
+    "m09"
+   ]
+  },
+  {
+   "url": "not opened",
+   "ids": [
+    "protected-en-18223-18222-bibliographic"
+   ],
+   "titles": [
+    "EN 18223:2026 and EN 18222:2026 (named in IDTA 02099-1 README and docs site)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "f04"
+   ]
+  },
+  {
+   "url": "https://eon.xyz/product-cloud",
+   "ids": [
+    "new-vendor-eon"
+   ],
+   "titles": [
+    "EON Product Cloud page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/gen2/",
+   "ids": [
+    "new-gs1-gen2-3-0-1"
+   ],
+   "titles": [
+    "EPC Radio-Frequency Identity Generation-2 UHF RFID Standard: Specification for RFID Air Interface Protocol for Communications at 860 MHz - 930 MHz"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/tds/",
+   "ids": [
+    "new-gs1-tds-2-3",
+    "new-gs1-epc-tds-2-3"
+   ],
+   "titles": [
+    "EPC Tag Data Standard (TDS)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02",
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://en.wikipedia.org/wiki/EPCIS",
+   "ids": [
+    "new-wikipedia-epcis"
+   ],
+   "titles": [
+    "EPCIS (Wikipedia article, via search summary)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/epcis/openapi.json",
+   "ids": [
+    "new-gs1-epcis-openapi-ref"
+   ],
+   "titles": [
+    "EPCIS 2.0 REST Bindings (openapi.json on ref.gs1.org)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/guidelines/epcis-cbv/1.0.0/",
+   "ids": [
+    "new-gs1-epcis-cbv-guideline-1-0"
+   ],
+   "titles": [
+    "EPCIS and CBV Implementation Guideline"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/epcis/artefacts",
+   "ids": [
+    "new-gs1-epcis-artefacts"
+   ],
+   "titles": [
+    "EPCIS artefacts page"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/RalphTro/epcis-event-hash-generator",
+   "ids": [
+    "new-epcis-event-hash-generator"
+   ],
+   "titles": [
+    "EPCIS Event Hash Generator (RalphTro/epcis-event-hash-generator; fork openepcis/epcis-event-hash-generator)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/epcis/epcis-json-schema.json",
+   "ids": [
+    "new-gs1-epcis-json-schema-ref"
+   ],
+   "titles": [
+    "EPCIS JSON Schema (epcis-json-schema.json on ref.gs1.org)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/epcis/epcis-context.jsonld",
+   "ids": [
+    "new-gs1-epcis-context-ref"
+   ],
+   "titles": [
+    "EPCIS JSON-LD context (epcis-context.jsonld on ref.gs1.org)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/epcis/",
+   "ids": [
+    "new-gs1-epcis-2-0-pdf"
+   ],
+   "titles": [
+    "EPCIS Standard"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/epcis/archive",
+   "ids": [
+    "new-gs1-epcis-archive"
+   ],
+   "titles": [
+    "EPCIS standard archive (release list)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://eips.ethereum.org/EIPS/eip-1155",
+   "ids": [
+    "new-eip-1155"
+   ],
+   "titles": [
+    "ERC-1155: Multi Token Standard"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://eips.ethereum.org/EIPS/eip-721",
+   "ids": [
+    "new-eip-721"
+   ],
+   "titles": [
+    "ERC-721: Non-Fungible Token Standard"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://eclipse-esmf.github.io/esmf-developer-guide/tooling-guide/samm-cli.html",
+   "ids": [
+    "new-esmf-samm-cli"
+   ],
+   "titles": [
+    "ESMF developer guide: samm-cli; eclipse-esmf/esmf-sdk"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/ethereum/execution-apis",
+   "ids": [
+    "new-ethereum-execution-apis"
+   ],
+   "titles": [
+    "Ethereum execution-apis (Execution Layer JSON-RPC specification)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/decentralized-identity/ethr-did-resolver",
+   "ids": [
+    "new-ethr-did-resolver"
+   ],
+   "titles": [
+    "ethr-did-resolver repository metadata"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://portal.etsi.org/EC-EFTA-Mandates",
+   "ids": [
+    "new-etsi-ec-efta-mandates"
+   ],
+   "titles": [
+    "ETSI EC/EFTA Mandates page, entry M/604"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "not retrieved",
+   "ids": [
+    "new-etsi-en-319-401",
+    "new-iso-23257-2022",
+    "new-iso-ts-23635-2022"
+   ],
+   "titles": [
+    "ETSI EN 319 401 (number and version only, as listed in the annex of Implementing Regulation (EU) 2025/2531)",
+    "ISO 23257:2022 (number only, as listed in the annex of Implementing Regulation (EU) 2025/2531)",
+    "ISO/TS 23635:2022 (number only, as listed in the annex of Implementing Regulation (EU) 2025/2531)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.09.01_60/gs_cim009v010901p.pdf",
+   "ids": [
+    "etsi-gs-cim-009-v1-9-1"
+   ],
+   "titles": [
+    "ETSI GS CIM 009 V1.9.1 (2025-07) Context Information Management (CIM); NGSI-LD API"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://commission.europa.eu/strategy-and-policy/coronavirus-response/safe-covid-19-vaccines-europeans/eu-digital-covid-certificate_en",
+   "ids": [
+    "new-ec-dcc-page"
+   ],
+   "titles": [
+    "EU Digital COVID Certificate (Commission web page)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/eu-digital-product-passport-faq-batteries_en",
+   "ids": [
+    "ec-faq-dpp-batteries"
+   ],
+   "titles": [
+    "EU Digital Product Passport FAQ for Batteries"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework",
+   "ids": [
+    "new-eudi-arf-repo"
+   ],
+   "titles": [
+    "eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.europarl.europa.eu/doceo/document/E-10-2026-000888_EN.html",
+   "ids": [
+    "new-e-000888-2026"
+   ],
+   "titles": [
+    "European Parliament written question E-000888/2026 (as cited by a secondary source in sibling record m10)"
+   ],
+   "levels": [
+    "not_located"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "url": "https://github.com/factory-x-contributions/factoryx-edc",
+   "ids": [
+    "new-factoryx-edc"
+   ],
+   "titles": [
+    "factory-x-contributions/factoryx-edc"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://ec.europa.eu/info/law/better-regulation/api/download/090166e52134b777",
+   "ids": [
+    "new-hys-14382-factual-summary"
+   ],
+   "titles": [
+    "Factual summary report on the online public consultation for the delegated act setting out the requirements for Digital Product Passport service providers"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "url": "https://github.com/louisaxel-ambroise/epcis",
+   "ids": [
+    "new-fastnt-epcis"
+   ],
+   "titles": [
+    "FasTnT EPCIS repository (louisaxel-ambroise/epcis; older FasTnT/epcis)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/FraunhoferIOSB/FAAAST-Service",
+   "ids": [
+    "new-faaast-service"
+   ],
+   "titles": [
+    "FA³ST Service (FraunhoferIOSB/FAAAST-Service)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/FIWARE/context.Orion-LD",
+   "ids": [
+    "new-orion-ld-repo"
+   ],
+   "titles": [
+    "FIWARE/context.Orion-LD"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://gs1.se/en/case/digital-product-passport-pilot-within-textiles/",
+   "ids": [
+    "new-gs1se-trace4value-pilot"
+   ],
+   "titles": [
+    "From production to sales - digital product passport in textiles (Trace4Value pilot case)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/20848510",
+   "ids": [
+    "new-dacapo-fullstack-dpp"
+   ],
+   "titles": [
+    "Full-Stack Digital Product Passport Architecture Supporting Interoperability and AI-Enabled Use"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://docs.gaia-x.eu/technical-committee/architecture-document/25.11/trust_framework_architecture/",
+   "ids": [
+    "new-gaiax-ad-25-11"
+   ],
+   "titles": [
+    "Gaia-X Architecture Document 25.11: Trust Framework architecture"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://api.github.com/orgs/ehn-dcc-development/repos",
+   "ids": [
+    "new-ehn-dcc-github-metadata"
+   ],
+   "titles": [
+    "GitHub repository listings of ehn-dcc-development and eu-digital-green-certificates, and related libraries"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://api.github.com/repos/gs1/GS1DigitalLinkToolkit.js",
+   "ids": [
+    "new-gs1-repos-metadata"
+   ],
+   "titles": [
+    "GitHub repository metadata: gs1/GS1DigitalLinkToolkit.js, gs1/digital-link.js, gs1/interpretGS1scan, gs1/gs1-syntax-dictionary, sergiss/epc-tds, arthurdejong/python-stdnum, NaturalHistoryMuseum/pylibdmtx"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://en.pine.gs1.de/news/von-todo-gmbh-41b9c",
+   "ids": [
+    "new-gs1-pine-goodstag-news"
+   ],
+   "titles": [
+    "GoodsTag Joins BatteryPass-Ready Initiative"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/ai/GS1_Application_Identifiers.jsonld",
+   "ids": [
+    "new-gs1-ai-dataset"
+   ],
+   "titles": [
+    "GS1 Application Identifiers (JSON-LD dataset)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/gs1-syntax-engine",
+   "ids": [
+    "new-gs1-syntax-engine",
+    "new-gs1-syntax-engine-repo"
+   ],
+   "titles": [
+    "GS1 Barcode Syntax Engine",
+    "GS1 Barcode Syntax Engine (gs1/gs1-syntax-engine)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/digital-link/",
+   "ids": [
+    "new-gs1-dl-hub-page"
+   ],
+   "titles": [
+    "GS1 Digital Link (standards hub page)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/digital-link/1.1.4/",
+   "ids": [
+    "new-gs1-dl-1-1-4-legacy"
+   ],
+   "titles": [
+    "GS1 Digital Link Standard (legacy standard serving as an archive and reference point)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/digital-link/uri-syntax/",
+   "ids": [
+    "gs1-digital-link-uri-syntax-1-7-0"
+   ],
+   "titles": [
+    "GS1 Digital Link Standard: URI Syntax"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "g02",
+    "m02",
+    "m06",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/test-suites/resolver/",
+   "ids": [
+    "new-gs1-resolver-test-suite-page"
+   ],
+   "titles": [
+    "GS1 Digital Link Test Suite (resolver)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/digital-link/compression/",
+   "ids": [
+    "new-gs1-dl-compression-epc-1-0-0"
+   ],
+   "titles": [
+    "GS1 Digital Link URI: Compression Technical Standard for EPC binary strings"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02",
+    "m02"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/GS1_DigitalLink_Resolver_CE",
+   "ids": [
+    "new-gs1-resolver-ce",
+    "new-gs1-resolver-ce-repo"
+   ],
+   "titles": [
+    "GS1 DigitalLink Resolver Community Edition"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1",
+   "ids": [
+    "new-gs1-github-org"
+   ],
+   "titles": [
+    "GS1 GitHub organisation repository listing"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/resolver/linkset-context",
+   "ids": [
+    "new-gs1-resolver-linkset-context"
+   ],
+   "titles": [
+    "GS1 resolver linkset JSON-LD context"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://gs1.eu/wp-content/uploads/2025/04/GS1-Standards-Enabling-DPP-V2.2.pdf",
+   "ids": [
+    "new-gs1-in-europe-enabling-dpp-v2-2"
+   ],
+   "titles": [
+    "GS1 Standards enabling the EU digital product passport"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "m02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/voc/data/archive",
+   "ids": [
+    "new-gs1-webvoc-archive"
+   ],
+   "titles": [
+    "GS1 Web Vocabulary archive",
+    "GS1 Web Vocabulary data archive"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m02"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/WebVoc",
+   "ids": [
+    "new-gs1-webvoc-github",
+    "new-gs1-webvoc"
+   ],
+   "titles": [
+    "GS1 Web Vocabulary development repository (gs1/WebVoc)",
+    "gs1/WebVoc (GitHub)",
+    "GS1 Web vocabulary development site (gs1/WebVoc), v1.16 gs1Voc.jsonld",
+    "GS1 Web Vocabulary (development site gs1/WebVoc and ref.gs1.org/voc)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01",
+    "f04",
+    "m02",
+    "m08"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/voc/data/linktypes",
+   "ids": [
+    "new-gs1-webvoc-linktypes"
+   ],
+   "titles": [
+    "GS1 Web Vocabulary link types in JSON",
+    "GS1 Web Vocabulary link types data file",
+    "GS1 Web Vocabulary link types (JSON)"
+   ],
+   "levels": [
+    "substantive",
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "f04",
+    "m02",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/resolver/",
+   "ids": [
+    "gs1-conformant-resolver-1-2-1"
+   ],
+   "titles": [
+    "GS1-Conformant Resolver Standard"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m02",
+    "m05",
+    "m08",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/EPCIS",
+   "ids": [
+    "new-gs1-epcis-repo"
+   ],
+   "titles": [
+    "gs1/EPCIS GitHub repository"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/linkset",
+   "ids": [
+    "new-gs1-linkset-repo"
+   ],
+   "titles": [
+    "gs1/linkset"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/TDT",
+   "ids": [
+    "new-gs1-tdt-repo"
+   ],
+   "titles": [
+    "gs1/TDT (TDT demo and JSON artefacts)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/gs1/GS1DL-resolver-testsuite",
+   "ids": [
+    "new-gs1dl-resolver-testsuite"
+   ],
+   "titles": [
+    "GS1DL-resolver-testsuite"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://www.edpb.europa.eu/documents/guideline/guidelines-022025-on-processing-of-personal-data-through-blockchain_en",
+   "ids": [
+    "new-edpb-guidelines-02-2025"
+   ],
+   "titles": [
+    "Guidelines 02/2025 on processing of personal data through blockchain technologies"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/rfc/rfc9111.html",
+   "ids": [
+    "new-rfc-9111"
+   ],
+   "titles": [
+    "HTTP Caching"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+   "ids": [
+    "new-rfc-9110"
+   ],
+   "titles": [
+    "HTTP Semantics"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://hyperledger-fabric.readthedocs.io/en/latest/private-data/private-data.html",
+   "ids": [
+    "new-fabric-private-data-docs"
+   ],
+   "titles": [
+    "Hyperledger Fabric documentation: Private data"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://www.iana.org/assignments/media-types/application/aas+zip",
+   "ids": [
+    "new-iana-media-type-aas-zip"
+   ],
+   "titles": [
+    "IANA Media Types registry: application/aas+zip registration template"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/specification/IdentityResolver",
+   "ids": [
+    "new-untp-identity-resolver"
+   ],
+   "titles": [
+    "Identity Resolver | UN Transparency Protocol"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Carbon%20Footprint",
+   "ids": [
+    "new-idta-02023-carbon-footprint"
+   ],
+   "titles": [
+    "IDTA 02023 Carbon Footprint (submodel template JSON)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.io/idta-submodel-templates/IDTA-02099-1/1.0.1/index.html",
+   "ids": [
+    "idta-02099-1-dpp-metadata"
+   ],
+   "titles": [
+    "IDTA 02099-1 Digital Product Passport Part 1 Metadata (docs site)",
+    "Digital Product Passport - Part 1: Metadata",
+    "IDTA 02099-1: Digital Product Passport, Part 1: Metadata",
+    "Digital Product Passport - Part 1: Metadata (IDTA 02099-1)"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m04",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+   "ids": [
+    "new-idta-content-hub",
+    "new-idta-content-hub-submodels"
+   ],
+   "titles": [
+    "IDTA content hub, Submodel Templates listing",
+    "IDTA content hub: AAS Submodel Templates"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+   "ids": [
+    "new-idta-content-hub-aas-specs"
+   ],
+   "titles": [
+    "IDTA content hub: AAS Specifications (Release 26-01)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.io/idta-submodel-templates/index/home/index.html",
+   "ids": [
+    "idta-02035-1-dbp-digital-nameplate"
+   ],
+   "titles": [
+    "IDTA submodel templates docs site index (02099-1 and 02035 parts)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04"
+   ]
+  },
+  {
+   "url": "https://webstore.iec.ch/publication/28560",
+   "ids": [
+    "new-iec-61360-1"
+   ],
+   "titles": [
+    "IEC 61360-1:2017 (Standard data element types with associated classification scheme, Part 1)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://webstore.iec.ch/en/publication/67673",
+   "ids": [
+    "iec-61406-1-2022"
+   ],
+   "titles": [
+    "IEC 61406-1:2022 Identification Link - Part 1: General requirements"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m03",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://gs1.eu/wp-content/uploads/2025/07/Implementation-Considerations-for-Unique-DPP-Product-Identifiers_GS1.pdf",
+   "ids": [
+    "new-gs1-impl-considerations-upi"
+   ],
+   "titles": [
+    "Implementation Considerations for Unique DPP Product Identifiers"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "",
+   "ids": [
+    "espr-art-11-credentials-implementing-act"
+   ],
+   "titles": [
+    "Implementing act under Art. 11, fourth subparagraph, of Regulation (EU) 2024/1781 on procedures to issue and verify digital credentials"
+   ],
+   "levels": [
+    "not_located"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.buildingsmart.org/standards/bsi-standards/information-delivery-specification-ids/",
+   "ids": [
+    "new-buildingsmart-ids-search"
+   ],
+   "titles": [
+    "Information Delivery Specification (IDS) search excerpts"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://ticaret.gov.tr/data/6a01cd7a269de10b6487a349/Dijital Çağda Ürün Güvenliği Sempozyumu  Komisyon DPP Sunumu (2026 Haziran).pptx.pdf",
+   "ids": [
+    "new-ec-dg-grow-dpp-slides-2026-06"
+   ],
+   "titles": [
+    "Introduction to the Digital Product Passport (DG GROW presentation, 11 June 2026)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://docs.iota.org/developer/iota-identity/references/iota-did-method-spec",
+   "ids": [
+    "new-iota-did-method-spec"
+   ],
+   "titles": [
+    "IOTA DID Method Specification v2.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/iotaledger/dpp-demonstrator",
+   "ids": [
+    "new-iota-dpp-demonstrator"
+   ],
+   "titles": [
+    "IOTA DPP Showcase (dpp-demonstrator) README"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/iotaledger/notarization",
+   "ids": [
+    "new-iota-notarization"
+   ],
+   "titles": [
+    "IOTA Notarization Toolkit (repository README and poi-rs README)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/iotaledger/identity",
+   "ids": [
+    "new-iota-identity-repo"
+   ],
+   "titles": [
+    "iotaledger/identity repository metadata"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://www.ipoint-systems.com/solutions/circular-economy/",
+   "ids": [
+    "new-vendor-ipoint"
+   ],
+   "titles": [
+    "IPOINT circular economy and DPP solution page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/ISAITB/shacl-validator",
+   "ids": [
+    "new-itb-shacl-validator"
+   ],
+   "titles": [
+    "ISAITB shacl-validator repository metadata"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "not located",
+   "ids": [
+    "iso-16739-1-ifc",
+    "batteries-art-77-9-implementing-act",
+    "dpp-service-providers-delegated-act",
+    "espr-art-12-4-identifiers-delegated-act",
+    "espr-art-11-credentials-implementing-act",
+    "espr-art-4-product-delegated-acts",
+    "new-second-dpp-standards-decision"
+   ],
+   "titles": [
+    "ISO 16739-1 Industry Foundation Classes (IFC) for data sharing in the construction and facility management industries",
+    "Commission implementing act(s) under Art. 77(9) of Regulation (EU) 2023/1542 on persons with a legitimate interest and their access to battery passport information",
+    "Delegated act under Art. 11, third subparagraph, of Regulation (EU) 2024/1781 on requirements for DPP service providers",
+    "Delegated act under Art. 12(4) of Regulation (EU) 2024/1781 on life cycle management of unique identifiers and data carriers",
+    "Implementing act under Art. 11, fourth subparagraph, of Regulation (EU) 2024/1781 on issuing and verifying digital credentials",
+    "Product-specific delegated acts under Art. 4 of Regulation (EU) 2024/1781",
+    "Implementing decision citing EN 18239:2026 and EN 18246:2026 in the OJ"
+   ],
+   "levels": [
+    "not_located"
+   ],
+   "protected_standard": true,
+   "files": [
+    "g03",
+    "m01"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/78829.html",
+   "ids": [
+    "new-iso-17442-1-2020"
+   ],
+   "titles": [
+    "ISO 17442-1:2020 - Financial services — Legal entity identifier (LEI) — Part 1: Assignment"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/81599.html",
+   "ids": [
+    "new-iso-26324"
+   ],
+   "titles": [
+    "ISO 26324:2022 - Information and documentation — Digital object identifier system"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://webstore.iec.ch/en/publication/10334",
+   "ids": [
+    "iso-iec-15459-parts-1-6"
+   ],
+   "titles": [
+    "ISO/IEC 15459 - Information technology - Automatic identification and data capture techniques - Unique identification (Parts 1 to 6)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/54779.html",
+   "ids": [
+    "iso-iec-15459-1-2014"
+   ],
+   "titles": [
+    "ISO/IEC 15459-1:2014 - Information technology - Automatic identification and data capture techniques - Unique identification - Part 1 (title as in prior record)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "not retrieved (catalogue pages not opened today)",
+   "ids": [
+    "iso-iec-15459-1-2014"
+   ],
+   "titles": [
+    "ISO/IEC 15459-1:2014, -2:2015, -3:2014, -4:2014, -5:2014, -6:2014 (series as named in ESPR Annex III and Batteries Art. 77(3))"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/54782.html",
+   "ids": [
+    "iso-iec-15459-4-2014"
+   ],
+   "titles": [
+    "ISO/IEC 15459-4:2014 - Information technology — Automatic identification and data capture techniques — Unique identification — Part 4: Individual products and product packages"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/54786.html",
+   "ids": [
+    "iso-iec-15459-6-2014"
+   ],
+   "titles": [
+    "ISO/IEC 15459-6:2014 - Information technology — Automatic identification and data capture techniques — Unique identification — Part 6: Groupings"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "not opened (cited as [ISO15961], [ISO15962] in TDS 2.3)",
+   "ids": [
+    "new-iso-iec-15962"
+   ],
+   "titles": [
+    "ISO/IEC 15962 (RFID for item management - data protocol: data encoding rules and logical memory functions) and ISO/IEC 15961 (data protocol)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/80926.html",
+   "ids": [
+    "new-iso-iec-16022-2024"
+   ],
+   "titles": [
+    "ISO/IEC 16022:2024 - Information technology — Automatic identification and data capture techniques — Data Matrix bar code symbology specification"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/78309.html",
+   "ids": [
+    "new-iso-iec-18000-63-2021"
+   ],
+   "titles": [
+    "ISO/IEC 18000-63:2021 - Information technology — Radio frequency identification for item management — Part 63: Parameters for air interface communications at 860 MHz to 960 MHz Type C"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/83389.html",
+   "ids": [
+    "new-iso-iec-18004-2024"
+   ],
+   "titles": [
+    "ISO/IEC 18004:2024 - Information technology — Automatic identification and data capture techniques — QR code bar code symbology specification"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/fr/standard/85540.html",
+   "ids": [
+    "new-iso-iec-18975-2024"
+   ],
+   "titles": [
+    "ISO/IEC 18975:2024 (exact title not captured)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/85540.html",
+   "ids": [
+    "new-iso-iec-18975"
+   ],
+   "titles": [
+    "ISO/IEC 18975:2024 Information technology - Automatic identification and data capture techniques - Encoding and resolving identifiers over HTTP"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/standard/85557.html",
+   "ids": [
+    "new-iso-iec-19987-2024"
+   ],
+   "titles": [
+    "ISO/IEC 19987:2024 (EPC Information services, per search result titles)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://ccn-scc.ca/standardsdb/standards/8185963",
+   "ids": [
+    "new-iso-iec-19988-2024"
+   ],
+   "titles": [
+    "ISO/IEC 19988:2024 (Core business vocabulary, per search result)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "not opened (title as listed in new-m604-draft-sr-2024-02 point 7.3 and referenced as [ISO20248] in TDS 2.3)",
+   "ids": [
+    "new-iso-iec-20248"
+   ],
+   "titles": [
+    "ISO/IEC 20248: Information technology - Automatic identification and data capture techniques - Digital signature data structure schema"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/obp/ui/en/#iso:std:iso-iec:6523:-1:ed-2:v1:en",
+   "ids": [
+    "new-iso-iec-6523-1-2023"
+   ],
+   "titles": [
+    "ISO/IEC 6523-1:2023 (organization identification schemes, part 1)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://www.iso.org/obp/ui/en/#iso:std:iso-iec:7064:ed-1:v1:en",
+   "ids": [
+    "new-iso-iec-7064-2003"
+   ],
+   "titles": [
+    "ISO/IEC 7064:2003 (check character systems)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-dataspace-protocol-base/DataspaceProtocol/releases/tag/2025-1-err2",
+   "ids": [
+    "new-iso-iec-fdis-20151-1"
+   ],
+   "titles": [
+    "ISO/IEC FDIS 20151-1 (dataspace terminology, as named in DSP release notes)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": true,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/CIR4FUN-EU/java-dpp-sdk",
+   "ids": [
+    "cir4fun-java-dpp-sdk"
+   ],
+   "titles": [
+    "java-dpp-sdk (Cir4Fun)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://opcfoundation.org/news/press-releases/joint-forces-for-digital-product-passport-dpp/",
+   "ids": [
+    "new-opc-joint-forces"
+   ],
+   "titles": [
+    "Joint forces for Digital Product Passport (DPP)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/info/rfc8785",
+   "ids": [
+    "rfc-8785"
+   ],
+   "titles": [
+    "JSON Canonicalization Scheme (JCS)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/resolver/description-file-schema",
+   "ids": [
+    "new-gs1-resolver-description-file-schema"
+   ],
+   "titles": [
+    "JSON schema for a conformant GS1 resolver description file"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://ref.gs1.org/standards/resolver/linkset-schema",
+   "ids": [
+    "new-gs1-resolver-linkset-schema"
+   ],
+   "titles": [
+    "JSON schema for linksets as defined in RFC 9264"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/json-ld11/",
+   "ids": [
+    "new-w3c-json-ld-11"
+   ],
+   "titles": [
+    "JSON-LD 1.1"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/json-ld11-api/",
+   "ids": [
+    "new-w3c-json-ld-11-api"
+   ],
+   "titles": [
+    "JSON-LD 1.1 Processing Algorithms and API"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://registry.npmjs.org/jsonld/latest",
+   "ids": [
+    "new-jsonld-js"
+   ],
+   "titles": [
+    "jsonld (npm package metadata)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.kezzler.com/solutions/digital-product-passport",
+   "ids": [
+    "new-vendor-kezzler"
+   ],
+   "titles": [
+    "Kezzler digital product passport page and GS1 standards page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://leiroc.org/lei.htm",
+   "ids": [
+    "new-leiroc-lei"
+   ],
+   "titles": [
+    "LEI code structure page (LEI Regulatory Oversight Committee)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml",
+   "ids": [
+    "new-iana-link-relations"
+   ],
+   "titles": [
+    "Link Relation Types (IANA registry)",
+    "Link Relations registry",
+    "IANA Link Relation Types registry"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m02",
+    "m03",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/ldp/",
+   "ids": [
+    "new-w3c-ldp"
+   ],
+   "titles": [
+    "Linked Data Platform 1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/lws10-core/",
+   "ids": [
+    "new-w3c-lws10-core"
+   ],
+   "titles": [
+    "Linked Web Storage Protocol 1.0"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/rfc/rfc9264.html",
+   "ids": [
+    "new-rfc-9264",
+    "new-rfc-9264-linkset"
+   ],
+   "titles": [
+    "Linkset: Media Types and a Link Relation Type for Link Sets"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02",
+    "m03"
+   ]
+  },
+  {
+   "url": "https://store.icao.int/en/machine-readable-travel-documents-part-13-visible-digital-seals-doc-9303-part-13",
+   "ids": [
+    "new-icao-store-9303-13"
+   ],
+   "titles": [
+    "Machine Readable Travel Documents - Part 13 - Visible Digital Seals (Doc 9303-13) (ICAO Store)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://www.madaster.com/en",
+   "ids": [
+    "new-vendor-madaster"
+   ],
+   "titles": [
+    "Madaster home page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://doi.org/10.1016/j.procs.2026.02.212",
+   "ids": [
+    "new-made2verify-procs-2026"
+   ],
+   "titles": [
+    "Made2Verify: A Scalable GS1-Compliant Resolver and Fallback Dashboard for Digital Product Passports"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03"
+   ]
+  },
+  {
+   "url": "https://www.minespider.com/",
+   "ids": [
+    "new-vendor-minespider"
+   ],
+   "titles": [
+    "Minespider home page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://eitrawmaterials.eu/success-stories/minespider-revolutionising-traceability-product-passports",
+   "ids": [
+    "new-minespider-eit-story"
+   ],
+   "titles": [
+    "Minespider success story (EIT RawMaterials)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/nfcpy/ndeflib",
+   "ids": [
+    "new-ndeflib"
+   ],
+   "titles": [
+    "ndeflib - NFC Data Exchange Format library (nfcpy/ndeflib)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://developer.android.com/develop/connectivity/nfc/nfc",
+   "ids": [
+    "new-android-nfc-basics"
+   ],
+   "titles": [
+    "NFC basics (Android Developers)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://ngsi-ld-tutorials.readthedocs.io/en/latest/",
+   "ids": [
+    "new-ngsi-ld-tutorials"
+   ],
+   "titles": [
+    "NGSI-LD Tutorials (FIWARE)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/JaewookByun/epcis",
+   "ids": [
+    "new-oliot-epcis"
+   ],
+   "titles": [
+    "Oliot EPCIS 2.0 (JaewookByun/epcis)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://www.onem2m.org/technical/published-specifications",
+   "ids": [
+    "new-onem2m-published-specs"
+   ],
+   "titles": [
+    "oneM2M published specifications (technical page)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://github.com/CIRPASS-2/ontologies-battery",
+   "ids": [
+    "new-cirpass2-ontologies-battery",
+    "new-cirpass2-ontology-repos"
+   ],
+   "titles": [
+    "ontologies-battery: EU DPP Battery Ontology (README)",
+    "CIRPASS-2 ontologies-battery (EU DPP Battery Ontology, SHACL shapes, examples, tests)",
+    "CIRPASS-2 ontology repositories (battery, tyre, textiles, docs)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07",
+    "m08",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://reference.opcfoundation.org/",
+   "ids": [
+    "new-opcua-online-reference"
+   ],
+   "titles": [
+    "OPC Foundation Online Reference (index)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://wiot-group.com/think/en/articles/opc-ua-open-source-dpp-solution-erich-barnstedt/",
+   "ids": [
+    "new-wiot-opcua-dpp"
+   ],
+   "titles": [
+    "OPC UA open-source DPP solution (Barnstedt session page)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://dpp.eclipse.org/",
+   "ids": [
+    "oss4dpp-eclipse"
+   ],
+   "titles": [
+    "Open Source for the Digital Product Passport (Eclipse Foundation initiative, 'OSS4DPP')"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://github.com/open-dpp/open-dpp",
+   "ids": [
+    "new-open-dpp-repo"
+   ],
+   "titles": [
+    "open-dpp/open-dpp"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://cirpass2.eu/open-source-dpp-catalogue/",
+   "ids": [
+    "new-cirpass2-open-source-catalogue",
+    "new-opendpp-catalogue"
+   ],
+   "titles": [
+    "OpenDPP Catalogue (CIRPASS-2)",
+    "OpenDPP Catalogue (open-source tools directory)"
+   ],
+   "levels": [
+    "metadata_only",
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/OpenDPP/opendpp-interop",
+   "ids": [
+    "new-opendpp-interop"
+   ],
+   "titles": [
+    "OpenDPP/opendpp-interop",
+    "OpenDPP Interop Boundary Kit (OpenDPP/opendpp-interop)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://github.com/openepcis/epcis-repository-ce",
+   "ids": [
+    "new-openepcis-repository-ce"
+   ],
+   "titles": [
+    "OpenEPCIS EPCIS 2.0 Repository Community Edition"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/openepcis/openepcis-epc-digitallink-translator",
+   "ids": [
+    "new-openepcis-dl-translator",
+    "new-openepcis-digitallink-translator"
+   ],
+   "titles": [
+    "OpenEPCIS GS1 Digital Link Toolkit (openepcis-epc-digitallink-translator)",
+    "openepcis/openepcis-epc-digitallink-translator"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01",
+    "m02",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/openepcis",
+   "ids": [
+    "new-openepcis-org-listing"
+   ],
+   "titles": [
+    "openepcis organisation repository listing (GitHub API)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/openepcis/openepcis-event-hash-generator",
+   "ids": [
+    "new-openepcis-event-hash-generator"
+   ],
+   "titles": [
+    "openepcis/openepcis-event-hash-generator"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://github.com/openepcis/openepcis-test-resources",
+   "ids": [
+    "new-openepcis-test-resources"
+   ],
+   "titles": [
+    "openepcis/openepcis-test-resources"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01"
+   ]
+  },
+  {
+   "url": "https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html",
+   "ids": [
+    "new-openid4vci-1-0"
+   ],
+   "titles": [
+    "OpenID for Verifiable Credential Issuance 1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://openid.net/specs/openid-4-verifiable-presentations-1_0.html",
+   "ids": [
+    "new-openid4vp-1-0"
+   ],
+   "titles": [
+    "OpenID for Verifiable Presentations 1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/opentimestamps/opentimestamps-client",
+   "ids": [
+    "new-opentimestamps-client"
+   ],
+   "titles": [
+    "OpenTimestamps client README"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/15040842",
+   "ids": [
+    "new-cirpass2-backup-redirection-report"
+   ],
+   "titles": [
+    "Options for redirection to the mandatory DPP Backup (DPP System)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/owl2-overview/",
+   "ids": [
+    "new-w3c-owl2-overview"
+   ],
+   "titles": [
+    "OWL 2 Web Ontology Language Document Overview (Second Edition)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/pa11y/pa11y",
+   "ids": [
+    "new-pa11y"
+   ],
+   "titles": [
+    "pa11y/pa11y repository metadata"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "file:docs/research/raw/implementation-methods/m01-law-baseline.json",
+   "ids": [
+    "prior-record-m01"
+   ],
+   "titles": [
+    "Project prior record m01-law-baseline.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "file:docs/research/raw/implementation-methods/m07-eu-reference-pilots.json",
+   "ids": [
+    "prior-record-m07"
+   ],
+   "titles": [
+    "Project prior record m07-eu-reference-pilots.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://www.protokol.com/",
+   "ids": [
+    "new-vendor-protokol-provenant"
+   ],
+   "titles": [
+    "Protokol home page (Provenant link)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://publications.europa.eu/webapi/rdf/sparql",
+   "ids": [
+    "new-cellar-sparql-2026-10-19",
+    "impl-dec-eu-2026-2048"
+   ],
+   "titles": [
+    "Publications Office Cellar SPARQL endpoint, two read-only metadata queries",
+    "Commission Implementing Decision (EU) 2026/2048 of 14 September 2026 on the harmonised standard for batteries drafted in support of Regulation (EU) 2023/1542"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "https://github.com/digitalbazaar/pyld",
+   "ids": [
+    "new-pyld"
+   ],
+   "titles": [
+    "PyLD (PyPI metadata, README, CHANGELOG)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://pypi.org/project/pyshacl/",
+   "ids": [
+    "pypi-pyshacl"
+   ],
+   "titles": [
+    "pySHACL (Python SHACL validator)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://pypi.org/pypi/dpp-sdk/json",
+   "ids": [
+    "cir4fun-python-dpp-sdk"
+   ],
+   "titles": [
+    "python-dpp-sdk (Cir4Fun; PyPI dpp-sdk)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://github.com/opentimestamps/python-opentimestamps",
+   "ids": [
+    "new-python-opentimestamps"
+   ],
+   "titles": [
+    "python-opentimestamps"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://github.com/pyx-industries/pyx-identity-resolver",
+   "ids": [
+    "new-pyx-identity-resolver"
+   ],
+   "titles": [
+    "pyx-industries/pyx-identity-resolver"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.qudt.org/",
+   "ids": [
+    "new-qudt"
+   ],
+   "titles": [
+    "QUDT home page"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/rdf12-concepts/",
+   "ids": [
+    "new-w3c-rdf12-concepts"
+   ],
+   "titles": [
+    "RDF 1.2 Concepts and Abstract Data Model"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/rdf-canon/",
+   "ids": [
+    "new-w3c-rdf-canon"
+   ],
+   "titles": [
+    "RDF Dataset Canonicalization"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/RDFLib/rdflib/blob/main/docs/security_considerations.md",
+   "ids": [
+    "new-rdflib"
+   ],
+   "titles": [
+    "rdflib repository and Security Considerations document"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://nfc-forum.org/build/specifications/record-type-definition-rtd-technical-specification",
+   "ids": [
+    "new-nfc-forum-rtd-page"
+   ],
+   "titles": [
+    "Record Type Definition (RTD) Technical Specification (NFC Forum product page)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "file:docs/reference/reference-system.md; file:src/dppce/infrastructure/reference_server.py",
+   "ids": [
+    "new-dppce-reference-system"
+   ],
+   "titles": [
+    "Reference DPP system and data formats (docs/reference/reference-system.md) and src/dppce/infrastructure/reference_server.py"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj/eng",
+   "ids": [
+    "reg-eu-2023-1542"
+   ],
+   "titles": [
+    "Regulation (EU) 2023/1542 concerning batteries and waste batteries"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://publications.europa.eu/resource/cellar/d86c4599-ac88-11f1-b9e5-01aa75ed71a1.0007.02/DOC_1",
+   "ids": [
+    "reg-eu-2023-1542"
+   ],
+   "titles": [
+    "Regulation (EU) 2023/1542 concerning batteries and waste batteries (consolidated text 13.08.2026)",
+    "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries, amending Directive 2008/98/EC and Regulation (EU) 2019/1020 and repealing Directive 2006/66/EC",
+    "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries",
+    "Regulation (EU) 2023/1542 concerning batteries and waste batteries",
+    "Regulation (EU) 2023/1542 concerning batteries and waste batteries (consolidated text)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "f03",
+    "g01",
+    "g02",
+    "m01",
+    "m07",
+    "m08",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/oj",
+   "ids": [
+    "reg-eu-2023-1542"
+   ],
+   "titles": [
+    "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries",
+    "Regulation (EU) 2023/1542 concerning batteries and waste batteries"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03",
+    "m04",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://publications.europa.eu/resource/cellar/d0065c31-2ce3-11ee-95a2-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "reg-eu-2023-1542"
+   ],
+   "titles": [
+    "Regulation (EU) 2023/1542 of the European Parliament and of the Council of 12 July 2023 concerning batteries and waste batteries, amending Directive 2008/98/EC and Regulation (EU) 2019/1020 and repealing Directive 2006/66/EC"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://publications.europa.eu/resource/cellar/ef51c6ab-a06c-11ee-b164-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-data-act-reg-2023-2854"
+   ],
+   "titles": [
+    "Regulation (EU) 2023/2854 (Data Act)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng",
+   "ids": [
+    "new-reg-eu-2024-1183"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/1183 amending Regulation (EU) No 910/2014 (European Digital Identity Framework)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://publications.europa.eu/resource/cellar/459993a1-068e-11ef-a251-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-eidas2-reg-2024-1183"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/1183 of the European Parliament and of the Council of 11 April 2024 amending Regulation (EU) No 910/2014 as regards establishing the European Digital Identity Framework"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng",
+   "ids": [
+    "espr-reg-2024-1781"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/1781 (Ecodesign for Sustainable Products Regulation)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj",
+   "ids": [
+    "reg-eu-2024-1781",
+    "espr-reg-2024-1781"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/1781 establishing a framework for the setting of ecodesign requirements for sustainable products",
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products",
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council establishing a framework for the setting of ecodesign requirements for sustainable products",
+    "Regulation (EU) 2024/1781 establishing a framework for the setting of ecodesign requirements for sustainable products (ESPR)"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03",
+    "m03",
+    "m04",
+    "m09",
+    "m10"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/66b9f8da-34ea-11ef-b441-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "reg-eu-2024-1781",
+    "espr-reg-2024-1781"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC",
+    "Regulation (EU) 2024/1781 establishing a framework for the setting of ecodesign requirements for sustainable products",
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council (Cellar DOC_1 of original text)",
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products",
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC (Text with EEA relevance)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01",
+    "f02",
+    "f04",
+    "g01",
+    "g02",
+    "m01",
+    "m06"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/78530460-7228-11f0-bf4e-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "reg-eu-2024-1781",
+    "espr-reg-2024-1781"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/1781 of the European Parliament and of the Council of 13 June 2024 establishing a framework for the setting of ecodesign requirements for sustainable products, amending Directive (EU) 2020/1828 and Regulation (EU) 2023/1542 and repealing Directive 2009/125/EC",
+    "Regulation (EU) 2024/1781 (Ecodesign for Sustainable Products Regulation), consolidated text 02024R1781-20240628",
+    "Regulation (EU) 2024/1781 (Ecodesign for Sustainable Products Regulation)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f03",
+    "m05",
+    "m07",
+    "m08"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/a860ee13-bce2-11ef-91ed-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-reg-eu-2024-3110-cpr"
+   ],
+   "titles": [
+    "Regulation (EU) 2024/3110 laying down harmonised rules for the marketing of construction products",
+    "Regulation (EU) 2024/3110 of the European Parliament and of the Council of 27 November 2024 laying down harmonised rules for the marketing of construction products and repealing Regulation (EU) No 305/2011",
+    "Regulation (EU) 2024/3110 laying down harmonised rules for the marketing of construction products (Construction Products Regulation)"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03",
+    "m01",
+    "m10"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/f2294563-d703-11f0-8da2-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-reg-eu-2025-2509-toys"
+   ],
+   "titles": [
+    "Regulation (EU) 2025/2509 of the European Parliament and of the Council on the safety of toys",
+    "Regulation (EU) 2025/2509 of the European Parliament and of the Council on the safety of toys (title as cited in the Commission DPP FAQ)",
+    "Regulation (EU) 2025/2509 on the safety of toys"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m01",
+    "m10"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/394bc298-86fd-11f1-bf5e-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "reg-eu-2026-1738"
+   ],
+   "titles": [
+    "Regulation (EU) 2026/1738 of the European Parliament and of the Council of 8 July 2026 on circularity requirements for vehicle design and on management of end-of-life vehicles, amending Regulations (EU) No 168/2013, (EU) 2018/858, (EU) 2019/1020 and (EU) 2023/1542, and repealing Directives 2000/53/EC and 2005/64/EC"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "http://publications.europa.eu/resource/cellar/886a72ea-15d9-11f1-8870-01aa75ed71a1.0006.03/DOC_1",
+   "ids": [
+    "new-reg-eu-2026-405-detergents"
+   ],
+   "titles": [
+    "Regulation (EU) 2026/405 of the European Parliament and of the Council on detergents and surfactants",
+    "Regulation (EU) 2026/405 of the European Parliament and of the Council on detergents and surfactants (title shortened)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m01"
+   ]
+  },
+  {
+   "url": "https://zenodo.org/records/15007667",
+   "ids": [
+    "new-cirpass2-dppsp-call-for-evidence-response"
+   ],
+   "titles": [
+    "Response to Call for Evidence on Rules for DPP Service Providers"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/info/rfc9052",
+   "ids": [
+    "new-rfc-9052-cose"
+   ],
+   "titles": [
+    "RFC 9052: CBOR Object Signing and Encryption (COSE): Structures and Process"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/info/rfc9285",
+   "ids": [
+    "new-rfc-9285-base45"
+   ],
+   "titles": [
+    "RFC 9285: The Base45 Data Encoding"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://eips.ethereum.org/EIPS/eip-1186",
+   "ids": [
+    "new-eip-1186"
+   ],
+   "titles": [
+    "RPC-Method to get Merkle Proofs - eth_getProof (EIP-1186)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://community.sap.com/t5/integration-blog-posts/sap-digital-battery-passport/ba-p/14274343",
+   "ids": [
+    "new-vendor-sap"
+   ],
+   "titles": [
+    "SAP digital battery passport material (search excerpts)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.scantrust.com/digital-product-passports/",
+   "ids": [
+    "new-vendor-scantrust"
+   ],
+   "titles": [
+    "Scantrust digital product passports page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://schema.org/docs/releases.html",
+   "ids": [
+    "new-schemaorg"
+   ],
+   "titles": [
+    "schema.org releases and terms of service"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/ScorpioBroker/ScorpioBroker",
+   "ids": [
+    "new-scorpio-repo"
+   ],
+   "titles": [
+    "ScorpioBroker/ScorpioBroker"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/",
+   "ids": [
+    "new-ietf-sd-jwt-vc-draft"
+   ],
+   "titles": [
+    "SD-JWT-based Verifiable Digital Credentials (draft-ietf-oauth-sd-jwt-vc)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vc-jose-cose/",
+   "ids": [
+    "w3c-vc-jose-cose"
+   ],
+   "titles": [
+    "Securing Verifiable Credentials using JOSE and COSE"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/WAI/test-evaluate/tools/selecting/",
+   "ids": [
+    "new-w3c-wai-selecting-tools"
+   ],
+   "titles": [
+    "Selecting Web Accessibility Evaluation Tools"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/info/rfc9901",
+   "ids": [
+    "new-rfc-9901-sd-jwt"
+   ],
+   "titles": [
+    "Selective Disclosure for JSON Web Tokens (RFC 9901)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/eclipse-esmf/esmf-semantic-aspect-meta-model",
+   "ids": [
+    "new-eclipse-samm"
+   ],
+   "titles": [
+    "Semantic Aspect Meta Model (SAMM) specification and repository"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://eclipse-esmf.github.io/samm-specification/snapshot/index.html",
+   "ids": [
+    "new-esmf-samm-spec"
+   ],
+   "titles": [
+    "Semantic Aspect Meta Model (SAMM) specification, Eclipse Semantic Modeling Framework"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/shacl12-core/",
+   "ids": [
+    "new-w3c-shacl12-core"
+   ],
+   "titles": [
+    "SHACL 1.2 Core"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/shacl/",
+   "ids": [
+    "new-w3c-shacl"
+   ],
+   "titles": [
+    "Shapes Constraint Language (SHACL)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "docs/research/raw/implementation-methods/m02-gs1-web-resolver.json",
+   "ids": [
+    "prior-m02-gs1-web-resolver"
+   ],
+   "titles": [
+    "Sibling research record m02-gs1-web-resolver.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "docs/research/raw/implementation-methods/m03-aas-digital-twin.json",
+   "ids": [
+    "prior-m03-aas-digital-twin"
+   ],
+   "titles": [
+    "Sibling research record m03-aas-digital-twin.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "docs/research/raw/implementation-methods/m05-verifiable-credentials.json",
+   "ids": [
+    "prior-m05-verifiable-credentials"
+   ],
+   "titles": [
+    "Sibling research record m05-verifiable-credentials.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "docs/research/raw/implementation-methods/m06-dlt-anchored.json",
+   "ids": [
+    "prior-m06-dlt-anchored"
+   ],
+   "titles": [
+    "Sibling research record m06-dlt-anchored.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "docs/research/raw/implementation-methods/m07-eu-reference-pilots.json",
+   "ids": [
+    "prior-m07-eu-reference-pilots"
+   ],
+   "titles": [
+    "Sibling research record m07-eu-reference-pilots.json"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "https://www.siemens.com/es-es/industries/batteries/battery-passport/",
+   "ids": [
+    "new-vendor-siemens"
+   ],
+   "titles": [
+    "Siemens Battery Passport page and conference slides"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://nfc-forum.org/uploads/specifications/60-NFCForum-TS-RTD_SIG-2.0.pdf",
+   "ids": [
+    "new-nfc-forum-sig-rtd-2-0"
+   ],
+   "titles": [
+    "Signature Record Type Definition Technical Specification (RTD_SIG) 2.0"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://gs1.eu/news/six-gs1-standards-now-published-as-harmonised-standards-in-the-official-journal-of-the-eu/",
+   "ids": [
+    "new-gs1-eu-news-harmonised-standards"
+   ],
+   "titles": [
+    "Six DPP Standards Now Published as Harmonised Standards in the Official Journal of the EU"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://spec.smarthealth.cards/",
+   "ids": [
+    "new-shc-spec-1-4-0"
+   ],
+   "titles": [
+    "SMART Health Cards Framework"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://solidproject.org/TR/protocol",
+   "ids": [
+    "new-solid-protocol"
+   ],
+   "titles": [
+    "Solid Protocol"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-metamodel/tree/v3.2.0",
+   "ids": [
+    "idta-01001-metamodel"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 1: Metamodel"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-1-metamodel-idta-number-01001",
+   "ids": [
+    "idta-01001-metamodel"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 1: Metamodel"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-metamodel",
+   "ids": [
+    "idta-01001-metamodel"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 1: Metamodel"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-api/tree/v3.2.0",
+   "ids": [
+    "idta-01002-api"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.io/aas-specifications/IDTA-01002/v3.2/specification/interfaces.html",
+   "ids": [
+    "idta-01002-api"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-api/blob/main/DiscoveryServiceSpecification/V3.2_SSP-001.yaml",
+   "ids": [
+    "idta-01002-api"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces (Discovery Service Specification and API schemas)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-2-application-programming-interfaces-idta-number-01002",
+   "ids": [
+    "idta-01002-api"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces (IDTA 01002)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/http-rest-api/interactions.adoc",
+   "ids": [
+    "idta-01002-api"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 2: Application Programming Interfaces (IDTA-01002) v3.2.0 - interactions page"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-iec61360",
+   "ids": [
+    "idta-01003a-iec61360"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 3a: Data Specification IEC 61360"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-measurement-units",
+   "ids": [
+    "idta-01003b-units"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 3b: Data Specification Units of Measurement"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-security/tree/v3.1.0",
+   "ids": [
+    "idta-01004-security"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 4: Security"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications/specification-of-the-asset-administration-shell-part-4-security-idta-number-01004",
+   "ids": [
+    "idta-01004-security"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 4: Security"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/admin-shell-io/aas-specs-aasx/tree/v3.2.0",
+   "ids": [
+    "idta-01005-aasx"
+   ],
+   "titles": [
+    "Specification of the Asset Administration Shell Part 5: Package File Format (AASX)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://www.spherity.com/post/the-world-s-first-decentralized-verifiable-battery-passport",
+   "ids": [
+    "new-vendor-spherity"
+   ],
+   "titles": [
+    "Spherity VERA page and decentralized battery passport write-up"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://atpinfo.de/veranstaltungen/sps-2024-der-idta-stand-ist-zentrale-anlaufstelle-fuer-die-aas/",
+   "ids": [
+    "new-atpinfo-sps2024-idta"
+   ],
+   "titles": [
+    "SPS 2024: Der IDTA-Stand ist zentrale Anlaufstelle für die AAS"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://github.com/stellio-hub/stellio-context-broker",
+   "ids": [
+    "new-stellio-repo"
+   ],
+   "titles": [
+    "stellio-hub/stellio-context-broker"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/rfc/rfc5646.html",
+   "ids": [
+    "new-rfc-5646"
+   ],
+   "titles": [
+    "Tags for Identifying Languages"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://health.ec.europa.eu/publications/technical-specifications-eu-digital-covid-certificates-volumes-1-5_en",
+   "ids": [
+    "new-ec-dcc-techspecs-page"
+   ],
+   "titles": [
+    "Technical specifications for EU Digital COVID Certificates Volumes 1-5"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://industrialdigitaltwin.org/en/technology",
+   "ids": [
+    "new-idta-technology-page"
+   ],
+   "titles": [
+    "Technology - IDTA"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://eclass.eu/fileadmin/Redaktion/pdf-Dateien/Sonstige_Dateien/ECLASS_terms-of-use_4-3.pdf",
+   "ids": [
+    "new-eclass-terms-of-use"
+   ],
+   "titles": [
+    "Terms of Use for the ECLASS Standard"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://api.crossref.org/works/10.1515/auto-2024-0150",
+   "ids": [
+    "new-otto-kleinert-2025-test-engines"
+   ],
+   "titles": [
+    "Test engines for the asset administration shell"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m03"
+   ]
+  },
+  {
+   "url": "https://uncefact.github.io/tests-untp/docs/test-suites",
+   "ids": [
+    "new-tests-untp-docs-test-suites"
+   ],
+   "titles": [
+    "tests-untp documentation: Test Suites page (0.7.0 and next)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/uncefact/tests-untp/tree/next/packages/untp-playground",
+   "ids": [
+    "new-untp-playground-package"
+   ],
+   "titles": [
+    "tests-untp packages/untp-playground README and verify route source"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/uncefact/tests-untp/blob/next/packages/untp-test-suite/README.md",
+   "ids": [
+    "new-untp-test-suite-package"
+   ],
+   "titles": [
+    "tests-untp packages/untp-test-suite README"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://catena-x.net/use-case-cluster/digital-product-passport/",
+   "ids": [
+    "new-catenax-dpp-usecase-page"
+   ],
+   "titles": [
+    "The Catena-X Digital Product Passport (use case cluster page)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://hub.ebsi.eu/vc-framework/did/legal-entities",
+   "ids": [
+    "new-ebsi-did-method"
+   ],
+   "titles": [
+    "The did:ebsi DID method | DevHub"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://identity.foundation/didwebvh/v1.0/",
+   "ids": [
+    "new-dif-did-webvh-1-0"
+   ],
+   "titles": [
+    "The did:webvh DID Method -- did:web + Verifiable History"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/iron-steel_en",
+   "ids": [
+    "new-ec-iron-steel-dpp-page"
+   ],
+   "titles": [
+    "The Digital Product Passport (DPP) for Iron and Steel"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://www.tilkal.com/",
+   "ids": [
+    "new-vendor-tilkal"
+   ],
+   "titles": [
+    "Tilkal home page and GitHub organisation"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/filip26/titanium-json-ld",
+   "ids": [
+    "new-titanium-json-ld"
+   ],
+   "titles": [
+    "Titanium JSON-LD repository metadata"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/TopQuadrant/shacl",
+   "ids": [
+    "new-topbraid-shacl"
+   ],
+   "titles": [
+    "TopBraid SHACL API README"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://ebsi.eu/projects/trace4eu-battery-materials-traceability",
+   "ids": [
+    "new-ebsi-trace4eu-page",
+    "new-ebsi-trace4eu-battery"
+   ],
+   "titles": [
+    "TRACE4EU Battery Materials Traceability (EBSI project page)",
+    "TRACE4EU Battery Materials Traceability"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05",
+    "m06",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://github.com/trace4eu",
+   "ids": [
+    "new-trace4eu-github"
+   ],
+   "titles": [
+    "trace4eu GitHub organization"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m07"
+   ]
+  },
+  {
+   "url": "https://eclipse-tractusx.github.io/docs-kits/kits/eco-pass-kit/adoption-view",
+   "ids": [
+    "new-tractusx-ecopass-kit"
+   ],
+   "titles": [
+    "Tractus-X EcoPass KIT adoption view (released 26.09 and unreleased next)",
+    "Eclipse Tractus-X EcoPass KIT, Adoption View"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m04"
+   ]
+  },
+  {
+   "url": "https://github.com/transpareo/transpareo-time-machine",
+   "ids": [
+    "new-transpareo-time-machine"
+   ],
+   "titles": [
+    "transpareo/transpareo-time-machine repository metadata",
+    "transpareo/transpareo-time-machine"
+   ],
+   "levels": [
+    "metadata_only",
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://specs.ipfs.tech/http-gateways/trustless-gateway/",
+   "ids": [
+    "new-ipfs-trustless-gateway"
+   ],
+   "titles": [
+    "Trustless Gateway Specification"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m06"
+   ]
+  },
+  {
+   "url": "https://trustrace.com/solutions/digital-product-passport-dpp-compliance",
+   "ids": [
+    "new-vendor-trustrace"
+   ],
+   "titles": [
+    "TrusTrace DPP compliance solution page"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/uncefact/project-storage-service",
+   "ids": [
+    "new-uncefact-storage-service"
+   ],
+   "titles": [
+    "uncefact/project-storage-service"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/uncefact/project-vckit",
+   "ids": [
+    "new-uncefact-vckit"
+   ],
+   "titles": [
+    "uncefact/project-vckit"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/uncefact/tests-untp/issues/1096",
+   "ids": [
+    "untp-tests-issue-1096"
+   ],
+   "titles": [
+    "uncefact/tests-untp issue #1096: Track the UNTP changes since v0.7.0 and the work each product needs"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/uncefact/tests-untp",
+   "ids": [
+    "new-tests-untp-repo"
+   ],
+   "titles": [
+    "uncefact/tests-untp repository (README, releases, version.json, licence)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://unece.org/trade/uncefact/cl-recommendations",
+   "ids": [
+    "new-unece-rec20"
+   ],
+   "titles": [
+    "UNECE Recommendation 20 (unit codes; full title not verified, official pages unreachable)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/rfc/rfc9562.html",
+   "ids": [
+    "new-rfc-9562"
+   ],
+   "titles": [
+    "Universally Unique IDentifiers (UUIDs)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/Architecture",
+   "ids": [
+    "new-untp-0-7-0-architecture"
+   ],
+   "titles": [
+    "UNTP Architecture 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/ConformityCredential",
+   "ids": [
+    "untp-dcc-0-7-0"
+   ],
+   "titles": [
+    "UNTP Conformity Credential 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://vocabulary.uncefact.org/untp/",
+   "ids": [
+    "untp-vocabulary-context-0-7-0"
+   ],
+   "titles": [
+    "UNTP Core Types vocabulary and JSON-LD context 0.7.0"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/DecentralisedAccessControl",
+   "ids": [
+    "new-untp-0-7-0-dac"
+   ],
+   "titles": [
+    "UNTP Decentralised Access Control 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/specification/corporate-record",
+   "ids": [
+    "new-untp-wip-dcr"
+   ],
+   "titles": [
+    "UNTP Digital Corporate Record, Work in Progress"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/DigitalFacilityRecord",
+   "ids": [
+    "new-untp-0-7-0-dfr"
+   ],
+   "titles": [
+    "UNTP Digital Facility Record 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/DigitalIdentityAnchor",
+   "ids": [
+    "new-untp-0-7-0-dia"
+   ],
+   "titles": [
+    "UNTP Digital Identity Anchor 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/DigitalProductPassport",
+   "ids": [
+    "new-untp-0-7-0-dpp"
+   ],
+   "titles": [
+    "UNTP Digital Product Passport 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/DigitalTraceabilityEvents",
+   "ids": [
+    "new-untp-0-7-0-dte"
+   ],
+   "titles": [
+    "UNTP Digital Traceability Events 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f01",
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/artefacts/schema/v0.7.0/dpp/DigitalProductPassport.json",
+   "ids": [
+    "new-untp-0-7-0-dpp-schema"
+   ],
+   "titles": [
+    "UNTP DigitalProductPassport JSON Schema v0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/IdentityResolver",
+   "ids": [
+    "new-untp-0-7-0-idr"
+   ],
+   "titles": [
+    "UNTP Identity Resolver, version 0.7.0 (published page and source)",
+    "UNTP Identity Resolver 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m05"
+   ]
+  },
+  {
+   "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/raw/main/website/docs/specification/IdentityResolver.md",
+   "ids": [
+    "untp-spec-repository"
+   ],
+   "titles": [
+    "UNTP spec-untp, IdentityResolver.md on GitLab main and API metadata",
+    "UNTP specification repository - Identity Resolver page"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04",
+    "m09"
+   ]
+  },
+  {
+   "url": "https://opensource.unicc.org/un/unece/uncefact/spec-untp/-/tags",
+   "ids": [
+    "untp-spec-repository"
+   ],
+   "titles": [
+    "UNTP specification repository (GitLab) tags page"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification",
+   "ids": [
+    "new-untp-0-7-0-spec-index"
+   ],
+   "titles": [
+    "UNTP Technical Specifications 0.7.0 (index and sidebar)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/specification/",
+   "ids": [
+    "new-untp-wip-spec-index"
+   ],
+   "titles": [
+    "UNTP Technical Specifications, Work in Progress (index)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/0.7.0/specification/VerifiableCredentials",
+   "ids": [
+    "new-untp-0-7-0-vc-profile"
+   ],
+   "titles": [
+    "UNTP Verifiable Credentials 0.7.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/docs/specification/VerifiableCredentials",
+   "ids": [
+    "new-untp-wip-vc-profile"
+   ],
+   "titles": [
+    "UNTP Verifiable Credentials, Work in Progress"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01",
+    "m05"
+   ]
+  },
+  {
+   "url": "https://untp.unece.org/versions",
+   "ids": [
+    "untp-versions-page"
+   ],
+   "titles": [
+    "UNTP versions",
+    "UNTP Documentation Versions page"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "m05",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://thebatterypass.eu/wp-content/uploads/BatteryPass-Ready_User-Stories_v1.0.cleaned.pdf",
+   "ids": [
+    "new-bpr-user-stories-v1"
+   ],
+   "titles": [
+    "User Stories from a Technical Perspective (BatteryPass-Ready), v1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f02",
+    "f03",
+    "m07"
+   ]
+  },
+  {
+   "url": "https://w3c.github.io/vcalm/",
+   "ids": [
+    "new-w3c-vcalm"
+   ],
+   "titles": [
+    "VCALM v1.0 (Verifiable Credentials HTTP API and protocols), formerly VC API"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vc-data-integrity/",
+   "ids": [
+    "w3c-vc-data-integrity-1-0"
+   ],
+   "titles": [
+    "Verifiable Credential Data Integrity 1.0"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05",
+    "m08"
+   ]
+  },
+  {
+   "url": "https://w3c.github.io/vc-render-method/",
+   "ids": [
+    "new-w3c-vc-render-method"
+   ],
+   "titles": [
+    "Verifiable Credential Rendering Methods v1.0"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/vc-data-model-2.0/",
+   "ids": [
+    "w3c-vcdm-2-0"
+   ],
+   "titles": [
+    "Verifiable Credentials Data Model v2.0"
+   ],
+   "levels": [
+    "substantive",
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05",
+    "m06",
+    "m10"
+   ]
+  },
+  {
+   "url": "https://github.com/w3c/json-ld-api/tree/main/tests",
+   "ids": [
+    "new-w3c-test-suites"
+   ],
+   "titles": [
+    "W3C test suites for JSON-LD API, SHACL and RDF canonicalization"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m08"
+   ]
+  },
+  {
+   "url": "https://github.com/w3c/vc-bitstring-status-list-test-suite",
+   "ids": [
+    "new-w3c-vc-test-suite-repos"
+   ],
+   "titles": [
+    "W3C VC test suite repositories (vc-data-model-2.0, vc-jose-cose, vc-di-ecdsa, vc-di-eddsa, vc-bitstring-status-list)"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/w3c/vc-jose-cose",
+   "ids": [
+    "new-w3c-vc-jose-cose-repo"
+   ],
+   "titles": [
+    "w3c/vc-jose-cose repository commits and issue #345"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://github.com/w3c/vc-test-suite-implementations",
+   "ids": [
+    "new-w3c-vc-test-suite-implementations"
+   ],
+   "titles": [
+    "w3c/vc-test-suite-implementations"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m05"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/WCAG22/",
+   "ids": [
+    "wcag-2-2"
+   ],
+   "titles": [
+    "Web Content Accessibility Guidelines (WCAG) 2.2"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g01"
+   ]
+  },
+  {
+   "url": "https://www.rfc-editor.org/rfc/rfc8288.html",
+   "ids": [
+    "new-rfc-8288"
+   ],
+   "titles": [
+    "Web Linking"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m02"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/wot-discovery/",
+   "ids": [
+    "new-w3c-wot-discovery"
+   ],
+   "titles": [
+    "Web of Things (WoT) Discovery"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://www.w3.org/TR/wot-thing-description11/",
+   "ids": [
+    "new-w3c-wot-td-1-1",
+    "new-wot-td-note"
+   ],
+   "titles": [
+    "Web of Things (WoT) Thing Description 1.1",
+    "Absence note: no integrity mechanism found in TD 1.1 portion read"
+   ],
+   "levels": [
+    "substantive",
+    "not_located"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "https://www.solutions-numeriques.com/?p=4011",
+   "ids": [
+    "new-2d-doc-search"
+   ],
+   "titles": [
+    "Web search on the French 2D-Doc / cachet electronique visible (CEV)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  },
+  {
+   "url": "https://eudigitalproductpassport.org/updates/battery-passport-access-rights-implementing-act-delay",
+   "ids": [
+    "new-websearch-art-77-9-secondary"
+   ],
+   "titles": [
+    "Web search results on the status of the Art. 77(9) act (eudigitalproductpassport.org, productpasses.com, battery-tech.net and others)"
+   ],
+   "levels": [
+    "secondary_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m01"
+   ]
+  },
+  {
+   "url": "https://learn.microsoft.com/en-us/azure/digital-twins/overview",
+   "ids": [
+    "new-azure-dt-overview"
+   ],
+   "titles": [
+    "What is Azure Digital Twins?"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g03"
+   ]
+  },
+  {
+   "url": "docs/research/raw/implementation-methods/x02-critic.json",
+   "ids": [
+    "new-x02-critic"
+   ],
+   "titles": [
+    "x02-critic.json (sweep critique)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "f04"
+   ]
+  },
+  {
+   "url": "https://github.com/zxing-cpp/zxing-cpp",
+   "ids": [
+    "pypi-zxing-cpp"
+   ],
+   "titles": [
+    "zxing-cpp"
+   ],
+   "levels": [
+    "metadata_only"
+   ],
+   "protected_standard": false,
+   "files": [
+    "m09"
+   ]
+  },
+  {
+   "url": "https://github.com/zxing-cpp/zxing-cpp/blob/master/wrappers/python/zxing.cpp",
+   "ids": [
+    "new-zxing-cpp-python-binding"
+   ],
+   "titles": [
+    "zxing-cpp: wrappers/python/zxing.cpp and core/src/BarcodeFormat.h (master branch)"
+   ],
+   "levels": [
+    "substantive"
+   ],
+   "protected_standard": false,
+   "files": [
+    "g02"
+   ]
+  }
+ ]
+}

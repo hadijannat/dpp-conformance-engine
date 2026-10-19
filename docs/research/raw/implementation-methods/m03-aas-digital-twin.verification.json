@@ -1,0 +1,364 @@
+{
+  "target": "m03-aas-digital-twin",
+  "retrieval_date": "2026-10-19",
+  "method_note": "Read the whole target. Chose claims with highest oracle impact: spec versions and release dates, IDTA-01002/01001/01004/01005 mechanisms (paths, profile ids, status codes, JWS header, linkset), template semanticIds, IANA registrations, repository licences and activity, all 24 DOIs, and existing_check mappings. Re-fetched IDTA spec sources at tag v3.2.0 and the template JSON through gh api, IANA, Crossref, PyPI and the engine source. EUR-Lex returned empty pages, so law claims were compared only with the repository records. No EN/ISO/IEC/DIN document was opened; IDTA annex text that cites ENs was read only for IDTA's own statements.",
+  "checked": [
+    {
+      "claim_ref": "maturity.versions_at_retrieval[0]",
+      "claim": "IDTA-01001 v3.2 released 2026-07-21 (tag v3.2.0); default branch master, pushed 2026-09-09",
+      "risk": "version",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.github.com/repos/admin-shell-io/aas-specs-metamodel/releases",
+      "evidence": "Latest release v3.2.0 published 2026-07-21T07:24Z; repository default branch is master; pushed_at 2026-09-09; licence CC-BY-4.0; not archived.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[1]",
+      "claim": "IDTA-01002 v3.2.0 on 2026-07-21, v3.1.3 on 2026-07-06 last 3.1 line, repo pushed 2026-10-16, main unchanged since 2026-07-20",
+      "risk": "repo_metadata",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.github.com/repos/admin-shell-io/aas-specs-api/releases",
+      "evidence": "Releases v3.2.0 (2026-07-21), v3.1.3 (2026-07-06); pushed_at 2026-10-16; latest commit on main 2026-07-20T14:29Z; default branch main.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[4..5]",
+      "claim": "IDTA-01004 v3.1 (2026-07-21) and IDTA-01005 v3.2 (2026-07-21); 01003-a 3.1.1 (2025-08-01); 01003-b 3.0.0 (2026-07-21)",
+      "risk": "version",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.github.com/repos/admin-shell-io/aas-specs-security/releases",
+      "evidence": "Release tags and dates match: security v3.1.0 2026-07-21, aasx v3.2.0 2026-07-21, iec61360 v3.1.1 2025-08-01, measurement-units v3.0.0 2026-07-21. Note security repo pushed_at is 2026-10-14 (later than the tag), not stated in file.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.spec_status / sources[new-idta-content-hub-aas-specs]",
+      "claim": "Content hub Release 26-01 lists Part 1 3.2, Part 2 3.2, 3a 3.1.1, 3b 3.0, Part 4 3.1, Part 5 3.2",
+      "risk": "version",
+      "verdict": "confirmed",
+      "evidence_url": "https://industrialdigitaltwin.org/en/content-hub/aasspecifications",
+      "evidence": "Page shows Release 26-01 with the six parts; versions only inferable from image file names (as the file itself says); they agree with the GitHub tags.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.versions_at_retrieval[8..10] and sources[new-idta-content-hub-submodels]",
+      "claim": "Content hub: 02099 and 02035-1..7 Published 1.0; 02023 1.0; 02006 3.0.1 Published and 4.0 In Development; 02004 2.0; 02078-2 and 02088 In Development; 02078-3 'Coming soon'",
+      "risk": "status",
+      "verdict": "confirmed",
+      "evidence_url": "https://industrialdigitaltwin.org/en/content-hub/submodels",
+      "evidence": "All listed statuses and versions match the page (first 100000 characters read). 02078-3 carries no status label, only 'Coming soon' under downloads, matching the file's wording.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L01.mechanism / L05.mechanism",
+      "claim": "DppMetadata template: submodel id https://admin-shell.io/idta/SubmodelTemplate/dppMetadata/1/0, semanticId ModelReference/Submodel https://admin-shell.io/idta/cds/dppMetadata/1; digitalProductPassportId..dppStatus xs:string One, lastUpdate xs:dateTime One, economicOperatorId One, facilityId ZeroToOne, contentSpecificationIds ZeroToOne list",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1",
+      "evidence": "Parsed folder 1/0/2 JSON: ids, key type Submodel, valueTypes, cardinality qualifiers and per-element semanticIds https://admin-shell.io/idta/cds/<name>/1 all match. Nine top-level elements plus the list child give the 'ten elements' figure used in sources[].what_it_shows.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L05.mechanism (battery templates)",
+      "claim": "Battery template semanticIds: 02035-1 .../digitalbatterypassport/nameplate/1/0/Nameplate; 02035-2 Submodel key 0173-1#01-AHF578#003; 02035-3 .../CarbonFootprint/CarbonFootprint/1/0; 02035-4 .../TechnicalData/1/0; 02035-5 urn:samm:...product_condition:1.0.2#ProductCondition; 02035-6 ...material_composition:1.0.0#...; 02035-7 ...circularity:1.0.0#...",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport",
+      "evidence": "Parsed latest JSON folders (1/1, 1/1, 1/1, 1/0/2, 1/0/2, 1/0/1, 1/0/2); every semanticId string equals the file. The 02035-3 id equals the generic 02023 id (checked in 02023 1/0/2 JSON).",
+      "correction": null
+    },
+    {
+      "claim_ref": "anomalies[IDTA 02035-2 / 02004]; sources[idta-submodel-templates-repo]",
+      "claim": "02006 3/0/2 semanticId https://admin-shell.io/idta/nameplate/3/0/Nameplate (ExternalReference); 02004 2/0/2 ModelReference Submodel 0173-1#01-AHF578#003; 02023 1/0/2 templateId https://admin-shell.io/IDTA02023-1-0",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/submodel-templates",
+      "evidence": "JSON of the three folders read; values match exactly, including the second semanticId collision (02035-2 vs 02004).",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism (status codes)",
+      "claim": "HTTP mapping uses 200, 201, 202, 204, 400, 401, 403, 404, 405, 409, 500, 501, 502",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/http-rest-api/http-rest-api.adoc",
+      "evidence": "Status-code table lists exactly these thirteen codes with the names Success, SuccessCreated, SuccessAccepted, SuccessNoContent, ClientError*, ServerError*.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism (ID Link)",
+      "claim": "ID Link GET with Accept application/linkset+json, application/json;q=0.9 gives 200 linkset+json with aas, aas-service-endpoints, dpp, dpp-service-endpoints; JSON-only client may get 302 with Location and Link header rel=alternate type linkset+json (RFC 8288)",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/http-rest-api/interactions.adoc",
+      "evidence": "Interactions page gives the same Accept header, the 200/linkset+json sequence, the 302 fallback marked 'may', and the Link header per RFC 8288. Authentication hints (type OIDC with well_known_url) appear in the example linkset.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03/L04 (Discovery)",
+      "claim": "POST /lookup/shellsByAssetLink is the v3.2 search; GET /lookup/shells deprecated; SSP-002 has only POST search plus GET /lookup/shells/{aasId}",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/DiscoveryServiceSpecification/V3.2_SSP-001.yaml",
+      "evidence": "OpenAPI SSP-001 has /lookup/shells (GET), /lookup/shellsByAssetLink (POST, SearchAllAssetAdministrationShellIdsByAssetLink), /lookup/shells/{id} GET/POST/DELETE; SSP-002 omits the deprecated GET. Changelog marks GetAllAssetAdministrationShellIdsByAssetLink deprecated.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L04.mechanism (profile list)",
+      "claim": "Profile numbers per service specification (AAS Repo SSP-001..006, Submodel Repo SSP-001..007, CD Repo SSP-001..003, AAS Registry SSP-001..005, Submodel Registry SSP-001..004, Discovery SSP-001..002, AASX FS SSP-001..002, AAS Service 001-002, Submodel Service 001-003) and identifier form https://admin-shell.io/aas/API/3/2/<Name>ServiceSpecification/SSP-<n>",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/http-rest-api/service-specifications-and-profiles.adoc",
+      "evidence": "Profile tables list exactly these profiles and meanings (Query, Signature, Identifiable, History, Template, Bulk, Minimal Read, Async). Identifier pattern confirmed.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L06.mechanism / L08.mechanism",
+      "claim": "$history?date on /shells/{id} (AAS Repo SSP-006) and /submodels/{id} (Submodel Repo SSP-007); $signed on /shells (SSP-004), /submodels (SSP-006), /concept-descriptions (CD SSP-003), response text/plain format jwt",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/tree/v3.2.0",
+      "evidence": "Profile OpenAPI files contain exactly these paths, operationIds (GetAssetAdministrationShellVersionByIdAndDate, GetSubmodelVersionByIdAndDate, ...ByIdSigned) and text/plain with format jwt.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L08.mechanism (JWS header)",
+      "claim": "JWS: alg only RS256, typ 'JWS', x5c, sigT (ISO 8601), sid (GUID); root certificate exchanged out of band; payload is the JSON object",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/signatures.adoc",
+      "evidence": "Signatures page lists these header parameters with the same constraints; example header shows alg RS256, sid, sigT, typ JWS, x5c.",
+      "correction": null
+    },
+    {
+      "claim_ref": "anomalies[signature profile numbering]",
+      "claim": "Changelog names Submodel Repository signature profile SSP-003 and CD Repository SSP-004, profile sections define SSP-006 and SSP-003",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/changelog.adoc",
+      "evidence": "Changelog line 19 says AAS Repo SSP-004, Submodel Repo SSP-003; service-specifications page and OpenAPI use Submodel Repo SSP-006 and CD Repo SSP-003. The inconsistency is real.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L04/L10 (DPP annex)",
+      "claim": "Annex states: uniqueProductIdentifier shall correspond to globalAssetId; selects DppMetadata by semanticId and content by contentSpecificationIds; keys by semanticId; atomic write with rollback; audit trail; deletion restrictions enforced even if delete is offered; AAS Registry is not the EU DPP registry; no template for registration data",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/annex/dpp.adoc",
+      "evidence": "All statements present (lines 63-106, 134, 148-150, 163-185, 268-269, 407-409). Wording in the file is 'shall equal'; IDTA wording is 'shall correspond'. Minor.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L01.variants[3]",
+      "claim": "DppMetadata granularity Model, Item, Batch map to AssetKind Type, Instance, Batch; Batch is new in 3.2",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-metamodel/blob/v3.2.0/documentation/IDTA-01001/modules/ROOT/pages/annex/dpp.adoc",
+      "evidence": "Mapping table: Item->Instance, Model->Type, Batch->Batch; metamodel changelog V3.2 adds AssetKind Batch. The table labels the left column as EN 18223 granularity, see rule5_findings.",
+      "correction": null
+    },
+    {
+      "claim_ref": "maturity.regulatory_alignment / L07.mechanism",
+      "claim": "IDTA-01004 v3.1 rights CREATE, READ, UPDATE, DELETE, EXECUTE, VIEW, ALL; default deny; JWT claims iss, exp, aud, sub, client_id, iat, jti (RFC 9068); anonymous rules allowed; annex DPP is a placeholder because EN 18239/18246 'expected September 2026'",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-security/tree/v3.1.0",
+      "evidence": "acl.bnf lists the seven rights; access-rule-model.adoc states deny without matching rule, standard RFC 9068 claims, ANONYMOUS keyword; annex/dpp.adoc says mapping cannot be given until release. File says IDTA-01004 'requires' anonymous rules can be written; IDTA says rules 'can also be defined'. Wording nit.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L07.mechanism (HTTP 401/403 corpus)",
+      "claim": "Conformance corpus HTTP.auth.001/002: no credentials gives 401, deny gives 403 with no payload leakage",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/annex/conformance-test-corpus.adoc",
+      "evidence": "Corpus rows HTTP.auth.001 (401) and HTTP.auth.002 (403, no payload leakage), HTTP.put.001/002, HTTP.invoke.001, HTTP.file.001, HTTP.query.001, QL.parse.001-003, ERR.cast.001 exist.",
+      "correction": null
+    },
+    {
+      "claim_ref": "layers.L03.mechanism / sources[idta-01005-aasx]",
+      "claim": "AASX media type application/aas+zip (changed in v3.2 from application/asset-administration-shell-package+xml); relationships aasx-origin, aas-spec, aas-suppl; origin file empty or 'Intentionally empty'; www.admin-shell.io relationship path deprecated",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-specs-aasx/blob/v3.2.0/documentation/IDTA-01005/modules/ROOT/pages/aasx.adoc",
+      "evidence": "Part 5 text and Part 2 changelog line 49 confirm the media type change and relationship rules.",
+      "correction": null
+    },
+    {
+      "claim_ref": "sources[new-iana-media-type-aas-zip]",
+      "claim": "application/aas+zip registered at IANA 2026-02-20, change controller IDTA e.V., extension .aasx, spec IDTA Part 5",
+      "risk": "url",
+      "verdict": "confirmed",
+      "evidence_url": "https://www.iana.org/assignments/media-types/application/aas+zip",
+      "evidence": "Registration page shows change controller IDTA e.V., registered and updated 2026-02-20, extension .aasx, published specification Part 5.",
+      "correction": null
+    },
+    {
+      "claim_ref": "sources[new-iana-link-relations]; anomalies",
+      "claim": "IANA registers 'dpp' with UNTP IdentityResolver reference; 'aas', 'aas-service-endpoints', 'dpp-service-endpoints' not registered; 'linkset' registered with RFC 9264",
+      "risk": "technical_mechanism",
+      "verdict": "confirmed",
+      "evidence_url": "https://www.iana.org/assignments/link-relations/link-relations.xhtml",
+      "evidence": "Registry has dpp (product to its digital product passport; reference UNTP Identity Resolver) and linkset (RFC 9264); the three IDTA tokens are absent.",
+      "correction": null
+    },
+    {
+      "claim_ref": "repo_metadata: aas-test-engines",
+      "claim": "Apache-2.0, not archived, pushed 2025-08-05, no GitHub releases, PyPI 1.0.3 uploaded 2025-08-05, PyPI licence field null, default metamodel 3.0.1 / API 3.0.3, only Contact Information and Digital Nameplate templates, registry/discovery/CD suites 'IDTA members only'",
+      "risk": "repo_metadata",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-test-engines",
+      "evidence": "gh api: Apache-2.0, archived false, pushed 2025-08-05T08:51Z, last commit 2025-08-05T08:45Z, zero releases. PyPI JSON: latest 1.0.3 uploaded 2025-08-05 08:51 UTC, license null. README: versions 3.0.1/3.0.3, two templates, asterisk 'IDTA members only' on registries, Discovery Full and CD repository.",
+      "correction": null
+    },
+    {
+      "claim_ref": "implementations[aas-test-engines].note; layers.L05 constraint list",
+      "claim": "Engine does not check AASd-012, -115, -020, -021, -077, AASc-3a-003, -050",
+      "risk": "spec_reference",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/admin-shell-io/aas-test-engines/blob/main/doc/file.md",
+      "evidence": "doc/file.md lists exactly these seven unchecked constraints.",
+      "correction": null
+    },
+    {
+      "claim_ref": "engine_mapping: aas.validate / api.contract / integrity.jws / access.restricted_fields / persistence.versions",
+      "claim": "aas.validate wraps only aas_test_engines file.check_json_data; api.contract supports GET only; integrity.jws allows ES256 only (P-256); access.restricted_fields uses capability access.policy; carrier.qr; registry.mock; persistence.versions is experimental; EU registry and scheduled persistence interface_only",
+      "risk": "engine_mapping",
+      "verdict": "confirmed",
+      "evidence_url": "file:///Users/aeroshariati/DPP-CE/.claude/worktrees/dpp-methods/docs/reference/capabilities.md",
+      "evidence": "src/dppce/adapters/lifecycle.py line 186 calls aas_file.check_json_data; src/dppce/evidence/jws.py ALLOWED_ALGORITHMS = ('ES256',); capabilities.md row 59 'Only get is supported'; check-to-capability table rows 56, 60, 72 match the file's existing_capability fields; interface_only states match.",
+      "correction": null
+    },
+    {
+      "claim_ref": "implementations[BaSyx Java / FA3ST / BaSyx Python / AAS4J]",
+      "claim": "BaSyx Java: license MIT, pushed 2026-10-19, release 2.0.0-milestone-15 on 2026-07-30, authorization RBAC only with Keycloak; FA3ST: Apache-2.0, v1.3.0 2025-10-28, Part 2 v3.1.2, no security; BaSyx Python 2.2.0 on 2026-10-02, Part 2 v3.1.1; AAS4J 2.0.2 on 2026-05-13, Part 1 V3.1",
+      "risk": "repo_metadata",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/eclipse-basyx/basyx-java-server-sdk",
+      "evidence": "gh api licences, pushed_at and releases agree; feature-authorization Readme says only RBAC and Keycloak; FA3ST README lines 23-34; BaSyx Python README table; AAS4J README line 4 and 81.",
+      "correction": null
+    },
+    {
+      "claim_ref": "implementations[Eclipse AASX Server / Package Explorer / aas-core*]",
+      "claim": "aaspe server and package-explorer: GitHub NOASSERTION, licence file Apache-2.0; server pre-release v0.3.1.812 on 2026-10-14; package-explorer v2025-10-21; aas-core3.0-python MIT file, v1.1.4 on 2026-02-06; aas-core3.1-python MIT file, v1.0.0-rc1 on 2025-12-10, pushed 2026-03-19; aas-core3.2-python created 2026-07-16 with only LICENSE; aas-core3.0-testgen archived; aas-core-testdatagen v0.0.4 2026-03-12; aas-smt-lint pushed 2025-11-06",
+      "risk": "repo_metadata",
+      "verdict": "confirmed",
+      "evidence_url": "https://github.com/eclipse-aascw",
+      "evidence": "gh api: values match. Licence files read (Apache terms in both aaspe repos; MIT in aas-core3.1-python and aas-core3.0-testgen). Org listing shows aas-core3.0-testgen archived.",
+      "correction": null
+    },
+    {
+      "claim_ref": "literature[0..22]",
+      "claim": "23 Crossref DOIs resolve to the recorded titles, years and venues (incl. procs.2025.01.099 issued 2025; procs.2026.02.383 Procedia Computer Science; ICPS QR paper; atp magazin)",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.crossref.org/works?filter=doi:10.3390/su17030969",
+      "evidence": "Two filtered Crossref queries (10 and 13 DOIs) return titles and container-titles identical to the file; all years match. Author names used in text (Otto et al. 2025 QR; Ristin et al. 2026 JSON Schemas; Broering et al. 2022 integrity) match the first authors in Crossref.",
+      "correction": null
+    },
+    {
+      "claim_ref": "literature[arXiv 10.48550/arxiv.2609.17062]",
+      "claim": "arXiv paper v1 2026-09-15, v2 2026-09-27, 'six authors'; set-theoretic evaluation of AAS instances with structural, cardinality and semanticId conformity scoring",
+      "risk": "doi",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://arxiv.org/abs/2609.17062",
+      "evidence": "Title, DOI, v1/v2 dates and the abstract (structural, semantic, cardinality, specification conformity; reference AAS or required SemanticIDs) match. The author count is unclear on the page (seven names listed, 'and 5 other authors' wording); the file's 'six authors' could not be confirmed.",
+      "correction": "Write 'author count not verified' or list names after reading the arXiv listing."
+    },
+    {
+      "claim_ref": "literature[10.1515/auto-2024-0150] / sources[new-otto-kleinert-2025-test-engines]",
+      "claim": "Test engines paper: at - Automatisierungstechnik 73(2) 145-158; online 2025-02-03, print 2025-02-25; describes the official Test Engines",
+      "risk": "doi",
+      "verdict": "confirmed",
+      "evidence_url": "https://api.crossref.org/works/10.1515/auto-2024-0150",
+      "evidence": "Crossref: volume 73, issue 2, pages 145-158, online 2025-02-03, print 2025-02-25; abstract proposes conformance-testing methods and Test Engines with a case study and limits. Authors in the source id ('otto-kleinert') were not checked.",
+      "correction": null
+    },
+    {
+      "claim_ref": "sources[new-zvei-dpp40-discussion-paper-2023]",
+      "claim": "ZVEI DPP4.0 paper: authors Garrels, Grüner, Orzelski, Reinschmidt; CC BY-ND 4.0; URL product identifiers, 2D codes with RFID or NFC alternative, OIDC with X.509, X.509 signing; date 2023-04-11",
+      "risk": "url",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://ZVEI.ORG/fileadmin/user_upload/Themen/Industrie/PCF%40ControlCabinet/20230411_Discussion_Paper_DPP40.pdf",
+      "evidence": "PDF text extracted locally: title, four authors, CC BY-ND 4.0 statement, 2D codes (QR or data matrix) with RFID/NFC alternative, OpenID Connect with X.509, X.509 signing all confirmed. No publication date appears in the extracted front matter; 2023-04-11 comes only from the file name (the file says so).",
+      "correction": "Keep 'date from file name' wording."
+    },
+    {
+      "claim_ref": "reg_law: Regulation (EU) 2024/1781 Art. 10(1)(a)-(d), 10(3), 10(4), 11(a)-(h), 13(4); Regulation (EU) 2023/1542 Art. 77(2),(3),(7),(8),(10), 78(e),(g)",
+      "claim": "Law paraphrases and article letters",
+      "risk": "legal_citation",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://eur-lex.europa.eu/eli/reg/2024/1781/oj/eng",
+      "evidence": "EUR-Lex returned empty content to WebFetch for /eli/.../oj/eng and legal-content URLs for both regulations today, so the primary text could not be re-read. The paraphrases agree point by point with the 2026-10-13 repository records docs/research/raw/espr.json (provisions 14-36) and batteries-regulation.json (provisions 43-53), which the file cites. Not independently confirmed in this session.",
+      "correction": null
+    },
+    {
+      "claim_ref": "sources[en-18219-2026].url",
+      "claim": "CEN catalogue URL for EN 18219 (FSP_PROJECT:79954 with a cs= token)",
+      "risk": "url",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://standards.cencenelec.eu/ords/f?p=205:110:::::FSP_PROJECT:79954",
+      "evidence": "Not fetched (protected-standard fence allows catalogue metadata only, and the file itself says it copied the URL from catalogue/sources.yaml). The session token 'cs=...' in the URL is a session-like parameter that may not be durable.",
+      "correction": "Prefer the URL without the cs= parameter once the catalogue is re-checked."
+    },
+    {
+      "claim_ref": "sources[impl-reg-eu-2026-1778]",
+      "claim": "Implementing Regulation (EU) 2026/1778 of 16 July 2026 on DPP registry arrangements; published 2026-07-17",
+      "risk": "legal_citation",
+      "verdict": "not_confirmed",
+      "evidence_url": "https://eur-lex.europa.eu/eli/reg_impl/2026/1778/oj",
+      "evidence": "EUR-Lex not readable today; title, dates and entry into force 2026-08-06 agree with catalogue/sources.yaml and commission-2026-acts.json (2026-10-13 record). No primary re-read.",
+      "correction": null
+    }
+  ],
+  "rule5_findings": [
+    {
+      "claim_ref": "layers.L01_unique_identifiers.variants[3]",
+      "problem": "Lists the granularity values Model, Item, Batch as 'DppMetadata granularity values'. IDTA-01001 v3.2 annex labels this value set as EN 18223 granularity, so the sentence reproduces an enumeration of an EN document. The 02099-1 JSON template carries only the example 'Item' and no enumeration.",
+      "fix": "Say: 'IDTA-01001 v3.2 maps the DppMetadata granularity string to AssetKind Instance, Type or Batch (annex mapping table); the permitted granularity strings are not recorded here'. Or cite the IDTA table by name as secondary and keep it out of oracle text."
+    },
+    {
+      "claim_ref": "layers.L04/L05/L10 and conformance_implications (aas.dpp_compose, ReadDPP-style flows)",
+      "problem": "No violation found. Watch item: the IDTA DPP annexes are themselves organized around EN 18222 operation names, EN clause and table numbers. The file avoids them (scope_note says so) and none appeared in the text. Keep that fence when the engine oracles are written.",
+      "fix": "No change. When implementing aas.dpp_compose, cite 'IDTA-01002 v3.2 annex DPP' only and do not copy its EN-labelled operation or clause references."
+    }
+  ],
+  "missed_items": [
+    {
+      "topic": "IDTA 02035-4 template identifier",
+      "fact": "The Technical Data battery template (02035-4, folder 1/0/2) carries administration templateId 'IDTA-02003-2-0', the id of a different IDTA template, unlike its siblings that use https://admin-shell.io/idta-02035-N. Relevant for template-conformance checks that match templateId.",
+      "source_url": "https://github.com/admin-shell-io/submodel-templates/tree/main/published/Digital%20Battery%20Passport/4_Technical%20Data"
+    },
+    {
+      "topic": "IDTA-01001 DPP annex validation layering",
+      "fact": "The annex says a DPP document must validate against at least two kinds of schema: a generic DPP schema derived from the CEN data-model standard and the schemas of each content submodel. This supports two separate engine steps (data.jsonschema for the header, template conformance for content).",
+      "source_url": "https://github.com/admin-shell-io/aas-specs-metamodel/blob/v3.2.0/documentation/IDTA-01001/modules/ROOT/pages/annex/dpp.adoc"
+    },
+    {
+      "topic": "IDTA-01001 v3.2 conformance note on nesting",
+      "fact": "The V3.2 changelog states that a minimum container recursion depth of 32 should be supported and that for certification at most 32 recursion test cases are to be tested. The file records the depth but not the certification hint, which a test oracle can reuse.",
+      "source_url": "https://github.com/admin-shell-io/aas-specs-metamodel/blob/v3.2.0/documentation/IDTA-01001/modules/ROOT/pages/changelog.adoc"
+    },
+    {
+      "topic": "aas-specs-security repository activity",
+      "fact": "admin-shell-io/aas-specs-security was pushed on 2026-10-14, after tag v3.1.0 (2026-07-21); the file does not record post-release activity for this repository, although it does for aas-specs-api.",
+      "source_url": "https://github.com/admin-shell-io/aas-specs-security"
+    },
+    {
+      "topic": "Archived aas-core test generators",
+      "fact": "Besides aas-core3.0-testgen, the org eclipse-aascw also archived aas-core3.0rc02-testgen and aas-core3.1-testgen on 2026-05-12. The file says only that testdatagen succeeds the 3.0 generator.",
+      "source_url": "https://github.com/eclipse-aascw"
+    },
+    {
+      "topic": "Pagination default",
+      "fact": "IDTA-01002 v3.2 prose table shows Limit as nonNegativeInteger with default 100; file's anomaly says prose gives default 100 and schema minimum 1. Both are true; a limit=0 probe is therefore a boundary case worth a fixture.",
+      "source_url": "https://github.com/admin-shell-io/aas-specs-api/blob/v3.2.0/documentation/IDTA-01002-3/modules/ROOT/pages/http-rest-api/http-rest-api.adoc"
+    }
+  ],
+  "overall": "The target file is highly reliable on the points checked: all 20+ spec, repository, licence, version, date, IANA and engine-mapping claims matched the primary sources, and all 23 Crossref DOIs match title, year and venue. No claim was refuted. Open weaknesses are limited: law paraphrases and the 2026/1778 act rest on 2026-10-13 records because EUR-Lex was empty, the arXiv author count and the EN 18219 catalogue URL are unconfirmed, and one sentence lists a granularity value set labelled by IDTA as EN 18223 content. The file's own anomaly list (profile numbering, assetIds spelling, limit default) is accurate and useful for oracle design.",
+  "counts": {
+    "checked": 34,
+    "confirmed": 29,
+    "refuted": 0,
+    "not_confirmed": 5
+  }
+}
