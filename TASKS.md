@@ -160,7 +160,7 @@ All work is of 2026-10-18. Each row is on `main`, except where the row states ot
 | D8-05 adapter review | `4e48f6b` to `ec2a1ad`, and `dae6117` | The fixes of `validation/records/review-adapters-2026-10-18.md`. `dae6117` refuses a stamp of a moment that does not exist. |
 | D6-08 key tooling | `0403e5f` to `5f22f66` | `dppce keys generate`, `authorize`, `trust-bundle add-key`, `open`, and `prove`. The contracts `dppce.opening/1` and `dppce.proof/1`. The review fixes. |
 | W6-mut2 | `b7c0410` to `5037d12`, merge commit `dfd03b1` | Mutation tests of round 3 for the transport, redaction, and authorization code. |
-| CI and CodeQL fixes | `d012334`, `12f57c8`, `b7b744c` | A TEST-ONLY PKI that Python 3.13 accepts, and a TLS 1.2 minimum (CodeQL alert 13). New output files get mode 0600 (CodeQL alerts 14 to 16). |
+| CI and CodeQL fixes | `d012334`, `12f57c8`, `b7b744c` | A TEST-ONLY PKI that Python 3.13 accepts, and a TLS 1.2 minimum (CodeQL alert 13). `12f57c8` sets mode 0644 for new output files (CodeQL alert 14) and adjusts the in-place mode test (alert 15). `b7b744c` sets mode 0600, as the owner decided (alert 14), and adjusts the test again (alert 16). |
 | Follow-ups | `83a08a4`, `7077837`, `1019a8d`, `5fe675d`, `2311513`, `8b3bfff` | Port 0 is never the default port. `Observation.acquired_at` uses `Stamp`. The mutmut configuration deselects the reason-code page test. A proof or an opening is `not_checked` when ordering fails. |
 | Records | `a7ef327`, `8394f36`, on `final/2026-10-18` only | The method validation record at `8b3bfff`. The review record of the key tooling. |
 | W5-CI (PR #2) | `c71169c` to `b2eb10e`, on branch `ci/scans-and-release-gates` only | Scan, documentation, and DCO jobs, and release gates. |

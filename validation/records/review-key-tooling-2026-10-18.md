@@ -15,21 +15,25 @@ Prerequisites: read `docs/explanation/architecture.md` sections 9.1, 10, 10.2, 1
 | Commits reviewed | `aa7b9ce` before the rebase. `b450905` for the review of the fixes. `276b598` before the rebase for the follow-ups. |
 | Fixes | On `origin/main`. See the Findings tables and "Commit identifiers". |
 | Reviewers | AI agents. Designers, finders, skeptics, fixers, and the integrator are AI agents. |
-| Author | A development agent wrote this record. |
+| Author | A development agent wrote this record. A second development agent corrected it after a record check. |
 | Nature | **An agent review. It is not an audit. No person has reviewed this record.** |
 
 One source calls its stage a security audit. That stage is an agent review too. This record calls
 it the agent security review.
 
-The author of this record ran only `git log`, `git show`, `git patch-id`, `grep`, `ls`, and Vale.
+The agent that wrote this record ran only these commands: `git status`, `git log`, `git show`,
+`git patch-id`, `git branch --contains`, `git merge-base`, `grep`, `sed`, and `ls`. It also ran
+`python3 -I` scripts that extracted the journal results and the SR message, Vale, `git commit`,
+and `git commit --amend`. The second agent ran read-only `git` and shell commands, `python3 -I`
+extraction scripts, Vale, `uv run just docs`, `uv run just check`, and `git commit`.
 Every other result here is quoted from a source in the next section. No review status of a
 catalogue entry was changed. No approval, reviewer name, or validation result is stated here that
 a command did not produce.
 
 ## Sources
 
-The sources are in the agent session store of the development host. They are not in the
-repository. "J2 line 70" means line 70 of the `journal.jsonl` file of J2. Each `result` line of
+The sources are on the development host, in the agent session store and its scratchpad. They
+are not in the repository. "J2 line 70" means line 70 of the `journal.jsonl` file of J2. Each `result` line of
 a journal holds the return value of one agent.
 
 | Name | Source | Content |
@@ -39,6 +43,7 @@ a journal holds the return value of one agent.
 | J2 | workflow `wf_6649f8e9-2fd` | Adversarial review of `aa7b9ce`: contract, tests, and docs lenses |
 | J3 | workflow `wf_fe4c3c1d-bf9` | Integration, fixes, review of the fixes, second fix round |
 | J4 | workflow `wf_f5e9efb3-8fb` | The four follow-ups, their review, and the fix |
+| MUT | `final/mutation-results.txt` in the scratchpad | Output of `mutmut results --all true` for the `uv run just mutation` run at `8b3bfff` |
 
 ## Scope
 
@@ -50,10 +55,13 @@ a journal holds the return value of one agent.
   and `__main__.py`, and `src/dppce/models/results.py` and `__init__.py`. The list is in J1 line 9.
 - Other files are `validation/rig.py`, `compose.yaml`, the tests, and the operator pages.
 - The integration rebased D6-08 onto `d012334`, which holds the adapter review fixes (J3 line 3).
-- The follow-ups change `src/dppce/infrastructure/transport.py`, `src/dppce/models/testing.py`,
-  `pyproject.toml` (`[tool.mutmut]`), `disclosure.py`, and `verify.py` (J4 line 3).
+- The follow-ups change `src/dppce/infrastructure/transport.py`, `src/dppce/cli.py`
+  (`_confirmed_origins` refuses port 0), `src/dppce/models/testing.py`, `pyproject.toml`
+  (`[tool.mutmut]`), `disclosure.py`, and `verify.py` (J4 line 3).
+- They also change four generated schemas (decision, envelope, opening, and proof) and the
+  protected `docs/explanation/architecture.md`, sections 9.1 and 11.4 (J4 line 3).
 - No review stage in the sources covers `12f57c8` and `b7b744c`, the file mode. This record lists
-  them as an owner decision only.
+  `b7b744c` as owner decision 4, and `12f57c8` only as the step before it.
 
 ## Method
 
@@ -313,8 +321,9 @@ the same identifiers on `origin/main`.
   origin (J3 line 5). The J3 security reviewer did not reproduce it end to end (J3 line 8).
 - **SR-N2, SR-N5, SR-N6, and SR-N7.** These notes are not changed. The coordinating agent told
   the J3 fixer to leave SR-N2 and SR-N7. The owner decisions above do not name them.
-- **Mutation run.** `uv run just mutation` was not run after `2311513` (J4 line 25). The kill of
-  mutant 18 rests on a scratch mutant with the same one-line change.
+- **Mutation run.** The J4 fixer did not run `uv run just mutation` (J4 line 25). The later run
+  at `8b3bfff` lists `x_validate_authorization__mutmut_18` as killed (MUT line 5634). Its logs
+  are on the development host only. No record in `validation/records/` describes that run.
 - **Probe files.** Agent probes left TEST-ONLY keys in the system temporary directory of the
   development host (SR, and J2 line 18). An `ls` in this run still finds four such directories.
 - **Scope of SR.** SR did not review the `cmd_run` changes, `validation/rig.py`, `compose.yaml`,
