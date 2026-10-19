@@ -89,9 +89,13 @@ def test_an_inherited_git_location_does_not_redirect_the_temporary_repository(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # A git hook or a rebase --exec exports GIT_DIR; the fixture must still use its own repository.
+    # The two direct git calls get a clean environment too: an inherited GIT_WORK_TREE stops
+    # `git init --bare` (exit 128).
+    clean = {name: value for name, value in os.environ.items() if name not in _GIT_LOCATION}
     other = tmp_path / "other.git"
     subprocess.run(  # noqa: S603 - fixed arguments, local temporary repository
         ["git", "init", "-q", "--bare", str(other)],  # noqa: S607 - git from PATH
+        env=clean,
         check=True,
         capture_output=True,
     )
@@ -102,10 +106,12 @@ def test_an_inherited_git_location_does_not_redirect_the_temporary_repository(
     assert (tmp_path / "own" / ".git").is_dir()
     untouched = subprocess.run(  # noqa: S603 - fixed arguments, local temporary repository
         ["git", "--git-dir", str(other), "rev-parse", "--verify", "-q", "HEAD"],  # noqa: S607
+        env=clean,
         capture_output=True,
         check=False,
     )
-    assert untouched.returncode != 0
+    # 1 is "no such ref"; a git error (128) must not pass as an untouched repository.
+    assert untouched.returncode == 1
     assert repo.check(repo.base, repo.commit("feat: signed", TRAILER)).returncode == 0
 
 
