@@ -34,8 +34,10 @@ A gate job stops the release when one of these conditions is true:
 - The tag is not `v` followed by the version in `pyproject.toml` (`RELEASE.TAG.VERSION_MISMATCH`).
 - The `ci` workflow did not pass for the tagged commit on `main` (`RELEASE.CI.NOT_PASSED`).
 
-A scan job then scans a build of the tagged commit with Trivy. A high or critical finding with a
-fix stops the release before the approval.
+A scan job then builds the container image of the tagged commit one time and scans it with Trivy.
+A high or critical finding with a fix stops the release before the approval. The image job pushes
+the scanned archive without a second build. If the pushed digest is not the scanned digest, the
+job stops before it signs the provenance.
 
 To make a release:
 
