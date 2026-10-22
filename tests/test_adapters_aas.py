@@ -91,6 +91,11 @@ def test_a_sample_that_the_validator_rejects_is_invalid(
             "or Infinity",
         ),
         ("package-high-ratio.aasx", "aasx", "an AASX package within the size limits of the check"),
+        (
+            "package-corrupt-part.aasx",
+            "aasx",
+            "an AASX package whose part aasx/environment.json can be read",
+        ),
     ],
 )
 def test_a_sample_that_cannot_be_read_as_the_declared_format_is_invalid(

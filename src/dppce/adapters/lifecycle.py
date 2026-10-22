@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import re
 import zipfile
+import zlib
 from datetime import datetime
 from io import BytesIO
 from itertools import pairwise
@@ -277,6 +278,10 @@ def _read_aasx(aas_file: Any, body: bytes, version: str, supported: list[str]) -
                     raise _NotReadableError("JSON, or it has a repeated key, NaN, or Infinity") from None
         except _NotReadableError as problem:
             raise _NotReadableError(f"an AASX package whose part {member.filename} is {problem}") from None
+        # A corrupt, encrypted, or unsupported member raises out of ZipFile.read. That is an
+        # unreadable sample, not a crash (rule 7).
+        except (zipfile.BadZipFile, zlib.error, EOFError, RuntimeError, NotImplementedError):
+            raise _NotReadableError(f"an AASX package whose part {member.filename} can be read") from None
     result = aas_file.check_aasx_data(package, version)
     # The wrapped validator only warns about a package with no AAS part, so an empty package would pass.
     root = aas_file.Relationship("ROOT", "/")
