@@ -34,7 +34,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `persistence.scheduled` | persistence | interface_only |  | Scheduled acquisition over time and backup references. | A scheduler runs acquisitions at declared intervals and keeps each recording. |
 | `registry.mock` | registry | supported |  | Passive lookup against a configurable mock registry. |  |
 | `registry.official` | registry | interface_only |  | Checks against an official registry environment. | A separately authorized official environment is available. Passive checks are separate from registration and update operations. |
-| `aas.validate` | aas | experimental | `aas_test_engines` | Wrap a pinned aas-test-engines release. A valid Asset Administration Shell is not a complete DPP conformance statement. |  |
+| `aas.validate` | aas | experimental | `aas_test_engines` | Wrap a pinned aas-test-engines release for a JSON, XML, or AASX sample. A metamodel version that the release does not verify is unsupported, not a fail. A valid Asset Administration Shell is not a complete DPP conformance statement. |  |
 | `manual.review` | manual | supported |  | Verify the signed result of a manual step: signature, key trust for the purpose 'manual', and binding to the step and the system. The engine does not perform the review. |  |
 | `evidence.jws_es256` | evidence | supported |  | Sign and verify reports with JWS ES256. |  |
 | `evidence.devlog` | evidence | interface_only |  | File-backed Merkle log for development. | A log implementation exists in dppce.evidence, with append, inclusion-proof, and consistency-proof tests on local fixtures. Its documentation states whether it implements RFC 9162 and what protection it gives against equivocation. |
@@ -53,6 +53,8 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | Check | Capability | Parameter | Type | Default | Meaning |
 | --- | --- | --- | --- | --- | --- |
 | `aas.validate` | `aas.validate` | `artifact` | string | `"aas_file"` | Name of the IXIT sample that holds the AAS file. |
+| `aas.validate` | `aas.validate` | `format` | one of `json`, `xml`, `aasx` | `"json"` | Serialization of the sample: json, xml, or an aasx package. |
+| `aas.validate` | `aas.validate` | `metamodel_version` | string | `"3.0"` | AAS metamodel version that the sample claims. A version that the wrapped release does not verify gives unsupported, not a fail. |
 | `access.restricted_fields` | `access.policy` | `role` | string | `"anonymous"` | Role whose view is probed. |
 | `api.contract` | `api.contract` | `resource` | one of `item`, `model`, `signed`, `versions`, `registry_record` | `"item"` | Passport resource whose marked operation is judged. |
 | `api.contract` | `api.contract` | `path` | string or none | none | Expected IXIT template path. A different template gives blocked. |
@@ -64,8 +66,10 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `data.rules` | `data.rules` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
 | `identifier.consistency` | `identifier.consistency` | `compare_item` | boolean | `false` | Also compare the resolved passport with the document at the IXIT 'item' template, as JSON values. |
 | `identifier.parse` | `identifier.parse` | `scheme` | string or none | none | Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS. |
+| `identifier.parse` | `identifier.parse` | `require_https` | boolean | `false` | Fail an identifier, and on resolve each redirect target, whose scheme is not https. The EU registry user guide names https identifiers only. |
 | `identifier.resolve` | `identifier.resolve` | `accept` | string or none | none | Accept request header. Printable ASCII, 1 to 256 characters. |
 | `identifier.resolve` | `identifier.resolve` | `accepted_media_types` | list of string or none | none | Final media types that count as resolved. Default: a final JSON object only. |
+| `identifier.resolve` | `identifier.resolve` | `require_https` | boolean | `false` | Fail an identifier, and on resolve each redirect target, whose scheme is not https. The EU registry user guide names https identifiers only. |
 | `integrity.jws` | `integrity.jws` | (none) | | | |
 | `manual.review` | `manual.review` | (none) | | | |
 | `persistence.versions` | `persistence.versions` | (none) | | | |

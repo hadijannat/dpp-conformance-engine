@@ -28,8 +28,10 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | --- | --- | --- | --- | --- |
 | `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
 | `AAS.INVALID` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | fail; inconclusive under a non-default verdict rule |
+| `AAS.PARAMS.INVALID` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
 | `AAS.SAMPLE.MISSING` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
 | `AAS.VALID` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | pass |
+| `AAS.VERSION.UNSUPPORTED` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
 | `ACCESS.ENTITLEMENT.MISSING` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |
 | `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive |
 | `ACCESS.ENTITLEMENT.REFUSED` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |
@@ -109,12 +111,13 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `IDENTIFIER.NOT_RESOLVABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
 | `IDENTIFIER.NOT_RESOLVED` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
 | `IDENTIFIER.NO_TARGET` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.resolve` | `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.resolve` | inconclusive |
+| `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive |
 | `IDENTIFIER.RESOLUTION.STATUS` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.RESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass |
 | `IDENTIFIER.RESOLVED.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass |
 | `IDENTIFIER.RESPONSE.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.RESPONSE.NOT_JSON` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
+| `IDENTIFIER.SCHEME.NOT_HTTPS` | IDENTIFIER | `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.SCHEME.UNKNOWN` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | inconclusive |
 | `IDENTIFIER.SCHEME.UNSUPPORTED` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | inconclusive |
 | `IDENTIFIER.SYNTAX.INVALID` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | fail; inconclusive under a non-default verdict rule |
