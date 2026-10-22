@@ -77,13 +77,17 @@ def validator_calls(monkeypatch: pytest.MonkeyPatch) -> list[Any]:
         def ok(self) -> bool:
             return True
 
-    def check_json_data(document: Any) -> _Result:
+    def check_json_data(document: Any, version: str = "3.0") -> _Result:
         calls.append(document)
         return _Result()
+
+    def supported_versions() -> dict[str, list[str]]:
+        return {"3.0": []}
 
     package, module = types.ModuleType("aas_test_engines"), types.ModuleType("aas_test_engines.file")
     # A plain ModuleType declares no attributes; these two are the stand-in's whole interface.
     module.check_json_data = check_json_data  # type: ignore[attr-defined]
+    module.supported_versions = supported_versions  # type: ignore[attr-defined]
     package.file = module  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "aas_test_engines", package)
     monkeypatch.setitem(sys.modules, "aas_test_engines.file", module)
