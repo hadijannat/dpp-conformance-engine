@@ -45,7 +45,7 @@ aas-test-engines (`aas`).
 | distlib                    | 0.4.3           | Python Software Foundation License                   | https://github.com/pypa/distlib                                       |
 | dpp-conformance-engine     | 0.1.0rc1        | Apache-2.0                                           | UNKNOWN                                                               |
 | fences                     | 1.4.0           | MIT License                                          | https://github.com/ifak/fences                                        |
-| filelock                   | 4.1.1           | MIT                                                  | https://github.com/tox-dev/py-filelock                                |
+| filelock                   | 4.2.4           | MIT                                                  | https://github.com/tox-dev/py-filelock                                |
 | fqdn                       | 1.6.0           | MPL-2.0                                              | https://github.com/ypcrts/fqdn                                        |
 | ghp-import                 | 2.1.0           | Apache Software License                              | https://github.com/c-w/ghp-import                                     |
 | hypothesis                 | 6.169.0         | MPL-2.0                                              | https://hypothesis.works                                              |
