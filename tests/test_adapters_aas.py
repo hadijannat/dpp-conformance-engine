@@ -18,6 +18,12 @@ from tests.test_url_templates import context
 
 pytest.importorskip("aas_test_engines", reason="needs the optional 'aas' extra")
 
+# Reason: aas-test-engines 1.0.3 calls typing.ForwardRef._evaluate without type_params when its
+# file module loads. Python 3.13 deprecates that call; the warning is upstream, not in dppce.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:Failing to pass a value to the 'type_params' parameter:DeprecationWarning"
+)
+
 SAMPLES = Path(__file__).resolve().parent.parent / "fixtures" / "aas"
 
 
