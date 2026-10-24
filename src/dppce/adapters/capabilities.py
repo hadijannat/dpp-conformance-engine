@@ -166,7 +166,8 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "aas.validate",
         "aas",
         _E,
-        "Wrap a pinned aas-test-engines release. A valid Asset "
+        "Wrap a pinned aas-test-engines release for a JSON, XML, or AASX sample. A metamodel version "
+        "that the release does not verify is unsupported, not a fail. A valid Asset "
         "Administration Shell is not a complete DPP conformance statement.",
         "aas_test_engines",
         "",

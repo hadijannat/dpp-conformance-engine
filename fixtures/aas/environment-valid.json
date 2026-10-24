@@ -1,0 +1,12 @@
+{
+  "assetAdministrationShells": [
+    {
+      "id": "https://example.test/TEST-ONLY/aas/1",
+      "modelType": "AssetAdministrationShell",
+      "assetInformation": {
+        "assetKind": "Instance",
+        "globalAssetId": "https://example.test/TEST-ONLY/asset/1"
+      }
+    }
+  ]
+}

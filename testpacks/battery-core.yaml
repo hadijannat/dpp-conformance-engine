@@ -39,6 +39,8 @@ test_purposes:
   - anonymous
   stimulus:
     check: identifier.parse
+    params:
+      require_https: true
   expected_evidence:
   - The decoded identifier scheme and syntax result.
   permitted_modes: *id002

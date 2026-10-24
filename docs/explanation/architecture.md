@@ -349,10 +349,12 @@ Initial registry:
 | `integrity.jws` | `integrity.jws` | Signature validity, issuer trust, and certificate validity, as separate findings. |
 | `persistence.versions` | `persistence.versions` | Version history obeys the declared update rule. |
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
-| `aas.validate` | `aas.validate` | Wrap aas-test-engines. Needs the `aas` extra. |
+| `aas.validate` | `aas.validate` | Wrap aas-test-engines for a JSON, XML, or AASX sample. A metamodel version that the pinned release does not verify is `unsupported`. Needs the `aas` extra. |
 | `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
 
-`identifier.resolve` takes two optional parameters. `accept` sets the `Accept` request header.
+`identifier.resolve` takes three optional parameters. `require_https`, default false, fails a
+carrier URL or a redirect target whose scheme is not https with `IDENTIFIER.SCHEME.NOT_HTTPS`.
+A refused carrier URL is not fetched. `accept` sets the `Accept` request header.
 `accepted_media_types` lists the final media types that count as resolved. Without
 `accepted_media_types` the check needs a final JSON object, as before. `IDENTIFIER.RESOLVED`
 always means a final JSON object. A pass on another listed media type gives
@@ -381,7 +383,8 @@ A transport error or a server error on either fetch gives `unreachable`. The che
 the `item` template, also with `item_target: resolved`, because it compares the two routes.
 
 `identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
-`http://`, `https://`, `HTTP://`, or `HTTPS://`. The host part is not empty and holds only `A-Z`,
+`http://`, `https://`, `HTTP://`, or `HTTPS://`. With `require_https`, a valid identifier whose
+scheme is not https gives `IDENTIFIER.SCHEME.NOT_HTTPS`. The host part is not empty and holds only `A-Z`,
 `a-z`, `0-9`, `.`, `-`, `:`, `[`, and `]`. So user information and an IPv6 zone identifier are
 refused. A port after the host is ASCII digits only, from 0 to 65535. The path is `/01/<GTIN>/21/<serial>`. The GTIN is 14 ASCII digits with a correct check
 digit. The serial is 1 to 20 characters from `A-Z`, `a-z`, `0-9`, `.`, `_`, and `-`. The whole

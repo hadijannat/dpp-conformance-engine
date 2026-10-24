@@ -30,7 +30,7 @@ aas-test-engines (`aas`).
 | babel                      | 2.18.0          | BSD License                                          | https://babel.pocoo.org/                                              |
 | backrefs                   | 8.1             | MIT                                                  | https://github.com/facelessuser/backrefs                              |
 | boolean.py                 | 5.0             | BSD-2-Clause                                         | https://github.com/bastikr/boolean.py                                 |
-| certifi                    | 2026.7.22       | Mozilla Public License 2.0 (MPL 2.0)                 | https://github.com/certifi/python-certifi                             |
+| certifi                    | 2026.10.19      | Mozilla Public License 2.0 (MPL 2.0)                 | https://github.com/certifi/python-certifi                             |
 | cffi                       | 2.1.1           | MIT-0                                                | https://cffi.readthedocs.io/en/latest/whatsnew.html                   |
 | cfgv                       | 3.5.0           | MIT                                                  | https://github.com/asottile/cfgv                                      |
 | chardet                    | 7.6.0           | 0BSD                                                 | https://github.com/chardet/chardet                                    |
@@ -45,7 +45,7 @@ aas-test-engines (`aas`).
 | distlib                    | 0.4.3           | Python Software Foundation License                   | https://github.com/pypa/distlib                                       |
 | dpp-conformance-engine     | 0.1.0rc1        | Apache-2.0                                           | UNKNOWN                                                               |
 | fences                     | 1.4.0           | MIT License                                          | https://github.com/ifak/fences                                        |
-| filelock                   | 4.1.1           | MIT                                                  | https://github.com/tox-dev/py-filelock                                |
+| filelock                   | 4.2.4           | MIT                                                  | https://github.com/tox-dev/py-filelock                                |
 | fqdn                       | 1.6.0           | MPL-2.0                                              | https://github.com/ypcrts/fqdn                                        |
 | ghp-import                 | 2.1.0           | Apache Software License                              | https://github.com/c-w/ghp-import                                     |
 | hypothesis                 | 6.169.0         | MPL-2.0                                              | https://hypothesis.works                                              |
@@ -83,7 +83,7 @@ aas-test-engines (`aas`).
 | packaging                  | 26.3            | Apache-2.0 OR BSD-2-Clause                           | https://github.com/pypa/packaging                                     |
 | paginate                   | 0.5.7           | MIT License                                          | https://github.com/Signum/paginate                                    |
 | pathspec                   | 1.1.1           | Mozilla Public License 2.0 (MPL 2.0)                 | https://python-path-specification.readthedocs.io/en/latest/index.html |
-| pillow                     | 12.3.0          | MIT-CMU                                              | https://python-pillow.github.io                                       |
+| pillow                     | 13.0.0          | MIT-CMU                                              | https://python-pillow.org                                             |
 | pip-requirements-parser    | 32.0.1          | MIT                                                  | https://github.com/nexB/pip-requirements-parser                       |
 | platformdirs               | 4.13.0          | MIT                                                  | https://github.com/tox-dev/platformdirs                               |
 | pluggy                     | 1.6.0           | MIT License                                          | UNKNOWN                                                               |
@@ -121,7 +121,7 @@ aas-test-engines (`aas`).
 | uri-template               | 1.3.0           | MIT License                                          | https://gitlab.linss.com/open-source/python/uri-template              |
 | urllib3                    | 2.8.0           | MIT                                                  | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst              |
 | verspec                    | 0.2.0           | BSD-3-Clause OR Apache-2.0                           | UNKNOWN                                                               |
-| virtualenv                 | 21.14.7         | MIT                                                  | https://github.com/pypa/virtualenv                                    |
+| virtualenv                 | 21.14.12        | MIT                                                  | https://github.com/pypa/virtualenv                                    |
 | watchdog                   | 6.0.0           | Apache Software License                              | https://github.com/gorakhargosh/watchdog                              |
 | webcolors                  | 25.10.0         | BSD License                                          | https://webcolors.readthedocs.io                                      |
 | zxing-cpp                  | 3.1.1           | Apache-2.0                                           | https://github.com/zxing-cpp/zxing-cpp                                |

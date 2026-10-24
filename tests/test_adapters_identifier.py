@@ -14,6 +14,7 @@ import pytest
 
 from dppce.adapters.carrier import qr_decode
 from dppce.adapters.identifier import consistency, parse, resolve
+from dppce.infrastructure.interfaces import Record, Request
 from dppce.models import ICS, IXIT, CheckOutcome, ExecutionStatus
 from dppce.testdefs.registry import CheckContext
 from tests.support import reply
@@ -265,12 +266,112 @@ def test_a_custom_accept_replaces_the_default_header(tmp_path: Path, loopback: A
     assert resolver.accepts == [["text/html"]], "exactly one Accept header line"
 
 
-# -- one named producing test for each identifier and carrier reason code (gap D4-13) ----------
-
-
 def _with_identifier(ctx: CheckContext, identifier: str) -> CheckContext:
     samples = {"identifier": identifier}
     return replace(ctx, ixit=IXIT.model_validate(ctx.ixit.model_dump(mode="json") | {"samples": samples}))
+
+
+# -- require_https: the EU registry user guide names https identifiers only -------------------
+
+
+class _Redirected(_Canned):
+    """A canned acquirer whose answer records the given redirect chain."""
+
+    def __init__(self, redirects: tuple[str, ...]) -> None:
+        super().__init__(b'{"id": "x"}')
+        self._redirects = redirects
+
+    def fetch(self, request: Request) -> Record:
+        record = replace(super().fetch(request), redirects=self._redirects)
+        self._records[-1] = record
+        return record
+
+
+@pytest.mark.parametrize(
+    ("origin", "passed", "code"),
+    [
+        ("https://a", True, "IDENTIFIER.SYNTAX.OK"),
+        ("HTTPS://a", True, "IDENTIFIER.SYNTAX.OK"),
+        ("http://a", False, "IDENTIFIER.SCHEME.NOT_HTTPS"),
+    ],
+)
+def test_parse_with_require_https_fails_a_valid_http_identifier(
+    origin: str, passed: bool, code: str, tmp_path: Path
+) -> None:
+    base = _context(tmp_path, _POLICY, _Canned(b"{}"))
+    stimulus = base.purpose.stimulus.model_copy(
+        update={"check": "identifier.parse", "params": {"require_https": True}}
+    )
+    ics = ICS.model_validate(base.ics.model_dump(mode="json") | {"identifier_scheme": "gs1-digital-link"})
+    ixit = IXIT.model_validate(
+        base.ixit.model_dump(mode="json") | {"samples": {"identifier": f"{origin}{GS1_PATH}"}}
+    )
+    outcome = parse(
+        replace(base, purpose=base.purpose.model_copy(update={"stimulus": stimulus}), ics=ics, ixit=ixit)
+    )
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (ExecutionStatus.COMPLETED, passed, code)
+    # Syntax is judged first and stays valid: only the scheme rule failed.
+    assert outcome.observations[0].summary["valid"] is True
+
+
+def test_parse_without_require_https_still_accepts_http(tmp_path: Path) -> None:
+    outcome = _parse(tmp_path, {"identifier": f"http://a{GS1_PATH}"})
+    assert (outcome.passed, outcome.reason_code) == (True, "IDENTIFIER.SYNTAX.OK")
+
+
+def test_parse_with_a_non_boolean_require_https_is_blocked(tmp_path: Path) -> None:
+    base = _context(tmp_path, _POLICY, _Canned(b"{}"))
+    stimulus = base.purpose.stimulus.model_copy(
+        update={"check": "identifier.parse", "params": {"require_https": "yes"}}
+    )
+    ics = ICS.model_validate(base.ics.model_dump(mode="json") | {"identifier_scheme": "gs1-digital-link"})
+    outcome = parse(replace(base, purpose=base.purpose.model_copy(update={"stimulus": stimulus}), ics=ics))
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.BLOCKED, "IDENTIFIER.PARAMS.INVALID")
+
+
+def test_resolve_with_require_https_does_not_fetch_an_http_carrier(tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b'{"id": "x"}', "application/json")  # a loopback origin is http
+    outcome = resolve(live(tmp_path, resolver, {"require_https": True}))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "IDENTIFIER.SCHEME.NOT_HTTPS",
+    )
+    assert outcome.observations[0].kind == "derived"
+    assert resolver.server.seen == []
+
+
+@pytest.mark.parametrize(
+    ("hops", "passed", "code"),
+    [
+        (("https://id.example.test/go", "https://dpp.example.test/x"), True, "IDENTIFIER.RESOLVED"),
+        (("https://id.example.test/go", "http://dpp.example.test/x"), False, "IDENTIFIER.SCHEME.NOT_HTTPS"),
+    ],
+)
+def test_resolve_with_require_https_judges_each_redirect_target(
+    hops: tuple[str, ...], passed: bool, code: str, tmp_path: Path, loopback: Any
+) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json")
+    ctx = _with_identifier(
+        live(tmp_path, resolver, {"require_https": True}, _Redirected(hops)), f"https://a{GS1_PATH}"
+    )
+    outcome = resolve(ctx)
+    assert (outcome.passed, outcome.reason_code) == (passed, code)
+    assert outcome.observations[0].summary["redirects"] == 2
+    if not passed:
+        assert "1 of 2 redirect targets do not use the https scheme" in outcome.message
+
+
+def test_resolve_without_require_https_ignores_a_downgraded_hop(tmp_path: Path, loopback: Any) -> None:
+    resolver = Resolver(loopback, b"{}", "application/json")
+    hops = ("http://dpp.example.test/x",)
+    outcome = resolve(
+        _with_identifier(live(tmp_path, resolver, {}, _Redirected(hops)), f"https://a{GS1_PATH}")
+    )
+    assert (outcome.passed, outcome.reason_code) == (True, "IDENTIFIER.RESOLVED")
+
+
+# -- one named producing test for each identifier and carrier reason code (gap D4-13) ----------
 
 
 def test_resolve_of_a_text_that_is_not_a_url_is_unresolved(tmp_path: Path, loopback: Any) -> None:
@@ -580,7 +681,15 @@ PRODUCERS: dict[str, list[str]] = {
         _HERE + "test_a_gtin_in_non_ascii_digits_is_invalid_syntax",
         _HERE + "test_parse_refuses_a_scheme_host_or_character_that_gs1_refuses",
     ],
-    "IDENTIFIER.PARAMS.INVALID": [_HERE + "test_resolve_refuses_malformed_parameters_before_any_request"],
+    "IDENTIFIER.PARAMS.INVALID": [
+        _HERE + "test_resolve_refuses_malformed_parameters_before_any_request",
+        _HERE + "test_parse_with_a_non_boolean_require_https_is_blocked",
+    ],
+    "IDENTIFIER.SCHEME.NOT_HTTPS": [
+        _HERE + "test_parse_with_require_https_fails_a_valid_http_identifier",
+        _HERE + "test_resolve_with_require_https_does_not_fetch_an_http_carrier",
+        _HERE + "test_resolve_with_require_https_judges_each_redirect_target",
+    ],
     "IDENTIFIER.UNRESOLVED": [
         _HERE + "test_resolve_of_a_text_that_is_not_a_url_is_unresolved",
         _HERE + "test_resolve_of_a_404_or_410_answer_is_unresolved",
@@ -634,7 +743,7 @@ def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -
         (ADAPTERS / name).read_text(encoding="utf-8") for name in ("identifier.py", "carrier.py", "common.py")
     )
     codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
-    assert len(codes) == 23
+    assert len(codes) == 24
     assert codes == set(PRODUCERS)
     # The window of the last test must stop before the module constants, which name every code.
     assert '"CARRIER.QR.OK"' not in _test_source(
