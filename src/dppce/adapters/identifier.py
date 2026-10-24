@@ -38,6 +38,13 @@ _ACCEPT = re.compile(r"[\x20-\x7e]{1,256}")
 _MEDIA_TYPE = re.compile(r"[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*")
 _MAX_MEDIA_TYPES = 16
 _LIMIT = "Digital consistency does not prove physical authenticity."
+_HTTPS = Field(
+    default=False,
+    description=(
+        "Fail an identifier, and on resolve each redirect target, whose scheme is not https. "
+        "The EU registry user guide names https identifiers only."
+    ),
+)
 
 
 class ParseParams(Model):
@@ -46,6 +53,7 @@ class ParseParams(Model):
         min_length=1,
         description="Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS.",
     )
+    require_https: StrictBool = _HTTPS
 
     @field_validator("scheme", mode="before")
     @classmethod
@@ -67,6 +75,7 @@ class ResolveParams(Model):
         max_length=_MAX_MEDIA_TYPES,
         description="Final media types that count as resolved. Default: a final JSON object only.",
     )
+    require_https: StrictBool = _HTTPS
 
     @field_validator("accept")
     @classmethod
@@ -116,9 +125,19 @@ def parse_gs1_digital_link(text: str) -> str | None:
     return None
 
 
+def is_https(url: str) -> bool:
+    try:
+        return urlsplit(url).scheme.lower() == "https"
+    except ValueError:
+        return False
+
+
 @register("identifier.parse", capability="identifier.parse", params=ParseParams)
 def parse(ctx: CheckContext) -> CheckOutcome:
     scheme = str(ctx.params.get("scheme", ctx.ics.identifier_scheme))
+    require_https = ctx.params.get("require_https", False)
+    if not isinstance(require_https, bool):
+        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'require_https' is not a boolean.")
     if scheme == "unknown":
         return blocked("IDENTIFIER.SCHEME.UNKNOWN", "The ICS does not declare the identifier scheme.")
     if scheme != "gs1-digital-link":
@@ -140,18 +159,24 @@ def parse(ctx: CheckContext) -> CheckOutcome:
             f"The carrier identifier is not valid: {reason}.",
             [observation],
         )
+    if require_https and not is_https(text):
+        message = "The carrier identifier does not use the https scheme, which the test purpose requires."
+        return completed(False, "IDENTIFIER.SCHEME.NOT_HTTPS", message, [observation])
     return completed(
         True, "IDENTIFIER.SYNTAX.OK", f"The carrier identifier has valid {scheme} syntax.", [observation]
     )
 
 
-def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None] | None:
-    """The validated ``accept`` and ``accepted_media_types`` parameters, or None if malformed.
+def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None, bool] | None:
+    """The validated ``accept``, ``accepted_media_types``, and ``require_https``, or None if malformed.
 
     fullmatch, not ``$``: a trailing newline must not pass. CR and LF are outside the classes.
     """
     accept = ctx.params.get("accept")
     accepted = ctx.params.get("accepted_media_types")
+    require_https = ctx.params.get("require_https", False)
+    if not isinstance(require_https, bool):
+        return None
     if accept is not None and not (isinstance(accept, str) and _ACCEPT.fullmatch(accept)):
         return None
     if accepted is not None and not (
@@ -160,16 +185,19 @@ def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None] | 
         and all(isinstance(t, str) and _MEDIA_TYPE.fullmatch(t) for t in accepted)
     ):
         return None
-    return accept, [str(t) for t in accepted] if accepted is not None else None
+    return accept, [str(t) for t in accepted] if accepted is not None else None, require_https
 
 
 @register("identifier.resolve", capability="identifier.resolve", params=ResolveParams)
 def resolve(ctx: CheckContext) -> CheckOutcome:
     params = _resolve_params(ctx)
     if params is None:
-        message = "The parameters 'accept' or 'accepted_media_types' are not valid. Nothing is fetched."
+        message = (
+            "The parameters 'accept', 'accepted_media_types', or 'require_https' are not valid. "
+            "Nothing is fetched."
+        )
         return blocked("IDENTIFIER.PARAMS.INVALID", message)
-    accept, accepted = params
+    accept, accepted, require_https = params
     text, _, transformations, problem = carrier_identifier(ctx)
     if problem is not None or text is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
@@ -183,6 +211,13 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
             "The carrier identifier is not a URL, so it cannot resolve.",
             [observation],
         )
+    if require_https and not is_https(text):
+        # Not fetched: the engine does not follow a carrier URL that the test purpose refuses.
+        observation = ctx.observation(
+            0, kind="derived", summary={"https": False}, transformations=transformations
+        )
+        message = "The carrier identifier does not use the https scheme, which the test purpose requires."
+        return completed(False, "IDENTIFIER.SCHEME.NOT_HTTPS", message, [observation])
     record = fetch_once(ctx, text, accept=accept)
     if (problem := unusable(ctx, record)) is not None:
         return problem
@@ -191,6 +226,13 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
     observation = ctx.observation(
         0, kind="exchange", records=[record], summary=summary, transformations=transformations
     )
+    downgraded = [hop for hop in record.redirects if not is_https(hop)]
+    if require_https and downgraded:
+        message = (
+            f"{len(downgraded)} of {len(record.redirects)} redirect targets do not use the https scheme, "
+            "which the test purpose requires."
+        )
+        return completed(False, "IDENTIFIER.SCHEME.NOT_HTTPS", message, [observation])
     if record.status in (404, 410):
         return completed(
             False,
