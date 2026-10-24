@@ -243,12 +243,16 @@ def _parse_xml(body: bytes) -> ElementTree.Element:
     return builder.close()
 
 
-def _read_xml(aas_file: Any, body: bytes, version: str, supported: list[str]) -> Any:
-    root = _parse_xml(body)
+def _gate_version(root: Any, supported: list[str]) -> Any:
+    # An AAS namespace names its metamodel version; other XML (OPC parts) has no AAS namespace.
     namespace = _AAS_NAMESPACE.match(root.tag)
     if namespace is not None and (declared := f"{namespace[1]}.{namespace[2]}") not in supported:
         raise _VersionError(declared)
-    return aas_file.check_xml_data(root, version)
+    return root
+
+
+def _read_xml(aas_file: Any, body: bytes, version: str, supported: list[str]) -> Any:
+    return aas_file.check_xml_data(_gate_version(_parse_xml(body), supported), version)
 
 
 def _read_aasx(aas_file: Any, body: bytes, version: str, supported: list[str]) -> Any:
@@ -270,7 +274,8 @@ def _read_aasx(aas_file: Any, body: bytes, version: str, supported: list[str]) -
         name = member.filename.lower()
         try:
             if name.endswith((".xml", ".rels")):
-                _parse_xml(package.read(member))
+                # The same version gate as a plain XML sample, so a 3.1 part is unsupported (rule 7).
+                _gate_version(_parse_xml(package.read(member)), supported)
             elif name.endswith(".json"):
                 try:
                     parse_strict(package.read(member))

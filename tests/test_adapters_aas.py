@@ -131,8 +131,14 @@ def test_a_metamodel_version_outside_the_wrapped_release_is_unsupported_and_read
     assert acquirer.records() == ()
 
 
-def test_an_xml_namespace_of_a_newer_metamodel_is_unsupported(tmp_path: Path) -> None:
-    outcome, _ = _run(tmp_path, "environment-v3-1.xml", format="xml")
+@pytest.mark.parametrize(
+    ("sample", "serialization"),
+    [("environment-v3-1.xml", "xml"), ("package-v3-1.aasx", "aasx")],
+)
+def test_an_xml_namespace_of_a_newer_metamodel_is_unsupported(
+    sample: str, serialization: str, tmp_path: Path
+) -> None:
+    outcome, _ = _run(tmp_path, sample, format=serialization)
     assert (outcome.status, outcome.passed, outcome.reason_code) == (
         ExecutionStatus.UNSUPPORTED,
         None,

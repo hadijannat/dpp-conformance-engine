@@ -21,4 +21,5 @@ Each sample holds one shell with an `example.test` identifier, or a deliberate d
 | `package-doctype.aasx` | `AAS.INVALID`: a relationships part holds a document type declaration |
 | `package-repeated-key.aasx` | `AAS.INVALID`: the AAS part is JSON with a repeated key, which the strict parser refuses |
 | `package-high-ratio.aasx` | `AAS.INVALID`: a member expands beyond the compression ratio that the check permits |
+| `package-v3-1.aasx` | `unsupported`, `AAS.VERSION.UNSUPPORTED`: the XML AAS part names metamodel 3.1 |
 | `package-corrupt-part.aasx` | `AAS.INVALID`: the compressed bytes of the AAS part are damaged, so the ZIP reader fails on it |
