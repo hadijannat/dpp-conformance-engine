@@ -189,7 +189,11 @@ def test_the_engine_profile_refuses_every_wycheproof_vector_and_never_calls_a_va
 
 
 def test_the_computed_disagreements_equal_the_listed_ones() -> None:
-    computed = {"D-JCS-1": _jcs_disagreements(), **_profile_disagreements()}
+    computed = {
+        "D-JCS-1": _jcs_disagreements(),
+        **_profile_disagreements(),
+        "D-DL-2": [uri for uri, _ in _gs1_dl_disagreements()],
+    }
     assert computed == EXPECTED_DISAGREEMENTS
 
 
@@ -325,11 +329,13 @@ def test_gs1_dl_never_accepts_what_the_reference_rejects() -> None:
     assert [uri for uri in rejected if isinstance(gs1.parse(uri), gs1.DigitalLink)] == []
 
 
+def _gs1_dl_disagreements() -> list[tuple[str, gs1.DigitalLink | gs1.Problem]]:
+    results = [(err, uri, gs1.parse(uri)) for err, uri, _ in _gs1_cases_with_output()[0]]
+    return [(uri, result) for err, uri, result in results if (err == "OK") != isinstance(result, gs1.DigitalLink)]
+
+
 def test_gs1_dl_disagrees_only_on_the_convenience_alphas() -> None:
-    results = [(err, uri, gs1.parse(uri)) for err, uri, _ in GS1_CASES_WITH_OUTPUT]
-    disagreements = [
-        (uri, result) for err, uri, result in results if (err == "OK") != isinstance(result, gs1.DigitalLink)
-    ]
+    disagreements = _gs1_dl_disagreements()
     assert [uri for uri, _ in disagreements] == EXPECTED_DISAGREEMENTS["D-DL-2"]
     assert {result.rule for _, result in disagreements if isinstance(result, gs1.Problem)} == {"KEY"}
 

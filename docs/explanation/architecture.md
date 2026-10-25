@@ -338,7 +338,8 @@ Initial registry:
 | Check | Capability | Purpose |
 | --- | --- | --- |
 | `carrier.qr_decode` | `carrier.qr` | Decode a QR image artifact with zxing-cpp. Needs the `qr` extra. |
-| `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. |
+| `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. The parameter `form` selects the GS1 Digital Link grammar. |
+| `identifier.granularity` | `identifier.granularity` | Classifies a GS1 Digital Link carrier with a GTIN as model, batch, or item level, and compares the level with the granularity of the ICS. Experimental. |
 | `identifier.resolve` | `identifier.resolve` | Bounded resolution of the identifier to a passport. |
 | `identifier.consistency` | `identifier.consistency` | Compares the carrier identifier with the `id` of the resolved passport. With a QR image sample, it also compares the carrier identifier with the declared sample identifier. With `compare_item`, it also compares the resolved passport with the document at the target of the `item` template. It does not read the ICS. |
 | `api.contract` | `api.contract` | Response matches the pinned OpenAPI contract. |
@@ -405,7 +406,11 @@ published passport that is a linkset gives `blocked` with `INTEGRITY.PAYLOAD.NOT
 With `item_target: resolved`, a resolver answer that is a linkset gives
 `INTEGRITY.NO_TARGET` first (section 9.2).
 
-`identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
+`identifier.parse` takes the optional parameter `form`. Its values are `dppce-item`, the default,
+and `gs1-dl`. The default keeps the strict grammar below, so existing decision digests do not
+change.
+
+With the form `dppce-item`, `identifier.parse` accepts one GS1 Digital Link form. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. With `require_https`, a valid identifier whose
 scheme is not https gives `IDENTIFIER.SCHEME.NOT_HTTPS`. The host part is not empty and holds only `A-Z`,
 `a-z`, `0-9`, `.`, `-`, `:`, `[`, and `]`. So user information and an IPv6 zone identifier are
@@ -415,6 +420,52 @@ URL holds only the characters that RFC 3986 permits in a URI, including `%`. Eve
 gives `IDENTIFIER.SYNTAX.INVALID`. This includes forms that GS1 permits, such as a GTIN without
 a serial, a key qualifier, or a path prefix. The check reads the query and the fragment only for
 their characters.
+
+The form `gs1-dl` is experimental. It accepts an uncompressed GS1 Digital Link URI, as GS1
+Digital Link URI Syntax 1.7.0 defines it. The AI data comes from the vendored GS1 Barcode Syntax
+Dictionary in `testpacks/data/gs1-syntax-engine`. The parse steps follow `gs1_parseDLuri` of
+gs1-syntax-engine with its default options. The vendored `dl.c` cases are the oracle.
+
+- The URI starts with the same four scheme prefixes as in the form `dppce-item`.
+- The host is not empty and holds no character that GS1 Digital Link refuses. The fragment is
+  ignored.
+- `require_https` applies as in the form `dppce-item`.
+- A path prefix before the primary key is permitted.
+- The primary key is an AI that a `dlpkey` entry of the dictionary names.
+- The key qualifiers are an ordered subset of one qualifier list of that entry.
+- Each AI value is percent-decoded. Its length, its character set, and its linters come from the
+  dictionary. The linters include the check digit.
+- A query parameter with a numeric name is a data attribute. Its AI must exist and carry the data
+  attribute flag. A key qualifier of the path is not a data attribute.
+- The check ignores every other query parameter.
+- The check does not apply the pairing rules of the dictionary (`req` and `ex`).
+- A linter of a data attribute that this version does not implement is not applied. The
+  observation summary names it in `unchecked_linters`.
+
+A failure gives `IDENTIFIER.SYNTAX.INVALID`. The observation summary names the failed rule in
+`rule`. The rule is one value of the closed set `URI`, `KEY`, `QUALIFIER_ORDER`, `AI_VALUE`,
+`CHECK_DIGIT`, `PERCENT`, and `ATTRIBUTE`. A valid URI gives a summary with `key`, `qualifiers`,
+and `attributes`. These name AIs only, never values.
+
+A URI with no primary key in the path looks compressed if its last segment has at least 10
+base64url characters and is not all digits. It gives `unsupported` with `IDENTIFIER.SYNTAX.COMPRESSED`, because this
+version does not decompress. Another URL without a primary key and with such a last segment
+also gives this outcome. It is never a pass.
+
+`identifier.granularity` has no parameters. It parses the carrier identifier with the form
+`gs1-dl`. The check takes the first row that applies:
+
+1. The scheme of the ICS is `unknown` or not `gs1-digital-link`: as `identifier.parse`.
+2. The ICS declares the granularity `unknown`: `blocked`, `IDENTIFIER.GRANULARITY.NOT_DECLARED`.
+3. The carrier identifier looks compressed: `unsupported`, `IDENTIFIER.SYNTAX.COMPRESSED`.
+4. The carrier identifier is not a valid uncompressed URI: `blocked`,
+   `IDENTIFIER.GRANULARITY.NOT_PARSED`. `identifier.parse` judges the syntax.
+5. The primary key is not a GTIN (AI 01): `unsupported`, `IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED`.
+6. The level differs from the declared granularity: `IDENTIFIER.GRANULARITY.MISMATCH`.
+7. Otherwise: pass, `IDENTIFIER.GRANULARITY.OK`.
+
+A key qualifier 21 (serial) or 235 (third-party controlled serialized extension) gives item
+level. Else a key qualifier 10 (lot) gives batch level. Else the level is model.
 
 `data.jsonschema` selects the dialect from the top-level `$schema` of the pinned schema:
 

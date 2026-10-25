@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, StrictBool, field_validator
 
+from dppce.adapters import gs1
 from dppce.adapters.common import (
     LINKSET_TYPES,
     blocked,
@@ -56,6 +57,15 @@ class ParseParams(Model):
         description="Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS.",
     )
     require_https: StrictBool = _HTTPS
+    form: Literal["dppce-item", "gs1-dl"] = Field(
+        default="dppce-item",
+        description=(
+            "Grammar of the gs1-digital-link scheme. dppce-item: /01/<GTIN>/21/<serial> only. "
+            "gs1-dl (experimental): an uncompressed GS1 Digital Link URI with a path prefix, any "
+            "primary key, key qualifiers in order, and query data attributes, checked against the "
+            "vendored GS1 Barcode Syntax Dictionary."
+        ),
+    )
 
     @field_validator("scheme", mode="before")
     @classmethod
@@ -134,23 +144,58 @@ def is_https(url: str) -> bool:
         return False
 
 
-@register("identifier.parse", capability="identifier.parse", params=ParseParams)
-def parse(ctx: CheckContext) -> CheckOutcome:
-    scheme = str(ctx.params.get("scheme", ctx.ics.identifier_scheme))
-    require_https = ctx.params.get("require_https", False)
-    if not isinstance(require_https, bool):
-        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'require_https' is not a boolean.")
+def _scheme_problem(scheme: str) -> CheckOutcome | None:
     if scheme == "unknown":
         return blocked("IDENTIFIER.SCHEME.UNKNOWN", "The ICS does not declare the identifier scheme.")
     if scheme != "gs1-digital-link":
         message = f"This version has no parser for the scheme '{scheme}'."
         return not_done(ExecutionStatus.UNSUPPORTED, "IDENTIFIER.SCHEME.UNSUPPORTED", message)
+    return None
+
+
+def _compressed() -> CheckOutcome:
+    message = (
+        "The carrier identifier looks like a compressed GS1 Digital Link URI. "
+        "This version does not decompress it."
+    )
+    return not_done(ExecutionStatus.UNSUPPORTED, "IDENTIFIER.SYNTAX.COMPRESSED", message)
+
+
+@register("identifier.parse", capability="identifier.parse", params=ParseParams)
+def parse(ctx: CheckContext) -> CheckOutcome:
+    scheme = str(ctx.params.get("scheme", ctx.ics.identifier_scheme))
+    require_https = ctx.params.get("require_https", False)
+    form = ctx.params.get("form", "dppce-item")
+    if not isinstance(require_https, bool):
+        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'require_https' is not a boolean.")
+    if form not in ("dppce-item", "gs1-dl"):
+        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'form' is not dppce-item or gs1-dl.")
+    if (problem := _scheme_problem(scheme)) is not None:
+        return problem
     text, records, transformations, problem = carrier_identifier(ctx)
     if problem is not None or text is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
-    reason = parse_gs1_digital_link(text)
     kind: Literal["artifact", "declaration"] = "artifact" if records else "declaration"
-    summary = {"scheme": scheme, "valid": reason is None, **({"reason": reason} if reason else {})}
+    if form == "gs1-dl":
+        result = gs1.parse(text)
+        if isinstance(result, gs1.Problem) and result.rule == "COMPRESSED":
+            return _compressed()
+        summary: dict[str, object] = {"scheme": scheme, "form": form}
+        if isinstance(result, gs1.Problem):
+            reason: str | None = result.reason
+            summary |= {"valid": False, "rule": result.rule, "reason": result.reason}
+        else:
+            reason = None
+            summary |= {
+                "valid": True,
+                "key": result.key,
+                "qualifiers": list(result.qualifiers),
+                "attributes": list(result.attributes),
+                "unchecked_linters": list(result.unchecked),
+            }
+    else:
+        reason = parse_gs1_digital_link(text)
+        summary = {"scheme": scheme, "valid": reason is None, **({"reason": reason} if reason else {})}
     observation = ctx.observation(
         0, kind=kind, records=records, summary=summary, transformations=transformations
     )
@@ -167,6 +212,46 @@ def parse(ctx: CheckContext) -> CheckOutcome:
     return completed(
         True, "IDENTIFIER.SYNTAX.OK", f"The carrier identifier has valid {scheme} syntax.", [observation]
     )
+
+
+# The first key qualifier in this list sets the level. AI 235 (TPX) is a serialised extension.
+_LEVELS: tuple[tuple[str, Literal["item", "batch"]], ...] = (("21", "item"), ("235", "item"), ("10", "batch"))
+
+
+@register("identifier.granularity", capability="identifier.granularity")
+def granularity(ctx: CheckContext) -> CheckOutcome:
+    """Compare the key set of the GS1 carrier with the granularity that the ICS declares."""
+    if (problem := _scheme_problem(str(ctx.ics.identifier_scheme))) is not None:
+        return problem
+    declared = ctx.ics.granularity
+    if declared == "unknown":
+        return blocked("IDENTIFIER.GRANULARITY.NOT_DECLARED", "The ICS does not declare the granularity.")
+    text, records, transformations, problem = carrier_identifier(ctx)
+    if problem is not None or text is None:
+        return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
+    result = gs1.parse(text)
+    if isinstance(result, gs1.Problem):
+        if result.rule == "COMPRESSED":
+            return _compressed()
+        message = (
+            f"The carrier identifier is not a valid uncompressed GS1 Digital Link URI (rule {result.rule}), "
+            "so it has no granularity. identifier.parse with the form gs1-dl judges the syntax."
+        )
+        return blocked("IDENTIFIER.GRANULARITY.NOT_PARSED", message)
+    if result.key != "01":
+        message = f"This version classifies a GTIN (AI 01) only. The primary key is AI ({result.key})."
+        return not_done(ExecutionStatus.UNSUPPORTED, "IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED", message)
+    level = next((name for ai, name in _LEVELS if ai in result.qualifiers), "model")
+    kind: Literal["artifact", "declaration"] = "artifact" if records else "declaration"
+    summary = {"key": result.key, "qualifiers": list(result.qualifiers), "level": level, "declared": declared}
+    observation = ctx.observation(
+        0, kind=kind, records=records, summary=summary, transformations=transformations
+    )
+    if level != declared:
+        message = f"The carrier identifier is {level} level, but the ICS declares {declared} granularity."
+        return completed(False, "IDENTIFIER.GRANULARITY.MISMATCH", message, [observation])
+    message = f"The carrier identifier is {level} level, as the ICS declares."
+    return completed(True, "IDENTIFIER.GRANULARITY.OK", message, [observation])
 
 
 def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None, bool] | None:

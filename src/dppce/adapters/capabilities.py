@@ -42,7 +42,25 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         None,
         "A reader integration exists and is tested against physical tags in a recorded test campaign.",
     ),
-    ("identifier.parse", "identifier", _S, "Scheme-aware syntax check of the carrier payload.", None, ""),
+    (
+        "identifier.parse",
+        "identifier",
+        _S,
+        "Scheme-aware syntax check of the carrier payload. The form gs1-dl is experimental: it checks an "
+        "uncompressed GS1 Digital Link URI against the vendored GS1 Barcode Syntax Dictionary.",
+        None,
+        "",
+    ),
+    (
+        "identifier.granularity",
+        "identifier",
+        _E,
+        "Classify a GS1 Digital Link carrier with a GTIN as model, batch, or item level from its key "
+        "qualifiers, and compare the level with the granularity of the ICS.",
+        None,
+        "The level rules are reviewed against GS1 Digital Link URI Syntax 1.7.0 and run against "
+        "carriers of at least one independent GS1 resolver in a recorded test campaign.",
+    ),
     ("identifier.resolve", "identifier", _S, "Bounded resolution of an identifier to a passport.", None, ""),
     (
         "identifier.consistency",
