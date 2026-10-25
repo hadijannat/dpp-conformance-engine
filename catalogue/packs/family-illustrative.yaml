@@ -179,6 +179,66 @@ requirements:
   - id: default
     tests:
     - TP-GS1-CONSISTENCY-001
+- id: FAM-GS1-LINKSET-001
+  title: The resolver serves a linkset for the identifier
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The resolver answers a linkset request for the identifier with an RFC 9264 linkset. Its anchor
+    is the identifier, and it has a link with a declared relation.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-LINKSET-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-LINKSET-001
+- id: FAM-GS1-WELLKNOWN-001
+  title: The resolver serves a description file
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The origin of the identifier serves a JSON resolver description file whose resolverRoot has the
+    same origin.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-WELLKNOWN-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-WELLKNOWN-001
+- id: FAM-GS1-CONFORMANCE-001
+  title: The resolver gives the expected final status
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The resolver redirects a default request, answers a linkset request with 200 and no redirect,
+    and never answers 200 for an identifier with a wrong check digit.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-CONFORMANCE-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-CONFORMANCE-001
 # -- family/aas: Asset Administration Shell files ----------------------------------------------
 - id: FAM-AAS-JSON-001
   title: The AAS JSON file is valid
