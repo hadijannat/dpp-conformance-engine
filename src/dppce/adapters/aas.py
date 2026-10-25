@@ -1,6 +1,7 @@
 """Asset Administration Shell file adapters.
 
-A valid Asset Administration Shell is not a complete DPP conformance statement.
+A valid Asset Administration Shell is not a complete DPP conformance statement. ``aas.dpp_compose``
+compares an environment with the pinned IDTA 02099-1 DPP metadata template. It needs no extra.
 """
 
 from __future__ import annotations
@@ -9,7 +10,7 @@ import re
 import zipfile
 import zlib
 from io import BytesIO
-from typing import Any, Literal
+from typing import Any, Final, Literal
 from xml.etree import ElementTree
 from xml.parsers import expat
 
@@ -203,3 +204,141 @@ def aas_validate(ctx: CheckContext) -> CheckOutcome:
             False, "AAS.INVALID", f"The wrapped validator rejects the file. {limit}", [observation]
         )
     return completed(True, "AAS.VALID", f"The wrapped validator accepts the file. {limit}", [observation])
+
+
+# Derived from tests/vectors/idta-02099-1, and a test asserts that the two are equal. Identifiers
+# only: the definitions of the template are not copied (CLAUDE.md rule 5).
+DPP_TEMPLATE: Final = "IDTA 02099-1 version 1.0 (template release 1.0.2)"
+DPP_SUBMODEL_SEMANTIC_ID: Final = "https://admin-shell.io/idta/cds/dppMetadata/1"
+# (idShort, semanticId, SMT/Cardinality) of each top-level element, in template order.
+DPP_ELEMENTS: Final = (
+    ("digitalProductPassportId", "https://admin-shell.io/idta/cds/digitalProductPassportId/1", "One"),
+    ("uniqueProductIdentifier", "https://admin-shell.io/idta/cds/uniqueProductIdentifier/1", "One"),
+    ("granularity", "https://admin-shell.io/idta/cds/granularity/1", "One"),
+    ("dppSchemaVersion", "https://admin-shell.io/idta/cds/dppSchemaVersion/1", "One"),
+    ("dppStatus", "https://admin-shell.io/idta/cds/dppStatus/1", "One"),
+    ("lastUpdate", "https://admin-shell.io/idta/cds/lastUpdate/1", "One"),
+    ("economicOperatorId", "https://admin-shell.io/idta/cds/economicOperatorId/1", "One"),
+    ("facilityId", "https://admin-shell.io/idta/cds/facilityId/1", "ZeroToOne"),
+    ("contentSpecificationIds", "https://admin-shell.io/idta/cds/contentSpecificationIds/1", "ZeroToOne"),
+)
+# The mapping table of the IDTA 02099-1 documentation binds this element to the globalAssetId of the
+# shell. The template defines no binding to specificAssetIds.
+DPP_PRODUCT_ID: Final = "uniqueProductIdentifier"
+_DPP_LIMIT = (
+    f"The check compares with {DPP_TEMPLATE} and reads the JSON serialization only. It does not "
+    "check the format of a value. An AAS environment is not by itself a DPP."
+)
+
+
+class DppComposeParams(Model):
+    artifact: str = Field(
+        default="aas_file",
+        min_length=1,
+        description="Name of the IXIT sample that holds the AAS environment in the JSON serialization.",
+    )
+
+
+def _key_value(reference: Any) -> str | None:
+    """The value of the one key of a reference, of any reference type. Another shape gives None."""
+    keys = reference.get("keys") if isinstance(reference, dict) else None
+    if isinstance(keys, list) and len(keys) == 1 and isinstance(keys[0], dict):
+        value = keys[0].get("value")
+        return value if isinstance(value, str) else None
+    return None
+
+
+def _objects(value: Any) -> list[dict[str, Any]]:
+    # A member of the wrong type holds no usable object, so the rule that needs it fails (item 7).
+    return [item for item in value if isinstance(item, dict)] if isinstance(value, list) else []
+
+
+def _present(elements: list[dict[str, Any]], name: str, semantic_id: str) -> dict[str, Any] | None:
+    for element in elements:
+        value = element.get("value")
+        if (
+            element.get("idShort") == name
+            and _key_value(element.get("semanticId")) == semantic_id
+            and isinstance(value, str | list)
+            and value
+        ):
+            return element
+    return None
+
+
+def _agrees(shells: list[dict[str, Any]], submodel: dict[str, Any], product_id: Any) -> bool:
+    """Each shell that references the submodel has the product identifier as its globalAssetId."""
+    referencing = [
+        shell
+        for shell in shells
+        if any(
+            isinstance(ref, dict)
+            and isinstance(keys := ref.get("keys"), list)
+            and keys
+            and isinstance(keys[-1], dict)
+            and keys[-1].get("value") == submodel.get("id")
+            for ref in _objects(shell.get("submodels"))
+        )
+    ]
+    return bool(referencing) and all(
+        isinstance(info := shell.get("assetInformation"), dict) and info.get("globalAssetId") == product_id
+        for shell in referencing
+    )
+
+
+@register("aas.dpp_compose", capability="aas.dpp_compose", params=DppComposeParams)
+def aas_dpp_compose(ctx: CheckContext) -> CheckOutcome:
+    record = ctx.acquirer.artifact(str(ctx.params.get("artifact", "aas_file")))
+    if record.error is not None:
+        return blocked("AAS.SAMPLE.MISSING", "The Asset Administration Shell sample is not available.")
+    try:
+        environment = parse_strict(record.body)
+    except ValueError:
+        environment = None
+    if not isinstance(environment, dict):
+        environment = {}
+    submodels = [
+        s
+        for s in _objects(environment.get("submodels"))
+        if _key_value(s.get("semanticId")) == DPP_SUBMODEL_SEMANTIC_ID
+    ]
+    shells = _objects(environment.get("assetAdministrationShells"))
+    required = [
+        (name, semantic_id) for name, semantic_id, cardinality in DPP_ELEMENTS if cardinality == "One"
+    ]
+    missing: set[str] = set()
+    agrees = bool(submodels)
+    for submodel in submodels:
+        elements = _objects(submodel.get("submodelElements"))
+        missing.update(
+            name for name, semantic_id in required if _present(elements, name, semantic_id) is None
+        )
+        product = _present(elements, DPP_PRODUCT_ID, dict(required)[DPP_PRODUCT_ID])
+        agrees = agrees and product is not None and _agrees(shells, submodel, product.get("value"))
+    summary = {
+        "dpp_submodels": len(submodels),
+        "missing_elements": sorted(missing),
+        "identifier_agrees": agrees,
+    }
+    observation = ctx.observation(0, kind="artifact", records=[record], summary=summary)
+    if not submodels:
+        message = (
+            "The sample is not a JSON object with a submodel whose semanticId is "
+            f"{DPP_SUBMODEL_SEMANTIC_ID}. {_DPP_LIMIT}"
+        )
+        return completed(False, "AAS.DPP.SUBMODEL_MISSING", message, [observation])
+    if missing:
+        names = ", ".join(sorted(missing))
+        message = (
+            "A DPP metadata submodel lacks a required element with its idShort, its semanticId, and a "
+            f"value: {names}. {_DPP_LIMIT}"
+        )
+        return completed(False, "AAS.DPP.ELEMENT_MISSING", message, [observation])
+    if not agrees:
+        message = (
+            f"The {DPP_PRODUCT_ID} of a DPP metadata submodel is not the globalAssetId of each shell that "
+            f"references it, or no shell references it. {_DPP_LIMIT}"
+        )
+        return completed(False, "AAS.DPP.ID_MISMATCH", message, [observation])
+    message = f"The DPP metadata submodel has the required elements and agrees with its shell. {_DPP_LIMIT}"
+    return completed(True, "AAS.DPP.OK", message, [observation])

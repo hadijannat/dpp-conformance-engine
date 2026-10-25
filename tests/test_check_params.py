@@ -34,6 +34,7 @@ IXIT = {
 }
 # The initial registry of the architecture contract, section 8.
 CONTRACT_CHECKS = (
+    "aas.dpp_compose",
     "aas.validate",
     "access.restricted_fields",
     "api.contract",
@@ -79,6 +80,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "data.rules": ({"documnet": "item"}, "documnet"),
     "access.restricted_fields": ({"rol": "anonymous"}, "rol"),
     "aas.validate": ({"artefact": "aas_file"}, "artefact"),
+    "aas.dpp_compose": ({"artefact": "aas_json"}, "artefact"),
     "resolver.linkset": ({"relation": ["https://example.test/rel/passport"]}, "relation"),
     **{name: ({"documnet": "item"}, "documnet") for name in (*NO_PARAMETERS, *LIFECYCLE_CHECKS)},
 }
@@ -100,6 +102,8 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("aas.validate", {"format": 7}),
     ("aas.validate", {"metamodel_version": "3"}),
     ("aas.validate", {"metamodel_version": 3.0}),
+    ("aas.dpp_compose", {"artifact": 7}),
+    ("aas.dpp_compose", {"artifact": ""}),
     ("identifier.parse", {"scheme": 7}),
     ("identifier.parse", {"require_https": "yes"}),
     ("identifier.parse", {"require_https": 1}),

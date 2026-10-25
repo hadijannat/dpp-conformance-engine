@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from dppce.adapters.lifecycle import aas_validate
+from dppce.adapters.aas import aas_validate
 from dppce.models import ExecutionStatus
 from tests.support import ArtifactAcquirer, make_artifact
 from tests.test_url_templates import context
@@ -162,6 +162,14 @@ def test_malformed_parameters_are_blocked_before_the_sample_is_read(
         "AAS.PARAMS.INVALID",
     )
     assert acquirer.records() == ()
+
+
+def test_the_wrapped_release_accepts_an_empty_environment(tmp_path: Path) -> None:
+    # The stated limit of aas.validate: an empty environment is valid for the wrapped release.
+    # aas.dpp_compose fails the same sample with AAS.DPP.SUBMODEL_MISSING.
+    acquirer = ArtifactAcquirer({"aas_file": make_artifact("aas_file", b"{}")})
+    outcome = aas_validate(context(tmp_path, "aas.validate", acquirer=acquirer))  # type: ignore[arg-type]
+    assert (outcome.passed, outcome.reason_code) == (True, "AAS.VALID")
 
 
 def test_a_missing_sample_is_blocked(tmp_path: Path) -> None:

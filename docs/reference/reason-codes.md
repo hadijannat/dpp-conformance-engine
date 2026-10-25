@@ -27,9 +27,13 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | Code | Area | Check | Produced in | Step verdict |
 | --- | --- | --- | --- | --- |
 | `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
+| `AAS.DPP.ELEMENT_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
+| `AAS.DPP.ID_MISMATCH` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
+| `AAS.DPP.OK` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | pass |
+| `AAS.DPP.SUBMODEL_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
 | `AAS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | fail; inconclusive under a non-default verdict rule |
 | `AAS.PARAMS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
-| `AAS.SAMPLE.MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
+| `AAS.SAMPLE.MISSING` | AAS | `aas.dpp_compose`, `aas.validate` | `dppce.adapters.aas.aas_dpp_compose`, `dppce.adapters.aas.aas_validate` | inconclusive |
 | `AAS.VALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | pass |
 | `AAS.VERSION.UNSUPPORTED` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
 | `ACCESS.ENTITLEMENT.MISSING` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |

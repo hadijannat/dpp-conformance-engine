@@ -355,6 +355,31 @@ requirements:
   - id: default
     tests:
     - TP-AAS-AASX-001
+- id: FAM-AAS-DPP-001
+  title: The AAS JSON file holds DPP metadata of the IDTA 02099-1 template
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The declared AAS JSON file has a DPP metadata submodel with the required elements of
+    the pinned IDTA 02099-1 template, and its product identifier is the globalAssetId of its shell.
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_json
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-AAS-DPP-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-DPP-001
 # -- family/credentials: verifiable credentials, VC and UNTP style -----------------------------
 - id: FAM-VC-RESOLVE-001
   title: The credential URL resolves

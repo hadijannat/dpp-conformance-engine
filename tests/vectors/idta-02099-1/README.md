@@ -31,7 +31,7 @@ The repository names no copyright holder. The specification imprint names the pu
 "Industrial Digital Twin Association". So `REUSE.toml` names that publisher as the holder.
 
 Attribution: IDTA 02099-1, Digital Product Passport - Part 1: Metadata, version 1.0, template
-release 1.0.2, by the Industrial Digital Twin Association, licensed under CC-BY-4.0. The file is
+release 1.0.2. Publisher: Industrial Digital Twin Association. License: CC-BY-4.0. The file is
 not modified.
 
 ## Use in this project

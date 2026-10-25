@@ -1,0 +1,148 @@
+{
+  "assetAdministrationShells": [
+    {
+      "id": "https://example.test/TEST-ONLY/aas/dpp-1",
+      "idShort": "TestOnlyDppShell",
+      "modelType": "AssetAdministrationShell",
+      "assetInformation": {
+        "assetKind": "Instance",
+        "globalAssetId": "https://example.test/TEST-ONLY/product/1"
+      },
+      "submodels": [
+        {
+          "type": "ModelReference",
+          "keys": [
+            {
+              "type": "Submodel",
+              "value": "https://example.test/TEST-ONLY/submodel/dpp-metadata-1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "submodels": [
+    {
+      "id": "https://example.test/TEST-ONLY/submodel/dpp-metadata-1",
+      "idShort": "DppMetadata",
+      "kind": "Instance",
+      "modelType": "Submodel",
+      "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+          {
+            "type": "GlobalReference",
+            "value": "https://admin-shell.io/idta/cds/dppMetadata/1"
+          }
+        ]
+      },
+      "submodelElements": [
+        {
+          "idShort": "digitalProductPassportId",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "https://example.test/TEST-ONLY/dpp/1",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/digitalProductPassportId/1"
+              }
+            ]
+          }
+        },
+        {
+          "idShort": "uniqueProductIdentifier",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "https://example.test/TEST-ONLY/product/2",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/uniqueProductIdentifier/1"
+              }
+            ]
+          }
+        },
+        {
+          "idShort": "granularity",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "Item",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/granularity/1"
+              }
+            ]
+          }
+        },
+        {
+          "idShort": "dppSchemaVersion",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "TEST-ONLY-schema-1",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/dppSchemaVersion/1"
+              }
+            ]
+          }
+        },
+        {
+          "idShort": "dppStatus",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "Active",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/dppStatus/1"
+              }
+            ]
+          }
+        },
+        {
+          "idShort": "lastUpdate",
+          "modelType": "Property",
+          "valueType": "xs:dateTime",
+          "value": "2026-10-01T08:00:00Z",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/lastUpdate/1"
+              }
+            ]
+          }
+        },
+        {
+          "idShort": "economicOperatorId",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "urn:example:operator:0001",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/economicOperatorId/1"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -92,3 +92,26 @@ test_purposes:
   - The validator result.
   permitted_modes: *modes
   requires_scope: none
+# The DPP metadata submodel of the JSON file, compared with the pinned IDTA 02099-1 template.
+- id: TP-AAS-DPP-001
+  title: Compare the DPP metadata submodel of the AAS JSON file with the IDTA 02099-1 template
+  requirements:
+  - FAM-AAS-DPP-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_json
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: aas.dpp_compose
+    params:
+      artifact: aas_json
+  expected_evidence:
+  - The DPP metadata submodel, its required elements, and the shell that references it.
+  permitted_modes: *modes
+  requires_scope: none
