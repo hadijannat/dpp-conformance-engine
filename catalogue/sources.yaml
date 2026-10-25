@@ -7217,6 +7217,36 @@ sources:
   uncertainties:
   - The cases are in C unit tests. Project test code extracts them from the text.
   - The release of the GS1 Digital Link URI syntax standard that the library follows was not determined.
+- id: testpacks/data/gs1-syntax-engine/gs1-syntax-dictionary.txt
+  title: 'GS1 Barcode Syntax Dictionary: src/c-lib/gs1-syntax-dictionary.txt'
+  identifier: gs1/gs1-syntax-engine src/c-lib/gs1-syntax-dictionary.txt
+  issuing_body: GS1 AISBL (GitHub repository gs1/gs1-syntax-engine)
+  source_type: reference_data
+  official_url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/gs1-syntax-dictionary.txt
+  edition_or_version: commit 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72
+  publication_date: null
+  retrieval_date: '2026-10-25'
+  legal_or_spec_status: Third-party data file. The header states the release 2026-01-27. The engine reads it at run time for
+    the GS1 Digital Link grammar.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72 and in the header
+    of the file.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. testpacks/data/gs1-syntax-engine/README.md names the source
+    and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 3e0e1680a0bb5a5af13c863a4d8d6075f5766a09c463a78e0168d7330eecf779
+  hash_note: SHA-256 of the vendored bytes. Git blob f78d7918123bf041525a6f1a5bc058a6d1c6e787, the same object as the upstream
+    path at the commit.
+  evidence:
+  - url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/gs1-syntax-dictionary.txt
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The engine implements the linters that the primary keys and the key qualifiers use. Other linters are not applied, and
+    the observation summary names them.
 # Sources of the research in docs/research/raw/implementation-methods/ (retrieved 2026-10-19), merged on 2026-10-19.
 # The merge added records only. It did not change the records above.
 # Derived fields: identifier is the number in the title, or else the URL. The research did not record
