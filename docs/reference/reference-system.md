@@ -532,6 +532,11 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `wellknown_redirect` | family `resolver`: `/.well-known/gs1resolver` answers `301` to `/resolver-description.json`, which serves the description file |
 | `resolver_200_for_invalid` | family `resolver`: `/01/...` answers `200` with `{"status": "ok"}` for an unknown identifier, for example a GTIN with a wrong check digit |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
+| `vc_tampered` | family `credentials`: the payload of the credential of section 4.7 names serial `OTHER0001` after signing |
+| `vc_hs256_confusion` | family `credentials`: the credential header names `HS256`, and the signature is an HMAC-SHA256 with the DER public key of the TEST-ONLY leaf as the key |
+| `vc_expired` | family `credentials`: the validly signed credential has `validFrom` `2025-01-01T00:00:00Z` and `validUntil` `2026-01-01T00:00:00Z` |
+| `vc_untrusted_kid` | family `credentials`: the validly signed credential has the `kid` `TEST-ONLY-unknown-issuer-key`, which the trust bundle does not hold |
+| `vc_alg_none` | family `credentials`: the credential header names `none`, and the signature part is empty |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:
