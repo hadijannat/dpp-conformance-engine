@@ -21,7 +21,7 @@ Other implementation families get a wrong verdict, a blocked step, or no step at
 3. An independent security audit.
 4. DCO sign-off of agent commits.
 
-**What P2 adds.** Program P2 has 29 packages in 11 waves. Each wave adds checks for one or more implementation families.
+**What P2 adds.** Program P2 has 31 packages in 11 waves. Most waves add checks for one or more implementation families. P2-16 (status documents) is now part of P2-29.
 
 | Family | What P2 adds |
 | --- | --- |
@@ -103,11 +103,11 @@ This page gives bibliographic metadata for standards only.
 | GS1 Web Vocabulary | Page gave HTTP 403 | Not checked |
 | UNTP | Versions 0.7.0 and 0.6.0 are work in progress toward 1.0; pilot only. The GitHub repository was archived on 2026-04-24 after release 0.6.1 | Primary page |
 | W3C VC Data Model 2.0, Bitstring Status List 1.0, Data Integrity 1.0 and its EdDSA and ECDSA suites | Recommendations of 2025-05-15 | Primary page |
-| W3C VC-JOSE-COSE | Page shows a Recommendation dated 13 October 2026; the agent did not verify it | Primary page, date unverified |
+| W3C VC-JOSE-COSE | Page shows a Recommendation dated 13 October 2026; whether this is a republished Recommendation is open | Primary page |
 | W3C DID 1.1 | Candidate Recommendation Snapshot of 2026-03-05; the did:web W3C URL gave 404 | Primary page |
 | did:webvh 1.0 | DIF ratified; no date found | Secondary only |
-| IDTA 02099-1 DPP Part 1 Metadata v1.0 | Released 2026-05-28 | Not marked by the agent |
-| AAS specification Parts 1 and 2 v3.2 | PDFs dated July 2026; release status unconfirmed | Not marked by the agent |
+| IDTA 02099-1 DPP Part 1 Metadata v1.0 | Released 2026-05-28 | Not verified (IDTA PDF only) |
+| AAS specification Parts 1 and 2 v3.2 | PDFs dated July 2026; release status unconfirmed | Not verified (IDTA PDF only) |
 | Catena-X CX-0143 and CX-0160 | Not found; CX-0134 exists; battery passport standard planned for 26.06 | Secondary only |
 
 The agent also read PyPI metadata for candidate libraries.
@@ -251,7 +251,7 @@ The critic raised four risks that shape the packages:
 - Agents read the code. They did not run the method validation or a mutation run for this page.
 - The baseline command ran once at `4990be0`. The counts apply to that commit only.
 - The landscape check used snippets for most EU items. No primary EU page was read.
-- The W3C VC-JOSE-COSE date is unverified.
+- Whether the W3C VC-JOSE-COSE Recommendation of 13 October 2026 is a republication is open.
 - Value and effort ratings in the plan are agent judgments.
 - Fault ids in the plan are placeholders. The integrator assigns real ids.
 - This page contains no text of any EN, ISO, IEC, or DIN document.
