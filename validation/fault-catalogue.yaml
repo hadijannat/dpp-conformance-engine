@@ -22,13 +22,16 @@
 # and before the commit that changes the 5xx outcome in the adapters.
 # Version 0.5.0 adds E-14 and E-15. Their entry commit comes before the commits that add the
 # status list, the attestation version 2, and the dimension signers.
+# Version 0.6.0 adds the boundary cases B-10 and B-11. Their entry commit comes before the commit
+# that adds the linkset and JWS JSON guards to the adapters. It also comes before the commit that
+# adds the flags resolver_linkset_as_passport and signed_jws_json to the reference system.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.5.0
+version: 0.6.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
