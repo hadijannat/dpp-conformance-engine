@@ -628,7 +628,7 @@ template holds definition text from a European standard, so the project does not
 holds its identifiers. A test derives the same table from a local copy that an operator supplies.
 These rules apply:
 
-- A semanticId matches if it is an object with one key, and the value of that key is the
+- A semanticId matches if it is an object with one key. The value of that key must be the
   semanticId of the template as exact text. The reference type and the key type do not matter.
 - A DPP metadata submodel is an object of the list `submodels` with the matching semanticId
   `https://admin-shell.io/idta/cds/dppMetadata/1`.
