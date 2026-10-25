@@ -200,7 +200,8 @@ def test_options_names_the_read_methods_and_the_cors_headers() -> None:
             assert headers["Access-Control-Allow-Origin"] == "*"
             assert headers["Access-Control-Allow-Methods"] == "GET, HEAD, OPTIONS"
             assert headers["Access-Control-Allow-Headers"] == "Accept, Authorization"
-            assert "Content-Length" not in headers and "Content-Type" not in headers
+            assert "Content-Length" not in headers
+            assert "Content-Type" not in headers
 
 
 def test_the_reference_system_has_no_write_operation() -> None:
@@ -278,18 +279,15 @@ def test_fault_flags_are_the_core_flags_and_the_flags_of_each_family() -> None:
     from dppce.infrastructure import reference, reference_server  # noqa: PLC0415 - the unit under test
 
     family_flags = [family.FLAGS for family in reference.FAMILIES]
-    assert reference_server.FAULTS == reference_server.CORE_FAULTS.union(*family_flags)
-    assert sum(map(len, family_flags)) + len(reference_server.CORE_FAULTS) == len(reference_server.FAULTS)
+    assert reference_server.CORE_FAULTS.union(*family_flags) == reference_server.FAULTS
+    # No flag is in two places.
+    assert len(reference_server.FAULTS) == len(reference_server.CORE_FAULTS) + sum(map(len, family_flags))
     assert set(BASE_FLAGS) <= reference_server.FAULTS
-    try:
+    with pytest.raises(ValueError, match="no_such_flag"):
         ReferenceSystem(FIXTURES, frozenset({"no_such_flag"}))
-    except ValueError as error:
-        assert "no_such_flag" in str(error)
-    else:
-        raise AssertionError("an unknown flag must be refused")
 
 
-def test_a_new_family_needs_one_families_entry_and_no_core_edit(monkeypatch: Any) -> None:
+def test_a_new_family_needs_one_families_entry_and_no_core_edit(monkeypatch: pytest.MonkeyPatch) -> None:
     from types import SimpleNamespace  # noqa: PLC0415 - only this test needs it
 
     from dppce.infrastructure import reference  # noqa: PLC0415 - the unit under test
@@ -308,7 +306,7 @@ def test_a_new_family_needs_one_families_entry_and_no_core_edit(monkeypatch: Any
         assert _call(server.origin, "GET", "/demo")[0] == 404
 
 
-def test_the_header_injection_guard_covers_every_method(monkeypatch: Any) -> None:
+def test_the_header_injection_guard_covers_every_method(monkeypatch: pytest.MonkeyPatch) -> None:
     def hostile(self: Any, request: Any) -> Any:
         return 303, "text/plain", b"", {"Location": "/dpp/x\r\nX-Injected: 1"}
 
@@ -328,12 +326,8 @@ def test_the_rig_samples_key_swaps_a_sample_for_a_fixture(tmp_path: Path) -> Non
     assert "qr_image: samples/qr_image.png" in ixit
     assert "other_file: samples/other_file.json" in ixit
     assert (tmp_path / "rig" / "samples" / "qr_image.png").read_bytes() == (ROOT / source).read_bytes()
-    try:
-        ReferenceRig(tmp_path / "x", samples={"../escape": source}).__enter__()
-    except ValueError as error:
-        assert "escape" in str(error)
-    else:
-        raise AssertionError("a sample name must be a plain file name")
+    with pytest.raises(ValueError, match="escape"):
+        ReferenceRig(tmp_path / "x", samples={"../escape": source})
 
 
 @pytest.mark.qr

@@ -183,7 +183,17 @@ class ReferenceRig:
         layout: Literal["reference", "alternate"] = "reference",
         data_root: Path | None = None,
         manual: Mapping[str, Literal["pass", "fail"]] | None = None,
+        samples: Mapping[str, str] | None = None,
     ) -> None:
+        """``samples`` maps an IXIT sample name to a fixture path relative to the repository root.
+
+        The rig copies each fixture beside the IXIT and names the copy in ``IXIT.samples``. A
+        ``validation/cases.py`` row uses this key to swap a sample, for example an AAS file.
+        """
+        self._samples = dict(samples or {})
+        for name in self._samples:
+            if Path(name).name != name or name.startswith("."):
+                raise ValueError(f"the sample name {name!r} is not a plain file name")
         self.work = work
         self.profile = profile
         self._manual = dict(manual or {})
@@ -210,6 +220,11 @@ class ReferenceRig:
         ixit = yaml.safe_load((FIXTURES / f"{self.profile}.ixit.yaml").read_text(encoding="utf-8"))
         ixit["endpoints"]["origin_override"] = origin
         ixit["samples"]["qr_image"] = f"qr/{self._qr}.png"
+        for name, source in sorted(self._samples.items()):
+            copy = rig / "samples" / f"{name}{Path(source).suffix}"
+            copy.parent.mkdir(exist_ok=True)
+            shutil.copyfile(ROOT / source, copy)
+            ixit["samples"][name] = f"samples/{copy.name}"
         ics = yaml.safe_load((FIXTURES / f"{self.profile}.ics.yaml").read_text(encoding="utf-8"))
         if self._alternate:
             if not (self.data_root / CONTRACT).exists():
