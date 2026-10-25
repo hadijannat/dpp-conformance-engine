@@ -550,7 +550,8 @@ def test_data_jsonschema_fails_a_document_that_breaks_date_time(tmp_path: Path) 
 
 # -- regression: every shipped schema keeps its outcome ---------------------------------------------
 
-SHIPPED_SCHEMAS = sorted((ROOT / "profiles").rglob("*.schema.json"))
+# The schemas shipped at 4990be0. A later profile family states its own dialect and formats.
+SHIPPED_SCHEMAS = sorted((ROOT / "profiles" / "battery").rglob("*.schema.json"))
 CONTRACT = ROOT / "profiles" / "battery" / "contracts" / "reference-api.openapi.yaml"
 
 
