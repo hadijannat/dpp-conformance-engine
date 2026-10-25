@@ -2,7 +2,8 @@
 
 Audience: assessors and contributors.
 Purpose: reproduce the validation of the checks against seeded faults.
-Prerequisites: an installed development environment with the `qr` extra.
+Prerequisites: an installed development environment with the `qr` and `aas` extras
+(`uv sync --all-extras`).
 
 ## What it does
 
@@ -29,6 +30,43 @@ uv run python -m validation.run
 
 3. Read the record in `validation/records/`. Each figure has a numerator and a denominator.
    The field `human_review_and_signature` is always `null`. The engine never fills it.
+
+## Family profiles
+
+The validation also runs the family profiles. Each family control names one family profile.
+The rig uses the shipped example ICS and IXIT in `profiles/family/examples/`. The trust bundle,
+keys, issuer, evaluation time, and loopback origin are the same as for the battery runs.
+
+| Control | Profile |
+| --- | --- |
+| `C-FAMILY-WEB` | `family/web` |
+| `C-FAMILY-GS1` | `family/gs1-resolver` |
+| `C-FAMILY-VC` | `family/credentials` |
+| `C-FAMILY-AAS` | `family/aas`, with the synthetic file `fixtures/aas/environment-valid.json` |
+
+`C-FAMILY-AAS` needs the optional `aas` extra. Without it, the AAS check gives `unsupported`,
+and the control does not pass.
+
+A family control passes only if every executed step of its profile passes. Its executed steps
+count in `false_positives_on_controls`. Its result counts in `controls` and `replays`.
+
+### The per-case field `profiles`
+
+A fault entry can name the profiles that it runs under. Use full profile ids.
+
+```yaml
+  - id: F-50
+    fault: example_flag
+    test_purpose: TP-GS1-RESOLVE-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: EXAMPLE.REASON}
+```
+
+An entry without `profiles` runs under the catalogue-level `profiles`, the battery profiles.
+A boundary case runs once, so it names at most one profile. More than one is a catalogue error.
+
+Each listed profile must plan the test purpose of the entry. If a profile does not plan it,
+the validation stops with a catalogue error. It never skips the case.
 
 ## How to read the record
 

@@ -3,9 +3,10 @@
 Usage: ``uv run python -m validation.run``
 
 The run seeds each fault of ``validation/fault-catalogue.yaml`` into the local reference
-system, for each battery profile, and compares the outcome with the outcome that the
-catalogue stated before the checks existed. It also runs the valid controls, the boundary
-cases, the evidence faults, and five replays for each profile.
+system, for each profile of the fault (by default the battery profiles), and compares the
+outcome with the outcome that the catalogue stated before the checks existed. It also runs the
+valid controls of the battery and family profiles, the boundary cases, the evidence faults, and
+five replays for each control.
 
 Every figure in the record has a numerator and a denominator. The record describes this
 software against a synthetic reference system. It is not evidence about a real DPP system,
@@ -33,7 +34,7 @@ from dppce.models import DecisionBody, EvidenceEnvelope, ExecutionStatus, TrustB
 from dppce.verifier import verify
 from validation import cases
 from validation.evidence_cases import SETUP, TAMPER
-from validation.rig import LAB, REPORT_KEY, REPORT_KID, TRUST, ReferenceRig
+from validation.rig import LAB, REPORT_KEY, REPORT_KID, TRUST, ReferenceRig, RunResult
 
 RECORDS = Path(__file__).resolve().parent / "records"
 VERIFY_AT = datetime(2026, 10, 14, tzinfo=UTC)
@@ -96,37 +97,54 @@ def _control_findings(decision: DecisionBody) -> dict[str, Any]:
     }
 
 
+def _control(
+    work: Path, ident: str, profile: str, setup: dict[str, Any]
+) -> tuple[dict[str, Any], RunResult, ReferenceRig]:
+    """Run one control on the unmodified reference system and replay it."""
+    with ReferenceRig(work / ident / profile, profile, **setup) as rig:
+        run = rig.run()
+        code, replay = rig.replay(run, times=REPLAYS)
+    row = {
+        "id": ident,
+        "profile": rig.profile,
+        **_control_findings(run.envelope.decision),
+        "replays": REPLAYS,
+        "replay_digests_equal": bool(replay["match"]),
+        "decision_digest": replay["expected_digest"],
+        "replay_exit_code": code,
+    }
+    return row, run, rig
+
+
 def _controls(work: Path) -> tuple[list[dict[str, Any]], EvidenceEnvelope | None, Path | None]:
     rows: list[dict[str, Any]] = []
     first: tuple[EvidenceEnvelope, Path] | None = None
-    for profile in cases.profiles():
-        # A TEST-ONLY manual result, so that the signed control holds a completed manual step (E-13).
-        with ReferenceRig(work / f"control-{profile}", profile, manual={"TP-MANUAL-001": "pass"}) as rig:
-            run = rig.run()
-            code, replay = rig.replay(run, times=REPLAYS)
-            if first is None:
-                first = (EvidenceEnvelope.model_validate_json(rig.sign(run).read_bytes()), run.run_dir)
-        rows.append(
-            {
-                "profile": f"battery/{profile}",
-                **_control_findings(run.envelope.decision),
-                "replays": REPLAYS,
-                "replay_digests_equal": bool(replay["match"]),
-                "decision_digest": replay["expected_digest"],
-                "replay_exit_code": code,
-            }
-        )
+    # A TEST-ONLY manual result, so that the signed control holds a completed manual step (E-13).
+    baseline = {"manual": {"TP-MANUAL-001": "pass"}}
+    plan = [("C-BASELINE", profile, baseline) for profile in cases.profiles()]
+    plan += [(control.id, control.profile, control.rig) for control in cases.controls()]
+    for ident, profile, setup in plan:
+        row, run, rig = _control(work, ident, profile, setup)
+        if first is None:
+            first = (EvidenceEnvelope.model_validate_json(rig.sign(run).read_bytes()), run.run_dir)
+        rows.append(row)
     return rows, first[0] if first else None, first[1] if first else None
 
 
 def _sut_cases(work: Path, group: list[cases.Case], label: str, all_profiles: bool) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for case in group:
-        for profile in cases.profiles() if all_profiles else [case.profile or "ev"]:
-            directory = work / f"{label}-{case.id}-{profile}"
-            with ReferenceRig(directory, case.profile or profile, faults=case.faults, **case.rig) as rig:
+        for profile in case.profiles if all_profiles else [case.profile or case.profiles[0]]:
+            directory = work / f"{label}-{case.id}" / profile
+            with ReferenceRig(directory, profile, faults=case.faults, **case.rig) as rig:
                 run = rig.run(**({"at": case.at} if case.at else {}))
             if case.test_purpose is not None:
+                if all(t.test_purpose_id != case.test_purpose for t in run.envelope.decision.test_results):
+                    # A case that runs nothing would vanish from the figures, so it stops the run.
+                    raise cases.CatalogueError(
+                        f"{case.id}: the test purpose {case.test_purpose} is not planned under {profile}; "
+                        f"the case names the profiles {', '.join(case.profiles)}"
+                    )
                 step = run.step(case.test_purpose)
                 observed = {"verdict": step["verdict"], "reason_code": step["reason_code"]}
             else:
@@ -135,7 +153,7 @@ def _sut_cases(work: Path, group: list[cases.Case], label: str, all_profiles: bo
             rows.append(
                 {
                     "id": case.id,
-                    "profile": f"battery/{case.profile or profile}",
+                    "profile": rig.profile,
                     "target": case.test_purpose or case.requirement,
                     "expected": case.expected,
                     "observed": observed,
@@ -257,7 +275,8 @@ def main() -> int:
         "schema_version": "dppce.validationrecord/1",
         "started_utc": started.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "scope": "The checks of the illustrative pack, the evidence envelope, and the verifier of this "
-        "engine version, against the synthetic local reference system, for three battery profiles.",
+        "engine version, against the synthetic local reference system, for three battery profiles "
+        "and the family profiles that the controls and the faults name.",
         "fixtures": "fixtures/reference (synthetic; generated by scripts/gen_fixtures.py) and "
         "validation/fault-catalogue.yaml",
         "fault_catalogue_version": cases.load()["version"],

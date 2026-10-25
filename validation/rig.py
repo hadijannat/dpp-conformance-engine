@@ -31,6 +31,7 @@ from dppce.models import Authorization, EvidenceEnvelope, ManualResult, SutIdent
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "fixtures" / "reference"
+FAMILY_EXAMPLES = ROOT / "profiles" / "family" / "examples"
 TRUST = FIXTURES / "trust" / "TEST-ONLY-trust-bundle.json"
 REPORT_KEY = FIXTURES / "trust" / "TEST-ONLY-report-signing.key.pem"
 REPORT_KID = "TEST-ONLY-report-key-1"
@@ -185,8 +186,13 @@ class ReferenceRig:
         manual: Mapping[str, Literal["pass", "fail"]] | None = None,
         samples: Mapping[str, str] | None = None,
     ) -> None:
-        """``samples`` maps an IXIT sample name to a fixture path relative to the repository root.
+        """``profile`` is a full profile id, or a short battery name such as ``ev``.
 
+        A battery profile reads the ICS and IXIT of ``fixtures/reference``. A family profile reads
+        the shipped example of ``profiles/family/examples``. It gets no QR image, role secret, or
+        manual result unless the arguments name one.
+
+        ``samples`` maps an IXIT sample name to a fixture path relative to the repository root.
         The rig copies each fixture beside the IXIT and names the copy in ``IXIT.samples``. A
         ``validation/cases.py`` row uses this key to swap a sample, for example an AAS file.
         """
@@ -195,12 +201,16 @@ class ReferenceRig:
             if Path(name).name != name or name.startswith("."):
                 raise ValueError(f"the sample name {name!r} is not a plain file name")
         self.work = work
-        self.profile = profile
+        self.profile = profile if "/" in profile else f"battery/{profile}"
+        group, _, name = self.profile.partition("/")
+        self._family = group == "family"
+        self._declarations = FAMILY_EXAMPLES if self._family else FIXTURES
+        self._name = name
         self._manual = dict(manual or {})
         self._manual_files: list[Path] = []
         self._ics_changes = ics_changes or {}
         self._ixit_changes = ixit_changes or {}
-        self._qr = qr or profile
+        self._qr = qr or (None if self._family else name)
         self._alternate = layout == "alternate"
         system = AlternateLayout(FIXTURES, faults) if self._alternate else None
         self._server = ReferenceServer(FIXTURES, faults=faults, system=system) if serve else None
@@ -217,15 +227,16 @@ class ReferenceRig:
         self.origin = origin
         rig = self.work / "rig"
         shutil.copytree(FIXTURES / "qr", rig / "qr")
-        ixit = yaml.safe_load((FIXTURES / f"{self.profile}.ixit.yaml").read_text(encoding="utf-8"))
+        ixit = yaml.safe_load((self._declarations / f"{self._name}.ixit.yaml").read_text(encoding="utf-8"))
         ixit["endpoints"]["origin_override"] = origin
-        ixit["samples"]["qr_image"] = f"qr/{self._qr}.png"
+        if self._qr is not None:
+            ixit["samples"]["qr_image"] = f"qr/{self._qr}.png"
         for name, source in sorted(self._samples.items()):
             copy = rig / "samples" / f"{name}{Path(source).suffix}"
             copy.parent.mkdir(exist_ok=True)
             shutil.copyfile(ROOT / source, copy)
             ixit["samples"][name] = f"samples/{copy.name}"
-        ics = yaml.safe_load((FIXTURES / f"{self.profile}.ics.yaml").read_text(encoding="utf-8"))
+        ics = yaml.safe_load((self._declarations / f"{self._name}.ics.yaml").read_text(encoding="utf-8"))
         if self._alternate:
             if not (self.data_root / CONTRACT).exists():
                 for name in ("catalogue", "profiles", "testpacks"):
@@ -315,7 +326,7 @@ class ReferenceRig:
         """The arguments of ``dppce run`` for this rig, without --create-data-key."""
         arguments = [
             "run",
-            "--profile", f"battery/{self.profile}",
+            "--profile", self.profile,
             "--ics", str(self._rig / "ics.yaml"),
             "--ixit", str(self._rig / "ixit.yaml"),
             "--mode", mode,
@@ -329,7 +340,8 @@ class ReferenceRig:
             "--issuer-id", LAB,
             *self._data_arguments(),
         ]  # fmt: skip
-        for role in _ROLES:
+        # A family example declares the anonymous role only, so it confirms no role secret.
+        for role in () if self._family else _ROLES:
             arguments += ["--role-secret", f"{role}=file:TEST-ONLY-{role}.token"]
         for path in self._manual_files:
             arguments += ["--manual-result", str(path)]
