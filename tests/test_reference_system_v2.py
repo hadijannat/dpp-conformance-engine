@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+import pytest
 from validation.rig import FIXTURES, AlternateLayout
 
 from dppce.infrastructure.reference_server import ReferenceServer, ReferenceSystem
@@ -154,6 +155,194 @@ def test_every_old_request_gets_the_answer_of_the_base_version() -> None:
             assert actual[layout]["none"][target] == answers, (layout, target)
         changed = [flag for flag in BASE_FLAGS if actual[layout][flag] != expected[layout][flag]]
         assert changed == [], layout
+
+
+# -- new behavior -------------------------------------------------------------------------------
+
+EV = ("09506000134352", "EV0001")
+RESOLVER = f"/01/{EV[0]}/21/{EV[1]}"
+LINKSET_TYPE = "application/linkset+json"
+
+
+def _call(
+    origin: str, method: str, target: str, headers: dict[str, str] | None = None
+) -> tuple[int, dict[str, str], bytes]:
+    host, port = origin.removeprefix("http://").rsplit(":", 1)
+    connection = http.client.HTTPConnection(host, int(port), timeout=5)
+    try:
+        connection.request(method, target, headers=headers or {})
+        response = connection.getresponse()
+        body = response.read()
+    finally:
+        connection.close()
+    seen = {name: value for name, value in response.getheaders() if name != "Date"}
+    return response.status, seen, body
+
+
+def test_head_gives_the_status_and_headers_of_get_without_a_body() -> None:
+    for faults in (frozenset(), frozenset({"deny_all"})):
+        with ReferenceServer(FIXTURES, faults=faults) as server:
+            for target in [*reference_targets(), f"{RESOLVER}?linkType=linkset", "/.well-known/gs1resolver"]:
+                get_status, get_headers, get_body = _call(server.origin, "GET", target)
+                head_status, head_headers, head_body = _call(server.origin, "HEAD", target)
+                assert (head_status, head_headers, head_body) == (get_status, get_headers, b""), target
+                assert head_headers["Content-Length"] == str(len(get_body)), target
+
+
+def test_options_names_the_read_methods_and_the_cors_headers() -> None:
+    with ReferenceServer(FIXTURES) as server:
+        for target in ("*", RESOLVER, f"/dpp/{EV[0]}-{EV[1]}", "/.well-known/gs1resolver"):
+            status, headers, body = _call(
+                server.origin, "OPTIONS", target, {"Origin": "https://a.example.test"}
+            )
+            assert (status, body) == (204, b""), target
+            assert headers["Allow"] == "GET, HEAD, OPTIONS"
+            assert headers["Access-Control-Allow-Origin"] == "*"
+            assert headers["Access-Control-Allow-Methods"] == "GET, HEAD, OPTIONS"
+            assert headers["Access-Control-Allow-Headers"] == "Accept, Authorization"
+            assert "Content-Length" not in headers and "Content-Type" not in headers
+
+
+def test_the_reference_system_has_no_write_operation() -> None:
+    with ReferenceServer(FIXTURES) as server:
+        before = _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}")
+        for method in ("POST", "PUT", "PATCH", "DELETE"):
+            status, _, _ = _call(server.origin, method, f"/dpp/{EV[0]}-{EV[1]}")
+            assert status == 501, method
+        assert _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}") == before
+
+
+def _linkset(origin: str, target: str, headers: dict[str, str] | None = None) -> Any:
+    status, seen, body = _call(origin, "GET", target, headers)
+    assert (status, seen["Content-Type"], seen["Vary"]) == (200, LINKSET_TYPE, "Accept"), target
+    return json.loads(body)
+
+
+def test_the_resolver_answers_a_linkset_on_request() -> None:
+    expected = {
+        "linkset": [
+            {
+                "anchor": f"https://id.example.test{RESOLVER}",
+                "https://dppce.example.test/rel/passport": [
+                    {"href": f"https://id.example.test/dpp/{EV[0]}-{EV[1]}", "type": "application/json"}
+                ],
+            }
+        ]
+    }
+    with ReferenceServer(FIXTURES) as server:
+        assert _linkset(server.origin, f"{RESOLVER}?linkType=linkset") == expected
+        assert _linkset(server.origin, f"{RESOLVER}?linkType=all") == expected
+        assert _linkset(server.origin, RESOLVER, {"Accept": LINKSET_TYPE}) == expected
+        assert (
+            _linkset(server.origin, RESOLVER, {"Accept": f"application/json;q=0.5, {LINKSET_TYPE}"})
+            == expected
+        )
+
+
+def test_the_resolver_redirects_to_the_passport_for_any_other_request() -> None:
+    accepts = ("*/*", "application/json", f"{LINKSET_TYPE};q=0", f"application/json, {LINKSET_TYPE};q=0.5")
+    with ReferenceServer(FIXTURES) as server:
+        default = _call(server.origin, "GET", RESOLVER, {"Accept": "*/*"})
+        assert (default[0], default[1]["Location"]) == (303, f"/dpp/{EV[0]}-{EV[1]}")
+        for accept in accepts:
+            assert _call(server.origin, "GET", RESOLVER, {"Accept": accept}) == default, accept
+        assert _call(server.origin, "GET", f"{RESOLVER}?linkType=gs1:dpp") == default
+
+
+def test_a_resolver_fault_also_applies_to_a_linkset_request() -> None:
+    for flag, status in (("resolver_404", 404), ("resolver_5xx", 503), ("deny_all", 403)):
+        with ReferenceServer(FIXTURES, faults=frozenset({flag})) as server:
+            assert _call(server.origin, "GET", f"{RESOLVER}?linkType=linkset")[0] == status, flag
+    with ReferenceServer(FIXTURES) as server:
+        assert _call(server.origin, "GET", f"/01/{EV[0]}/21/UNKNOWN0?linkType=linkset")[0] == 404
+
+
+def test_the_linkset_follows_the_rig_layout() -> None:
+    with ReferenceServer(FIXTURES, system=AlternateLayout(FIXTURES)) as server:
+        document = _linkset(server.origin, f"{RESOLVER}?linkType=linkset")
+    link = document["linkset"][0]["https://dppce.example.test/rel/passport"][0]
+    assert link["href"] == f"https://id.example.test/passports/{EV[0]}/{EV[1]}/data"
+
+
+def test_the_resolver_serves_a_synthetic_description_file() -> None:
+    with ReferenceServer(FIXTURES) as server:
+        status, headers, body = _call(server.origin, "GET", "/.well-known/gs1resolver")
+    assert (status, headers["Content-Type"]) == (200, "application/json")
+    document = json.loads(body)
+    assert document["resolverRoot"] == "https://id.example.test"
+    assert document["supportedPrimaryKeys"] == ["01"]
+    assert "synthetic" in document["name"]
+
+
+def test_fault_flags_are_the_core_flags_and_the_flags_of_each_family() -> None:
+    from dppce.infrastructure import reference, reference_server  # noqa: PLC0415 - the unit under test
+
+    family_flags = [family.FLAGS for family in reference.FAMILIES]
+    assert reference_server.FAULTS == reference_server.CORE_FAULTS.union(*family_flags)
+    assert sum(map(len, family_flags)) + len(reference_server.CORE_FAULTS) == len(reference_server.FAULTS)
+    assert set(BASE_FLAGS) <= reference_server.FAULTS
+    try:
+        ReferenceSystem(FIXTURES, frozenset({"no_such_flag"}))
+    except ValueError as error:
+        assert "no_such_flag" in str(error)
+    else:
+        raise AssertionError("an unknown flag must be refused")
+
+
+def test_a_new_family_needs_one_families_entry_and_no_core_edit(monkeypatch: Any) -> None:
+    from types import SimpleNamespace  # noqa: PLC0415 - only this test needs it
+
+    from dppce.infrastructure import reference  # noqa: PLC0415 - the unit under test
+
+    def respond(system: ReferenceSystem, request: Any) -> Any:
+        if request.target != "/demo" or "demo_flag" not in system.faults:
+            return None
+        return 200, "text/plain", request.method.encode("ascii"), {}
+
+    demo = SimpleNamespace(FLAGS=frozenset({"demo_flag"}), respond=respond)
+    monkeypatch.setattr(reference, "FAMILIES", (*reference.FAMILIES, demo))
+    with ReferenceServer(FIXTURES, faults=frozenset({"demo_flag"})) as server:
+        assert _call(server.origin, "GET", "/demo")[::2] == (200, b"GET")
+        assert _call(server.origin, "GET", RESOLVER)[0] == 303
+    with ReferenceServer(FIXTURES) as server:
+        assert _call(server.origin, "GET", "/demo")[0] == 404
+
+
+def test_the_header_injection_guard_covers_every_method(monkeypatch: Any) -> None:
+    def hostile(self: Any, request: Any) -> Any:
+        return 303, "text/plain", b"", {"Location": "/dpp/x\r\nX-Injected: 1"}
+
+    monkeypatch.setattr(ReferenceSystem, "respond", hostile)
+    with ReferenceServer(FIXTURES) as server:
+        for method in ("GET", "HEAD", "OPTIONS"):
+            status, headers, _ = _call(server.origin, method, RESOLVER)
+            assert (status, "X-Injected" in headers) == (400, False), method
+
+
+def test_the_rig_samples_key_swaps_a_sample_for_a_fixture(tmp_path: Path) -> None:
+    from validation.rig import ROOT, ReferenceRig  # noqa: PLC0415 - only this test needs the rig
+
+    source = "fixtures/reference/qr/invalid.png"
+    with ReferenceRig(tmp_path, samples={"qr_image": source, "other_file": "fixtures/reference/roles.json"}):
+        ixit = (tmp_path / "rig" / "ixit.yaml").read_text(encoding="utf-8")
+    assert "qr_image: samples/qr_image.png" in ixit
+    assert "other_file: samples/other_file.json" in ixit
+    assert (tmp_path / "rig" / "samples" / "qr_image.png").read_bytes() == (ROOT / source).read_bytes()
+    try:
+        ReferenceRig(tmp_path / "x", samples={"../escape": source}).__enter__()
+    except ValueError as error:
+        assert "escape" in str(error)
+    else:
+        raise AssertionError("a sample name must be a plain file name")
+
+
+@pytest.mark.qr
+def test_a_swapped_sample_changes_the_outcome_of_the_run(tmp_path: Path) -> None:
+    from validation.rig import ReferenceRig  # noqa: PLC0415 - only this test needs the rig
+
+    with ReferenceRig(tmp_path, samples={"qr_image": "fixtures/reference/qr/invalid.png"}) as rig:
+        step = rig.run().step("TP-ID-001")
+    assert (step["verdict"], step["reason_code"]) == ("fail", "IDENTIFIER.SYNTAX.INVALID")
 
 
 if __name__ == "__main__" and sys.argv[1:] == ["--write"]:
