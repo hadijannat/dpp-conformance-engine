@@ -26,12 +26,12 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 
 | Code | Area | Check | Produced in | Step verdict |
 | --- | --- | --- | --- | --- |
-| `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
-| `AAS.INVALID` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | fail; inconclusive under a non-default verdict rule |
-| `AAS.PARAMS.INVALID` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
-| `AAS.SAMPLE.MISSING` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
-| `AAS.VALID` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | pass |
-| `AAS.VERSION.UNSUPPORTED` | AAS | `aas.validate` | `dppce.adapters.lifecycle.aas_validate` | inconclusive |
+| `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
+| `AAS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | fail; inconclusive under a non-default verdict rule |
+| `AAS.PARAMS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
+| `AAS.SAMPLE.MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
+| `AAS.VALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | pass |
+| `AAS.VERSION.UNSUPPORTED` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
 | `ACCESS.ENTITLEMENT.MISSING` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |
 | `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive |
 | `ACCESS.ENTITLEMENT.REFUSED` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |
