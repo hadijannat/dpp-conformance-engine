@@ -230,6 +230,18 @@ sut_faults:
     description: The resolver path answers 200 with a passport that has the carrier identifier but differs from the passport at the API item target.
     test_purpose: TP-ID-003
     expected: {verdict: fail, reason_code: IDENTIFIER.BINDING.MISMATCH}
+  - id: F-54
+    class: registry_inconsistency
+    fault: registry_extra_field_differs
+    description: The registry record and the passport differ in a third declared field pair.
+    test_purpose: TP-REGISTRY-002
+    expected: {verdict: fail, reason_code: REGISTRY.INCONSISTENT}
+  - id: F-55
+    class: undeclared_change
+    fault: version_raw_digest_stale
+    description: The last raw-byte digest of the history is not the digest of the current item body.
+    test_purpose: TP-PERSIST-002
+    expected: {verdict: fail, reason_code: PERSISTENCE.UNDECLARED_CHANGE}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
