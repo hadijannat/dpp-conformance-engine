@@ -7273,6 +7273,39 @@ sources:
   uncertainties:
   - The repository is a place to try out the format. The relation between this file and the GS1 resolver standard was not determined.
   - The schema is stricter than RFC 9264. It requires an anchor and permits only four target attributes. The engine does not use it as a check rule.
+- id: tests/vectors/idta-02099-1/IDTA-02099-1-template-dpp-part-1.json
+  title: 'IDTA 02099-1 Digital Product Passport - Part 1: Metadata, version 1.0: JSON template, release 1.0.2'
+  identifier: IDTA 02099-1 template 1.0.2 (admin-shell-io/submodel-templates)
+  issuing_body: Industrial Digital Twin Association (GitHub repository admin-shell-io/submodel-templates)
+  source_type: test_vector
+  official_url: https://github.com/admin-shell-io/submodel-templates/blob/f3790038b6c9c2d7e5ebbb4609997468fadf3e85/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/2/IDTA%2002099-1_Template%20Digital%20Product%20Passport%20-%20Part%201.json
+  edition_or_version: commit f3790038b6c9c2d7e5ebbb4609997468fadf3e85
+  publication_date: null
+  retrieval_date: '2026-10-25'
+  legal_or_spec_status: Third-party submodel template of an industry association. Not a law and not a standard. The project
+    uses it for the check aas.dpp_compose.
+  license_or_reuse_terms: CC-BY-4.0, read in LICENSE.txt at commit f3790038b6c9c2d7e5ebbb4609997468fadf3e85. The repository
+    names no copyright holder; the specification imprint names the publisher Industrial Digital Twin Association.
+  permitted_use_basis: Redistributed unchanged under CC-BY-4.0 with attribution. tests/vectors/idta-02099-1/README.md names
+    the source, the license, and the attribution.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 45d3f5ee78f628941816f4f6e30221f535a91c318114f41143328881c887eb85
+  hash_note: SHA-256 of the vendored bytes. Git blob b3dd7e42bd681296e00b8571ab3745da4e1c2770, the same object as the upstream
+    path at the commit.
+  evidence:
+  - url: https://github.com/admin-shell-io/submodel-templates/blob/f3790038b6c9c2d7e5ebbb4609997468fadf3e85/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/2/IDTA%2002099-1_Template%20Digital%20Product%20Passport%20-%20Part%201.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/admin-shell-io/submodel-templates/blob/f3790038b6c9c2d7e5ebbb4609997468fadf3e85/LICENSE.txt
+    what_it_shows: The CC-BY-4.0 license of the repository.
+    official: true
+  uncertainties:
+  - The concept descriptions of the file hold definition text that names a European standard as its source. The project does
+    not copy that text. The owner decides whether the unchanged file stays, or only the derived table in src/dppce/adapters/aas.py.
+  - The binding of uniqueProductIdentifier to the globalAssetId of the shell comes from the mapping table of the IDTA 02099-1
+    documentation at the same commit, not from the JSON file.
+  - The publication date of release 1.0.2 was not determined. The last commit that changed its directory is dated 2026-09-24.
 # Sources of the research in docs/research/raw/implementation-methods/ (retrieved 2026-10-19), merged on 2026-10-19.
 # The merge added records only. It did not change the records above.
 # Derived fields: identifier is the number in the title, or else the URL. The research did not record

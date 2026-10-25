@@ -39,6 +39,12 @@ precedence = "override"
 SPDX-FileCopyrightText = "The authors of the GitHub repository gs1/linkset (the upstream LICENSE names no holder)"
 SPDX-License-Identifier = "Apache-2.0"
 
+[[annotations]]
+path = "tests/vectors/idta-02099-1/IDTA-02099-1-template-dpp-part-1.json"
+precedence = "override"
+SPDX-FileCopyrightText = "Industrial Digital Twin Association (the publisher that the specification imprint names; the upstream repository names no holder)"
+SPDX-License-Identifier = "CC-BY-4.0"
+
 # Unchanged third-party data that the wheel ships. Its README names the source and the license.
 [[annotations]]
 path = "testpacks/data/gs1-syntax-engine/gs1-syntax-dictionary.txt"
