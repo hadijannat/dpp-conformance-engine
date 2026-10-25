@@ -13,7 +13,7 @@ from typing import Final, Literal
 
 from cryptography import x509
 from cryptography.exceptions import UnsupportedAlgorithm
-from pydantic import Field, ValidationError, field_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 
 from dppce.adapters.common import blocked, completed, fetch_once, resource_url, unusable
 from dppce.adapters.integrity import _certificates, _purpose, _status_gap, _TooLongError, trust_path
@@ -55,7 +55,8 @@ class JoseParams(Model):
         default="trust_kid",
         description=(
             "trust_kid: the kid names a key of the trust bundle with the purpose passport. "
-            "x5c: the certificate chain in x5c reaches a passport anchor of the trust bundle."
+            "x5c: the certificate chain in x5c reaches a passport anchor of the trust bundle. "
+            "x5c needs the profile jws: no rule binds a credential issuer to a certificate."
         ),
     )
     source: Literal["signed", "sample"] = Field(
@@ -91,6 +92,13 @@ class JoseParams(Model):
         if value is not None and len(set(value)) != len(value):
             raise ValueError("each algorithm may appear once")
         return value
+
+    @model_validator(mode="after")
+    def _issuer_binding(self) -> JoseParams:
+        # Under vc-jose with x5c, any certificate under an anchor could sign for any issuer.
+        if self.profile == "vc-jose" and self.key_source == "x5c":
+            raise ValueError("the profile vc-jose needs the key source trust_kid")
+        return self
 
 
 class _Finding(Exception):  # noqa: N818 - a finding, not an error of the engine
@@ -135,8 +143,15 @@ def _chain_key(trust: TrustBundle, signature: Signature) -> tuple[PublicKey, lis
     try:
         certificates = _certificates(signature.header)
     except _TooLongError:
+        # The limit applies to a chain of certificates only. The body limit bounds this decoding.
+        chain = signature.header["x5c"]
+        assert isinstance(chain, list)  # noqa: S101 - _certificates raises for a long list only
+        if all(_certificates({"x5c": [item]}) for item in chain):
+            raise _Finding(
+                None, "INTEGRITY.JOSE.TOO_LARGE", f"The x5c chain is longer than {x509path.MAX_CHAIN}."
+            ) from None
         raise _Finding(
-            None, "INTEGRITY.JOSE.TOO_LARGE", f"The x5c chain is longer than {x509path.MAX_CHAIN}."
+            False, "INTEGRITY.JOSE.MALFORMED", "The x5c header does not hold certificates."
         ) from None
     if certificates is None:
         if "x5c" in signature.header:

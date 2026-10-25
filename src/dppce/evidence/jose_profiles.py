@@ -20,7 +20,7 @@ import base64
 import binascii
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, Final, Literal
 
@@ -219,6 +219,10 @@ def check_header(signature: Signature, profile: Profile) -> None:
             "INTEGRITY.JOSE.HEADER", "The token needs a header extension that the profile does not define."
         )
     if "b64" in header:
+        # RFC 7797, section 6: a protected b64 that crit names. Any other b64 is no such form, so
+        # one more header member cannot turn a fail into a blocked step.
+        if "b64" not in signature.protected or not isinstance(crit, list) or "b64" not in crit:
+            raise JoseError("INTEGRITY.JOSE.MALFORMED", "The member b64 is not protected and named in crit.")
         if not isinstance(header["b64"], bool):
             raise JoseError("INTEGRITY.JOSE.MALFORMED", "The member b64 is not a boolean.")
         if header["b64"] is False:
@@ -315,8 +319,9 @@ def _moment(value: object) -> datetime:
     if match[1] == "60":  # a leap second counts as the second before it
         text = text[: match.start(1)] + "59" + text[match.end(1) :]
     try:
-        return datetime.fromisoformat(text).astimezone(UTC)
-    except ValueError as exc:
+        # Aware moments compare across offsets. A conversion to UTC can leave the date range.
+        return datetime.fromisoformat(text)
+    except (ValueError, OverflowError) as exc:
         raise JoseError("INTEGRITY.JOSE.CLAIMS", message) from exc
 
 

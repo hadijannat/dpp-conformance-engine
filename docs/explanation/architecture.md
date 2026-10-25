@@ -421,7 +421,8 @@ The check takes six optional parameters:
   any JWS and reads no `typ` and no claim.
 - `key_source`, default `trust_kid`. With `trust_kid`, the `kid` names a key of the trust bundle
   with the purpose `passport`. With `x5c`, the chain in `x5c` must reach a passport anchor, as in
-  `integrity.jws`. The set is closed. A later version can add a DID key source.
+  `integrity.jws`. The value `x5c` needs the profile `jws`, because no rule binds a credential
+  issuer to a certificate. The set is closed. A later version can add a DID key source.
 - `source`, default `signed`. The value `signed` fetches the resource `signed`. The value `sample`
   reads the IXIT sample that `sample` names, default `credential`, and sends no request.
 - `accept` sets the `Accept` header of the fetch. The media type of the answer is not judged.
@@ -443,14 +444,16 @@ that applies:
    any key is looked up.
 6. A `crit` that is not a list of protected member names is `INTEGRITY.JOSE.MALFORMED`. A `crit`
    that names a member other than `b64` gives `INTEGRITY.JOSE.HEADER`.
-7. `b64: false` gives `INTEGRITY.JOSE.HEADER` under `vc-jose`. Under `jws` it gives `blocked`,
-   `INTEGRITY.JOSE.UNSUPPORTED`, because RFC 7797 defines this form.
+7. A `b64` that is unprotected, or that `crit` does not name, is `INTEGRITY.JOSE.MALFORMED`. A
+   protected `b64: false` that `crit` names gives `INTEGRITY.JOSE.HEADER` under `vc-jose`. Under
+   `jws` it gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`, because RFC 7797 defines this form.
 8. Under `vc-jose`, a present `typ` other than `vc+jwt` gives `INTEGRITY.JOSE.TYPE`. The check
    compares it without case and accepts the prefix `application/`. An absent `typ` is permitted.
 9. With `trust_kid`, no passport key with the `kid` gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. A key
    that is revoked, or outside its validity at the evaluation time, gives
    `INTEGRITY.JOSE.KEY_NOT_VALID`. With `x5c`, a missing chain or a chain without a path to an
-   anchor gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. A chain longer than the limit gives `blocked`.
+   anchor gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. An `x5c` entry that is not a certificate gives
+   `INTEGRITY.JOSE.MALFORMED`. A chain of certificates longer than the limit gives `blocked`.
 10. The key type gives the algorithm: P-256 gives `ES256`, P-384 gives `ES384`, and Ed25519 gives
     `EdDSA`. Another key type gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`. An algorithm outside
     `algorithms`, or a header `alg` that differs from it, gives `INTEGRITY.JOSE.ALGORITHM`.

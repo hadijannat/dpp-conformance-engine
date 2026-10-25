@@ -345,6 +345,14 @@ def test_an_unencoded_payload_is_outside_vc_jose_and_an_unsupported_form_of_jws(
     is_blocked(jose(tmp_path, Served(token), trust, profile="jws"), "INTEGRITY.JOSE.UNSUPPORTED")
     not_boolean = compact({**VC_HEADER, "b64": "false", "crit": ["b64"]}, vc(), key)
     failed(jose(tmp_path, Served(not_boolean), trust, profile="jws"), "INTEGRITY.JOSE.MALFORMED")
+    # RFC 7797, section 6: b64 is protected and crit names it. Any other b64 is not that form, so a
+    # system under test cannot turn a bad signature into a blocked step with one more member.
+    zeroed = f"{b64u(_json(VC_HEADER))}.{b64u(vc())}.{b64u(bytes(64))}"
+    for profile in ("vc-jose", "jws"):
+        unprotected = jose(tmp_path, Served(flattened(zeroed, {"b64": False})), trust, profile=profile)
+        failed(unprotected, "INTEGRITY.JOSE.MALFORMED")
+        no_crit = compact({**VC_HEADER, "b64": False}, vc(), key)
+        failed(jose(tmp_path, Served(no_crit), trust, profile=profile), "INTEGRITY.JOSE.MALFORMED")
     # b64 true is the default form (RFC 7797, section 3).
     passed(jose(tmp_path, Served(compact({**VC_HEADER, "b64": True, "crit": ["b64"]}, vc(), key)), trust))
 
@@ -411,6 +419,9 @@ def test_no_trust_bundle_is_blocked_and_nothing_is_fetched(
         ({"exp": 1791892800}, "INTEGRITY.JOSE.EXPIRED"),  # exactly the evaluation time (RFC 7519, 4.1.4)
         ({"validFrom": "2026-10-13T12:00:01Z"}, "INTEGRITY.JOSE.NOT_YET_VALID"),
         ({"nbf": 1791892801}, "INTEGRITY.JOSE.NOT_YET_VALID"),
+        # Moments at the edge of the date range are judged, never an error of the engine.
+        ({"validFrom": "9999-12-31T23:59:59-01:00"}, "INTEGRITY.JOSE.NOT_YET_VALID"),
+        ({"validUntil": "0001-01-01T00:00:00+01:00"}, "INTEGRITY.JOSE.EXPIRED"),
         ({"iss": "urn:example:operator:0002"}, "INTEGRITY.JOSE.ISSUER_MISMATCH"),
         ({"issuer": None}, "INTEGRITY.JOSE.CLAIMS"),
         ({"issuer": {"name": "no id"}}, "INTEGRITY.JOSE.CLAIMS"),
@@ -434,6 +445,7 @@ def test_credential_claims_are_judged_at_the_evaluation_time(
         {"iss": ISSUER, "exp": 2082758400, "nbf": 1767225600.5},
         {"validFrom": "2026-01-01t00:00:00.250+01:00", "validUntil": "2036-12-31T23:59:60Z"},
         {"validFrom": None, "validUntil": None},
+        {"validFrom": "0001-01-01T00:00:00+01:00", "validUntil": "9999-12-31T23:59:59-01:00"},
     ],
 )
 def test_valid_claims_pass(
@@ -543,6 +555,9 @@ def test_the_signed_resource_must_answer_200(tmp_path: Path, trust: TrustBundle)
         {"accept": "\n"},
         {"sample": ""},
         {"other": 1},
+        # No rule binds the credential issuer to a certificate yet, so vc-jose needs trust_kid.
+        {"key_source": "x5c"},
+        {"profile": "vc-jose", "key_source": "x5c"},
     ],
 )
 def test_invalid_parameters_are_blocked_and_nothing_is_read(
@@ -580,7 +595,7 @@ def test_the_rfc_8037_ed25519_vector_verifies_and_a_changed_byte_does_not(tmp_pa
 def test_the_wycheproof_es256_vectors_agree(tmp_path: Path) -> None:
     document = json.loads(WYCHEPROOF.read_bytes())
     checked = valid = 0
-    accepted_invalid = set()
+    not_a_fail: dict[int, tuple[ExecutionStatus, str | None]] = {}
     for group in document["testGroups"]:
         public = group.get("public") or {}
         if (public.get("kty"), public.get("crv")) != ("EC", "P-256"):
@@ -594,12 +609,17 @@ def test_the_wycheproof_es256_vectors_agree(tmp_path: Path) -> None:
             if test["result"] == "valid":
                 valid += 1
                 passed(outcome)
-            elif outcome.passed:
-                accepted_invalid.add(test["tcId"])
+            elif (outcome.status, outcome.passed) != (ExecutionStatus.COMPLETED, False):
+                not_a_fail[test["tcId"]] = (outcome.status, outcome.reason_code)
     assert (checked, valid) == (41, 2)
-    # tcId 356 expects a refusal for key_ops ["encrypt"]. The trust bundle cannot express key_ops:
-    # the operator pins a key for the purpose passport only.
-    assert accepted_invalid == {356}
+    # Every other invalid vector is a completed fail: not blocked, not an error. Two vectors change
+    # the trusted key, not the token. tcId 354 pins a key with use "enc": the engine does not use
+    # that operator key, so the step is blocked. tcId 356 expects a refusal for key_ops ["encrypt"].
+    # The trust bundle cannot express key_ops: the operator pins a key for the purpose passport only.
+    assert not_a_fail == {
+        354: (ExecutionStatus.BLOCKED, "INTEGRITY.JOSE.UNSUPPORTED"),
+        356: (ExecutionStatus.COMPLETED, "INTEGRITY.JOSE.OK"),
+    }
 
 
 # -- the reference system: control C-FAMILY-VC and faults F-56 to F-60 --------------------------------
@@ -689,6 +709,20 @@ def test_the_jws_profile_verifies_the_signed_passport_through_its_x5c_chain(
         outcome = run(_reference_context(tmp_path, server.origin, profile="jws", key_source="x5c"))
     assert outcome.reason_code == code, outcome.message
     assert outcome.passed is (code == "INTEGRITY.JOSE.OK")
+
+
+def test_a_long_x5c_chain_is_blocked_only_if_every_entry_is_a_certificate(
+    tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
+) -> None:
+    pem = (FIXTURES / "pki" / "TEST-ONLY-leaf.cert.pem").read_text()
+    der = "".join(line for line in pem.splitlines() if not line.startswith("-----"))
+    for chain, junk in ((["AAAA"] * 6, True), ([der] * 5 + ["AAAA"], True), ([der] * 6, False)):
+        token = compact({"alg": "ES256", "x5c": chain}, b"{}", key)
+        outcome = jose(tmp_path, Served(token), trust, profile="jws", key_source="x5c")
+        if junk:
+            failed(outcome, "INTEGRITY.JOSE.MALFORMED")
+        else:
+            is_blocked(outcome, "INTEGRITY.JOSE.TOO_LARGE")
 
 
 def test_the_reference_credential_is_served_for_its_media_type_only(tmp_path: Path) -> None:
