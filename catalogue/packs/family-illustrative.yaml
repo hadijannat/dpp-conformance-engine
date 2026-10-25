@@ -39,12 +39,12 @@ requirements:
     tests:
     - TP-WEB-RESOLVE-001
 - id: FAM-WEB-CONSISTENCY-001
-  title: The passport URL and the passport name the same identifier
+  title: The passport member id equals the passport URL
   source:
     source_id: dppce-illustrative
   authority_class: illustrative
   modality: mandatory
-  paraphrase: The identifier in the resolved passport equals the passport URL.
+  paraphrase: The resolved JSON passport has a member `id` whose value equals the passport URL.
   applicability: *web
   testability: automated
   review_status: draft-needs-review
@@ -165,7 +165,8 @@ requirements:
     source_id: dppce-illustrative
   authority_class: illustrative
   modality: mandatory
-  paraphrase: The carrier, the declaration, and the resolved passport give the same identifier.
+  paraphrase: The resolved JSON passport has a member `id` whose value equals the carrier URL. A declared
+    identifier, when given, equals it too.
   applicability: *gs1_dl
   testability: automated
   review_status: draft-needs-review

@@ -63,7 +63,7 @@ test_purposes:
   - The resolver exchange with its redirect chain.
   permitted_modes: *modes
 - id: TP-GS1-CONSISTENCY-001
-  title: Compare the identifier across carrier, declaration, and passport
+  title: Compare the carrier URL with the declaration and the member id of the JSON passport
   requirements:
   - FAM-GS1-CONSISTENCY-001
   profiles:

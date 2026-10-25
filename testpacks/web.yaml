@@ -40,7 +40,7 @@ test_purposes:
   - illustrative
   - exploratory
 - id: TP-WEB-CONSISTENCY-001
-  title: Compare the passport URL with the identifier in the passport
+  title: Compare the passport URL with the member id of the JSON passport
   requirements:
   - FAM-WEB-CONSISTENCY-001
   profiles:
