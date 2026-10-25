@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from dppce.infrastructure.reference import jose, resolver
+from dppce.infrastructure.reference import did, jose, resolver
 from dppce.infrastructure.reference.base import Family
 
-FAMILIES: Final[tuple[Family, ...]] = (resolver, jose)
+FAMILIES: Final[tuple[Family, ...]] = (resolver, jose, did)

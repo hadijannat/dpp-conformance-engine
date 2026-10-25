@@ -48,7 +48,7 @@ A header value with a line break is never sent. The server answers `400` in its 
 
 The package `dppce.infrastructure.reference` holds family modules. A family module adds the
 behavior of one implementation family, for example a resolver. The families are `resolver`
-(section 4.6) and `jose`, which owns the flag `signed_jws_json`. The module docstring of the
+(section 4.6), `jose`, which owns the flag `signed_jws_json`, and `did` (section 4.7). The module docstring of the
 package states the contract. In short:
 
 - `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
@@ -247,6 +247,22 @@ of the GS1 Resolver Community Edition (Apache-2.0, commit `bf885fd`). The values
 
 A malformed GS1 path, for example a GTIN of 13 digits, still gets `404`. The engine sends such
 paths for the faults F-30 and F-31, so their answers stay the same.
+
+### 4.7 DID document (family module `did`)
+
+Module: `dppce.infrastructure.reference.did`. The behavior is synthetic. The public origin
+`https://id.example.test` gives the DID `did:web:id.example.test`. Its DID document is at
+`/.well-known/did.json`, with the media type `application/did+json`:
+
+```json
+{"id": "did:web:id.example.test",
+ "verificationMethod": [{"id": "did:web:id.example.test#key-1", "type": "JsonWebKey",
+   "controller": "did:web:id.example.test", "publicKeyJwk": {"kty": "EC", "crv": "P-256", "x": "...", "y": "..."}}],
+ "assertionMethod": ["did:web:id.example.test#key-1"]}
+```
+
+The key is the public key of `fixtures/reference/pki/TEST-ONLY-leaf.cert.pem`. The document has
+no `@context`, so a reader processes it as plain JSON. Every other path passes to the core.
 
 ## 5. Local data formats
 
@@ -507,6 +523,9 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `wellknown_redirect` | family `resolver`: `/.well-known/gs1resolver` answers `301` to `/resolver-description.json`, which serves the description file |
 | `resolver_200_for_invalid` | family `resolver`: `/01/...` answers `200` with `{"status": "ok"}` for an unknown identifier, for example a GTIN with a wrong check digit |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
+| `did_id_mismatch` | family `did`: the `id` of the DID document is `did:web:other.example.test` |
+| `did_private_key` | family `did`: the JWK of the verification method also holds the synthetic private member `d` |
+| `did_redirect_off_host` | family `did`: `/.well-known/did.json` answers `302` to `https://other.example.test/.well-known/did.json`, outside the scope of the rig |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:
