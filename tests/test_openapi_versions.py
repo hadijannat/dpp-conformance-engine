@@ -272,6 +272,27 @@ def test_a_3_0_reference_into_an_extension_is_blocked(tmp_path: Path) -> None:
     assert _contract(tmp_path, _v30(schema, components), b'{"n": 5}') == (*BLOCKED, 0)
 
 
+@pytest.mark.parametrize(
+    "ref",
+    [
+        # The resolver decodes the fragment, so %2F becomes a path separator into the extension.
+        "#/components/schemas/A%2Fx-s",
+        "#/components/schemas/A%2fx-s",
+        # ~1 is the JSON Pointer escape of '/'. No component key may hold it (OpenAPI 3.0.3).
+        "#/components/schemas/A~1x-s",
+        "#/components/schemas/A~0",
+    ],
+)
+def test_a_3_0_encoded_reference_into_an_extension_is_blocked(ref: str, tmp_path: Path) -> None:
+    components = {
+        "schemas": {
+            "A": {"type": "object", "x-s": {"type": "number", "minimum": 5, "exclusiveMinimum": True}}
+        }
+    }
+    schema = {"type": "object", "properties": {"n": {"$ref": ref}}}
+    assert _contract(tmp_path, _v30(schema, components), b'{"n": 5}') == (*BLOCKED, 0)
+
+
 def test_a_3_0_component_outside_the_translation_is_blocked(tmp_path: Path) -> None:
     components = {"schemas": {"Item": {"type": "object"}, "Other": {"type": "object", "discriminator": {}}}}
     assert _contract(tmp_path, _v30({"$ref": "#/components/schemas/Item"}, components)) == (*BLOCKED, 0)

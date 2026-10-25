@@ -475,7 +475,9 @@ A field that is not a field of the 3.0 Schema Object, for example `const`, gives
 `API.CONTRACT.UNSUPPORTED_VERSION`. An extension field that starts with `x-` stays unchanged.
 `discriminator`, `writeOnly`, a `$ref` with a sibling field, and a boolean schema also give
 `API.CONTRACT.UNSUPPORTED_VERSION`. These change validation in 3.0, and the translation does not
-cover them. A `$ref` must name a schema in `components.schemas` exactly. Any other target is not
+cover them. A `$ref` must name a schema in `components.schemas` exactly. Its name holds only letters, digits,
+`.`, `-`, and `_`, as OpenAPI 3.0.3 requires for component keys. So no encoded separator can point
+below a component. Any other target is not
 translated, so it also gives `API.CONTRACT.UNSUPPORTED_VERSION`.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not

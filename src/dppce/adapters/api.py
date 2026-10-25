@@ -142,7 +142,12 @@ def _from_oas30(node: Any) -> dict[str, Any]:  # noqa: PLR0912 - one branch per 
         if len(node) != 1:
             raise _UntranslatableError("$ref with siblings")
         # Only the component roots are translated. Elsewhere 2020-12 would read the raw 3.0 form.
-        if not (isinstance(node["$ref"], str) and re.fullmatch(r"#/components/schemas/[^/]+", node["$ref"])):
+        # OpenAPI 3.0.3 limits component keys to [a-zA-Z0-9.-_]. So '%' and '~' cannot hide a
+        # separator that the resolver decodes into a path below a root.
+        if not (
+            isinstance(node["$ref"], str)
+            and re.fullmatch(r"#/components/schemas/[A-Za-z0-9._-]+", node["$ref"])
+        ):
             raise _UntranslatableError("$ref outside the translated components")
         return dict(node)
     if any(not (key in _OAS30_FIELDS or (isinstance(key, str) and key.startswith("x-"))) for key in node):
