@@ -1,0 +1,94 @@
+# Audience: contributors and assessors.
+# Purpose: define the declarative test purposes for the Asset Administration Shell profile family/aas.
+# This file is project-authored and synthetic. It makes no normative statement.
+#
+# Later packages add their test purposes to this file. Rules for a new entry:
+# - The id starts with TP-AAS- and must not reuse TP-AAS-001 of battery/core. It names one
+#   FAM-AAS-... requirement in catalogue/packs/family-illustrative.yaml, and that requirement
+#   names it back.
+# - The applicability starts with `profile.id eq family/aas` and equals the applicability of the
+#   requirement. Every family profile selects every family test pack, so this term keeps the
+#   step not applicable under the other family profiles.
+# - Read ICS fields only (identifier_scheme, signature_format, granularity, features.*), never
+#   ics.characteristics: a family profile declares no product fact.
+# One step per serialization. A feature flag selects it, so that a file is never read as the
+# wrong format, which would be a false fail.
+schema_version: dppce.testpack/1
+testpack_id: family/aas-core
+version: 0.1.0
+title: Asset Administration Shell test purposes
+test_purposes:
+- id: TP-AAS-JSON-001
+  title: Validate the AAS JSON file
+  requirements:
+  - FAM-AAS-JSON-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - &aas
+      fact: profile.id
+      op: eq
+      value: family/aas
+    - fact: ics.features.aas_json
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: aas.validate
+    params:
+      artifact: aas_json
+      format: json
+  expected_evidence:
+  - The validator result.
+  permitted_modes: &modes
+  - illustrative
+  - exploratory
+  requires_scope: none
+- id: TP-AAS-XML-001
+  title: Validate the AAS XML file
+  requirements:
+  - FAM-AAS-XML-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_xml
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: aas.validate
+    params:
+      artifact: aas_xml
+      format: xml
+  expected_evidence:
+  - The validator result.
+  permitted_modes: *modes
+  requires_scope: none
+- id: TP-AAS-AASX-001
+  title: Validate the AASX package
+  requirements:
+  - FAM-AAS-AASX-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_aasx
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: aas.validate
+    params:
+      artifact: aas_aasx
+      format: aasx
+  expected_evidence:
+  - The validator result.
+  permitted_modes: *modes
+  requires_scope: none

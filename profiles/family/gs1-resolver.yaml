@@ -1,0 +1,21 @@
+# Audience: contributors and assessors.
+# Purpose: select the family pack and the family test packs for a GS1 Digital Link resolver.
+# This file is project-authored and synthetic. It makes no normative statement.
+# Every family profile selects every family test pack. Each test purpose applies to its own
+# profile only, so a step of another family is not applicable. An example ICS and IXIT are in
+# profiles/family/examples/.
+schema_version: dppce.profile/1
+id: family/gs1-resolver
+title: GS1 Digital Link resolver
+description: A resolver that resolves a GS1 Digital Link identifier to a passport. The profile pins
+  no schema, no API contract, and no access policy.
+product_category: any
+packs:
+- family/illustrative
+testpacks:
+- family/web-core
+- family/gs1-resolver-core
+- family/aas-core
+- family/credentials-core
+roles:
+- anonymous

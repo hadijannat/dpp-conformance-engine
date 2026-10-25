@@ -1,0 +1,78 @@
+# Audience: contributors and assessors.
+# Purpose: define the declarative test purposes for the GS1 resolver profile family/gs1-resolver.
+# This file is project-authored and synthetic. It makes no normative statement.
+#
+# Later packages add their test purposes to this file. Rules for a new entry:
+# - The id starts with TP-GS1-. It names one FAM-GS1-... requirement in
+#   catalogue/packs/family-illustrative.yaml, and that requirement names it back.
+# - The applicability starts with `profile.id eq family/gs1-resolver` and equals the
+#   applicability of the requirement. Every family profile selects every family test pack, so
+#   this term keeps the step not applicable under the other family profiles.
+# - Read ICS fields only (identifier_scheme, signature_format, granularity, features.*), never
+#   ics.characteristics: a family profile declares no product fact.
+schema_version: dppce.testpack/1
+testpack_id: family/gs1-resolver-core
+version: 0.1.0
+title: GS1 resolver test purposes
+test_purposes:
+- id: TP-GS1-SYNTAX-001
+  title: Parse the item-level GS1 Digital Link identifier
+  requirements:
+  - FAM-GS1-SYNTAX-001
+  profiles:
+  - '*'
+  # This version parses /01/<GTIN>/21/<serial> only, so the step needs item granularity.
+  applicability:
+    all:
+    - &gs1
+      fact: profile.id
+      op: eq
+      value: family/gs1-resolver
+    - &gs1_scheme
+      fact: ics.identifier_scheme
+      op: eq
+      value: gs1-digital-link
+    - fact: ics.granularity
+      op: eq
+      value: item
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.parse
+  expected_evidence:
+  - The decoded identifier scheme and syntax result.
+  permitted_modes: &modes
+  - illustrative
+  - exploratory
+  requires_scope: none
+- id: TP-GS1-RESOLVE-001
+  title: Resolve the GS1 Digital Link identifier
+  requirements:
+  - FAM-GS1-RESOLVE-001
+  profiles:
+  - '*'
+  applicability: &gs1_dl
+    all:
+    - *gs1
+    - *gs1_scheme
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.resolve
+  expected_evidence:
+  - The resolver exchange with its redirect chain.
+  permitted_modes: *modes
+- id: TP-GS1-CONSISTENCY-001
+  title: Compare the carrier URL with the declaration and the member id of the JSON passport
+  requirements:
+  - FAM-GS1-CONSISTENCY-001
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.consistency
+  expected_evidence:
+  - The compared identifier sources.
+  permitted_modes: *modes

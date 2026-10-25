@@ -1,0 +1,304 @@
+# Audience: contributors and assessors.
+# Purpose: demonstrate the family profiles with synthetic rules. No rule here states a legal or standard requirement.
+# This file is project-authored and synthetic. It makes no normative statement.
+#
+# How to extend: one requirement per family layer, with one path and one test purpose.
+# The applicability of a requirement starts with `profile.id eq family/<family>` and equals the
+# applicability of its test purpose. A step that does not apply then leaves a requirement that
+# does not apply, never a requirement with an empty path. Requirement ids are FAM-<FAMILY>-...;
+# the test purposes are in testpacks/web.yaml, gs1-resolver.yaml, aas.yaml, and credentials.yaml.
+schema_version: dppce.pack/1
+pack_id: family/illustrative
+version: 0.1.0
+title: Illustrative family rules
+description: Synthetic rules for the family profiles family/web, family/gs1-resolver, family/aas, and
+  family/credentials.
+scope_statement: Synthetic demonstration rules only. This pack covers no law and no standard.
+requirements:
+# -- family/web: a plain web passport ----------------------------------------------------------
+- id: FAM-WEB-RESOLVE-001
+  title: The passport URL resolves
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The passport URL resolves to a JSON object or to an HTML page.
+  applicability: &web
+    fact: profile.id
+    op: eq
+    value: family/web
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-WEB-RESOLVE-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-WEB-RESOLVE-001
+- id: FAM-WEB-CONSISTENCY-001
+  title: The passport member id equals the passport URL
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The resolved JSON passport has a member `id` whose value equals the passport URL.
+  applicability: *web
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-WEB-CONSISTENCY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-WEB-CONSISTENCY-001
+- id: FAM-WEB-INTEGRITY-001
+  title: The signed passport verifies
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The signature is valid, the issuer is trusted, and the certificate is valid.
+  applicability:
+    all:
+    - *web
+    - fact: ics.signature_format
+      op: eq
+      value: jws
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-WEB-INTEGRITY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-WEB-INTEGRITY-001
+- id: FAM-WEB-VERSIONS-001
+  title: Versions obey the declared update rule
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: recommended
+  paraphrase: The version history obeys the update rule that the system declares.
+  applicability:
+    all:
+    - *web
+    - fact: ics.features.version_history
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-WEB-VERSIONS-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-WEB-VERSIONS-001
+# -- family/gs1-resolver: a GS1 Digital Link resolver ------------------------------------------
+- id: FAM-GS1-SYNTAX-001
+  title: The item identifier has GS1 Digital Link syntax
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: An item-level identifier has the form /01/<GTIN>/21/<serial> with a valid check digit.
+  applicability:
+    all:
+    - &gs1
+      fact: profile.id
+      op: eq
+      value: family/gs1-resolver
+    - &gs1_scheme
+      fact: ics.identifier_scheme
+      op: eq
+      value: gs1-digital-link
+    - fact: ics.granularity
+      op: eq
+      value: item
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-SYNTAX-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-SYNTAX-001
+- id: FAM-GS1-RESOLVE-001
+  title: The identifier resolves
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The GS1 Digital Link identifier resolves to a passport document.
+  applicability: &gs1_dl
+    all:
+    - *gs1
+    - *gs1_scheme
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-RESOLVE-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-RESOLVE-001
+- id: FAM-GS1-CONSISTENCY-001
+  title: The identifier and the passport are consistent
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The resolved JSON passport has a member `id` whose value equals the carrier URL. A declared
+    identifier, when given, equals it too.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-CONSISTENCY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-CONSISTENCY-001
+# -- family/aas: Asset Administration Shell files ----------------------------------------------
+- id: FAM-AAS-JSON-001
+  title: The AAS JSON file is valid
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The declared AAS JSON file passes the wrapped validator.
+  applicability:
+    all:
+    - &aas
+      fact: profile.id
+      op: eq
+      value: family/aas
+    - fact: ics.features.aas_json
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-AAS-JSON-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-JSON-001
+- id: FAM-AAS-XML-001
+  title: The AAS XML file is valid
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The declared AAS XML file passes the wrapped validator.
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_xml
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-AAS-XML-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-XML-001
+- id: FAM-AAS-AASX-001
+  title: The AASX package is valid
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The declared AASX package passes the wrapped validator.
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_aasx
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-AAS-AASX-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-AASX-001
+# -- family/credentials: verifiable credentials, VC and UNTP style -----------------------------
+- id: FAM-VC-RESOLVE-001
+  title: The credential URL resolves
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The credential URL resolves to a JSON object or to a credential media type.
+  applicability: &vc
+    fact: profile.id
+    op: eq
+    value: family/credentials
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-RESOLVE-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-RESOLVE-001
+- id: FAM-VC-INTEGRITY-001
+  title: The signed credential verifies
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The signature is valid, the issuer is trusted, and the certificate is valid.
+  applicability:
+    all:
+    - *vc
+    - fact: ics.signature_format
+      op: eq
+      value: jws
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-INTEGRITY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-INTEGRITY-001

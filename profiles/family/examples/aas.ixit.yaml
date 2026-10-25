@@ -1,0 +1,23 @@
+# Synthetic test information for the profile family/aas.
+# Project-authored example. The origin options equal those of fixtures/reference/ev.ixit.yaml.
+# The reference system serves no AAS file, and no sample file ships here. Put the AAS file of the
+# system under test next to this IXIT as aas.json. Without it, the step is blocked with
+# AAS.SAMPLE.MISSING, which is inconclusive. The check reads the file and sends no request.
+schema_version: dppce.ixit/1
+endpoints:
+  api: https://id.example.test
+  public_origin: https://id.example.test
+  origin_override: http://127.0.0.1:8765
+samples:
+  aas_json: aas.json
+network:
+  allowed_hosts:
+  - 127.0.0.1
+  allow_private_hosts:
+  - 127.0.0.1
+  max_requests: 100
+  contact: reference-rig@example.test
+trust:
+  policy_version: TEST-ONLY-reference-1
+observation:
+  retention_days: 30

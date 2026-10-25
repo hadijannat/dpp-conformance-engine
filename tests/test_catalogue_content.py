@@ -74,7 +74,11 @@ def test_the_data_root_loads(catalogue: Catalogue, testpacks: dict[str, TestPack
     assert EU_TESTPACK in testpacks
     assert catalogue.legal_as_of == "2026-10-13"
     assert catalogue.packs[EU_PACK].requirements, "the draft pack is not empty"
-    for profile in load_profiles(ROOT).values():
+    # Every battery/* profile, pinned so that a new one cannot escape the check. A family profile
+    # (profiles/family/) selects no battery pack.
+    battery = {i: p for i, p in load_profiles(ROOT).items() if i.startswith("battery/")}
+    assert set(battery) == set(BATTERY_PROFILES)
+    for profile in battery.values():
         assert {EU_PACK, EN_PACK} <= set(profile.packs)
         assert EU_TESTPACK in profile.testpacks
 
