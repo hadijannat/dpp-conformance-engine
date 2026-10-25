@@ -230,6 +230,41 @@ sut_faults:
     description: The resolver path answers 200 with a passport that has the carrier identifier but differs from the passport at the API item target.
     test_purpose: TP-ID-003
     expected: {verdict: fail, reason_code: IDENTIFIER.BINDING.MISMATCH}
+  - id: F-48
+    class: contract_violation
+    fault: resolver_linkset_invalid
+    description: The linkset answer has the linkset media type, but its linkset member is not a list of link context objects.
+    test_purpose: TP-GS1-LINKSET-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.LINKSET.STRUCTURE}
+  - id: F-49
+    class: contract_violation
+    fault: resolver_linkset_no_dpp
+    description: The linkset has no link with the declared passport relation.
+    test_purpose: TP-GS1-LINKSET-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.LINKSET.RELATION_MISSING}
+  - id: F-50
+    class: contract_violation
+    fault: resolver_linkset_anchor_mismatch
+    description: The anchor of the linkset is a different identifier.
+    test_purpose: TP-GS1-LINKSET-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.LINKSET.ANCHOR}
+  - id: F-51
+    class: contract_violation
+    fault: wellknown_wrong_root
+    description: The resolver description file names a different resolverRoot.
+    test_purpose: TP-GS1-WELLKNOWN-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.WELLKNOWN.ROOT}
+  - id: F-52
+    class: contract_violation
+    fault: resolver_200_for_invalid
+    description: The resolver answers 200 for a GS1 path with a wrong GTIN check digit.
+    test_purpose: TP-GS1-CONFORMANCE-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.CONFORMANCE.INVALID_ACCEPTED}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -299,6 +334,13 @@ boundary_cases:
     test_purpose: TP-INTEGRITY-001
     expected: {verdict: inconclusive, reason_code: INTEGRITY.FORMAT.UNSUPPORTED}
     rationale: The JSON serialization is valid JWS. integrity.jws verifies the compact form only.
+  - id: B-14
+    fault: wellknown_redirect
+    description: The well-known path redirects to another path that serves the description file.
+    test_purpose: TP-GS1-WELLKNOWN-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: inconclusive, reason_code: RESOLVER.WELLKNOWN.REDIRECTED}
+    rationale: A redirected configuration file is not judged.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:
