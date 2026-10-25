@@ -106,8 +106,15 @@ def test_the_grammar_accepts_the_uncompressed_forms(
         ("ftp://a/01/09520123456788", "URI"),
         ("https://a$b/01/09520123456788", "URI"),
         ("https://a/01/09520123456788<", "URI"),
+        # Stricter than dl.c, which checks only the characters of the host.
+        ("https://a:abc/01/09520123456788/21/1", "URI"),
+        ("https://a:99999/01/09520123456788/21/1", "URI"),
+        ("https://[::1/01/09520123456788/21/1", "URI"),
+        ("https://a]b[/01/09520123456788/21/1", "URI"),
         ("https://a/products/09520123456788", "KEY"),
         ("https://a/01/09520123456788/", "KEY"),
+        # A primary key in the path: never taken for a compressed URI.
+        (f"{ORIGIN}/01/{GTIN}/somethinglongjunk", "KEY"),
         (f"{ORIGIN}/01/{GTIN}/21/S1/10/L1", "QUALIFIER_ORDER"),
         (f"{ORIGIN}/01/{GTIN}/99/ABC", "QUALIFIER_ORDER"),
         (f"{ORIGIN}/01/09520123456787", "CHECK_DIGIT"),
@@ -117,6 +124,8 @@ def test_the_grammar_accepts_the_uncompressed_forms(
         (f"{ORIGIN}/01/{GTIN}/10/", "AI_VALUE"),
         (f"{ORIGIN}/01/{GTIN}/10/A%20B", "AI_VALUE"),
         (f"{ORIGIN}/01/{GTIN}?99=A+B", "AI_VALUE"),
+        # AI 8030 is cset Z, so only the FNC1 guard refuses the decoded "^".
+        (f"{ORIGIN}/01/{GTIN}?8030=AB%5ECD", "AI_VALUE"),
         (f"{ORIGIN}/01/{GTIN}/10/A%00B", "PERCENT"),
         (f"{ORIGIN}/01/{GTIN}?89=X", "ATTRIBUTE"),
         (f"{ORIGIN}/01/{GTIN}?10=ABC", "ATTRIBUTE"),

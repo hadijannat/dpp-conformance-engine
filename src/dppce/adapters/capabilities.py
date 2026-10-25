@@ -58,8 +58,8 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "Classify a GS1 Digital Link carrier with a GTIN as model, batch, or item level from its key "
         "qualifiers, and compare the level with the granularity of the ICS.",
         None,
-        "The level rules are reviewed against GS1 Digital Link URI Syntax 1.7.0 and run against "
-        "carriers of at least one independent GS1 resolver in a recorded test campaign.",
+        "A reviewer checks the level rules against GS1 Digital Link URI Syntax 1.7.0. "
+        "A recorded test campaign runs them against carriers of at least one independent GS1 resolver.",
     ),
     ("identifier.resolve", "identifier", _S, "Bounded resolution of an identifier to a passport.", None, ""),
     (

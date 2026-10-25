@@ -34,7 +34,7 @@ from dppce.testdefs.registry import CheckContext, register
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
 # The scheme spellings, the host characters, and the URI characters that GS1 Digital Link permits.
 _SCHEMES = ("http://", "https://", "HTTP://", "HTTPS://")
-_HOST = re.compile(r"[A-Za-z0-9.:\[\]-]+")
+_HOST = gs1.HOST
 _URI_CHARACTERS = re.compile(r"[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+")
 # Test-purpose parameters of identifier.resolve. Printable ASCII only: no CR, no LF.
 _ACCEPT = re.compile(r"[\x20-\x7e]{1,256}")

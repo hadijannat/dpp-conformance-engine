@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from functools import cache
 from itertools import combinations
 from typing import Final, Literal
+from urllib.parse import urlsplit
 
 from dppce.infrastructure.resources import data_root
 
@@ -27,6 +28,7 @@ RULES: Final[tuple[Rule, ...]] = (
 
 _URI = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%")
 _BAD_DOMAIN = frozenset("_~?#@!$&'()*+,;=%")
+HOST: Final = re.compile(r"[A-Za-z0-9.:\[\]-]+")  # the netloc that both forms accept
 _SCHEMES = ("https://", "HTTPS://", "http://", "HTTP://")
 _CSET82 = "!\"%&'()*+,-./0123456789:;<=>?ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz"
 _CSETS: Final = {
@@ -249,8 +251,10 @@ def _element(ai: str, raw: str, query: bool) -> tuple[str, str] | Problem:
     value = _unescape(raw, query)
     if value is None:
         return Problem("PERCENT", f"the decoded value of AI ({ai}) in the {where} holds a NUL character")
+    if "^" in value:
+        return Problem("AI_VALUE", f"the value of AI ({ai}) holds the FNC1 character")
     entry = dictionary().entries[ai]
-    if not entry.min_length <= len(value) <= entry.max_length or "^" in value:
+    if not entry.min_length <= len(value) <= entry.max_length:
         return Problem("AI_VALUE", f"the value of AI ({ai}) has a wrong length")
     return ai, value
 
@@ -267,6 +271,15 @@ def _split(text: str) -> tuple[list[str], str | None] | Problem:
         return Problem("URI", "the host has a character that GS1 Digital Link does not permit")
     if not domain or not slash:
         return Problem("URI", "the URI has no host or no path")
+    # Stricter than dl.c, which checks only the characters of the host: the authority must also
+    # be one that RFC 3986 permits, as in the form dppce-item.
+    try:
+        parts = urlsplit(text)
+        _ = parts.port
+    except ValueError:
+        return Problem("URI", "the host or the port is not a valid URI authority")
+    if not parts.hostname or not HOST.fullmatch(parts.netloc):
+        return Problem("URI", "the host or the port is not a valid URI authority")
     path, has_query, query = rest.partition("#")[0].partition("?")
     return path.split("/"), query if has_query else None
 
@@ -281,7 +294,11 @@ def _path_elements(segments: list[str]) -> list[tuple[str, str]] | Problem:
             break
         index -= 2
     if start is None:
-        if _COMPRESSED.fullmatch(segments[-1]) and not segments[-1].isdigit():
+        if (
+            not keys.intersection(segments)
+            and _COMPRESSED.fullmatch(segments[-1])
+            and not segments[-1].isdigit()
+        ):
             return Problem("COMPRESSED", "the URI looks like a compressed GS1 Digital Link URI")
         return Problem("KEY", "the path has no GS1 Digital Link primary key")
     elements = []

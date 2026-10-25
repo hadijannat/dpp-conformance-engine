@@ -330,6 +330,8 @@ def test_gs1_dl_never_accepts_what_the_reference_rejects() -> None:
     rejected = [uri for err, uri in GS1_CASES if err != "OK"]
     assert len(rejected) == 45
     assert [uri for uri in rejected if isinstance(gs1.parse(uri), gs1.DigitalLink)] == []
+    # A rejected case is a fault of the URI, never the engine limit COMPRESSED.
+    assert [uri for uri in rejected if getattr(gs1.parse(uri), "rule", None) == "COMPRESSED"] == []
 
 
 def _gs1_dl_disagreements() -> list[tuple[str, gs1.DigitalLink | gs1.Problem]]:

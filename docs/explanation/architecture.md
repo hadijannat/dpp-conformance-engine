@@ -429,6 +429,8 @@ gs1-syntax-engine with its default options. The vendored `dl.c` cases are the or
 - The URI starts with the same four scheme prefixes as in the form `dppce-item`.
 - The host is not empty and holds no character that GS1 Digital Link refuses. The fragment is
   ignored.
+- The authority is valid as in the form `dppce-item`: a port is a number from 0 to 65535, and
+  IPv6 brackets are balanced. This rule is stricter than `dl.c`, which checks only characters.
 - `require_https` applies as in the form `dppce-item`.
 - A path prefix before the primary key is permitted.
 - The primary key is an AI that a `dlpkey` entry of the dictionary names.
@@ -447,8 +449,8 @@ A failure gives `IDENTIFIER.SYNTAX.INVALID`. The observation summary names the f
 `CHECK_DIGIT`, `PERCENT`, and `ATTRIBUTE`. A valid URI gives a summary with `key`, `qualifiers`,
 and `attributes`. These name AIs only, never values.
 
-A URI with no primary key in the path looks compressed if its last segment has at least 10
-base64url characters and is not all digits. It gives `unsupported` with `IDENTIFIER.SYNTAX.COMPRESSED`, because this
+A URI with no primary key in the path can look compressed. This is so if its last segment has
+at least 10 base64url characters and is not all digits. It gives `unsupported` with `IDENTIFIER.SYNTAX.COMPRESSED`, because this
 version does not decompress. Another URL without a primary key and with such a last segment
 also gives this outcome. It is never a pass.
 
