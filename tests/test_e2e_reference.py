@@ -299,10 +299,14 @@ def test_validation_each_profile_passes_and_replays_five_times(profile: str, tmp
 
 
 @pytest.mark.validation
-@pytest.mark.parametrize("profile", cases.profiles())
 @pytest.mark.parametrize("case", cases.sut_faults(), ids=lambda c: c.id)
-def test_validation_each_fault_on_each_profile(case: cases.Case, profile: str, tmp_path: Path) -> None:
+def test_validation_each_fault_on_each_profile(case: cases.Case, tmp_path: Path) -> None:
+    # A fault runs under the profiles that its entry names, as in validation.run.
     assert case.test_purpose is not None
-    with ReferenceRig(tmp_path, profile, faults=case.faults, **case.rig) as rig:
-        step = rig.run().step(case.test_purpose)
-    assert (step["verdict"], step["reason_code"]) == (case.expected["verdict"], case.expected["reason_code"])
+    for profile in case.profiles:
+        with ReferenceRig(tmp_path / profile, profile, faults=case.faults, **case.rig) as rig:
+            step = rig.run().step(case.test_purpose)
+        assert (step["verdict"], step["reason_code"]) == (
+            case.expected["verdict"],
+            case.expected["reason_code"],
+        ), profile

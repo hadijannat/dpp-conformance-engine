@@ -51,7 +51,8 @@ SPOILS: list[Spoil] = [
 def _gs1_cases() -> list[dict[str, Any]]:
     document = yaml.safe_load(CATALOGUE.read_text(encoding="utf-8"))
     entries = [*document["sut_faults"], *document["boundary_cases"]]
-    return [e for e in entries if PROFILE in e.get("profiles", ())]
+    # Other cases of the family profile (identifier syntax and granularity) are not resolver cases.
+    return [e for e in entries if PROFILE in e.get("profiles", ()) and e["test_purpose"] in PURPOSES.values()]
 
 
 GS1_CASES = _gs1_cases()

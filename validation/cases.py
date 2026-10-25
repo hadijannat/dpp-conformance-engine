@@ -6,7 +6,7 @@ is set up for each case. The expected outcome always comes from the catalogue, n
 A row of ``_SETUP`` maps a catalogue id to keyword arguments of ``ReferenceRig``, plus the key
 ``at`` (an evaluation time) and, for a boundary case only, ``profile`` (a full profile id). Add a
 row only when the fault flag alone does not describe the setup, for example
-``"F-40": {"ixit_changes": {...}}``. A sut fault picks its profiles with the catalogue field
+``"F-46": {"ixit_changes": {...}}``. A sut fault picks its profiles with the catalogue field
 ``profiles`` only; a ``profile`` key in its row is a catalogue error.
 """
 
