@@ -41,8 +41,28 @@ controls:
   - id: C-EVIDENCE
     description: An unmodified signed envelope, verified with the test trust bundle.
     expected: Every mandatory verification dimension gives `pass`.
+  # A family control runs the shipped example ICS and IXIT of its family profile.
+  - id: C-FAMILY-WEB
+    profile: family/web
+    description: The unmodified reference system for the family profile family/web.
+    expected: Every executed test purpose of the profile gives `pass`.
+  - id: C-FAMILY-GS1
+    profile: family/gs1-resolver
+    description: The unmodified reference system for the family profile family/gs1-resolver.
+    expected: Every executed test purpose of the profile gives `pass`.
+  - id: C-FAMILY-VC
+    profile: family/credentials
+    description: The unmodified reference system for the family profile family/credentials.
+    expected: Every executed test purpose of the profile gives `pass`.
+  - id: C-FAMILY-AAS
+    profile: family/aas
+    description: The synthetic AAS file fixtures/aas/environment-valid.json for the family profile family/aas.
+    expected: Every executed test purpose of the profile gives `pass`.
 
 # Faults in the system under test. `fault` is the flag that the reference system accepts.
+# `profiles` is optional: the full profile ids that the case runs under. Without it, the case
+# runs under the catalogue-level `profiles`. Each listed profile must plan the test purpose.
+# A boundary case runs once, under its first profile, unless its rig setup names a profile.
 sut_faults:
   - id: F-01
     class: contract_violation
