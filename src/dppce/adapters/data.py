@@ -16,6 +16,7 @@ from pydantic import Field, ValidationError, model_validator
 
 from dppce.adapters.common import (
     MISSING,
+    DialectError,
     blocked,
     completed,
     dig,
@@ -145,6 +146,9 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
     )
     try:
         check = validator(schema)
+    except DialectError:
+        message = "The pinned schema names a dialect other than JSON Schema 2020-12 or draft-07."
+        return blocked("DATA.SCHEMA.DIALECT", message)
     except SchemaError:
         return malformed
     if check is None:

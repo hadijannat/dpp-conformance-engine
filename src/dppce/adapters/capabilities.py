@@ -60,7 +60,8 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "api",
         _S,
         "Check a response against a pinned, maintainer-supplied OpenAPI "
-        "contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema.",
+        "contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. A 3.0 "
+        "contract is translated exactly, or blocked. Another version is blocked.",
         None,
         "",
     ),
@@ -73,7 +74,14 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "Runs only with a signed authorization that grants the scope 'fuzz'. Tested against the "
         "reference system with a request budget.",
     ),
-    ("data.jsonschema", "data", _S, "Validate a document against a pinned JSON Schema.", None, ""),
+    (
+        "data.jsonschema",
+        "data",
+        _S,
+        "Validate a document against a pinned JSON Schema in the 2020-12 or the draft-07 dialect.",
+        None,
+        "",
+    ),
     (
         "data.context",
         "data",

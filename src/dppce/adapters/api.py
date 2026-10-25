@@ -2,8 +2,9 @@
 
 Supported subset of OpenAPI 3.1: path templates, ``get``, the response status, the response
 media type, and a JSON Schema with local ``#/components/schemas`` references. Anything else is
-reported as ``unsupported``. Fuzzing and negative tests are a separate capability that needs a
-signed authorization.
+reported as ``unsupported``. A 3.0 contract is judged through an exact translation of its Schema
+Objects; another version gives ``blocked``. Fuzzing and negative tests are a separate capability
+that needs a signed authorization.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from jsonschema import SchemaError
 from pydantic import Field
 
 from dppce.adapters.common import (
+    DialectError,
     blocked,
     completed,
     effective_url,
@@ -55,6 +57,146 @@ class ContractParams(Model):
 
 def _unsupported(message: str) -> CheckOutcome:
     return not_done(ExecutionStatus.UNSUPPORTED, "API.CONTRACT.UNSUPPORTED_FEATURE", message)
+
+
+_OAS31_DIALECT = "https://spec.openapis.org/oas/3.1/dialect/base"
+_DRAFT_2020 = "https://json-schema.org/draft/2020-12/schema"
+
+
+def _version_gate(document: dict[str, Any]) -> bool | CheckOutcome:
+    """True for OpenAPI 3.0.x, False for 3.1.x, or a blocked outcome for any other version.
+
+    A 3.1 contract can change the default dialect of its schemas. The engine applies 2020-12.
+    """
+    version = document.get("openapi")
+    text = version if isinstance(version, str) else ""
+    dialect = document.get("jsonSchemaDialect", _OAS31_DIALECT)
+    if re.fullmatch(r"3\.1\.[0-9]+", text) and dialect in (_OAS31_DIALECT, _DRAFT_2020):
+        return False
+    if re.fullmatch(r"3\.0\.[0-9]+", text):
+        return True
+    message = "The contract is not OpenAPI 3.0.x or 3.1.x with the default schema dialect."
+    return blocked("API.CONTRACT.UNSUPPORTED_VERSION", message)
+
+
+# The fields of an OpenAPI 3.0 Schema Object whose meaning a 2020-12 validator keeps or that it
+# translates. "discriminator" and "writeOnly" change validation in 3.0, so they are not here.
+_OAS30_FIELDS = frozenset(
+    {
+        "title",
+        "description",
+        "default",
+        "deprecated",
+        "externalDocs",
+        "xml",
+        "readOnly",
+        "example",
+        "format",
+        "nullable",
+        "type",
+        "enum",
+        "multipleOf",
+        "maximum",
+        "exclusiveMaximum",
+        "minimum",
+        "exclusiveMinimum",
+        "maxLength",
+        "minLength",
+        "pattern",
+        "maxItems",
+        "minItems",
+        "uniqueItems",
+        "maxProperties",
+        "minProperties",
+        "required",
+        "items",
+        "properties",
+        "additionalProperties",
+        "allOf",
+        "anyOf",
+        "oneOf",
+        "not",
+    }
+)
+_OAS30_TYPES = frozenset({"array", "boolean", "integer", "number", "object", "string"})
+
+
+class _UntranslatableError(ValueError):
+    pass
+
+
+def _of(value: Any, kind: type) -> Any:
+    if not isinstance(value, kind):
+        raise _UntranslatableError(kind.__name__)
+    return value
+
+
+def _from_oas30(node: Any) -> dict[str, Any]:  # noqa: PLR0912 - one branch per translated keyword reads as the 3.0 rule list
+    """An OpenAPI 3.0 Schema Object as JSON Schema 2020-12 with the same meaning, or _UntranslatableError.
+
+    Only schema positions are walked, so a property named "nullable" stays a property.
+    """
+    node = _of(node, dict)  # 3.0 has no boolean schema
+    if "$ref" in node:
+        # 3.0 ignores the siblings of $ref. 2020-12 applies them.
+        if len(node) != 1:
+            raise _UntranslatableError("$ref with siblings")
+        # Only the component roots are translated. Elsewhere 2020-12 would read the raw 3.0 form.
+        if not (isinstance(node["$ref"], str) and re.fullmatch(r"#/components/schemas/[^/]+", node["$ref"])):
+            raise _UntranslatableError("$ref outside the translated components")
+        return dict(node)
+    if any(not (key in _OAS30_FIELDS or (isinstance(key, str) and key.startswith("x-"))) for key in node):
+        raise _UntranslatableError("a field outside the 3.0 Schema Object or the translation")
+    out = {k: v for k, v in node.items() if k not in ("nullable", "example")}
+    kind = node.get("type")
+    if kind is not None and _of(kind, str) not in _OAS30_TYPES:
+        raise _UntranslatableError("type")
+    # OpenAPI 3.0.3: nullable adds null to an explicit type only. Other keywords still apply.
+    if _of(node.get("nullable", False), bool) and kind is not None:
+        out["type"] = [kind, "null"]
+    for flag, bound in (("exclusiveMinimum", "minimum"), ("exclusiveMaximum", "maximum")):
+        if flag in node:
+            # The draft 04 form: a boolean that modifies its bound, which must be present.
+            if bound not in node:
+                raise _UntranslatableError(flag)
+            if _of(out.pop(flag), bool):
+                out[flag] = out.pop(bound)
+    for key, value in node.items():
+        if key in ("items", "not") or (key == "additionalProperties" and not isinstance(value, bool)):
+            out[key] = _from_oas30(value)
+        elif key in ("allOf", "anyOf", "oneOf"):
+            out[key] = [_from_oas30(part) for part in _of(value, list)]
+        elif key == "properties":
+            out[key] = {name: _from_oas30(part) for name, part in _of(value, dict).items()}
+    return out
+
+
+def _translated(
+    document: dict[str, Any], responses: dict[str, dict[str, Any]]
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]] | CheckOutcome:
+    """The components and the responses with each 3.0 Schema Object translated, or blocked.
+
+    Every component schema is translated, because any of them can be the target of a reference.
+    """
+    try:
+        schemas = _of(_of(document.get("components", {}), dict).get("schemas", {}), dict)
+        translated = {name: _from_oas30(schema) for name, schema in schemas.items()}
+        found = {
+            status: declared
+            | {
+                "content": {
+                    name: media | ({"schema": _from_oas30(media["schema"])} if "schema" in media else {})
+                    for name, media in declared.get("content", {}).items()
+                }
+            }
+            for status, declared in responses.items()
+        }
+    except _UntranslatableError:
+        message = (
+            "The OpenAPI 3.0 contract uses a schema construct that the engine does not translate exactly."
+        )
+        return blocked("API.CONTRACT.UNSUPPORTED_VERSION", message)
+    return {"schemas": translated}, found
 
 
 def _shape(path: str) -> str:
@@ -218,17 +360,26 @@ def _target(
 
 
 @register("api.contract", capability="api.contract", params=ContractParams)
-def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch per documented outcome; the reason-code page reads them here
+def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - one branch per documented outcome; the reason-code page reads them here
     method = str(ctx.params.get("method", "get")).lower()
     document = _bound_contract(ctx)
     if isinstance(document, CheckOutcome):
         return document
+    openapi_30 = _version_gate(document)
+    if isinstance(openapi_30, CheckOutcome):
+        return openapi_30
     if method != "get":
         return _unsupported(f"The method '{method}' is outside the supported subset.")
     operation = _operation(ctx, document, method)
     if isinstance(operation, CheckOutcome):
         return operation
     resource, template, responses = operation
+    components = document.get("components", {})
+    if openapi_30:
+        translated = _translated(document, responses)
+        if isinstance(translated, CheckOutcome):
+            return translated
+        components, responses = translated
     resolved = resource == "item" and ctx.ixit.item_target == "resolved"
     url = _target(ctx, resource, template, resolved=resolved)
     if isinstance(url, CheckOutcome):
@@ -279,8 +430,16 @@ def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch p
             "The status and the media type match the contract. It declares no schema.",
         )
     malformed = "The contract schema is not a valid JSON Schema, or a local reference does not resolve."
+    # The top-level $schema would select the dialect of the components too. 3.1 uses 2020-12 only.
+    if not (
+        isinstance(named := schema.get("$schema", _DRAFT_2020), str)
+        and named.removesuffix("#") == _DRAFT_2020
+    ):
+        return _unsupported("The contract schema names a dialect other than JSON Schema 2020-12.")
     try:
-        check = validator({**schema, "components": document.get("components", {})})
+        check = validator({**schema, "components": components}, openapi_30=openapi_30)
+    except DialectError:
+        return _unsupported("The contract schema names a dialect other than JSON Schema 2020-12.")
     except SchemaError:
         return _unsupported(malformed)
     if check is None:

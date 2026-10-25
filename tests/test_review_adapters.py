@@ -374,7 +374,9 @@ def test_data_lifecycle_9_data_jsonschema_never_passes_a_body_that_breaks_format
     assert (outcome.passed, outcome.reason_code) == (False, "DATA.SCHEMA.INVALID")
 
 
-@pytest.mark.parametrize("format_name", ["iri-reference", "date-time", "time", "hostname", "regex"])
+# "iri-reference", "date-time", and "time" moved to the asserted formats (P2-01), so
+# "json-pointer" and "idn-hostname" take their places on the cannot-assert path.
+@pytest.mark.parametrize("format_name", ["uri-template", "json-pointer", "idn-hostname", "hostname", "regex"])
 def test_data_lifecycle_9_a_format_that_the_engine_cannot_assert_is_not_passed(
     format_name: str, tmp_path: Path
 ) -> None:
@@ -383,6 +385,7 @@ def test_data_lifecycle_9_a_format_that_the_engine_cannot_assert_is_not_passed(
     (tmp_path / "schema.json").write_text(json.dumps(schema), encoding="utf-8")
     outcome = run(context(tmp_path, "data.jsonschema", acquirer=Canned(b'{"id": "x"}')))
     assert outcome.passed is not True
+    assert outcome.reason_code == "DATA.SCHEMA.UNSUPPORTED_FORMAT"
 
 
 # -- data-lifecycle-6: data.jsonschema compares numbers exactly ----------------------------------------

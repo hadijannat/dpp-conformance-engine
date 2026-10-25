@@ -20,9 +20,9 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `identifier.parse` | identifier | supported |  | Scheme-aware syntax check of the carrier payload. |  |
 | `identifier.resolve` | identifier | supported |  | Bounded resolution of an identifier to a passport. |  |
 | `identifier.consistency` | identifier | supported |  | Compare the carrier identifier, as exact text, with the id of the resolved passport. With a QR image, also compare it with the declared sample identifier. With compare_item, also compare the resolved passport with the API item document as JSON values. Digital consistency does not prove physical authenticity. |  |
-| `api.contract` | api | supported |  | Check a response against a pinned, maintainer-supplied OpenAPI contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. |  |
+| `api.contract` | api | supported |  | Check a response against a pinned, maintainer-supplied OpenAPI contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. A 3.0 contract is translated exactly, or blocked. Another version is blocked. |  |
 | `api.fuzz` | api | interface_only |  | Schemathesis fuzzing of the API. | Runs only with a signed authorization that grants the scope 'fuzz'. Tested against the reference system with a request budget. |
-| `data.jsonschema` | data | supported |  | Validate a document against a pinned JSON Schema. |  |
+| `data.jsonschema` | data | supported |  | Validate a document against a pinned JSON Schema in the 2020-12 or the draft-07 dialect. |  |
 | `data.context` | data | supported |  | Check JSON-LD context references against a pinned allowlist. No context is fetched. |  |
 | `data.rules` | data | supported |  | Versioned rule packs: completeness, units, ranges, relationships, freshness. |  |
 | `data.shacl` | data | interface_only |  | SHACL validation with pySHACL. | pySHACL is an optional extra. Shapes are pinned local files. Results agree with the JSON Schema path on the shared fixtures, and disagreements are recorded. |

@@ -409,6 +409,68 @@ gives `IDENTIFIER.SYNTAX.INVALID`. This includes forms that GS1 permits, such as
 a serial, a key qualifier, or a path prefix. The check reads the query and the fragment only for
 their characters.
 
+`data.jsonschema` selects the dialect from the top-level `$schema` of the pinned schema:
+
+- No `$schema`, or `https://json-schema.org/draft/2020-12/schema`, selects JSON Schema 2020-12.
+- `http://json-schema.org/draft-07/schema` selects draft-07. A URI with an empty fragment `#` is
+  the same URI.
+- Any other value gives `blocked` with `DATA.SCHEMA.DIALECT`. A subschema that names a different
+  dialect also gives `DATA.SCHEMA.DIALECT`.
+- A keyword that the selected dialect ignores gives `blocked` with `DATA.SCHEMA.MALFORMED`. The
+  validator would skip the keyword, so a document that breaks it would pass.
+- For 2020-12, these keywords are `dependencies`, `additionalItems`, `$recursiveRef`, and
+  `$recursiveAnchor`.
+- For draft-07, these keywords are `dependentRequired`, `dependentSchemas`, `prefixItems`,
+  `unevaluatedProperties`, `unevaluatedItems`, `minContains`, `maxContains`, `$dynamicRef`, and
+  `$recursiveRef`.
+- The engine looks for such a keyword only where the dialect expects a subschema, in
+  `definitions`, and in each target of a local `$ref`. A property name is not a keyword.
+- A local `$ref` that does not resolve gives `blocked` with `DATA.SCHEMA.MALFORMED`.
+
+Both dialects compare numbers exactly and assert `format`. The engine asserts `date`,
+`date-time`, `time`, `duration`, `email`, `idn-email`, `ipv4`, `ipv6`, `uuid`, `uri`,
+`uri-reference`, `iri`, and `iri-reference`:
+
+- `date`, `time`, and `date-time` follow RFC 3339, section 5.6. The time offset is required.
+- A leap second is valid only at 23:59 UTC. In a `date-time`, it is also valid only on the last
+  day of a month in UTC.
+- `duration` follows RFC 3339, Appendix A. Its letters are case-insensitive, as all ABNF literals
+  are.
+- `uri` and `uri-reference` follow RFC 3986. `iri` and `iri-reference` follow RFC 3987.
+- `email` and `idn-email` use the checks of jsonschema. These checks look only for an `@`.
+- Any other format gives `blocked` with `DATA.SCHEMA.UNSUPPORTED_FORMAT`, because the engine
+  cannot assert it.
+
+`api.contract` reads the top-level `openapi` field of the bound contract before it sends a
+request:
+
+- `3.1.x` uses JSON Schema 2020-12, as `data.jsonschema` does. A `jsonSchemaDialect` other than
+  the OpenAPI 3.1 base dialect or 2020-12 gives `blocked` with `API.CONTRACT.UNSUPPORTED_VERSION`.
+- `3.0.x` makes the engine translate each Schema Object to 2020-12 with the same meaning. This
+  applies to `components.schemas` and to the response schemas of the marked operation.
+- A missing value, a value that is not a string, or any other version gives `blocked` with
+  `API.CONTRACT.UNSUPPORTED_VERSION`.
+- A contract schema that names a dialect other than 2020-12, or that uses an ignored keyword,
+  gives `unsupported` with `API.CONTRACT.UNSUPPORTED_FEATURE`. A response schema cannot select
+  draft-07, because its `$schema` would also apply to `components.schemas`.
+
+The 3.0 translation changes these fields and keeps all other fields unchanged:
+
+- `nullable: true` adds `null` to an explicit `type`, as OpenAPI 3.0.3 states. Without a `type`,
+  it has no effect. Other keywords, for example `enum`, can still refuse `null`.
+- A boolean `exclusiveMinimum` or `exclusiveMaximum` becomes the numeric form with the value of
+  its bound. The bound must be present.
+- The translation removes `example`, because it is an annotation only.
+- `integer` accepts only a number without a fraction and without an exponent, as in JSON Schema
+  Wright draft 00.
+
+A field that is not a field of the 3.0 Schema Object, for example `const`, gives `blocked` with
+`API.CONTRACT.UNSUPPORTED_VERSION`. An extension field that starts with `x-` stays unchanged.
+`discriminator`, `writeOnly`, a `$ref` with a sibling field, and a boolean schema also give
+`API.CONTRACT.UNSUPPORTED_VERSION`. These change validation in 3.0, and the translation does not
+cover them. A `$ref` must name a schema in `components.schemas` exactly. Any other target is not
+translated, so it also gives `API.CONTRACT.UNSUPPORTED_VERSION`.
+
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.
 
