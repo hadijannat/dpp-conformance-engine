@@ -331,7 +331,9 @@ def test_gs1_dl_never_accepts_what_the_reference_rejects() -> None:
 
 def _gs1_dl_disagreements() -> list[tuple[str, gs1.DigitalLink | gs1.Problem]]:
     results = [(err, uri, gs1.parse(uri)) for err, uri, _ in _gs1_cases_with_output()[0]]
-    return [(uri, result) for err, uri, result in results if (err == "OK") != isinstance(result, gs1.DigitalLink)]
+    return [
+        (uri, result) for err, uri, result in results if (err == "OK") != isinstance(result, gs1.DigitalLink)
+    ]
 
 
 def test_gs1_dl_disagrees_only_on_the_convenience_alphas() -> None:

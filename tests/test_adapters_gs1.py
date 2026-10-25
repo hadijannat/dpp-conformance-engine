@@ -62,7 +62,16 @@ def test_every_linter_of_a_primary_key_or_a_key_qualifier_is_implemented() -> No
         for component in dictionary.entries[ai].components
         for linter in component.linters
     }
-    assert used == {"csum", "csumalpha", "gcppos1", "gcppos2", "importeridx", "nozeroprefix", "pieceoftotal", "zero"}
+    assert used == {
+        "csum",
+        "csumalpha",
+        "gcppos1",
+        "gcppos2",
+        "importeridx",
+        "nozeroprefix",
+        "pieceoftotal",
+        "zero",
+    }
     assert used <= set(gs1.LINTERS)
 
 
@@ -225,17 +234,31 @@ def test_granularity_compares_the_key_set_with_the_ics(
     assert outcome.observations[0].summary["declared"] == declared
 
 
+_ITEM = {"granularity": "item"}
+_BLOCKED, _UNSUPPORTED = ExecutionStatus.BLOCKED, ExecutionStatus.UNSUPPORTED
+
+
 @pytest.mark.parametrize(
     ("uri", "ics", "status", "code"),
     [
-        (f"{ORIGIN}/01/{GTIN}", {"granularity": "unknown"}, ExecutionStatus.BLOCKED, "IDENTIFIER.GRANULARITY.NOT_DECLARED"),
-        (f"{ORIGIN}/00/952012345678912345", {"granularity": "item"}, ExecutionStatus.UNSUPPORTED, "IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED"),
-        ("https://id.gs1.org/AQnYUc1gmiAA", {"granularity": "item"}, ExecutionStatus.UNSUPPORTED, "IDENTIFIER.SYNTAX.COMPRESSED"),
-        (f"{ORIGIN}/01/09520123456787", {"granularity": "item"}, ExecutionStatus.BLOCKED, "IDENTIFIER.GRANULARITY.NOT_PARSED"),
-        (f"{ORIGIN}/01/{GTIN}", {"granularity": "item", "identifier_scheme": "unknown"}, ExecutionStatus.BLOCKED, "IDENTIFIER.SCHEME.UNKNOWN"),
-        (f"{ORIGIN}/01/{GTIN}", {"granularity": "item", "identifier_scheme": "urn-uuid"}, ExecutionStatus.UNSUPPORTED, "IDENTIFIER.SCHEME.UNSUPPORTED"),
+        (f"{ORIGIN}/01/{GTIN}", {"granularity": "unknown"}, _BLOCKED, "IDENTIFIER.GRANULARITY.NOT_DECLARED"),
+        (f"{ORIGIN}/00/952012345678912345", _ITEM, _UNSUPPORTED, "IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED"),
+        ("https://id.gs1.org/AQnYUc1gmiAA", _ITEM, _UNSUPPORTED, "IDENTIFIER.SYNTAX.COMPRESSED"),
+        (f"{ORIGIN}/01/09520123456787", _ITEM, _BLOCKED, "IDENTIFIER.GRANULARITY.NOT_PARSED"),
+        (
+            f"{ORIGIN}/01/{GTIN}",
+            {**_ITEM, "identifier_scheme": "unknown"},
+            _BLOCKED,
+            "IDENTIFIER.SCHEME.UNKNOWN",
+        ),
+        (
+            f"{ORIGIN}/01/{GTIN}",
+            {**_ITEM, "identifier_scheme": "urn-uuid"},
+            _UNSUPPORTED,
+            "IDENTIFIER.SCHEME.UNSUPPORTED",
+        ),
     ],
-)  # fmt: skip
+)
 def test_granularity_never_passes_without_a_classification(
     uri: str, ics: dict[str, str], status: ExecutionStatus, code: str, tmp_path: Path
 ) -> None:
@@ -254,7 +277,9 @@ def _cli(arguments: list[str]) -> tuple[int, Any]:
     return code, json.loads(text) if text else None
 
 
-def _family_run(tmp_path: Path, qr: str | None = None, ics_changes: dict[str, Any] | None = None) -> dict[str, Any]:
+def _family_run(
+    tmp_path: Path, qr: str | None = None, ics_changes: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Run family/gs1-resolver against the reference system. Returns {test purpose: (verdict, code)}."""
     with ReferenceServer(FIXTURES) as server:
         ics = yaml.safe_load((EXAMPLES / "gs1-resolver.ics.yaml").read_text(encoding="utf-8"))

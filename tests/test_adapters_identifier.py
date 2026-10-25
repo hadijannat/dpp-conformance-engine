@@ -666,6 +666,7 @@ ADAPTERS = ROOT / "src" / "dppce" / "adapters"
 DEGRADED_EXPECTED = ROOT / "fixtures" / "reference" / "qr" / "degraded" / "expected.json"
 DEGRADED_TEST = "tests/test_adapters_carrier.py::test_a_degraded_image_gives_the_expected_outcome"
 _HERE = "tests/test_adapters_identifier.py::"
+_GS1 = "tests/test_adapters_gs1.py::"
 # Seeded faults F-20, F-30, F-31, F-33, F-34, and F-35 also produce identifier and carrier codes
 # in tests/test_e2e_reference.py. Their codes come from the fault catalogue, so they are not listed.
 # F-32 gives a transport code since the owner decision of 2026-10-18.
@@ -718,6 +719,14 @@ PRODUCERS: dict[str, list[str]] = {
     "IDENTIFIER.BINDING.NOT_COMPARABLE": [
         _HERE + "test_binding_with_a_non_json_or_404_item_is_not_comparable"
     ],
+    "IDENTIFIER.SYNTAX.COMPRESSED": [_GS1 + "test_form_gs1_dl_gives_unsupported_for_a_compressed_uri"],
+    "IDENTIFIER.GRANULARITY.OK": [_GS1 + "test_granularity_compares_the_key_set_with_the_ics"],
+    "IDENTIFIER.GRANULARITY.MISMATCH": [_GS1 + "test_granularity_compares_the_key_set_with_the_ics"],
+    "IDENTIFIER.GRANULARITY.NOT_DECLARED": [_GS1 + "test_granularity_never_passes_without_a_classification"],
+    "IDENTIFIER.GRANULARITY.NOT_PARSED": [_GS1 + "test_granularity_never_passes_without_a_classification"],
+    "IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED": [
+        _GS1 + "test_granularity_never_passes_without_a_classification"
+    ],
     "CARRIER.SAMPLE.MISSING": [_HERE + "test_an_ixit_without_a_carrier_sample_is_blocked"],
     "CARRIER.QR.DEPENDENCY_MISSING": [_HERE + "test_qr_decode_without_the_decoder_is_unsupported"],
     "CARRIER.SAMPLE.TOO_LARGE": [
@@ -746,7 +755,7 @@ def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -
         (ADAPTERS / name).read_text(encoding="utf-8") for name in ("identifier.py", "carrier.py", "common.py")
     )
     codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
-    assert len(codes) == 25
+    assert len(codes) == 31
     assert codes == set(PRODUCERS)
     # The window of the last test must stop before the module constants, which name every code.
     assert '"CARRIER.QR.OK"' not in _test_source(

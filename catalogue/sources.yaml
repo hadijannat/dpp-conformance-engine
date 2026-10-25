@@ -7221,7 +7221,7 @@ sources:
   title: 'GS1 Barcode Syntax Dictionary: src/c-lib/gs1-syntax-dictionary.txt'
   identifier: gs1/gs1-syntax-engine src/c-lib/gs1-syntax-dictionary.txt
   issuing_body: GS1 AISBL (GitHub repository gs1/gs1-syntax-engine)
-  source_type: reference_data
+  source_type: test_vector
   official_url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/gs1-syntax-dictionary.txt
   edition_or_version: commit 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72
   publication_date: null

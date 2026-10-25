@@ -255,9 +255,8 @@ def _element(ai: str, raw: str, query: bool) -> tuple[str, str] | Problem:
     return ai, value
 
 
-def parse(text: str) -> DigitalLink | Problem:
-    """Parse an uncompressed GS1 Digital Link URI. A Problem names the rule that failed."""
-    entries = dictionary().entries
+def _split(text: str) -> tuple[list[str], str | None] | Problem:
+    """The path segments after the host and the query (None if absent). The fragment is dropped."""
     if not set(text) <= _URI:
         return Problem("URI", "the URI has a character that a URI does not permit")
     scheme = next((s for s in _SCHEMES if text.startswith(s)), None)
@@ -268,12 +267,13 @@ def parse(text: str) -> DigitalLink | Problem:
         return Problem("URI", "the host has a character that GS1 Digital Link does not permit")
     if not domain or not slash:
         return Problem("URI", "the URI has no host or no path")
-    rest = rest.partition("#")[0]
-    path, has_query, query = rest.partition("?")
-    segments = path.split("/")
+    path, has_query, query = rest.partition("#")[0].partition("?")
+    return path.split("/"), query if has_query else None
 
-    # Walk back over /AI/value pairs from the end of the path to the first primary key.
-    keys = {sequence[0] for sequence in dictionary().sequences}
+
+def _path_elements(segments: list[str]) -> list[tuple[str, str]] | Problem:
+    """Walk back over /AI/value pairs from the end of the path to the first primary key."""
+    entries, keys = dictionary().entries, {sequence[0] for sequence in dictionary().sequences}
     start, index = None, len(segments) - 1
     while index >= 1 and segments[index - 1] in entries:
         if segments[index - 1] in keys:
@@ -284,39 +284,65 @@ def parse(text: str) -> DigitalLink | Problem:
         if _COMPRESSED.fullmatch(segments[-1]) and not segments[-1].isdigit():
             return Problem("COMPRESSED", "the URI looks like a compressed GS1 Digital Link URI")
         return Problem("KEY", "the path has no GS1 Digital Link primary key")
-
-    elements: list[tuple[str, str]] = []
+    elements = []
     for at in range(start, len(segments), 2):
         element = _element(segments[at], segments[at + 1], query=False)
         if isinstance(element, Problem):
             return element
         elements.append(element)
-    path_ais = tuple(ai for ai, _ in elements)
-    for parameter in query.split("&") if has_query else ():
+    return elements
+
+
+def _query_elements(query: str | None) -> list[tuple[str, str]] | Problem:
+    elements = []
+    for parameter in query.split("&") if query is not None else ():
         name, equals, raw = parameter.partition("=")
         # An empty name counts as numeric, so "=x" is an unknown AI: the stricter reading.
         numeric = not name or (name.isascii() and name.isdigit())
         if not equals or not numeric:
             continue  # a singleton or a parameter that is not an AI: ignored
-        if name not in entries:
+        if name not in dictionary().entries:
             return Problem("ATTRIBUTE", f"the query has the unknown AI ({name})")
         element = _element(name, raw, query=True)
         if isinstance(element, Problem):
             return element
         elements.append(element)
+    return elements
 
+
+def _attribute_problem(path_ais: tuple[str, ...], attributes: tuple[str, ...]) -> Problem | None:
+    for ai in attributes:
+        if not dictionary().entries[ai].attribute:
+            return Problem("ATTRIBUTE", f"the AI ({ai}) is not a permitted data attribute")
+        trials = ((*path_ais[:j], ai, *path_ais[j:]) for j in range(1, len(path_ais) + 1))
+        if any(trial in dictionary().sequences for trial in trials):
+            return Problem("ATTRIBUTE", f"the AI ({ai}) is a key qualifier and belongs in the path")
+    return None
+
+
+def parse(text: str) -> DigitalLink | Problem:
+    """Parse an uncompressed GS1 Digital Link URI. A Problem names the rule that failed."""
+    entries = dictionary().entries
+    split = _split(text)
+    if isinstance(split, Problem):
+        return split
+    segments, query = split
+    path_elements = _path_elements(segments)
+    if isinstance(path_elements, Problem):
+        return path_elements
+    query_elements = _query_elements(query)
+    if isinstance(query_elements, Problem):
+        return query_elements
+    elements = path_elements + query_elements
+    path_ais = tuple(ai for ai, _ in path_elements)
     if path_ais not in dictionary().sequences:
         return Problem("QUALIFIER_ORDER", "the key qualifiers of the path are not a valid sequence in order")
     all_ais = [ai for ai, _ in elements]
     if len(set(all_ais)) != len(all_ais):
         return Problem("ATTRIBUTE", "an AI occurs more than once")
     attributes = tuple(all_ais[len(path_ais) :])
-    for ai in attributes:
-        if not entries[ai].attribute:
-            return Problem("ATTRIBUTE", f"the AI ({ai}) is not a permitted data attribute")
-        trials = (path_ais[:j] + (ai,) + path_ais[j:] for j in range(1, len(path_ais) + 1))
-        if any(trial in dictionary().sequences for trial in trials):
-            return Problem("ATTRIBUTE", f"the AI ({ai}) is a key qualifier and belongs in the path")
+    if (problem := _attribute_problem(path_ais, attributes)) is not None:
+        return problem
     unchecked: set[str] = set()
     for ai, value in elements:
         if (problem := _validate(entries[ai], value, unchecked)) is not None:
