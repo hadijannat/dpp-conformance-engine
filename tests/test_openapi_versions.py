@@ -115,6 +115,28 @@ def test_a_3_1_schema_in_another_dialect_is_unsupported(tmp_path: Path) -> None:
     assert _contract(tmp_path, _with_schema(schema))[:3] == UNSUPPORTED
 
 
+@pytest.mark.parametrize(
+    "dialect", ["http://json-schema.org/draft-07/schema#", "http://json-schema.org/draft-07/schema"]
+)
+def test_a_3_1_schema_cannot_switch_the_components_to_draft_07(dialect: str, tmp_path: Path) -> None:
+    # draft-07 would ignore the siblings of $ref in Item, which 2020-12 applies.
+    components = {
+        "schemas": {
+            "Base": {"type": "object"},
+            "Item": {"$ref": "#/components/schemas/Base", "required": ["id"]},
+        }
+    }
+    get = {
+        "responses": {
+            "200": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Item"}}}}
+        }
+    }
+    contract = _item_get(get, components)
+    assert _contract(tmp_path, contract, b"{}")[:3] == SCHEMA
+    get["responses"]["200"]["content"]["application/json"]["schema"]["$schema"] = dialect
+    assert _contract(tmp_path, _item_get(get, components), b"{}")[:3] == UNSUPPORTED
+
+
 def test_a_3_1_schema_with_a_keyword_that_2020_12_ignores_is_unsupported(tmp_path: Path) -> None:
     schema = {"type": "object", "dependencies": {"id": ["other"]}}
     assert _contract(tmp_path, _with_schema(schema))[:3] == UNSUPPORTED
@@ -227,11 +249,27 @@ def test_a_3_0_component_schema_is_translated(tmp_path: Path) -> None:
         {"properties": {"a": {"if": {}}}},
         {"allOf": {"type": "string"}},
         {"properties": []},
+        # A reference must name a translated root: elsewhere the raw 3.0 form would be read.
+        {"$ref": "#/components/schemas/A/type"},
+        {"$ref": "#/components"},
+        {"$ref": "#/paths"},
+        {"$ref": "#"},
     ],
 )
 def test_a_3_0_construct_outside_the_translation_is_blocked(schema: Any, tmp_path: Path) -> None:
     contract = _v30(schema, {"schemas": {"A": {"type": "object"}}})
     assert _contract(tmp_path, contract) == (*BLOCKED, 0)
+
+
+def test_a_3_0_reference_into_an_extension_is_blocked(tmp_path: Path) -> None:
+    # The extension value is not translated, so 2020-12 would read exclusiveMinimum true as 1.
+    components = {
+        "schemas": {
+            "A": {"type": "object", "x-s": {"type": "number", "minimum": 5, "exclusiveMinimum": True}}
+        }
+    }
+    schema = {"type": "object", "properties": {"n": {"$ref": "#/components/schemas/A/x-s"}}}
+    assert _contract(tmp_path, _v30(schema, components), b'{"n": 5}') == (*BLOCKED, 0)
 
 
 def test_a_3_0_component_outside_the_translation_is_blocked(tmp_path: Path) -> None:

@@ -450,7 +450,7 @@ def _uri_grammar(ucschar: str, iprivate: str) -> tuple[re.Pattern[str], re.Patte
         )
     )
     # An IP literal stays ASCII in an IRI too. RFC 3986 has no zone identifier.
-    literal = rf"\[(?:{ipv6}|v{hexdig}+\.[A-Za-z0-9._~\-{sub}:]+)\]"
+    literal = rf"\[(?:{ipv6}|[vV]{hexdig}+\.[A-Za-z0-9._~\-{sub}:]+)\]"
     userinfo = f"(?:[{unreserved}{sub}:]|{pct})*"
     authority = f"(?:{userinfo}@)?(?:{literal}|(?:[{unreserved}{sub}]|{pct})*)(?::[0-9]*)?"
     abempty = f"(?:/{pchar}*)*"
@@ -595,26 +595,41 @@ def _dialect(value: object) -> str:
     return name
 
 
-def _check_keywords(part: Mapping[str, Any], dialect: str) -> None:
+def _check_keywords(part: Mapping[str, Any], dialect: str, root: Mapping[str, Any]) -> None:
     """Raise if a subschema names another dialect, or uses a keyword that its dialect ignores.
 
     The walk follows the keywords of the dialect, so a property named "dependencies" is no keyword.
-    ponytail: a subschema that only a ``$ref`` into an unknown keyword reaches is not walked.
+    It also follows each ``$ref`` the way the validator resolves it against ``root``, because a
+    reference can reach a subschema in any container. A reference that does not resolve raises.
     """
-    pending: list[Any] = [part]
+    specification = _SPECIFICATIONS[dialect]
+    pending: list[tuple[Any, Any]] = [
+        (part, Registry().resolver_with_root(specification.create_resource(root)))
+    ]
+    seen: set[int] = set()
     while pending:
-        node = pending.pop()
-        if not isinstance(node, Mapping):
+        node, resolver = pending.pop()
+        if not isinstance(node, Mapping) or id(node) in seen:
             continue
+        seen.add(id(node))
         if "$schema" in node and _dialect(node["$schema"]) != dialect:
             raise DialectError("a subschema names another dialect")
         if ignored := sorted(_IGNORED[dialect] & node.keys()):
             raise SchemaError(f"the dialect ignores the keywords {', '.join(ignored)}")
-        pending.extend(_SPECIFICATIONS[dialect].subresources_of(node))
+        resolver = resolver.in_subresource(specification.create_resource(node))
+        children = list(specification.subresources_of(node))
         # 2020-12 keeps "definitions" in its metaschema but does not walk it as a keyword.
         definitions = node.get("definitions")
         if isinstance(definitions, Mapping):
-            pending.extend(definitions.values())
+            children.extend(definitions.values())
+        pending.extend((child, resolver) for child in children)
+        reference = node.get("$ref")
+        if isinstance(reference, str):
+            try:
+                resolved = resolver.lookup(reference)
+            except Unresolvable as exc:
+                raise SchemaError(f"a local reference does not resolve: {exc}") from exc
+            pending.append((resolved.contents, resolved.resolver))
 
 
 def _exact(node: Any) -> Any:
@@ -672,10 +687,13 @@ def validator(schema: Mapping[str, Any], *, openapi_30: bool = False) -> Validat
     parts = components.get("schemas") if isinstance(components, Mapping) else None
     dialect = _dialect(schema.get("$schema", _DRAFT_2020))
     cls = _OPENAPI_30 if openapi_30 else _VALIDATORS[dialect]
-    for part in [schema, *(parts.values() if isinstance(parts, Mapping) else ())]:
+    every = [schema, *(parts.values() if isinstance(parts, Mapping) else ())]
+    for part in every:
         cls.check_schema(part)
+    # Only after every part is valid: a reference can lead the walk into any component.
+    for part in every:
         if isinstance(part, Mapping):
-            _check_keywords(part, dialect)
+            _check_keywords(part, dialect, schema)
     # An empty registry has no retrieval function, so no reference can leave the document.
     return cls(_exact(dict(schema)), registry=Registry(), format_checker=_FORMATS)
 

@@ -407,8 +407,9 @@ their characters.
 - For draft-07, these keywords are `dependentRequired`, `dependentSchemas`, `prefixItems`,
   `unevaluatedProperties`, `unevaluatedItems`, `minContains`, `maxContains`, `$dynamicRef`, and
   `$recursiveRef`.
-- The engine looks for such a keyword only where the dialect expects a subschema, and in
-  `definitions`. A property name is not a keyword.
+- The engine looks for such a keyword only where the dialect expects a subschema, in
+  `definitions`, and in each target of a local `$ref`. A property name is not a keyword.
+- A local `$ref` that does not resolve gives `blocked` with `DATA.SCHEMA.MALFORMED`.
 
 Both dialects compare numbers exactly and assert `format`. The engine asserts `date`,
 `date-time`, `time`, `duration`, `email`, `idn-email`, `ipv4`, `ipv6`, `uuid`, `uri`,
@@ -433,8 +434,9 @@ request:
   applies to `components.schemas` and to the response schemas of the marked operation.
 - A missing value, a value that is not a string, or any other version gives `blocked` with
   `API.CONTRACT.UNSUPPORTED_VERSION`.
-- A contract schema that names a different dialect, or that uses an ignored keyword, gives
-  `unsupported` with `API.CONTRACT.UNSUPPORTED_FEATURE`.
+- A contract schema that names a dialect other than 2020-12, or that uses an ignored keyword,
+  gives `unsupported` with `API.CONTRACT.UNSUPPORTED_FEATURE`. A response schema cannot select
+  draft-07, because its `$schema` would also apply to `components.schemas`.
 
 The 3.0 translation changes these fields and keeps all other fields unchanged:
 
@@ -450,7 +452,8 @@ A field that is not a field of the 3.0 Schema Object, for example `const`, gives
 `API.CONTRACT.UNSUPPORTED_VERSION`. An extension field that starts with `x-` stays unchanged.
 `discriminator`, `writeOnly`, a `$ref` with a sibling field, and a boolean schema also give
 `API.CONTRACT.UNSUPPORTED_VERSION`. These change validation in 3.0, and the translation does not
-cover them.
+cover them. A `$ref` must name a schema in `components.schemas` exactly. Any other target is not
+translated, so it also gives `API.CONTRACT.UNSUPPORTED_VERSION`.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.

@@ -141,6 +141,9 @@ def _from_oas30(node: Any) -> dict[str, Any]:  # noqa: PLR0912 - one branch per 
         # 3.0 ignores the siblings of $ref. 2020-12 applies them.
         if len(node) != 1:
             raise _UntranslatableError("$ref with siblings")
+        # Only the component roots are translated. Elsewhere 2020-12 would read the raw 3.0 form.
+        if not (isinstance(node["$ref"], str) and re.fullmatch(r"#/components/schemas/[^/]+", node["$ref"])):
+            raise _UntranslatableError("$ref outside the translated components")
         return dict(node)
     if any(not (key in _OAS30_FIELDS or (isinstance(key, str) and key.startswith("x-"))) for key in node):
         raise _UntranslatableError("a field outside the 3.0 Schema Object or the translation")
@@ -357,7 +360,7 @@ def _target(
 
 
 @register("api.contract", capability="api.contract", params=ContractParams)
-def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch per documented outcome; the reason-code page reads them here
+def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - one branch per documented outcome; the reason-code page reads them here
     method = str(ctx.params.get("method", "get")).lower()
     document = _bound_contract(ctx)
     if isinstance(document, CheckOutcome):
@@ -427,10 +430,16 @@ def contract(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one branch p
             "The status and the media type match the contract. It declares no schema.",
         )
     malformed = "The contract schema is not a valid JSON Schema, or a local reference does not resolve."
+    # The top-level $schema would select the dialect of the components too. 3.1 uses 2020-12 only.
+    if not (
+        isinstance(named := schema.get("$schema", _DRAFT_2020), str)
+        and named.removesuffix("#") == _DRAFT_2020
+    ):
+        return _unsupported("The contract schema names a dialect other than JSON Schema 2020-12.")
     try:
         check = validator({**schema, "components": components}, openapi_30=openapi_30)
     except DialectError:
-        return _unsupported("The contract schema names a dialect other than JSON Schema 2020-12 or draft-07.")
+        return _unsupported("The contract schema names a dialect other than JSON Schema 2020-12.")
     except SchemaError:
         return _unsupported(malformed)
     if check is None:

@@ -133,6 +133,58 @@ def test_a_draft_07_schema_with_a_keyword_that_draft_07_ignores_is_blocked(
     )
 
 
+@pytest.mark.parametrize(
+    "schema",
+    [
+        # draft-07 does not walk $defs as a keyword, but a reference reaches it.
+        {
+            "$schema": DRAFT_07,
+            "properties": {"a": {"$ref": "#/$defs/A"}},
+            "$defs": {"A": {"type": "array", "prefixItems": [{"type": "string"}]}},
+        },
+        {"$schema": DRAFT_07, "$ref": "#/$defs/A", "$defs": {"A": {"dependentRequired": {"x": ["y"]}}}},
+        {"properties": {"a": {"$ref": "#/x/A"}}, "x": {"A": {"dependencies": {"b": ["c"]}}}},
+        # RFC 6901: percent-decode first, then ~1 is "/" and ~0 is "~".
+        {"$ref": "#/x/a~1b%25/c~0d", "x": {"a/b%": {"c~d": {"dependencies": {"b": ["c"]}}}}},
+        {"$ref": "#/nowhere"},
+        {"properties": {"a": {"$ref": "#/x/A"}}, "x": {"A": {"$ref": "#/x/B"}}},
+    ],
+    ids=[
+        "draft-07-defs",
+        "draft-07-root-ref",
+        "custom-container",
+        "escaped-pointer",
+        "unresolved",
+        "chained",
+    ],
+)
+def test_a_keyword_that_only_a_reference_reaches_is_checked(schema: dict[str, Any], tmp_path: Path) -> None:
+    body = b'{"a": [1], "b": 1, "x": 1}'
+    assert _jsonschema(tmp_path, schema, body) == (ExecutionStatus.BLOCKED, None, "DATA.SCHEMA.MALFORMED")
+
+
+def test_a_reference_target_in_another_dialect_is_blocked_with_dialect(tmp_path: Path) -> None:
+    schema = {"properties": {"a": {"$ref": "#/x/A"}}, "x": {"A": {"$schema": DRAFT_07, "type": "string"}}}
+    assert _jsonschema(tmp_path, schema, b'{"a": "x"}') == (
+        ExecutionStatus.BLOCKED,
+        None,
+        "DATA.SCHEMA.DIALECT",
+    )
+
+
+def test_a_reference_cycle_ends(tmp_path: Path) -> None:
+    schema = {
+        "$defs": {"a": {"properties": {"n": {"$ref": "#/$defs/a"}}}},
+        "$ref": "#/$defs/a",
+        "type": "object",
+    }
+    assert _jsonschema(tmp_path, schema, b'{"n": {"n": {}}}') == (
+        ExecutionStatus.COMPLETED,
+        True,
+        "DATA.SCHEMA.OK",
+    )
+
+
 def test_a_property_named_like_an_ignored_keyword_is_not_a_keyword(tmp_path: Path) -> None:
     schema = {
         "type": "object",
@@ -391,6 +443,8 @@ FORMAT_TABLE: dict[str, tuple[list[str], list[str]]] = {
             "http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com",
             "ldap://[2001:db8::7]/c=GB?objectClass?one",
             "http://[v1.fe80::a+en1]/",
+            # ABNF literals are case-insensitive, also the IPvFuture "v".
+            "http://[V1.x]/",
             "http://[::ffff:192.0.2.1]/",
             "http://999.999.999.999/",
             "mailto:John.Doe@example.com",
