@@ -397,6 +397,8 @@ non-empty list `signatures` of objects that each have a string `signature`. Such
 `blocked` with `INTEGRITY.FORMAT.UNSUPPORTED`. Any other body that is not a compact JWS gives
 `INTEGRITY.TOKEN.MALFORMED`. A
 published passport that is a linkset gives `blocked` with `INTEGRITY.PAYLOAD.NOT_COMPARABLE`.
+With `item_target: resolved`, a resolver answer that is a linkset gives
+`INTEGRITY.NO_TARGET` first (section 9.2).
 
 `identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. With `require_https`, a valid identifier whose
@@ -711,7 +713,8 @@ passport resource.
   error at the resolver gives `unreachable`.
 - A missing or unreadable carrier sample keeps its own outcome. These cases give `blocked` with
   `<AREA>.NO_TARGET`. They are a failed carrier check, a carrier that is not an HTTP or HTTPS
-  URL, and a resolver status other than 200.
+  URL, a resolver status other than 200, and a resolver answer that is a linkset (section 8).
+  The engine does not follow the links of a linkset.
 - Redaction can change the URL. The engine does not fetch a URL that holds `<removed>`, also in
   percent-encoded form. The check gives `blocked` with `<AREA>.NO_TARGET`.
 - `integrity.jws` resolves the URL after it judges the signed passport. A resolver failure

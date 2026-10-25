@@ -14,7 +14,7 @@ from typing import Any
 
 import pytest
 
-from dppce.adapters.identifier import is_linkset
+from dppce.adapters.common import is_linkset
 from dppce.models import CheckOutcome, ExecutionStatus
 from tests import test_review_findings
 from tests.support import make_record
@@ -216,9 +216,13 @@ def test_control_a_json_object_that_is_no_jws_stays_malformed(
 # -- integrity.jws: a linkset as the published passport -------------------------------------------
 
 
-@pytest.mark.parametrize("item_target", ["resolved", "template"])
+# With item_target: resolved, item_url blocks the linkset first. The integrity guard covers the template.
+@pytest.mark.parametrize(
+    ("item_target", "code"),
+    [("resolved", "INTEGRITY.NO_TARGET"), ("template", "INTEGRITY.PAYLOAD.NOT_COMPARABLE")],
+)
 def test_integrity_does_not_compare_a_signed_payload_with_a_linkset(
-    item_target: str, pki: dict[str, Any], tmp_path: Path, loopback: Any
+    item_target: str, code: str, pki: dict[str, Any], tmp_path: Path, loopback: Any
 ) -> None:
     api = Origin(loopback)
     body = linkset(api.origin)
@@ -228,4 +232,4 @@ def test_integrity_does_not_compare_a_signed_payload_with_a_linkset(
     api.routes[ITEM_PATH] = answer(body)
     ctx = resolved_context(tmp_path, "integrity.jws", api.origin, trust=pki["trust"])
     ctx = ctx if item_target == "resolved" else template_mode(ctx)
-    _blocked(run(ctx), "INTEGRITY.PAYLOAD.NOT_COMPARABLE")
+    _blocked(run(ctx), code)

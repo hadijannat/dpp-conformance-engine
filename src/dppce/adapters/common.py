@@ -38,6 +38,9 @@ from dppce.testdefs.registry import CheckContext
 MISSING: Final = object()
 _DENIED: Final = ("policy_denied", "authorization_denied", "budget_exhausted")
 SERVER_ERRORS: Final = range(500, 600)
+LINKSET: Final = "application/linkset+json"
+# RFC 9264 defines the JSON format and the native format. Both name links, not a passport.
+LINKSET_TYPES: Final = frozenset({LINKSET, "application/linkset"})
 _MAX_QR_PIXELS: Final = 4096 * 4096
 
 
@@ -203,6 +206,18 @@ def media_type(record: Record) -> str:
     return (record.header("content-type") or "").split(";")[0].strip().lower()
 
 
+def is_linkset(record: Record, document: dict[str, Any] | None) -> bool:
+    """Is the answer an RFC 9264 linkset? By its media type, or by a non-empty list of link contexts.
+
+    Either linkset media type counts: application/linkset+json or the native application/linkset.
+    A linkset names where a passport is. It is not a passport, whatever keys it also holds.
+    """
+    if media_type(record) in LINKSET_TYPES:
+        return True
+    contexts = document.get("linkset") if document is not None else None
+    return isinstance(contexts, list) and bool(contexts) and all(isinstance(c, dict) for c in contexts)
+
+
 def template_url(ctx: CheckContext, endpoint: str, template: str, area: str) -> str | CheckOutcome:
     """Build the public URL of a path template under an IXIT endpoint, or a blocked outcome.
 
@@ -294,6 +309,10 @@ def item_url(ctx: CheckContext, area: str) -> str | CheckOutcome:
         return no_answer(ctx, record)
     if record.status != 200:
         message = f"The IXIT asks for the resolved item target, and the resolver answers {record.status}."
+        return blocked(f"{area}.NO_TARGET", message)
+    if is_linkset(record, json_object(record)):
+        # The linkset names where the passport is. The engine does not follow it (OD-04).
+        message = "The IXIT asks for the resolved item target, and the resolver answers with a linkset."
         return blocked(f"{area}.NO_TARGET", message)
     final = record.redirects[-1] if record.redirects else record.url
     # Redaction writes the marker percent-encoded in a query and plain elsewhere.

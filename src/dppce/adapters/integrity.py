@@ -23,13 +23,13 @@ from dppce.adapters.common import (
     blocked,
     completed,
     fetch_once,
+    is_linkset,
     item_url,
     json_object,
     resource_url,
     same_json,
     unusable,
 )
-from dppce.adapters.identifier import is_linkset
 from dppce.evidence import x509path
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, public_jwk_of, verify_compact
