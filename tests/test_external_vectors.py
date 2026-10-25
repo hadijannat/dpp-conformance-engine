@@ -1,6 +1,7 @@
 """The engine against committed third-party test vectors (gap D8-01).
 
-Each vector set is vendored unchanged under ``tests/vectors/<set>/``. ``catalogue/sources.yaml``
+Each vector set is vendored unchanged under ``tests/vectors/<set>/``. Oracle data that the engine
+reads at run time is vendored under ``testpacks/data/<set>/``. ``catalogue/sources.yaml``
 holds one ``test_vector`` record for each file with its SHA-256. The tests run with no network.
 
 Agreement is evidence, not proof. Where the engine and a vector set disagree, the disagreement
@@ -65,9 +66,11 @@ EXPECTED_DISAGREEMENTS: dict[str, object] = {
 
 
 def _vector_files() -> dict[str, bytes]:
+    # testpacks/data holds vendored oracle files that the engine reads at run time.
+    paths = sorted([*VECTORS.rglob("*"), *(ROOT / "testpacks" / "data").rglob("*")])
     return {
         path.relative_to(ROOT).as_posix(): path.read_bytes()
-        for path in sorted(VECTORS.rglob("*"))
+        for path in paths
         if path.is_file() and path.name != "README.md" and not path.name.startswith(".")
     }
 
