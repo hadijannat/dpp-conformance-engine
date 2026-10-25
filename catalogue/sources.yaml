@@ -7290,8 +7290,8 @@ sources:
     tests/vectors/idta-02099-1/README.md names the source, the license, and how an operator supplies a local copy.
   verification_level: substantive
   independent_check: not_checked
-  sha256: 45d3f5ee78f628941816f4f6e30221f535a91c318114f41143328881c887eb85
-  hash_note: SHA-256 of the upstream bytes at the commit. Git blob b3dd7e42bd681296e00b8571ab3745da4e1c2770.
+  hash_note: Not vendored, so the sha256 field stays empty. The upstream bytes at the commit have the SHA-256
+    45d3f5ee78f628941816f4f6e30221f535a91c318114f41143328881c887eb85 and the Git blob b3dd7e42bd681296e00b8571ab3745da4e1c2770.
   evidence:
   - url: https://github.com/admin-shell-io/submodel-templates/blob/f3790038b6c9c2d7e5ebbb4609997468fadf3e85/published/Digital%20Product%20Passport/Digital%20Product%20Passport%20Part-1/1/0/2/IDTA%2002099-1_Template%20Digital%20Product%20Passport%20-%20Part%201.json
     what_it_shows: The file at the pinned commit.
