@@ -424,9 +424,10 @@ default: the digest covers the canonical form of the item. With `raw-sha256`, th
 the bytes of the item body as served, so a body without a canonical form is comparable. A digest
 has the form `sha256:<hex>`. `version_kind` is `integer` by default: the numbers must strictly
 ascend. With `string`, the labels must be distinct non-empty strings, and the update times give
-the order. A malformed pointer is refused when the test pack loads. A pointer that resolves to no
-list gives `PERSISTENCE.RESPONSE.NOT_JSON`. An entry that is not an object, or that lacks a
-mapped member, is a finding of `PERSISTENCE.UNDECLARED_CHANGE`. The system under test therefore
+the order. The lint and the run planner refuse a malformed pointer. A pointer that resolves to no
+list gives `PERSISTENCE.RESPONSE.NOT_JSON`. An entry that is not an object, or that lacks the
+version or the time member, is a finding of `PERSISTENCE.UNDECLARED_CHANGE`. The check compares
+the digest member of the last entry only. A missing digest member is a finding. The system under test therefore
 cannot turn a fail into `blocked` or `inconclusive` with the shape of its history. Invalid
 parameters that reach the check give `blocked` with `PERSISTENCE.PARAMS.INVALID`.
 
@@ -436,7 +437,7 @@ default is the two pairs `identifier` and `operator_identifier`, which compare `
 with `/id` and `/operator_identifier` with `/operator/identifier`. A pointer that resolves to
 no value, or to `null`, makes the pair missing. A missing pair is not compared. A difference in
 a compared pair gives `REGISTRY.INCONSISTENT` before a missing pair gives
-`REGISTRY.FIELD.MISSING`. Invalid parameters that reach the check give `blocked` with
+`REGISTRY.FIELD.MISSING`. Declared pairs other than the default are experimental. Invalid parameters that reach the check give `blocked` with
 `REGISTRY.PARAMS.INVALID`.
 
 `data.jsonschema` selects the dialect from the top-level `$schema` of the pinned schema:

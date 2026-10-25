@@ -165,8 +165,7 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "registry.mock",
         "registry",
         _S,
-        "Passive lookup against a configurable mock registry. "
-        "Declared JSON Pointer pairs set the compared fields.",
+        "Passive lookup against a configurable mock registry.",
         None,
         "",
     ),

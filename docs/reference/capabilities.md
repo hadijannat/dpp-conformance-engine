@@ -32,7 +32,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `integrity.status_list` | integrity | interface_only |  | Bitstring Status List retrieval and check. | Status retrieval behind the transport, with a mock status service and staleness tests. |
 | `persistence.versions` | persistence | experimental |  | Compare version-aware observations with the declared update rule. JSON Pointers and a digest kind map third-party history layouts. A limited number of observations cannot prove lifetime availability. |  |
 | `persistence.scheduled` | persistence | interface_only |  | Scheduled acquisition over time and backup references. | A scheduler runs acquisitions at declared intervals and keeps each recording. |
-| `registry.mock` | registry | supported |  | Passive lookup against a configurable mock registry. Declared JSON Pointer pairs set the compared fields. |  |
+| `registry.mock` | registry | supported |  | Passive lookup against a configurable mock registry. |  |
 | `registry.official` | registry | interface_only |  | Checks against an official registry environment. | A separately authorized official environment is available. Passive checks are separate from registration and update operations. |
 | `aas.validate` | aas | experimental | `aas_test_engines` | Wrap a pinned aas-test-engines release for a JSON, XML, or AASX sample. A metamodel version that the release does not verify is unsupported, not a fail. A valid Asset Administration Shell is not a complete DPP conformance statement. |  |
 | `manual.review` | manual | supported |  | Verify the signed result of a manual step: signature, key trust for the purpose 'manual', and binding to the step and the system. The engine does not perform the review. |  |

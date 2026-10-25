@@ -320,3 +320,19 @@ def test_the_root_pointer_compares_the_whole_document(tmp_path: Path) -> None:
     params = {"fields": [{"name": "whole", "registry_pointer": "", "passport_pointer": ""}]}
     assert _registry(tmp_path, {"a": 1}, {"a": 1}, params).reason_code == "REGISTRY.OK"
     assert _registry(tmp_path, {"a": True}, {"a": 1}, params).reason_code == "REGISTRY.INCONSISTENT"
+
+
+@pytest.mark.parametrize(
+    ("check", "params", "code"),
+    [
+        ("persistence.versions", {"entries_pointer": "x"}, "PERSISTENCE.PARAMS.INVALID"),
+        ("registry.consistency", {"fields": []}, "REGISTRY.PARAMS.INVALID"),
+    ],
+)
+def test_invalid_params_that_skip_the_lint_block_before_any_request(
+    tmp_path: Path, check: str, params: dict[str, Any], code: str
+) -> None:
+    acquirer = ByUrl({})
+    outcome = run(context(tmp_path, check, params=params, acquirer=acquirer))
+    assert (outcome.status, outcome.reason_code) == (ExecutionStatus.BLOCKED, code)
+    assert acquirer.records() == ()
