@@ -206,15 +206,17 @@ def media_type(record: Record) -> str:
     return (record.header("content-type") or "").split(";")[0].strip().lower()
 
 
-def is_linkset(record: Record, document: dict[str, Any] | None) -> bool:
-    """Is the answer an RFC 9264 linkset? By its media type, or by a non-empty list of link contexts.
+def is_linkset(document: dict[str, Any] | None) -> bool:
+    """Is the answer an RFC 9264 linkset? By its exact shape only (RFC 9264, section 4.2.1).
 
-    Either linkset media type counts: application/linkset+json or the native application/linkset.
-    A linkset names where a passport is. It is not a passport, whatever keys it also holds.
+    A linkset is a JSON object with "linkset" as its only member, and that member is a non-empty
+    list of link context objects. A linkset names where a passport is, so it is not a passport.
+    The media type does not decide. Otherwise a system under test could add a linkset member,
+    or send a linkset media type, to turn the fail of a passport into a blocked step.
     """
-    if media_type(record) in LINKSET_TYPES:
-        return True
-    contexts = document.get("linkset") if document is not None else None
+    if document is None or document.keys() != {"linkset"}:
+        return False
+    contexts = document["linkset"]
     return isinstance(contexts, list) and bool(contexts) and all(isinstance(c, dict) for c in contexts)
 
 
@@ -310,7 +312,7 @@ def item_url(ctx: CheckContext, area: str) -> str | CheckOutcome:
     if record.status != 200:
         message = f"The IXIT asks for the resolved item target, and the resolver answers {record.status}."
         return blocked(f"{area}.NO_TARGET", message)
-    if is_linkset(record, json_object(record)):
+    if is_linkset(json_object(record)):
         # The linkset names where the passport is. The engine does not follow it (OD-04).
         message = "The IXIT asks for the resolved item target, and the resolver answers with a linkset."
         return blocked(f"{area}.NO_TARGET", message)

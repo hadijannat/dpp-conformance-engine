@@ -268,7 +268,7 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
         )
         return completed(False, "IDENTIFIER.RESPONSE.MEDIA_TYPE", message, [observation])
     document = json_object(record)
-    if is_linkset(record, document):
+    if is_linkset(document):
         return _linkset_outcome(accepted, observation)
     if accepted is not None and not (final == "application/json" or final.endswith("+json")):
         message = (
@@ -317,7 +317,7 @@ def consistency(ctx: CheckContext) -> CheckOutcome:
     if (problem := unusable(ctx, record)) is not None:
         return problem
     document = json_object(record) if record.status == 200 else None
-    if document is None or is_linkset(record, document):
+    if document is None or is_linkset(document):
         found = "resolves to a linkset, not to a passport" if document else "did not resolve to a passport"
         return blocked("IDENTIFIER.NOT_RESOLVED", f"The identifier {found}. There is nothing to compare.")
     passport = document.get("id")

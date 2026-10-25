@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import re
 from datetime import datetime, timedelta
 from typing import Final
 
@@ -36,11 +37,13 @@ from dppce.evidence.jws import SignatureError, header_of, public_jwk_of, verify_
 from dppce.evidence.x509path import MAX_CHAIN, extension_value, path_gap
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.models import CheckOutcome, JsonValue, TrustBundle
+from dppce.models import CheckOutcome, ExecutionStatus, JsonValue, Observation, TrustBundle
 from dppce.testdefs.registry import CheckContext, register
 
 PASSPORT_TYP = "dpp+jws"
 _LIMIT = "A valid signature does not prove that the signed attributes are true."
+# Non-empty base64url with no padding (RFC 7515, section 2).
+_B64URL: Final = re.compile(r"[A-Za-z0-9_-]+")
 
 # Extended key usages that permit signing a document, and usages that name a different purpose.
 _SIGNING_PURPOSES: Final = frozenset(
@@ -62,20 +65,46 @@ class _TooLongError(Exception):
     """The chain in ``x5c`` is longer than this engine follows."""
 
 
-def _is_jws_json(document: dict[str, object] | None) -> bool:
-    """A JWS JSON Serialization (RFC 7515, section 7.2): the member types decide, not the key names.
+def _is_b64url(value: object) -> bool:
+    return isinstance(value, str) and _B64URL.fullmatch(value) is not None
 
-    A string payload, and a string signature or a non-empty list of objects with a string signature.
-    """
-    if document is None or not isinstance(document.get("payload"), str):
+
+def _is_signature(member: dict[str, object]) -> bool:
+    """One signature of RFC 7515, section 7.2.1: a signature, and a protected header, a header, or both."""
+    if not _is_b64url(member.get("signature")) or not {"protected", "header"} & member.keys():
         return False
-    if isinstance(document.get("signature"), str):
+    if "header" in member and not isinstance(member["header"], dict):
+        return False
+    if "protected" not in member:
         return True
-    signatures = document.get("signatures")
+    protected = member["protected"]
+    if not _is_b64url(protected):
+        return False
+    try:
+        header_of(f"{protected}..")  # the decoder, the strict parser, and the object test of the compact path
+    except SignatureError:
+        return False
+    return True
+
+
+def _is_jws_json(document: dict[str, object] | None) -> bool:
+    """A JWS JSON Serialization (RFC 7515, section 7.2), by the exact shape of its members.
+
+    A non-empty base64url payload. The flattened form has the members of one signature at the top
+    level. The general form has a non-empty list of signatures and no signature member at the top.
+    Any other shape is a malformed token, so that a system under test cannot turn a fail into a
+    blocked step.
+    """
+    if document is None or not _is_b64url(document.get("payload")):
+        return False
+    if "signatures" not in document:
+        return _is_signature(document)
+    signatures = document["signatures"]
     return (
-        isinstance(signatures, list)
+        not {"signature", "protected", "header"} & document.keys()
+        and isinstance(signatures, list)
         and bool(signatures)
-        and all(isinstance(s, dict) and isinstance(s.get("signature"), str) for s in signatures)
+        and all(isinstance(s, dict) and _is_signature(s) for s in signatures)
     )
 
 
@@ -156,10 +185,11 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     findings: dict[str, JsonValue] = {"status": record.status}
     more: list[Record] = []
 
+    def observed() -> Observation:
+        return ctx.observation(0, kind="exchange", records=[record, *more], summary={"findings": findings})
+
     def result(passed: bool, code: str, message: str, *, no_answer: bool = False) -> CheckOutcome:
-        summary = {"findings": findings}
-        observation = ctx.observation(0, kind="exchange", records=[record, *more], summary=summary)
-        return completed(passed, code, f"{message} {_LIMIT}", [observation], no_answer=no_answer)
+        return completed(passed, code, f"{message} {_LIMIT}", [observed()], no_answer=no_answer)
 
     if record.status is None or record.status >= _SERVER_ERROR:
         # A server error is no answer about the signature. It is not a failed signature.
@@ -175,10 +205,16 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     except SignatureError:
         if _is_jws_json(json_object(record)):
             # OD-05: the JWS JSON serialization (RFC 7515, section 7.2) is valid JWS. A limit of this engine.
+            findings["structure"] = "a JWS JSON serialization"
             message = (
                 "The body is a JWS JSON serialization. This engine verifies the compact serialization only."
             )
-            return blocked("INTEGRITY.FORMAT.UNSUPPORTED", message)
+            return CheckOutcome(
+                status=ExecutionStatus.BLOCKED,
+                reason_code="INTEGRITY.FORMAT.UNSUPPORTED",
+                message=message,
+                observations=(observed(),),
+            )
         findings["structure"] = "not a compact JWS"
         return result(False, "INTEGRITY.TOKEN.MALFORMED", "The body is not a compact JWS.")
     if "x5c" not in header:
@@ -273,7 +309,7 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
             "The published passport is not a JSON object, so the signed payload has nothing to compare with."
         )
         return blocked("INTEGRITY.PAYLOAD.NOT_COMPARABLE", message)
-    if is_linkset(item, document):
+    if is_linkset(document):
         message = (
             "The published passport is a linkset, so the signed payload has no passport to compare with."
         )

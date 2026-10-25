@@ -360,9 +360,10 @@ A refused carrier URL is not fetched. `accept` sets the `Accept` request header.
 always means a final JSON object. A pass on another listed media type gives
 `IDENTIFIER.RESOLVED.MEDIA_TYPE`. The observation summary always records the final media type.
 
-A linkset (RFC 9264) is not a passport. An answer is a linkset if its media type is
-`application/linkset+json` or the native `application/linkset`. It is also a linkset if it is a
-JSON object whose `linkset` value is a non-empty list of objects. After the
+A linkset (RFC 9264) is not a passport. An answer is a linkset only if it is a JSON object with
+`linkset` as its only member. The value of `linkset` is a non-empty list of objects. The media
+type does not decide. If a linkset media type comes with a different body, each check judges that
+body as any other answer. After the
 `accepted_media_types` test, a linkset gives `blocked` with `IDENTIFIER.RESPONSE.LINKSET`. The
 check does not follow the links. If `accepted_media_types` lists one of the two linkset media
 types, a linkset gives
@@ -392,10 +393,14 @@ A transport error or a server error on either fetch gives `unreachable`. The che
 the `item` template, also with `item_target: resolved`, because it compares the two routes.
 
 `integrity.jws` verifies the JWS Compact Serialization only. A JWS JSON Serialization (RFC 7515,
-section 7.2) is a JSON object with a string `payload`. It also has a string `signature`, or a
-non-empty list `signatures` of objects that each have a string `signature`. Such a body gives
-`blocked` with `INTEGRITY.FORMAT.UNSUPPORTED`. Any other body that is not a compact JWS gives
-`INTEGRITY.TOKEN.MALFORMED`. A
+section 7.2) is a JSON object with a non-empty base64url `payload`. Here, base64url text holds only
+`A-Z`, `a-z`, `0-9`, `-`, and `_`. A signature has a non-empty base64url `signature`, and a
+`protected` member, a `header` member, or both. A `protected` value is the base64url form of a
+JSON object. A `header` value is a JSON object. The flattened form has the members of one
+signature at the top level and no `signatures`. The general form has a non-empty list
+`signatures` of signatures and none of their members at the top level. Such a body gives
+`blocked` with `INTEGRITY.FORMAT.UNSUPPORTED` and an observation of the signed resource. Any other
+body that is not a compact JWS gives `INTEGRITY.TOKEN.MALFORMED`. A
 published passport that is a linkset gives `blocked` with `INTEGRITY.PAYLOAD.NOT_COMPARABLE`.
 With `item_target: resolved`, a resolver answer that is a linkset gives
 `INTEGRITY.NO_TARGET` first (section 9.2).
