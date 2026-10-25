@@ -16,6 +16,7 @@ from pydantic import Field, field_validator
 
 from dppce.adapters.common import (
     LINKSET,
+    SERVER_ERRORS,
     blocked,
     carrier_identifier,
     completed,
@@ -24,6 +25,7 @@ from dppce.adapters.common import (
     is_linkset,
     json_object,
     media_type,
+    no_answer,
     unusable,
 )
 from dppce.adapters.identifier import gtin_check_digit_ok
@@ -42,7 +44,8 @@ _NO_TARGET: Final = "The carrier identifier is not an http or https URL. There i
 
 
 def _is_relation(value: object) -> bool:
-    if not isinstance(value, str) or len(value) > _MAX_RELATION_LENGTH:
+    # "anchor" names the context IRI of a link context object, not a relation (RFC 9264, 4.2.2).
+    if not isinstance(value, str) or len(value) > _MAX_RELATION_LENGTH or value == "anchor":
         return False
     return _REGISTERED.fullmatch(value) is not None or is_http_url(value)
 
@@ -111,8 +114,14 @@ def _structure_ok(document: dict[str, Any]) -> bool:
     return True
 
 
-def _linkset_failure(record: Record, carrier: str, relations: list[str]) -> tuple[str, str] | None:
-    """The reason code and message of the first rule that the answer breaks, or None."""
+def _no_reply(record: Record) -> bool:
+    # Only a missing answer is tested before the rules. The body rules of ``unusable`` wait until a
+    # rule needs the body: otherwise a body coding or a long body would turn a status fail into blocked.
+    return record.error is not None or record.status in SERVER_ERRORS
+
+
+def _linkset_head_failure(record: Record) -> tuple[str, str] | None:
+    """The reason code and message of the first status or media type rule that breaks, or None."""
     if record.status != 200:
         return (
             "RESOLVER.LINKSET.STATUS",
@@ -120,6 +129,11 @@ def _linkset_failure(record: Record, carrier: str, relations: list[str]) -> tupl
         )
     if media_type(record) != LINKSET:
         return "RESOLVER.LINKSET.MEDIA_TYPE", f"The linkset answer does not have the media type {LINKSET}."
+    return None
+
+
+def _linkset_body_failure(record: Record, carrier: str, relations: list[str]) -> tuple[str, str] | None:
+    """The reason code and message of the first body rule that the answer breaks, or None."""
     document = json_object(record)
     if document is None or not _structure_ok(document):
         message = "The linkset answer is not an RFC 9264 linkset of link context objects with target objects."
@@ -130,7 +144,7 @@ def _linkset_failure(record: Record, carrier: str, relations: list[str]) -> tupl
             "RESOLVER.LINKSET.ANCHOR",
             "No link context of the linkset has the carrier identifier as its anchor.",
         )
-    if not any(c.get(relation) for c in anchored for relation in relations):
+    if not any(isinstance(c.get(r), list) and c[r] for c in anchored for r in relations):
         message = (
             "The link context of the carrier has no link with a relation that the test purpose declares."
         )
@@ -157,8 +171,8 @@ def linkset(ctx: CheckContext) -> CheckOutcome:
     observations: list[Observation] = []
     for index, (request, url, accept) in enumerate(probes):
         record = fetch_once(ctx, url, accept=accept)
-        if (problem := unusable(ctx, record)) is not None:
-            return problem
+        if _no_reply(record):
+            return no_answer(ctx, record)
         observations.append(
             ctx.observation(
                 index,
@@ -168,7 +182,12 @@ def linkset(ctx: CheckContext) -> CheckOutcome:
                 transformations=transformations,
             )
         )
-        if (failure := _linkset_failure(record, carrier, [str(r) for r in relations])) is not None:
+        failure = _linkset_head_failure(record)
+        if failure is None:
+            if (problem := unusable(ctx, record)) is not None:
+                return problem
+            failure = _linkset_body_failure(record, carrier, [str(r) for r in relations])
+        if failure is not None:
             return completed(False, *failure, observations)
     message = (
         "The resolver answers both linkset requests with a linkset of the carrier identifier that has "
@@ -188,8 +207,8 @@ def well_known(ctx: CheckContext) -> CheckOutcome:
         return target
     carrier, transformations = target
     record = fetch_once(ctx, origin_of(carrier) + WELL_KNOWN)
-    if (problem := unusable(ctx, record)) is not None:
-        return problem
+    if _no_reply(record):
+        return no_answer(ctx, record)
     observation = ctx.observation(
         0,
         kind="exchange",
@@ -197,19 +216,16 @@ def well_known(ctx: CheckContext) -> CheckOutcome:
         summary=_summary(record, "well_known"),
         transformations=transformations,
     )
-    if record.redirects:
-        return CheckOutcome(
-            status=ExecutionStatus.BLOCKED,
-            reason_code="RESOLVER.WELLKNOWN.REDIRECTED",
-            message="The description file path redirects. This check does not judge a redirected file.",
-            observations=(observation,),
-        )
+    # The rules judge the final answer, also after a redirect. Only a redirected file that would
+    # pass is blocked, so that a redirect cannot turn a fail into blocked.
     if record.status != 200:
         message = f"The description file path answers {record.status}, not 200."
         return completed(False, "RESOLVER.WELLKNOWN.STATUS", message, [observation])
     if not _is_json(media_type(record)):
         message = "The description file does not have a JSON media type."
         return completed(False, "RESOLVER.WELLKNOWN.MEDIA_TYPE", message, [observation])
+    if (problem := unusable(ctx, record)) is not None:
+        return problem
     document = json_object(record)
     if document is None:
         message = "The description file is not a JSON object."
@@ -218,6 +234,13 @@ def well_known(ctx: CheckContext) -> CheckOutcome:
     if not (isinstance(root, str) and is_http_url(root) and origin_of(root) == origin_of(carrier)):
         message = "The resolverRoot of the description file is not a URL with the origin of the carrier."
         return completed(False, "RESOLVER.WELLKNOWN.ROOT", message, [observation])
+    if record.redirects:
+        return CheckOutcome(
+            status=ExecutionStatus.BLOCKED,
+            reason_code="RESOLVER.WELLKNOWN.REDIRECTED",
+            message="The description file path redirects. This check does not pass a redirected file.",
+            observations=(observation,),
+        )
     message = (
         "The description file names the origin of the carrier as resolverRoot. "
         "The other members of the file are not judged."
@@ -270,8 +293,9 @@ def conformance(ctx: CheckContext) -> CheckOutcome:
     observations: list[Observation] = []
     for index, (probe, url) in enumerate(probes):
         record = fetch_once(ctx, url)
-        if (problem := unusable(ctx, record)) is not None:
-            return problem
+        # The rules judge status and redirects only, never the body, so the body rules do not apply.
+        if _no_reply(record):
+            return no_answer(ctx, record)
         observations.append(
             ctx.observation(
                 index,

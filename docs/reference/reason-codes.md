@@ -227,12 +227,12 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `RESOLVER.CONFORMANCE.LINKSET_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
 | `RESOLVER.CONFORMANCE.NO_REDIRECT` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
 | `RESOLVER.CONFORMANCE.OK` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver.conformance` | pass |
-| `RESOLVER.LINKSET.ANCHOR` | RESOLVER |  | `dppce.adapters.resolver._linkset_failure` | not fixed here |
-| `RESOLVER.LINKSET.MEDIA_TYPE` | RESOLVER |  | `dppce.adapters.resolver._linkset_failure` | not fixed here |
+| `RESOLVER.LINKSET.ANCHOR` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
+| `RESOLVER.LINKSET.MEDIA_TYPE` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here |
 | `RESOLVER.LINKSET.OK` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | pass |
-| `RESOLVER.LINKSET.RELATION_MISSING` | RESOLVER |  | `dppce.adapters.resolver._linkset_failure` | not fixed here |
-| `RESOLVER.LINKSET.STATUS` | RESOLVER |  | `dppce.adapters.resolver._linkset_failure` | not fixed here |
-| `RESOLVER.LINKSET.STRUCTURE` | RESOLVER |  | `dppce.adapters.resolver._linkset_failure` | not fixed here |
+| `RESOLVER.LINKSET.RELATION_MISSING` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
+| `RESOLVER.LINKSET.STATUS` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here |
+| `RESOLVER.LINKSET.STRUCTURE` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
 | `RESOLVER.NO_TARGET` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver._carrier`, `dppce.adapters.resolver.conformance` | inconclusive |
 | `RESOLVER.PARAMS.INVALID` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | inconclusive |
 | `RESOLVER.WELLKNOWN.MEDIA_TYPE` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |

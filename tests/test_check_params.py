@@ -85,6 +85,7 @@ UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     ("data.context", {"document": "nothing", **ALLOWLIST}),
     ("resolver.linkset", {"document": "nothing", **RELATIONS}),
     ("resolver.linkset", {"relations": ["Not A Relation"]}),
+    ("resolver.linkset", {"relations": ["anchor"]}),
     ("api.contract", {"resource": "nothing"}),
     ("api.contract", {"method": "post"}),
     ("identifier.resolve", {"accepted_media_types": ["Text/HTML"]}),

@@ -71,7 +71,7 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "resolver",
         _E,
         "Check the GS1 resolver description file at the origin of the carrier identifier: status, "
-        "JSON media type, and resolverRoot. A redirect is not judged.",
+        "JSON media type, and resolverRoot. A redirected file that would pass is not passed.",
         None,
         "The GS1 resolver description schema is pinned as a local file and the check validates "
         "against it. Tested against a GS1 conformant resolver in a recorded test campaign.",

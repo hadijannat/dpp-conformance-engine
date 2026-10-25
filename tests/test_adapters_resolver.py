@@ -40,6 +40,12 @@ LINKTYPE = RESOLVER_PATH + "?linkType=linkset"
 WELL_KNOWN = "/.well-known/gs1resolver"
 # The carrier GTIN 09506000134352 with a wrong check digit.
 INVALID = "/01/09506000134353/21/EV0001"
+# Answers whose body the engine cannot judge: a body coding, and a body over the limit.
+Spoil = tuple[dict[str, str], bytes, dict[str, Any] | None]
+SPOILS: list[Spoil] = [
+    ({"Content-Encoding": "gzip"}, b'{"error": "x"}', None),
+    ({}, b'{"error": "' + b"x" * 4096 + b'"}', {"max_body_bytes": 1024}),
+]
 
 
 def _gs1_cases() -> list[dict[str, Any]]:
@@ -227,6 +233,29 @@ def test_linkset_status_other_than_200_fails(status: int, tmp_path: Path, loopba
     _failed(run(ctx), "RESOLVER.LINKSET.STATUS")
 
 
+@pytest.mark.parametrize("spoil", SPOILS, ids=["encoded", "truncated"])
+def test_linkset_status_fail_is_not_hidden_by_an_unusable_body(
+    spoil: Spoil, tmp_path: Path, loopback: Any
+) -> None:
+    # The status rule does not read the body, so a body coding or size cannot turn the fail into blocked.
+    headers, body, policy = spoil
+    api = Origin(loopback)
+    answer = (404, body, {"Content-Type": "application/json"} | headers)
+    api.routes.update({RESOLVER_PATH: answer, LINKTYPE: answer})
+    ctx = resolved_context(
+        tmp_path, "resolver.linkset", api.origin, params={"relations": [RELATION]}, policy=policy
+    )
+    _failed(run(ctx), "RESOLVER.LINKSET.STATUS")
+
+
+def test_linkset_body_with_a_coding_is_not_judged(tmp_path: Path, loopback: Any) -> None:
+    api = Origin(loopback)
+    answer = (200, _linkset(api.origin), {"Content-Type": LINKSET_TYPE, "Content-Encoding": "gzip"})
+    api.routes.update({RESOLVER_PATH: answer, LINKTYPE: answer})
+    ctx = resolved_context(tmp_path, "resolver.linkset", api.origin, params={"relations": [RELATION]})
+    _blocked(run(ctx), "TRANSPORT.BODY_ENCODED")
+
+
 def test_linkset_judges_the_link_type_request_too(tmp_path: Path, loopback: Any) -> None:
     api = Origin(loopback)
     api.routes.update(_routes(_linkset(api.origin)))
@@ -284,6 +313,8 @@ def test_linkset_without_a_declared_relation_fails(body: bytes, tmp_path: Path, 
         {"relations": ["https://x.example/a\n"]},
         {"relations": ["not a relation"]},
         {"relations": ["https://x.example/a"] * 17},
+        # "anchor" names the link context, not a relation: it would match the anchor text.
+        {"relations": ["anchor"]},
     ],
 )
 def test_linkset_with_invalid_parameters_sends_nothing(
@@ -350,6 +381,42 @@ def test_well_known_redirect_blocks(tmp_path: Path, loopback: Any) -> None:
 @pytest.mark.parametrize(
     ("route", "code"),
     [
+        ((200, _description("https://other.example.test"), {}), "RESOLVER.WELLKNOWN.ROOT"),
+        ((404, b'{"error": "x"}', {}), "RESOLVER.WELLKNOWN.STATUS"),
+        ((200, b"<html></html>", {"Content-Type": "text/html"}), "RESOLVER.WELLKNOWN.MEDIA_TYPE"),
+        ((200, b"[]", {}), "RESOLVER.WELLKNOWN.NOT_JSON"),
+    ],
+)
+def test_well_known_redirect_does_not_hide_a_fail(
+    route: tuple[int, bytes, dict[str, str]], code: str, tmp_path: Path, loopback: Any
+) -> None:
+    # Only a redirected file that would pass is blocked, so a redirect cannot turn a fail into blocked.
+    api = Origin(loopback)
+    api.routes[WELL_KNOWN] = moved(api.origin + "/description.json")
+    api.routes["/description.json"] = route
+    _failed(_well_known(tmp_path, api), code)
+
+
+@pytest.mark.parametrize("spoil", SPOILS, ids=["encoded", "truncated"])
+def test_well_known_status_fail_is_not_hidden_by_an_unusable_body(
+    spoil: Spoil, tmp_path: Path, loopback: Any
+) -> None:
+    headers, body, policy = spoil
+    api = Origin(loopback, {WELL_KNOWN: (404, body, headers)})
+    _failed(run(resolved_context(tmp_path, "resolver.well_known", api.origin, policy=policy)),
+            "RESOLVER.WELLKNOWN.STATUS")  # fmt: skip
+
+
+def test_well_known_body_with_a_coding_is_not_judged(tmp_path: Path, loopback: Any) -> None:
+    api = Origin(
+        loopback, {WELL_KNOWN: (200, _description("https://other.example.test"), {"Content-Encoding": "br"})}
+    )
+    _blocked(_well_known(tmp_path, api), "TRANSPORT.BODY_ENCODED")
+
+
+@pytest.mark.parametrize(
+    ("route", "code"),
+    [
         ((404, b'{"error": "x"}', {}), "RESOLVER.WELLKNOWN.STATUS"),
         ((403, b'{"error": "x"}', {}), "RESOLVER.WELLKNOWN.STATUS"),
         ((200, b"<html></html>", {"Content-Type": "text/html"}), "RESOLVER.WELLKNOWN.MEDIA_TYPE"),
@@ -379,7 +446,8 @@ def _resolver(origin: str) -> dict[str, tuple[int, bytes, dict[str, str]]]:
 
 
 def _conformance(tmp_path: Path, api: Origin) -> CheckOutcome:
-    ctx = resolved_context(tmp_path, "resolver.conformance", api.origin)
+    # A small body limit, so that a long body is a truncated one.
+    ctx = resolved_context(tmp_path, "resolver.conformance", api.origin, policy={"max_body_bytes": 1024})
     outcome = run(ctx)
     assert {r.method for r in ctx.acquirer.records()} == {"GET"}, "no write method, no HEAD, no OPTIONS"
     return outcome
@@ -409,6 +477,10 @@ def test_conformance_passes(
             "RESOLVER.CONFORMANCE.LINKSET_REDIRECTED",
         ),
         ({RESOLVER_PATH: served()}, "RESOLVER.CONFORMANCE.NO_REDIRECT"),
+        # The check never reads a body, so a body coding or size cannot turn a fail into blocked.
+        ({INVALID: (200, b"{}", {"Content-Encoding": "gzip"})}, "RESOLVER.CONFORMANCE.INVALID_ACCEPTED"),
+        ({INVALID: (200, b"x" * 4096, {})}, "RESOLVER.CONFORMANCE.INVALID_ACCEPTED"),
+        ({RESOLVER_PATH: (200, b"{}", {"Content-Encoding": "br"})}, "RESOLVER.CONFORMANCE.NO_REDIRECT"),
     ],
 )
 def test_conformance_fails(
