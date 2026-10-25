@@ -3,9 +3,11 @@
 ``validation/fault-catalogue.yaml`` states what must happen. This module says how the rig
 is set up for each case. The expected outcome always comes from the catalogue, never from here.
 
-A row of ``_SETUP`` maps a catalogue id to keyword arguments of ``ReferenceRig``, plus the keys
-``profile`` (a full profile id) and ``at`` (an evaluation time). Add a row only when the fault
-flag alone does not describe the setup, for example ``"F-40": {"ixit_changes": {...}}``.
+A row of ``_SETUP`` maps a catalogue id to keyword arguments of ``ReferenceRig``, plus the key
+``at`` (an evaluation time) and, for a boundary case only, ``profile`` (a full profile id). Add a
+row only when the fault flag alone does not describe the setup, for example
+``"F-40": {"ixit_changes": {...}}``. A sut fault picks its profiles with the catalogue field
+``profiles`` only; a ``profile`` key in its row is a catalogue error.
 """
 
 from __future__ import annotations
@@ -85,10 +87,16 @@ def _profiles(entry: dict[str, Any], default: tuple[str, ...]) -> tuple[str, ...
     return tuple(named)
 
 
-def _case(entry: dict[str, Any], default: tuple[str, ...]) -> Case:
+def _case(entry: dict[str, Any], default: tuple[str, ...], section: str) -> Case:
     setup = dict(_SETUP.get(entry["id"], {}))
     flag = entry.get("fault", "none")
     profiles = _profiles(entry, default)
+    # validation.run runs a sut fault under each of `profiles` and a boundary case only once,
+    # so either mismatch would leave a profile unrun without a message.
+    if section == "sut_faults" and "profile" in setup:
+        raise CatalogueError(f"{entry['id']}: a sut fault names its profiles in 'profiles', not in _SETUP")
+    if section == "boundary_cases" and len(profiles) > 1 and "profiles" in entry:
+        raise CatalogueError(f"{entry['id']}: a boundary case runs once, so it names at most one profile")
     return Case(
         id=entry["id"],
         description=entry["description"],
@@ -111,7 +119,7 @@ def load() -> dict[str, Any]:
 def _cases(section: str) -> list[Case]:
     document = load()
     default = tuple(document["profiles"])
-    return [_case(entry, default) for entry in document[section]]
+    return [_case(entry, default, section) for entry in document[section]]
 
 
 def sut_faults() -> list[Case]:

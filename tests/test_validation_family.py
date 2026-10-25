@@ -34,6 +34,7 @@ _AAS = [
     pytest.mark.aas,
     pytest.mark.skipif(find_spec("aas_test_engines") is None, reason="needs the optional 'aas' extra"),
 ]
+_LOAD = cases.load  # the shipped catalogue, before any test patches it
 _SYNTAX = {
     "id": "F-TEST-GS1",
     "class": "test_only",
@@ -44,14 +45,14 @@ _SYNTAX = {
 }
 
 
-def _with_fault(monkeypatch: pytest.MonkeyPatch, **changes: Any) -> cases.Case:
-    """Add one synthetic sut fault to the loaded catalogue and return its case."""
-    document = cases.load()
+def _with_fault(monkeypatch: pytest.MonkeyPatch, section: str = "sut_faults", **changes: Any) -> cases.Case:
+    """Add one synthetic case to a section of the shipped catalogue and return it."""
+    document = _LOAD()
     entry = {**_SYNTAX, **changes}
     patched = copy.deepcopy(document)
-    patched["sut_faults"].append(entry)
+    patched[section].append(entry)
     monkeypatch.setattr(cases, "load", lambda: patched)
-    return next(c for c in cases.sut_faults() if c.id == entry["id"])
+    return next(c for c in cases._cases(section) if c.id == entry["id"])
 
 
 def test_the_catalogue_names_one_control_per_family_profile() -> None:
@@ -123,6 +124,24 @@ def test_a_malformed_profiles_field_is_a_catalogue_error(
 ) -> None:
     with pytest.raises(cases.CatalogueError, match="F-TEST-GS1"):
         _with_fault(monkeypatch, profiles=profiles)
+
+
+def test_a_boundary_case_with_more_than_one_profile_is_a_catalogue_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A boundary case runs once, so a second profile would never run.
+    with pytest.raises(cases.CatalogueError, match=r"F-TEST-GS1.*one profile"):
+        _with_fault(monkeypatch, "boundary_cases", profiles=["family/gs1-resolver", "battery/ev"])
+    case = _with_fault(monkeypatch, "boundary_cases", profiles=["family/gs1-resolver"])
+    assert case.profile == "family/gs1-resolver"
+
+
+def test_a_setup_profile_on_a_sut_fault_is_a_catalogue_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A sut fault picks its profiles with the catalogue field only, never with a setup row.
+    monkeypatch.setitem(cases._SETUP, "F-TEST-GS1", {"profile": "family/gs1-resolver"})
+    with pytest.raises(cases.CatalogueError, match=r"F-TEST-GS1.*'profiles'"):
+        _with_fault(monkeypatch)
+    assert _with_fault(monkeypatch, "boundary_cases").profile == "family/gs1-resolver"
 
 
 @pytest.mark.validation

@@ -2,7 +2,8 @@
 
 Audience: assessors and contributors.
 Purpose: reproduce the validation of the checks against seeded faults.
-Prerequisites: an installed development environment with the `qr` extra.
+Prerequisites: an installed development environment with the `qr` and `aas` extras
+(`uv sync --all-extras`).
 
 ## What it does
 
@@ -62,7 +63,7 @@ A fault entry can name the profiles that it runs under. Use full profile ids.
 ```
 
 An entry without `profiles` runs under the catalogue-level `profiles`, the battery profiles.
-A boundary case runs once, under its first profile.
+A boundary case runs once, so it names at most one profile. More than one is a catalogue error.
 
 Each listed profile must plan the test purpose of the entry. If a profile does not plan it,
 the validation stops with a catalogue error. It never skips the case.
