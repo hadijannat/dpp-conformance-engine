@@ -1,0 +1,22 @@
+# Synthetic test information for the profile family/gs1-resolver against the loopback reference system.
+# Project-authored example. The origin options equal those of fixtures/reference/ev.ixit.yaml.
+# Start the reference system first: python -m dppce.infrastructure.reference_server
+schema_version: dppce.ixit/1
+endpoints:
+  api: https://id.example.test
+  public_origin: https://id.example.test
+  origin_override: http://127.0.0.1:8765
+samples:
+  identifier: https://id.example.test/01/09506000134352/21/EV0001
+  passport_id: 09506000134352-EV0001
+network:
+  allowed_hosts:
+  - 127.0.0.1
+  allow_private_hosts:
+  - 127.0.0.1
+  max_requests: 100
+  contact: reference-rig@example.test
+trust:
+  policy_version: TEST-ONLY-reference-1
+observation:
+  retention_days: 30

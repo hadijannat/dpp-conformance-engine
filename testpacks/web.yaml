@@ -1,0 +1,95 @@
+# Audience: contributors and assessors.
+# Purpose: define the declarative test purposes for the plain web passport profile family/web.
+# This file is project-authored and synthetic. It makes no normative statement.
+#
+# Later packages add their test purposes to this file. Rules for a new entry:
+# - The id starts with TP-WEB-. It names one FAM-WEB-... requirement in
+#   catalogue/packs/family-illustrative.yaml, and that requirement names it back.
+# - The applicability starts with `profile.id eq family/web` and equals the applicability of the
+#   requirement. Every family profile selects every family test pack, so this term keeps the
+#   step not applicable under the other family profiles.
+# - Read ICS fields only (identifier_scheme, signature_format, granularity, features.*), never
+#   ics.characteristics: a family profile declares no product fact.
+schema_version: dppce.testpack/1
+testpack_id: family/web-core
+version: 0.1.0
+title: Plain web passport test purposes
+test_purposes:
+- id: TP-WEB-RESOLVE-001
+  title: Resolve the passport URL
+  requirements:
+  - FAM-WEB-RESOLVE-001
+  profiles:
+  - '*'
+  applicability: &web
+    fact: profile.id
+    op: eq
+    value: family/web
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.resolve
+    params:
+      accepted_media_types:
+      - application/json
+      - application/ld+json
+      - text/html
+  expected_evidence:
+  - The resolver exchange with its redirect chain.
+  permitted_modes: &modes
+  - illustrative
+  - exploratory
+- id: TP-WEB-CONSISTENCY-001
+  title: Compare the passport URL with the identifier in the passport
+  requirements:
+  - FAM-WEB-CONSISTENCY-001
+  profiles:
+  - '*'
+  applicability: *web
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.consistency
+  expected_evidence:
+  - The compared identifier sources.
+  permitted_modes: *modes
+- id: TP-WEB-INTEGRITY-001
+  title: Verify the signed passport
+  requirements:
+  - FAM-WEB-INTEGRITY-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *web
+    - fact: ics.signature_format
+      op: eq
+      value: jws
+  roles:
+  - anonymous
+  stimulus:
+    check: integrity.jws
+  expected_evidence:
+  - Separate findings for signature, issuer trust, certificate validity, revocation, and payload.
+  permitted_modes: *modes
+  severity: critical
+- id: TP-WEB-VERSIONS-001
+  title: Check the version history
+  requirements:
+  - FAM-WEB-VERSIONS-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *web
+    - fact: ics.features.version_history
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: persistence.versions
+  expected_evidence:
+  - The version entries and the digest comparison.
+  permitted_modes: *modes
+  severity: minor

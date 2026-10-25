@@ -1,0 +1,12 @@
+# Synthetic declaration for the profile family/gs1-resolver against the loopback reference system.
+# Project-authored example. It makes no normative statement. Replace every value for a real system.
+schema_version: dppce.ics/1
+sut:
+  name: dppce reference DPP system (synthetic)
+  version: '1'
+  operator: Example Battery Works (synthetic)
+  identifier: urn:example:sut:reference-dpp
+profile: family/gs1-resolver
+product_category: unknown
+granularity: item
+identifier_scheme: gs1-digital-link
