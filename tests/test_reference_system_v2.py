@@ -11,6 +11,7 @@ Rewrite the snapshot only when a fixture body changes on purpose, and say why in
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import http.client
 import json
@@ -20,8 +21,11 @@ from typing import Any
 from urllib.parse import quote
 
 import pytest
+from cryptography import x509
+from cryptography.hazmat.primitives.asymmetric import ec
 from validation.rig import FIXTURES, AlternateLayout
 
+from dppce.evidence.jws import header_of, payload_of, public_jwk_of, verify_compact
 from dppce.infrastructure.reference_server import ReferenceServer, ReferenceSystem
 
 SNAPSHOT = Path(__file__).resolve().parent / "fixtures" / "reference-system-snapshot.json"
@@ -280,6 +284,37 @@ def test_the_resolver_serves_a_synthetic_description_file() -> None:
     assert document["resolverRoot"] == "https://id.example.test"
     assert document["supportedPrimaryKeys"] == ["01"]
     assert "synthetic" in document["name"]
+
+
+def test_flag_resolver_linkset_as_passport_answers_the_default_request_with_a_linkset() -> None:
+    with ReferenceServer(FIXTURES) as server:
+        expected = _linkset(server.origin, f"{RESOLVER}?linkType=linkset")
+    with ReferenceServer(FIXTURES, faults=frozenset({"resolver_linkset_as_passport"})) as server:
+        assert _linkset(server.origin, RESOLVER) == expected
+        assert _linkset(server.origin, RESOLVER, {"Accept": "*/*"}) == expected
+        # A route that is not the resolver keeps its core answer.
+        assert _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}")[1]["Content-Type"] == "application/json"
+
+
+def test_flag_signed_jws_json_serves_the_compact_token_as_flattened_jws_json() -> None:
+    signed = f"/dpp/{EV[0]}-{EV[1]}/signed"
+    with ReferenceServer(FIXTURES) as server:
+        compact = _call(server.origin, "GET", signed)[2].decode("ascii")
+    with ReferenceServer(FIXTURES, faults=frozenset({"signed_jws_json"})) as server:
+        status, headers, body = _call(server.origin, "GET", signed)
+        other = _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}")
+    assert (status, headers["Content-Type"]) == (200, "application/jose+json")
+    document = json.loads(body)
+    assert sorted(document) == ["payload", "protected", "signature"]
+    token = ".".join((document["protected"], document["payload"], document["signature"]))
+    # The ES256 signature is randomized, so the header and the payload equal the compact token's.
+    assert token.split(".")[:2] == compact.split(".")[:2]
+    header = header_of(token)
+    assert header["typ"] == "dpp+jws"
+    leaf = x509.load_der_x509_certificate(base64.b64decode(header["x5c"][0]))
+    assert isinstance(leaf_key := leaf.public_key(), ec.EllipticCurvePublicKey)
+    assert verify_compact(token, public_jwk_of(leaf_key), typ="dpp+jws") == payload_of(compact)
+    assert other[1]["Content-Type"] == "application/json"
 
 
 def test_fault_flags_are_the_core_flags_and_the_flags_of_each_family() -> None:
