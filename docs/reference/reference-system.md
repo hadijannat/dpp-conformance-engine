@@ -57,9 +57,11 @@ The reference system asks each family in the order of `FAMILIES`, then the core 
 `deny_all`, only the core routes answer. `FAULTS` is the union of the core flags and the flags
 of each family. To add a family, write one module and add one entry to `FAMILIES`.
 
-A family passes on each request that the core answers, unless one of its own flags is active.
-The test `tests/test_reference_system_v2.py` compares the core answers with a snapshot of
-version 1. The snapshot covers each route, role, and fault flag of version 1.
+A family must not change the answer to a request of the version 1 snapshot, unless one of its
+own flags is active. The snapshot holds each route, role, and fault flag of version 1. It uses
+`GET` with no `Accept` header or with `Accept: */*`. The test
+`tests/test_reference_system_v2.py` compares the answers with this snapshot. A family can add
+answers for other paths, queries, or `Accept` values.
 
 ## 2. Identifiers and the origin override
 

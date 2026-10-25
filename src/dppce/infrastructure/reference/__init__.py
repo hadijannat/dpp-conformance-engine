@@ -15,9 +15,12 @@ Contract of a family module (``base.Family``):
   drops it for ``HEAD``. The module never changes state: the reference system has no write
   operation.
 
-The reference system asks each family in ``FAMILIES`` order, before the core. A family must
-pass on every request that the core already answers, unless one of its own flags is active.
-``tests/test_reference_system_v2.py`` checks this with a snapshot of the core answers.
+The reference system asks each family in ``FAMILIES`` order, before the core. Under
+``deny_all`` no family is asked. A family must not change the answer to a request of the
+version 1 snapshot, unless one of its own flags is active. The snapshot holds each route of
+each layout, each role, and each fault flag of version 1, for ``GET`` with no ``Accept`` header
+or with ``Accept: */*``. ``tests/test_reference_system_v2.py`` checks the snapshot. A family may
+add answers for other paths, queries, or ``Accept`` values.
 
 To add a family: write ``reference/<name>.py`` and add one entry to ``FAMILIES``. The core
 handler and the HTTP server do not change. Document each new flag in

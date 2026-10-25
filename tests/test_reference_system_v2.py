@@ -204,6 +204,13 @@ def test_options_names_the_read_methods_and_the_cors_headers() -> None:
             assert "Content-Type" not in headers
 
 
+def test_under_deny_all_only_the_core_answers_and_options_is_forbidden() -> None:
+    with ReferenceServer(FIXTURES, faults=frozenset({"deny_all"})) as server:
+        # The core has no route for this path, so a 403 here shows that no family answered.
+        assert _call(server.origin, "GET", "/.well-known/gs1resolver")[0] == 403
+        assert _call(server.origin, "OPTIONS", RESOLVER)[0] == 403
+
+
 def test_the_reference_system_has_no_write_operation() -> None:
     with ReferenceServer(FIXTURES) as server:
         before = _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}")
