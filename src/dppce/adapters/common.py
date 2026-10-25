@@ -8,12 +8,13 @@ from __future__ import annotations
 import io
 import re
 import warnings
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from decimal import Decimal
 from typing import Any, Final
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import jsonschema
+import referencing.jsonschema
 from jsonschema.exceptions import SchemaError, ValidationError
 from jsonschema.protocols import Validator
 from referencing import Registry
@@ -341,16 +342,160 @@ def dig(document: Any, dotted: str) -> Any:
     return node
 
 
-_URI: Final = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]*")
 # A fixed set, so that an installed optional package cannot change what a run asserts. These
-# checkers of jsonschema need only the standard library. "uri" is the engine's own.
-_FORMATS: Final = jsonschema.FormatChecker(formats=("date", "email", "idn-email", "ipv4", "ipv6", "uuid"))
+# checkers of jsonschema need only the standard library. The other formats are the engine's own:
+# jsonschema's checkers for them need packages that are not installed.
+_FORMATS: Final = jsonschema.FormatChecker(formats=("email", "idn-email", "ipv4", "ipv6", "uuid"))
+
+# RFC 3339 section 5.6. [0-9] and fullmatch: a non-ASCII digit or a trailing newline is refused.
+_FULL_DATE: Final = re.compile(r"([0-9]{4})-([0-9]{2})-([0-9]{2})")
+_FULL_TIME: Final = re.compile(
+    r"([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.[0-9]+)?(?:[Zz]|([+-])([0-9]{2}):([0-9]{2}))"
+)
+# RFC 3339 Appendix A. ABNF literals are case-insensitive (RFC 5234 section 2.3); ASCII only,
+# because Unicode case folding matches the long s to "S".
+_DUR_TIME: Final = r"T(?:[0-9]+H(?:[0-9]+M(?:[0-9]+S)?)?|[0-9]+M(?:[0-9]+S)?|[0-9]+S)"
+_DUR_DATE: Final = r"(?:[0-9]+D|[0-9]+M(?:[0-9]+D)?|[0-9]+Y(?:[0-9]+M(?:[0-9]+D)?)?)"
+_DURATION: Final = re.compile(
+    f"P(?:{_DUR_DATE}(?:{_DUR_TIME})?|{_DUR_TIME}|[0-9]+W)", re.ASCII | re.IGNORECASE
+)
 
 
-@_FORMATS.checks("uri")
-def _is_uri(value: object) -> bool:
-    # ponytail: an RFC 3986 scheme and URI characters only; the parts after the scheme are not parsed.
-    return not isinstance(value, str) or _URI.fullmatch(value) is not None
+def _days_in(year: int, month: int) -> int:
+    if month == 2:
+        return 29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28
+    return 30 if month in (4, 6, 9, 11) else 31
+
+
+def _full_date(text: str) -> tuple[int, int, int] | None:
+    # Not datetime.date: RFC 3339 permits the year 0000, and Python dates start at 0001.
+    match = _FULL_DATE.fullmatch(text)
+    if match is None:
+        return None
+    year, month, day = map(int, match.groups())
+    return (year, month, day) if 1 <= month <= 12 and 1 <= day <= _days_in(year, month) else None
+
+
+def _full_time(text: str) -> tuple[bool, int] | None:
+    """(leap second, day shift to UTC) of an RFC 3339 full-time, or None.
+
+    A leap second is valid only at 23:59 UTC (RFC 3339 section 5.7).
+    """
+    match = _FULL_TIME.fullmatch(text)
+    if match is None:
+        return None
+    hour, minute, second, sign = int(match[1]), int(match[2]), int(match[3]), match[4]
+    hours, minutes = int(match[5] or 0), int(match[6] or 0)
+    if hour > 23 or minute > 59 or second > 60 or hours > 23 or minutes > 59:
+        return None
+    offset = (hours * 60 + minutes) * (-1 if sign == "-" else 1)
+    shift, utc = divmod(hour * 60 + minute - offset, 1440)
+    if second == 60 and utc != 23 * 60 + 59:
+        return None
+    return second == 60, shift
+
+
+@_FORMATS.checks("date")
+def _is_date(value: object) -> bool:
+    return not isinstance(value, str) or _full_date(value) is not None
+
+
+@_FORMATS.checks("time")
+def _is_time(value: object) -> bool:
+    return not isinstance(value, str) or _full_time(value) is not None
+
+
+@_FORMATS.checks("date-time")
+def _is_date_time(value: object) -> bool:
+    if not isinstance(value, str):
+        return True
+    day, separator, time = value[:10], value[10:11], value[11:]
+    date, clock = _full_date(day), _full_time(time)
+    if date is None or separator not in ("T", "t") or clock is None:
+        return False
+    leap, shift = clock
+    if not leap:
+        return True
+    # A leap second ends a month in UTC. The UTC date is the local date moved by the shift.
+    year, month, mday = date
+    last = _days_in(year, month)
+    return {0: mday == last, 1: mday + 1 == last, -1: mday == 1}[shift]
+
+
+@_FORMATS.checks("duration")
+def _is_duration(value: object) -> bool:
+    return not isinstance(value, str) or _DURATION.fullmatch(value) is not None
+
+
+def _uri_grammar(ucschar: str, iprivate: str) -> tuple[re.Pattern[str], re.Pattern[str]]:
+    """RFC 3986 Appendix A, or RFC 3987 section 2.2 with the extra characters: (absolute, reference)."""
+    hexdig, sub = "[0-9A-Fa-f]", "!$&'()*+,;="
+    unreserved = "A-Za-z0-9._~" + ucschar + r"\-"
+    pct = f"%{hexdig}{hexdig}"
+    pchar = f"(?:[{unreserved}{sub}:@]|{pct})"
+    octet = "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])"
+    h16, ipv4 = hexdig + "{1,4}", rf"{octet}(?:\.{octet}){{3}}"
+    ls32 = f"(?:{h16}:{h16}|{ipv4})"
+    ipv6 = "|".join(
+        (
+            f"(?:{h16}:){{6}}{ls32}",
+            f"::(?:{h16}:){{5}}{ls32}",
+            f"(?:{h16})?::(?:{h16}:){{4}}{ls32}",
+            f"(?:(?:{h16}:){{0,1}}{h16})?::(?:{h16}:){{3}}{ls32}",
+            f"(?:(?:{h16}:){{0,2}}{h16})?::(?:{h16}:){{2}}{ls32}",
+            f"(?:(?:{h16}:){{0,3}}{h16})?::{h16}:{ls32}",
+            f"(?:(?:{h16}:){{0,4}}{h16})?::{ls32}",
+            f"(?:(?:{h16}:){{0,5}}{h16})?::{h16}",
+            f"(?:(?:{h16}:){{0,6}}{h16})?::",
+        )
+    )
+    # An IP literal stays ASCII in an IRI too. RFC 3986 has no zone identifier.
+    literal = rf"\[(?:{ipv6}|v{hexdig}+\.[A-Za-z0-9._~\-{sub}:]+)\]"
+    userinfo = f"(?:[{unreserved}{sub}:]|{pct})*"
+    authority = f"(?:{userinfo}@)?(?:{literal}|(?:[{unreserved}{sub}]|{pct})*)(?::[0-9]*)?"
+    abempty = f"(?:/{pchar}*)*"
+    absolute_path = f"/(?:{pchar}+{abempty})?"
+    hier = f"(?://{authority}{abempty}|{absolute_path}|{pchar}+{abempty}|)"
+    noscheme = f"(?:[{unreserved}{sub}@]|{pct})+{abempty}"
+    relative = f"(?://{authority}{abempty}|{absolute_path}|{noscheme}|)"
+    tail = f"(?:\\?(?:{pchar}|[/?{iprivate}])*)?(?:#(?:{pchar}|[/?])*)?"
+    scheme = r"[A-Za-z][A-Za-z0-9+.\-]*"
+    return re.compile(f"{scheme}:{hier}{tail}"), re.compile(f"(?:{scheme}:{hier}|{relative}){tail}")
+
+
+_URI, _URI_REFERENCE = _uri_grammar("", "")
+
+
+def _ranges(*bounds: tuple[int, int]) -> str:
+    return "".join(f"{chr(low)}-{chr(high)}" for low, high in bounds)
+
+
+# RFC 3987: ucschar extends unreserved, and iprivate is permitted in the query only.
+_UCSCHAR: Final = _ranges(
+    (0xA0, 0xD7FF),
+    (0xF900, 0xFDCF),
+    (0xFDF0, 0xFFEF),
+    *((plane << 16, (plane << 16) + 0xFFFD) for plane in range(1, 14)),
+    (0xE1000, 0xEFFFD),
+)
+_IPRIVATE: Final = _ranges((0xE000, 0xF8FF), (0xF0000, 0xFFFFD), (0x100000, 0x10FFFD))
+_IRI, _IRI_REFERENCE = _uri_grammar(_UCSCHAR, _IPRIVATE)
+
+
+def _grammar_check(grammar: re.Pattern[str]) -> Callable[[object], bool]:
+    def check(value: object) -> bool:
+        return not isinstance(value, str) or grammar.fullmatch(value) is not None
+
+    return check
+
+
+for _format, _grammar in (
+    ("uri", _URI),
+    ("uri-reference", _URI_REFERENCE),
+    ("iri", _IRI),
+    ("iri-reference", _IRI_REFERENCE),
+):
+    _FORMATS.checks(_format)(_grammar_check(_grammar))
 
 
 def _is_number(_: object, value: object) -> bool:
@@ -395,14 +540,81 @@ def _multiple_of(validator: Validator, divisor: Any, instance: Any, schema: Any)
         yield ValidationError(f"The value is not a multiple of {divisor}.")
 
 
-# Documents are parsed with exact decimals, so a value just above a bound cannot round onto it.
-_Validator: Final[type[Validator]] = jsonschema.validators.extend(  # type: ignore[no-untyped-call]  # jsonschema ships extend() without annotations
-    jsonschema.Draft202012Validator,
-    validators={"multipleOf": _multiple_of},
-    type_checker=jsonschema.Draft202012Validator.TYPE_CHECKER.redefine_many(
-        {"number": _is_number, "integer": _is_integer}
+def _extended(base: Any, integer: Callable[[object, object], bool] = _is_integer) -> type[Validator]:
+    # Documents are parsed with exact decimals, so a value just above a bound cannot round onto it.
+    extended: type[Validator] = jsonschema.validators.extend(  # type: ignore[no-untyped-call]  # jsonschema ships extend() without annotations
+        base,
+        validators={"multipleOf": _multiple_of},
+        type_checker=base.TYPE_CHECKER.redefine_many({"number": _is_number, "integer": integer}),
+    )
+    return extended
+
+
+_DRAFT_2020: Final = "https://json-schema.org/draft/2020-12/schema"
+_DRAFT_07: Final = "http://json-schema.org/draft-07/schema"
+_VALIDATORS: Final = {
+    _DRAFT_2020: _extended(jsonschema.Draft202012Validator),
+    _DRAFT_07: _extended(jsonschema.Draft7Validator),
+}
+_SPECIFICATIONS: Final = {
+    _DRAFT_2020: referencing.jsonschema.DRAFT202012,
+    _DRAFT_07: referencing.jsonschema.DRAFT7,
+}
+# Keywords of another dialect that this dialect does not implement. The validator would skip one
+# silently, and a document that breaks it would pass.
+_IGNORED: Final = {
+    _DRAFT_2020: frozenset({"additionalItems", "dependencies", "$recursiveAnchor", "$recursiveRef"}),
+    _DRAFT_07: frozenset(
+        {
+            "$dynamicRef",
+            "$recursiveRef",
+            "dependentRequired",
+            "dependentSchemas",
+            "maxContains",
+            "minContains",
+            "prefixItems",
+            "unevaluatedItems",
+            "unevaluatedProperties",
+        }
     ),
-)
+}
+# OpenAPI 3.0 takes its integer from JSON Schema Wright draft 00: no fraction and no exponent part.
+# With exact parsing, only such a number is a Python int.
+_OPENAPI_30: Final = _extended(jsonschema.Draft202012Validator, lambda _, value: type(value) is int)
+
+
+class DialectError(SchemaError):
+    """The schema names a JSON Schema dialect that the engine does not implement."""
+
+
+def _dialect(value: object) -> str:
+    """The dialect that a ``$schema`` value names, or DialectError. An empty fragment is the same URI."""
+    name = value.removesuffix("#") if isinstance(value, str) else None
+    if name not in _VALIDATORS:
+        raise DialectError(f"the dialect {value!r} is not implemented")
+    return name
+
+
+def _check_keywords(part: Mapping[str, Any], dialect: str) -> None:
+    """Raise if a subschema names another dialect, or uses a keyword that its dialect ignores.
+
+    The walk follows the keywords of the dialect, so a property named "dependencies" is no keyword.
+    ponytail: a subschema that only a ``$ref`` into an unknown keyword reaches is not walked.
+    """
+    pending: list[Any] = [part]
+    while pending:
+        node = pending.pop()
+        if not isinstance(node, Mapping):
+            continue
+        if "$schema" in node and _dialect(node["$schema"]) != dialect:
+            raise DialectError("a subschema names another dialect")
+        if ignored := sorted(_IGNORED[dialect] & node.keys()):
+            raise SchemaError(f"the dialect ignores the keywords {', '.join(ignored)}")
+        pending.extend(_SPECIFICATIONS[dialect].subresources_of(node))
+        # 2020-12 keeps "definitions" in its metaschema but does not walk it as a keyword.
+        definitions = node.get("definitions")
+        if isinstance(definitions, Mapping):
+            pending.extend(definitions.values())
 
 
 def _exact(node: Any) -> Any:
@@ -432,12 +644,15 @@ def unassertable_formats(schema: Any) -> list[str]:
     return sorted(found)
 
 
-def validator(schema: Mapping[str, Any]) -> Validator | None:
+def validator(schema: Mapping[str, Any], *, openapi_30: bool = False) -> Validator | None:
     """Build a validator that never fetches anything. Returns None if the schema has a non-local ``$ref``.
 
-    Raises SchemaError for a schema that is not valid JSON Schema 2020-12, also in
+    The top-level ``$schema`` selects the dialect: absent or 2020-12, or draft-07. Another value
+    raises DialectError. Raises SchemaError for a schema that is not valid in its dialect, also in
     ``components.schemas``: such a schema would raise or blame the document for its own defect.
-    The validator asserts ``format``. Give it documents parsed with exact decimals.
+    A keyword that the dialect ignores also raises SchemaError. ``openapi_30`` takes a schema
+    that api.contract translated from OpenAPI 3.0 and keeps the 3.0 integer. The validator
+    asserts ``format``. Give it documents parsed with exact decimals.
     """
 
     def local(node: Any) -> bool:
@@ -455,10 +670,14 @@ def validator(schema: Mapping[str, Any]) -> Validator | None:
     # check_schema does not read the OpenAPI "components" keyword, so each component is checked.
     components = schema.get("components")
     parts = components.get("schemas") if isinstance(components, Mapping) else None
+    dialect = _dialect(schema.get("$schema", _DRAFT_2020))
+    cls = _OPENAPI_30 if openapi_30 else _VALIDATORS[dialect]
     for part in [schema, *(parts.values() if isinstance(parts, Mapping) else ())]:
-        _Validator.check_schema(part)
+        cls.check_schema(part)
+        if isinstance(part, Mapping):
+            _check_keywords(part, dialect)
     # An empty registry has no retrieval function, so no reference can leave the document.
-    return _Validator(_exact(dict(schema)), registry=Registry(), format_checker=_FORMATS)
+    return cls(_exact(dict(schema)), registry=Registry(), format_checker=_FORMATS)
 
 
 def schema_errors(check: Validator, document: Any) -> list[JsonValue] | None:
