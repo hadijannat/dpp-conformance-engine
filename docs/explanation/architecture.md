@@ -360,6 +360,13 @@ A refused carrier URL is not fetched. `accept` sets the `Accept` request header.
 always means a final JSON object. A pass on another listed media type gives
 `IDENTIFIER.RESOLVED.MEDIA_TYPE`. The observation summary always records the final media type.
 
+A linkset (RFC 9264) is not a passport. An answer is a linkset if its media type is
+`application/linkset+json`. It is also a linkset if it is a JSON object whose `linkset` value is a
+non-empty list of objects. After the `accepted_media_types` test, a linkset gives `blocked`
+with `IDENTIFIER.RESPONSE.LINKSET`. The check does not follow the links. If
+`accepted_media_types` lists `application/linkset+json`, a linkset gives
+`IDENTIFIER.RESOLVED.MEDIA_TYPE`. A linkset never gives `IDENTIFIER.RESOLVED`.
+
 `identifier.resolve` reports an answer with a status from 500 to 599 as `unreachable` (section 9).
 Any other status except 200, 404, and 410 gives `IDENTIFIER.RESOLUTION.STATUS`.
 
@@ -371,7 +378,8 @@ payload. The check takes the first row that applies:
 1. The carrier identifier is not a URL: `blocked`, `IDENTIFIER.NOT_RESOLVABLE`. A URL here is
    an `http` or `https` URL with a host, a valid port, and no control character or space.
    `identifier.resolve` uses the same test and gives `IDENTIFIER.UNRESOLVED` for any other text.
-2. The resolver answer is not a JSON object with status 200: `blocked`, `IDENTIFIER.NOT_RESOLVED`.
+2. The resolver answer is not a JSON object with status 200, or it is a linkset:
+   `blocked`, `IDENTIFIER.NOT_RESOLVED`.
 3. An identifier differs: `IDENTIFIER.MISMATCH`. The check does not fetch the item target.
 4. With `compare_item`, the `item` template gives no URL: `blocked`, `IDENTIFIER.NO_TARGET`. The
    item target is not fetched.
@@ -381,6 +389,11 @@ payload. The check takes the first row that applies:
 
 A transport error or a server error on either fetch gives `unreachable`. The check always uses
 the `item` template, also with `item_target: resolved`, because it compares the two routes.
+
+`integrity.jws` verifies the JWS Compact Serialization only. A body that is a JSON object with
+`payload` and `signature` or `signatures` is a JWS JSON Serialization (RFC 7515, section 7.2).
+It gives `blocked` with `INTEGRITY.FORMAT.UNSUPPORTED`, not `INTEGRITY.TOKEN.MALFORMED`. A
+published passport that is a linkset gives `blocked` with `INTEGRITY.PAYLOAD.NOT_COMPARABLE`.
 
 `identifier.parse` accepts one GS1 Digital Link form in this version. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. With `require_https`, a valid identifier whose

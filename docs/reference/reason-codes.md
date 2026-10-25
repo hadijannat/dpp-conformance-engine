@@ -114,7 +114,8 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive |
 | `IDENTIFIER.RESOLUTION.STATUS` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.RESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass |
-| `IDENTIFIER.RESOLVED.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass |
+| `IDENTIFIER.RESOLVED.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier._linkset_outcome`, `dppce.adapters.identifier.resolve` | pass |
+| `IDENTIFIER.RESPONSE.LINKSET` | IDENTIFIER |  | `dppce.adapters.identifier._linkset_outcome` | inconclusive |
 | `IDENTIFIER.RESPONSE.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.RESPONSE.NOT_JSON` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.SCHEME.NOT_HTTPS` | IDENTIFIER | `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
@@ -126,6 +127,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `INTEGRITY.CERT.EXPIRED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.CERT.KEY_USAGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.CERT.REVOKED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
+| `INTEGRITY.FORMAT.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.ISSUER.UNTRUSTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.KEY.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.NO_TARGET` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
