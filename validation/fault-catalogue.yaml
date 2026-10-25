@@ -26,10 +26,11 @@
 # that adds the linkset and JWS JSON guards to the adapters. It also comes before the commit that
 # adds the flags resolver_linkset_as_passport and signed_jws_json to the reference system.
 # Version 0.7.0 adds the family controls C-FAMILY-WEB, C-FAMILY-GS1, C-FAMILY-VC, and
-# C-FAMILY-AAS, and the optional per-case field profiles. It also adds the faults F-40 to F-52,
-# F-54, and F-55 and the boundary cases B-12 and B-14. Each entry commit comes before the commits
-# that implement the check and seed the fault. F-43 and F-44 are the exception: their flags are
-# older than their entries.
+# C-FAMILY-AAS, and the optional per-case field profiles. It also adds the faults F-40 to F-43,
+# F-48 to F-52, F-54, and F-55, and the boundary cases B-12, B-14, and F-44 to F-47. F-53 is not
+# used. Each entry commit comes before the commits that implement the check and seed the fault,
+# with two exceptions. The flags of F-43 and F-44 are older than their entries. The QR fixture of
+# F-45 is older than its entry, but its rig setup is newer.
 # - C-FAMILY-*: the entry commit comes before the commit that runs family profiles in the rig.
 # - F-40 to F-47 and B-12: the entry commit comes before the commit that adds the form gs1-dl and
 #   the check identifier.granularity. It also comes before the commit that adds the QR fixtures
