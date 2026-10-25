@@ -6,7 +6,7 @@ Prerequisites: none.
 Each file is project-authored and synthetic. No file is a copy of an IDTA template.
 Each sample holds one shell with an `example.test` identifier, or a deliberate defect.
 The `TEST-ONLY-dpp-*` files use the semanticIds and idShorts of the pinned IDTA 02099-1
-template in `tests/vectors/idta-02099-1`. They copy no other content of it.
+template that `tests/vectors/idta-02099-1/README.md` names. They copy no other content of it.
 
 | File | Expected outcome with aas-test-engines 1.0.3 |
 | --- | --- |

@@ -88,8 +88,7 @@ def test_each_vendored_vector_file_has_one_source_record_with_its_hashes() -> No
         assert commit is not None, record.id
         assert record.official_url.startswith("https://github.com/"), record.id
         assert commit[1] in record.official_url, record.id
-        # CC-BY-4.0: the IDTA 02099-1 template (OD-02 of program P2). Every other vector is Apache-2.0.
-        assert record.license_or_reuse_terms.startswith(("Apache-2.0", "CC-BY-4.0")), record.id
+        assert record.license_or_reuse_terms.startswith("Apache-2.0"), record.id
 
 
 # -- RFC 8785 (JCS) -----------------------------------------------------------------------------

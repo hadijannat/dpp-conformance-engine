@@ -206,8 +206,9 @@ def aas_validate(ctx: CheckContext) -> CheckOutcome:
     return completed(True, "AAS.VALID", f"The wrapped validator accepts the file. {limit}", [observation])
 
 
-# Derived from tests/vectors/idta-02099-1, and a test asserts that the two are equal. Identifiers
-# only: the definitions of the template are not copied (CLAUDE.md rule 5).
+# Derived from the pinned template that tests/vectors/idta-02099-1/README.md names. A test asserts that
+# the two are equal when an operator supplies the file. Identifiers only: the template holds
+# definitions with a European standard as their source, so it is not vendored (CLAUDE.md rule 5).
 DPP_TEMPLATE: Final = "IDTA 02099-1 version 1.0 (template release 1.0.2)"
 DPP_SUBMODEL_SEMANTIC_ID: Final = "https://admin-shell.io/idta/cds/dppMetadata/1"
 # (idShort, semanticId, SMT/Cardinality) of each top-level element, in template order.

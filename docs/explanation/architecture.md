@@ -623,8 +623,10 @@ as valid. So `AAS.VALID` does not show that the file has a shell or a submodel.
 `aas.dpp_compose` takes one optional parameter, `artifact`, the IXIT sample. Its default is
 `aas_file`. The check reads the sample as JSON with the strict parser. It sends no request and
 needs no extra. It compares the sample with IDTA 02099-1 version 1.0, template release 1.0.2. The
-template is vendored in `tests/vectors/idta-02099-1`. A table in `src/dppce/adapters/aas.py` holds
-its identifiers, and a test derives the same table from the file. These rules apply:
+template holds definition text from a European standard, so the project does not vendor it.
+`tests/vectors/idta-02099-1/README.md` names the pinned file. A table in `src/dppce/adapters/aas.py`
+holds its identifiers. A test derives the same table from a local copy that an operator supplies.
+These rules apply:
 
 - A semanticId matches if it is an object with one key, and the value of that key is the
   semanticId of the template as exact text. The reference type and the key type do not matter.

@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +23,9 @@ from tests.test_url_templates import context
 
 ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = ROOT / "fixtures" / "aas"
-TEMPLATE = ROOT / "tests" / "vectors" / "idta-02099-1" / "IDTA-02099-1-template-dpp-part-1.json"
+# The template is not vendored (CLAUDE.md rule 5, tests/vectors/idta-02099-1/README.md). An operator
+# supplies a local copy of the pinned blob through this variable.
+TEMPLATE = os.environ.get("DPPCE_IDTA_02099_1_TEMPLATE", "")
 VALID = json.loads((SAMPLES / "TEST-ONLY-dpp-valid.json").read_text(encoding="utf-8"))
 
 
@@ -43,14 +46,16 @@ def _verdict(outcome: Any) -> tuple[Any, Any, str]:
     return outcome.status, outcome.passed, outcome.reason_code
 
 
-# -- The table is the vendored template ----------------------------------------------------------
+# -- The table is the pinned template ------------------------------------------------------------
 
 
-def test_the_table_equals_the_vendored_template() -> None:
-    assert hashlib.sha256(TEMPLATE.read_bytes()).hexdigest() == (
+@pytest.mark.skipif(not TEMPLATE, reason="set DPPCE_IDTA_02099_1_TEMPLATE to a local copy of the template")
+def test_the_table_equals_the_template() -> None:
+    body = Path(TEMPLATE).read_bytes()
+    assert hashlib.sha256(body).hexdigest() == (
         "45d3f5ee78f628941816f4f6e30221f535a91c318114f41143328881c887eb85"
     )
-    template = json.loads(TEMPLATE.read_text(encoding="utf-8"))
+    template = json.loads(body)
     (submodel,) = template["submodels"]
     assert submodel["semanticId"]["keys"][0]["value"] == aas.DPP_SUBMODEL_SEMANTIC_ID
     derived = tuple(
