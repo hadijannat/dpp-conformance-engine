@@ -32,6 +32,13 @@ _SETUP: dict[str, dict[str, Any]] = {
     "B-05": {"ics_changes": {"characteristics": {"capacity_wh": "unknown"}}},
     "B-06": {"profile": "battery/lmt"},
     "B-08": {"ics_changes": {"features": {"item_data": False}}},
+    "F-40": {"samples": {"qr_image": "fixtures/reference/qr/TEST-ONLY-qualifier-order.png"}},
+    "F-41": {"samples": {"qr_image": "fixtures/reference/qr/TEST-ONLY-model-level.png"}},
+    "F-42": {"samples": {"qr_image": "fixtures/reference/qr/TEST-ONLY-http-scheme.png"}},
+    "B-12": {"ics_changes": {"granularity": "unknown"}},
+    "F-45": {"qr": "invalid"},
+    "F-46": {"ixit_changes": {"resources": {"item": {"path": "/dpp/{id}/missing"}}}},
+    "F-47": {"ics_changes": {"identifier_scheme": "unknown"}},
     # The reference system serves no AAS file, so the control supplies a synthetic one.
     "C-FAMILY-AAS": {"samples": {"aas_json": "fixtures/aas/environment-valid.json"}},
 }
@@ -42,6 +49,9 @@ _NOT_A_FLAG = (
     "qr_wrong_shape",
     "qr_non_ascii_digits",
     "qr_two_symbols",
+    "qr_qualifier_order",
+    "qr_model_level",
+    "qr_http_scheme",
 )
 
 

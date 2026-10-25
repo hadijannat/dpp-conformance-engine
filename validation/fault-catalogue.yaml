@@ -250,6 +250,32 @@ sut_faults:
     description: The resolver path answers 200 with a passport that has the carrier identifier but differs from the passport at the API item target.
     test_purpose: TP-ID-003
     expected: {verdict: fail, reason_code: IDENTIFIER.BINDING.MISMATCH}
+  - id: F-40
+    class: carrier_fault
+    fault: qr_qualifier_order
+    description: The QR payload is a GS1 Digital Link URI with the serial before the lot.
+    test_purpose: TP-GS1-SYNTAX-002
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
+  - id: F-41
+    class: carrier_fault
+    fault: qr_model_level
+    description: The QR payload is a GTIN-only GS1 Digital Link URI, and the ICS declares item granularity.
+    test_purpose: TP-GS1-GRANULARITY-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: IDENTIFIER.GRANULARITY.MISMATCH}
+  - id: F-42
+    class: carrier_fault
+    fault: qr_http_scheme
+    description: The QR payload is a valid GS1 Digital Link URI with the http scheme.
+    test_purpose: TP-ID-001
+    expected: {verdict: fail, reason_code: IDENTIFIER.SCHEME.NOT_HTTPS}
+  - id: F-43
+    class: unresolved_identifier
+    fault: deny_all
+    description: The system answers 403 to every request, also to the resolver path of the carrier identifier.
+    test_purpose: TP-ID-002
+    expected: {verdict: fail, reason_code: IDENTIFIER.RESOLUTION.STATUS}
   - id: F-54
     class: registry_inconsistency
     fault: registry_extra_field_differs
@@ -331,6 +357,37 @@ boundary_cases:
     test_purpose: TP-INTEGRITY-001
     expected: {verdict: inconclusive, reason_code: INTEGRITY.FORMAT.UNSUPPORTED}
     rationale: The JSON serialization is valid JWS. integrity.jws verifies the compact form only.
+  - id: B-12
+    fault: none
+    description: The ICS declares the granularity as "unknown".
+    test_purpose: TP-GS1-GRANULARITY-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: inconclusive, reason_code: IDENTIFIER.GRANULARITY.NOT_DECLARED}
+    rationale: Missing information is never a pass.
+  - id: F-44
+    fault: resolver_404
+    description: The resolver answers 404 for the carrier identifier.
+    test_purpose: TP-ID-003
+    expected: {verdict: inconclusive, reason_code: IDENTIFIER.NOT_RESOLVED}
+    rationale: Without a resolved passport there is nothing to compare. TP-ID-002 judges the resolution.
+  - id: F-45
+    fault: qr_payload_invalid
+    description: The QR image decodes to text that is not an HTTPS or HTTP URL.
+    test_purpose: TP-ID-003
+    expected: {verdict: inconclusive, reason_code: IDENTIFIER.NOT_RESOLVABLE}
+    rationale: A carrier text that is not a URL has no passport to compare. TP-ID-001 judges the syntax.
+  - id: F-46
+    fault: none
+    description: The IXIT item template names a path that answers 404, and the resolver still answers.
+    test_purpose: TP-ID-003
+    expected: {verdict: inconclusive, reason_code: IDENTIFIER.BINDING.NOT_COMPARABLE}
+    rationale: The resolved passport has no item document to compare with. TP-API-001 judges the item target.
+  - id: F-47
+    fault: none
+    description: The ICS declares the identifier scheme as "unknown".
+    test_purpose: TP-ID-001
+    expected: {verdict: inconclusive, reason_code: IDENTIFIER.SCHEME.UNKNOWN}
+    rationale: Without a declared scheme the engine selects no parser. Missing information is never a pass.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:

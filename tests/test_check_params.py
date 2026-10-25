@@ -42,6 +42,7 @@ CONTRACT_CHECKS = (
     "data.jsonschema",
     "data.rules",
     "identifier.consistency",
+    "identifier.granularity",
     "identifier.parse",
     "identifier.resolve",
     "integrity.jws",
@@ -50,6 +51,7 @@ CONTRACT_CHECKS = (
     "registry.consistency",
 )
 NO_PARAMETERS = (
+    "identifier.granularity",
     "integrity.jws",
     "manual.review",
 )
@@ -77,6 +79,7 @@ UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     ("api.contract", {"resource": "nothing"}),
     ("api.contract", {"method": "post"}),
     ("identifier.resolve", {"accepted_media_types": ["Text/HTML"]}),
+    ("identifier.parse", {"form": "gs1"}),
     ("aas.validate", {"format": "yaml"}),
 ]
 WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
@@ -89,6 +92,8 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("identifier.parse", {"require_https": "yes"}),
     ("identifier.parse", {"require_https": 1}),
     ("identifier.parse", {"scheme": None}),
+    ("identifier.parse", {"form": 7}),
+    ("identifier.parse", {"form": None}),
     ("identifier.resolve", {"accept": 7}),
     ("identifier.resolve", {"accept": "text/html\n"}),
     ("identifier.resolve", {"require_https": "yes"}),

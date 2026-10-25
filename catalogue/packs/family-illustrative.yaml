@@ -179,6 +179,46 @@ requirements:
   - id: default
     tests:
     - TP-GS1-CONSISTENCY-001
+- id: FAM-GS1-SYNTAX-002
+  title: The carrier identifier is an uncompressed GS1 Digital Link URI
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The carrier identifier is an uncompressed GS1 Digital Link URI. Its primary key, its key qualifiers in their
+    order, and its AI values follow the vendored GS1 Barcode Syntax Dictionary.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-SYNTAX-002-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-SYNTAX-002
+- id: FAM-GS1-GRANULARITY-001
+  title: The carrier granularity agrees with the declared granularity
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: A GTIN-only carrier identifier is model level, one with a lot is batch level, and one with a serial is item
+    level. This level equals the granularity of the ICS.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-GRANULARITY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-GRANULARITY-001
 # -- family/aas: Asset Administration Shell files ----------------------------------------------
 - id: FAM-AAS-JSON-001
   title: The AAS JSON file is valid

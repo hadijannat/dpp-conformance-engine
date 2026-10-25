@@ -17,7 +17,8 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `carrier.qr` | carrier | supported | `zxingcpp` | Decode a QR image file with zxing-cpp. Image quality limits apply: the engine does not grade print quality. |  |
 | `carrier.nfc` | carrier | interface_only |  | Read an NFC tag. | A reader integration exists and is tested against physical tags in a recorded test campaign. |
 | `carrier.rfid` | carrier | interface_only |  | Read an RFID tag. | A reader integration exists and is tested against physical tags in a recorded test campaign. |
-| `identifier.parse` | identifier | supported |  | Scheme-aware syntax check of the carrier payload. |  |
+| `identifier.parse` | identifier | supported |  | Scheme-aware syntax check of the carrier payload. The form gs1-dl is experimental: it checks an uncompressed GS1 Digital Link URI against the vendored GS1 Barcode Syntax Dictionary. |  |
+| `identifier.granularity` | identifier | experimental |  | Classify a GS1 Digital Link carrier with a GTIN as model, batch, or item level from its key qualifiers, and compare the level with the granularity of the ICS. | A reviewer checks the level rules against GS1 Digital Link URI Syntax 1.7.0. A recorded test campaign runs them against carriers of at least one independent GS1 resolver. |
 | `identifier.resolve` | identifier | supported |  | Bounded resolution of an identifier to a passport. |  |
 | `identifier.consistency` | identifier | supported |  | Compare the carrier identifier, as exact text, with the id of the resolved passport. With a QR image, also compare it with the declared sample identifier. With compare_item, also compare the resolved passport with the API item document as JSON values. Digital consistency does not prove physical authenticity. |  |
 | `api.contract` | api | supported |  | Check a response against a pinned, maintainer-supplied OpenAPI contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. A 3.0 contract is translated exactly, or blocked. Another version is blocked. |  |
@@ -65,8 +66,10 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `data.jsonschema` | `data.jsonschema` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
 | `data.rules` | `data.rules` | `document` | one of `item`, `model` | `"item"` | Item-level or model-level document. |
 | `identifier.consistency` | `identifier.consistency` | `compare_item` | boolean | `false` | Also compare the resolved passport with the document at the IXIT 'item' template, as JSON values. |
+| `identifier.granularity` | `identifier.granularity` | (none) | | | |
 | `identifier.parse` | `identifier.parse` | `scheme` | string or none | none | Identifier scheme to parse. Omit the key to use identifier_scheme of the ICS. |
 | `identifier.parse` | `identifier.parse` | `require_https` | boolean | `false` | Fail an identifier, and on resolve each redirect target, whose scheme is not https. The EU registry user guide names https identifiers only. |
+| `identifier.parse` | `identifier.parse` | `form` | one of `dppce-item`, `gs1-dl` | `"dppce-item"` | Grammar of the gs1-digital-link scheme. dppce-item: /01/<GTIN>/21/<serial> only. gs1-dl (experimental): an uncompressed GS1 Digital Link URI with a path prefix, any primary key, key qualifiers in order, and query data attributes, checked against the vendored GS1 Barcode Syntax Dictionary. |
 | `identifier.resolve` | `identifier.resolve` | `accept` | string or none | none | Accept request header. Printable ASCII, 1 to 256 characters. |
 | `identifier.resolve` | `identifier.resolve` | `accepted_media_types` | list of string or none | none | Final media types that count as resolved. Default: a final JSON object only. |
 | `identifier.resolve` | `identifier.resolve` | `require_https` | boolean | `false` | Fail an identifier, and on resolve each redirect target, whose scheme is not https. The EU registry user guide names https identifiers only. |

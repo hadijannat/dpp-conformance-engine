@@ -11,8 +11,8 @@ Needs the ``qr`` extra (zxing-cpp and Pillow) for the QR images.
 ``--degraded-qr-only`` writes only the degraded QR images in ``qr/degraded``. They have no
 randomness, so this option rotates no key.
 
-``--fault-qr-only`` writes only the QR images of faults F-30 and F-31 in ``qr``. They have no
-randomness, so this option rotates no key.
+``--fault-qr-only`` writes only the QR images of faults F-30, F-31, F-40, F-41, and F-42 in
+``qr``. They have no randomness, so this option rotates no key.
 
 ``--add-manual-key`` adds the key ``TEST-ONLY-manual-key-1`` (trust purpose ``manual``) to the
 existing trust bundle and writes its private key. It rotates no other key.
@@ -197,11 +197,16 @@ def _qr(path: Path, text: str) -> None:
 
 
 def _fault_qr() -> None:
-    """Write the QR images of faults F-30 and F-31. No randomness, so no key rotates."""
+    """Write the QR images of faults F-30, F-31, F-40, F-41, and F-42. No randomness, so no key rotates."""
     serial = ITEMS["ev"][0]
     _qr(OUT / "qr" / "TEST-ONLY-wrong-shape.png", f"{PUBLIC_ORIGIN}/01/9506000134352/21/{serial}")
     arabic_indic = GTIN.translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩"))
     _qr(OUT / "qr" / "TEST-ONLY-non-ascii-digits.png", f"{PUBLIC_ORIGIN}/01/{arabic_indic}/21/{serial}")
+    # The serial (21) before the lot (10) breaks the fixed key qualifier order.
+    _qr(OUT / "qr" / "TEST-ONLY-qualifier-order.png", f"{PUBLIC_ORIGIN}/01/{GTIN}/21/{serial}/10/LOT1")
+    _qr(OUT / "qr" / "TEST-ONLY-model-level.png", f"{PUBLIC_ORIGIN}/01/{GTIN}")
+    http_origin = PUBLIC_ORIGIN.replace("https://", "http://", 1)
+    _qr(OUT / "qr" / "TEST-ONLY-http-scheme.png", f"{http_origin}/01/{GTIN}/21/{serial}")
 
 
 def _blot(image: Image.Image, box: tuple[int, int, int, int], fill: int) -> Image.Image:

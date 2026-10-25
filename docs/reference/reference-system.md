@@ -508,6 +508,9 @@ encodes plain text that is not a URL. Three more QR faults are fixtures too:
 - `qr_wrong_shape`: `qr/TEST-ONLY-wrong-shape.png` encodes a GTIN of 13 digits.
 - `qr_non_ascii_digits`: `qr/TEST-ONLY-non-ascii-digits.png` encodes the GTIN in Arabic-Indic digits.
 - `qr_two_symbols`: `qr/degraded/TEST-ONLY-two-symbols.png` holds two readable QR symbols.
+- `qr_qualifier_order`: `qr/TEST-ONLY-qualifier-order.png` encodes a GS1 Digital Link URI with the serial before the lot.
+- `qr_model_level`: `qr/TEST-ONLY-model-level.png` encodes a GS1 Digital Link URI with a GTIN only.
+- `qr_http_scheme`: `qr/TEST-ONLY-http-scheme.png` encodes the `ev` identifier with the `http` scheme.
 
 The fault `unreachable` is a rig condition: no server runs.
 
@@ -528,6 +531,9 @@ fixtures/reference/
   qr/{ev,lmt,industrial,invalid}.png QR images
   qr/TEST-ONLY-wrong-shape.png       QR image of fault F-30
   qr/TEST-ONLY-non-ascii-digits.png  QR image of fault F-31
+  qr/TEST-ONLY-qualifier-order.png   QR image of fault F-40
+  qr/TEST-ONLY-model-level.png       QR image of fault F-41
+  qr/TEST-ONLY-http-scheme.png       QR image of fault F-42
   {ev,lmt,industrial}.ics.yaml       declarations for each profile
   {ev,lmt,industrial}.ixit.yaml      test information; the rig replaces `origin_override`
   trust/TEST-ONLY-trust-bundle.json  anchors and keys for the reference system
