@@ -47,7 +47,8 @@ A header value with a line break is never sent. The server answers `400` in its 
 ### 1.1 Family modules
 
 The package `dppce.infrastructure.reference` holds family modules. A family module adds the
-behavior of one implementation family, for example a resolver. The module docstring of the
+behavior of one implementation family, for example a resolver. The families are `resolver`
+(section 4.6) and `jose`, which owns the flag `signed_jws_json`. The module docstring of the
 package states the contract. In short:
 
 - `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
@@ -493,6 +494,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `leak_supplier_to_legitimate_interest` | the `legitimate_interest` passport includes `restricted.supplier_reference` |
 | `leak_usage_log_anonymous` | the anonymous passport includes `restricted.usage_log` with its canary |
 | `deny_all` | every path answers `403` with `{"error": "forbidden"}` |
+| `resolver_linkset_as_passport` | family `resolver`: `/01/...` answers each request with the linkset of section 4.6, also with no `Accept` header or with `Accept: */*` |
+| `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:

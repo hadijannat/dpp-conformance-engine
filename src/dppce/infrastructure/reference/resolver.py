@@ -9,7 +9,8 @@ This module adds:
 - the description file ``/.well-known/gs1resolver``.
 
 Every other request passes to the core, so the core answer stays the same byte for byte. The
-engine transport sends ``Accept: */*``, which never selects the linkset. The passport is the
+engine transport sends ``Accept: */*``, which selects the linkset only under the flag
+``resolver_linkset_as_passport``. The passport is the
 only link, so every other ``linkType`` gets the core redirect.
 """
 
@@ -23,7 +24,8 @@ from dppce.infrastructure.reference.base import PUBLIC_ORIGIN, RESOLVER_PATH, Re
 if TYPE_CHECKING:
     from dppce.infrastructure.reference_server import ReferenceSystem
 
-FLAGS: Final = frozenset[str]()
+# B-10: the default request gets the linkset, as if the linkset were the passport.
+FLAGS: Final = frozenset({"resolver_linkset_as_passport"})
 LINKSET: Final = "application/linkset+json"
 # A synthetic relation type in the reserved example domain. It is not a GS1 link type.
 PASSPORT_RELATION: Final = "https://dppce.example.test/rel/passport"
@@ -72,7 +74,11 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
     if request.path == WELL_KNOWN:
         return json_reply(200, DESCRIPTION)
     link_type = (parse_qs(request.query).get("linkType") or [""])[0]
-    wanted = link_type in ("linkset", "all") or prefers_linkset(request.header("accept"))
+    wanted = (
+        link_type in ("linkset", "all")
+        or prefers_linkset(request.header("accept"))
+        or "resolver_linkset_as_passport" in system.faults
+    )
     if RESOLVER_PATH.match(request.path) is None or not wanted:
         return None
     reply = system.handle(request.path, request.header("authorization"))
