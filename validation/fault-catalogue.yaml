@@ -284,6 +284,18 @@ boundary_cases:
     requirement: ILL-DATA-001
     expected: {verdict: fail}
     rationale: An ICS declaration cannot waive a mandatory requirement.
+  - id: B-10
+    fault: resolver_linkset_as_passport
+    description: The resolver answers 200 with an application/linkset+json linkset to the default request.
+    test_purpose: TP-ID-002
+    expected: {verdict: inconclusive, reason_code: IDENTIFIER.RESPONSE.LINKSET}
+    rationale: A linkset is not a passport. resolver.linkset judges the linkset itself.
+  - id: B-11
+    fault: signed_jws_json
+    description: The signed passport endpoint serves a valid flattened JWS JSON serialization.
+    test_purpose: TP-INTEGRITY-001
+    expected: {verdict: inconclusive, reason_code: INTEGRITY.FORMAT.UNSUPPORTED}
+    rationale: The JSON serialization is valid JWS. integrity.jws verifies the compact form only.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:
