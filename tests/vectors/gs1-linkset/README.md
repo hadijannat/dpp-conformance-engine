@@ -8,8 +8,8 @@ Prerequisites: none.
 `gs1/linkset`. The copy comes from commit `bedc11ec56527255369909509b7d06e471180472`. It was
 retrieved on 2026-10-25.
 
-The `LICENSE` file of the repository at the same commit gives the Apache License, Version 2.0.
-A copy of the license is in `LICENSES/Apache-2.0.txt` of this repository.
+The license is the Apache License, Version 2.0. The `LICENSE` file of the repository at the same
+commit gives it. A copy of the license is in `LICENSES/Apache-2.0.txt` of this repository.
 
 The file is a JSON Schema draft-07 document for a linkset in the JSON format of RFC 9264. The
 repository describes itself as a place to try out the linkset format of GS1 resolvers. So the

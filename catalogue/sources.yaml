@@ -7217,7 +7217,7 @@ sources:
   uncertainties:
   - The cases are in C unit tests. Project test code extracts them from the text.
   - The release of the GS1 Digital Link URI syntax standard that the library follows was not determined.
-- id: testpacks/data/gs1-linkset/linkset-schema.json
+- id: tests/vectors/gs1-linkset/linkset-schema.json
   title: 'GS1 linkset JSON Schema: linkset-schema.json'
   identifier: gs1/linkset linkset-schema.json
   issuing_body: GS1 AISBL (GitHub repository gs1/linkset)
@@ -7228,7 +7228,7 @@ sources:
   retrieval_date: '2026-10-25'
   legal_or_spec_status: Third-party schema in a repository for trying out the linkset format. Not a specification and not normative.
   license_or_reuse_terms: Apache-2.0, read in LICENSE at commit bedc11ec56527255369909509b7d06e471180472.
-  permitted_use_basis: Redistributed unchanged under Apache-2.0. testpacks/data/gs1-linkset/README.md names the source and the license.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/gs1-linkset/README.md names the source and the license.
   verification_level: substantive
   independent_check: not_checked
   sha256: ff902c5a13f197727169cb8579e29ab598940bc266d90e8702191d7df392cf04

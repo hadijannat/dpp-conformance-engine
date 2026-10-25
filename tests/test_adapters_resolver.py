@@ -26,7 +26,7 @@ from tests.test_url_templates import run
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOGUE = ROOT / "validation" / "fault-catalogue.yaml"
-GS1_SCHEMA = ROOT / "testpacks" / "data" / "gs1-linkset" / "linkset-schema.json"
+GS1_SCHEMA = ROOT / "tests" / "vectors" / "gs1-linkset" / "linkset-schema.json"
 PROFILE = "family/gs1-resolver"
 LINKSET_TYPE = "application/linkset+json"
 RELATION = "https://dppce.example.test/rel/passport"
