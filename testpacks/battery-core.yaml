@@ -245,6 +245,24 @@ test_purposes:
   - The version entries and the digest comparison.
   permitted_modes: *id002
   severity: minor
+- id: TP-PERSIST-002
+  title: Check the raw-byte digest of the version history
+  requirements:
+  - ILL-PERSIST-002
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: persistence.versions
+    params:
+      digest_field: raw_digest
+      digest_of: raw-sha256
+  expected_evidence:
+  - The version entries and the comparison of the raw-byte digest.
+  permitted_modes: *id002
+  severity: minor
 - id: TP-REGISTRY-001
   title: Compare the registry record with the passport
   requirements:
@@ -258,6 +276,31 @@ test_purposes:
     check: registry.consistency
   expected_evidence:
   - The compared identifier and operator.
+  permitted_modes: *id002
+- id: TP-REGISTRY-002
+  title: Compare a declared third field pair of the registry record
+  requirements:
+  - ILL-REGISTRY-002
+  profiles:
+  - '*'
+  applicability: *id001
+  roles:
+  - anonymous
+  stimulus:
+    check: registry.consistency
+    params:
+      fields:
+      - name: identifier
+        registry_pointer: /identifier
+        passport_pointer: /id
+      - name: operator_identifier
+        registry_pointer: /operator_identifier
+        passport_pointer: /operator/identifier
+      - name: passport_url
+        registry_pointer: /passport_url
+        passport_pointer: /id
+  expected_evidence:
+  - The compared identifier, operator, and passport URL.
   permitted_modes: *id002
 - id: TP-AAS-001
   title: Validate the Asset Administration Shell file
