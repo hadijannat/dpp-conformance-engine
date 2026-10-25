@@ -33,6 +33,36 @@ class ReferenceServer:
 `python -m dppce.infrastructure.reference_server --fixtures fixtures/reference --port 8080
 [--fault NAME]...` runs it in the foreground. The server only reads. It has no write operation.
 
+The server answers `GET`, `HEAD`, and `OPTIONS`. Every other method gets `501` from
+`http.server`, and nothing changes.
+
+- `HEAD` gets the status and the headers of `GET`, without a body.
+- `OPTIONS` gets `204` with `Allow: GET, HEAD, OPTIONS` and these CORS headers:
+  `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, HEAD, OPTIONS`, and
+  `Access-Control-Allow-Headers: Accept, Authorization`. A `204` answer has no `Content-Type`
+  and no `Content-Length`. Under the flag `deny_all`, `OPTIONS` gets `403`.
+
+A header value with a line break is never sent. The server answers `400` in its place.
+
+### 1.1 Family modules
+
+The package `dppce.infrastructure.reference` holds family modules. A family module adds the
+behavior of one implementation family, for example a resolver. The module docstring of the
+package states the contract. In short:
+
+- `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
+- `respond(system, request)`: the answer to a `GET` or `HEAD` request, or `None` to pass it on.
+
+The reference system asks each family in the order of `FAMILIES`, then the core routes. Under
+`deny_all`, only the core routes answer. `FAULTS` is the union of the core flags and the flags
+of each family. To add a family, write one module and add one entry to `FAMILIES`.
+
+A family must not change the answer to a request of the version 1 snapshot, unless one of its
+own flags is active. The snapshot holds each route, role, and fault flag of version 1. It uses
+`GET` with no `Accept` header or with `Accept: */*`. The test
+`tests/test_reference_system_v2.py` compares the answers with this snapshot. A family can add
+answers for other paths, queries, or `Accept` values.
+
 ## 2. Identifiers and the origin override
 
 Carriers hold the public identifier, for example
@@ -63,7 +93,8 @@ Three synthetic items, one for each profile:
 
 ## 3. Endpoints
 
-All are `GET`. `{id}` is `<gtin>-<serial>`, for example `09506000134352-EV0001`.
+All are `GET` or `HEAD` (section 1). `{id}` is `<gtin>-<serial>`, for example
+`09506000134352-EV0001`.
 
 These paths are the URL layout of the reference system only. The engine does not assume them.
 The IXIT declares a URL template for each fetched resource (architecture contract, section 9.2).
@@ -72,6 +103,8 @@ The test rig also serves a second layout, `/passports/{gtin}/{serial}/data`, to 
 | Path | Answer |
 | --- | --- |
 | `/01/{gtin}/21/{serial}` | `303` with `Location: /dpp/{id}` |
+| `/01/{gtin}/21/{serial}?linkType=linkset` | `200 application/linkset+json`: a linkset (section 4.6) |
+| `/.well-known/gs1resolver` | `200 application/json`: the resolver description (section 4.6) |
 | `/dpp/{id}` | `200 application/json`: the item-level passport for the role |
 | `/dpp/{id}/model` | `200 application/json`: the shared model-level data |
 | `/dpp/{id}/signed` | `200 application/jose`: compact JWS over the anonymous item-level passport |
@@ -175,6 +208,43 @@ The fixture PKI lives in `fixtures/reference/pki/`. Each file name starts with `
 - a root certificate that the test trust bundle lists as an anchor, and a leaf that it signed;
 - a second, untrusted root with its leaf (fault `sig_untrusted_issuer`);
 - a leaf from the trusted root whose validity ended on 2025-12-31 (fault `cert_expired`).
+
+### 4.6 Resolver surface (family module `resolver`)
+
+Module: `dppce.infrastructure.reference.resolver`. The behavior is synthetic. It follows
+RFC 9110 for negotiation and RFC 9264 for the linkset.
+
+The resolver path `/01/{gtin}/21/{serial}` gives a linkset in these cases:
+
+- the query has `linkType=linkset` or `linkType=all`;
+- the `Accept` header lists `application/linkset+json` with a weight above 0, and no other
+  range has a higher weight.
+
+A linkset answer has `Vary: Accept`. Every other request gets the core `303`, without `Vary`.
+Thus `Accept: */*`, which the engine transport sends, gets the answer of version 1. The
+passport is the only link, so each other `linkType` value also gets the `303`.
+
+```json
+{"linkset": [{"anchor": "https://id.example.test/01/09506000134352/21/EV0001",
+  "https://dppce.example.test/rel/passport": [
+    {"href": "https://id.example.test/dpp/09506000134352-EV0001", "type": "application/json"}]}]}
+```
+
+The relation type is synthetic and is in the reserved example domain. It is not a GS1 link
+type. The `href` is the `Location` of the core answer in public form. A seeded resolver fault,
+for example `resolver_404`, applies to the linkset request too.
+
+`/.well-known/gs1resolver` gives a synthetic resolver description. The field names are those
+of the GS1 Resolver Community Edition (Apache-2.0, commit `bf885fd`). The values are synthetic:
+
+```json
+{"name": "dppce synthetic reference resolver", "resolverRoot": "https://id.example.test",
+ "supportedLinkType": [{"namespace": "https://dppce.example.test/rel/", "prefix": "dppce:"}],
+ "supportedPrimaryKeys": ["01"]}
+```
+
+A malformed GS1 path, for example a GTIN of 13 digits, still gets `404`. The engine sends such
+paths for the faults F-30 and F-31, so their answers stay the same.
 
 ## 5. Local data formats
 
@@ -432,6 +502,11 @@ encodes plain text that is not a URL. Three more QR faults are fixtures too:
 - `qr_two_symbols`: `qr/degraded/TEST-ONLY-two-symbols.png` holds two readable QR symbols.
 
 The fault `unreachable` is a rig condition: no server runs.
+
+A fault can also be a sample fixture. The rig setup key `samples` maps an IXIT sample name to
+a fixture path, relative to the repository root. The rig copies the fixture beside the IXIT and
+names the copy in `IXIT.samples`. A row in `validation/cases.py` uses this key, for example
+`{"samples": {"aas_file": "<fixture path>"}}`.
 
 ## 7. Fixtures
 

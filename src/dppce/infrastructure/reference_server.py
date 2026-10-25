@@ -1,8 +1,9 @@
 """A minimal local reference DPP system for tests and demonstrations.
 
 Specification: docs/reference/reference-system.md. All data are synthetic. The server is an
-example and not a normative authority. It only reads: there is no write operation.
-Fault flags seed one defect each, for the method validation in validation/.
+example and not a normative authority. It only reads: there is no write operation. It answers
+GET, HEAD, and OPTIONS. Fault flags seed one defect each, for the method validation in
+validation/. Family modules in ``dppce.infrastructure.reference`` add more behavior.
 """
 
 from __future__ import annotations
@@ -24,12 +25,21 @@ from cryptography.hazmat.primitives import serialization
 
 from dppce.evidence.canonical import canonical_bytes, digest
 from dppce.evidence.jws import LocalSigner
+from dppce.infrastructure import reference
+from dppce.infrastructure.reference.base import PUBLIC_ORIGIN, Reply, Request
+from dppce.infrastructure.reference.base import RESOLVER_PATH as _RESOLVER_PATH
+from dppce.infrastructure.reference.base import json_reply as _json
 
-PUBLIC_ORIGIN: Final = "https://id.example.test"
+# PUBLIC_ORIGIN, Reply, and Request moved to reference.base. This module still exports them.
+__all__ = [
+    "CORE_FAULTS", "FAULTS", "PUBLIC_ORIGIN", "ReferenceServer", "ReferenceSystem", "Reply", "Request",
+    "known_faults", "main",
+]  # fmt: skip
+
 CANARY: Final = "CANARY-7f3a-supplier"
 NOTES_CANARY: Final = "CANARY-2b9c-dismantling"
 USAGE_CANARY: Final = "CANARY-4d1e-usage"
-FAULTS: Final = frozenset(
+CORE_FAULTS: Final = frozenset(
     {
         "api_wrong_content_type", "api_schema_violation", "leak_fetch", "leak_export", "leak_search",
         "leak_error", "leak_html", "sig_invalid", "sig_untrusted_issuer", "cert_expired", "id_mismatch",
@@ -40,6 +50,22 @@ FAULTS: Final = frozenset(
         "resolver_5xx", "resolver_html", "resolver_divergent",
     }
 )  # fmt: skip
+
+
+def known_faults() -> frozenset[str]:
+    """The core flags and the flags of each family module."""
+    return CORE_FAULTS.union(*(family.FLAGS for family in reference.FAMILIES))
+
+
+FAULTS: Final = known_faults()
+_READ_METHODS: Final = "GET, HEAD, OPTIONS"
+# The answer to OPTIONS: a CORS preflight for any origin, read methods only.
+_OPTIONS_HEADERS: Final = {
+    "Allow": _READ_METHODS,
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": _READ_METHODS,
+    "Access-Control-Allow-Headers": "Accept, Authorization",
+}
 _RESTRICTED: Final = {
     "dismantling_notes": ("legitimate_interest", "authority"),
     "supplier_reference": ("authority",),
@@ -59,21 +85,14 @@ _ROLE_FAULTS: Final = {
 _ITEM_PATH: Final = re.compile(
     r"^/dpp/(?P<id>[0-9]{14}-[A-Za-z0-9]+)(?P<rest>/model|/signed|/versions|/export|\.html)?$"
 )
-_RESOLVER_PATH: Final = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9]+)$")
 _REGISTRY_PATH: Final = re.compile(r"^/registry/(?P<id>[0-9]{14}-[A-Za-z0-9]+)$")
-
-Reply = tuple[int, str, bytes, dict[str, str]]
-
-
-def _json(status: int, document: Any, media_type: str = "application/json") -> Reply:
-    return status, media_type, json.dumps(document, sort_keys=True).encode("utf-8"), {}
 
 
 class ReferenceSystem:
     """The behavior of the reference system, apart from the HTTP plumbing."""
 
     def __init__(self, fixtures: Path, faults: frozenset[str] = frozenset()) -> None:
-        unknown = faults - FAULTS
+        unknown = faults - known_faults()
         if unknown:
             raise ValueError(f"unknown fault flags: {sorted(unknown)}")
         self.faults = faults
@@ -219,7 +238,19 @@ class ReferenceSystem:
             return _json(200, {**document, "version": document["version"] + 1})
         return 303, "text/plain", b"", {"Location": f"/dpp/{ident}"}
 
+    def respond(self, request: Request) -> Reply:
+        """Answer GET, HEAD, and OPTIONS. Family modules come first, then the core routes."""
+        denied = "deny_all" in self.faults
+        if request.method == "OPTIONS":
+            return _json(403, {"error": "forbidden"}) if denied else (204, "", b"", dict(_OPTIONS_HEADERS))
+        # Under deny_all the core answers alone, as in version 1, also for a subclass layout.
+        for family in () if denied else reference.FAMILIES:
+            if (reply := family.respond(self, request)) is not None:
+                return reply
+        return self.handle(request.target, request.header("authorization"))
+
     def handle(self, target: str, authorization: str | None) -> Reply:
+        """The core routes. The answers are the answers of version 1, byte for byte."""
         parts = urlsplit(target)
         path, role, faults = parts.path, self.role_of(authorization), self.faults
         if "deny_all" in faults:
@@ -271,10 +302,10 @@ class ReferenceServer:
             def log_message(self, format: str, *args: object) -> None:
                 return
 
-            def do_GET(self) -> None:
-                status, media_type, body, headers = behavior.handle(
-                    self.path, self.headers.get("Authorization")
-                )
+            def _answer(self) -> None:
+                headers_in = {name.lower(): value for name, value in self.headers.items()}
+                request = Request(self.command, self.path, headers_in)
+                status, media_type, body, headers = behavior.respond(request)
                 if any("\r" in value or "\n" in value for value in headers.values()):
                     # A value built from the request path must never start a new header line.
                     status, media_type, body, headers = (
@@ -284,12 +315,25 @@ class ReferenceServer:
                         {},
                     )
                 self.send_response(status)
-                self.send_header("Content-Type", media_type)
-                self.send_header("Content-Length", str(len(body)))
+                if status != 204:
+                    # RFC 9110, section 8.6: a 204 answer has no Content-Length.
+                    self.send_header("Content-Type", media_type)
+                    self.send_header("Content-Length", str(len(body)))
                 for name, value in headers.items():
                     self.send_header(name, value.replace("\r", "").replace("\n", ""))
                 self.end_headers()
-                self.wfile.write(body)
+                if self.command != "HEAD":
+                    self.wfile.write(body)
+
+            # No other method has a handler, so http.server answers 501: nothing is written.
+            def do_GET(self) -> None:
+                self._answer()
+
+            def do_HEAD(self) -> None:
+                self._answer()
+
+            def do_OPTIONS(self) -> None:
+                self._answer()
 
         self._server = http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler)
         self._thread: threading.Thread | None = None
