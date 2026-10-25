@@ -67,7 +67,7 @@ def test_each_family_profile_and_test_pack_loads() -> None:
         assert profile.packs == (PACK,)
         assert set(profile.testpacks) == FAMILY_TESTPACKS
         assert profile.facts == {}, "a family profile declares no battery fact"
-        assert profile.item_schema is None and profile.api_contract is None
+        assert (profile.item_schema, profile.api_contract) == (None, None)
         assert profile.roles == ("anonymous",)
     # The examples sit one level deeper, so that load_profiles does not read them as profiles.
     assert all(path.parent == EXAMPLES for path in EXAMPLES.glob("*.yaml"))
@@ -78,7 +78,9 @@ def test_the_family_files_lint_without_error() -> None:
         load_catalogue(ROOT), load_profiles(ROOT), load_testpacks(ROOT), registry.param_models(), ROOT
     )
     assert [f for f in findings if f.severity == "error"] == []
-    family = [f for f in findings if f.location.startswith(("family/", "TP-WEB-", "TP-GS1-", "TP-AAS-", "TP-VC-"))]
+    family = [
+        f for f in findings if f.location.startswith(("family/", "TP-WEB-", "TP-GS1-", "TP-AAS-", "TP-VC-"))
+    ]
     assert family == [], "the family files give no finding at all"
     code, _ = _cli(["catalogue", "lint"])
     assert code == 0
@@ -103,7 +105,8 @@ def test_each_family_step_and_requirement_gates_on_its_own_profile() -> None:
                 assert requirements[requirement_id].applicability == purpose.applicability
     for requirement in requirements.values():
         assert requirement.authority_class is AuthorityClass.ILLUSTRATIVE
-        assert requirement.review_status is not ReviewStatus.APPROVED and requirement.approval is None
+        assert requirement.review_status is not ReviewStatus.APPROVED
+        assert requirement.approval is None
         assert any("no normative statement" in i.text for i in requirement.interpretations), requirement.id
         assert [len(p.tests) for p in requirement.assessment_paths] == [1], requirement.id
 
@@ -133,15 +136,16 @@ def test_dppce_plan_works_for_each_family_example(family: str) -> None:
     assert plan["profile_id"] == profile_id
     assert plan["conflicts"] == []
     steps = plan["steps"]
-    assert steps and all(s["test_purpose_id"].startswith(tp_prefix) for s in steps), steps
+    assert steps
+    assert all(s["test_purpose_id"].startswith(tp_prefix) for s in steps), steps
     assert all(s["check"] != "unavailable" for s in steps), "no path names a step that cannot run"
     others = {
-        e["id"] for e in plan["exclusions"] if e["kind"] == "test_purpose" and not e["id"].startswith(tp_prefix)
+        e["id"]
+        for e in plan["exclusions"]
+        if e["kind"] == "test_purpose" and not e["id"].startswith(tp_prefix)
     }
     assert others, "the steps of the other families are left out"
-    assert all(
-        e["reason_code"] == "STEP.NOT_APPLICABLE" for e in plan["exclusions"] if e["id"] in others
-    )
+    assert all(e["reason_code"] == "STEP.NOT_APPLICABLE" for e in plan["exclusions"] if e["id"] in others)
 
 
 def _run(tmp_path: Path, family: str) -> tuple[int, EvidenceEnvelope]:
@@ -183,7 +187,9 @@ def test_a_family_run_on_the_unmodified_reference_system_has_no_fail(tmp_path: P
             assert result.verdict is Verdict.INCONCLUSIVE, result.test_purpose_id
             assert result.message.strip(), result.test_purpose_id
     own = [r for r in decision.requirement_results if r.requirement_id.startswith(requirement_prefix)]
-    assert own and all(r.verdict is Verdict.PASS for r in own), [(r.requirement_id, r.verdict) for r in own]
+    assert own
+    assert all(r.verdict is Verdict.PASS for r in own), [(r.requirement_id, r.verdict) for r in own]
     others = [r for r in decision.requirement_results if not r.requirement_id.startswith(requirement_prefix)]
-    assert others and all(r.verdict is Verdict.NOT_APPLICABLE for r in others)
+    assert others
+    assert all(r.verdict is Verdict.NOT_APPLICABLE for r in others)
     assert (decision.overall, code) == (Verdict.PASS, 0)
