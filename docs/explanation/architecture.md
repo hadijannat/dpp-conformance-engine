@@ -649,9 +649,10 @@ The check takes the first rule that applies:
    `blocked`, `IDENTITY.DID.TOO_LARGE`.
 4. The body is not one JSON object for the strict parser of the engine: `IDENTITY.DID.NOT_JSON`.
 5. The `id` is not the DID as exact text: `IDENTITY.DID.ID_MISMATCH`.
-6. A `publicKeyJwk` holds a private member (`d`, `p`, `q`, `dp`, `dq`, `qi`, `oth`, or `k`):
-   `IDENTITY.DID.PRIVATE_KEY`. The rule reads each verification method and each embedded
-   assertion method, also a malformed one.
+6. A `publicKeyJwk` holds a private member (`d`, `p`, `q`, `dp`, `dq`, `qi`, `oth`, or `k`), or
+   a method has a member whose name starts with `privateKey`: `IDENTITY.DID.PRIVATE_KEY`. The
+   rule reads each verification method and each embedded method of every verification
+   relationship, also a malformed one. A relationship can be a list or one object.
 7. `IDENTITY.DID.VERIFICATION_METHOD` for one of these: `verificationMethod` is not a list. A
    method has no non-empty string `id`, `type`, or `controller`. A `publicKeyJwk` is not an object
    with a string `kty`. Two methods have the same id. A relative id starts with `#` and resolves

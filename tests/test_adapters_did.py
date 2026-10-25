@@ -219,6 +219,39 @@ def test_a_private_key_in_an_embedded_assertion_method_fails(tmp_path: Path, loo
     _failed(_live(tmp_path, loopback, _served(document)), "IDENTITY.DID.PRIVATE_KEY")
 
 
+@pytest.mark.parametrize(
+    "relationship", ["authentication", "keyAgreement", "capabilityInvocation", "capabilityDelegation"]
+)
+@pytest.mark.parametrize("shape", ["list", "object"])
+def test_a_private_key_in_any_verification_relationship_fails(
+    relationship: str, shape: str, tmp_path: Path, loopback: Any
+) -> None:
+    # A leaking method must not pass because it moved to a relationship that the structure rules skip.
+    leaked = _method(DID + "#key-2", publicKeyJwk=KEY | {"d": "TEST-ONLY"})
+    document = _document(**{relationship: [leaked] if shape == "list" else leaked})
+    _failed(_live(tmp_path, loopback, _served(document)), "IDENTITY.DID.PRIVATE_KEY")
+
+
+@pytest.mark.parametrize(
+    "member",
+    [
+        {"privateKeyJwk": KEY | {"d": "TEST-ONLY-private"}},
+        {"privateKeyMultibase": "zTEST-ONLY-private"},
+    ],
+)
+@pytest.mark.parametrize("place", ["verificationMethod", "assertionMethod", "authentication"])
+def test_a_private_key_property_of_a_method_fails(
+    member: dict[str, Any], place: str, tmp_path: Path, loopback: Any
+) -> None:
+    method = _method(DID + "#key-2") | member
+    document = (
+        _document(verificationMethod=[_method(), method])
+        if place == "verificationMethod"
+        else (_document(**{place: [method]}))
+    )
+    _failed(_live(tmp_path, loopback, _served(document)), "IDENTITY.DID.PRIVATE_KEY")
+
+
 def test_a_private_key_is_not_hidden_by_another_defect(tmp_path: Path, loopback: Any) -> None:
     # A broken method or an unread key format must not turn the private key fail into another outcome.
     leaked = _method(DID + "#key-2", publicKeyJwk=KEY | {"d": "TEST-ONLY"})

@@ -43,6 +43,14 @@ _LABEL: Final = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
 _SEGMENT: Final = re.compile(r"[A-Za-z0-9._-]+")
 # RFC 7517 and RFC 7518: the private members of an EC, OKP, RSA, or symmetric JWK.
 PRIVATE_MEMBERS: Final = frozenset({"d", "p", "q", "dp", "dq", "qi", "oth", "k"})
+# DID Core 1.0, verification relationships. Each one can embed a method, so the private key rule reads each.
+RELATIONSHIPS: Final = (
+    "assertionMethod",
+    "authentication",
+    "keyAgreement",
+    "capabilityInvocation",
+    "capabilityDelegation",
+)
 # A DID document has a few keys. The bound keeps the strict parse cheap, also for an offline copy.
 MAX_DOCUMENT_BYTES: Final = 1024 * 1024
 _INVALID: Final = "The parameter 'did' or 'source' is not valid. Nothing is fetched."
@@ -143,15 +151,21 @@ def _failure(document: dict[str, Any], did: str) -> tuple[str, str] | None:
     """
     if document.get("id") != did:
         return "IDENTITY.DID.ID_MISMATCH", "The id of the DID document is not the resolved DID."
+    for name in ("verificationMethod", *RELATIONSHIPS):
+        value = document.get(name)
+        for method in value if isinstance(value, list) else [value]:
+            if not isinstance(method, dict):
+                continue
+            jwk = method.get("publicKeyJwk")
+            if any(key.startswith("privateKey") for key in method) or (
+                isinstance(jwk, dict) and PRIVATE_MEMBERS & jwk.keys()
+            ):
+                return "IDENTITY.DID.PRIVATE_KEY", "A verification method publishes a private key member."
     methods = document.get("verificationMethod", [])
     assertions = document.get("assertionMethod", [])
     listed = methods if isinstance(methods, list) else []
     embedded = [a for a in assertions if isinstance(a, dict)] if isinstance(assertions, list) else []
     candidates = [*listed, *embedded]
-    for method in candidates:
-        jwk = method.get("publicKeyJwk") if isinstance(method, dict) else None
-        if isinstance(jwk, dict) and PRIVATE_MEMBERS & jwk.keys():
-            return "IDENTITY.DID.PRIVATE_KEY", "A verification method publishes a private key member."
     if not isinstance(methods, list) or not all(_is_method(m) for m in candidates):
         message = (
             "A verification method lacks a string id, type, or controller, or has a malformed publicKeyJwk."
