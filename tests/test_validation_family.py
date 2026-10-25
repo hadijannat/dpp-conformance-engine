@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
+from importlib.util import find_spec
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,11 @@ PREFIX = {
     "family/credentials": "TP-VC-",
     "family/aas": "TP-AAS-",
 }
+# Without the extra, aas.validate gives unsupported, so the AAS control cannot pass.
+_AAS = [
+    pytest.mark.aas,
+    pytest.mark.skipif(find_spec("aas_test_engines") is None, reason="needs the optional 'aas' extra"),
+]
 _SYNTAX = {
     "id": "F-TEST-GS1",
     "class": "test_only",
@@ -54,10 +60,7 @@ def test_the_catalogue_names_one_control_per_family_profile() -> None:
 
 @pytest.mark.parametrize(
     "control",
-    [
-        pytest.param(c, id=c.id, marks=[pytest.mark.aas] if c.profile == "family/aas" else [])
-        for c in cases.controls()
-    ],
+    [pytest.param(c, id=c.id, marks=_AAS if c.profile == "family/aas" else []) for c in cases.controls()],
 )
 def test_the_rig_runs_each_family_control_on_loopback(control: cases.Control, tmp_path: Path) -> None:
     row, run, _ = vrun._control(tmp_path, control.id, control.profile, control.rig)

@@ -43,6 +43,9 @@ keys, issuer, evaluation time, and loopback origin are the same as for the batte
 | `C-FAMILY-VC` | `family/credentials` |
 | `C-FAMILY-AAS` | `family/aas`, with the synthetic file `fixtures/aas/environment-valid.json` |
 
+`C-FAMILY-AAS` needs the optional `aas` extra. Without it, the AAS check gives `unsupported`,
+and the control does not pass.
+
 A family control passes only if every executed step of its profile passes. Its executed steps
 count in `false_positives_on_controls`. Its result counts in `controls` and `replays`.
 
