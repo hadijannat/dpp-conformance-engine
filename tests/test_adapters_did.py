@@ -70,7 +70,8 @@ def _ctx(
     samples: dict[str, Path] | None = None,
 ) -> CheckContext:
     params: dict[str, Any] = {"did": did} | ({"source": source} if source is not None else {})
-    the_ixit = ixit(endpoints={"api": origin, "public_origin": PUBLIC, "origin_override": origin})
+    endpoints = {"api": origin, "registry": origin, "public_origin": PUBLIC, "origin_override": origin}
+    the_ixit = ixit(endpoints=endpoints)
     engine = transport(policy, samples=samples or {})
     return context(tmp_path, "identity.did", params=params, the_ixit=the_ixit, acquirer=engine)
 
@@ -154,12 +155,15 @@ def test_a_valid_document_passes_and_the_summary_holds_no_value(tmp_path: Path, 
     assert observation.summary["source"] == "live"
     assert observation.transformations == ("origin_override",)
     text = json.dumps([o.summary for o in outcome.observations])
-    assert "did:" not in text and "http" not in text and "TEST-ONLY" not in text
+    for value in ("did:", "http", "TEST-ONLY"):
+        assert value not in text
 
 
 def test_a_did_with_a_path_fetches_the_path(tmp_path: Path, loopback: Any) -> None:
     did = DID + ":issuers:acme"
-    document = _document(id=did, verificationMethod=[_method(did + "#k", controller=did)], assertionMethod=["#k"])
+    document = _document(
+        id=did, verificationMethod=[_method(did + "#k", controller=did)], assertionMethod=["#k"]
+    )
     api = Origin(loopback, {"/issuers/acme/did.json": _served(document)})
     outcome = run(_ctx(tmp_path, api.origin, did=did))
     assert (outcome.passed, outcome.reason_code) == (True, "IDENTITY.DID.OK")
@@ -172,10 +176,17 @@ def test_a_did_with_a_path_fetches_the_path(tmp_path: Path, loopback: Any) -> No
         _document(assertionMethod=["#key-1"]),
         _document(verificationMethod=None, assertionMethod=[_method()]),
         _document(verificationMethod=None, assertionMethod=None),
-        _document(verificationMethod=[_method(controller=[DID])]),
+        _document(controller=[DID, "did:web:other.example.test"]),
         _document(service=[{"id": "#s", "type": "x", "serviceEndpoint": "https://elsewhere.example.test"}]),
     ],
-    ids=["relative-ids", "relative-reference", "embedded", "no-methods", "controller-list", "other-members"],
+    ids=[
+        "relative-ids",
+        "relative-reference",
+        "embedded",
+        "no-methods",
+        "document-controllers",
+        "other-members",
+    ],
 )
 def test_a_valid_document_in_another_shape_passes(document: Any, tmp_path: Path, loopback: Any) -> None:
     outcome = _live(tmp_path, loopback, _served(document))
@@ -226,7 +237,10 @@ def test_a_private_key_is_not_hidden_by_another_defect(tmp_path: Path, loopback:
         _document(verificationMethod=[_method(type=None)]),
         _document(verificationMethod=[_method(controller=None)]),
         _document(verificationMethod=[_method(controller=7)]),
+        # DID Core 1.0: the controller of a verification method is one DID string.
+        _document(verificationMethod=[_method(controller=[DID])]),
         _document(verificationMethod=[_method(publicKeyJwk="TEST-ONLY")]),
+        _document(verificationMethod=[{**_method(), "publicKeyJwk": None}]),
         _document(verificationMethod=[_method(publicKeyJwk={"crv": "P-256"})]),
         _document(verificationMethod=[_method(), _method("#key-1")]),
         _document(assertionMethod=[_method(type=None)]),
@@ -306,7 +320,11 @@ def test_a_redirect_does_not_hide_a_fail(tmp_path: Path, loopback: Any) -> None:
 
 def test_a_server_error_is_no_answer(tmp_path: Path, loopback: Any) -> None:
     outcome = _live(tmp_path, loopback, (503, b"{}", {}))
-    assert (outcome.passed, outcome.unreachable, outcome.reason_code) == (False, True, "TRANSPORT.SERVER_ERROR")
+    assert (outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        False,
+        True,
+        "TRANSPORT.SERVER_ERROR",
+    )
 
 
 def test_a_did_host_outside_the_policy_is_denied_and_nothing_is_sent(tmp_path: Path, loopback: Any) -> None:
@@ -384,7 +402,9 @@ def test_resolve_did_web_gives_the_public_keys_by_absolute_method_id(tmp_path: P
 
 def _did_cases() -> list[dict[str, Any]]:
     document = yaml.safe_load(CATALOGUE.read_text(encoding="utf-8"))
-    return [e for e in (*document["sut_faults"], *document["boundary_cases"]) if e["test_purpose"] == PURPOSE]
+    # Some boundary cases name a requirement, not a test purpose.
+    entries = (*document["sut_faults"], *document["boundary_cases"])
+    return [e for e in entries if e.get("test_purpose") == PURPOSE]
 
 
 DID_CASES = _did_cases()

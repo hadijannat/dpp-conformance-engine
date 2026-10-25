@@ -32,6 +32,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `data.shacl` | data | interface_only |  | SHACL validation with pySHACL. | pySHACL is an optional extra. Shapes are pinned local files. Results agree with the JSON Schema path on the shared fixtures, and disagreements are recorded. |
 | `access.policy` | access | supported |  | Compare what each role receives with a declared access policy: the entitled fields on the fetch channel, and the withheld fields on the fetch, search, export, error, and HTML channels. Uses synthetic canaries. |  |
 | `integrity.jws` | integrity | supported |  | Verify a JWS on a passport: signature validity, issuer trust, and certificate validity, as separate findings. A valid signature does not prove that the signed attributes are true. |  |
+| `identity.did` | did | experimental |  | Resolve a did:web DID through the transport policy, or read an offline copy of its DID document, and check the id, the verification methods, and the assertion methods. Resolution is not trust. | Tested against the did:web documents of at least two independent issuers in a recorded test campaign, live and as offline copies. The JWK key types of the document are checked against the key types that the credential checks verify. |
 | `integrity.cose` | integrity | interface_only |  | Verify a COSE signature. | A COSE profile with an algorithm allowlist and its own test vectors. |
 | `integrity.status_list` | integrity | interface_only |  | Bitstring Status List retrieval and check. | Status retrieval behind the transport, with a mock status service and staleness tests. |
 | `persistence.versions` | persistence | experimental |  | Compare version-aware observations with the declared update rule. JSON Pointers and a digest kind map third-party history layouts. A limited number of observations cannot prove lifetime availability. |  |
@@ -76,6 +77,8 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `identifier.resolve` | `identifier.resolve` | `accept` | string or none | none | Accept request header. Printable ASCII, 1 to 256 characters. |
 | `identifier.resolve` | `identifier.resolve` | `accepted_media_types` | list of string or none | none | Final media types that count as resolved. Default: a final JSON object only. |
 | `identifier.resolve` | `identifier.resolve` | `require_https` | boolean | `false` | Fail an identifier, and on resolve each redirect target, whose scheme is not https. The EU registry user guide names https identifiers only. |
+| `identity.did` | `identity.did` | `did` | string | required | The did:web DID to resolve, for example did:web:id.example.test. The host is a domain name. A port is percent-encoded as %3A. A path holds letters, digits, '.', '_', and '-'. |
+| `identity.did` | `identity.did` | `source` | string or none | none | Name of the IXIT sample that holds an offline copy of the DID document. Without it, the check fetches the document through the transport policy. |
 | `integrity.jws` | `integrity.jws` | (none) | | | |
 | `manual.review` | `manual.review` | (none) | | | |
 | `persistence.versions` | `persistence.versions` | `entries_pointer` | string | `"/versions"` | JSON Pointer (RFC 6901) to the list of history entries. |

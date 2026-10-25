@@ -132,6 +132,18 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `IDENTIFIER.SYNTAX.INVALID` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.SYNTAX.OK` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | pass |
 | `IDENTIFIER.UNRESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
+| `IDENTITY.DID.ASSERTION_UNRESOLVED` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
+| `IDENTITY.DID.ID_MISMATCH` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
+| `IDENTITY.DID.KEY_FORMAT` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document` | not fixed here |
+| `IDENTITY.DID.NOT_JSON` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | fail; inconclusive under a non-default verdict rule |
+| `IDENTITY.DID.OK` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document` | pass |
+| `IDENTITY.DID.PARAMS_INVALID` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document`, `dppce.adapters.did.resolve_did_web` | inconclusive |
+| `IDENTITY.DID.PRIVATE_KEY` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
+| `IDENTITY.DID.REDIRECTED` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | not fixed here |
+| `IDENTITY.DID.SAMPLE_MISSING` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | inconclusive |
+| `IDENTITY.DID.STATUS` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | fail; inconclusive under a non-default verdict rule |
+| `IDENTITY.DID.TOO_LARGE` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | not fixed here |
+| `IDENTITY.DID.VERIFICATION_METHOD` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
 | `INTEGRITY.CERT.EXPIRED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.CERT.KEY_USAGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.CERT.REVOKED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |

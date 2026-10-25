@@ -177,6 +177,18 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "",
     ),
     (
+        "identity.did",
+        "did",
+        _E,
+        "Resolve a did:web DID through the transport policy, or read an offline copy of its DID "
+        "document, and check the id, the verification methods, and the assertion methods. "
+        "Resolution is not trust.",
+        None,
+        "Tested against the did:web documents of at least two independent issuers in a recorded test "
+        "campaign, live and as offline copies. The JWK key types of the document are checked against "
+        "the key types that the credential checks verify.",
+    ),
+    (
         "integrity.cose",
         "integrity",
         _I,
