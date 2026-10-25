@@ -191,6 +191,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `PERSISTENCE.DIGEST.NOT_COMPARABLE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.NO_TARGET` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.OK` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | pass |
+| `PERSISTENCE.PARAMS.INVALID` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.RESPONSE.NOT_CONCLUSIVE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
 | `PERSISTENCE.RESPONSE.NOT_JSON` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
 | `PERSISTENCE.RESPONSE.STATUS` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
@@ -214,6 +215,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `REGISTRY.LOOKUP.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive; fail under a non-default verdict rule |
 | `REGISTRY.NO_TARGET` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
 | `REGISTRY.OK` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | pass |
+| `REGISTRY.PARAMS.INVALID` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
 | `REGISTRY.RESPONSE.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
 | `REGISTRY.RESPONSE.NOT_JSON` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
 | `REGISTRY.RESPONSE.STATUS` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |

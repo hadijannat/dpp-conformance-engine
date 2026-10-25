@@ -416,6 +416,29 @@ gives `IDENTIFIER.SYNTAX.INVALID`. This includes forms that GS1 permits, such as
 a serial, a key qualifier, or a path prefix. The check reads the query and the fragment only for
 their characters.
 
+`persistence.versions` takes six optional parameters. Each default is the layout of the reference
+system. `entries_pointer`, default `/versions`, is a JSON Pointer (RFC 6901) to the list of
+history entries. `version_field`, `time_field`, and `digest_field` name the members of an entry.
+The defaults are `version`, `updated_at`, and `content_digest`. `digest_of` is `jcs-sha256` by
+default: the digest covers the canonical form of the item. With `raw-sha256`, the digest covers
+the bytes of the item body as served, so a body without a canonical form is comparable. A digest
+has the form `sha256:<hex>`. `version_kind` is `integer` by default: the numbers must strictly
+ascend. With `string`, the labels must be distinct non-empty strings, and the update times give
+the order. A malformed pointer is refused when the test pack loads. A pointer that resolves to no
+list gives `PERSISTENCE.RESPONSE.NOT_JSON`. An entry that is not an object, or that lacks a
+mapped member, is a finding of `PERSISTENCE.UNDECLARED_CHANGE`. The system under test therefore
+cannot turn a fail into `blocked` or `inconclusive` with the shape of its history. Invalid
+parameters that reach the check give `blocked` with `PERSISTENCE.PARAMS.INVALID`.
+
+`registry.consistency` takes one optional parameter, `fields`: 1 to 16 pairs with a unique
+`name`, a `registry_pointer`, and a `passport_pointer`. Both pointers follow RFC 6901. The
+default is the two pairs `identifier` and `operator_identifier`, which compare `/identifier`
+with `/id` and `/operator_identifier` with `/operator/identifier`. A pointer that resolves to
+no value, or to `null`, makes the pair missing. A missing pair is not compared. A difference in
+a compared pair gives `REGISTRY.INCONSISTENT` before a missing pair gives
+`REGISTRY.FIELD.MISSING`. Invalid parameters that reach the check give `blocked` with
+`REGISTRY.PARAMS.INVALID`.
+
 `data.jsonschema` selects the dialect from the top-level `$schema` of the pinned schema:
 
 - No `$schema`, or `https://json-schema.org/draft/2020-12/schema`, selects JSON Schema 2020-12.

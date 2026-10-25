@@ -148,7 +148,8 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "persistence",
         _E,
         "Compare version-aware observations with the declared "
-        "update rule. A limited number of observations cannot prove lifetime availability.",
+        "update rule. JSON Pointers and a digest kind map third-party history layouts. "
+        "A limited number of observations cannot prove lifetime availability.",
         None,
         "",
     ),
@@ -160,7 +161,15 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         None,
         "A scheduler runs acquisitions at declared intervals and keeps each recording.",
     ),
-    ("registry.mock", "registry", _S, "Passive lookup against a configurable mock registry.", None, ""),
+    (
+        "registry.mock",
+        "registry",
+        _S,
+        "Passive lookup against a configurable mock registry. "
+        "Declared JSON Pointer pairs set the compared fields.",
+        None,
+        "",
+    ),
     (
         "registry.official",
         "registry",
