@@ -351,6 +351,9 @@ Initial registry:
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
 | `aas.validate` | `aas.validate` | Wrap aas-test-engines for a JSON, XML, or AASX sample. A metamodel version that the pinned release does not verify is `unsupported`. Needs the `aas` extra. |
 | `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
+| `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
+| `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirect gives `blocked`. |
+| `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
 
 `identifier.resolve` takes three optional parameters. `require_https`, default false, fails a
 carrier URL or a redirect target whose scheme is not https with `IDENTIFIER.SCHEME.NOT_HTTPS`.
@@ -479,6 +482,54 @@ cover them. A `$ref` must name a schema in `components.schemas` exactly. Its nam
 `.`, `-`, and `_`, as OpenAPI 3.0.3 requires for component keys. So no encoded separator can point
 below a component. Any other target is not
 translated, so it also gives `API.CONTRACT.UNSUPPORTED_VERSION`.
+
+The three `resolver.*` checks send `GET` requests only. Each needs a carrier identifier that is an
+`http` or `https` URL. Any other text gives `blocked` with `RESOLVER.NO_TARGET`, and nothing is
+sent. A transport error or a status from 500 to 599 gives `unreachable`. A body of an unexpected
+shape is a fail, never `blocked`. So a system under test cannot reshape a wrong answer into one
+that is not judged.
+
+`resolver.linkset` takes one required parameter, `relations`: 1 to 16 relation types. Each is a
+lower-case registered relation name or an `http` or `https` IRI. Another value gives `blocked`
+with `RESOLVER.PARAMS.INVALID`, and nothing is sent. The check sends two requests: the carrier URL
+with `Accept: application/linkset+json`, and the carrier URL with the query `linkType=linkset`.
+It judges each answer by the first rule that applies:
+
+1. A status other than 200: `RESOLVER.LINKSET.STATUS`.
+2. A media type other than `application/linkset+json`: `RESOLVER.LINKSET.MEDIA_TYPE`.
+3. The body is not a linkset (`identifier.resolve` above gives the shape), a link context has an
+   `anchor` that is not a string, or a relation member is not a list of objects with a string
+   `href`: `RESOLVER.LINKSET.STRUCTURE`.
+4. No link context has the carrier URL, as exact text, as its `anchor`: `RESOLVER.LINKSET.ANCHOR`.
+5. No such link context has a non-empty list for one of the `relations`:
+   `RESOLVER.LINKSET.RELATION_MISSING`.
+
+Otherwise the check passes with `RESOLVER.LINKSET.OK`. It does not fetch a link target, and it does
+not judge the other target attributes.
+
+`resolver.well_known` fetches `/.well-known/gs1resolver` at the origin of the carrier URL. A
+redirect gives `blocked` with `RESOLVER.WELLKNOWN.REDIRECTED`. A status other than 200 gives
+`RESOLVER.WELLKNOWN.STATUS`. A media type other than `application/json` or a `+json` type gives
+`RESOLVER.WELLKNOWN.MEDIA_TYPE`. A body that is not a JSON object gives `RESOLVER.WELLKNOWN.NOT_JSON`.
+`resolverRoot` must be an `http` or `https` URL with the origin of the carrier URL. The check
+compares origins in lower case and without a default port. Otherwise the check gives `RESOLVER.WELLKNOWN.ROOT`. The
+other members of the file are not judged.
+
+`resolver.conformance` needs a carrier URL whose path holds `/01/` and 14 digits with a correct
+check digit. Otherwise it gives `blocked` with `RESOLVER.NO_TARGET`, and nothing is sent. It sends
+three requests in this order and stops at the first failure:
+
+1. The carrier URL. The answer must come through at least one redirect:
+   `RESOLVER.CONFORMANCE.NO_REDIRECT`.
+2. The carrier URL with the query `linkType=linkset`. A redirect gives
+   `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`. A final status other than 200 gives
+   `RESOLVER.CONFORMANCE.LINKSET_STATUS`.
+3. The carrier URL with the last digit of the GTIN increased by one, modulo 10. A final status of
+   200 gives `RESOLVER.CONFORMANCE.INVALID_ACCEPTED`. A final status other than 400 or 404 gives
+   `RESOLVER.CONFORMANCE.INVALID_STATUS`.
+
+Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`. The transport does not record the
+status of a redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.

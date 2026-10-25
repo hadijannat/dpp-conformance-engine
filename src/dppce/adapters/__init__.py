@@ -4,7 +4,7 @@ Importing this package registers every check. There is no plugin discovery: a ch
 because one of the modules below registers it.
 """
 
-from dppce.adapters import access, api, carrier, data, identifier, integrity, lifecycle, manual
+from dppce.adapters import access, api, carrier, data, identifier, integrity, lifecycle, manual, resolver
 from dppce.adapters.capabilities import manifest
 
 __all__ = [
@@ -17,4 +17,5 @@ __all__ = [
     "lifecycle",
     "manifest",
     "manual",
+    "resolver",
 ]

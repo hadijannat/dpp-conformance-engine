@@ -48,14 +48,22 @@ CONTRACT_CHECKS = (
     "manual.review",
     "persistence.versions",
     "registry.consistency",
+    "resolver.conformance",
+    "resolver.linkset",
+    "resolver.well_known",
 )
 NO_PARAMETERS = (
     "integrity.jws",
     "manual.review",
     "persistence.versions",
     "registry.consistency",
+    "resolver.conformance",
+    "resolver.well_known",
 )
+# The checks whose parameter model has a required field, so the empty parameters do not fit.
+REQUIRED_PARAMETERS = ("data.context", "resolver.linkset")
 ALLOWLIST: dict[str, Any] = {"allowed_contexts": ["https://example.test/c"]}
+RELATIONS: dict[str, Any] = {"relations": ["https://example.test/rel/passport"]}
 
 # Each check with a misspelled key, and the key that the problem must name.
 MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
@@ -69,11 +77,14 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "data.rules": ({"documnet": "item"}, "documnet"),
     "access.restricted_fields": ({"rol": "anonymous"}, "rol"),
     "aas.validate": ({"artefact": "aas_file"}, "artefact"),
+    "resolver.linkset": ({"relation": ["https://example.test/rel/passport"]}, "relation"),
     **{name: ({"documnet": "item"}, "documnet") for name in NO_PARAMETERS},
 }
 UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     *((name, {"document": "nothing"}) for name in CONTRACT_CHECKS if name != "data.context"),
     ("data.context", {"document": "nothing", **ALLOWLIST}),
+    ("resolver.linkset", {"document": "nothing", **RELATIONS}),
+    ("resolver.linkset", {"relations": ["Not A Relation"]}),
     ("api.contract", {"resource": "nothing"}),
     ("api.contract", {"method": "post"}),
     ("identifier.resolve", {"accepted_media_types": ["Text/HTML"]}),
@@ -101,6 +112,10 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("data.context", {"document": 7, **ALLOWLIST}),
     ("data.context", {"document": "item", "allowed_contexts": "https://example.test/c"}),
     ("access.restricted_fields", {"role": True}),
+    ("resolver.linkset", {"relations": "https://example.test/rel/passport"}),
+    ("resolver.linkset", {"relations": [7]}),
+    ("resolver.linkset", {"relations": ["https://example.test/rel/a\n"]}),
+    ("resolver.linkset", {"relations": []}),
     *((name, {"document": 7}) for name in NO_PARAMETERS),
 ]
 
@@ -179,8 +194,9 @@ def test_the_shipped_parameters_and_the_empty_parameters_fit() -> None:
     assert checked, "the shipped test packs name registered checks"
     for name in CONTRACT_CHECKS:
         empty = params_problem(models[name], {})
-        assert (empty is None) is (name != "data.context"), name
+        assert (empty is None) is (name not in REQUIRED_PARAMETERS), name
     assert _problem("data.context", {"document": "item", **ALLOWLIST}) is None
+    assert _problem("resolver.linkset", {"relations": ["describedby", "https://example.test/rel/a"]}) is None
     assert (
         _problem("identifier.resolve", {"accept": "text/html", "accepted_media_types": ["text/html"]}) is None
     )

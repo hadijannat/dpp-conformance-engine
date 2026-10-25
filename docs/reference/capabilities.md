@@ -20,6 +20,9 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `identifier.parse` | identifier | supported |  | Scheme-aware syntax check of the carrier payload. |  |
 | `identifier.resolve` | identifier | supported |  | Bounded resolution of an identifier to a passport. |  |
 | `identifier.consistency` | identifier | supported |  | Compare the carrier identifier, as exact text, with the id of the resolved passport. With a QR image, also compare it with the declared sample identifier. With compare_item, also compare the resolved passport with the API item document as JSON values. Digital consistency does not prove physical authenticity. |  |
+| `resolver.linkset` | resolver | experimental |  | Fetch the linkset of the carrier identifier by Accept header and by linkType query. Check status, media type, RFC 9264 structure, the anchor, and a declared relation. Link targets are not fetched. | Tested against a GS1 conformant resolver in a recorded test campaign. The structure rule is reviewed against RFC 9264 by a person. |
+| `resolver.well_known` | resolver | experimental |  | Check the GS1 resolver description file at the origin of the carrier identifier: status, JSON media type, and resolverRoot. A redirect is not judged. | The GS1 resolver description schema is pinned as a local file and the check validates against it. Tested against a GS1 conformant resolver in a recorded test campaign. |
+| `resolver.conformance` | resolver | experimental |  | Probe the final status of a default, a linkType=linkset, and an invalid-check-digit request. The status of a redirect hop is not judged. | The transport records the status of each redirect hop, and the check asserts it. Tested against a GS1 conformant resolver in a recorded test campaign. |
 | `api.contract` | api | supported |  | Check a response against a pinned, maintainer-supplied OpenAPI contract. A subset of OpenAPI 3.1 is supported: status, media type, and JSON Schema. A 3.0 contract is translated exactly, or blocked. Another version is blocked. |  |
 | `api.fuzz` | api | interface_only |  | Schemathesis fuzzing of the API. | Runs only with a signed authorization that grants the scope 'fuzz'. Tested against the reference system with a request budget. |
 | `data.jsonschema` | data | supported |  | Validate a document against a pinned JSON Schema in the 2020-12 or the draft-07 dialect. |  |
@@ -74,3 +77,6 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `manual.review` | `manual.review` | (none) | | | |
 | `persistence.versions` | `persistence.versions` | (none) | | | |
 | `registry.consistency` | `registry.mock` | (none) | | | |
+| `resolver.conformance` | `resolver.conformance` | (none) | | | |
+| `resolver.linkset` | `resolver.linkset` | `relations` | list of string | required | Relation types that name the passport, for example the spellings of one link type. Each is a registered relation name or an http or https IRI. One of them must have a link in the linkset context of the carrier. No target is fetched. |
+| `resolver.well_known` | `resolver.well_known` | (none) | | | |
