@@ -132,26 +132,43 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `IDENTIFIER.SYNTAX.INVALID` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.SYNTAX.OK` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | pass |
 | `IDENTIFIER.UNRESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
-| `INTEGRITY.CERT.EXPIRED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.CERT.KEY_USAGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.CERT.REVOKED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
+| `INTEGRITY.CERT.EXPIRED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here |
+| `INTEGRITY.CERT.KEY_USAGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here |
+| `INTEGRITY.CERT.REVOKED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here |
 | `INTEGRITY.FORMAT.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.ISSUER.UNTRUSTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
+| `INTEGRITY.JOSE.ALGORITHM` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.verify` | not fixed here |
+| `INTEGRITY.JOSE.CLAIMS` | INTEGRITY |  | `dppce.evidence.jose_profiles._moment`, `dppce.evidence.jose_profiles._seconds`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.EXPIRED` | INTEGRITY |  | `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.HEADER` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
+| `INTEGRITY.JOSE.ISSUER_MISMATCH` | INTEGRITY |  | `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.ISSUER_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.jose._pinned_key` | not fixed here |
+| `INTEGRITY.JOSE.KEY_NOT_VALID` | INTEGRITY |  | `dppce.adapters.jose._pinned_key` | not fixed here |
+| `INTEGRITY.JOSE.MALFORMED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles._decode`, `dppce.evidence.jose_profiles._signature`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.parse` | not fixed here |
+| `INTEGRITY.JOSE.NOT_AVAILABLE` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here |
+| `INTEGRITY.JOSE.NOT_YET_VALID` | INTEGRITY |  | `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.OK` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here |
+| `INTEGRITY.JOSE.PARAMS` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | inconclusive |
+| `INTEGRITY.JOSE.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.jose._acquire` | inconclusive |
+| `INTEGRITY.JOSE.SIGNATURE` | INTEGRITY |  | `dppce.adapters.jose._judge`, `dppce.evidence.jose_profiles.verify` | not fixed here |
+| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here |
+| `INTEGRITY.JOSE.TYPE` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
+| `INTEGRITY.JOSE.UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.key_algorithm`, `dppce.evidence.jose_profiles.public_key_from_jwk` | not fixed here |
 | `INTEGRITY.KEY.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
-| `INTEGRITY.NO_TARGET` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
+| `INTEGRITY.NO_TARGET` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._acquire` | inconclusive |
 | `INTEGRITY.OK` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
+| `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings`, `dppce.adapters.jose._chain_key` | inconclusive / not fixed here |
 | `INTEGRITY.PAYLOAD.MISMATCH` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.SIGNATURE.INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.STATUS.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
+| `INTEGRITY.STATUS.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
 | `INTEGRITY.TOKEN.MALFORMED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.NOT_AVAILABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.NOT_PROCESSABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.NO_ANSWER` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.TOO_LARGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive / not fixed here |
-| `INTEGRITY.TRUST.ANCHOR_INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
-| `INTEGRITY.TRUST.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
+| `INTEGRITY.TRUST.ANCHOR_INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
+| `INTEGRITY.TRUST.MISSING` | INTEGRITY | `integrity.jose`, `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose.jose_check` | inconclusive |
 | `ISSUER.ACCREDITATION.NO_REFERENCE` | ISSUER |  | `dppce.cli._inputs_from_args`, `dppce.verifier.verify._issuer_problem` | not fixed here |
 | `ISSUER.STATEMENT.MISMATCH` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
 | `ISSUER.STATEMENT.UNSPECIFIED` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |

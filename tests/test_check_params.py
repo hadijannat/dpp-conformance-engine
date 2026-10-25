@@ -45,6 +45,7 @@ CONTRACT_CHECKS = (
     "identifier.granularity",
     "identifier.parse",
     "identifier.resolve",
+    "integrity.jose",
     "integrity.jws",
     "manual.review",
     "persistence.versions",
@@ -80,6 +81,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "access.restricted_fields": ({"rol": "anonymous"}, "rol"),
     "aas.validate": ({"artefact": "aas_file"}, "artefact"),
     "resolver.linkset": ({"relation": ["https://example.test/rel/passport"]}, "relation"),
+    "integrity.jose": ({"key_sorce": "x5c"}, "key_sorce"),
     **{name: ({"documnet": "item"}, "documnet") for name in (*NO_PARAMETERS, *LIFECYCLE_CHECKS)},
 }
 UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
@@ -93,6 +95,9 @@ UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     ("identifier.resolve", {"accepted_media_types": ["Text/HTML"]}),
     ("identifier.parse", {"form": "gs1"}),
     ("aas.validate", {"format": "yaml"}),
+    ("integrity.jose", {"profile": "jwt"}),
+    ("integrity.jose", {"key_source": "did"}),
+    ("integrity.jose", {"algorithms": ["HS256"]}),
 ]
 WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("carrier.qr_decode", {"artifact": 7}),
@@ -126,6 +131,10 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("resolver.linkset", {"relations": [7]}),
     ("resolver.linkset", {"relations": ["https://example.test/rel/a\n"]}),
     ("resolver.linkset", {"relations": []}),
+    ("integrity.jose", {"accept": 7}),
+    ("integrity.jose", {"accept": "application/vc+jwt\n"}),
+    ("integrity.jose", {"algorithms": "ES256"}),
+    ("integrity.jose", {"sample": 7}),
 ]
 
 

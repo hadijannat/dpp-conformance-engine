@@ -48,6 +48,21 @@
       },
       "not_before": "2026-01-01T00:00:00Z",
       "not_after": "2036-01-01T00:00:00Z"
+    },
+    {
+      "kid": "TEST-ONLY-vc-issuer-key-1",
+      "issuer": "urn:example:operator:0001",
+      "purposes": [
+        "passport"
+      ],
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "74KUCPh8WbId2ZqDOx0azhmfPgSZAI2pRYmJmy2DEeY",
+        "y": "X_6VWdqoqUSDFZQ0uIbnxAfKJLpkLVYIsuPjE288zmE"
+      },
+      "not_before": "2026-01-01T00:00:00Z",
+      "not_after": "2036-01-01T00:00:00Z"
     }
   ],
   "anchors": [

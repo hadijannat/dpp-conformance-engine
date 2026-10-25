@@ -177,6 +177,19 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "",
     ),
     (
+        "integrity.jose",
+        "integrity",
+        _E,
+        "Verify a JWS credential or token under a named profile (vc-jose or jws) in the compact, "
+        "flattened JSON, or general JSON serialization. Every signature must verify. The key type "
+        "gives the algorithm (ES256, ES384, or EdDSA); none and HMAC are refused. The key comes from x5c "
+        "or from a pinned passport key of the trust bundle. Signature, issuer trust, and validity are "
+        "separate findings. The report signing profile is unchanged.",
+        None,
+        "Tested against a VC-JOSE issuer of a third party in a recorded test campaign. A person reviews "
+        "the header and claim rules against RFC 7515, RFC 8725, and W3C VC-JOSE-COSE.",
+    ),
+    (
         "integrity.cose",
         "integrity",
         _I,

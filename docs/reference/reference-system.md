@@ -48,7 +48,8 @@ A header value with a line break is never sent. The server answers `400` in its 
 
 The package `dppce.infrastructure.reference` holds family modules. A family module adds the
 behavior of one implementation family, for example a resolver. The families are `resolver`
-(section 4.6) and `jose`, which owns the flag `signed_jws_json`. The module docstring of the
+(section 4.6), `jose`, which owns the flag `signed_jws_json`, and `credentials` (section 4.7).
+The module docstring of the
 package states the contract. In short:
 
 - `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
@@ -247,6 +248,30 @@ of the GS1 Resolver Community Edition (Apache-2.0, commit `bf885fd`). The values
 
 A malformed GS1 path, for example a GTIN of 13 digits, still gets `404`. The engine sends such
 paths for the faults F-30 and F-31, so their answers stay the same.
+
+### 4.7 VC-JOSE credential (family module `credentials`)
+
+Module: `dppce.infrastructure.reference.credentials`. The behavior is synthetic. It follows the
+W3C Recommendation VC-JOSE-COSE and RFC 7515.
+
+A request for `/dpp/{id}/signed` with exactly `Accept: application/vc+jwt` gets `200` with the
+media type `application/vc+jwt`. The body is a compact JWS with the protected header
+`{"alg": "ES256", "kid": "TEST-ONLY-vc-issuer-key-1", "typ": "vc+jwt"}`. Every other request gets
+the core answer, so the answer to `Accept: */*` stays the `dpp+jws` token of section 4.5.
+
+The payload is `canonical_bytes` of this credential. The subject is the `id` of the anonymous
+item-level passport:
+
+```json
+{"@context": ["https://www.w3.org/ns/credentials/v2"], "type": ["VerifiableCredential"],
+ "issuer": "urn:example:operator:0001", "validFrom": "2026-01-01T00:00:00Z",
+ "validUntil": "2036-01-01T00:00:00Z",
+ "credentialSubject": {"id": "https://id.example.test/01/09506000134352/21/EV0001"}}
+```
+
+The TEST-ONLY leaf key of section 4.5 signs the credential. The TEST-ONLY trust bundle pins its
+public key as `TEST-ONLY-vc-issuer-key-1`, with the issuer `urn:example:operator:0001` and the
+purpose `passport`.
 
 ## 5. Local data formats
 
@@ -554,6 +579,8 @@ to rotate them. QR images are generated with zxing-cpp and Pillow (the `qr` extr
 rotates no key.
 `scripts/gen_fixtures.py --add-manual-key` adds only the manual signing key to the trust bundle.
 The rig signs manual results with it for the synthetic reference system only.
+The bundle entry `TEST-ONLY-vc-issuer-key-1` pins the public key of the TEST-ONLY leaf for the
+credential of section 4.7. It was added to the bundle by hand, and no key was rotated.
 
 ## 8. Check parameters and outcomes
 
