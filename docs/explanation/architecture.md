@@ -613,7 +613,7 @@ For the third request, its 3xx status gives `RESOLVER.CONFORMANCE.INVALID_STATUS
 request, it gives `unreachable`.
 
 Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`. The transport does not record the
-status of a redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
+status of a followed redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.

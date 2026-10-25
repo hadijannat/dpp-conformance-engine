@@ -1,7 +1,7 @@
 """Resolver adapter: the GS1 Digital Link resolver surface of the carrier identifier.
 
 The checks judge what the resolver answers to a few fixed GET requests. They never follow a link
-of a linkset, and they do not judge the status of a redirect hop: the transport does not record it.
+of a linkset, and they do not judge the status of a followed redirect hop: the transport does not record it.
 A body of an unexpected shape is a fail, never a blocked step, so that a system under test cannot
 reshape a wrong answer into one that is not judged.
 """
