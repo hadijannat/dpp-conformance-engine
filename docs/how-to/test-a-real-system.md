@@ -58,6 +58,24 @@ refuses them without a matching authorization.
 11. List the recordings past the retention period with `dppce purge --runs DIR --keys DIR`.
 12. Check the list. Then delete those recordings with the same command and `--yes`.
 
+## Choose a profile
+
+Use a battery profile only for a battery passport. For another system, use a family profile.
+A family profile pins no schema, no API contract, and no access policy.
+Its requirements are illustrative and make no normative statement.
+
+| Profile | Use it when the system |
+| --- | --- |
+| `family/web` | Serves a passport at an https URL, as JSON or as an HTML page |
+| `family/gs1-resolver` | Resolves a GS1 Digital Link identifier to a passport |
+| `family/aas` | Supplies Asset Administration Shell files in JSON, XML, or AASX form |
+| `family/credentials` | Issues the passport as a verifiable credential, in the VC or UNTP style |
+
+Each family profile reads only ICS fields: `identifier_scheme`, `signature_format`, `granularity`, and `features`.
+A step that does not fit these declarations is not applicable. It is never a fail.
+Declare `product_category: unknown` in the ICS.
+An example ICS and IXIT for each family are in `profiles/family/examples/`.
+
 ## Manual steps
 
 A manual step needs a signed manual result. The engine does not perform the review.
