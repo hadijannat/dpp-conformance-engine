@@ -76,3 +76,35 @@ test_purposes:
   expected_evidence:
   - The compared identifier sources.
   permitted_modes: *modes
+- id: TP-GS1-SYNTAX-002
+  title: Parse the carrier identifier as an uncompressed GS1 Digital Link URI of any granularity
+  requirements:
+  - FAM-GS1-SYNTAX-002
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.parse
+    params:
+      form: gs1-dl
+  expected_evidence:
+  - The decoded identifier, its primary key, its key qualifiers, and the syntax result.
+  permitted_modes: *modes
+  requires_scope: none
+- id: TP-GS1-GRANULARITY-001
+  title: Compare the granularity of the carrier identifier with the ICS
+  requirements:
+  - FAM-GS1-GRANULARITY-001
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.granularity
+  expected_evidence:
+  - The key set of the carrier identifier and the declared granularity.
+  permitted_modes: *modes
+  requires_scope: none

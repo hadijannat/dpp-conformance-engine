@@ -14,6 +14,9 @@ is listed in ``EXPECTED_DISAGREEMENTS`` with the side that the engine follows:
   vector of a group without an EC P-256 key, and never as BAD_SIGNATURE.
 - D-DL-1: ``identifier.parse`` accepts only ``/01/<GTIN>/21/<serial>`` (architecture section 8,
   gap D4-06). It refuses other GS1 Digital Link forms that GS1 accepts.
+- D-DL-2: the form ``gs1-dl`` of ``identifier.parse`` (``dppce.adapters.gs1``) refuses the
+  deprecated convenience alphas, as dl.c does by default. Three dl.c cases enable them without an
+  option setter, so the extraction cannot tell them from default cases.
 """
 
 from __future__ import annotations
@@ -28,6 +31,7 @@ from typing import Any
 import pytest
 import rfc8785
 
+from dppce.adapters import gs1
 from dppce.adapters.identifier import parse_gs1_digital_link
 from dppce.catalogue import load_catalogue
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
@@ -47,6 +51,13 @@ EXPECTED_DISAGREEMENTS: dict[str, object] = {
     "D-JCS-1": {"structures", "values"},
     "D-JWS-1": {18, 378},
     "D-JWS-2": "every vector of a group without an EC P-256 key",
+    # dl.c accepts these three only after `ctx->permitConvenienceAlphas = true`, an option that
+    # has no setter call, so the extraction counts them as default-option cases.
+    "D-DL-2": [
+        "https://a/gtin/12312312312333",
+        "https://a/gtin/12312312312333/ser/ABC123",
+        "https://a/sscc/006141411234567890",
+    ],
 }
 
 
@@ -232,20 +243,26 @@ def _c_string(literals: str) -> str:
 
 def _gs1_cases() -> tuple[list[tuple[str, str]], int, int]:
     """Return the default-option (expected error, URI) cases, the skipped count, and the call count."""
+    cases, skipped, calls = _gs1_cases_with_output()
+    return [(err, uri) for err, uri, _ in cases], skipped, calls
+
+
+def _gs1_cases_with_output() -> tuple[list[tuple[str, str, str]], int, int]:
+    """As ``_gs1_cases``, with the expected AI element string of each case (``^`` is FNC1)."""
     text = GS1_DL.read_bytes().decode("utf-8")
     start, end = "void test_dl_parseDLuri(void)", "void test_dl_URIunescape(void)"
     assert text.count(start) == 1
     assert text.count(end) == 1
     body = _strip_comments(text[text.index(start) : text.index(end)])
     active: set[str] = set()
-    cases: list[tuple[str, str]] = []
+    cases: list[tuple[str, str, str]] = []
     skipped = 0
     for match in _CALL.finditer(body):
         if match["setter"] is None:
             if active:
                 skipped += 1
             else:
-                cases.append((match["err"], _c_string(match["uri"])))
+                cases.append((match["err"], _c_string(match["uri"]), _c_string(match["out"])))
             continue
         args = [a.strip() for a in match["args"].split(",")]
         name, value = match["setter"], args[-1]
@@ -286,3 +303,42 @@ def test_gs1_every_disagreement_is_the_documented_path_shape_refusal() -> None:
     assert {(err, reason) for err, _, reason in disagreements} == {("OK", PATH_SHAPE)}
     accepted = [uri for err, uri, reason in results if err == "OK" and reason is None]
     assert accepted == ["https://id.gs1.org/01/09520123456788/21/12345"]
+
+
+# -- GS1 Digital Link URI syntax: the form gs1-dl ------------------------------------------------
+
+GS1_CASES_WITH_OUTPUT = _gs1_cases_with_output()[0]
+
+
+def _element_string(link: gs1.DigitalLink) -> str:
+    """The AI element string that dl.c writes: FNC1 first and after each variable-length AI."""
+    out, fnc1 = [], True
+    for ai, value in link.elements:
+        out.append(("^" if fnc1 else "") + ai + value)
+        fnc1 = not gs1.dictionary().entries[ai].fixed
+    return "".join(out)
+
+
+def test_gs1_dl_never_accepts_what_the_reference_rejects() -> None:
+    rejected = [uri for err, uri in GS1_CASES if err != "OK"]
+    assert len(rejected) == 45
+    assert [uri for uri in rejected if isinstance(gs1.parse(uri), gs1.DigitalLink)] == []
+
+
+def test_gs1_dl_disagrees_only_on_the_convenience_alphas() -> None:
+    results = [(err, uri, gs1.parse(uri)) for err, uri, _ in GS1_CASES_WITH_OUTPUT]
+    disagreements = [
+        (uri, result) for err, uri, result in results if (err == "OK") != isinstance(result, gs1.DigitalLink)
+    ]
+    assert [uri for uri, _ in disagreements] == EXPECTED_DISAGREEMENTS["D-DL-2"]
+    assert {result.rule for _, result in disagreements if isinstance(result, gs1.Problem)} == {"KEY"}
+
+
+def test_gs1_dl_extracts_the_element_string_of_every_accepted_case() -> None:
+    accepted = [
+        (uri, out, result)
+        for err, uri, out in GS1_CASES_WITH_OUTPUT
+        if err == "OK" and isinstance(result := gs1.parse(uri), gs1.DigitalLink)
+    ]
+    assert len(accepted) == 60
+    assert [(uri, out) for uri, out, result in accepted if _element_string(result) != out] == []
