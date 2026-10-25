@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 38,
+    "cycle": 42,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-25: wave 1 of program P2 (P2-00, P2-01, P2-02, P2-03, P2-30, and the integrator commits) is on the integration branch worktree-wf_5ec6fc29-ba8-16, based on main 4990be0, and is not yet on main.",
+    "state_at_end": "2026-10-25: wave 1 of program P2 is on main as 19451c4 (plus 5d0037a, a $ref charset fix of api.contract after a push security review; CI and CodeQL green on 5d0037a), and wave 2 (P2-33, P2-06, P2-04, P2-05, and the integrator commits) is on the integration branch worktree-wf_33558979-41d-12, based on main 5d0037a, and is not yet on main.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -70,7 +70,7 @@
       "status": "in progress",
       "research_passes": 1,
       "review_rounds": null,
-      "note": "Program P2, practical DPP conformance test cases (docs/research/practical-use-assessment-2026-10-25.md). Owner decisions of 2026-10-25 in chat, answers to four questions: protected files \"Same terms as T1 (Recommended)\"; dependencies \"Optional extras only (Recommended)\"; oracles \"Fetch open sources (Recommended)\"; landing \"Land and push like T1 (Recommended)\". Each protected diff is shown to the owner before it lands on main. Not covered: approval of interpretations (OQ-002), OQ-016 and other reviewer readings, a real-system run, DCO sign-off."
+      "note": "Program P2, practical DPP conformance test cases (docs/research/practical-use-assessment-2026-10-25.md). Owner decisions of 2026-10-25 in chat, answers to four questions: protected files \"Same terms as T1 (Recommended)\"; dependencies \"Optional extras only (Recommended)\"; oracles \"Fetch open sources (Recommended)\"; landing \"Land and push like T1 (Recommended)\". Each protected diff is shown to the owner before it lands on main. Not covered: approval of interpretations (OQ-002), OQ-016 and other reviewer readings, a real-system run, DCO sign-off. Wave 1 landed on main as 19451c4, after an extra fix commit (19451c4 detects a linkset and a JWS JSON serialization by their exact shape) that followed an automated security review."
     }
   },
   "repair_attempts": {
@@ -577,6 +577,30 @@
       "kind": "implement-and-check",
       "milestone": "M8",
       "summary": "P2-30 (7fe619a tests first, then 3b972d2, ae05ddc, b130b95, d3e4147, 3c0ac78): family profiles web, gs1-resolver, aas, and credentials with the illustrative family pack and four family test packs; an end-to-end test runs family/web and family/gs1-resolver on the reference system, and family controls in validation.run are not built."
+    },
+    {
+      "cycle": 39,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-33 (d748612 catalogue controls and the per-case profiles field first, then a2434fe, c2c8055, 1779e80, f36887a): validation.run runs the family controls C-FAMILY-WEB, C-FAMILY-GS1, C-FAMILY-VC, and C-FAMILY-AAS and runs each sut fault under the profiles of its entry; the package did not edit tests/test_e2e_reference.py, so the integrator made its validation test loop over the profiles of each case."
+    },
+    {
+      "cycle": 40,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-06 (52b9dfb catalogue entries F-54 and F-55 first, then ac89691, 8cab003, b7e4e53): persistence.versions and registry.consistency take closed field-map parameters (JSON Pointers, a raw-sha256 digest, string versions, 1 to 16 field pairs) with the codes PERSISTENCE.PARAMS.INVALID and REGISTRY.PARAMS.INVALID; just validate was not run in the package."
+    },
+    {
+      "cycle": 41,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-04 (32e53e5 vendored GS1 Barcode Syntax Dictionary, 2150738 catalogue entries F-40 to F-47 and B-12, and 42512c0 tests first, then b4955b0, 09bbb51, 55ce646, fb1ce5e, 397e884): identifier.parse takes the form gs1-dl and the check identifier.granularity compares the carrier level with the ICS; in the package, uv run just check failed only on F-40, F-41, and B-12, which waited for P2-33."
+    },
+    {
+      "cycle": 42,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-05 (b0924ff catalogue entries F-48 to F-52 and B-14 and 60ee0a7 tests first, then de8777e, 0eab2bd, 14ec0d8, fb8b9d2): the checks resolver.linkset, resolver.well_known, and resolver.conformance judge the GS1 resolver, with a vendored GS1 linkset schema as a test oracle only; in the package, uv run just check failed only on the six family cases, which waited for P2-33."
     }
   ],
   "blockers": [
