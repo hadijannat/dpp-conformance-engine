@@ -52,9 +52,9 @@ CONTRACT_CHECKS = (
 NO_PARAMETERS = (
     "integrity.jws",
     "manual.review",
-    "persistence.versions",
-    "registry.consistency",
 )
+# Checks that took no parameter in the base version and now take a closed model (package P2-06).
+LIFECYCLE_CHECKS = ("persistence.versions", "registry.consistency")
 ALLOWLIST: dict[str, Any] = {"allowed_contexts": ["https://example.test/c"]}
 
 # Each check with a misspelled key, and the key that the problem must name.
@@ -69,7 +69,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "data.rules": ({"documnet": "item"}, "documnet"),
     "access.restricted_fields": ({"rol": "anonymous"}, "rol"),
     "aas.validate": ({"artefact": "aas_file"}, "artefact"),
-    **{name: ({"documnet": "item"}, "documnet") for name in NO_PARAMETERS},
+    **{name: ({"documnet": "item"}, "documnet") for name in (*NO_PARAMETERS, *LIFECYCLE_CHECKS)},
 }
 UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     *((name, {"document": "nothing"}) for name in CONTRACT_CHECKS if name != "data.context"),
@@ -101,7 +101,10 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("data.context", {"document": 7, **ALLOWLIST}),
     ("data.context", {"document": "item", "allowed_contexts": "https://example.test/c"}),
     ("access.restricted_fields", {"role": True}),
-    *((name, {"document": 7}) for name in NO_PARAMETERS),
+    *((name, {"document": 7}) for name in (*NO_PARAMETERS, *LIFECYCLE_CHECKS)),
+    ("persistence.versions", {"entries_pointer": 7}),
+    ("persistence.versions", {"digest_of": 7}),
+    ("registry.consistency", {"fields": "identifier"}),
 ]
 
 

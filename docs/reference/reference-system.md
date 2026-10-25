@@ -177,13 +177,14 @@ Item-level data and model-level data are separate documents with separate schema
 
 ```json
 {"versions": [
-  {"version": 1, "updated_at": "2026-09-01T08:00:00Z", "content_digest": "sha256:..."},
-  {"version": 3, "updated_at": "2026-10-10T08:00:00Z", "content_digest": "sha256:..."}
+  {"version": 1, "updated_at": "2026-09-01T08:00:00Z", "content_digest": "sha256:...", "raw_digest": "sha256:..."},
+  {"version": 3, "updated_at": "2026-10-10T08:00:00Z", "content_digest": "sha256:...", "raw_digest": "sha256:..."}
 ]}
 ```
 
 `content_digest` is `dppce.evidence.canonical.digest` of the anonymous item-level passport of
-that version. Declared update rule of the reference system: a change of content needs a higher
+that version. `raw_digest` is the SHA-256 of the bytes that the item route serves for that
+version. `TP-PERSIST-002` compares it with `digest_of: raw-sha256`. Declared update rule of the reference system: a change of content needs a higher
 version number and a later or equal `updated_at`. The last entry describes the current document.
 The check compares `updated_at` values as instants. Each value must be an RFC 3339 date-time with
 an offset. `T` and `Z` may be lower case. A missing or other value breaks the rule. If the
@@ -492,6 +493,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `context_invalid` | `@context` is `["https://unpinned.example.test/ctx"]` |
 | `registry_inconsistent` | the registry record names operator `urn:example:operator:9999` |
 | `version_undeclared_change` | the last version entry repeats the previous version number with a different digest |
+| `registry_extra_field_differs` | the registry `passport_url` names serial `OTHER0001`, not the passport identifier |
+| `version_raw_digest_stale` | the last version entry repeats the `raw_digest` of the first entry |
 | `over_restrict_legitimate_interest` | the `legitimate_interest` passport omits `restricted.dismantling_notes` |
 | `leak_supplier_to_legitimate_interest` | the `legitimate_interest` passport includes `restricted.supplier_reference` |
 | `leak_usage_log_anonymous` | the anonymous passport includes `restricted.usage_log` with its canary |
@@ -626,8 +629,8 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
 | `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
-| `persistence.versions` | none | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail); no canonical form of the passport: `blocked`, `PERSISTENCE.DIGEST.NOT_COMPARABLE` (section 4.3) |
-| `registry.consistency` | none | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail). Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
+| `persistence.versions` | `entries_pointer`, `version_field`, `time_field`, `digest_field`, `digest_of`, `version_kind` (the defaults are the layout of section 4.3) | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail); no canonical form of the passport with `jcs-sha256`: `blocked`, `PERSISTENCE.DIGEST.NOT_COMPARABLE` (section 4.3); malformed parameter: `blocked`, `PERSISTENCE.PARAMS.INVALID` |
+| `registry.consistency` | `fields` (1 to 16 pairs of `name`, `registry_pointer`, and `passport_pointer`; the default is the two pairs of section 4.4) | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail); malformed parameter: `blocked`, `REGISTRY.PARAMS.INVALID`. Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`), `format` (`json`, `xml`, or `aasx`; default `json`), `metamodel_version` (default `3.0`) | `AAS.VALID`. The message names the format and the version that the check covers | `AAS.INVALID` (fail): the wrapped validator read the sample and rejected it, or the sample is not readable as the declared format, or an AASX package has no AAS specification part; a `metamodel_version` that the wrapped release does not verify, or an XML namespace that names such a version: `unsupported`, `AAS.VERSION.UNSUPPORTED`, and the sample is not read; malformed parameter: `blocked`, `AAS.PARAMS.INVALID`; sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
 
 ### 8.1 Outcomes of `integrity.jws`
@@ -709,6 +712,8 @@ Requirement pack `illustrative/core` (file `catalogue/packs/illustrative-core.ya
 | `ILL-EV-ONLY-001` | mandatory | `ics.product_category eq ev` | `TP-ID-001` |
 | `ILL-CAPACITY-001` | mandatory | `ics.characteristics.capacity_wh gt profile.capacity_threshold_wh` is not expressible, so the profile sets the constant and the pack uses `{fact: ics.characteristics.capacity_wh, op: gt, value: 2000}` | `TP-DATA-004` |
 | `ILL-PERSIST-001` | recommended | always | `TP-PERSIST-001` (`persistence.versions`) |
+| `ILL-PERSIST-002` | recommended | always | `TP-PERSIST-002` (`persistence.versions`, `digest_of: raw-sha256`) |
+| `ILL-REGISTRY-002` | mandatory | always | `TP-REGISTRY-002` (`registry.consistency`, three declared pairs) |
 | `ILL-MANUAL-001` | recommended | always | `TP-MANUAL-001` (`manual: true`, check `manual.review`) |
 | `ILL-NFC-001` | optional | `ics.carriers contains nfc` | `TP-NFC-001` (check `carrier.nfc_read`, not registered) |
 | `ILL-AAS-001` | optional | `ics.features.aas eq true` | `TP-AAS-001` (`aas.validate`) |

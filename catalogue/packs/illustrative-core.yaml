@@ -271,6 +271,25 @@ requirements:
   - id: default
     tests:
     - TP-REGISTRY-001
+- id: ILL-REGISTRY-002
+  title: The registry record agrees with the passport in a third field
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The mock registry record names the passport URL that the passport states as its identifier.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-REGISTRY-002-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-REGISTRY-002
 - id: ILL-EV-ONLY-001
   title: Rule for the EV category only
   source:
@@ -336,6 +355,25 @@ requirements:
   - id: default
     tests:
     - TP-PERSIST-001
+- id: ILL-PERSIST-002
+  title: The version history digest covers the served bytes
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: recommended
+  paraphrase: The last digest of the version history is the digest of the item body as served.
+  applicability: *id001
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: ILL-PERSIST-002-I1
+    text: Synthetic rule that demonstrates engine behavior.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-PERSIST-002
 - id: ILL-MANUAL-001
   title: Manual review of the carrier marking
   source:

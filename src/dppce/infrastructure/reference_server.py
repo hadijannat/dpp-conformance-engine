@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import base64
 import copy
+import hashlib
 import html
 import http.server
 import json
@@ -47,7 +48,8 @@ CORE_FAULTS: Final = frozenset(
         "data_wrong_unit", "data_relationship", "context_invalid", "registry_inconsistent",
         "version_undeclared_change", "over_restrict_legitimate_interest",
         "leak_supplier_to_legitimate_interest", "leak_usage_log_anonymous", "deny_all",
-        "resolver_5xx", "resolver_html", "resolver_divergent",
+        "resolver_5xx", "resolver_html", "resolver_divergent", "registry_extra_field_differs",
+        "version_raw_digest_stale",
     }
 )  # fmt: skip
 
@@ -86,6 +88,11 @@ _ITEM_PATH: Final = re.compile(
     r"^/dpp/(?P<id>[0-9]{14}-[A-Za-z0-9]+)(?P<rest>/model|/signed|/versions|/export|\.html)?$"
 )
 _REGISTRY_PATH: Final = re.compile(r"^/registry/(?P<id>[0-9]{14}-[A-Za-z0-9]+)$")
+
+
+def _raw_digest(document: dict[str, Any]) -> str:
+    """The digest of the bytes that the item route serves for ``document``."""
+    return "sha256:" + hashlib.sha256(_json(200, document)[2]).hexdigest()
 
 
 class ReferenceSystem:
@@ -157,13 +164,22 @@ class ReferenceSystem:
         current = self.item(ident, "anonymous")
         first = {**current, "version": 1, "updated_at": "2026-09-01T08:00:00Z"}
         entries = [
-            {"version": 1, "updated_at": first["updated_at"], "content_digest": digest(first)},
+            {
+                "version": 1,
+                "updated_at": first["updated_at"],
+                "content_digest": digest(first),
+                "raw_digest": _raw_digest(first),
+            },
             {
                 "version": current["version"],
                 "updated_at": current["updated_at"],
                 "content_digest": digest(current),
+                "raw_digest": _raw_digest(current),
             },
         ]
+        if "version_raw_digest_stale" in self.faults:
+            # The history repeats the digest of the first body for the current one.
+            entries[-1] = {**entries[-1], "raw_digest": entries[0]["raw_digest"]}
         if "version_undeclared_change" in self.faults:
             # The content changed, but the version number did not.
             entries[0] = {**entries[0], "version": current["version"]}
@@ -198,7 +214,10 @@ class ReferenceSystem:
             "operator_identifier": "urn:example:operator:9999"
             if inconsistent
             else item["operator"]["identifier"],
-            "passport_url": item["id"],
+            # A third pair for TP-REGISTRY-002: it compares with the passport id.
+            "passport_url": item["id"].rsplit("/", 1)[0] + "/OTHER0001"
+            if "registry_extra_field_differs" in self.faults
+            else item["id"],
             "registered_at": "2026-09-01T08:00:00Z",
         }
 

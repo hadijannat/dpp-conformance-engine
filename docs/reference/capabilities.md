@@ -30,7 +30,7 @@ A capability with the state `interface_only` is a deferred integration. It is no
 | `integrity.jws` | integrity | supported |  | Verify a JWS on a passport: signature validity, issuer trust, and certificate validity, as separate findings. A valid signature does not prove that the signed attributes are true. |  |
 | `integrity.cose` | integrity | interface_only |  | Verify a COSE signature. | A COSE profile with an algorithm allowlist and its own test vectors. |
 | `integrity.status_list` | integrity | interface_only |  | Bitstring Status List retrieval and check. | Status retrieval behind the transport, with a mock status service and staleness tests. |
-| `persistence.versions` | persistence | experimental |  | Compare version-aware observations with the declared update rule. A limited number of observations cannot prove lifetime availability. |  |
+| `persistence.versions` | persistence | experimental |  | Compare version-aware observations with the declared update rule. JSON Pointers and a digest kind map third-party history layouts. A limited number of observations cannot prove lifetime availability. |  |
 | `persistence.scheduled` | persistence | interface_only |  | Scheduled acquisition over time and backup references. | A scheduler runs acquisitions at declared intervals and keeps each recording. |
 | `registry.mock` | registry | supported |  | Passive lookup against a configurable mock registry. |  |
 | `registry.official` | registry | interface_only |  | Checks against an official registry environment. | A separately authorized official environment is available. Passive checks are separate from registration and update operations. |
@@ -72,5 +72,10 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `identifier.resolve` | `identifier.resolve` | `require_https` | boolean | `false` | Fail an identifier, and on resolve each redirect target, whose scheme is not https. The EU registry user guide names https identifiers only. |
 | `integrity.jws` | `integrity.jws` | (none) | | | |
 | `manual.review` | `manual.review` | (none) | | | |
-| `persistence.versions` | `persistence.versions` | (none) | | | |
-| `registry.consistency` | `registry.mock` | (none) | | | |
+| `persistence.versions` | `persistence.versions` | `entries_pointer` | string | `"/versions"` | JSON Pointer (RFC 6901) to the list of history entries. |
+| `persistence.versions` | `persistence.versions` | `version_field` | string | `"version"` | Member of an entry: the version. |
+| `persistence.versions` | `persistence.versions` | `time_field` | string | `"updated_at"` | Member of an entry: the update time (RFC 3339). |
+| `persistence.versions` | `persistence.versions` | `digest_field` | string | `"content_digest"` | Member of an entry: the digest of the item. |
+| `persistence.versions` | `persistence.versions` | `digest_of` | one of `jcs-sha256`, `raw-sha256` | `"jcs-sha256"` | What the digest covers: the canonical form of the item (sha256:<hex>), or the bytes of the item body as served (sha256:<hex>). |
+| `persistence.versions` | `persistence.versions` | `version_kind` | one of `integer`, `string` | `"integer"` | Integer versions must ascend. String versions must be distinct, and time orders them. |
+| `registry.consistency` | `registry.mock` | `fields` | list of any | `[{"name": "identifier", "registry_pointer": "/identifier", "passport_pointer": "/id"}, {"name": "operator_identifier", "registry_pointer": "/operator_identifier", "passport_pointer": "/operator/identifier"}]` | Pairs of values to compare, each as a name and two JSON Pointers. Names are unique. |
