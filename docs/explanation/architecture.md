@@ -632,11 +632,12 @@ These rules apply:
   semanticId of the template as exact text. The reference type and the key type do not matter.
 - A DPP metadata submodel is an object of the list `submodels` with the matching semanticId
   `https://admin-shell.io/idta/cds/dppMetadata/1`.
-- A required element is a top-level element with the cardinality `One` in the template. An
-  object of `submodelElements` is that element if it has its idShort, a matching semanticId, and
-  a non-empty string or list as `value`.
+- A required element is a top-level element with the cardinality `One` in the template. Each one
+  is a Property. An object of `submodelElements` is that element if it is the only object with its
+  idShort. It must also have the `modelType` `Property`, a matching semanticId, and a non-empty
+  string as `value`.
 - A shell references a submodel if the last key of a reference in its `submodels` has the `id`
-  of the submodel as its value.
+  of the submodel as its value. A submodel without a string `id` has no referencing shell.
 - The mapping table of the IDTA 02099-1 documentation binds `uniqueProductIdentifier` to
   `assetInformation.globalAssetId`. The template binds no element to `specificAssetIds`, so the
   check does not read them.

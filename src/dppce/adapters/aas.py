@@ -211,17 +211,18 @@ def aas_validate(ctx: CheckContext) -> CheckOutcome:
 # definitions with a European standard as their source, so it is not vendored (CLAUDE.md rule 5).
 DPP_TEMPLATE: Final = "IDTA 02099-1 version 1.0 (template release 1.0.2)"
 DPP_SUBMODEL_SEMANTIC_ID: Final = "https://admin-shell.io/idta/cds/dppMetadata/1"
-# (idShort, semanticId, SMT/Cardinality) of each top-level element, in template order.
+# (idShort, semanticId, SMT/Cardinality, modelType) of each top-level element, in template order.
+_CDS = "https://admin-shell.io/idta/cds/"
 DPP_ELEMENTS: Final = (
-    ("digitalProductPassportId", "https://admin-shell.io/idta/cds/digitalProductPassportId/1", "One"),
-    ("uniqueProductIdentifier", "https://admin-shell.io/idta/cds/uniqueProductIdentifier/1", "One"),
-    ("granularity", "https://admin-shell.io/idta/cds/granularity/1", "One"),
-    ("dppSchemaVersion", "https://admin-shell.io/idta/cds/dppSchemaVersion/1", "One"),
-    ("dppStatus", "https://admin-shell.io/idta/cds/dppStatus/1", "One"),
-    ("lastUpdate", "https://admin-shell.io/idta/cds/lastUpdate/1", "One"),
-    ("economicOperatorId", "https://admin-shell.io/idta/cds/economicOperatorId/1", "One"),
-    ("facilityId", "https://admin-shell.io/idta/cds/facilityId/1", "ZeroToOne"),
-    ("contentSpecificationIds", "https://admin-shell.io/idta/cds/contentSpecificationIds/1", "ZeroToOne"),
+    ("digitalProductPassportId", f"{_CDS}digitalProductPassportId/1", "One", "Property"),
+    ("uniqueProductIdentifier", f"{_CDS}uniqueProductIdentifier/1", "One", "Property"),
+    ("granularity", f"{_CDS}granularity/1", "One", "Property"),
+    ("dppSchemaVersion", f"{_CDS}dppSchemaVersion/1", "One", "Property"),
+    ("dppStatus", f"{_CDS}dppStatus/1", "One", "Property"),
+    ("lastUpdate", f"{_CDS}lastUpdate/1", "One", "Property"),
+    ("economicOperatorId", f"{_CDS}economicOperatorId/1", "One", "Property"),
+    ("facilityId", f"{_CDS}facilityId/1", "ZeroToOne", "Property"),
+    ("contentSpecificationIds", f"{_CDS}contentSpecificationIds/1", "ZeroToOne", "SubmodelElementList"),
 )
 # The mapping table of the IDTA 02099-1 documentation binds this element to the globalAssetId of the
 # shell. The template defines no binding to specificAssetIds.
@@ -254,21 +255,31 @@ def _objects(value: Any) -> list[dict[str, Any]]:
     return [item for item in value if isinstance(item, dict)] if isinstance(value, list) else []
 
 
-def _present(elements: list[dict[str, Any]], name: str, semantic_id: str) -> dict[str, Any] | None:
-    for element in elements:
-        value = element.get("value")
-        if (
-            element.get("idShort") == name
-            and _key_value(element.get("semanticId")) == semantic_id
-            and isinstance(value, str | list)
-            and value
-        ):
-            return element
+def _present(elements: list[dict[str, Any]], name: str, semantic_id: str) -> str | None:
+    """The text value of the one Property with this idShort and semanticId, else None.
+
+    A repeated idShort counts as missing: a second, different copy must not hide behind the first.
+    Each required element of the template is a Property, and a test asserts that of the table.
+    """
+    matches = [element for element in elements if element.get("idShort") == name]
+    if len(matches) != 1:
+        return None
+    (element,) = matches
+    value = element.get("value")
+    if (
+        element.get("modelType") == "Property"
+        and _key_value(element.get("semanticId")) == semantic_id
+        and isinstance(value, str)
+        and value
+    ):
+        return value
     return None
 
 
-def _agrees(shells: list[dict[str, Any]], submodel: dict[str, Any], product_id: Any) -> bool:
+def _agrees(shells: list[dict[str, Any]], submodel: dict[str, Any], product_id: str) -> bool:
     """Each shell that references the submodel has the product identifier as its globalAssetId."""
+    if not isinstance(submodel.get("id"), str):
+        return False
     referencing = [
         shell
         for shell in shells
@@ -305,7 +316,7 @@ def aas_dpp_compose(ctx: CheckContext) -> CheckOutcome:
     ]
     shells = _objects(environment.get("assetAdministrationShells"))
     required = [
-        (name, semantic_id) for name, semantic_id, cardinality in DPP_ELEMENTS if cardinality == "One"
+        (name, semantic_id) for name, semantic_id, cardinality, _ in DPP_ELEMENTS if cardinality == "One"
     ]
     missing: set[str] = set()
     agrees = bool(submodels)
@@ -315,7 +326,7 @@ def aas_dpp_compose(ctx: CheckContext) -> CheckOutcome:
             name for name, semantic_id in required if _present(elements, name, semantic_id) is None
         )
         product = _present(elements, DPP_PRODUCT_ID, dict(required)[DPP_PRODUCT_ID])
-        agrees = agrees and product is not None and _agrees(shells, submodel, product.get("value"))
+        agrees = agrees and product is not None and _agrees(shells, submodel, product)
     summary = {
         "dpp_submodels": len(submodels),
         "missing_elements": sorted(missing),
@@ -331,8 +342,8 @@ def aas_dpp_compose(ctx: CheckContext) -> CheckOutcome:
     if missing:
         names = ", ".join(sorted(missing))
         message = (
-            "A DPP metadata submodel lacks a required element with its idShort, its semanticId, and a "
-            f"value: {names}. {_DPP_LIMIT}"
+            "A DPP metadata submodel lacks a required element as one Property with its idShort, its "
+            f"semanticId, and a text value: {names}. {_DPP_LIMIT}"
         )
         return completed(False, "AAS.DPP.ELEMENT_MISSING", message, [observation])
     if not agrees:

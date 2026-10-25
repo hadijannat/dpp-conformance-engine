@@ -63,11 +63,19 @@ def test_the_table_equals_the_template() -> None:
             element["idShort"],
             element["semanticId"]["keys"][0]["value"],
             next(q["value"] for q in element["qualifiers"] if q["type"] == "SMT/Cardinality"),
+            element["modelType"],
         )
         for element in submodel["submodelElements"]
     )
     assert derived == aas.DPP_ELEMENTS
-    assert aas.DPP_PRODUCT_ID in {name for name, _, _ in aas.DPP_ELEMENTS}
+
+
+def test_each_required_element_of_the_table_is_a_property() -> None:
+    # The check reads the value of a required element as text. That holds only for a Property.
+    assert {model for _, _, cardinality, model in aas.DPP_ELEMENTS if cardinality == "One"} == {"Property"}
+    assert aas.DPP_PRODUCT_ID in {
+        name for name, _, cardinality, _ in aas.DPP_ELEMENTS if cardinality == "One"
+    }
 
 
 # -- Pass ------------------------------------------------------------------------------------------
@@ -99,7 +107,7 @@ def test_the_semantic_id_matches_by_key_value_whatever_the_reference_type(tmp_pa
 
 def test_an_optional_element_may_be_absent(tmp_path: Path) -> None:
     # facilityId and contentSpecificationIds have the cardinality ZeroToOne in the template.
-    names = {name for name, _, cardinality in aas.DPP_ELEMENTS if cardinality != "One"}
+    names = {name for name, _, cardinality, _ in aas.DPP_ELEMENTS if cardinality != "One"}
     assert names == {"facilityId", "contentSpecificationIds"}
     outcome = _run(tmp_path, (SAMPLES / "TEST-ONLY-dpp-valid.json").read_bytes())
     assert outcome.passed is True
@@ -162,8 +170,22 @@ def _element(document: dict[str, Any], name: str) -> dict[str, Any]:
         lambda e: e.update(semanticId={"keys": [{"value": "https://admin-shell.io/idta/cds/dppStatus/2"}]}),
         lambda e: e.pop("semanticId"),
         lambda e: e.update(idShort="status"),
+        # Every required element of the template is a Property, whose value is text.
+        lambda e: e.update(value=[{}]),
+        lambda e: e.update(modelType="Blob"),
+        lambda e: e.pop("modelType"),
     ],
-    ids=["empty-value", "no-value", "value-not-text", "other-semantic-id", "no-semantic-id", "other-idshort"],
+    ids=[
+        "empty-value",
+        "no-value",
+        "value-not-text",
+        "other-semantic-id",
+        "no-semantic-id",
+        "other-idshort",
+        "value-a-list",
+        "blob-not-property",
+        "no-model-type",
+    ],
 )
 def test_a_required_element_needs_its_idshort_its_semantic_id_and_a_value(
     change: Any, tmp_path: Path
@@ -173,10 +195,32 @@ def test_a_required_element_needs_its_idshort_its_semantic_id_and_a_value(
     assert outcome.observations[0].summary["missing_elements"] == ["dppStatus"]
 
 
+def test_a_repeated_required_element_counts_as_missing(tmp_path: Path) -> None:
+    # An idShort is unique in a submodel. A second, different copy must not hide behind the first.
+    def repeat(document: dict[str, Any]) -> None:
+        second = copy.deepcopy(_element(document, "uniqueProductIdentifier"))
+        second["value"] = "https://example.test/TEST-ONLY/product/2"
+        document["submodels"][0]["submodelElements"].append(second)
+
+    outcome = _run(tmp_path, _changed(repeat))
+    assert _verdict(outcome) == (ExecutionStatus.COMPLETED, False, "AAS.DPP.ELEMENT_MISSING")
+    assert outcome.observations[0].summary["missing_elements"] == ["uniqueProductIdentifier"]
+
+
+def test_a_product_identifier_list_equal_to_the_global_asset_id_fails(tmp_path: Path) -> None:
+    def lists(document: dict[str, Any]) -> None:
+        _element(document, "uniqueProductIdentifier")["value"] = [7]
+        document["assetAdministrationShells"][0]["assetInformation"]["globalAssetId"] = [7]
+
+    outcome = _run(tmp_path, _changed(lists))
+    assert _verdict(outcome) == (ExecutionStatus.COMPLETED, False, "AAS.DPP.ELEMENT_MISSING")
+    assert outcome.observations[0].summary["missing_elements"] == ["uniqueProductIdentifier"]
+
+
 def test_submodel_elements_that_are_not_a_list_miss_every_required_element(tmp_path: Path) -> None:
     outcome = _run(tmp_path, _changed(lambda d: d["submodels"][0].update(submodelElements={})))
     assert outcome.reason_code == "AAS.DPP.ELEMENT_MISSING"
-    required = sorted(name for name, _, cardinality in aas.DPP_ELEMENTS if cardinality == "One")
+    required = sorted(name for name, _, cardinality, _ in aas.DPP_ELEMENTS if cardinality == "One")
     assert outcome.observations[0].summary["missing_elements"] == required
 
 
@@ -206,6 +250,15 @@ def test_a_product_identifier_that_differs_from_the_global_asset_id_fails(tmp_pa
                 {"name": "uniqueProductIdentifier", "value": "https://example.test/TEST-ONLY/product/1"}
             ],
         ),
+        # No submodel id and a reference key without a value: None must not equal None.
+        lambda d: (
+            d["submodels"][0].pop("id"),
+            d["assetAdministrationShells"][0]["submodels"][0]["keys"][0].pop("value"),
+        ),
+        lambda d: (
+            d["submodels"][0].update(id=7),
+            d["assetAdministrationShells"][0]["submodels"][0]["keys"][0].update(value=7),
+        ),
     ],
     ids=[
         "shell-without-references",
@@ -215,6 +268,8 @@ def test_a_product_identifier_that_differs_from_the_global_asset_id_fails(tmp_pa
         "no-shells",
         "shells-not-a-list",
         "specific-asset-id-only",
+        "no-submodel-id-and-no-key-value",
+        "submodel-id-not-text",
     ],
 )
 def test_a_dpp_submodel_without_an_agreeing_shell_fails(change: Any, tmp_path: Path) -> None:
