@@ -35,6 +35,7 @@ from tests.test_url_templates import run
 pki = test_review_findings.pki  # the module fixture of the integrity tests
 
 LINKSET_TYPE = "application/linkset+json"
+NATIVE_TYPE = "application/linkset"
 
 
 def linkset(origin: str) -> bytes:
@@ -42,6 +43,11 @@ def linkset(origin: str) -> bytes:
     anchor = origin + RESOLVER_PATH
     links = [{"href": origin + ITEM_PATH, "type": "application/json"}]
     return json.dumps({"linkset": [{"anchor": anchor, "describedby": links}]}).encode()
+
+
+def native_linkset(origin: str) -> bytes:
+    """The same linkset in the native format of RFC 9264."""
+    return f'<{origin}{ITEM_PATH}>; rel="describedby"; anchor="{origin}{RESOLVER_PATH}"'.encode()
 
 
 def answer(body: bytes, media: str = LINKSET_TYPE) -> Route:
@@ -60,6 +66,7 @@ def _blocked(outcome: CheckOutcome, code: str) -> None:
     [
         (LINKSET_TYPE, b"not json", True),  # the media type alone says linkset
         ("application/linkset+json; profile=x", b"{}", True),
+        (NATIVE_TYPE, b'<https://x/p>; rel="describedby"; anchor="https://x"', True),
         ("application/json", b'{"linkset": [{"anchor": "a"}]}', True),
         ("application/json", b'{"linkset": []}', False),
         ("application/json", b'{"linkset": ["a"]}', False),
@@ -77,11 +84,12 @@ def test_is_linkset(media: str, body: bytes, expected: bool) -> None:
 
 
 @pytest.mark.parametrize(
-    "media", [LINKSET_TYPE, "application/linkset+json; charset=utf-8", "application/json"]
+    "media", [LINKSET_TYPE, "application/linkset+json; charset=utf-8", "application/json", NATIVE_TYPE]
 )
 def test_resolve_does_not_call_a_linkset_a_passport(media: str, tmp_path: Path, loopback: Any) -> None:
     api = Origin(loopback)
-    api.routes[RESOLVER_PATH] = answer(linkset(api.origin), media)
+    body = native_linkset(api.origin) if media == NATIVE_TYPE else linkset(api.origin)
+    api.routes[RESOLVER_PATH] = answer(body, media)
     _blocked(run(resolved_context(tmp_path, "identifier.resolve", api.origin)), "IDENTIFIER.RESPONSE.LINKSET")
 
 
@@ -162,10 +170,21 @@ def test_a_jws_json_serialization_is_unsupported_not_malformed(
     _blocked(run(ctx), "INTEGRITY.FORMAT.UNSUPPORTED")
 
 
+@pytest.mark.parametrize(
+    "body",
+    [
+        b'{"payload": "e30"}',
+        # RFC 7515, section 7.2: the member types make the serialization, not the key names.
+        b'{"payload": 1, "signature": 2}',
+        b'{"payload": "x", "signatures": "no"}',
+        b'{"payload": "x", "signatures": []}',
+        b'{"payload": "x", "signatures": [{"signature": 1}]}',
+    ],
+)
 def test_control_a_json_object_that_is_no_jws_stays_malformed(
-    pki: dict[str, Any], tmp_path: Path, loopback: Any
+    body: bytes, pki: dict[str, Any], tmp_path: Path, loopback: Any
 ) -> None:
-    signed = (200, b'{"payload": "e30"}', {"Content-Type": "application/json"})
+    signed = (200, body, {"Content-Type": "application/json"})
     api = Origin(loopback, {f"{ITEM_PATH}/signed": signed, ITEM_PATH: served(PASSPORT)})
     ctx = template_mode(resolved_context(tmp_path, "integrity.jws", api.origin, trust=pki["trust"]))
     outcome = run(ctx)

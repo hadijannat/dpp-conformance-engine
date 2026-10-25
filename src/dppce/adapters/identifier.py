@@ -30,6 +30,8 @@ from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, register
 
 LINKSET = "application/linkset+json"
+# RFC 9264 defines the JSON format and the native format. Both name links, not a passport.
+_LINKSET_TYPES = frozenset({LINKSET, "application/linkset"})
 
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
 # The scheme spellings, the host characters, and the URI characters that GS1 Digital Link permits.
@@ -131,9 +133,10 @@ def parse_gs1_digital_link(text: str) -> str | None:
 def is_linkset(record: Record, document: dict[str, Any] | None) -> bool:
     """Is the answer an RFC 9264 linkset? By its media type, or by a non-empty list of link contexts.
 
+    Either linkset media type counts: application/linkset+json or the native application/linkset.
     A linkset names where a passport is. It is not a passport, whatever keys it also holds.
     """
-    if media_type(record) == LINKSET:
+    if media_type(record) in _LINKSET_TYPES:
         return True
     contexts = document.get("linkset") if document is not None else None
     return isinstance(contexts, list) and bool(contexts) and all(isinstance(c, dict) for c in contexts)
@@ -203,7 +206,7 @@ def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None, bo
 
 
 def _linkset_outcome(accepted: list[str] | None, observation: Observation) -> CheckOutcome:
-    if accepted is not None and LINKSET in accepted:
+    if accepted is not None and _LINKSET_TYPES.intersection(accepted):
         message = (
             "The identifier resolves to a linkset, which the test purpose accepts. "
             "This does not show that the resource is the passport of the product."

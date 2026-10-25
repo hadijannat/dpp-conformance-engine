@@ -62,6 +62,23 @@ class _TooLongError(Exception):
     """The chain in ``x5c`` is longer than this engine follows."""
 
 
+def _is_jws_json(document: dict[str, object] | None) -> bool:
+    """A JWS JSON Serialization (RFC 7515, section 7.2): the member types decide, not the key names.
+
+    A string payload, and a string signature or a non-empty list of objects with a string signature.
+    """
+    if document is None or not isinstance(document.get("payload"), str):
+        return False
+    if isinstance(document.get("signature"), str):
+        return True
+    signatures = document.get("signatures")
+    return (
+        isinstance(signatures, list)
+        and bool(signatures)
+        and all(isinstance(s, dict) and isinstance(s.get("signature"), str) for s in signatures)
+    )
+
+
 def _certificates(header: dict[str, object]) -> list[x509.Certificate] | None:
     """The certificates of ``x5c``, or None if it does not hold certificates. Raises ``_TooLongError``."""
     chain = header.get("x5c")
@@ -156,12 +173,7 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     try:
         header = header_of(token)
     except SignatureError:
-        serialized = json_object(record)
-        if (
-            serialized is not None
-            and "payload" in serialized
-            and serialized.keys() & {"signature", "signatures"}
-        ):
+        if _is_jws_json(json_object(record)):
             # OD-05: the JWS JSON serialization (RFC 7515, section 7.2) is valid JWS. A limit of this engine.
             message = (
                 "The body is a JWS JSON serialization. This engine verifies the compact serialization only."
