@@ -13,5 +13,10 @@ The tests/vectors directory holds unchanged third-party test files.
 Each subdirectory README names the source, the copyright holder, and
 the license.
 
+The testpacks/data/gs1-syntax-engine directory holds one unchanged
+third-party data file, the GS1 Barcode Syntax Dictionary. The wheel
+ships it. Its README names the source, the copyright holders, and
+the license.
+
 Third-party software is used as separately installed dependencies.
 Each dependency keeps its own license. See docs/reference/dependency-licenses.md.

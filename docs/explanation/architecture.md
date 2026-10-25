@@ -607,6 +607,11 @@ three requests in this order and stops at the first failure:
    200 gives `RESOLVER.CONFORMANCE.INVALID_ACCEPTED`. A final status other than 400 or 404 gives
    `RESOLVER.CONFORMANCE.INVALID_STATUS`.
 
+A redirect that the transport does not follow, out of the scope or past the redirect limit, still
+counts as a redirect. For the second request, it gives `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`.
+For the third request, its 3xx status gives `RESOLVER.CONFORMANCE.INVALID_STATUS`. For the first
+request, it gives `unreachable`.
+
 Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`. The transport does not record the
 status of a redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
 

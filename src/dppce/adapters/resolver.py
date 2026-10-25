@@ -40,6 +40,8 @@ _MAX_RELATION_LENGTH: Final = 2048
 _REGISTERED: Final = re.compile(r"[a-z][a-z0-9.-]*")
 _GTIN: Final = re.compile(r"/01/([0-9]{14})(?=/|$)")
 WELL_KNOWN: Final = "/.well-known/gs1resolver"
+# The transport errors of a redirect that it does not follow. The record keeps the 3xx status.
+_UNFOLLOWED: Final = ("redirect_out_of_scope", "too_many_redirects")
 _NO_TARGET: Final = "The carrier identifier is not an http or https URL. There is no resolver to probe."
 
 
@@ -294,7 +296,9 @@ def conformance(ctx: CheckContext) -> CheckOutcome:
     for index, (probe, url) in enumerate(probes):
         record = fetch_once(ctx, url)
         # The rules judge status and redirects only, never the body, so the body rules do not apply.
-        if _no_reply(record):
+        # A redirect that the transport does not follow keeps its 3xx status. It is judged for the
+        # probes link_type and invalid, so that a system cannot hide a fail behind such a redirect.
+        if _no_reply(record) and not (probe != "default" and record.error in _UNFOLLOWED):
             return no_answer(ctx, record)
         observations.append(
             ctx.observation(

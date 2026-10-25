@@ -55,7 +55,7 @@ count in `false_positives_on_controls`. Its result counts in `controls` and `rep
 A fault entry can name the profiles that it runs under. Use full profile ids.
 
 ```yaml
-  - id: F-50
+  - id: F-99
     fault: example_flag
     test_purpose: TP-GS1-RESOLVE-001
     profiles: [family/gs1-resolver]

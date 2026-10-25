@@ -9,7 +9,8 @@ Prerequisites: none.
 retrieved on 2026-10-25.
 
 The license is the Apache License, Version 2.0. The `LICENSE` file of the repository at the same
-commit gives it. A copy of the license is in `LICENSES/Apache-2.0.txt` of this repository.
+commit gives it. The `LICENSE` file of the repository names no copyright holder. So `REUSE.toml`
+names the authors of the repository as the holder. A copy of the license is in `LICENSES/Apache-2.0.txt` of this repository.
 
 The file is a JSON Schema draft-07 document for a linkset in the JSON format of RFC 9264. The
 repository describes itself as a place to try out the linkset format of GS1 resolvers. So the

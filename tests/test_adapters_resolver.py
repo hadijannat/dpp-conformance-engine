@@ -40,6 +40,7 @@ LINKTYPE = RESOLVER_PATH + "?linkType=linkset"
 WELL_KNOWN = "/.well-known/gs1resolver"
 # The carrier GTIN 09506000134352 with a wrong check digit.
 INVALID = "/01/09506000134353/21/EV0001"
+OUT_OF_SCOPE = "https://out-of-scope.example.test/x"
 # Answers whose body the engine cannot judge: a body coding, and a body over the limit.
 Spoil = tuple[dict[str, str], bytes, dict[str, Any] | None]
 SPOILS: list[Spoil] = [
@@ -478,6 +479,10 @@ def test_conformance_passes(
             "RESOLVER.CONFORMANCE.LINKSET_REDIRECTED",
         ),
         ({RESOLVER_PATH: served()}, "RESOLVER.CONFORMANCE.NO_REDIRECT"),
+        # A redirect that the transport does not follow is still a redirect, so it cannot hide a fail.
+        ({INVALID: moved(OUT_OF_SCOPE)}, "RESOLVER.CONFORMANCE.INVALID_STATUS"),
+        ({LINKTYPE: moved(OUT_OF_SCOPE)}, "RESOLVER.CONFORMANCE.LINKSET_REDIRECTED"),
+        ({INVALID: moved("/a"), "/a": moved("/a")}, "RESOLVER.CONFORMANCE.INVALID_STATUS"),
         # The check never reads a body, so a body coding or size cannot turn a fail into blocked.
         ({INVALID: (200, b"{}", {"Content-Encoding": "gzip"})}, "RESOLVER.CONFORMANCE.INVALID_ACCEPTED"),
         ({INVALID: (200, b"x" * 4096, {})}, "RESOLVER.CONFORMANCE.INVALID_ACCEPTED"),
