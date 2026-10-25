@@ -30,7 +30,11 @@ from dppce.infrastructure.reference.base import PUBLIC_ORIGIN, Reply, Request
 from dppce.infrastructure.reference.base import RESOLVER_PATH as _RESOLVER_PATH
 from dppce.infrastructure.reference.base import json_reply as _json
 
-__all__ = ["FAULTS", "PUBLIC_ORIGIN", "ReferenceServer", "ReferenceSystem", "Reply", "Request", "main"]
+# PUBLIC_ORIGIN, Reply, and Request moved to reference.base. This module still exports them.
+__all__ = [
+    "CORE_FAULTS", "FAULTS", "PUBLIC_ORIGIN", "ReferenceServer", "ReferenceSystem", "Reply", "Request",
+    "known_faults", "main",
+]  # fmt: skip
 
 CANARY: Final = "CANARY-7f3a-supplier"
 NOTES_CANARY: Final = "CANARY-2b9c-dismantling"
