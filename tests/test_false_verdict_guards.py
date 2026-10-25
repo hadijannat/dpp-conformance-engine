@@ -149,6 +149,28 @@ def test_control_a_consistent_passport_still_passes(tmp_path: Path, loopback: An
     assert run(ctx).reason_code == "IDENTIFIER.CONSISTENT"
 
 
+# -- item_target: resolved ------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("media", [LINKSET_TYPE, "application/json"])
+@pytest.mark.parametrize(
+    ("check", "params"),
+    [
+        ("data.jsonschema", None),
+        ("data.context", {"allowed_contexts": ["https://example.test/c"]}),
+        ("data.rules", None),
+    ],
+)
+def test_a_resolved_linkset_is_no_item_target(
+    check: str, params: dict[str, Any] | None, media: str, tmp_path: Path, loopback: Any
+) -> None:
+    # The resolver answers 200 with no redirect, so the carrier URL would be the passport URL.
+    api = Origin(loopback, {ITEM_PATH: served(PASSPORT)})
+    api.routes[RESOLVER_PATH] = answer(linkset(api.origin), media)
+    _blocked(run(resolved_context(tmp_path, check, api.origin, params=params)), "DATA.NO_TARGET")
+    assert api.hits(ITEM_PATH) == 0
+
+
 # -- integrity.jws: the JSON serialization --------------------------------------------------------
 
 
