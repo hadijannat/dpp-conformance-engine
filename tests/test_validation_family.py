@@ -90,6 +90,7 @@ def test_a_case_without_profiles_runs_under_the_catalogue_profiles() -> None:
         "B-06": "battery/lmt",
         "B-12": "family/gs1-resolver",
         "B-14": "family/gs1-resolver",
+        "B-16": "family/aas",
     }
 
 
