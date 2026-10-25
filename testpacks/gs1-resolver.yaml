@@ -108,3 +108,50 @@ test_purposes:
   - The key set of the carrier identifier and the declared granularity.
   permitted_modes: *modes
   requires_scope: none
+- id: TP-GS1-LINKSET-001
+  title: Fetch the linkset of the carrier identifier and check its structure, anchor, and relation
+  requirements:
+  - FAM-GS1-LINKSET-001
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: resolver.linkset
+    params:
+      # The synthetic passport relation of the reference system. It is not a GS1 link type.
+      # A laboratory lists the relation IRIs of the resolver under test.
+      relations:
+      - https://dppce.example.test/rel/passport
+  expected_evidence:
+  - The two linkset exchanges, by Accept header and by linkType query.
+  permitted_modes: *modes
+- id: TP-GS1-WELLKNOWN-001
+  title: Check the resolver description file at the origin of the carrier identifier
+  requirements:
+  - FAM-GS1-WELLKNOWN-001
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: resolver.well_known
+  expected_evidence:
+  - The exchange of the description file.
+  permitted_modes: *modes
+- id: TP-GS1-CONFORMANCE-001
+  title: Probe the final status of a default, a linkset, and an invalid resolver request
+  requirements:
+  - FAM-GS1-CONFORMANCE-001
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: resolver.conformance
+  expected_evidence:
+  - The three resolver exchanges with their redirect chains.
+  permitted_modes: *modes

@@ -1,0 +1,72 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "@id": "https://ref.gs1.org/standards/resolver/linkset-schema",
+    "title": "JSON schema for linksets as defined in RFC 9264",
+    "type": "object",
+    "properties": {
+        "linkset": {
+            "description": "The linkset",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "anchor": {
+                        "description": "The URL at the root of the linkset, a.k.a the link context",
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "patternProperties": {
+                    "(?!anchor)^([a-z]+$)|(^https?:\/\/[a-zA-z0-9./]+$)": {
+                        "title": "Link object schema",
+                        "description": "The schema for each link context object for each link relation",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "href": {
+                                    "name": "href",
+                                    "description": "The target URL",
+                                    "type": "string",
+                                    "format": "uri"
+                                },
+                                "title": {
+                                    "title": "title",
+                                    "description": "A human-readable title for the link",
+                                    "type": "string"
+                                },
+                                "hreflang": {
+                                    "name": "hreflang",
+                                    "description": "The human language(s) of the target resource",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "pattern": "(^\\w{2}$)|(^\\w{2}-\\w{2}$)"
+                                    }
+                                },
+                                "type": {
+                                    "name": "Type",
+                                    "description": "The content type (MIME type) of the target resource",
+                                    "type": "string",
+                                    "pattern": "\\w+/[-+.\\w]+"
+                                }
+                            },
+                            "required": [
+                                "href"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": [
+                    "anchor"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [
+        "linkset"
+    ],
+    "additionalProperties": false
+}

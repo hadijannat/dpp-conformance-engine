@@ -500,6 +500,12 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `leak_usage_log_anonymous` | the anonymous passport includes `restricted.usage_log` with its canary |
 | `deny_all` | every path answers `403` with `{"error": "forbidden"}` |
 | `resolver_linkset_as_passport` | family `resolver`: `/01/...` answers each request with the linkset of section 4.6, also with no `Accept` header or with `Accept: */*` |
+| `resolver_linkset_invalid` | family `resolver`: the value of `linkset` is the link context object itself, not a list of link context objects |
+| `resolver_linkset_no_dpp` | family `resolver`: the link of the linkset has the relation `https://dppce.example.test/rel/other`, not the passport relation |
+| `resolver_linkset_anchor_mismatch` | family `resolver`: the `anchor` of the linkset names serial `OTHER0001` |
+| `wellknown_wrong_root` | family `resolver`: `resolverRoot` of `/.well-known/gs1resolver` is `https://other.example.test` |
+| `wellknown_redirect` | family `resolver`: `/.well-known/gs1resolver` answers `301` to `/resolver-description.json`, which serves the description file |
+| `resolver_200_for_invalid` | family `resolver`: `/01/...` answers `200` with `{"status": "ok"}` for an unknown identifier, for example a GTIN with a wrong check digit |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`

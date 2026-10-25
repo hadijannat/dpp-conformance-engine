@@ -76,7 +76,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `CARRIER.QR.DEPENDENCY_MISSING` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `CARRIER.QR.NOT_DECODED` | CARRIER |  | `dppce.adapters.common.decode_qr` | fail; inconclusive under a non-default verdict rule |
 | `CARRIER.QR.OK` | CARRIER | `carrier.qr_decode` | `dppce.adapters.carrier.qr_decode` | pass |
-| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.granularity`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive |
+| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.granularity`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.resolver._carrier` | inconclusive |
 | `CARRIER.SAMPLE.TOO_LARGE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here |
@@ -229,6 +229,26 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `REPLAY.INPUT.CHANGED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
 | `REPLAY.INPUT.NOT_RECORDED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
 | `REPLAY.RECORDING_MISMATCH` | REPLAY |  | `dppce.orchestrator.run.execute` | error |
+| `RESOLVER.CONFORMANCE.INVALID_ACCEPTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
+| `RESOLVER.CONFORMANCE.INVALID_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
+| `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
+| `RESOLVER.CONFORMANCE.LINKSET_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
+| `RESOLVER.CONFORMANCE.NO_REDIRECT` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
+| `RESOLVER.CONFORMANCE.OK` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver.conformance` | pass |
+| `RESOLVER.LINKSET.ANCHOR` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
+| `RESOLVER.LINKSET.MEDIA_TYPE` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here |
+| `RESOLVER.LINKSET.OK` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | pass |
+| `RESOLVER.LINKSET.RELATION_MISSING` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
+| `RESOLVER.LINKSET.STATUS` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here |
+| `RESOLVER.LINKSET.STRUCTURE` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
+| `RESOLVER.NO_TARGET` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver._carrier`, `dppce.adapters.resolver.conformance` | inconclusive |
+| `RESOLVER.PARAMS.INVALID` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | inconclusive |
+| `RESOLVER.WELLKNOWN.MEDIA_TYPE` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
+| `RESOLVER.WELLKNOWN.NOT_JSON` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
+| `RESOLVER.WELLKNOWN.OK` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | pass |
+| `RESOLVER.WELLKNOWN.REDIRECTED` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | inconclusive |
+| `RESOLVER.WELLKNOWN.ROOT` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
+| `RESOLVER.WELLKNOWN.STATUS` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
 | `RESULT.MISSING` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `RESULT.NOT_PLANNED` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
 | `SIGN.INPUT.LINK` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |

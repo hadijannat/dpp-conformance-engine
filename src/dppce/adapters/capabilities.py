@@ -74,6 +74,37 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "",
     ),
     (
+        "resolver.linkset",
+        "resolver",
+        _E,
+        "Fetch the linkset of the carrier identifier by Accept header and by linkType query. Check "
+        "status, media type, RFC 9264 structure, the anchor, and a declared relation. Link targets "
+        "are not fetched.",
+        None,
+        "Tested against a GS1 conformant resolver in a recorded test campaign. The structure rule "
+        "is reviewed against RFC 9264 by a person.",
+    ),
+    (
+        "resolver.well_known",
+        "resolver",
+        _E,
+        "Check the GS1 resolver description file at the origin of the carrier identifier: status, "
+        "JSON media type, and resolverRoot. A redirected file that would pass is not passed.",
+        None,
+        "The GS1 resolver description schema is pinned as a local file and the check validates "
+        "against it. Tested against a GS1 conformant resolver in a recorded test campaign.",
+    ),
+    (
+        "resolver.conformance",
+        "resolver",
+        _E,
+        "Probe the final status of a default, a linkType=linkset, and an invalid-check-digit request. "
+        "The status of a redirect hop is not judged.",
+        None,
+        "The transport records the status of each redirect hop, and the check asserts it. Tested "
+        "against a GS1 conformant resolver in a recorded test campaign.",
+    ),
+    (
         "api.contract",
         "api",
         _S,
