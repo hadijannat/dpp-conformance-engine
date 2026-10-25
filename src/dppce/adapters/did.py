@@ -122,12 +122,12 @@ class DidDocument:
 
 
 def _absolute(did: str, ident: str) -> str:
-    # DID Core 1.0, 3.2.2: a relative DID URL starts with '#' and resolves against the DID.
+    # DID Core 1.0, relative DID URLs: one that starts with '#' resolves against the DID.
     return did + ident if ident.startswith("#") else ident
 
 
 def _is_method(value: object) -> bool:
-    """DID Core 1.0, 5.2: id, type, and controller are strings. A JWK is an object with kty."""
+    """DID Core 1.0, verification methods: id, type, and controller are strings. A JWK has a kty."""
     if not isinstance(value, dict):
         return False
     if not all(isinstance(value.get(name), str) and value[name] for name in ("id", "type", "controller")):
