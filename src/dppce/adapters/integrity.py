@@ -29,6 +29,7 @@ from dppce.adapters.common import (
     same_json,
     unusable,
 )
+from dppce.adapters.identifier import is_linkset
 from dppce.evidence import x509path
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, public_jwk_of, verify_compact
@@ -155,6 +156,17 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     try:
         header = header_of(token)
     except SignatureError:
+        serialized = json_object(record)
+        if (
+            serialized is not None
+            and "payload" in serialized
+            and serialized.keys() & {"signature", "signatures"}
+        ):
+            # OD-05: the JWS JSON serialization (RFC 7515, section 7.2) is valid JWS. A limit of this engine.
+            message = (
+                "The body is a JWS JSON serialization. This engine verifies the compact serialization only."
+            )
+            return blocked("INTEGRITY.FORMAT.UNSUPPORTED", message)
         findings["structure"] = "not a compact JWS"
         return result(False, "INTEGRITY.TOKEN.MALFORMED", "The body is not a compact JWS.")
     if "x5c" not in header:
@@ -247,6 +259,11 @@ def jws_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912, PLR0915 - th
     if document is None:
         message = (
             "The published passport is not a JSON object, so the signed payload has nothing to compare with."
+        )
+        return blocked("INTEGRITY.PAYLOAD.NOT_COMPARABLE", message)
+    if is_linkset(item, document):
+        message = (
+            "The published passport is a linkset, so the signed payload has no passport to compare with."
         )
         return blocked("INTEGRITY.PAYLOAD.NOT_COMPARABLE", message)
     # Compare the two documents as JSON values. The canonical form with integers only is a rule

@@ -7,7 +7,7 @@ digital records. They cannot show that a carrier sits on the product that it nam
 from __future__ import annotations
 
 import re
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from pydantic import Field, StrictBool, field_validator
@@ -25,8 +25,11 @@ from dppce.adapters.common import (
     same_json,
     unusable,
 )
+from dppce.infrastructure.interfaces import Record
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, register
+
+LINKSET = "application/linkset+json"
 
 _GS1_PATH = re.compile(r"^/01/(?P<gtin>[0-9]{14})/21/(?P<serial>[A-Za-z0-9._-]{1,20})$")
 # The scheme spellings, the host characters, and the URI characters that GS1 Digital Link permits.
@@ -125,6 +128,17 @@ def parse_gs1_digital_link(text: str) -> str | None:
     return None
 
 
+def is_linkset(record: Record, document: dict[str, Any] | None) -> bool:
+    """Is the answer an RFC 9264 linkset? By its media type, or by a non-empty list of link contexts.
+
+    A linkset names where a passport is. It is not a passport, whatever keys it also holds.
+    """
+    if media_type(record) == LINKSET:
+        return True
+    contexts = document.get("linkset") if document is not None else None
+    return isinstance(contexts, list) and bool(contexts) and all(isinstance(c, dict) for c in contexts)
+
+
 def is_https(url: str) -> bool:
     try:
         return urlsplit(url).scheme.lower() == "https"
@@ -188,6 +202,22 @@ def _resolve_params(ctx: CheckContext) -> tuple[str | None, list[str] | None, bo
     return accept, [str(t) for t in accepted] if accepted is not None else None, require_https
 
 
+def _linkset_outcome(accepted: list[str] | None, observation: Observation) -> CheckOutcome:
+    if accepted is not None and LINKSET in accepted:
+        message = (
+            "The identifier resolves to a linkset, which the test purpose accepts. "
+            "This does not show that the resource is the passport of the product."
+        )
+        return completed(True, "IDENTIFIER.RESOLVED.MEDIA_TYPE", message, [observation])
+    # OD-04: the engine does not follow a linkset to the passport. That is a limit, not a fault.
+    return CheckOutcome(
+        status=ExecutionStatus.BLOCKED,
+        reason_code="IDENTIFIER.RESPONSE.LINKSET",
+        message="The resolver answers with a linkset, not a passport. This check does not follow the links.",
+        observations=(observation,),
+    )
+
+
 @register("identifier.resolve", capability="identifier.resolve", params=ResolveParams)
 def resolve(ctx: CheckContext) -> CheckOutcome:
     params = _resolve_params(ctx)
@@ -249,13 +279,16 @@ def resolve(ctx: CheckContext) -> CheckOutcome:
             f"The resolved resource has the media type '{final}', which the test purpose does not accept."
         )
         return completed(False, "IDENTIFIER.RESPONSE.MEDIA_TYPE", message, [observation])
+    document = json_object(record)
+    if is_linkset(record, document):
+        return _linkset_outcome(accepted, observation)
     if accepted is not None and not (final == "application/json" or final.endswith("+json")):
         message = (
             f"The identifier resolves to a resource of the accepted media type '{final}'. "
             "This does not show that the resource is the passport of the product."
         )
         return completed(True, "IDENTIFIER.RESOLVED.MEDIA_TYPE", message, [observation])
-    if json_object(record) is None:
+    if document is None:
         return completed(
             False,
             "IDENTIFIER.RESPONSE.NOT_JSON",
@@ -296,11 +329,9 @@ def consistency(ctx: CheckContext) -> CheckOutcome:
     if (problem := unusable(ctx, record)) is not None:
         return problem
     document = json_object(record) if record.status == 200 else None
-    if document is None:
-        return blocked(
-            "IDENTIFIER.NOT_RESOLVED",
-            "The identifier did not resolve to a passport. There is nothing to compare.",
-        )
+    if document is None or is_linkset(record, document):
+        found = "resolves to a linkset, not to a passport" if document else "did not resolve to a passport"
+        return blocked("IDENTIFIER.NOT_RESOLVED", f"The identifier {found}. There is nothing to compare.")
     passport = document.get("id")
     declared = ctx.ixit.samples.get("identifier") if "qr_image" in ctx.ixit.samples else None
     differences = [
