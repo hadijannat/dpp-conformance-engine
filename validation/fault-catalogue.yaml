@@ -338,6 +338,20 @@ sut_faults:
     description: The last raw-byte digest of the history is not the digest of the current item body.
     test_purpose: TP-PERSIST-002
     expected: {verdict: fail, reason_code: PERSISTENCE.UNDECLARED_CHANGE}
+  - id: F-61
+    class: identity_mismatch
+    fault: did_id_mismatch
+    description: The id of the DID document is a different DID.
+    test_purpose: TP-VC-DID-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: IDENTITY.DID.ID_MISMATCH}
+  - id: F-62
+    class: contract_violation
+    fault: did_private_key
+    description: A verification method of the DID document publishes a private key member.
+    test_purpose: TP-VC-DID-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: IDENTITY.DID.PRIVATE_KEY}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -445,6 +459,13 @@ boundary_cases:
     profiles: [family/gs1-resolver]
     expected: {verdict: inconclusive, reason_code: RESOLVER.WELLKNOWN.REDIRECTED}
     rationale: A redirected configuration file is not judged.
+  - id: B-15
+    fault: did_redirect_off_host
+    description: The DID document path redirects to a host outside the authorized scope.
+    test_purpose: TP-VC-DID-001
+    profiles: [family/credentials]
+    expected: {verdict: inconclusive, reason_code: TRANSPORT.REDIRECT_OUT_OF_SCOPE}
+    rationale: The engine does not follow a redirect out of the scope. It has no DID document to judge.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:
