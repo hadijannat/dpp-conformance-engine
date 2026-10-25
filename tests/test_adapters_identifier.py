@@ -699,6 +699,9 @@ PRODUCERS: dict[str, list[str]] = {
     "IDENTIFIER.RESOLVED.MEDIA_TYPE": [
         _HERE + "test_resolve_with_accepted_media_types_accepts_an_html_resolver"
     ],
+    "IDENTIFIER.RESPONSE.LINKSET": [
+        "tests/test_false_verdict_guards.py::test_resolve_does_not_call_a_linkset_a_passport"
+    ],
     "IDENTIFIER.RESPONSE.NOT_JSON": [
         _HERE + "test_resolve_by_default_still_needs_a_json_object_and_records_the_media_type"
     ],
@@ -743,7 +746,7 @@ def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -
         (ADAPTERS / name).read_text(encoding="utf-8") for name in ("identifier.py", "carrier.py", "common.py")
     )
     codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
-    assert len(codes) == 24
+    assert len(codes) == 25
     assert codes == set(PRODUCERS)
     # The window of the last test must stop before the module constants, which name every code.
     assert '"CARRIER.QR.OK"' not in _test_source(
