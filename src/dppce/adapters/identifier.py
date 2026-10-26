@@ -164,7 +164,10 @@ def _https_url_problem(text: str) -> str | None:
     except ValueError:
         return "the port is not a number from 0 to 65535"
     # did_web_url holds the domain-name rule: no IP literal, no IPv4, no numeric shorthand.
-    if not parts.hostname or "[" in parts.netloc or did_web_url(f"did:web:{parts.hostname}") is None:
+    # A percent-encoded colon in the host would read as a did:web port separator. One trailing dot
+    # (absolute domain name) is valid in a reg-name.
+    host = (parts.hostname or "").removesuffix(".")
+    if not host or "[" in parts.netloc or "%" in host or did_web_url(f"did:web:{host}") is None:
         return "the host is not a domain name"
     return None
 

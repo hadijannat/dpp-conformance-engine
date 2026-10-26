@@ -555,7 +555,8 @@ a value of `form` other than the default gives `blocked` with `IDENTIFIER.PARAMS
 - `https-url`: the payload matches the RFC 3986 URI grammar of the `uri` format checker. The scheme
   is `https`. There is no user information and no fragment. The port, if any, is a number from 0
   to 65535. The host is a domain name by the rule of the `did-web` mapping: no IP address and no
-  numeric shorthand such as `127.1`.
+  numeric shorthand such as `127.1`. One trailing dot in the host is allowed. A percent-encoded
+  host is not a domain name.
 - `did-web`: the payload maps to an https URL by the did:web mapping of `identity.did`. That
   mapping refuses IP hosts and numeric shorthand.
 - `urn-uuid`: the payload is `urn:uuid:` and then a UUID in the textual form of RFC 9562, which is

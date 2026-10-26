@@ -48,7 +48,7 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         _S,
         "Scheme-aware syntax check of the carrier payload. The form gs1-dl is experimental: it checks an "
         "uncompressed GS1 Digital Link URI against the vendored GS1 Barcode Syntax Dictionary. The "
-        "schemes https-url, did-web, and urn-uuid have a syntax parser.",
+        "schemes https-url, did-web, and urn-uuid are experimental: each has a syntax parser.",
         None,
         "",
     ),
