@@ -169,6 +169,41 @@ def test_a_difference_wins_over_a_linkset_answer(tmp_path: Path) -> None:
     assert _state(consistency(ctx)) == FAIL
 
 
+EV_QR = Path(__file__).resolve().parent.parent / "fixtures" / "reference" / "qr" / "ev.png"
+
+
+@pytest.mark.parametrize(
+    ("extra", "vc", "body"),
+    [
+        ([], {"credentialSubject": {"id": CARRIER}}, b"{}"),
+        (
+            [{"label": "aas_json", "kind": "sample", "pointer": "/id"}],
+            {"credentialSubject": {"id": CARRIER}},
+            b"{}",
+        ),
+        (
+            [{"label": "passport", "kind": "resolved", "pointer": "/id"}],
+            {"credentialSubject": {"id": CARRIER}},
+            json.dumps({"linkset": [{"anchor": CARRIER}]}).encode(),
+        ),
+    ],
+    ids=["sources-match", "with-a-missing-source", "with-a-linkset"],
+)
+def test_a_different_declared_identifier_keeps_the_mismatch_of_today(
+    tmp_path: Path, extra: list[dict[str, str]], vc: dict[str, Any], body: bytes
+) -> None:
+    # The QR image holds CARRIER. The IXIT declares OTHER, so the carrier side itself disagrees.
+    pytest.importorskip("zxingcpp", reason="needs the optional 'qr' extra (zxing-cpp)")
+    pytest.importorskip("PIL", reason="needs the optional 'qr' extra (Pillow)")
+    samples: dict[str, Any] = {"qr_image": EV_QR.read_bytes(), "vc_json": vc, "aas_json": {}}
+    ctx, _ = _ctx(
+        tmp_path, "identifier.consistency", {"sources": [*extra, SUBJECT]}, samples, carrier=OTHER, body=body
+    )
+    outcome = consistency(ctx)
+    assert _state(outcome) == (ExecutionStatus.COMPLETED, False, "IDENTIFIER.MISMATCH")
+    assert outcome.observations[0].summary["different"][0] == "declared"
+
+
 def test_a_linkset_without_a_difference_is_blocked(tmp_path: Path) -> None:
     linkset = json.dumps({"linkset": [{"anchor": CARRIER}]}).encode()
     sources = [{"label": "passport", "kind": "resolved", "pointer": "/id"}, SUBJECT]
@@ -250,9 +285,20 @@ def test_the_parameter_model_refuses_malformed_sources(sources: Any) -> None:
     assert params_problem(model, {"sources": sources}) is not None
 
 
-@pytest.mark.parametrize("sources", SOURCE_MODEL_REFUSALS[:3])
-def test_the_check_refuses_malformed_sources_without_the_planner(tmp_path: Path, sources: Any) -> None:
-    ctx, acquirer = _ctx(tmp_path, "identifier.consistency", {"sources": sources})
+def test_the_parameter_model_refuses_sources_with_compare_item() -> None:
+    # _cross ignores compare_item, so the item comparison that the pack asked for would not run.
+    model = registry.param_models()["identifier.consistency"]
+    assert params_problem(model, {"sources": [SUBJECT], "compare_item": True}) is not None
+
+
+@pytest.mark.parametrize(
+    "params",
+    [*({"sources": s} for s in SOURCE_MODEL_REFUSALS[:3]), {"sources": [SUBJECT], "compare_item": True}],
+)
+def test_the_check_refuses_malformed_sources_without_the_planner(
+    tmp_path: Path, params: dict[str, Any]
+) -> None:
+    ctx, acquirer = _ctx(tmp_path, "identifier.consistency", params)
     assert _state(consistency(ctx)) == (ExecutionStatus.BLOCKED, None, "IDENTIFIER.PARAMS.INVALID")
     assert acquirer.records() == ()
 

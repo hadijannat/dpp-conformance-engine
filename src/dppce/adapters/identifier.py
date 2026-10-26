@@ -387,9 +387,9 @@ class ConsistencyParams(Model):
         min_length=1,
         max_length=gs1.MAX_SOURCES,
         description=(
-            "Experimental. 1 to 8 sources whose value at a JSON Pointer is compared with the carrier "
-            "identifier as exact text, in place of the id of the resolved passport. Labels are unique. "
-            "Not with compare_item. Default: the id of the resolved passport."
+            "Experimental. 1 to 8 sources. The value of each at a JSON Pointer is compared with the "
+            "carrier identifier as exact text. It replaces the id of the resolved passport. "
+            "Labels are unique. Not with compare_item. Default: the id of the resolved passport."
         ),
     )
 

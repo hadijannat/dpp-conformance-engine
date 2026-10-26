@@ -79,9 +79,10 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "identifier.equivalence",
         "identifier",
         _E,
-        "Compare the carrier identifier with a declared identifier in GS1 canonical form: a GTIN-8, "
-        "GTIN-12, or GTIN-13 padded to 14 digits, scheme and host without case, percent-decoded values, "
-        "and no path prefix. It does not change the exact-text rule of identifier.consistency.",
+        "Compare the carrier identifier with a declared identifier in GS1 canonical form. A GTIN-8, "
+        "GTIN-12, or GTIN-13 counts as the padded GTIN-14. Case in the scheme and the host, "
+        "percent-encoding, and a path prefix do not count. It does not change the exact-text rule "
+        "of identifier.consistency.",
         None,
         "A reviewer checks the canonical form against GS1 Digital Link URI Syntax 1.7.0. "
         "A recorded test campaign compares carriers and declared identifiers of at least one "
