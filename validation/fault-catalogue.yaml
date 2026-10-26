@@ -63,13 +63,24 @@
 # The AAS commits from the one that names the template on were rewritten before they landed, to
 # remove a vendored file. The entry commit and the commit after it kept their hashes. The order
 # did not change.
+# Version 0.9.0 adds the faults F-67 to F-70 and the boundary cases B-17 and B-18. Version 0.9.0
+# also changes the descriptions of C-FAMILY-GS1 and C-FAMILY-VC, which now name their samples in
+# fixtures/reference/samples/. The git history gives this order:
+# - F-67, F-68, and B-17: the entry commit comes before the commit that adds the check
+#   identifier.equivalence and the parameter sources of identifier.consistency. It also comes
+#   before the commit that adds their test purposes, their samples, and their rig setup.
+# - F-69, F-70, and B-18: the entry commit comes before the commit that adds the test purpose. It
+#   also comes before the commit that adds the check integrity.status_list and the commit that adds
+#   the three flags.
+# - C-FAMILY-GS1 and C-FAMILY-VC: their samples and rig setup come after the entry commit of F-67.
+#   The description change comes after the merge of the three packages of version 0.9.0.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.8.0
+version: 0.9.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
@@ -86,11 +97,11 @@ controls:
     expected: Every executed test purpose of the profile gives `pass`.
   - id: C-FAMILY-GS1
     profile: family/gs1-resolver
-    description: The unmodified reference system for the family profile family/gs1-resolver.
+    description: The unmodified reference system for the family profile family/gs1-resolver, with the declared identifier sample fixtures/reference/samples/TEST-ONLY-gs1-declared.json.
     expected: Every executed test purpose of the profile gives `pass`.
   - id: C-FAMILY-VC
     profile: family/credentials
-    description: The unmodified reference system for the family profile family/credentials.
+    description: The unmodified reference system for the family profile family/credentials, with the unsigned credential sample fixtures/reference/samples/TEST-ONLY-vc-subject.json.
     expected: Every executed test purpose of the profile gives `pass`.
   - id: C-FAMILY-AAS
     profile: family/aas
