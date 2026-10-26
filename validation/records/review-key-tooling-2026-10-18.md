@@ -113,7 +113,8 @@ add the counts of the stages.
 
 The 15 findings of the adversarial review are 6 of the contract lens, 5 of the tests lens, and 4
 of the docs lens. The docs lens count is distinct over its two runs. Of the 2 not fixed, one is
-confirmed and open (docs1-DOC-2), and one is refuted (contract-F6).
+confirmed and open (docs1-DOC-2), and one is refuted (contract-F6). docs1-DOC-2 was closed
+later. See "Closed after this record".
 
 The 8 findings of the review of the fixes are 3 of the security lens and 5 of the correctness
 lens. The 4 findings of the review of the follow-ups are 1 of the security lens and 3 of the
@@ -194,7 +195,7 @@ The Summary table keeps the counts of the review stages.
 | docs-DOC-1 | note | The proof example key is not in the tutorial report | confirmed, fixed as D1 | `b450905` |
 | docs-DOC-2 | note | The verify page calls the unsigned file the report | confirmed, fixed as D2 | `b450905` |
 | docs-DOC-3 | note | The tutorial omits `validity` from the `not_checked` list | confirmed, fixed as D3 | `b450905` |
-| docs1-DOC-2 | note | The standalone verifier paragraph omits the new options | confirmed, not fixed | none |
+| docs1-DOC-2 | note | The standalone verifier paragraph omits the new options | confirmed, fixed later | `49bd09b` |
 
 The docs- rows are the second docs run (J2 lines 70 and 77 to 82). The first run found DOC-1 and
 DOC-3 too (J2 lines 5 and 12 to 17). Its DOC-2 is the docs1-DOC-2 row. That finding did not reach
@@ -306,11 +307,6 @@ the same identifiers on `origin/main`.
 
 ## Open items
 
-- **docs1-DOC-2.** The standalone verifier paragraph names only
-  `ENVELOPE --trust BUNDLE --at TIME`. It omits `--status-list`, `--opening`, and `--proof`. A
-  `grep` in this run finds the text at `scripts/gen_reference_docs.py` line 88 and
-  `docs/reference/cli.md` line 467. The paragraph comes from the generator. Package P2-18 does
-  not own the generator, so the item stays open. Later line numbers can differ.
 - **INT-4, the rest.** `OpenedRecord.acquired_at` (`src/dppce/models/results.py` line 328) and
   `Record.acquired_at` (`src/dppce/infrastructure/interfaces.py` line 60) are plain `str`. Both
   files are protected. The J4 contract reviewer states that the commitment binds the value.
@@ -355,6 +351,12 @@ commit identifiers are those of the package branch. A rebase can change them; th
 | SR-N2 | `add-key` refuses a coordinate that is not the unpadded base64url of 32 bytes, with `TRUST.KEY.NOT_P256`. This covers padding, the standard alphabet, set unused bits, and x + p. | `3b69216` |
 | SR-N6 | `sign --in-place` opens the input once with `O_NOFOLLOW`, then reads from that descriptor and takes the mode from it. The descriptor stays open until the rename or the refusal, so a swapped-in entry cannot get the inode number of the input. Before the rename, it compares the path with that file. A change gives `SIGN.INPUT.LINK`, and nothing is written. | `486bc2a`, `8c37e41`, `8280537` |
 | SR-N7 | An opening whose salt is not the canonical base64 of its bytes gives `fail` with `OPENING.FILE.MALFORMED`. That fail comes before the root and ordering rules. | `0ad8ffa` |
+| docs1-DOC-2 | The standalone verifier paragraph of `scripts/gen_reference_docs.py` names `--status-list`, `--opening`, and `--proof`. `docs/reference/cli.md` is regenerated from it. | `49bd09b` |
+
+The integrator of wave 6 of program P2 closed docs1-DOC-2, because package P2-18 did not own the
+generator. That change has no test of its own: `tests/test_reference_docs.py` checks that the
+page equals the generator output. The package branch was merged without a rebase, so each commit
+identifier above is unchanged.
 
 **Tokens issued before `a2352dc`.** Since `a2352dc`, `authorize` refuses an endpoint with
 userinfo, with `AUTHORIZE.ENDPOINT.INVALID`. A token signed before `a2352dc` can still hold such
