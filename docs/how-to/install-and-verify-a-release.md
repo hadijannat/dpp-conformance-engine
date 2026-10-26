@@ -42,6 +42,8 @@ These changes are not in `v0.1.0rc1`, and they affect a laboratory:
   `dppce timestamp attach`.
 - An answer with a status from 500 to 599 counts as no answer. Most checks then give
   `TRANSPORT.SERVER_ERROR`, and the step is `inconclusive` by default.
+- An answer with the status 429 counts as no answer too. The checks then give
+  `TRANSPORT.RATE_LIMITED`, also `integrity.jws`, and the step is `inconclusive` by default.
 - Signed report status lists ([ADR 0016](../adr/0016-report-status-lists-validity-and-signer-roles-are-stated-in-the-attestation.md)).
   `dppce verify`, `dppce report`, and `python -m dppce.verifier` read a list with `--status-list`.
 - The attestation version `dppce.attestation/2` with `role`, `status`, `valid_until`, and

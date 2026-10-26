@@ -458,6 +458,7 @@ the `fetch` channel only.
 - A policy without a `fetch` channel gives `blocked` with `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL`.
 - An answer with a status from 500 to 599 on any channel cannot be judged. It gives
   `TRANSPORT.SERVER_ERROR` with `unreachable: true`. The check still searches its body for a leak.
+  An answer with the status 429 gives `TRANSPORT.RATE_LIMITED` in the same way.
 
 The check reads the channels in the order fetch, export, search, error, html. It stops after a
 transport error. Then it takes the first outcome that applies, in this order:
@@ -591,6 +592,7 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `resolver_200_for_invalid` | family `resolver`: `/01/...` answers `200` with `{"status": "ok"}` for an unknown identifier, for example a GTIN with a wrong check digit |
 | `negotiation_no_vary` | family `resolver`: `/01/...` answers `200` with an HTML page and no `Vary` header when the `Accept` weight of `text/html` is above that of `application/json` |
 | `negotiation_wrong_type` | family `resolver`: `/01/...` answers `200` with the HTML page and `Vary: Accept` when `Accept` lists `application/json` with a weight above 0, or prefers `text/html` |
+| `resolver_rate_limited` | family `resolver`: `/01/...` answers each default request (no `linkType`, and an `Accept` that does not prefer the linkset) with `429` and `Retry-After: 1`, every time |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
 | `vc_tampered` | family `credentials`: the payload of the credential of section 4.7 names serial `OTHER0001` after signing |
 | `vc_hs256_confusion` | family `credentials`: the credential header names `HS256`, and the signature is an HMAC-SHA256 with the DER public key of the TEST-ONLY leaf as the key |
@@ -706,13 +708,17 @@ Shared helpers in `dppce.adapters.common`:
   URL from an IXIT template. A missing template, endpoint, or placeholder value gives `blocked`
   with `<AREA>.NO_TARGET`. So does a placeholder value that is `.` or `..`: a server resolves such
   a dot segment to another resource.
-- `no_answer(ctx, record)`: builds the outcome for a record with a transport error or a server
-  error: status `completed`, `passed: false`, `unreachable: true`. Reason code
+- `no_reply(record)`: true for a record that holds no answer: a transport error, a 429, or a
+  status from 500 to 599.
+- `no_answer(ctx, record)`: builds the outcome for a record that `no_reply` finds: status
+  `completed`, `passed: false`, `unreachable: true`. Reason code
   `TRANSPORT.REDIRECT_OUT_OF_SCOPE` for that error, `TRANSPORT.DENIED` for `policy_denied`,
   `authorization_denied`, and `budget_exhausted`, and `TRANSPORT.UNREACHABLE` for the others.
-  A record with no transport error and a status from 500 to 599 gives `TRANSPORT.SERVER_ERROR`.
-- `unusable(ctx, record)`: gives the outcome of `no_answer` for a transport error and for a
-  status from 500 to 599. It also blocks a truncated or encoded body.
+  A record with no transport error and the status 429 gives `TRANSPORT.RATE_LIMITED`. A record
+  with no transport error and a status from 500 to 599 gives `TRANSPORT.SERVER_ERROR`.
+- `unusable(ctx, record)`: gives the outcome of `no_answer` for a transport error, a 429, and a
+  status from 500 to 599. It then calls `body_problem`.
+- `body_problem(record)`: blocks a truncated or encoded body.
 - `not_200(ctx, area, record, records)`: the data, persistence, and registry checks judge a
   document only with status 200. Status 401, 403, or 404 gives `blocked` with
   `<AREA>.RESPONSE.NOT_CONCLUSIVE`: an anonymous request that is refused or not found proves
@@ -728,12 +734,17 @@ An answer with a status from 500 to 599 is no answer, like a transport error. It
 `TRANSPORT.SERVER_ERROR` with `unreachable: true`, so the step is `inconclusive` by default. This
 is an owner decision of 2026-10-18. The access check still searches such a body for a leak. The
 signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.1).
+An answer with the status 429 is no answer too. It gives `TRANSPORT.RATE_LIMITED` with
+`unreachable: true` in every check, `integrity.jws` included. The access check still searches such
+a body for a leak. The transport waits for `Retry-After` once per fetch, only for a `GET` or a
+`HEAD`, only for a number of seconds up to 5, and only within the time limit and the request
+budget. It then sends the request one more time.
 
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
 | `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING`; an image above the pixel limit, also one that Pillow reports as a decompression bomb: `blocked`, `CARRIER.SAMPLE.TOO_LARGE`; an image that cannot be read: `blocked`, `CARRIER.SAMPLE.UNREADABLE` |
 | `identifier.parse` | `scheme` (default: `ics.identifier_scheme`), `require_https` (boolean, default `false`), `form` (`dppce-item` or `gs1-dl`, default `dppce-item`; for `gs1-digital-link` only) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail), also for a payload that does not match the declared scheme `https-url`, `did-web`, or `urn-uuid`; with `require_https`, a valid identifier whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); a scheme without a parser: `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN`; `require_https` not a boolean, or a `form` other than `dppce-item` with `https-url`, `did-web`, or `urn-uuid`: `blocked`, `IDENTIFIER.PARAMS.INVALID` |
-| `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case), `require_https` (boolean, default `false`); all optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); with `require_https`, a carrier URL whose scheme is not `https` (nothing is fetched) or a redirect target whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
+| `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case), `require_https` (boolean, default `false`); all optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 429: `TRANSPORT.RATE_LIMITED` (`unreachable: true`); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); with `require_https`, a carrier URL whose scheme is not `https` (nothing is fetched) or a redirect target whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
 | `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP`. A schema that is not valid in its dialect, or a local reference that does not resolve: `blocked`, `DATA.SCHEMA.MALFORMED`. A `$schema` other than 2020-12 or draft-07: `blocked`, `DATA.SCHEMA.DIALECT`. A keyword that the dialect ignores: `blocked`, `DATA.SCHEMA.MALFORMED` |
@@ -757,7 +768,7 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | --- | --- | --- | --- |
 | 1 | No trust bundle is configured | `blocked` | `INTEGRITY.TRUST.MISSING` |
 | 2 | The IXIT gives no URL template for `signed` or `item`, or such a URL cannot be built. With `item_target: resolved`, the `item` URL is found at row 18 instead | `blocked` | `INTEGRITY.NO_TARGET` |
-| 3 | The system answers with status 500 or higher | fail, `unreachable: true` | `INTEGRITY.TOKEN.NO_ANSWER` |
+| 3 | The system answers with status 500 or higher, or with 429 | fail, `unreachable: true` | `INTEGRITY.TOKEN.NO_ANSWER`; for 429, `TRANSPORT.RATE_LIMITED` |
 | 4 | The system answers with another status that is not 200 | fail | `INTEGRITY.TOKEN.NOT_AVAILABLE` |
 | 5 | The body is not a compact JWS, a part of it cannot be decoded, or `x5c` does not hold certificates | fail | `INTEGRITY.TOKEN.MALFORMED` |
 | 6 | The token has no `x5c` header | `blocked` | `INTEGRITY.KEY.UNSUPPORTED` |
@@ -772,8 +783,8 @@ The check takes the first row that applies. A limit of this engine is `blocked`,
 | 15 | A certificate below the anchor is outside its validity period | fail | `INTEGRITY.CERT.EXPIRED` |
 | 16 | A mandatory status snapshot is missing or stale | `blocked` | `INTEGRITY.STATUS.MISSING` |
 | 17 | A certificate below the anchor is in the revocation snapshot | fail | `INTEGRITY.CERT.REVOKED` |
-| 18 | With `item_target: resolved`, the carrier gives no resolved URL. A transport error or a server error at the resolver gives `unreachable` | `blocked` | `INTEGRITY.NO_TARGET` |
-| 19 | The published passport answers with a status from 500 to 599 | fail, `unreachable: true` | `TRANSPORT.SERVER_ERROR` |
+| 18 | With `item_target: resolved`, the carrier gives no resolved URL. A transport error, a 429, or a server error at the resolver gives `unreachable` | `blocked` | `INTEGRITY.NO_TARGET` |
+| 19 | The published passport answers with a status from 500 to 599, or with 429 | fail, `unreachable: true` | `TRANSPORT.SERVER_ERROR`; for 429, `TRANSPORT.RATE_LIMITED` |
 | 20 | The published passport is not JSON | `blocked` | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` |
 | 21 | The signed payload and the published passport are different JSON values | fail | `INTEGRITY.PAYLOAD.MISMATCH` |
 

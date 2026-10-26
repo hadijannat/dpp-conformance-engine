@@ -36,7 +36,7 @@ Without a capability entry, the planner gives the step `unsupported`. It never g
 1. Build each URL with `resource_url` of `src/dppce/adapters/common.py`. For the item passport, use `item_url`.
 2. `item_url` follows `IXIT.item_target`: the `item` template, or the URL that the carrier resolves to.
 3. Pass each fetched record to `unusable` before you judge its body.
-4. `unusable` gives the outcome of `no_answer` for a transport error and for a status from 500 to 599.
+4. `unusable` gives the outcome of `no_answer` for a transport error, a 429, and a status from 500 to 599.
 5. A check that judges a server error itself passes `server_error_is_no_answer=False`.
 
 ### Outcomes and reason codes

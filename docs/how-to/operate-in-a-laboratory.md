@@ -32,6 +32,7 @@ See [the release and the unreleased source](install-and-verify-a-release.md#the-
 
 An answer with a status from 500 to 599 is no answer, like a transport error.
 Most checks then give `TRANSPORT.SERVER_ERROR`. The step is `inconclusive` by default.
+An answer with the status 429 is no answer too. The checks then give `TRANSPORT.RATE_LIMITED`, also `integrity.jws`.
 The [reference system page](../reference/reference-system.md) names the exceptions.
 
 The run directory holds these files:
