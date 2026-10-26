@@ -1,0 +1,45 @@
+# Pinned oracle files: third-party schemas and data that the engine or its tests read.
+# Each file is vendored unchanged. `scripts/check_oracle_pins.py` checks the SHA-256 offline.
+# The `sources.yaml` record of each file holds the same digest and URL (tests/test_oracle_pins.py).
+# Add a pin with docs/how-to/pin-an-oracle.md.
+pins:
+- id: gs1-linkset-schema
+  path: tests/vectors/gs1-linkset/linkset-schema.json
+  repo: gs1/linkset
+  upstream_path: linkset-schema.json
+  commit: bedc11ec56527255369909509b7d06e471180472
+  url: https://github.com/gs1/linkset/blob/bedc11ec56527255369909509b7d06e471180472/linkset-schema.json
+  retrieval_date: '2026-10-25'
+  license: Apache-2.0
+  sha256: ff902c5a13f197727169cb8579e29ab598940bc266d90e8702191d7df392cf04
+  version: commit bedc11ec56527255369909509b7d06e471180472
+- id: gs1-syntax-dictionary
+  path: testpacks/data/gs1-syntax-engine/gs1-syntax-dictionary.txt
+  repo: gs1/gs1-syntax-engine
+  upstream_path: src/c-lib/gs1-syntax-dictionary.txt
+  commit: 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72
+  url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/gs1-syntax-dictionary.txt
+  retrieval_date: '2026-10-25'
+  license: Apache-2.0
+  sha256: 3e0e1680a0bb5a5af13c863a4d8d6075f5766a09c463a78e0168d7330eecf779
+  version: release 2026-01-27
+- id: gs1-digital-link-tests
+  path: tests/vectors/gs1-syntax-engine/dl.c
+  repo: gs1/gs1-syntax-engine
+  upstream_path: src/c-lib/dl.c
+  commit: 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72
+  url: https://github.com/gs1/gs1-syntax-engine/blob/58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72/src/c-lib/dl.c
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: c351912e15f52b95de3efabf071c0753b0fe615bf0b6ff41651dd52096595d7f
+  version: commit 58c1dc85d9ff4eb9368293bcf5264a9fe70bfc72
+- id: wycheproof-jws
+  path: tests/vectors/wycheproof/TEST-ONLY-json_web_signature_test.json
+  repo: C2SP/wycheproof
+  upstream_path: testvectors_v1/json_web_signature_test.json
+  commit: 7a325932231bd7a724c791c8b0d65ea4d6d2f435
+  url: https://github.com/C2SP/wycheproof/blob/7a325932231bd7a724c791c8b0d65ea4d6d2f435/testvectors_v1/json_web_signature_test.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 8e687a06fe8359f4ec51480f1a9f73c8faebd6f4c01b818b843b44eee54fd5d9
+  version: commit 7a325932231bd7a724c791c8b0d65ea4d6d2f435
