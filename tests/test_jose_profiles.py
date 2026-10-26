@@ -148,17 +148,21 @@ class Served:
     """An acquirer that answers every fetch with one body and holds named local artifacts."""
 
     def __init__(
-        self, body: bytes | str = b"", status: int = 200, artifacts: dict[str, bytes] | None = None
+        self,
+        body: bytes | str = b"",
+        status: int = 200,
+        artifacts: dict[str, bytes] | None = None,
+        **fields: Any,
     ) -> None:
         self._body = body.encode() if isinstance(body, str) else body
-        self._status, self._artifacts = status, artifacts or {}
+        self._status, self._artifacts, self._fields = status, artifacts or {}, fields
         self._records: list[Record] = []
         self.requests: list[Request] = []
 
     def fetch(self, request: Request) -> Record:
         self.requests.append(request)
         base = make_record(len(self._records) + 1, self._body, request.url)
-        record = Record(**{**base.__dict__, "status": self._status})
+        record = Record(**{**base.__dict__, "status": self._status, **self._fields})
         self._records.append(record)
         return record
 
@@ -377,7 +381,13 @@ def test_the_jws_profile_reads_no_typ_and_no_claims(
     tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
 ) -> None:
     token = compact({"alg": "ES256", "kid": KID, "typ": "dpp+jws"}, b"\x00 not JSON", key)
-    passed(jose(tmp_path, Served(token), trust, profile="jws"))
+    outcome = jose(tmp_path, Served(token), trust, profile="jws")
+    passed(outcome)
+    # The pass message names only the rules that ran: no claim, no validity, no issuer binding.
+    assert outcome.message.startswith(
+        "The signature verifies with a pinned key of the trust bundle under the profile jws. "
+        "No claim, no validity, and no issuer binding was judged."
+    )
 
 
 # -- the trusted key ----------------------------------------------------------------------------------
@@ -513,6 +523,45 @@ def test_size_limits_are_engine_limits(
     passed(jose(tmp_path, Served(general(*[token] * MAX_SIGNATURES)), trust))
 
 
+def _rsa_jwk() -> dict[str, str]:
+    numbers = rsa.generate_private_key(public_exponent=65537, key_size=2048).public_key().public_numbers()
+    return {"kty": "RSA", "n": b64u(numbers.n.to_bytes(256, "big")), "e": b64u(b"\x01\x00\x01")}
+
+
+def test_every_signature_is_judged_and_a_fail_comes_before_an_engine_limit(
+    tmp_path: Path, key: ec.EllipticCurvePrivateKey
+) -> None:
+    # A signature that this engine cannot judge must not hide a later one that fails, in any order.
+    zeroed = f"{b64u(_json(VC_HEADER))}.{b64u(vc())}.{b64u(bytes(64))}"
+    unencoded = compact({**VC_HEADER, "b64": False, "crit": ["b64"]}, vc(), key)
+    trust = bundle({KID: jwk(key), "TEST-ONLY-rsa": _rsa_jwk()})
+    for pair in ((unencoded, zeroed), (zeroed, unencoded)):
+        failed(jose(tmp_path, Served(general(*pair)), trust, profile="jws"), "INTEGRITY.JOSE.SIGNATURE")
+    rsa_kid = compact({**VC_HEADER, "kid": "TEST-ONLY-rsa"}, vc(), key)
+    for pair in ((rsa_kid, zeroed), (zeroed, rsa_kid)):
+        failed(jose(tmp_path, Served(general(*pair)), trust), "INTEGRITY.JOSE.SIGNATURE")
+    # Without a fail, the engine limit stays: nothing is a pass that was not judged.
+    good = compact(VC_HEADER, vc(), key)
+    is_blocked(jose(tmp_path, Served(general(rsa_kid, good)), trust), "INTEGRITY.JOSE.UNSUPPORTED")
+    # The claim rules also come before the engine limit.
+    expired = vc(validUntil="2020-01-01T00:00:00Z")
+    pair = (compact({**VC_HEADER, "kid": "TEST-ONLY-rsa"}, expired, key), compact(VC_HEADER, expired, key))
+    failed(jose(tmp_path, Served(general(*pair)), trust), "INTEGRITY.JOSE.EXPIRED")
+
+
+def test_more_signatures_than_the_limit_are_judged_before_the_limit_applies(
+    tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
+) -> None:
+    # Copies of a bad signature are no way out of the fail.
+    untrusted = compact(VC_HEADER, vc(), p256())
+    many = MAX_SIGNATURES + 1
+    failed(jose(tmp_path, Served(general(*[untrusted] * many)), trust), "INTEGRITY.JOSE.SIGNATURE")
+    unknown = compact({**VC_HEADER, "kid": "TEST-ONLY-unknown"}, vc(), key)
+    failed(jose(tmp_path, Served(general(*[unknown] * many)), trust), "INTEGRITY.JOSE.ISSUER_UNTRUSTED")
+    expired = compact(VC_HEADER, vc(validUntil="2020-01-01T00:00:00Z"), key)
+    failed(jose(tmp_path, Served(general(*[expired] * many)), trust), "INTEGRITY.JOSE.EXPIRED")
+
+
 def test_parse_names_the_serialization() -> None:
     token = compact(VC_HEADER, b"{}", p256())
     assert parse(token.encode()).serialization == "compact"
@@ -541,6 +590,14 @@ def test_an_offline_credential_sample_is_read_and_nothing_is_fetched(
 
 def test_the_signed_resource_must_answer_200(tmp_path: Path, trust: TrustBundle) -> None:
     failed(jose(tmp_path, Served(b"{}", status=404), trust), "INTEGRITY.JOSE.NOT_AVAILABLE")
+    # The status rule comes before the body rules: a coding or a cut body does not turn it into blocked.
+    body_rules: list[tuple[dict[str, Any], str]] = [
+        ({"headers": (("Content-Encoding", "gzip"),)}, "TRANSPORT.BODY_ENCODED"),
+        ({"truncated": True}, "TRANSPORT.BODY_TRUNCATED"),
+    ]
+    for fields, code in body_rules:
+        failed(jose(tmp_path, Served(b"nope", status=404, **fields), trust), "INTEGRITY.JOSE.NOT_AVAILABLE")
+        is_blocked(jose(tmp_path, Served(b"nope", **fields), trust), code)
     outcome = jose(tmp_path, Served(b"{}", status=503), trust)
     assert (outcome.passed, outcome.unreachable, outcome.reason_code) == (
         False,
@@ -715,6 +772,8 @@ def test_the_jws_profile_verifies_the_signed_passport_through_its_x5c_chain(
         outcome = run(_reference_context(tmp_path, server.origin, profile="jws", key_source="x5c"))
     assert outcome.reason_code == code, outcome.message
     assert outcome.passed is (code == "INTEGRITY.JOSE.OK")
+    if outcome.passed:
+        assert "a certificate that chains to a passport anchor under the profile jws" in outcome.message
 
 
 def test_a_long_x5c_chain_is_blocked_only_if_every_entry_is_a_certificate(
@@ -729,6 +788,13 @@ def test_a_long_x5c_chain_is_blocked_only_if_every_entry_is_a_certificate(
             failed(outcome, "INTEGRITY.JOSE.MALFORMED")
         else:
             is_blocked(outcome, "INTEGRITY.JOSE.TOO_LARGE")
+    # A long chain on one signature does not hide a signature without a chain, in either order.
+    long, bare = (
+        compact(header, b"{}", key) for header in ({"alg": "ES256", "x5c": [der] * 6}, {"alg": "ES256"})
+    )
+    for pair in ((long, bare), (bare, long)):
+        outcome = jose(tmp_path, Served(general(*pair)), trust, profile="jws", key_source="x5c")
+        failed(outcome, "INTEGRITY.JOSE.ISSUER_UNTRUSTED")
 
 
 def test_the_reference_credential_is_served_for_its_media_type_only(tmp_path: Path) -> None:

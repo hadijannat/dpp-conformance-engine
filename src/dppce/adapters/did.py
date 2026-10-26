@@ -71,6 +71,10 @@ def did_web_url(did: str) -> str | None:
     labels = host.split(".")
     if len(host) > 253 or not all(_LABEL.fullmatch(label) for label in labels):
         return None
+    # A URL parser reads a host whose last label is a number as IPv4 (127.1, 0x7f.0.0.1).
+    # No DNS top-level label is all digits.
+    if labels[-1].isdigit() or labels[-1][:2].lower() == "0x":
+        return None
     try:
         ipaddress.ip_address(host)
         return None

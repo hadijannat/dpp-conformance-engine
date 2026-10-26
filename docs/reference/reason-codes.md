@@ -166,8 +166,8 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `INTEGRITY.JOSE.OK` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here |
 | `INTEGRITY.JOSE.PARAMS` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | inconclusive |
 | `INTEGRITY.JOSE.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.jose._acquire` | inconclusive |
-| `INTEGRITY.JOSE.SIGNATURE` | INTEGRITY |  | `dppce.adapters.jose._judge`, `dppce.evidence.jose_profiles.verify` | not fixed here |
-| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here |
+| `INTEGRITY.JOSE.SIGNATURE` | INTEGRITY |  | `dppce.adapters.jose._signature`, `dppce.evidence.jose_profiles.verify` | not fixed here |
+| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here |
 | `INTEGRITY.JOSE.TYPE` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
 | `INTEGRITY.JOSE.UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.key_algorithm`, `dppce.evidence.jose_profiles.public_key_from_jwk` | not fixed here |
 | `INTEGRITY.KEY.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |

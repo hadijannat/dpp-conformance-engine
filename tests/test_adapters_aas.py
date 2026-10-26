@@ -168,6 +168,7 @@ def test_the_wrapped_release_accepts_an_empty_environment(tmp_path: Path) -> Non
     # The stated limit of aas.validate: an empty environment is valid for the wrapped release.
     # aas.dpp_compose fails the same sample with AAS.DPP.SUBMODEL_MISSING.
     acquirer = ArtifactAcquirer({"aas_file": make_artifact("aas_file", b"{}")})
+    # ArtifactAcquirer is a test double, not a full Acquirer.
     outcome = aas_validate(context(tmp_path, "aas.validate", acquirer=acquirer))  # type: ignore[arg-type]
     assert (outcome.passed, outcome.reason_code) == (True, "AAS.VALID")
 

@@ -116,6 +116,12 @@ def test_a_did_web_maps_to_an_https_url(did: str, url: str) -> None:
         "did:web:",
         "did:key:z6MkTEST",
         "did:web:127.0.0.1",
+        # IPv4 shorthand: a URL parser reads each of these as 127.0.0.1 (WHATWG URL, IPv4 parser).
+        "did:web:127.1",
+        "did:web:2130706433",
+        "did:web:0x7f.0.0.1",
+        "did:web:0177.0.0.1",
+        "did:web:id.example.0x10",
         "did:web:id.example.test%3A0",
         "did:web:id.example.test%3A65536",
         "did:web:id.example.test%3A",

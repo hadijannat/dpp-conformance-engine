@@ -11,7 +11,8 @@ The header ``alg`` must name that algorithm. It never selects one. Verification 
 
 Every function here judges untrusted bytes. A ``JoseError`` says why a token is refused. Only
 the codes in ``ENGINE_LIMITS`` are limits of this engine. They apply to a well-formed token only,
-so that a system under test cannot reshape a defect into a step that is not judged.
+and the check gives one only if no rule fails, so that a system under test cannot reshape a defect
+into a step that is not judged.
 """
 
 from __future__ import annotations
@@ -83,6 +84,8 @@ class Token:
     serialization: Literal["compact", "flattened", "general"]
     payload: bytes
     signatures: tuple[Signature, ...]
+    # More than MAX_SIGNATURES signatures: only the first ones are in ``signatures``.
+    truncated: bool = False
 
 
 # -- shape --------------------------------------------------------------------------------------
@@ -177,13 +180,14 @@ def parse(body: bytes) -> Token:
             "INTEGRITY.JOSE.MALFORMED", "The body is neither a compact JWS nor a JWS JSON serialization."
         )
     members = document.get("signatures", [document])
-    if len(members) > MAX_SIGNATURES:
-        raise JoseError("INTEGRITY.JOSE.TOO_LARGE", f"The token has more than {MAX_SIGNATURES} signatures.")
     payload = document["payload"]
+    # The limit bounds the verifications. The caller judges the first signatures before it applies.
     signatures = tuple(
-        _signature(m.get("protected", ""), m.get("header"), payload, m["signature"]) for m in members
+        _signature(m.get("protected", ""), m.get("header"), payload, m["signature"])
+        for m in members[:MAX_SIGNATURES]
     )
-    return Token("general" if "signatures" in document else "flattened", _decode(payload), signatures)
+    serialization: Literal["flattened", "general"] = "general" if "signatures" in document else "flattened"
+    return Token(serialization, _decode(payload), signatures, len(members) > MAX_SIGNATURES)
 
 
 # -- header rules -------------------------------------------------------------------------------

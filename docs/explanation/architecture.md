@@ -438,8 +438,10 @@ that applies:
 1. Invalid parameters: `blocked`, `INTEGRITY.JOSE.PARAMS`. No trust bundle: `blocked`,
    `INTEGRITY.TRUST.MISSING`. Nothing is read.
 2. A transport error or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
-   `INTEGRITY.JOSE.SAMPLE_MISSING`. A status other than 200: `INTEGRITY.JOSE.NOT_AVAILABLE`.
-3. A body above 2 MiB, or more than 8 signatures: `blocked`, `INTEGRITY.JOSE.TOO_LARGE`.
+   `INTEGRITY.JOSE.SAMPLE_MISSING`. A status other than 200: `INTEGRITY.JOSE.NOT_AVAILABLE`. Only
+   then, a body coding or a truncated body gives `blocked`, as `unusable` gives.
+3. A body above 2 MiB: `blocked`, `INTEGRITY.JOSE.TOO_LARGE`. With more than 8 signatures, the
+   check judges the first 8. It gives `blocked`, `INTEGRITY.JOSE.TOO_LARGE`, only if no row fails.
 4. A body of another shape, or a header that is not a JSON object: `INTEGRITY.JOSE.MALFORMED`.
 5. Then each signature in turn. A header without a string `alg` is `INTEGRITY.JOSE.MALFORMED`.
    The `alg` value `none`, `HS256`, `HS384`, or `HS512` gives `INTEGRITY.JOSE.ALGORITHM`, before
@@ -471,8 +473,11 @@ that applies:
 16. Otherwise: pass, `INTEGRITY.JOSE.OK`.
 
 Only rows 3, 7, 9, 10, and 12 can give `blocked` after the body is read. Each applies to a
-well-formed token only. A system under test therefore cannot reshape a defect into a step that is
-not judged.
+well-formed token only. An engine limit of one signature does not end the check. The check judges
+every other signature, every chain, and the claims under `vc-jose`. A fail of any row comes before
+any `blocked`, in every order of the signatures. A system under test therefore cannot reshape a
+judged defect into a step that is not judged. A signature after the eighth is not judged, and such
+a token is never a pass.
 
 `identifier.parse` takes the optional parameter `form`. Its values are `dppce-item`, the default,
 and `gs1-dl`. The default keeps the strict grammar below, so existing decision digests do not
@@ -726,7 +731,8 @@ mapping follows the did:web Method Specification, a W3C CCG report. The commit `
 Core 1.0. The mapping is:
 
 - The DID is `did:web:` and a domain name, then optional path segments after `:`. The domain name
-  is not an IP address.
+  is not an IP address. Its last label is not all digits and does not start with `0x`, because a
+  URL parser reads such a host as an IPv4 address.
 - A port follows the domain name as `%3A` and a number from 1 to 65535. `%3a` is the same.
 - Without a path, the URL is `https://<domain>[:<port>]/.well-known/did.json`. With a path, it is
   `https://<domain>[:<port>]/<segment>/.../did.json`.

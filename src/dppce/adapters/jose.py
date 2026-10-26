@@ -15,12 +15,21 @@ from cryptography import x509
 from cryptography.exceptions import UnsupportedAlgorithm
 from pydantic import Field, ValidationError, field_validator, model_validator
 
-from dppce.adapters.common import blocked, completed, fetch_once, resource_url, unusable
+from dppce.adapters.common import (
+    SERVER_ERRORS,
+    blocked,
+    completed,
+    fetch_once,
+    no_answer,
+    resource_url,
+    unusable,
+)
 from dppce.adapters.integrity import _certificates, _purpose, _status_gap, _TooLongError, trust_path
 from dppce.evidence import x509path
 from dppce.evidence.jose_profiles import (
     ALGORITHMS,
     ENGINE_LIMITS,
+    MAX_SIGNATURES,
     Algorithm,
     JoseError,
     Profile,
@@ -121,7 +130,11 @@ def _acquire(ctx: CheckContext, params: JoseParams) -> Record | CheckOutcome:
     if isinstance(url, CheckOutcome):
         return url
     record = fetch_once(ctx, url, accept=params.accept)
-    return unusable(ctx, record) or record
+    # Only a missing answer comes before the status rule: a body coding or a cut body must not
+    # turn a status fail into blocked. jose_check applies the body rules after the status rule.
+    if record.error is not None or record.status in SERVER_ERRORS:
+        return no_answer(ctx, record)
+    return record
 
 
 def _pinned_key(ctx: CheckContext, trust: TrustBundle, signature: Signature) -> tuple[PublicKey, TrustedKey]:
@@ -199,31 +212,69 @@ def _chain_findings(ctx: CheckContext, trust: TrustBundle, path: list[x509.Certi
         raise _Finding(False, "INTEGRITY.CERT.REVOKED", message, ("revocation", "revoked"))
 
 
+def _defer(exc: JoseError | _Finding, deferred: list[Exception]) -> None:
+    """Keep an engine limit for the end of the check. Raise any other finding at once."""
+    if (isinstance(exc, JoseError) and exc.code in ENGINE_LIMITS) or (
+        isinstance(exc, _Finding) and exc.passed is None
+    ):
+        deferred.append(exc)
+        return
+    raise exc
+
+
+def _signature(
+    ctx: CheckContext,
+    trust: TrustBundle,
+    params: JoseParams,
+    signature: Signature,
+    *,
+    found: tuple[list[TrustedKey], list[list[x509.Certificate]]],
+    findings: dict[str, JsonValue],
+) -> None:
+    """The header, key, and signature rules of one signature."""
+    check_header(signature, params.profile)
+    if params.key_source == "trust_kid":
+        key, entry = _pinned_key(ctx, trust, signature)
+        found[0].append(entry)
+    else:
+        key, path = _chain_key(trust, signature)
+        found[1].append(path)
+    try:
+        verify(signature, key, params.algorithms or ALGORITHMS)
+    except JoseError as exc:
+        if exc.code == "INTEGRITY.JOSE.SIGNATURE":
+            findings["signature"] = "invalid"
+        raise
+
+
 def _judge(
     ctx: CheckContext, trust: TrustBundle, params: JoseParams, body: bytes, findings: dict[str, JsonValue]
 ) -> None:
-    """Every finding in the order of the contract. Returns only if the token passes."""
+    """Every finding in the order of the contract. Returns only if the token passes.
+
+    An engine limit of one signature is kept, and the other signatures and the claims are judged.
+    So a fail anywhere comes before any limit, in every order of the signatures.
+    """
     token = parse(body)
     findings |= {"serialization": token.serialization, "signatures": len(token.signatures)}
+    deferred: list[Exception] = []
+    if token.truncated:
+        message = f"The token has more than {MAX_SIGNATURES} signatures."
+        deferred.append(JoseError("INTEGRITY.JOSE.TOO_LARGE", message))
     pinned: list[TrustedKey] = []
     paths: list[list[x509.Certificate]] = []
     for signature in token.signatures:
-        check_header(signature, params.profile)
-        if params.key_source == "trust_kid":
-            key, entry = _pinned_key(ctx, trust, signature)
-            pinned.append(entry)
-        else:
-            key, path = _chain_key(trust, signature)
-            paths.append(path)
         try:
-            verify(signature, key, params.algorithms or ALGORITHMS)
-        except JoseError as exc:
-            if exc.code == "INTEGRITY.JOSE.SIGNATURE":
-                findings["signature"] = "invalid"
-            raise
-    findings |= {"signature": "valid", "issuer_trust": "a trusted key"}
+            _signature(ctx, trust, params, signature, found=(pinned, paths), findings=findings)
+        except (JoseError, _Finding) as exc:
+            _defer(exc, deferred)
+    if not deferred:
+        findings |= {"signature": "valid", "issuer_trust": "a trusted key"}
     for path in paths:
-        _chain_findings(ctx, trust, path)
+        try:
+            _chain_findings(ctx, trust, path)
+        except _Finding as exc:
+            _defer(exc, deferred)
     if params.profile == "vc-jose":
         issuer = credential_issuer(token.payload, ctx.evaluation_time)
         findings["validity"] = "valid at the evaluation time"
@@ -231,6 +282,8 @@ def _judge(
             message = "The trust bundle binds the key to an issuer other than the credential issuer."
             finding = ("issuer_trust", "the key belongs to a different issuer")
             raise _Finding(False, "INTEGRITY.JOSE.ISSUER_UNTRUSTED", message, finding)
+    if deferred:
+        raise deferred[0]
 
 
 @register("integrity.jose", capability="integrity.jose", params=JoseParams)
@@ -262,6 +315,8 @@ def jose_check(ctx: CheckContext) -> CheckOutcome:
         findings["status"] = record.status
         message = f"The system declares a signed resource, and its endpoint answers {record.status}."
         return outcome(False, "INTEGRITY.JOSE.NOT_AVAILABLE", message)
+    if record.kind == "http" and (problem := unusable(ctx, record)) is not None:
+        return problem
     try:
         _judge(ctx, ctx.trust, params, record.body, findings)
     except JoseError as exc:
@@ -270,5 +325,15 @@ def jose_check(ctx: CheckContext) -> CheckOutcome:
         if found.finding is not None:
             findings[found.finding[0]] = found.finding[1]
         return outcome(found.passed, found.code, found.message)
-    message = "The signature, the issuer key, and the validity are in order under the profile."
+    if params.profile == "jws":
+        if params.key_source == "trust_kid":
+            signer = "a pinned key of the trust bundle"
+        else:
+            signer = "the key of a certificate that chains to a passport anchor"
+        message = (
+            f"The signature verifies with {signer} under the profile jws. "
+            "No claim, no validity, and no issuer binding was judged."
+        )
+    else:
+        message = "The signature, the issuer key, and the validity are in order under the profile."
     return outcome(True, "INTEGRITY.JOSE.OK", message)
