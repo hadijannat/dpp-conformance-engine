@@ -101,9 +101,7 @@ def derive(carrier: str, preferred: str) -> dict[str, str]:
     A GS1 Digital Link URI is also an https URL, and the web steps gate on https-url.
     """
     if not carrier or _UNSAFE.search(carrier):
-        raise ValueError(
-            "INIT.CARRIER.INVALID: the carrier is empty or has whitespace or a control character"
-        )
+        raise ValueError("the carrier is empty or has whitespace or a control character")
     schemes = _parsed_schemes(carrier)
     if not schemes:
         return {"identifier_scheme": "unknown"}
@@ -151,7 +149,7 @@ def _document(kind: str, family: str, body: dict[str, Any], notes: dict[str, str
 def draft(family: str, carrier: str | None, root: Path) -> Draft:
     """Draft the ICS and the IXIT of ``family``. Without a carrier, they equal the example."""
     if family not in FAMILIES:
-        raise ValueError(f"INIT.FAMILY.UNKNOWN: choose one of {', '.join(FAMILIES)}")
+        raise ValueError(f"the family must be one of {', '.join(FAMILIES)}")
     ics: dict[str, Any] = load_data(root / EXAMPLES / f"{family}.ics.yaml")
     ixit: dict[str, Any] = load_data(root / EXAMPLES / f"{family}.ixit.yaml")
     notes = dict(_NOTES)
