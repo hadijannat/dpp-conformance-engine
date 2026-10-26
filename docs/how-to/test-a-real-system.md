@@ -144,6 +144,22 @@ a test pack with that DID and the mode that you selected. The observation record
 A DID document that resolves is not trusted. Add the issuer key to your trust bundle with an
 issuer equal to the DID. Get the key through a channel that you trust.
 
+## Check a credential status list
+
+The check `integrity.status_list` fetches the status list credential at the URL that the
+credential names. Often a third party operates that host. A live fetch needs the origin of that
+host in the transport policy, as for any other origin. It also needs the permission of the host
+operator.
+
+Without that permission, use an offline copy.
+
+1. Get the status list credential from the owner as a file.
+2. Name the file in `IXIT.samples`, for example `status_list: list.jwt`.
+3. Give `list_source: sample` and `list_sample: status_list` in the parameters.
+
+The `id` of the copy must be the `statusListCredential` URL. The same applies to a DID document
+for `key_source: did`. Give its sample name in `did_sample`.
+
 ## Manual steps
 
 A manual step needs a signed manual result. The engine does not perform the review.
