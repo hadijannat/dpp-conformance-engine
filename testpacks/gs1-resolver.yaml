@@ -155,3 +155,25 @@ test_purposes:
   expected_evidence:
   - The three resolver exchanges with their redirect chains.
   permitted_modes: *modes
+# The IXIT sample gs1_declared is a JSON file whose member id holds the declared identifier. Without
+# it, the step is blocked, which is inconclusive. TP-GS1-CONSISTENCY-001 stays exact text.
+- id: TP-GS1-EQUIVALENCE-001
+  title: Compare the carrier identifier with the declared identifier in GS1 canonical form
+  requirements:
+  - FAM-GS1-EQUIVALENCE-001
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.equivalence
+    params:
+      source:
+        label: gs1_declared
+        kind: sample
+        pointer: /id
+  expected_evidence:
+  - The source of the declared identifier and the parts of the canonical form that differ.
+  permitted_modes: *modes
+  requires_scope: none

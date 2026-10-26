@@ -41,7 +41,11 @@ _SETUP: dict[str, dict[str, Any]] = {
     "F-47": {"ics_changes": {"identifier_scheme": "unknown"}},
     # The reference system serves no AAS file, so the control supplies a synthetic one. It holds a
     # DPP metadata submodel, because TP-AAS-DPP-001 reads the same sample.
-    "C-FAMILY-AAS": {"samples": {"aas_json": "fixtures/aas/TEST-ONLY-dpp-valid.json"}},
+    # The identifier is the globalAssetId of the sample, for TP-AAS-CONSISTENCY-001.
+    "C-FAMILY-AAS": {
+        "samples": {"aas_json": "fixtures/aas/TEST-ONLY-dpp-valid.json"},
+        "ixit_changes": {"samples": {"identifier": "https://example.test/TEST-ONLY/product/1"}},
+    },
     "F-63": {"samples": {"aas_json": "fixtures/aas/environment-invalid.json"}},
     "F-64": {"samples": {"aas_json": "fixtures/aas/environment-valid.json"}},
     "F-65": {"samples": {"aas_json": "fixtures/aas/TEST-ONLY-dpp-id-mismatch.json"}},
@@ -50,6 +54,15 @@ _SETUP: dict[str, dict[str, Any]] = {
         "ics_changes": {"features": {"aas_xml": True}},
         "samples": {"aas_xml": "fixtures/aas/environment-v3-1.xml"},
     },
+    # The rig writes the example IXIT into its own directory, so a relative sample path of the
+    # example does not resolve there. These rows give the controls their samples.
+    "C-FAMILY-VC": {"samples": {"vc_json": "fixtures/reference/samples/TEST-ONLY-vc-subject.json"}},
+    "C-FAMILY-GS1": {"samples": {"gs1_declared": "fixtures/reference/samples/TEST-ONLY-gs1-declared.json"}},
+    "F-67": {"samples": {"vc_json": "fixtures/reference/samples/TEST-ONLY-vc-subject-differs.json"}},
+    "F-68": {
+        "samples": {"gs1_declared": "fixtures/reference/samples/TEST-ONLY-gs1-serial-differs-padded.json"}
+    },
+    "B-17": {"samples": {"gs1_declared": "fixtures/reference/samples/TEST-ONLY-gs1-padded-gtin.json"}},
 }
 _NOT_A_FLAG = (
     "none",
@@ -66,6 +79,9 @@ _NOT_A_FLAG = (
     "aas_dpp_id_mismatch",
     "aas_dpp_element_missing",
     "aas_v3_1",
+    "vc_subject_differs",
+    "gs1_serial_differs_padded",
+    "gs1_padded_gtin",
 )
 
 

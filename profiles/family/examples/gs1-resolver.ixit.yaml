@@ -9,6 +9,9 @@ endpoints:
 samples:
   identifier: https://id.example.test/01/09506000134352/21/EV0001
   passport_id: 09506000134352-EV0001
+  # TP-GS1-EQUIVALENCE-001 compares the member id of this file with the carrier identifier.
+  # Replace it with the identifier that the system under test declares.
+  gs1_declared: TEST-ONLY-gs1-declared.json
 network:
   allowed_hosts:
   - 127.0.0.1

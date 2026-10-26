@@ -92,6 +92,7 @@ def test_a_case_without_profiles_runs_under_the_catalogue_profiles() -> None:
         "B-14": "family/gs1-resolver",
         "B-15": "family/credentials",
         "B-16": "family/aas",
+        "B-17": "family/gs1-resolver",
     }
 
 

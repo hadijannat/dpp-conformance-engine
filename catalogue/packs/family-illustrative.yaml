@@ -279,6 +279,27 @@ requirements:
   - id: default
     tests:
     - TP-GS1-CONFORMANCE-001
+- id: FAM-GS1-EQUIVALENCE-001
+  title: The declared identifier is GS1-equivalent to the carrier identifier
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The declared identifier and the carrier identifier have the same scheme, host, primary key, and key
+    qualifiers. A GTIN in 8, 12, or 13 digits counts as the same GTIN in 14 digits.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-EQUIVALENCE-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. Digital consistency does not prove
+      physical authenticity.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-EQUIVALENCE-001
 # -- family/aas: Asset Administration Shell files ----------------------------------------------
 - id: FAM-AAS-JSON-001
   title: The AAS JSON file is valid
@@ -380,6 +401,32 @@ requirements:
   - id: default
     tests:
     - TP-AAS-DPP-001
+- id: FAM-AAS-CONSISTENCY-001
+  title: The AAS shell names the carrier identifier
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The globalAssetId of the first shell of the declared AAS JSON file equals the carrier identifier as
+    exact text.
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_json
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-AAS-CONSISTENCY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. Digital consistency does not prove
+      physical authenticity.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-CONSISTENCY-001
 # -- family/credentials: verifiable credentials, VC and UNTP style -----------------------------
 - id: FAM-VC-RESOLVE-001
   title: The credential URL resolves
@@ -472,3 +519,23 @@ requirements:
   - id: default
     tests:
     - TP-VC-DID-001
+- id: FAM-VC-CONSISTENCY-001
+  title: The credential subject is the carrier identifier
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The credentialSubject id of the declared credential equals the carrier identifier as exact text.
+  applicability: *vc
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-CONSISTENCY-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. Digital consistency does not prove
+      physical authenticity.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-CONSISTENCY-001
