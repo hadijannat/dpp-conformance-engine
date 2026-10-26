@@ -477,6 +477,20 @@ sut_faults:
     test_purpose: TP-VC-STATUS-001
     profiles: [family/credentials]
     expected: {verdict: fail, reason_code: INTEGRITY.STATUS.LIST_SIGNATURE}
+  - id: F-74
+    class: contract_violation
+    fault: aas_api_wrong_status
+    description: The AAS repository answers 200 with an empty body to a GET of an unknown shell id.
+    test_purpose: TP-AAS-API-001
+    profiles: [family/aas]
+    expected: {verdict: fail, reason_code: AAS.API.PROFILE}
+  - id: F-75
+    class: contract_violation
+    fault: aas_api_bad_paging
+    description: The AAS repository ignores the limit parameter of a shell list request and returns every shell.
+    test_purpose: TP-AAS-API-001
+    profiles: [family/aas]
+    expected: {verdict: fail, reason_code: AAS.API.PROFILE}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
