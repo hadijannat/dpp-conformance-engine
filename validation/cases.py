@@ -39,8 +39,17 @@ _SETUP: dict[str, dict[str, Any]] = {
     "F-45": {"qr": "invalid"},
     "F-46": {"ixit_changes": {"resources": {"item": {"path": "/dpp/{id}/missing"}}}},
     "F-47": {"ics_changes": {"identifier_scheme": "unknown"}},
-    # The reference system serves no AAS file, so the control supplies a synthetic one.
-    "C-FAMILY-AAS": {"samples": {"aas_json": "fixtures/aas/environment-valid.json"}},
+    # The reference system serves no AAS file, so the control supplies a synthetic one. It holds a
+    # DPP metadata submodel, because TP-AAS-DPP-001 reads the same sample.
+    "C-FAMILY-AAS": {"samples": {"aas_json": "fixtures/aas/TEST-ONLY-dpp-valid.json"}},
+    "F-63": {"samples": {"aas_json": "fixtures/aas/environment-invalid.json"}},
+    "F-64": {"samples": {"aas_json": "fixtures/aas/environment-valid.json"}},
+    "F-65": {"samples": {"aas_json": "fixtures/aas/TEST-ONLY-dpp-id-mismatch.json"}},
+    "F-66": {"samples": {"aas_json": "fixtures/aas/TEST-ONLY-dpp-element-missing.json"}},
+    "B-16": {
+        "ics_changes": {"features": {"aas_xml": True}},
+        "samples": {"aas_xml": "fixtures/aas/environment-v3-1.xml"},
+    },
 }
 _NOT_A_FLAG = (
     "none",
@@ -52,6 +61,11 @@ _NOT_A_FLAG = (
     "qr_qualifier_order",
     "qr_model_level",
     "qr_http_scheme",
+    "aas_invalid_json",
+    "aas_dpp_metadata_missing",
+    "aas_dpp_id_mismatch",
+    "aas_dpp_element_missing",
+    "aas_v3_1",
 )
 
 

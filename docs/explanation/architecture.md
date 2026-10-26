@@ -351,6 +351,7 @@ Initial registry:
 | `persistence.versions` | `persistence.versions` | Version history obeys the declared update rule. |
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
 | `aas.validate` | `aas.validate` | Wrap aas-test-engines for a JSON, XML, or AASX sample. A metamodel version that the pinned release does not verify is `unsupported`. Needs the `aas` extra. |
+| `aas.dpp_compose` | `aas.dpp_compose` | Checks the DPP metadata submodel of an AAS environment sample and its relation to the shell, as the pinned IDTA 02099-1 release states. Experimental. |
 | `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
 | `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
@@ -614,6 +615,46 @@ request, it gives `unreachable`.
 
 Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`. The transport does not record the
 status of a followed redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
+
+`aas.validate` has a limit of the wrapped release. The release accepts an empty environment `{}`
+as valid. So `AAS.VALID` does not show that the file has a shell or a submodel.
+`aas.dpp_compose` judges the content of a DPP environment.
+
+`aas.dpp_compose` takes one optional parameter, `artifact`, the IXIT sample. Its default is
+`aas_file`. The check reads the sample as JSON with the strict parser. It sends no request and
+needs no extra. It compares the sample with IDTA 02099-1 version 1.0, template release 1.0.2. The
+template holds definition text from a European standard, so the project does not vendor it.
+`tests/vectors/idta-02099-1/README.md` names the pinned file. A table in `src/dppce/adapters/aas.py`
+holds its identifiers. A test derives the same table from a local copy that an operator supplies.
+These rules apply:
+
+- A semanticId matches if it is an object with one key. The value of that key must be the
+  semanticId of the template as exact text. The reference type and the key type do not matter.
+- A DPP metadata submodel is an object of the list `submodels` with the matching semanticId
+  `https://admin-shell.io/idta/cds/dppMetadata/1`.
+- A required element is a top-level element with the cardinality `One` in the template. Each one
+  is a Property. An object of `submodelElements` is that element if it is the only object with its
+  idShort. It must also have the `modelType` `Property`, a matching semanticId, and a non-empty
+  string as `value`.
+- A shell references a submodel if the last key of a reference in its `submodels` has the `id`
+  of the submodel as its value. A submodel without a string `id` has no referencing shell.
+- The mapping table of the IDTA 02099-1 documentation binds `uniqueProductIdentifier` to
+  `assetInformation.globalAssetId`. The template binds no element to `specificAssetIds`, so the
+  check does not read them.
+
+The check judges each DPP metadata submodel and takes the first row that applies:
+
+1. The sample is not available: `blocked`, `AAS.SAMPLE.MISSING`.
+2. The sample is not a JSON object, or no submodel matches: `AAS.DPP.SUBMODEL_MISSING`.
+3. A required element is missing: `AAS.DPP.ELEMENT_MISSING`. The observation summary names the
+   idShorts in `missing_elements`.
+4. No shell references a DPP metadata submodel, or a referencing shell has a `globalAssetId` that
+   is not its `uniqueProductIdentifier` as exact text: `AAS.DPP.ID_MISMATCH`.
+5. Otherwise: pass, `AAS.DPP.OK`.
+
+Each problem of the sample shape is a fail, never `blocked`. So a system under test cannot reshape
+a fail into a step that is not judged. The check does not judge value formats, value types,
+optional elements, or concept descriptions. An AAS environment is not by itself a DPP.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.

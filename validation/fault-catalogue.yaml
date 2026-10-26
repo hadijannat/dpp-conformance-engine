@@ -71,7 +71,7 @@ controls:
     expected: Every executed test purpose of the profile gives `pass`.
   - id: C-FAMILY-AAS
     profile: family/aas
-    description: The synthetic AAS file fixtures/aas/environment-valid.json for the family profile family/aas.
+    description: The synthetic AAS file fixtures/aas/TEST-ONLY-dpp-valid.json for the family profile family/aas. It holds a DPP metadata submodel of the pinned IDTA 02099-1 template.
     expected: Every executed test purpose of the profile gives `pass`.
 
 # Faults in the system under test. `fault` is the flag that the reference system accepts.
@@ -338,6 +338,34 @@ sut_faults:
     description: The last raw-byte digest of the history is not the digest of the current item body.
     test_purpose: TP-PERSIST-002
     expected: {verdict: fail, reason_code: PERSISTENCE.UNDECLARED_CHANGE}
+  - id: F-63
+    class: schema_fault
+    fault: aas_invalid_json
+    description: The AAS JSON sample breaks the metamodel. Its shell list is empty.
+    test_purpose: TP-AAS-JSON-001
+    profiles: [family/aas]
+    expected: {verdict: fail, reason_code: AAS.INVALID}
+  - id: F-64
+    class: schema_fault
+    fault: aas_dpp_metadata_missing
+    description: The AAS environment is valid, but no submodel has the semanticId of the pinned IDTA 02099-1 DPP metadata template.
+    test_purpose: TP-AAS-DPP-001
+    profiles: [family/aas]
+    expected: {verdict: fail, reason_code: AAS.DPP.SUBMODEL_MISSING}
+  - id: F-65
+    class: identity_mismatch
+    fault: aas_dpp_id_mismatch
+    description: The uniqueProductIdentifier of the DPP metadata submodel differs from the globalAssetId of the shell that references it.
+    test_purpose: TP-AAS-DPP-001
+    profiles: [family/aas]
+    expected: {verdict: fail, reason_code: AAS.DPP.ID_MISMATCH}
+  - id: F-66
+    class: schema_fault
+    fault: aas_dpp_element_missing
+    description: The DPP metadata submodel has no dppStatus element, which the pinned template marks with the cardinality One.
+    test_purpose: TP-AAS-DPP-001
+    profiles: [family/aas]
+    expected: {verdict: fail, reason_code: AAS.DPP.ELEMENT_MISSING}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -445,6 +473,13 @@ boundary_cases:
     profiles: [family/gs1-resolver]
     expected: {verdict: inconclusive, reason_code: RESOLVER.WELLKNOWN.REDIRECTED}
     rationale: A redirected configuration file is not judged.
+  - id: B-16
+    fault: aas_v3_1
+    description: The AAS XML sample has the namespace of metamodel 3.1, which the pinned release does not verify.
+    test_purpose: TP-AAS-XML-001
+    profiles: [family/aas]
+    expected: {verdict: inconclusive, reason_code: AAS.VERSION.UNSUPPORTED}
+    rationale: An unsupported version is a limit of the engine. A JSON sample names no version, so the XML namespace seeds this case.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:

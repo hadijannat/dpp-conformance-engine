@@ -233,9 +233,24 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         _E,
         "Wrap a pinned aas-test-engines release for a JSON, XML, or AASX sample. A metamodel version "
         "that the release does not verify is unsupported, not a fail. A valid Asset "
-        "Administration Shell is not a complete DPP conformance statement.",
+        "Administration Shell is not a complete DPP conformance statement. Limit: the wrapped release "
+        "accepts an empty environment {} as valid. So a pass does not show that the file has a shell.",
         "aas_test_engines",
-        "",
+        "Each seeded AAS fault of the fault catalogue (F-63, B-16) gives its expected outcome in the "
+        "method validation. A recorded test campaign compares the verdicts with a second AAS "
+        "validator on the same files.",
+    ),
+    (
+        "aas.dpp_compose",
+        "aas",
+        _E,
+        "Compare the DPP metadata submodel of an AAS environment sample in JSON with the pinned IDTA "
+        "02099-1 template. The check compares the semanticId and the elements with the cardinality "
+        "One. It compares the uniqueProductIdentifier with the globalAssetId of the referencing shell. "
+        "Values are not checked against their formats.",
+        None,
+        "Each seeded fault F-64 to F-66 gives its expected outcome in the method validation. A "
+        "recorded test campaign runs the check on DPP environments of at least two other AAS tools.",
     ),
     (
         "manual.review",
