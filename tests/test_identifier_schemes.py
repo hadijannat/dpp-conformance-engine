@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
 from dppce.adapters.identifier import parse
-from dppce.models import CheckOutcome, ExecutionStatus
+from dppce.models import ICS, IXIT, CheckOutcome, ExecutionStatus
 from tests.test_adapters_identifier import _parse
+from tests.test_adapters_security import _POLICY, _Canned, _context
 
 _UUID = "123e4567-e89b-12d3-a456-426614174000"
 
@@ -48,7 +50,7 @@ _BAD = (ExecutionStatus.COMPLETED, False, "IDENTIFIER.SYNTAX.INVALID")
         ("urn-uuid", "urn:uuid:" + _UUID[:-1], _BAD),
         ("urn-uuid", "urn:uuid:{" + _UUID + "}", _BAD),
         ("urn-uuid", "urn:uuid:" + _UUID.replace("e", "g", 1), _BAD),
-        ("urn-uuid", "urn:uuid:" + _UUID.replace("1", "١"), _BAD),
+        ("urn-uuid", "urn:uuid:" + _UUID.replace("1", chr(0x661)), _BAD),
         ("urn-uuid", "urn:uuid:" + _UUID + "\n", _BAD),
     ],
 )
@@ -88,11 +90,6 @@ def test_gs1_unknown_and_other_schemes_keep_their_behavior(tmp_path: Path) -> No
 
 
 def _with_params(tmp_path: Path, identifier: str, scheme: str, params: dict[str, object]) -> CheckOutcome:
-    from dataclasses import replace
-
-    from dppce.models import ICS, IXIT
-    from tests.test_adapters_security import _POLICY, _Canned, _context
-
     base = _context(tmp_path, _POLICY, _Canned(b"{}"))
     ics = ICS.model_validate(base.ics.model_dump(mode="json") | {"identifier_scheme": scheme})
     ixit = IXIT.model_validate(base.ixit.model_dump(mode="json") | {"samples": {"identifier": identifier}})

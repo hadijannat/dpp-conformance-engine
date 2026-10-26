@@ -7,6 +7,7 @@ digital records. They cannot show that a carrier sits on the product that it nam
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -14,6 +15,7 @@ from pydantic import Field, StrictBool, ValidationError, field_validator, model_
 
 from dppce.adapters import gs1
 from dppce.adapters.common import (
+    _URI,  # the RFC 3986 grammar of the uri format checker
     LINKSET_TYPES,
     MISSING,
     blocked,
@@ -29,6 +31,7 @@ from dppce.adapters.common import (
     same_json,
     unusable,
 )
+from dppce.adapters.did import did_web_url
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, register
 
@@ -145,6 +148,53 @@ def is_https(url: str) -> bool:
         return False
 
 
+def _https_url_problem(text: str) -> str | None:
+    """Why ``text`` is not an absolute https URL with a domain-name host, no user information, no fragment."""
+    if _URI.fullmatch(text) is None:
+        return "it is not a URI"
+    parts = urlsplit(text)
+    if parts.scheme != "https":
+        return "it is not an https URL"
+    if "@" in parts.netloc:
+        return "it has user information"
+    if "#" in text:
+        return "it has a fragment"
+    try:
+        _ = parts.port  # RFC 3986 allows any digits; a port above 65535 is no port
+    except ValueError:
+        return "the port is not a number from 0 to 65535"
+    # did_web_url holds the domain-name rule: no IP literal, no IPv4, no numeric shorthand.
+    if not parts.hostname or "[" in parts.netloc or did_web_url(f"did:web:{parts.hostname}") is None:
+        return "the host is not a domain name"
+    return None
+
+
+def _did_web_problem(text: str) -> str | None:
+    if did_web_url(text) is None:
+        return "it is not a did:web DID that maps to an https URL"
+    return None
+
+
+# RFC 9562 section 4: 8-4-4-4-12 hexadecimal digits. ASCII only, and no trailing newline.
+_UUID_URN = re.compile(r"(?i:urn:uuid:)[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}", re.ASCII)
+
+
+def _urn_uuid_problem(text: str) -> str | None:
+    return None if _UUID_URN.fullmatch(text) else "it is not a urn:uuid URN with the textual form of a UUID"
+
+
+# The identifier_scheme values with a parser besides gs1-digital-link. A parser returns why a text is invalid.
+_PARSERS: dict[str, Callable[[str], str | None]] = {
+    "https-url": _https_url_problem,
+    "did-web": _did_web_problem,
+    "urn-uuid": _urn_uuid_problem,
+}
+
+
+def _parse_scheme_problem(scheme: str) -> CheckOutcome | None:
+    return None if scheme in _PARSERS else _scheme_problem(scheme)
+
+
 def _scheme_problem(scheme: str) -> CheckOutcome | None:
     if scheme == "unknown":
         return blocked("IDENTIFIER.SCHEME.UNKNOWN", "The ICS does not declare the identifier scheme.")
@@ -171,19 +221,23 @@ def parse(ctx: CheckContext) -> CheckOutcome:
         return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'require_https' is not a boolean.")
     if form not in ("dppce-item", "gs1-dl"):
         return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'form' is not dppce-item or gs1-dl.")
-    if (problem := _scheme_problem(scheme)) is not None:
+    if (problem := _parse_scheme_problem(scheme)) is not None:
         return problem
+    if scheme in _PARSERS and form != "dppce-item":
+        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'form' applies to gs1-digital-link only.")
     text, records, transformations, problem = carrier_identifier(ctx)
     if problem is not None or text is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
     kind: Literal["artifact", "declaration"] = "artifact" if records else "declaration"
+    reason: str | None
+    summary: dict[str, object]
     if form == "gs1-dl":
         result = gs1.parse(text)
         if isinstance(result, gs1.Problem) and result.rule == "COMPRESSED":
             return _compressed()
-        summary: dict[str, object] = {"scheme": scheme, "form": form}
+        summary = {"scheme": scheme, "form": form}
         if isinstance(result, gs1.Problem):
-            reason: str | None = result.reason
+            reason = result.reason
             summary |= {"valid": False, "rule": result.rule, "reason": result.reason}
         else:
             reason = None
@@ -195,7 +249,7 @@ def parse(ctx: CheckContext) -> CheckOutcome:
                 "unchecked_linters": list(result.unchecked),
             }
     else:
-        reason = parse_gs1_digital_link(text)
+        reason = _PARSERS.get(scheme, parse_gs1_digital_link)(text)
         summary = {"scheme": scheme, "valid": reason is None, **({"reason": reason} if reason else {})}
     observation = ctx.observation(
         0, kind=kind, records=records, summary=summary, transformations=transformations
