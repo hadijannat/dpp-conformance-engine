@@ -93,8 +93,9 @@ Only you give these files, on the command line of `dppce run`. The ICS and the I
 
 1. Get the CA certificate and the client certificate from the owner through a channel that you trust.
 2. Make sure that the authorization names each origin that asks for the client certificate.
-3. Put the key passphrase in an environment variable or in a file in the `--secrets` directory.
-4. Give the four options to `dppce run`. Give `--client-cert` and `--client-key` together.
+3. If the key is encrypted, put its passphrase in an environment variable or in a file in the `--secrets` directory.
+4. Give `--ca-file` for a private CA. For a client certificate, give `--client-cert` and `--client-key` together.
+   Give `--client-key-passphrase-ref` only for an encrypted key.
 5. Read the standard error of the run. Compare each SHA-256 value with the value from the owner.
 
 The engine applies these rules:
