@@ -6,7 +6,9 @@ This module adds:
 
 - a linkset for ``?linkType=linkset`` or ``?linkType=all``, or for an ``Accept`` header that
   prefers ``application/linkset+json``, with ``Vary: Accept``;
-- the description file ``/.well-known/gs1resolver``.
+- the description file ``/.well-known/gs1resolver``;
+- under the flags ``negotiation_no_vary`` and ``negotiation_wrong_type``, an HTML page for the
+  resolver path, chosen by the ``Accept`` header (F-72, F-73).
 
 Every other request passes to the core, so the core answer stays the same byte for byte. The
 engine transport sends ``Accept: */*``, which selects the linkset only under the flag
@@ -40,6 +42,10 @@ FLAGS: Final = frozenset(
         "wellknown_redirect",
         # F-52: an identifier that the resolver does not know, a wrong check digit included, gets 200.
         "resolver_200_for_invalid",
+        # F-72: an HTML page for an Accept that prefers text/html, and no Vary header.
+        "negotiation_no_vary",
+        # F-73: the HTML page, with Vary, also for an Accept that prefers application/json.
+        "negotiation_wrong_type",
     }
 )
 LINKSET: Final = "application/linkset+json"
@@ -81,6 +87,34 @@ def prefers_linkset(accept: str | None) -> bool:
     return linkset > 0 and linkset >= max(weights.values(), default=0.0)
 
 
+def _weights(accept: str | None) -> dict[str, float]:
+    weights: dict[str, float] = {}
+    for item in (accept or "").split(","):
+        media_range, *parameters = item.split(";")
+        if media_range.strip():
+            weights[media_range.strip().lower()] = _quality(parameters)
+    return weights
+
+
+HTML_PAGE: Final = (
+    b"<!doctype html><html><head><title>Passport</title></head><body><p>Passport</p></body></html>\n"
+)
+
+
+def _negotiated(system: ReferenceSystem, request: Request) -> Reply | None:
+    """The HTML page of the negotiation faults, or None where the core answers."""
+    faults = system.faults & {"negotiation_no_vary", "negotiation_wrong_type"}
+    if not faults or RESOLVER_PATH.match(request.path) is None:
+        return None
+    weights = _weights(request.header("accept"))
+    html, json = weights.get("text/html", 0.0), weights.get("application/json", 0.0)
+    # F-73 answers text/html where application/json is wanted. F-72 answers it only where HTML wins.
+    if not (html > json or ("negotiation_wrong_type" in faults and json > 0)):
+        return None
+    vary = {} if "negotiation_no_vary" in faults else {"Vary": "Accept"}
+    return 200, "text/html; charset=utf-8", HTML_PAGE, vary
+
+
 def linkset(anchor: str, passport: str, faults: frozenset[str] = frozenset()) -> bytes:
     """An RFC 9264 linkset with one link from the identifier to the passport."""
     if "resolver_linkset_anchor_mismatch" in faults:
@@ -111,6 +145,8 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
         reply = system.handle(request.path, request.header("authorization"))
         if reply[0] == 404:
             return json_reply(200, {"status": "ok"})
+    if (page := _negotiated(system, request)) is not None:
+        return page
     link_type = (parse_qs(request.query).get("linkType") or [""])[0]
     wanted = (
         link_type in ("linkset", "all")

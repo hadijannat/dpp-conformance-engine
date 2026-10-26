@@ -484,6 +484,20 @@ sut_faults:
     test_purpose: TP-WEB-IDENTIFIER-001
     profiles: [family/web]
     expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
+  - id: F-72
+    class: contract_violation
+    fault: negotiation_no_vary
+    description: The resolver serves an HTML page or the JSON passport by the Accept header and sends no Vary header.
+    test_purpose: TP-WEB-NEGOTIATION-001
+    profiles: [family/web]
+    expected: {verdict: fail, reason_code: NEGOTIATION.VARY.MISSING}
+  - id: F-73
+    class: contract_violation
+    fault: negotiation_wrong_type
+    description: The resolver answers an Accept of application/json with the media type text/html.
+    test_purpose: TP-WEB-NEGOTIATION-001
+    profiles: [family/web]
+    expected: {verdict: fail, reason_code: NEGOTIATION.MEDIA_TYPE}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
