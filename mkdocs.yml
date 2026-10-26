@@ -27,6 +27,7 @@ nav:
   - Home: index.md
   - Tutorials:
       - Your first run: tutorials/first-run.md
+      - Draft the files for your own system: tutorials/test-your-own-system.md
   - How-to guides:
       - Write an ICS and an IXIT: how-to/write-an-ics-and-an-ixit.md
       - Verify a report: how-to/verify-a-report.md
