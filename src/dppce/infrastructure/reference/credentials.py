@@ -42,6 +42,12 @@ FLAGS: Final = frozenset(
         "vc_untrusted_kid",
         # F-60: an unsecured credential with alg none and an empty signature.
         "vc_alg_none",
+        # F-69: the status list sets the bit of the credential for the purpose revocation.
+        "vc_status_revoked",
+        # F-70: the list signature covers a list with the bit set; the served list has it clear.
+        "vc_status_list_unsigned",
+        # B-18: the ttl of the list is one day, so the list is stale at the evaluation time of the rig.
+        "vc_status_list_stale",
     }
 )
 MEDIA_TYPE: Final = "application/vc+jwt"
@@ -97,10 +103,15 @@ def status_list(revoked: bool = False, ttl_ms: int = STATUS_TTL_MS) -> dict[str,
 
 
 def status_token(system: ReferenceSystem) -> str:
+    faults = system.faults
     signer, _ = system.signer("leaf")
+    ttl_ms = 86_400_000 if "vc_status_list_stale" in faults else STATUS_TTL_MS
+    served = status_list("vc_status_revoked" in faults, ttl_ms)
+    # An attacker who clears the bit of a signed list cannot sign the cleared list.
+    signed = status_list(True, ttl_ms) if "vc_status_list_unsigned" in faults else served
     header = _b64(canonical_bytes({"alg": "ES256", "kid": KID, "typ": "vc+jwt"}))
-    signing_input = f"{header}.{_b64(canonical_bytes(status_list()))}".encode("ascii")
-    return f"{signing_input.decode('ascii')}.{_b64(signer.sign(signing_input))}"
+    signature = signer.sign(f"{header}.{_b64(canonical_bytes(signed))}".encode("ascii"))
+    return f"{header}.{_b64(canonical_bytes(served))}.{_b64(signature)}"
 
 
 def token(system: ReferenceSystem, subject: str) -> str:
