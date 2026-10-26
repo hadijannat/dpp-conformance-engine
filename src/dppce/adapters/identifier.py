@@ -10,11 +10,12 @@ import re
 from typing import Literal
 from urllib.parse import urlsplit
 
-from pydantic import Field, StrictBool, field_validator
+from pydantic import Field, StrictBool, ValidationError, field_validator, model_validator
 
 from dppce.adapters import gs1
 from dppce.adapters.common import (
     LINKSET_TYPES,
+    MISSING,
     blocked,
     carrier_identifier,
     completed,
@@ -381,15 +382,100 @@ class ConsistencyParams(Model):
             "as JSON values."
         ),
     )
+    sources: tuple[gs1.Source, ...] | None = Field(
+        default=None,
+        min_length=1,
+        max_length=gs1.MAX_SOURCES,
+        description=(
+            "Experimental. 1 to 8 sources. The value of each at a JSON Pointer is compared with the "
+            "carrier identifier as exact text. It replaces the id of the resolved passport. "
+            "Labels are unique. Not with compare_item. Default: the id of the resolved passport."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _sources(self) -> ConsistencyParams:
+        if self.sources is not None:
+            if len({s.label for s in self.sources}) != len(self.sources):
+                raise ValueError("each source label may appear once")
+            if self.compare_item:
+                raise ValueError("compare_item and sources cannot be used together")
+        return self
+
+
+def _cross(ctx: CheckContext) -> CheckOutcome | None:
+    """The rules with ``sources``, or None for ``sources: null``. A present value that differs
+    fails before any limit blocks.
+
+    So a system under test cannot reshape one source, for example into a linkset, to turn the
+    mismatch of another source into ``blocked``.
+    """
+    try:
+        sources = ConsistencyParams.model_validate(ctx.params).sources
+    except ValidationError:
+        # The lint refuses such a test pack. This guard covers a plan that skipped the lint.
+        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'sources' is not valid. Nothing is read.")
+    if sources is None:
+        return None
+    carrier, records, transformations, problem = carrier_identifier(ctx)
+    if problem is not None or carrier is None:
+        return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
+    declared = ctx.ixit.samples.get("identifier") if "qr_image" in ctx.ixit.samples else None
+    read = [(source, *gs1.source_value(ctx, source, carrier)) for source in sources]
+    observed = list(records)
+    for _, _, record in read:
+        if record is not None and record not in observed:
+            observed.append(record)
+    values = [(s.label, v) for s, v, _ in read if not isinstance(v, CheckOutcome)]
+    # A present value that is not text differs, as the id does without sources.
+    different = [label for label, value in values if value is not MISSING and value != carrier]
+    if declared is not None and declared != carrier:
+        different.insert(0, "declared")
+    missing = [label for label, value in values if value is MISSING]
+    compared = ["carrier", *(["declared"] if declared else []), *(s.label for s in sources)]
+    summary = {"compared": compared, "different": different, "missing": missing}
+    kind: Literal["exchange", "artifact", "declaration"] = (
+        "exchange" if any(r.kind == "http" for r in observed) else "artifact" if observed else "declaration"
+    )
+    observation = ctx.observation(
+        0, kind=kind, records=observed, summary=summary, transformations=transformations
+    )
+    message = f"The carrier identifier differs from: {', '.join(different)}. {_LIMIT}"
+    if "declared" in different:
+        # The declared sample is the carrier side, so its difference keeps the code of today.
+        return completed(False, "IDENTIFIER.MISMATCH", message, [observation])
+    if different:
+        return completed(False, "IDENTIFIER.CROSS.MISMATCH", message, [observation])
+    if (limit := next((v for _, v, _ in read if isinstance(v, CheckOutcome)), None)) is not None:
+        return limit
+    if missing:
+        message = (
+            f"The sources {', '.join(missing)} have no value at their pointer. Nothing is compared for them."
+        )
+        return CheckOutcome(
+            status=ExecutionStatus.BLOCKED,
+            reason_code="IDENTIFIER.CROSS.SOURCE_MISSING",
+            message=message,
+            observations=(observation,),
+        )
+    return completed(
+        True,
+        "IDENTIFIER.CONSISTENT",
+        f"The compared sources give the same identifier. {_LIMIT}",
+        [observation],
+    )
 
 
 @register("identifier.consistency", capability="identifier.consistency", params=ConsistencyParams)
-def consistency(ctx: CheckContext) -> CheckOutcome:
+def consistency(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one ordered rule list; a split hides its codes from the reason-code page
     compare_item = ctx.params.get("compare_item", False)
     if not isinstance(compare_item, bool):
         return blocked(
             "IDENTIFIER.PARAMS.INVALID", "The parameter 'compare_item' is not a boolean. Nothing is fetched."
         )
+    # Without sources the rules of today apply unchanged, so old recordings keep their digest.
+    if "sources" in ctx.params and (outcome := _cross(ctx)) is not None:
+        return outcome
     carrier, records, transformations, problem = carrier_identifier(ctx)
     if problem is not None or carrier is None:
         return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")

@@ -115,3 +115,30 @@ test_purposes:
   - The DPP metadata submodel, its required elements, and the shell that references it.
   permitted_modes: *modes
   requires_scope: none
+# An AAS keeps the product identifier in the globalAssetId of the shell. The IXIT sample
+# identifier gives the carrier identifier. Without it, the step is blocked, which is inconclusive.
+- id: TP-AAS-CONSISTENCY-001
+  title: Compare the carrier identifier with the globalAssetId of the AAS JSON file
+  requirements:
+  - FAM-AAS-CONSISTENCY-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_json
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.consistency
+    params:
+      sources:
+      - label: aas_json
+        kind: sample
+        pointer: /assetAdministrationShells/0/assetInformation/globalAssetId
+  expected_evidence:
+  - The compared, the different, and the missing identifier sources.
+  permitted_modes: *modes
+  requires_scope: none

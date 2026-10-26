@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -112,6 +113,8 @@ def test_each_family_step_and_requirement_gates_on_its_own_profile() -> None:
 
 
 def _example(tmp_path: Path, family: str, origin: str) -> tuple[Path, Path]:
+    # The sample files of an example IXIT are relative to it, so they go next to the copy.
+    shutil.copytree(EXAMPLES, tmp_path, dirs_exist_ok=True)
     ics = tmp_path / f"{family}.ics.yaml"
     ics.write_bytes((EXAMPLES / f"{family}.ics.yaml").read_bytes())
     ixit = yaml.safe_load((EXAMPLES / f"{family}.ixit.yaml").read_text(encoding="utf-8"))

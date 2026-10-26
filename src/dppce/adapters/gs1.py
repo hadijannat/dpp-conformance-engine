@@ -5,6 +5,9 @@ formats, the primary keys, the key qualifiers in their order, and the data attri
 parse steps follow ``gs1_parseDLuri`` of gs1-syntax-engine (Apache-2.0) at the commit of the
 vendored ``tests/vectors/gs1-syntax-engine/dl.c``, with its default options. That file is the
 oracle of this module. Pairing rules of the dictionary (``req``, ``ex``) are not applied.
+
+The module also holds the declared identity sources of ``identifier.consistency`` and the check
+``identifier.equivalence``. They are here because ``identifier`` imports this module.
 """
 
 from __future__ import annotations
@@ -14,10 +17,29 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from itertools import combinations
-from typing import Final, Literal
+from typing import Any, Final, Literal, cast, get_args
 from urllib.parse import urlsplit
 
+from pydantic import Field, ValidationError, field_validator, model_validator
+
+from dppce.adapters.common import (
+    MISSING,
+    blocked,
+    carrier_identifier,
+    completed,
+    fetch_once,
+    is_http_url,
+    is_linkset,
+    json_object,
+    not_done,
+    resource_url,
+    unusable,
+)
+from dppce.adapters.pointer import MAX_POINTER_LENGTH, parse_pointer, resolve_pointer
+from dppce.infrastructure.interfaces import Record
 from dppce.infrastructure.resources import data_root
+from dppce.models import CheckOutcome, ExecutionStatus, Model, ResourceName
+from dppce.testdefs.registry import CheckContext, register
 
 DICTIONARY: Final = ("testpacks", "data", "gs1-syntax-engine", "gs1-syntax-dictionary.txt")
 Rule = Literal["URI", "KEY", "QUALIFIER_ORDER", "AI_VALUE", "CHECK_DIGIT", "PERCENT", "ATTRIBUTE"]
@@ -244,13 +266,16 @@ def _unescape(raw: str, query: bool) -> str | None:
     return "".join(out)
 
 
-def _element(ai: str, raw: str, query: bool) -> tuple[str, str] | Problem:
+def _element(ai: str, raw: str, query: bool, zero_suppressed: bool = False) -> tuple[str, str] | Problem:
     where = "query" if query else "path"
     if not raw:
         return Problem("AI_VALUE", f"the value of AI ({ai}) in the {where} is empty")
     value = _unescape(raw, query)
     if value is None:
         return Problem("PERCENT", f"the decoded value of AI ({ai}) in the {where} holds a NUL character")
+    if zero_suppressed and ai == "01" and len(value) in (8, 12, 13):
+        # dl.c with permitZeroSuppressedGTINinDLuris: a GTIN-8, -12, or -13 is left-padded to 14.
+        value = value.zfill(14)
     if "^" in value:
         return Problem("AI_VALUE", f"the value of AI ({ai}) holds the FNC1 character")
     entry = dictionary().entries[ai]
@@ -284,7 +309,7 @@ def _split(text: str) -> tuple[list[str], str | None] | Problem:
     return path.split("/"), query if has_query else None
 
 
-def _path_elements(segments: list[str]) -> list[tuple[str, str]] | Problem:
+def _path_elements(segments: list[str], zero_suppressed: bool) -> list[tuple[str, str]] | Problem:
     """Walk back over /AI/value pairs from the end of the path to the first primary key."""
     entries, keys = dictionary().entries, {sequence[0] for sequence in dictionary().sequences}
     start, index = None, len(segments) - 1
@@ -303,14 +328,14 @@ def _path_elements(segments: list[str]) -> list[tuple[str, str]] | Problem:
         return Problem("KEY", "the path has no GS1 Digital Link primary key")
     elements = []
     for at in range(start, len(segments), 2):
-        element = _element(segments[at], segments[at + 1], query=False)
+        element = _element(segments[at], segments[at + 1], query=False, zero_suppressed=zero_suppressed)
         if isinstance(element, Problem):
             return element
         elements.append(element)
     return elements
 
 
-def _query_elements(query: str | None) -> list[tuple[str, str]] | Problem:
+def _query_elements(query: str | None, zero_suppressed: bool) -> list[tuple[str, str]] | Problem:
     elements = []
     for parameter in query.split("&") if query is not None else ():
         name, equals, raw = parameter.partition("=")
@@ -320,7 +345,7 @@ def _query_elements(query: str | None) -> list[tuple[str, str]] | Problem:
             continue  # a singleton or a parameter that is not an AI: ignored
         if name not in dictionary().entries:
             return Problem("ATTRIBUTE", f"the query has the unknown AI ({name})")
-        element = _element(name, raw, query=True)
+        element = _element(name, raw, query=True, zero_suppressed=zero_suppressed)
         if isinstance(element, Problem):
             return element
         elements.append(element)
@@ -337,17 +362,21 @@ def _attribute_problem(path_ais: tuple[str, ...], attributes: tuple[str, ...]) -
     return None
 
 
-def parse(text: str) -> DigitalLink | Problem:
-    """Parse an uncompressed GS1 Digital Link URI. A Problem names the rule that failed."""
+def parse(text: str, *, zero_suppressed: bool = False) -> DigitalLink | Problem:
+    """Parse an uncompressed GS1 Digital Link URI. A Problem names the rule that failed.
+
+    ``zero_suppressed`` pads a GTIN-8, GTIN-12, or GTIN-13 in AI (01) to 14 digits, as the dl.c
+    option permitZeroSuppressedGTINinDLuris does. The default is the default of dl.c: no padding.
+    """
     entries = dictionary().entries
     split = _split(text)
     if isinstance(split, Problem):
         return split
     segments, query = split
-    path_elements = _path_elements(segments)
+    path_elements = _path_elements(segments, zero_suppressed)
     if isinstance(path_elements, Problem):
         return path_elements
-    query_elements = _query_elements(query)
+    query_elements = _query_elements(query, zero_suppressed)
     if isinstance(query_elements, Problem):
         return query_elements
     elements = path_elements + query_elements
@@ -365,3 +394,179 @@ def parse(text: str) -> DigitalLink | Problem:
         if (problem := _validate(entries[ai], value, unchecked)) is not None:
             return problem
     return DigitalLink(path_ais[0], path_ais[1:], attributes, tuple(elements), tuple(sorted(unchecked)))
+
+
+# -- Declared identity sources ------------------------------------------------------------------
+
+SourceKind = Literal["resolved", "resource", "sample"]
+MAX_SOURCES: Final = 8
+_RESOURCES: Final = frozenset(get_args(ResourceName))
+
+
+class Source(Model):
+    label: str = Field(
+        pattern=r"^[a-z][a-z0-9_]{0,63}$",
+        description=(
+            "Name of the source in the summary. For the kind resource, the IXIT resource name. "
+            "For the kind sample, the IXIT sample name."
+        ),
+    )
+    kind: SourceKind = Field(
+        description=(
+            "resolved: the passport that the carrier resolves to. resource: the document at the IXIT "
+            "resource template that the label names. sample: the JSON file of the IXIT sample that "
+            "the label names."
+        ),
+    )
+    pointer: str = Field(
+        max_length=MAX_POINTER_LENGTH,
+        description="JSON Pointer (RFC 6901) to the identifier in the source document.",
+    )
+
+    @field_validator("pointer")
+    @classmethod
+    def _pointer(cls, value: str) -> str:
+        parse_pointer(value)
+        return value
+
+    @model_validator(mode="after")
+    def _resource(self) -> Source:
+        if self.kind == "resource" and self.label not in _RESOURCES:
+            raise ValueError(f"the label of a resource source is one of {', '.join(sorted(_RESOURCES))}")
+        return self
+
+
+def source_value(ctx: CheckContext, source: Source, carrier: str) -> tuple[Any, Record | None]:
+    """The JSON value at the pointer of the source and the record that was read.
+
+    The value is ``MISSING`` if the pointer does not resolve, and a ``CheckOutcome`` if the source
+    gives no JSON object. A resolved source follows the rules 1 and 2 of ``identifier.consistency``.
+    """
+    if source.kind == "sample":
+        record = ctx.acquirer.artifact(source.label)
+        document = json_object(record) if record.error is None else None
+        if document is None:
+            message = f"The sample '{source.label}' is not available as a JSON object. Nothing is compared."
+            return blocked("IDENTIFIER.CROSS.SOURCE_MISSING", message), record
+    else:
+        if source.kind == "resolved" and not is_http_url(carrier):
+            message = "The carrier identifier is not a URL. There is no passport to compare."
+            return blocked("IDENTIFIER.NOT_RESOLVABLE", message), None
+        # The model admits a resource name only for the kind resource.
+        url = (
+            carrier
+            if source.kind == "resolved"
+            else resource_url(ctx, cast(ResourceName, source.label), "IDENTIFIER")
+        )
+        if isinstance(url, CheckOutcome):
+            return url, None
+        record = fetch_once(ctx, url)
+        if (problem := unusable(ctx, record)) is not None:
+            return problem, record
+        document = json_object(record) if record.status == 200 else None
+        if source.kind == "resolved" and (document is None or is_linkset(document)):
+            found = (
+                "resolves to a linkset, not to a passport" if document else "did not resolve to a passport"
+            )
+            message = f"The identifier {found}. There is nothing to compare."
+            return blocked("IDENTIFIER.NOT_RESOLVED", message), record
+        if document is None:
+            message = (
+                f"The resource '{source.label}' is not a JSON object with status 200. Nothing is compared."
+            )
+            return blocked("IDENTIFIER.CROSS.SOURCE_MISSING", message), record
+    return resolve_pointer(document, parse_pointer(source.pointer)), record
+
+
+# -- identifier.equivalence ---------------------------------------------------------------------
+
+
+class EquivalenceParams(Model):
+    source: Source = Field(
+        description="The declared identifier that is compared with the carrier identifier."
+    )
+
+
+def canonical(text: str) -> tuple[str, str, tuple[tuple[str, str], ...]] | Problem:
+    """The scheme, the authority, and the key with its qualifiers, each as GS1 compares them.
+
+    Case does not count in the scheme and the host. Percent-decoding, the path prefix, and a
+    zero-suppressed GTIN do not count. Query data attributes are not part of the identity.
+    """
+    result = parse(text, zero_suppressed=True)
+    if isinstance(result, Problem):
+        return result
+    parts = urlsplit(text)
+    return parts.scheme.lower(), parts.netloc.lower(), result.elements[: 1 + len(result.qualifiers)]
+
+
+_PARTS: Final = ("scheme", "authority", "key")
+
+
+def _not_parsed(side: str, problem: Problem) -> CheckOutcome:
+    message = (
+        f"The {side} is not a valid uncompressed GS1 Digital Link URI (rule {problem.rule}), "
+        "so it has no canonical form. Nothing is compared."
+    )
+    return blocked("IDENTIFIER.EQUIVALENCE.NOT_PARSED", message)
+
+
+@register("identifier.equivalence", capability="identifier.equivalence", params=EquivalenceParams)
+def equivalence(ctx: CheckContext) -> CheckOutcome:
+    """Compare the carrier with a declared GS1 Digital Link URI in canonical form."""
+    try:
+        params = EquivalenceParams.model_validate(ctx.params)
+    except ValidationError:
+        # The lint refuses such a test pack. This guard covers a plan that skipped the lint.
+        return blocked("IDENTIFIER.PARAMS.INVALID", "The parameter 'source' is not valid. Nothing is read.")
+    carrier, records, transformations, problem = carrier_identifier(ctx)
+    if problem is not None or carrier is None:
+        return problem or blocked("CARRIER.SAMPLE.MISSING", "No identifier is available.")
+    value, record = source_value(ctx, params.source, carrier)
+    if isinstance(value, CheckOutcome):
+        return value
+    observed = [*records, *([record] if record is not None else [])]
+    label = params.source.label
+    if value is MISSING:
+        message = f"The source '{label}' has no value at its pointer. Nothing is compared."
+        return blocked("IDENTIFIER.CROSS.SOURCE_MISSING", message)
+    kind: Literal["exchange", "artifact"] = (
+        "exchange" if any(r.kind == "http" for r in observed) else "artifact"
+    )
+
+    def observation(summary: dict[str, object]) -> list[Any]:
+        summary = {"source": label, "kind": params.source.kind, **summary}
+        return [
+            ctx.observation(0, kind=kind, records=observed, summary=summary, transformations=transformations)
+        ]
+
+    # A present value that is not text differs: a system must not turn a difference into blocked.
+    if not isinstance(value, str):
+        message = (
+            f"The source '{label}' holds no text at its pointer, so it differs from the carrier identifier."
+        )
+        return completed(
+            False, "IDENTIFIER.EQUIVALENCE.DIFFERENT", message, observation({"different": ["type"]})
+        )
+    left, right = canonical(carrier), canonical(value)
+    if isinstance(left, Problem) and left.rule == "COMPRESSED":
+        message = (
+            "The carrier identifier looks like a compressed GS1 Digital Link URI. "
+            "This version does not decompress it."
+        )
+        return not_done(ExecutionStatus.UNSUPPORTED, "IDENTIFIER.SYNTAX.COMPRESSED", message)
+    if isinstance(left, Problem):
+        return _not_parsed("carrier identifier", left)
+    if isinstance(right, Problem):
+        return _not_parsed(f"source '{label}'", right)
+    different = [part for part, a, b in zip(_PARTS, left, right, strict=True) if a != b]
+    if different:
+        message = f"The carrier identifier and the source '{label}' differ in: {', '.join(different)}."
+        return completed(
+            False, "IDENTIFIER.EQUIVALENCE.DIFFERENT", message, observation({"different": different})
+        )
+    message = (
+        f"The carrier identifier and the source '{label}' have the same GS1 canonical form. "
+        "Digital consistency does not prove physical authenticity."
+    )
+    return completed(True, "IDENTIFIER.EQUIVALENCE.OK", message, observation({"different": []}))

@@ -43,6 +43,7 @@ CONTRACT_CHECKS = (
     "data.jsonschema",
     "data.rules",
     "identifier.consistency",
+    "identifier.equivalence",
     "identifier.granularity",
     "identifier.parse",
     "identifier.resolve",
@@ -66,10 +67,11 @@ NO_PARAMETERS = (
 # Checks that took no parameter in the base version and now take a closed model (package P2-06).
 LIFECYCLE_CHECKS = ("persistence.versions", "registry.consistency")
 # The checks whose parameter model has a required field, so the empty parameters do not fit.
-REQUIRED_PARAMETERS = ("data.context", "identity.did", "resolver.linkset")
+REQUIRED_PARAMETERS = ("data.context", "identifier.equivalence", "identity.did", "resolver.linkset")
 ALLOWLIST: dict[str, Any] = {"allowed_contexts": ["https://example.test/c"]}
 RELATIONS: dict[str, Any] = {"relations": ["https://example.test/rel/passport"]}
 DID: dict[str, Any] = {"did": "did:web:id.example.test"}
+SOURCE: dict[str, Any] = {"label": "passport", "kind": "resolved", "pointer": "/id"}
 
 # Each check with a misspelled key, and the key that the problem must name.
 MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
@@ -77,6 +79,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "identifier.parse": ({"schema": "gs1-digital-link"}, "schema"),
     "identifier.resolve": ({"acept": "text/html"}, "acept"),
     "identifier.consistency": ({"compre_item": True}, "compre_item"),
+    "identifier.equivalence": ({"source": SOURCE, "sorce": SOURCE}, "sorce"),
     "api.contract": ({"resorce": "item"}, "resorce"),
     "data.jsonschema": ({"documnet": "item"}, "documnet"),
     "data.context": ({"document": "item", "allowed_context": ["https://example.test/c"]}, "allowed_context"),
@@ -128,6 +131,10 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("identifier.resolve", {"require_https": 1}),
     ("identifier.consistency", {"compare_item": "yes"}),
     ("identifier.consistency", {"compare_item": 1}),
+    ("identifier.consistency", {"sources": SOURCE}),
+    ("identifier.consistency", {"sources": [{**SOURCE, "pointer": 7}]}),
+    ("identifier.equivalence", {"source": [SOURCE]}),
+    ("identifier.equivalence", {"source": {**SOURCE, "label": 7}}),
     ("api.contract", {"resource": 7}),
     ("data.jsonschema", {"document": 7}),
     ("data.rules", {"document": 7}),
