@@ -87,8 +87,8 @@
 # - F-74 and F-75: the entry commit comes before the commit that adds the check aas.api_profile, its
 #   test purpose, the aas family of the reference system, and the changes to the aas example ICS
 #   and IXIT. It also comes before the commit that adds the two flags.
-# Each of the three packages ends with a review fix commit. These commits change the checks and a
-# test purpose comment, not the entries. The entries meet in the merge commits of the three
+# Each of the three packages ends with a review fix commit. These commits change no entry. The
+# entries meet in the merge commits of the three
 # packages, and the merge keeps each entry as its package wrote it.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
