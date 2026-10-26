@@ -11,9 +11,20 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from html import escape
 
+from dppce.adapters.capabilities import manifest
 from dppce.evidence.envelope import decision_digest, declared_attestation
 from dppce.evidence.manual import MANUAL_CHECK
-from dppce.models import EvidenceEnvelope, ExecutionStatus, Ratio, TestResult, VerificationReport
+from dppce.models import (
+    EvidenceEnvelope,
+    ExecutionStatus,
+    JsonValue,
+    Ratio,
+    TestResult,
+    Verdict,
+    VerificationReport,
+)
+from dppce.report.hints import hint_for_code, hint_for_step, requirement_hint
+from dppce.testdefs import registry
 
 _CSS = """
 :root { color-scheme: light dark; --fg: #1a1a1a; --bg: #ffffff; --muted: #4a4a4a; --line: #767676;
@@ -183,7 +194,97 @@ def _manual_row(t: TestResult) -> tuple[str, ...]:
     )
 
 
-def _results(envelope: EvidenceEnvelope) -> str:
+# Summary fields whose values are field names, status codes, media types, counts, or engine
+# words. Any other field is named without its value: it can hold text that the system chose.
+_SHOWN_FIELDS = frozenset(
+    {
+        "compared",
+        "different",
+        "document",
+        "findings",
+        "https",
+        "media_type",
+        "missing",
+        "probes",
+        "profile",
+        "readable",
+        "redirects",
+        "request",
+        "resolvable",
+        "schema_errors",
+        "status",
+        "valid",
+    }
+)
+
+
+def _value(value: JsonValue, depth: int = 0) -> str:
+    """Plain text of an allowlisted summary value. Nested objects stop at two levels."""
+    if isinstance(value, list):
+        return ", ".join(_value(v, depth + 1) for v in value) or "none"
+    if isinstance(value, dict):
+        if depth >= 2:
+            return "(nested, not shown)"
+        return "; ".join(f"{k} {_value(v, depth + 1)}" for k, v in value.items()) or "none"
+    return "none" if value is None else str(value)
+
+
+def _observed(t: TestResult) -> str:
+    """The redacted summary fields of a step. Never a payload value."""
+    shown: list[str] = []
+    named: set[str] = set()
+    for observation in t.observations:
+        for key, value in observation.summary.items():
+            if key in _SHOWN_FIELDS:
+                shown.append(f"{_e(key.replace('_', ' '))}: {_e(_value(value))}")
+            else:
+                named.add(key)
+    if named:
+        shown.append("Other recorded fields, values not shown: " + ", ".join(_e(k) for k in sorted(named)))
+    return "<br>".join(shown) or "none"
+
+
+def _hint_cell(t: TestResult) -> str:
+    hint = hint_for_step(t)
+    if hint is None:
+        return "none"
+    label = "Remediation" if hint.kind == "remediation" else "Next step"
+    return f"{label}: {_e(hint.text)}"
+
+
+def _failed(envelope: EvidenceEnvelope) -> str:
+    """Each failed step: the rule of its check next to what the step observed, and a remediation."""
+    rules = {c.id: c.description for c in manifest().capabilities}
+
+    def rule(check: str) -> str:
+        spec = registry.get(check)
+        text = rules.get(spec.capability) if spec is not None else None
+        return _e(text) if text else "This engine has no description of the check."
+
+    failed = [t for t in envelope.decision.test_results if t.verdict is Verdict.FAIL]
+    table = _table(
+        "Failed steps",
+        ("Test purpose", "Check", "Rule of the check", "Observed", "Remediation"),
+        (
+            (
+                f"<code>{_e(t.test_purpose_id)}</code>",
+                f"<code>{_e(t.check)}</code>",
+                rule(t.check),
+                _observed(t),
+                _hint_cell(t),
+            )
+            for t in failed
+        ),
+    )
+    return (
+        '<section aria-labelledby="failed"><h2 id="failed">Failed steps and remediation</h2>'
+        "<p>The rule text comes from the engine that rendered this page. The observed fields are "
+        "the minimized summary of the step. The page never shows a payload value.</p>"
+        f"{table}</section>"
+    )
+
+
+def _results(envelope: EvidenceEnvelope, hints: bool) -> str:
     d = envelope.decision
     requirements = _table(
         "Requirement results",
@@ -211,14 +312,20 @@ def _results(envelope: EvidenceEnvelope) -> str:
                     "<br><small>Also: " + "; ".join(_e(x) for x in r.retained) + "</small>"
                     if r.retained
                     else ""
+                )
+                + (
+                    f"<br><small>Next step: {_e(text)}</small>"
+                    if hints and (text := requirement_hint(r, d.manifest.mode))
+                    else ""
                 ),
             )
             for r in d.requirement_results
         ),
     )
+    step_head = ("Test purpose", "Check", "Execution", "Verdict", "Severity", "Reason code", "Message")
     tests = _table(
         "Test step results",
-        ("Test purpose", "Check", "Execution", "Verdict", "Severity", "Reason code", "Message"),
+        (*step_head, "Next step or remediation") if hints else step_head,
         (
             (
                 f"<code>{_e(t.test_purpose_id)}</code>",
@@ -235,6 +342,7 @@ def _results(envelope: EvidenceEnvelope) -> str:
                 ),
                 f"<code>{_e(t.reason_code)}</code>",
                 _e(t.message),
+                *((_hint_cell(t),) if hints else ()),
             )
             for t in d.test_results
         ),
@@ -245,15 +353,17 @@ def _results(envelope: EvidenceEnvelope) -> str:
         ("Test purpose", "Execution", "Role", "Performed at", "Key id", "Outcome", "Record id"),
         manual_rows,
     )
+    exclusion_head = ("Kind", "Identifier", "Reason code", "Reason")
     exclusions = _table(
         "Exclusions",
-        ("Kind", "Identifier", "Reason code", "Reason"),
+        (*exclusion_head, "Next step") if hints else exclusion_head,
         (
             (
                 _e(x.kind.replace("_", " ")),
                 f"<code>{_e(x.id)}</code>",
                 f"<code>{_e(x.reason_code)}</code>",
                 _e(x.reason),
+                *((_e(hint_for_code(x.reason_code) or "none"),) if hints else ()),
             )
             for x in d.exclusions
         ),
@@ -272,6 +382,7 @@ def _results(envelope: EvidenceEnvelope) -> str:
     return (
         f'<section aria-labelledby="results"><h2 id="results">Results</h2>{requirements}{tests}'
         f"{manual}{manual_note}</section>"
+        f"{_failed(envelope) if hints else ''}"
         f'<section aria-labelledby="left-out"><h2 id="left-out">Exclusions and conflicts</h2>'
         f"<p>Nothing in the selected catalogue is left out silently.</p>{exclusions}{conflicts}</section>"
     )
@@ -350,8 +461,14 @@ def _evidence(envelope: EvidenceEnvelope, verification: VerificationReport | Non
     )
 
 
-def render(envelope: EvidenceEnvelope, verification: VerificationReport | None = None) -> str:
-    """Return the complete HTML document."""
+def render(
+    envelope: EvidenceEnvelope, verification: VerificationReport | None = None, *, hints: bool = True
+) -> str:
+    """Return the complete HTML document.
+
+    ``hints`` adds the next step of each step that did not pass and the remediation of each
+    failed step. They are render-only: the decision and its digest stay the same.
+    """
     manifest = envelope.decision.manifest
     title = f"Conformance test report: {manifest.sut.name}, {manifest.profile_id}"
     limits = "".join(f"<li>{_e(x)}</li>" for x in manifest.limitations)
@@ -361,7 +478,7 @@ def render(envelope: EvidenceEnvelope, verification: VerificationReport | None =
         f"<title>{_e(title)}</title><style>{_CSS}</style></head><body>"
         '<a class="skip" href="#main">Skip to the report</a>'
         f'<header><h1>{_e(title)}</h1></header><main id="main">'
-        f"{_summary(envelope)}{_scope(envelope)}{_coverage(envelope)}{_results(envelope)}"
+        f"{_summary(envelope)}{_scope(envelope)}{_coverage(envelope)}{_results(envelope, hints)}"
         f'<section aria-labelledby="limits"><h2 id="limits">Limitations</h2><ul>{limits}</ul></section>'
         f"{_evidence(envelope, verification)}</main>"
         f"<footer><p>Generated by dppce {_e(manifest.engine_version)}.</p></footer></body></html>\n"
