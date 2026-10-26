@@ -266,12 +266,32 @@ item-level passport:
 {"@context": ["https://www.w3.org/ns/credentials/v2"], "type": ["VerifiableCredential"],
  "issuer": "urn:example:operator:0001", "validFrom": "2026-01-01T00:00:00Z",
  "validUntil": "2036-01-01T00:00:00Z",
- "credentialSubject": {"id": "https://id.example.test/01/09506000134352/21/EV0001"}}
+ "credentialSubject": {"id": "https://id.example.test/01/09506000134352/21/EV0001"},
+ "credentialStatus": {"id": "https://id.example.test/01/09506000134352/21/EV0001#status",
+  "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "41267",
+  "statusListCredential": "https://id.example.test/credentials/status/1"}}
 ```
 
 The TEST-ONLY leaf key of section 4.5 signs the credential. The TEST-ONLY trust bundle pins its
 public key as `TEST-ONLY-vc-issuer-key-1`, with the issuer `urn:example:operator:0001` and the
 purpose `passport`.
+
+A request for `/credentials/status/1` gets `200` with the media type `application/vc+jwt`, for
+every `Accept` value. The body is the status list credential, a compact JWS with the same
+protected header and the same key. Its payload follows the W3C Recommendation Bitstring Status
+List v1.0:
+
+```json
+{"@context": ["https://www.w3.org/ns/credentials/v2"],
+ "id": "https://id.example.test/credentials/status/1",
+ "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+ "issuer": "urn:example:operator:0001", "validFrom": "2026-01-01T00:00:00Z",
+ "credentialSubject": {"id": "https://id.example.test/credentials/status/1#list",
+  "type": "BitstringStatusList", "statusPurpose": "revocation",
+  "encodedList": "<131072 bits, all 0>", "ttl": 315360000000}}
+```
+
+The `ttl` is 3650 days, so the list is fresh at the evaluation time of the rig.
 
 ### 4.8 DID document (family module `did`)
 
@@ -556,6 +576,9 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `did_id_mismatch` | family `did`: the `id` of the DID document is `did:web:other.example.test` |
 | `did_private_key` | family `did`: the JWK of the verification method also holds the synthetic private member `d` |
 | `did_redirect_off_host` | family `did`: `/.well-known/did.json` answers `302` to `https://other.example.test/.well-known/did.json`, outside the scope of the rig |
+| `vc_status_revoked` | family `credentials`: the status list of section 4.7 sets the bit at index `41267` |
+| `vc_status_list_unsigned` | family `credentials`: the signature of the status list covers a list with the bit at index `41267` set, and the served payload has the bit not set |
+| `vc_status_list_stale` | family `credentials`: the `ttl` of the status list is `86400000`, one day after its `validFrom`, so the list is stale at the evaluation time of the rig |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:
@@ -692,7 +715,8 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
 | `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
-| `integrity.jose` | `profile`, `key_source`, `source`, `sample`, `accept`, `algorithms`; all optional | `INTEGRITY.JOSE.OK` | the architecture contract, section 8, gives each outcome and its order. The reference credential is in section 4.7 |
+| `integrity.jose` | `profile`, `key_source`, `did_sample`, `source`, `sample`, `accept`, `algorithms`; all optional | `INTEGRITY.JOSE.OK` | the architecture contract, section 8, gives each outcome and its order. The reference credential is in section 4.7 |
+| `integrity.status_list` | `key_source`, `did_sample`, `source`, `sample`, `accept`, `list_source`, `list_sample`, `purpose`; all optional | `INTEGRITY.STATUS.OK` | the architecture contract, section 8, gives each outcome and its order. The reference status list is in section 4.7 |
 | `persistence.versions` | `entries_pointer`, `version_field`, `time_field`, `digest_field`, `digest_of`, `version_kind` (the defaults are the layout of section 4.3) | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail); no canonical form of the passport with `jcs-sha256`: `blocked`, `PERSISTENCE.DIGEST.NOT_COMPARABLE` (section 4.3); malformed parameter: `blocked`, `PERSISTENCE.PARAMS.INVALID` |
 | `registry.consistency` | `fields` (1 to 16 pairs of `name`, `registry_pointer`, and `passport_pointer`; the default is the two pairs of section 4.4) | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail); malformed parameter: `blocked`, `REGISTRY.PARAMS.INVALID`. Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`), `format` (`json`, `xml`, or `aasx`; default `json`), `metamodel_version` (default `3.0`) | `AAS.VALID`. The message names the format and the version that the check covers | `AAS.INVALID` (fail): the wrapped validator read the sample and rejected it, or the sample is not readable as the declared format, or an AASX package has no AAS specification part; a `metamodel_version` that the wrapped release does not verify, or an XML namespace that names such a version: `unsupported`, `AAS.VERSION.UNSUPPORTED`, and the sample is not read; malformed parameter: `blocked`, `AAS.PARAMS.INVALID`; sample missing: `blocked`, `AAS.SAMPLE.MISSING` |

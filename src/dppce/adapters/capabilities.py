@@ -227,10 +227,15 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
     (
         "integrity.status_list",
         "integrity",
-        _I,
-        "Bitstring Status List retrieval and check.",
+        _E,
+        "Verify a VC-JOSE credential, read its W3C BitstringStatusListEntry, get the status list "
+        "credential through the transport policy or from an IXIT sample, verify it under a pinned "
+        "issuer key, and check the purpose, the list length, the index, the bit, and the ttl. "
+        "One-bit entries only. Data Integrity proofs are not verified.",
         None,
-        "Status retrieval behind the transport, with a mock status service and staleness tests.",
+        "Tested against the status lists of at least two independent issuers in a recorded test "
+        "campaign, live and as offline copies. A person reviews the rules against the W3C "
+        "Recommendation Bitstring Status List v1.0, and the ttl anchor rule is confirmed.",
     ),
     (
         "persistence.versions",

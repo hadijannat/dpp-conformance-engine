@@ -539,3 +539,29 @@ requirements:
   - id: default
     tests:
     - TP-VC-CONSISTENCY-001
+- id: FAM-VC-STATUS-001
+  title: The status list of the credential shows it as not revoked
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The credential has a Bitstring Status List entry for revocation. Its status list credential
+    verifies with a pinned issuer key, and the bit of the credential is not set.
+  applicability:
+    all:
+    - *vc
+    - fact: ics.signature_format
+      op: eq
+      value: jws
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-STATUS-001-I1
+    text: Project-authored illustrative rule after the W3C Bitstring Status List v1.0. It makes no normative
+      statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-STATUS-001

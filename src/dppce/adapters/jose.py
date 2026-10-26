@@ -24,6 +24,7 @@ from dppce.adapters.common import (
     resource_url,
     unusable,
 )
+from dppce.adapters.did import DidDocument, did_web_url, resolve_did_web
 from dppce.adapters.integrity import _certificates, _purpose, _status_gap, _TooLongError, trust_path
 from dppce.evidence import x509path
 from dppce.evidence.jose_profiles import (
@@ -35,6 +36,7 @@ from dppce.evidence.jose_profiles import (
     Profile,
     PublicKey,
     Signature,
+    Token,
     check_header,
     credential_issuer,
     parse,
@@ -43,13 +45,27 @@ from dppce.evidence.jose_profiles import (
 )
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.models import CheckOutcome, ExecutionStatus, JsonValue, Model, TrustBundle, TrustedKey
+from dppce.models import (
+    CheckOutcome,
+    ExecutionStatus,
+    JsonValue,
+    Model,
+    Observation,
+    TrustBundle,
+    TrustedKey,
+)
 from dppce.testdefs.registry import CheckContext, register
 
-# A closed set. P2-11 adds "did": a key from a resolved DID document.
-KeySource = Literal["x5c", "trust_kid"]
+# A closed set. "did": a key of a resolved DID document that a pinned key of the DID matches.
+KeySource = Literal["x5c", "trust_kid", "did"]
 _ACCEPT: Final = re.compile(r"[\x20-\x7e]{1,256}")
+# A DID URL of any method with a fragment (W3C DID Core 1.0). Only did:web is resolved.
+_DID_URL: Final = re.compile(r"did:[a-z0-9]+:[^#\s]+#[^#\s]+")
+# The public members of an EC, OKP, or RSA JWK (RFC 7518, RFC 8037). Other members do not name the key.
+_PUBLIC_MEMBERS: Final = ("kty", "crv", "x", "y", "n", "e")
 _LIMIT: Final = "A valid signature does not prove that the signed attributes are true."
+# The resolved DID documents of one check, by DID: each DID is resolved once.
+Dids = dict[str, DidDocument | CheckOutcome]
 
 
 class JoseParams(Model):
@@ -65,7 +81,18 @@ class JoseParams(Model):
         description=(
             "trust_kid: the kid names a key of the trust bundle with the purpose passport. "
             "x5c: the certificate chain in x5c reaches a passport anchor of the trust bundle. "
-            "x5c needs the profile jws: no rule binds a credential issuer to a certificate."
+            "x5c needs the profile jws: no rule binds a credential issuer to a certificate. "
+            "did: the kid is a did:web DID URL. The key of the DID document must equal a passport key "
+            "of the trust bundle whose issuer is the DID. Resolution is not trust."
+        ),
+    )
+    did_sample: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=128,
+        description=(
+            "Name of the IXIT sample that holds an offline copy of the DID document, for the key "
+            "source did. Without it, the DID document is fetched through the transport policy."
         ),
     )
     source: Literal["signed", "sample"] = Field(
@@ -106,16 +133,30 @@ class JoseParams(Model):
     def _issuer_binding(self) -> JoseParams:
         # Under vc-jose with x5c, any certificate under an anchor could sign for any issuer.
         if self.profile == "vc-jose" and self.key_source == "x5c":
-            raise ValueError("the profile vc-jose needs the key source trust_kid")
+            raise ValueError("the profile vc-jose needs the key source trust_kid or did")
+        if self.did_sample is not None and self.key_source != "did":
+            raise ValueError("did_sample needs the key source did")
         return self
 
 
 class _Finding(Exception):  # noqa: N818 - a finding, not an error of the engine
-    """A finding that ends the check: a fail (``passed`` False) or an engine limit (None)."""
+    """A finding that ends the check: a fail (``passed`` False) or an engine limit (None).
 
-    def __init__(self, passed: bool | None, code: str, message: str, finding: tuple[str, str] | None = None):
+    ``no_answer`` marks a host that gave no answer: a fail that is not a defect, like a limit.
+    """
+
+    def __init__(
+        self,
+        passed: bool | None,
+        code: str,
+        message: str,
+        finding: tuple[str, str] | None = None,
+        *,
+        no_answer: bool = False,
+    ):
         super().__init__(message)
         self.passed, self.code, self.message, self.finding = passed, code, message, finding
+        self.no_answer = no_answer
 
 
 def _acquire(ctx: CheckContext, params: JoseParams) -> Record | CheckOutcome:
@@ -143,6 +184,10 @@ def _pinned_key(ctx: CheckContext, trust: TrustBundle, signature: Signature) -> 
     if key is None:
         message = "The kid names no passport key of the trust bundle."
         raise _Finding(False, "INTEGRITY.JOSE.ISSUER_UNTRUSTED", message, ("issuer_trust", "no trusted key"))
+    return _valid(ctx, trust, key)
+
+
+def _valid(ctx: CheckContext, trust: TrustBundle, key: TrustedKey) -> tuple[PublicKey, TrustedKey]:
     now = ctx.evaluation_time
     if trust.key_revoked(key.kid, now) or not parse_stamp(key.not_before) <= now <= parse_stamp(
         key.not_after
@@ -150,6 +195,56 @@ def _pinned_key(ctx: CheckContext, trust: TrustBundle, signature: Signature) -> 
         message = "The trusted key is revoked or outside its validity at the evaluation time."
         raise _Finding(False, "INTEGRITY.JOSE.KEY_NOT_VALID", message, ("issuer_trust", "key not valid"))
     return public_key_from_jwk(key.public_jwk), key
+
+
+def _untrusted(message: str, finding: str) -> _Finding:
+    return _Finding(False, "INTEGRITY.JOSE.ISSUER_UNTRUSTED", message, ("issuer_trust", finding))
+
+
+def _did_key(
+    ctx: CheckContext, trust: TrustBundle, params: JoseParams, signature: Signature, dids: Dids
+) -> tuple[PublicKey, TrustedKey]:
+    """The key of a DID document that a pinned key of the DID matches. Resolution is not trust."""
+    kid = signature.header.get("kid")
+    if not isinstance(kid, str) or not _DID_URL.fullmatch(kid):
+        raise _untrusted("The kid is not a DID URL with a fragment.", "no DID URL")
+    did = kid.partition("#")[0]
+    # The pin comes before the DID method, so an untrusted signer cannot pick a kid that gives a
+    # limit of the engine in place of this fail. Nothing pins the DID, so its host is not contacted.
+    pinned = [k for k in trust.keys if k.issuer == did and "passport" in k.purposes]
+    if not pinned:
+        raise _untrusted(
+            "No passport key of the trust bundle has the DID of the kid as its issuer.", "no pin"
+        )
+    if did_web_url(did) is None:
+        if not did.startswith("did:web:"):
+            message = "The kid is a DID URL of a DID method that this engine does not resolve."
+            raise _Finding(None, "INTEGRITY.JOSE.UNSUPPORTED", message)
+        raise _untrusted("The kid is not a did:web DID URL with a fragment.", "no DID URL")
+    if did not in dids:
+        dids[did] = resolve_did_web(ctx, did, params.did_sample)
+    resolved = dids[did]
+    if isinstance(resolved, CheckOutcome):
+        if resolved.unreachable:
+            raise _Finding(False, resolved.reason_code, resolved.message, no_answer=True)
+        if resolved.passed is False:
+            message = f"The DID document of the kid breaks the rule {resolved.reason_code}."
+            raise _untrusted(message, "the DID document breaks a rule")
+        raise _Finding(None, resolved.reason_code, resolved.message)
+    if kid not in resolved.assertion_methods:
+        raise _untrusted("The kid is not an assertion method of the DID document.", "not an assertion method")
+    public = resolved.keys.get(kid)
+    if public is None:
+        message = "The assertion method of the kid has no publicKeyJwk. This engine reads JWK keys only."
+        raise _Finding(None, "INTEGRITY.JOSE.UNSUPPORTED", message)
+    match = next(
+        (k for k in pinned if all(k.public_jwk.get(m) == public.get(m) for m in _PUBLIC_MEMBERS)), None
+    )
+    if match is None:
+        raise _untrusted(
+            "The key of the DID document is not a pinned key of the DID.", "no pinned key matches"
+        )
+    return _valid(ctx, trust, match)
 
 
 def _chain_key(trust: TrustBundle, signature: Signature) -> tuple[PublicKey, list[x509.Certificate]]:
@@ -215,7 +310,7 @@ def _chain_findings(ctx: CheckContext, trust: TrustBundle, path: list[x509.Certi
 def _defer(exc: JoseError | _Finding, deferred: list[Exception]) -> None:
     """Keep an engine limit for the end of the check. Raise any other finding at once."""
     if (isinstance(exc, JoseError) and exc.code in ENGINE_LIMITS) or (
-        isinstance(exc, _Finding) and exc.passed is None
+        isinstance(exc, _Finding) and (exc.passed is None or exc.no_answer)
     ):
         deferred.append(exc)
         return
@@ -230,11 +325,15 @@ def _signature(
     *,
     found: tuple[list[TrustedKey], list[list[x509.Certificate]]],
     findings: dict[str, JsonValue],
+    dids: Dids,
 ) -> None:
     """The header, key, and signature rules of one signature."""
     check_header(signature, params.profile)
     if params.key_source == "trust_kid":
         key, entry = _pinned_key(ctx, trust, signature)
+        found[0].append(entry)
+    elif params.key_source == "did":
+        key, entry = _did_key(ctx, trust, params, signature, dids)
         found[0].append(entry)
     else:
         key, path = _chain_key(trust, signature)
@@ -248,9 +347,15 @@ def _signature(
 
 
 def _judge(
-    ctx: CheckContext, trust: TrustBundle, params: JoseParams, body: bytes, findings: dict[str, JsonValue]
-) -> None:
-    """Every finding in the order of the contract. Returns only if the token passes.
+    ctx: CheckContext,
+    trust: TrustBundle,
+    params: JoseParams,
+    body: bytes,
+    *,
+    findings: dict[str, JsonValue],
+    dids: Dids,
+) -> Token:
+    """Every finding in the order of the contract. Returns the token only if it passes.
 
     An engine limit of one signature is kept, and the other signatures and the claims are judged.
     So a fail anywhere comes before any limit, in every order of the signatures.
@@ -265,7 +370,7 @@ def _judge(
     paths: list[list[x509.Certificate]] = []
     for signature in token.signatures:
         try:
-            _signature(ctx, trust, params, signature, found=(pinned, paths), findings=findings)
+            _signature(ctx, trust, params, signature, found=(pinned, paths), findings=findings, dids=dids)
         except (JoseError, _Finding) as exc:
             _defer(exc, deferred)
     if not deferred:
@@ -284,6 +389,34 @@ def _judge(
             raise _Finding(False, "INTEGRITY.JOSE.ISSUER_UNTRUSTED", message, finding)
     if deferred:
         raise deferred[0]
+    return token
+
+
+def did_observations(ctx: CheckContext, dids: Dids, start: int) -> list[Observation]:
+    """The observations of the resolved DID documents, numbered from ``start`` so each id is unique."""
+    found = [
+        o
+        for v in dids.values()
+        for o in (v.observations if isinstance(v, CheckOutcome) else (v.observation,))
+    ]
+    return [o.model_copy(update={"id": f"{ctx.purpose.id}#{start + n}"}) for n, o in enumerate(found)]
+
+
+def judged(
+    passed: bool | None,
+    code: str,
+    message: str,
+    observations: list[Observation],
+    *,
+    no_answer: bool = False,
+    limit: ExecutionStatus = ExecutionStatus.BLOCKED,
+) -> CheckOutcome:
+    """The outcome of a finding: a limit is ``limit``, a host without an answer is no answer."""
+    if passed is None:
+        return CheckOutcome(status=limit, reason_code=code, message=message, observations=tuple(observations))
+    if no_answer:
+        return completed(False, code, message, observations, no_answer=True)
+    return completed(passed, code, f"{message} {_LIMIT}", observations)
 
 
 @register("integrity.jose", capability="integrity.jose", params=JoseParams)
@@ -301,39 +434,55 @@ def jose_check(ctx: CheckContext) -> CheckOutcome:
         return acquired
     record = acquired
     findings: dict[str, JsonValue] = {"source": params.source}
+    dids: Dids = {}
 
-    def outcome(passed: bool | None, code: str, message: str) -> CheckOutcome:
+    def outcome(passed: bool | None, code: str, message: str, *, no_answer: bool = False) -> CheckOutcome:
         kind: Literal["artifact", "exchange"] = "artifact" if record.kind == "artifact" else "exchange"
         observation = ctx.observation(0, kind=kind, records=[record], summary={"findings": findings})
-        if passed is None:
-            return CheckOutcome(
-                status=ExecutionStatus.BLOCKED, reason_code=code, message=message, observations=(observation,)
-            )
-        return completed(passed, code, f"{message} {_LIMIT}", [observation])
+        return judged(
+            passed, code, message, [observation, *did_observations(ctx, dids, 1)], no_answer=no_answer
+        )
 
-    if record.kind == "http" and record.status != 200:
-        findings["status"] = record.status
-        message = f"The system declares a signed resource, and its endpoint answers {record.status}."
-        return outcome(False, "INTEGRITY.JOSE.NOT_AVAILABLE", message)
-    if record.kind == "http" and (problem := unusable(ctx, record)) is not None:
-        return problem
+    if (gate := credential_gate(ctx, record, findings)) is not None:
+        return gate if isinstance(gate, CheckOutcome) else outcome(*gate)
     try:
-        _judge(ctx, ctx.trust, params, record.body, findings)
-    except JoseError as exc:
-        return outcome(None if exc.code in ENGINE_LIMITS else False, exc.code, exc.message)
-    except _Finding as found:
-        if found.finding is not None:
-            findings[found.finding[0]] = found.finding[1]
-        return outcome(found.passed, found.code, found.message)
+        _judge(ctx, ctx.trust, params, record.body, findings=findings, dids=dids)
+    except (JoseError, _Finding) as exc:
+        return outcome(*finding_of(exc, findings), no_answer=isinstance(exc, _Finding) and exc.no_answer)
+    signer = {
+        "trust_kid": "a pinned key of the trust bundle",
+        "did": "a key of the DID document that a pinned key of the DID matches",
+        "x5c": "the key of a certificate that chains to a passport anchor",
+    }[params.key_source]
     if params.profile == "jws":
-        if params.key_source == "trust_kid":
-            signer = "a pinned key of the trust bundle"
-        else:
-            signer = "the key of a certificate that chains to a passport anchor"
         message = (
             f"The signature verifies with {signer} under the profile jws. "
             "No claim, no validity, and no issuer binding was judged."
         )
+    elif params.key_source == "did":
+        message = f"The signature verifies with {signer}. The issuer key and the validity are in order."
     else:
         message = "The signature, the issuer key, and the validity are in order under the profile."
     return outcome(True, "INTEGRITY.JOSE.OK", message)
+
+
+def credential_gate(
+    ctx: CheckContext, record: Record, findings: dict[str, JsonValue]
+) -> CheckOutcome | tuple[bool, str, str] | None:
+    """The status rule and the body rules of a fetched credential, before its body is judged."""
+    if record.kind == "http" and record.status != 200:
+        findings["status"] = record.status
+        message = f"The system declares a signed resource, and its endpoint answers {record.status}."
+        return False, "INTEGRITY.JOSE.NOT_AVAILABLE", message
+    if record.kind == "http":
+        return unusable(ctx, record)
+    return None
+
+
+def finding_of(exc: JoseError | _Finding, findings: dict[str, JsonValue]) -> tuple[bool | None, str, str]:
+    """(passed, code, message) of a refused token. An engine limit has ``passed`` None."""
+    if isinstance(exc, JoseError):
+        return (None if exc.code in ENGINE_LIMITS else False), exc.code, exc.message
+    if exc.finding is not None:
+        findings[exc.finding[0]] = exc.finding[1]
+    return exc.passed, exc.code, exc.message

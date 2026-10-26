@@ -50,6 +50,7 @@ CONTRACT_CHECKS = (
     "identity.did",
     "integrity.jose",
     "integrity.jws",
+    "integrity.status_list",
     "manual.review",
     "persistence.versions",
     "registry.consistency",
@@ -90,6 +91,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "resolver.linkset": ({"relation": ["https://example.test/rel/passport"]}, "relation"),
     "identity.did": ({**DID, "sourc": "did_document"}, "sourc"),
     "integrity.jose": ({"key_sorce": "x5c"}, "key_sorce"),
+    "integrity.status_list": ({"list_sorce": "live"}, "list_sorce"),
     **{name: ({"documnet": "item"}, "documnet") for name in (*NO_PARAMETERS, *LIFECYCLE_CHECKS)},
 }
 UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
@@ -108,7 +110,13 @@ UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     ("identifier.parse", {"form": "gs1"}),
     ("aas.validate", {"format": "yaml"}),
     ("integrity.jose", {"profile": "jwt"}),
-    ("integrity.jose", {"key_source": "did"}),
+    # P2-11 made "did" a key source. The set stays closed.
+    ("integrity.jose", {"key_source": "jwks"}),
+    ("integrity.jose", {"did_sample": "did_document"}),
+    ("integrity.status_list", {"purpose": "refresh"}),
+    ("integrity.status_list", {"key_source": "x5c"}),
+    ("integrity.status_list", {"list_source": "cache"}),
+    ("integrity.status_list", {"did_sample": "did_document"}),
     ("integrity.jose", {"algorithms": ["HS256"]}),
 ]
 WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [

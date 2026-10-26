@@ -1,14 +1,16 @@
-"""Credentials family: a VC-JOSE credential for the signed passport.
+"""Credentials family: a VC-JOSE credential for the signed passport, and its status list.
 
-Synthetic behavior, after the W3C Recommendation "Securing Verifiable Credentials using JOSE and
-COSE" and RFC 7515. A request for ``/dpp/{id}/signed`` with exactly ``Accept: application/vc+jwt``
-gets a compact JWS with ``typ: vc+jwt``. Its payload is a credential of the operator about the
-item passport. Every other request passes to the core, so the answers of version 1 stay the same.
-Each flag of this module changes this credential only.
+Synthetic behavior, after the W3C Recommendations "Securing Verifiable Credentials using JOSE and
+COSE" and "Bitstring Status List v1.0", and RFC 7515. A request for ``/dpp/{id}/signed`` with
+exactly ``Accept: application/vc+jwt`` gets a compact JWS with ``typ: vc+jwt``. Its payload is a
+credential of the operator about the item passport. Its ``BitstringStatusListEntry`` names the
+status list credential at ``/credentials/status/1``, a path that version 1 did not serve. Every
+other request passes to the core, so the answers of version 1 stay the same. Each flag of this
+module changes this credential or its status list only.
 
-The credential is signed with the TEST-ONLY leaf key of ``fixtures/reference/pki``. The TEST-ONLY
-trust bundle pins its public key under the kid ``TEST-ONLY-vc-issuer-key-1`` with the purpose
-``passport``. The key signs no other credential, and it protects nothing.
+The credential and the list are signed with the TEST-ONLY leaf key of ``fixtures/reference/pki``.
+The TEST-ONLY trust bundle pins its public key under the kid ``TEST-ONLY-vc-issuer-key-1`` with the
+purpose ``passport``. The key signs no other credential, and it protects nothing.
 """
 
 from __future__ import annotations
@@ -22,7 +24,8 @@ from typing import TYPE_CHECKING, Any, Final
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from dppce.evidence.canonical import canonical_bytes
-from dppce.infrastructure.reference.base import Reply, Request
+from dppce.evidence.status import encode_list
+from dppce.infrastructure.reference.base import PUBLIC_ORIGIN, Reply, Request
 
 if TYPE_CHECKING:
     from dppce.infrastructure.reference_server import ReferenceSystem
@@ -39,6 +42,12 @@ FLAGS: Final = frozenset(
         "vc_untrusted_kid",
         # F-60: an unsecured credential with alg none and an empty signature.
         "vc_alg_none",
+        # F-69: the status list sets the bit of the credential for the purpose revocation.
+        "vc_status_revoked",
+        # F-70: the list signature covers a list with the bit set; the served list has it clear.
+        "vc_status_list_unsigned",
+        # B-18: the ttl of the list is one day, so the list is stale at the evaluation time of the rig.
+        "vc_status_list_stale",
     }
 )
 MEDIA_TYPE: Final = "application/vc+jwt"
@@ -46,6 +55,12 @@ KID: Final = "TEST-ONLY-vc-issuer-key-1"
 UNKNOWN_KID: Final = "TEST-ONLY-unknown-issuer-key"
 ISSUER: Final = "urn:example:operator:0001"
 _SIGNED_PATH: Final = re.compile(r"^/dpp/(?P<id>[0-9]{14}-[A-Za-z0-9]+)/signed$")
+STATUS_PATH: Final = "/credentials/status/1"
+STATUS_URL: Final = PUBLIC_ORIGIN + STATUS_PATH
+# One list holds the status of every credential of the reference system at this index.
+STATUS_INDEX: Final = 41267
+# Ten years of 365 days: the list stays fresh from its validFrom past the key validity.
+STATUS_TTL_MS: Final = 3650 * 86_400_000
 
 
 def _b64(data: bytes) -> str:
@@ -60,7 +75,43 @@ def credential(subject: str) -> dict[str, Any]:
         "validFrom": "2026-01-01T00:00:00Z",
         "validUntil": "2036-01-01T00:00:00Z",
         "credentialSubject": {"id": subject},
+        "credentialStatus": {
+            "id": subject + "#status",
+            "type": "BitstringStatusListEntry",
+            "statusPurpose": "revocation",
+            "statusListIndex": str(STATUS_INDEX),
+            "statusListCredential": STATUS_URL,
+        },
     }
+
+
+def status_list(revoked: bool = False, ttl_ms: int = STATUS_TTL_MS) -> dict[str, Any]:
+    return {
+        "@context": ["https://www.w3.org/ns/credentials/v2"],
+        "id": STATUS_URL,
+        "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+        "issuer": ISSUER,
+        "validFrom": "2026-01-01T00:00:00Z",
+        "credentialSubject": {
+            "id": STATUS_URL + "#list",
+            "type": "BitstringStatusList",
+            "statusPurpose": "revocation",
+            "encodedList": encode_list((STATUS_INDEX,) if revoked else ()),
+            "ttl": ttl_ms,
+        },
+    }
+
+
+def status_token(system: ReferenceSystem) -> str:
+    faults = system.faults
+    signer, _ = system.signer("leaf")
+    ttl_ms = 86_400_000 if "vc_status_list_stale" in faults else STATUS_TTL_MS
+    served = status_list("vc_status_revoked" in faults, ttl_ms)
+    # An attacker who clears the bit of a signed list cannot sign the cleared list.
+    signed = status_list(True, ttl_ms) if "vc_status_list_unsigned" in faults else served
+    header = _b64(canonical_bytes({"alg": "ES256", "kid": KID, "typ": "vc+jwt"}))
+    signature = signer.sign(f"{header}.{_b64(canonical_bytes(signed))}".encode("ascii"))
+    return f"{header}.{_b64(canonical_bytes(served))}.{_b64(signature)}"
 
 
 def token(system: ReferenceSystem, subject: str) -> str:
@@ -87,6 +138,8 @@ def token(system: ReferenceSystem, subject: str) -> str:
 
 
 def respond(system: ReferenceSystem, request: Request) -> Reply | None:
+    if request.path == STATUS_PATH:
+        return 200, MEDIA_TYPE, status_token(system).encode("ascii"), {}
     match = _SIGNED_PATH.match(request.path)
     if match is None or request.header("accept") != MEDIA_TYPE:
         return None

@@ -359,6 +359,7 @@ Initial registry:
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
 | `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
 | `identity.did` | `identity.did` | Resolves a did:web DID, or reads an offline copy of its DID document. Checks the `id`, the verification methods, and the assertion methods. Resolution is not trust. Experimental. |
+| `integrity.status_list` | `integrity.status_list` | Verifies a VC-JOSE credential, reads its W3C Bitstring Status List entry, gets and verifies the status list credential, and checks the bit. An unsigned, untrusted, unreachable, or stale list never gives `pass`. Experimental. |
 
 `identifier.resolve` takes three optional parameters. `require_https`, default false, fails a
 carrier URL or a redirect target whose scheme is not https with `IDENTIFIER.SCHEME.NOT_HTTPS`.
@@ -449,14 +450,17 @@ are separate from the report signing profile (section 11.3). That profile, the a
 `dppce.evidence.jws`, and `integrity.jws` do not change. The sources are RFC 7515, RFC 7517,
 RFC 7518, RFC 8037, RFC 8725, and the W3C Recommendation VC-JOSE-COSE of 13 October 2026.
 
-The check takes six optional parameters:
+The check takes seven optional parameters:
 
 - `profile`, default `vc-jose`. The value `vc-jose` judges a credential. The value `jws` judges
   any JWS and reads no `typ` and no claim.
 - `key_source`, default `trust_kid`. With `trust_kid`, the `kid` names a key of the trust bundle
   with the purpose `passport`. With `x5c`, the chain in `x5c` must reach a passport anchor, as in
   `integrity.jws`. The value `x5c` needs the profile `jws`, because no rule binds a credential
-  issuer to a certificate. The set is closed. A later version can add a DID key source.
+  issuer to a certificate. With `did`, the `kid` is a did:web DID URL, and the rules of the key
+  source `did` below apply. The set is closed.
+- `did_sample` names the IXIT sample that holds an offline copy of the DID document. It needs the
+  key source `did`. Without it, the check fetches the DID document through the transport.
 - `source`, default `signed`. The value `signed` fetches the resource `signed`. The value `sample`
   reads the IXIT sample that `sample` names, default `credential`, and sends no request.
 - `accept` sets the `Accept` header of the fetch. The media type of the answer is not judged.
@@ -490,6 +494,7 @@ that applies:
    `INTEGRITY.JOSE.KEY_NOT_VALID`. With `x5c`, a missing chain or a chain without a path to an
    anchor gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. An `x5c` entry that is not a certificate gives
    `INTEGRITY.JOSE.MALFORMED`. A chain of certificates longer than the limit gives `blocked`.
+   With `did`, the rules of the key source `did` below apply.
 10. The key type gives the algorithm: P-256 gives `ES256`, P-384 gives `ES384`, and Ed25519 gives
     `EdDSA`. Another key type gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`. An algorithm outside
     `algorithms`, or a header `alg` that differs from it, gives `INTEGRITY.JOSE.ALGORITHM`.
@@ -501,7 +506,8 @@ that applies:
     that differs from the issuer gives `INTEGRITY.JOSE.ISSUER_MISMATCH`.
 14. A `validFrom` or an `nbf` after the evaluation time gives `INTEGRITY.JOSE.NOT_YET_VALID`. A
     `validUntil` before it, or an `exp` at or before it, gives `INTEGRITY.JOSE.EXPIRED`.
-15. With `trust_kid`, a trusted key of another issuer gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+15. With `trust_kid` or `did`, a trusted key of another issuer gives
+    `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
 16. Otherwise: pass, `INTEGRITY.JOSE.OK`.
 
 Only rows 3, 7, 9, 10, and 12 can give `blocked` after the body is read. Each applies to a
@@ -510,6 +516,31 @@ every other signature, every chain, and the claims under `vc-jose`. A fail of an
 any `blocked`, in every order of the signatures. A system under test therefore cannot reshape a
 judged defect into a step that is not judged. A signature after the eighth is not judged, and such
 a token is never a pass.
+
+The key source `did` applies these rules to each signature, in this order, in row 9:
+
+1. The `kid` must be a DID URL with a non-empty fragment. Another `kid` gives
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+2. No passport key of the trust bundle has the DID as its `issuer`:
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. The DID document is not fetched. This rule comes before the
+   DID method, so the `kid` of an untrusted signer cannot turn this fail into a limit.
+3. The DID must be a did:web DID that maps to a URL, as for `identity.did`. A pinned DID of another
+   DID method gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`. Another did:web DID gives
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+4. The check resolves the DID with `resolve_did_web`, once for each DID. With `did_sample`, it
+   reads the sample and sends nothing. A host without an answer, a redirect out of the scope, or a
+   host that the operator did not confirm gives no answer (`unreachable`). A `blocked` outcome of
+   the resolver gives `blocked` with its code. Both are kept like an engine limit.
+5. A DID document that breaks a rule of `identity.did` gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+6. The `kid` is not an `assertionMethod` entry of the document: `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+7. The assertion method has no `publicKeyJwk`: `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`.
+8. No passport key of the DID has the same `kty`, `crv`, `x`, `y`, `n`, and `e` as the method:
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. A matching key that is revoked, or outside its validity, gives
+   `INTEGRITY.JOSE.KEY_NOT_VALID`.
+
+Resolution is not trust. The document only shows which key the DID host publishes. The pinned key
+decides trust, and row 15 binds it to the credential issuer. The observation of each DID document
+follows the observation of the token.
 
 `identifier.parse` takes the optional parameter `form`. Its values are `dppce-item`, the default,
 and `gs1-dl`. The default keeps the strict grammar below, so existing decision digests do not
@@ -840,6 +871,89 @@ Resolution is not trust. DNS and TLS name the host, not the issuer. A key of the
 trusted only through a pinned `TrustedKey` of the trust bundle whose `issuer` equals the DID.
 `dppce.adapters.did.resolve_did_web` gives the resolved document and its public keys by absolute
 method id to other checks.
+
+`integrity.status_list` follows the W3C Recommendation Bitstring Status List v1.0 of 15 May 2025.
+It verifies the credential as `integrity.jose` does under the profile `vc-jose`. Then it reads the
+`BitstringStatusListEntry` of the credential and judges its status list credential. The bitstring
+decoder of section 11.4 is reused. The report status lists of section 11.4 do not change. The
+check takes eight optional parameters:
+
+- `key_source` (`trust_kid` or `did`), `did_sample`, `source`, `sample`, and `accept` have the
+  meaning of `integrity.jose`. They apply to the credential and to the status list credential.
+  `accept` is the `Accept` header of both fetches.
+- `list_source`, default `live`. With `live`, the check fetches the `statusListCredential` URL with
+  `GET` through the transport. With `sample`, it reads the IXIT sample that `list_sample` names,
+  default `status_list`, and sends no list request.
+- `purpose`, default `revocation`. The other value is `suspension`. The check judges the entries of
+  this purpose only.
+
+The status list host is often a third party. The operator must confirm its origin, as for any
+other origin. A host that the operator did not confirm gives `TRANSPORT.DENIED`, which is no answer
+and never a pass. For a third-party host, an offline copy from an IXIT sample is the default
+choice.
+
+The check takes the first rule that applies:
+
+1. Invalid parameters: `blocked`, `INTEGRITY.STATUS.PARAMS`. No trust bundle: `blocked`,
+   `INTEGRITY.TRUST.MISSING`. Nothing is read.
+2. The credential: rows 2 to 16 of `integrity.jose`, with their codes. The check then reads the
+   payload of the verified credential only.
+3. `credentialStatus` is one entry or a list of entries. An entry that is not a JSON object with a
+   string `type` gives `INTEGRITY.STATUS.ENTRY_MALFORMED`. For a `BitstringStatusListEntry`, a
+   `statusPurpose` that is not a string gives the same code. Of another entry, only the type is read.
+4. An entry for `purpose` with one of these problems gives `INTEGRITY.STATUS.ENTRY_MALFORMED`. The
+   `statusListIndex` is not a base-10 integer in a string. The `statusListCredential` is not an
+   `http` or `https` URL. The `id` is the URL of the list. A `statusSize` is not an integer above 0.
+5. No entry for `purpose`: `unsupported`, `INTEGRITY.STATUS.ENTRY_TYPE`, if the credential has
+   entries of another type only. Otherwise `INTEGRITY.STATUS.ENTRY_MISSING`. No list is fetched.
+6. Then each entry for `purpose` in turn, at most 4. With more entries, the check judges the first 4
+   and gives `blocked`, `INTEGRITY.STATUS.TOO_LARGE`, only if no rule fails.
+7. Live: a transport error or a status from 500 to 599 gives `unreachable`. A status other than 200
+   gives `INTEGRITY.STATUS.LIST_NOT_AVAILABLE`. A body coding or a truncated body gives `blocked`.
+   One URL is fetched once for each step.
+8. Sample: a missing sample gives `blocked`, `INTEGRITY.STATUS.SAMPLE_MISSING`. A sample whose `id`
+   is not the `statusListCredential` URL as exact text gives `blocked`, `INTEGRITY.STATUS.LIST_UNBOUND`.
+   The engine cannot show that such a sample is the list of the entry.
+9. A JSON credential without a JWS form whose `proof` is one or more well-formed Data Integrity
+   proofs gives `unsupported`, `INTEGRITY.STATUS.LIST_FORMAT`. This engine does not verify such
+   proofs. A well-formed proof has the `type` `DataIntegrityProof` and the string members
+   `cryptosuite`, `proofPurpose`, `verificationMethod`, and `proofValue`. Any other `proof` goes to
+   row 10.
+10. The list credential: the rows of `integrity.jose` under `vc-jose` with the same key source. A
+    refused signature, algorithm, header, or JWS shape, or a body that is not secured, gives
+    `INTEGRITY.STATUS.LIST_SIGNATURE`. An untrusted key, a key that is not valid, a key of another
+    issuer, or an `iss` that differs from the issuer gives `INTEGRITY.STATUS.LIST_UNTRUSTED`.
+11. Claims of the wrong form give `INTEGRITY.STATUS.LIST_MALFORMED`. A list credential outside its
+    `validFrom` and `validUntil` gives `INTEGRITY.STATUS.LIST_VALIDITY`. A list engine limit gives
+    `blocked` or `unsupported` (`INTEGRITY.STATUS.LIST_FORMAT` for a key type).
+12. `INTEGRITY.STATUS.LIST_MALFORMED` for one of these: the `id` of the verified list credential
+    is not the `statusListCredential` URL as exact text, also in live mode. The `type` lacks
+    `BitstringStatusListCredential`. The `credentialSubject` is not an object with the type
+    `BitstringStatusList` and a string `encodedList`. Its `statusPurpose` is not one or more
+    strings. A `ttl` is not an integer of at least 0.
+13. The list does not name `purpose` in its `statusPurpose`: `INTEGRITY.STATUS.PURPOSE`.
+14. An `encodedList` that does not decode gives `INTEGRITY.STATUS.LIST_MALFORMED`. A bitstring above
+    16 MiB gives `blocked`, `INTEGRITY.STATUS.TOO_LARGE`. The decoder stops at that size.
+15. Fewer than 131,072 bits: `INTEGRITY.STATUS.LIST_LENGTH`. An entry that ends past the end of the
+    list: `INTEGRITY.STATUS.INDEX_RANGE`. An entry holds `statusSize` bits from the index times the
+    `statusSize`.
+16. A `statusSize` other than 1: `unsupported`, `INTEGRITY.STATUS.SIZE_UNSUPPORTED`. Rows 12 to 15
+    apply to every `statusSize` first.
+17. A set bit under `revocation`: `INTEGRITY.STATUS.REVOKED`, also from a stale list, because
+    revocation is not reversible. A set bit under `suspension` in a list that is not stale:
+    `INTEGRITY.STATUS.SUSPENDED`.
+18. A stale list: `blocked`, `INTEGRITY.STATUS.STALE`. A list is stale if its `validFrom` plus its
+    `ttl`, in milliseconds, is before the evaluation time. Without `ttl` or `validFrom`, the check
+    does not judge staleness. The pass message then says so.
+19. Otherwise: pass, `INTEGRITY.STATUS.OK`.
+
+The issuer of the list credential can differ from the issuer of the credential, as the
+Recommendation permits. A pinned key of the list issuer must sign the list. The observation summary
+says which case applies. Only rows 6 to 9, 11, 14, 16, and 18 can give `blocked` or `unsupported`,
+or no answer, after the credential is read. Each limit applies to one entry. The check judges every
+other entry first. A fail of any entry comes before any limit, in every order of the entries. A
+limit of a list ends its entry, because the engine does not judge a list that it did not verify.
+The observation summary holds counts, states, and the status, never an index, a URL, or a key.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.
