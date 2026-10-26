@@ -587,12 +587,12 @@ qualifiers. Query data attributes are not compared. The check takes the first ro
 2. No carrier identifier is available: as `identifier.parse`.
 3. The source gives no document: as rule 4 of `identifier.consistency` with `sources`.
 4. The pointer does not resolve: `blocked`, `IDENTIFIER.CROSS.SOURCE_MISSING`.
-5. The value is not text: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`.
+5. The value is not text: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`. The summary names `type`.
 6. The carrier identifier looks compressed: `unsupported`, `IDENTIFIER.SYNTAX.COMPRESSED`.
 7. The carrier identifier or the value is not a valid uncompressed URI: `blocked`,
    `IDENTIFIER.EQUIVALENCE.NOT_PARSED`.
 8. The canonical forms differ: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`. The summary names the
-   parts that differ, from the set `scheme`, `authority`, `key`, and `type`.
+   parts that differ, from the set `scheme`, `authority`, and `key`.
 9. Otherwise: pass, `IDENTIFIER.EQUIVALENCE.OK`.
 
 `identifier.consistency` stays exact text. A test purpose that accepts a GTIN in another length
