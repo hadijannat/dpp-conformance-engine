@@ -398,6 +398,12 @@ def test_the_kid_must_name_a_valid_passport_key_of_the_trust_bundle(
     # The trust bundle binds the key to one issuer. A credential of another issuer is not trusted.
     other = bundle(public, issuer="urn:example:operator:0002")
     failed(jose(tmp_path, Served(token), other), "INTEGRITY.JOSE.ISSUER_UNTRUSTED")
+    # In the general form, every signing key must belong to the credential issuer, not only one.
+    second = p256()
+    foreign = bundle({"TEST-ONLY-foreign": jwk(second)}, issuer="urn:example:operator:0002")
+    mixed = bundle(public).model_copy(update={"keys": (*bundle(public).keys, *foreign.keys)})
+    cosigned = compact({**VC_HEADER, "kid": "TEST-ONLY-foreign"}, vc(), second)
+    failed(jose(tmp_path, Served(general(token, cosigned)), mixed), "INTEGRITY.JOSE.ISSUER_UNTRUSTED")
 
 
 def test_no_trust_bundle_is_blocked_and_nothing_is_fetched(
