@@ -16,7 +16,8 @@ engine transport sends ``Accept: */*``, which selects the linkset only under the
 only link, so every other ``linkType`` gets the core redirect.
 
 The other flags of this module change the linkset, the description file, or the answer for an
-unknown identifier. Each answer without one of these flags stays the same.
+unknown identifier. The flag ``resolver_rate_limited`` answers each default request with 429
+(B-20). Each answer without one of these flags stays the same.
 """
 
 from __future__ import annotations
@@ -46,6 +47,8 @@ FLAGS: Final = frozenset(
         "negotiation_no_vary",
         # F-73: the HTML page, with Vary, also for an Accept that prefers application/json.
         "negotiation_wrong_type",
+        # B-20: the default request gets 429 with Retry-After 1, every time.
+        "resolver_rate_limited",
     }
 )
 LINKSET: Final = "application/linkset+json"
@@ -148,6 +151,10 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
     if (page := _negotiated(system, request)) is not None:
         return page
     link_type = (parse_qs(request.query).get("linkType") or [""])[0]
+    default = not link_type and not prefers_linkset(request.header("accept"))
+    if "resolver_rate_limited" in system.faults and default and RESOLVER_PATH.match(request.path):
+        # B-20: every default request is rate limited, also the one retry after Retry-After.
+        return 429, "text/plain", b"", {"Retry-After": "1"}
     wanted = (
         link_type in ("linkset", "all")
         or prefers_linkset(request.header("accept"))

@@ -16,13 +16,15 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from validation.rig import FIXTURES
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce.adapters.access import restricted_fields
 from dppce.adapters.integrity import jws_check
 from dppce.infrastructure import transport as transport_module
 from dppce.infrastructure.clock import FrozenClock
-from dppce.infrastructure.interfaces import Request
+from dppce.infrastructure.interfaces import Record, Request
+from dppce.infrastructure.reference_server import ReferenceServer
 from dppce.infrastructure.transport import PolicyTransport, TransportConfig
 from dppce.models import CheckOutcome, ExecutionStatus, NetworkPolicy, TrustBundle, Verdict, VerdictRules
 from dppce.verdicts import step_verdict
@@ -243,3 +245,30 @@ def test_a_server_error_with_retry_after_is_not_retried(loopback: Any) -> None:
     waits: list[float] = []
     record = _engine(waits).fetch(Request("GET", f"{server.origin}/x"))
     assert (record.status, record.attempts, waits) == (503, 1, [])
+
+
+# -- fault B-20: the reference resolver answers 429 ---------------------------------------------
+
+
+def test_flag_resolver_rate_limited_answers_the_default_request_with_429(tmp_path: Path) -> None:
+    with ReferenceServer(FIXTURES, faults=frozenset({"resolver_rate_limited"})) as server:
+        ctx = resolved_context(tmp_path, "identifier.resolve", server.origin)
+        outcome = run(ctx)
+        records: tuple[Record, ...] = ctx.acquirer.records()
+    _rate_limited(outcome)
+    assert records[0].status == 429
+    # The transport waits once for Retry-After 1, and the resolver answers 429 again.
+    assert records[0].attempts == 2
+
+
+def test_flag_resolver_rate_limited_keeps_the_linkset_request() -> None:
+    with ReferenceServer(FIXTURES, faults=frozenset({"resolver_rate_limited"})) as server:
+        engine = PolicyTransport(
+            TransportConfig(policy=NetworkPolicy(**LOCAL), engine_version="1"),
+            NOW_CLOCK,
+            sleep=lambda _: None,
+        )
+        default = engine.fetch(Request("GET", server.origin + RESOLVER_PATH))
+        linkset = engine.fetch(Request("GET", server.origin + RESOLVER_PATH + "?linkType=linkset"))
+    assert (default.status, default.header("retry-after") is not None) == (429, True)
+    assert linkset.status == 200
