@@ -3,6 +3,7 @@
 Exit codes (docs/explanation/architecture.md, section 12):
 0 completed (run, replay: overall pass); 1 the system under test failed; 2 usage or input error;
 3 execution error; 4 evidence verification failed or replay digest mismatch; 5 inconclusive.
+For compare: 0 every step verdict is equal; 1 a step verdict differs.
 Every command accepts ``--json`` and then writes one JSON document to standard output.
 """
 
@@ -1570,7 +1571,12 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     compare = add("compare", cmd_compare, summary)
     compare.add_argument("a", type=Path, metavar="A", help="envelope of the first run")
     compare.add_argument("b", type=Path, metavar="B", help="envelope of the second run")
-    compare.add_argument("--format", choices=["text", "json"], default="text", help="--json gives json too")
+    compare.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="output format; --json is the same as --format json",
+    )
     compare.add_argument("--trust", type=Path, help="verify both envelopes first against this trust bundle")
     compare.add_argument("--at", help="evaluation time of the verification; needed with --trust")
 

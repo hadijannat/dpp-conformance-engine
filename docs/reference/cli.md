@@ -255,7 +255,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --json                write one JSON document to standard output
-  --format {text,json}  --json gives json too
+  --format {text,json}  output format; --json is the same as --format json
   --trust TRUST         verify both envelopes first against this trust bundle
   --at AT               evaluation time of the verification; needed with --trust
 ```

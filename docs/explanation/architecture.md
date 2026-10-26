@@ -2082,8 +2082,8 @@ bundle when they load it.
 
 | Code | Meaning |
 | --- | --- |
-| 0 | The command completed. For `run` and `replay`: the overall outcome is `pass`. |
-| 1 | The system under test failed: the overall outcome is `fail`. |
+| 0 | The command completed. For `run` and `replay`: the overall outcome is `pass`. For `compare`: every step verdict is equal. |
+| 1 | The system under test failed: the overall outcome is `fail`. For `compare`: a step verdict differs between the two envelopes. |
 | 2 | Usage or input error: bad arguments, invalid file, lint findings, or an applicability rule that compares two different types. |
 | 3 | Execution error: the overall outcome is `error`, or the engine failed. |
 | 4 | Evidence verification failed or is incomplete. Replay digest mismatch. |
