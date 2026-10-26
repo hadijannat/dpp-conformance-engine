@@ -18,6 +18,9 @@ is listed in ``EXPECTED_DISAGREEMENTS`` with the side that the engine follows:
 - D-DL-2: the form ``gs1-dl`` of ``identifier.parse`` (``dppce.adapters.gs1``) refuses the
   deprecated convenience alphas, as dl.c does by default. Three dl.c cases enable them without an
   option setter, so the extraction cannot tell them from default cases.
+- D-X509-1: one x509-limbo chain has a root with serial number 0. The cryptography library warns
+  when it loads that root, and the suite turns warnings into errors. The path code finds the chain
+  when the test ignores this one warning.
 """
 
 from __future__ import annotations
@@ -26,18 +29,24 @@ import base64
 import hashlib
 import json
 import re
+import warnings
 from pathlib import Path
 from typing import Any
 
 import pytest
 import rfc8785
+from cryptography import x509
+from cryptography.hazmat.primitives import serialization
+from cryptography.utils import CryptographyDeprecationWarning
 
 from dppce.adapters import gs1
 from dppce.adapters.identifier import parse_gs1_digital_link
 from dppce.catalogue import load_catalogue
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
+from dppce.evidence.x509path import trust_path
 from dppce.infrastructure.resources import data_root
+from dppce.models import TrustAnchor
 
 ROOT = data_root()
 VECTORS = Path(__file__).resolve().parent / "vectors"
@@ -47,6 +56,8 @@ WYCHEPROOF = VECTORS / "wycheproof" / "TEST-ONLY-json_web_signature_test.json"
 GS1_DL = VECTORS / "gs1-syntax-engine" / "dl.c"
 TYP = "dppce-attestation+jws"
 PATH_SHAPE = "the path does not have the form /01/<14 digits>/21/<serial>"
+
+LIMBO_SERIAL_ZERO = {"fastly.com.limbo.json"}
 
 EXPECTED_DISAGREEMENTS: dict[str, object] = {
     "D-JCS-1": {"structures", "values"},
@@ -59,6 +70,9 @@ EXPECTED_DISAGREEMENTS: dict[str, object] = {
         "https://a/gtin/12312312312333/ser/ABC123",
         "https://a/sscc/006141411234567890",
     ],
+    # The anchor of this chain, a public root, has serial number 0. The cryptography library loads
+    # it and warns (RFC 5280 requires a positive serial). The suite sets filterwarnings to error.
+    "D-X509-1": LIMBO_SERIAL_ZERO,
 }
 
 
@@ -196,6 +210,7 @@ def test_the_computed_disagreements_equal_the_listed_ones() -> None:
         "D-JCS-1": _jcs_disagreements(),
         **_profile_disagreements(),
         "D-DL-2": [uri for uri, _ in _gs1_dl_disagreements()],
+        "D-X509-1": _limbo_warned(),
     }
     assert computed == EXPECTED_DISAGREEMENTS
 
@@ -355,3 +370,65 @@ def test_gs1_dl_extracts_the_element_string_of_every_accepted_case() -> None:
     ]
     assert len(accepted) == 60
     assert [(uri, out) for uri, out, result in accepted if _element_string(result) != out] == []
+
+
+# -- x509-limbo path validation ------------------------------------------------------------------
+
+LIMBO = VECTORS / "x509-limbo" / "online"
+
+
+def _limbo() -> dict[str, dict[str, Any]]:
+    return {path.name: json.loads(path.read_bytes()) for path in sorted(LIMBO.glob("*.limbo.json"))}
+
+
+def _cert(pem: str) -> x509.Certificate:
+    return x509.load_pem_x509_certificate(pem.encode("ascii"))
+
+
+def _pem(certificate: x509.Certificate) -> str:
+    return certificate.public_bytes(serialization.Encoding.PEM).decode("ascii")
+
+
+def _limbo_path(case: dict[str, Any], *, anchors: bool = True) -> list[x509.Certificate] | None:
+    trusted = [
+        TrustAnchor(name=f"TEST-ONLY-limbo-{i}", certificate_pem=pem)
+        for i, pem in enumerate(case["trusted_certs"])
+    ]
+    return trust_path(
+        _cert(case["peer_certificate"]),
+        [_cert(pem) for pem in case["untrusted_intermediates"]],
+        trusted if anchors else [],
+    )
+
+
+def test_limbo_vector_set_holds_only_successful_server_chains() -> None:
+    cases = _limbo()
+    assert len(cases) == 14
+    # trust_path ignores time, names, and usage. Only SUCCESS chains of a SERVER validation are
+    # claimed, so a vector of another kind must not enter the set unnoticed.
+    assert {(c["expected_result"], c["validation_kind"]) for c in cases.values()} == {("SUCCESS", "SERVER")}
+
+
+@pytest.mark.parametrize("name", sorted(_limbo()))
+def test_trust_path_finds_the_limbo_chain_and_only_with_its_anchor(name: str) -> None:
+    case = _limbo()[name]
+    with warnings.catch_warnings():
+        if name in LIMBO_SERIAL_ZERO:
+            # The suite turns every warning into an error. The anchor loads with the warning only.
+            warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+        path = _limbo_path(case)
+        assert path is not None, name
+        assert _pem(path[0]) == case["peer_certificate"]
+        assert _pem(path[-1]) in case["trusted_certs"]
+        assert len(path) == len(case["untrusted_intermediates"]) + 2
+        assert _limbo_path(case, anchors=False) is None
+
+
+def _limbo_warned() -> set[str]:
+    warned = set()
+    for name, case in _limbo().items():
+        try:
+            _limbo_path(case)
+        except CryptographyDeprecationWarning:
+            warned.add(name)
+    return warned

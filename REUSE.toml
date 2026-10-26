@@ -28,6 +28,12 @@ SPDX-FileCopyrightText = "2016-2026 The Wycheproof Authors"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
+path = "tests/vectors/x509-limbo/online/*.limbo.json"
+precedence = "override"
+SPDX-FileCopyrightText = "The Python Cryptographic Authority and individual contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
 path = "tests/vectors/gs1-syntax-engine/dl.c"
 precedence = "override"
 SPDX-FileCopyrightText = "2021-2026 GS1 AISBL"
