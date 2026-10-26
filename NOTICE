@@ -11,8 +11,8 @@ standard. It refers to such documents by public bibliographic metadata only.
 
 The tests/vectors directory holds unchanged third-party test files.
 Each subdirectory README names the source, the copyright holder, and
-the license. The subdirectory idta-02099-1 holds its README only:
-the project does not vendor that third-party template.
+the license. The subdirectories idta-02099-1 and idta-01002-api hold
+their README only: the project does not vendor those third-party files.
 
 The testpacks/data/gs1-syntax-engine directory holds one unchanged
 third-party data file, the GS1 Barcode Syntax Dictionary. The wheel
