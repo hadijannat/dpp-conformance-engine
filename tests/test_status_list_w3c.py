@@ -368,6 +368,21 @@ def test_a_list_signature_that_does_not_verify_fails(
     failed(check(tmp_path, routes, trust), "INTEGRITY.STATUS.LIST_SIGNATURE")
 
 
+def with_keys(trust: TrustBundle, extra: TrustBundle) -> TrustBundle:
+    """The trust bundle with the keys of ``extra`` added."""
+    keys = [*trust.model_dump(mode="json")["keys"], *extra.model_dump(mode="json")["keys"]]
+    return TrustBundle.model_validate({**trust.model_dump(mode="json"), "keys": keys})
+
+
+PROOF: dict[str, str] = {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "ecdsa-rdfc-2019",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:example:TEST#key-1",
+    "proofValue": "zTEST",
+}
+
+
 def test_a_list_without_a_securing_mechanism_fails_and_a_data_integrity_list_is_unsupported(
     tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
 ) -> None:
@@ -376,28 +391,64 @@ def test_a_list_without_a_securing_mechanism_fails_and_a_data_integrity_list_is_
         check(tmp_path, Routes(credential(key), {LIST_URL: (200, plain)}), trust),
         "INTEGRITY.STATUS.LIST_SIGNATURE",
     )
-    proof = {
-        "type": "DataIntegrityProof",
-        "cryptosuite": "ecdsa-rdfc-2019",
-        "proofPurpose": "assertionMethod",
-        "verificationMethod": "did:example:TEST#key-1",
-        "proofValue": "zTEST",
-    }
-    secured = _json({**json.loads(plain), "proof": proof})
+    # The DID of the verificationMethod is the issuer of a pinned passport key.
+    pinned = with_keys(trust, bundle({"TEST-ONLY-di-key": jwk(p256())}, issuer="did:example:TEST"))
+    secured = _json({**json.loads(plain), "proof": PROOF})
     unsupported(
-        check(tmp_path, Routes(credential(key), {LIST_URL: (200, secured)}), trust),
+        check(tmp_path, Routes(credential(key), {LIST_URL: (200, secured)}), pinned),
         "INTEGRITY.STATUS.LIST_FORMAT",
     )
     # A proof member of another shape is no securing mechanism that the engine knows of: a fail.
     # An unsigned list cannot become a limit by a proof of any type string.
     revoked = json.loads(list_payload(encoded_list=encoded((INDEX,))))
-    lacking = {k: v for k, v in proof.items() if k != "verificationMethod"}
-    for odd_proof in ("TEST", {"type": "X"}, [proof, {"type": "X"}], lacking):
+    lacking = {k: v for k, v in PROOF.items() if k != "verificationMethod"}
+    for odd_proof in ("TEST", {"type": "X"}, [PROOF, {"type": "X"}], lacking):
         odd = _json({**revoked, "proof": odd_proof})
         failed(
-            check(tmp_path, Routes(credential(key), {LIST_URL: (200, odd)}), trust),
+            check(tmp_path, Routes(credential(key), {LIST_URL: (200, odd)}), pinned),
             "INTEGRITY.STATUS.LIST_SIGNATURE",
         )
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        ({}, "did:example:TEST#key-1", None),
+        ({}, "did:example:TEST#key-1", "urn:example:TEST"),
+        ({}, "https://id.example.test/keys#key-1", "https://id.example.test/keys"),
+        ({}, "did:example:TEST", "did:example:TEST"),
+        ({"issuer": "did:example:TEST"}, "did:example:TEST#key-1", "did:example:TEST"),
+        ({"id": LIST_URL + "/other"}, "did:example:TEST#key-1", "did:example:TEST"),
+    ],
+    ids=["unpinned-did", "pinned-other-issuer", "not-a-did", "no-fragment", "list-issuer", "list-id"],
+)
+def test_a_data_integrity_proof_not_tied_to_the_trust_bundle_fails(
+    tmp_path: Path,
+    key: ec.EllipticCurvePrivateKey,
+    trust: TrustBundle,
+    case: tuple[dict[str, Any], str, str | None],
+) -> None:
+    # A host must not turn a set bit or a missing signature into a limit with a made-up proof.
+    changes, method, extra_issuer = case
+    if extra_issuer is not None:
+        trust = with_keys(trust, bundle({"TEST-ONLY-di-key": jwk(p256())}, issuer=extra_issuer))
+    revoked = json.loads(list_payload(encoded_list=encoded((INDEX,)), **changes))
+    forged = _json({**revoked, "proof": PROOF | {"verificationMethod": method}})
+    failed(
+        check(tmp_path, Routes(credential(key), {LIST_URL: (200, forged)}), trust),
+        "INTEGRITY.STATUS.LIST_SIGNATURE",
+    )
+
+
+def test_a_data_integrity_proof_of_a_key_without_the_passport_purpose_fails(
+    tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
+) -> None:
+    other = bundle({"TEST-ONLY-di-key": jwk(p256())}, issuer="did:example:TEST", purposes=("status",))
+    forged = _json({**json.loads(list_payload()), "proof": PROOF})
+    failed(
+        check(tmp_path, Routes(credential(key), {LIST_URL: (200, forged)}), with_keys(trust, other)),
+        "INTEGRITY.STATUS.LIST_SIGNATURE",
+    )
 
 
 def test_the_list_must_be_signed_by_a_pinned_key_of_its_own_issuer(
@@ -417,21 +468,14 @@ def test_the_list_must_be_signed_by_a_pinned_key_of_its_own_issuer(
     )
 
 
-def test_a_list_of_another_pinned_issuer_passes_and_the_summary_says_so(
+def test_a_list_of_another_pinned_issuer_fails_as_a_delegated_status_issuer(
     tmp_path: Path, key: ec.EllipticCurvePrivateKey
 ) -> None:
-    # The W3C Recommendation permits a status issuer other than the credential issuer.
+    # Issuer B must not be able to say that the credential of issuer A is not revoked.
     status_key = p256()
-    trust = TrustBundle.model_validate(
-        {
-            **bundle({KID: jwk(key)}).model_dump(mode="json"),
-            "keys": [
-                *bundle({KID: jwk(key)}).model_dump(mode="json")["keys"],
-                *bundle(
-                    {"TEST-ONLY-status-key": jwk(status_key)}, issuer="urn:example:status-service"
-                ).model_dump(mode="json")["keys"],
-            ],
-        }
+    trust = with_keys(
+        bundle({KID: jwk(key)}),
+        bundle({"TEST-ONLY-status-key": jwk(status_key)}, issuer="urn:example:status-service"),
     )
     header = {"alg": "ES256", "kid": "TEST-ONLY-status-key", "typ": "vc+jwt"}
     routes = Routes(
@@ -439,8 +483,8 @@ def test_a_list_of_another_pinned_issuer_passes_and_the_summary_says_so(
         {LIST_URL: (200, status_list(status_key, header, issuer="urn:example:status-service"))},
     )
     outcome = check(tmp_path, routes, trust)
-    passed(outcome)
-    assert outcome.observations[0].summary["findings"]["lists"][0]["issuer"] == "another pinned issuer"
+    failed(outcome, "INTEGRITY.STATUS.LIST_UNTRUSTED")
+    assert "delegated status issuer is not supported" in outcome.message
 
 
 @pytest.mark.parametrize(

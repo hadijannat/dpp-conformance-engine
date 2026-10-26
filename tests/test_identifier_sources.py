@@ -392,17 +392,26 @@ def test_a_different_gs1_identifier_fails(tmp_path: Path, declared: object) -> N
 
 
 @pytest.mark.parametrize(
-    ("carrier", "declared"),
+    "declared",
     [
-        (CARRIER, "not a uri"),
-        (CARRIER, "https://id.example.test/01/09506000134353/21/EV0001"),
-        (CARRIER, "https://id.example.test/01/950600013435/21/EV0001"),
-        ("urn:uuid:TEST-ONLY-1", CARRIER),
+        "not a uri",
+        "https://id.example.test/01/09506000134353/21/EV0001",
+        "https://id.example.test/01/950600013435/21/EV0001",
+        # The compressed form is a heuristic that any long last segment reaches, so no limit.
+        "https://id.example.test/AQnYUc1gu4BCfNrP6M",
     ],
-    ids=["declared-not-a-uri", "check-digit", "gtin12-check-digit", "carrier-not-gs1"],
+    ids=["declared-not-a-uri", "check-digit", "gtin12-check-digit", "declared-looks-compressed"],
 )
-def test_an_unparsable_identifier_is_blocked(tmp_path: Path, carrier: str, declared: str) -> None:
-    assert _state(_equivalence(tmp_path, declared, carrier)) == NOT_PARSED
+def test_an_unparsable_declared_identifier_differs(tmp_path: Path, declared: str) -> None:
+    # A system under test must not turn a difference into blocked by serving an unparsable value.
+    outcome = _equivalence(tmp_path, declared)
+    assert _state(outcome) == DIFFERENT
+    assert outcome.observations[0].summary["different"] == ["syntax"]
+    assert "EV000" not in json.dumps(outcome.observations[0].summary), "no payload value in a summary"
+
+
+def test_an_unparsable_carrier_is_blocked(tmp_path: Path) -> None:
+    assert _state(_equivalence(tmp_path, CARRIER, "urn:uuid:TEST-ONLY-1")) == NOT_PARSED
 
 
 def test_a_compressed_carrier_is_unsupported(tmp_path: Path) -> None:

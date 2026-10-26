@@ -25,6 +25,7 @@ from pydantic import Field, ValidationError, field_validator, model_validator
 from dppce.adapters.common import SERVER_ERRORS, blocked, fetch_once, is_http_url, no_answer, unusable
 from dppce.adapters.jose import (
     _ACCEPT,
+    _DID_URL,
     Dids,
     JoseParams,
     _acquire,
@@ -251,11 +252,20 @@ def _payload_id(body: bytes) -> object:
     return document.get("id") if isinstance(document, dict) else None
 
 
-def _proof_secured(body: bytes) -> bool:
+def _pinned_method(trust: TrustBundle, method: str) -> bool:
+    """A DID URL whose DID is the issuer of a pinned passport key."""
+    did = method.partition("#")[0]
+    return bool(_DID_URL.fullmatch(method)) and any(
+        k.issuer == did and "passport" in k.purposes for k in trust.keys
+    )
+
+
+def _proof_secured(body: bytes, url: str, issuer: object, trust: TrustBundle) -> bool:
     """A JSON credential with well-formed Data Integrity proofs only, and no JWS form.
 
-    Any other proof falls through to the signature rule and fails, so a proof of an invented type
-    cannot turn an unsigned list into a limit of the engine.
+    The list must also name the issuer of the credential and the URL of the entry, and each proof
+    a pinned DID. Any other list falls through to the signature rule and fails, so a made-up
+    proof cannot turn an unsigned list into a limit of the engine.
     """
     try:
         document = parse_strict(body)
@@ -263,11 +273,14 @@ def _proof_secured(body: bytes) -> bool:
         return False
     if not isinstance(document, dict) or is_jws_json(document):
         return False
+    if document.get("id") != url or _issuer(document) != issuer:
+        return False
     proofs = _types(document.get("proof"))
     return bool(proofs) and all(
         isinstance(p, dict)
         and p.get("type") == "DataIntegrityProof"
         and all(isinstance(p.get(member), str) for member in _PROOF_MEMBERS)
+        and _pinned_method(trust, p["verificationMethod"])
         for p in proofs
     )
 
@@ -344,9 +357,9 @@ class _Lists:
             raise _Stop(None, problem.reason_code, problem.message)
         return record
 
-    def _verify(self, record: Record) -> dict[str, Any]:
+    def _verify(self, record: Record, url: str, issuer: object) -> dict[str, Any]:
         """Verify the list credential with the code of integrity.jose under the profile vc-jose."""
-        if _proof_secured(record.body):
+        if _proof_secured(record.body, url, issuer, self.trust):
             message = (
                 "The status list credential has a proof, for example Data Integrity, that this engine "
                 "does not verify."
@@ -371,19 +384,21 @@ class _Lists:
         return document
 
     def _entry(self, entry: _Entry, item: dict[str, JsonValue], issuer: object) -> None:
-        document = self._verify(self._record(entry.url, item))
+        document = self._verify(self._record(entry.url, item), entry.url, issuer)
+        # A pinned key of issuer B must not say that the credential of issuer A is not revoked.
+        if _issuer(document) != issuer:
+            message = (
+                "The issuer of the verified status list credential is not the issuer of the "
+                "credential. A delegated status issuer is not supported in this version."
+            )
+            raise _Stop(False, "INTEGRITY.STATUS.LIST_UNTRUSTED", message)
         # The signed id binds the list to the entry. Without it, a host can serve another list of
         # the same issuer, with the bit clear, at the URL of the entry.
         if document.get("id") != entry.url:
             raise _list_malformed(
                 "The id of the verified status list credential is not the statusListCredential URL."
             )
-        item |= {
-            "signature": "valid",
-            "issuer": "the issuer of the credential"
-            if _issuer(document) == issuer
-            else "another pinned issuer",
-        }
+        item |= {"signature": "valid", "issuer": "the issuer of the credential"}
         subject = document.get("credentialSubject")
         if LIST_TYPE not in _types(document.get("type")) or not isinstance(subject, dict):
             raise _list_malformed(

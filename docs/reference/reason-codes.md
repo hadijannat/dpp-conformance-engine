@@ -116,7 +116,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `IDENTIFIER.CROSS.MISMATCH` | IDENTIFIER |  | `dppce.adapters.identifier._cross` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.CROSS.SOURCE_MISSING` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier._cross` | inconclusive |
 | `IDENTIFIER.EQUIVALENCE.DIFFERENT` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.EQUIVALENCE.NOT_PARSED` | IDENTIFIER |  | `dppce.adapters.gs1._not_parsed` | inconclusive |
+| `IDENTIFIER.EQUIVALENCE.NOT_PARSED` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | inconclusive |
 | `IDENTIFIER.EQUIVALENCE.OK` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | pass |
 | `IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
 | `IDENTIFIER.GRANULARITY.MISMATCH` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | fail; inconclusive under a non-default verdict rule |
@@ -192,7 +192,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `INTEGRITY.STATUS.LIST_NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
 | `INTEGRITY.STATUS.LIST_SIGNATURE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._verify` | not fixed here |
 | `INTEGRITY.STATUS.LIST_UNBOUND` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
-| `INTEGRITY.STATUS.LIST_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.status_list` | not fixed here |
+| `INTEGRITY.STATUS.LIST_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._entry` | not fixed here |
 | `INTEGRITY.STATUS.LIST_VALIDITY` | INTEGRITY |  | `dppce.adapters.status_list` | not fixed here |
 | `INTEGRITY.STATUS.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
 | `INTEGRITY.STATUS.OK` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | not fixed here |

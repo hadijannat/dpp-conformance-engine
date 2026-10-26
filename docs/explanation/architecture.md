@@ -620,8 +620,10 @@ qualifiers. Query data attributes are not compared. The check takes the first ro
 4. The pointer does not resolve: `blocked`, `IDENTIFIER.CROSS.SOURCE_MISSING`.
 5. The value is not text: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`. The summary names `type`.
 6. The carrier identifier looks compressed: `unsupported`, `IDENTIFIER.SYNTAX.COMPRESSED`.
-7. The carrier identifier or the value is not a valid uncompressed URI: `blocked`,
-   `IDENTIFIER.EQUIVALENCE.NOT_PARSED`.
+7. The carrier identifier is not a valid uncompressed URI: `blocked`,
+   `IDENTIFIER.EQUIVALENCE.NOT_PARSED`. The value is not a valid uncompressed URI: fail,
+   `IDENTIFIER.EQUIVALENCE.DIFFERENT`. The summary names `syntax`. An unparsable text is never the
+   same GS1 key. A value that looks compressed also fails, because the detection is a heuristic.
 8. The canonical forms differ: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`. The summary names the
    parts that differ, from the set `scheme`, `authority`, and `key`.
 9. Otherwise: pass, `IDENTIFIER.EQUIVALENCE.OK`.
@@ -917,12 +919,15 @@ The check takes the first rule that applies:
 9. A JSON credential without a JWS form whose `proof` is one or more well-formed Data Integrity
    proofs gives `unsupported`, `INTEGRITY.STATUS.LIST_FORMAT`. This engine does not verify such
    proofs. A well-formed proof has the `type` `DataIntegrityProof` and the string members
-   `cryptosuite`, `proofPurpose`, `verificationMethod`, and `proofValue`. Any other `proof` goes to
-   row 10.
+   `cryptosuite`, `proofPurpose`, `verificationMethod`, and `proofValue`. The list must name the
+   issuer of the credential. Its `id` must be the `statusListCredential` URL. Each
+   `verificationMethod` must be a DID URL whose DID is the issuer of a pinned `passport` key. Any
+   other list goes to row 10.
 10. The list credential: the rows of `integrity.jose` under `vc-jose` with the same key source. A
     refused signature, algorithm, header, or JWS shape, or a body that is not secured, gives
     `INTEGRITY.STATUS.LIST_SIGNATURE`. An untrusted key, a key that is not valid, a key of another
-    issuer, or an `iss` that differs from the issuer gives `INTEGRITY.STATUS.LIST_UNTRUSTED`.
+    issuer, or an `iss` that differs from the issuer gives `INTEGRITY.STATUS.LIST_UNTRUSTED`. A
+    verified list whose issuer is not the issuer of the credential gives the same code.
 11. Claims of the wrong form give `INTEGRITY.STATUS.LIST_MALFORMED`. A list credential outside its
     `validFrom` and `validUntil` gives `INTEGRITY.STATUS.LIST_VALIDITY`. A list engine limit gives
     `blocked` or `unsupported` (`INTEGRITY.STATUS.LIST_FORMAT` for a key type).
@@ -947,11 +952,11 @@ The check takes the first rule that applies:
     does not judge staleness. The pass message then says so.
 19. Otherwise: pass, `INTEGRITY.STATUS.OK`.
 
-The issuer of the list credential can differ from the issuer of the credential, as the
-Recommendation permits. A pinned key of the list issuer must sign the list. The observation summary
-says which case applies. Only rows 6 to 9, 11, 14, 16, and 18 can give `blocked` or `unsupported`,
-or no answer, after the credential is read. Each limit applies to one entry. The check judges every
-other entry first. A fail of any entry comes before any limit, in every order of the entries. A
+The Recommendation permits a list issuer other than the issuer of the credential. This version
+does not support such a delegated status issuer: a pinned key of another issuer could clear the
+bit. Only rows 6 to 9, 11, 14, 16, and 18 can give `blocked` or `unsupported`, or no answer,
+after the credential is read. Each limit applies to one entry. The check judges every other entry
+first. A fail of any entry comes before any limit, in every order of the entries. A
 limit of a list ends its entry, because the engine does not judge a list that it did not verify.
 The observation summary holds counts, states, and the status, never an index, a URL, or a key.
 

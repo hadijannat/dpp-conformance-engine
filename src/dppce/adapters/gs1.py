@@ -503,14 +503,6 @@ def canonical(text: str) -> tuple[str, str, tuple[tuple[str, str], ...]] | Probl
 _PARTS: Final = ("scheme", "authority", "key")
 
 
-def _not_parsed(side: str, problem: Problem) -> CheckOutcome:
-    message = (
-        f"The {side} is not a valid uncompressed GS1 Digital Link URI (rule {problem.rule}), "
-        "so it has no canonical form. Nothing is compared."
-    )
-    return blocked("IDENTIFIER.EQUIVALENCE.NOT_PARSED", message)
-
-
 @register("identifier.equivalence", capability="identifier.equivalence", params=EquivalenceParams)
 def equivalence(ctx: CheckContext) -> CheckOutcome:
     """Compare the carrier with a declared GS1 Digital Link URI in canonical form."""
@@ -556,9 +548,21 @@ def equivalence(ctx: CheckContext) -> CheckOutcome:
         )
         return not_done(ExecutionStatus.UNSUPPORTED, "IDENTIFIER.SYNTAX.COMPRESSED", message)
     if isinstance(left, Problem):
-        return _not_parsed("carrier identifier", left)
+        message = (
+            f"The carrier identifier is not a valid uncompressed GS1 Digital Link URI (rule {left.rule}), "
+            "so it has no canonical form. Nothing is compared."
+        )
+        return blocked("IDENTIFIER.EQUIVALENCE.NOT_PARSED", message)
+    # An unparsable text is never the same GS1 key. A system must not turn a difference into
+    # blocked by the form of its value. The compressed form is a heuristic, so it is no limit here.
     if isinstance(right, Problem):
-        return _not_parsed(f"source '{label}'", right)
+        message = (
+            f"The source '{label}' is not a valid uncompressed GS1 Digital Link URI (rule {right.rule}), "
+            "so it differs from the carrier identifier."
+        )
+        return completed(
+            False, "IDENTIFIER.EQUIVALENCE.DIFFERENT", message, observation({"different": ["syntax"]})
+        )
     different = [part for part, a, b in zip(_PARTS, left, right, strict=True) if a != b]
     if different:
         message = f"The carrier identifier and the source '{label}' differ in: {', '.join(different)}."
