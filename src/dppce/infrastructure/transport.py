@@ -122,6 +122,15 @@ def _close_all(handles: tuple[int, ...]) -> None:
 
 
 @dataclass(frozen=True)
+class ClientIdentity:
+    """A TLS client certificate and its private key, from the operator. The key can be encrypted."""
+
+    certificate: Path
+    key: Path
+    passphrase: str | None = field(default=None, repr=False)
+
+
+@dataclass(frozen=True)
 class TransportConfig:
     policy: NetworkPolicy
     engine_version: str
@@ -136,6 +145,10 @@ class TransportConfig:
     private_origins: frozenset[str] | None = None
     samples: Mapping[str, Path] = field(default_factory=dict)
     max_artifact_bytes: int = 8 * 1024 * 1024
+    # Extra TLS trust anchors (PEM). They are added to the default store and never replace it.
+    ca_file: Path | None = None
+    # Presented only to an origin that ``authorization`` names. Without one, it is never sent.
+    client_identity: ClientIdentity | None = None
 
 
 @dataclass(frozen=True)
@@ -165,27 +178,39 @@ class _PinnedHTTPConnection(http.client.HTTPConnection):
         self.sock = socket.create_connection((self._address, self.port), self.timeout)
 
 
-def _tls_context() -> ssl.SSLContext:
+def _tls_context(ca_file: Path | None = None, client: ClientIdentity | None = None) -> ssl.SSLContext:
     """A client context that checks certificates and host names and refuses TLS below 1.2.
 
     The default context already refuses TLS 1.0 and 1.1. The minimum is stated here, so that no
-    change of a default can lower it.
+    change of a default can lower it. A CA file and a client identity only add to this context:
+    neither can turn a check off.
     """
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
+    try:
+        if ca_file is not None:
+            context.load_verify_locations(cafile=ca_file)
+        if client is not None:
+            # An empty passphrase, not None: OpenSSL would otherwise ask for one on the terminal.
+            context.load_cert_chain(client.certificate, client.key, password=client.passphrase or "")
+    except (OSError, ValueError) as exc:
+        # ssl.SSLError is an OSError. Its text names the OpenSSL error, never the passphrase.
+        raise ValueError(f"TLS.CONTEXT.UNUSABLE: {exc}") from None
     return context
 
 
 class _PinnedHTTPSConnection(http.client.HTTPSConnection):
-    def __init__(self, host: str, port: int, address: str, timeout: float) -> None:
-        super().__init__(host, port, timeout=timeout, context=_tls_context())
+    def __init__(
+        self, host: str, port: int, address: str, timeout: float, context: ssl.SSLContext | None = None
+    ) -> None:
+        self._tls = context or _tls_context()
+        super().__init__(host, port, timeout=timeout, context=self._tls)
         self._address = address
 
     def connect(self) -> None:
         raw = socket.create_connection((self._address, self.port), self.timeout)
         # The certificate is checked against the host name, not against the pinned address.
-        context = _tls_context()
-        self.sock = context.wrap_socket(raw, server_hostname=self.host)
+        self.sock = self._tls.wrap_socket(raw, server_hostname=self.host)
 
 
 class PolicyTransport:
@@ -221,6 +246,17 @@ class PolicyTransport:
         self._secrets = tuple(sorted(set(tokens), key=len, reverse=True))
         self._sent = 0
         self._last_sent: float | None = None
+        # Built once, so that a file that cannot be used stops the run before its first request.
+        self._tls = _tls_context(config.ca_file)
+        client = config.client_identity
+        self._tls_client = None if client is None else _tls_context(config.ca_file, client)
+
+    def _tls_for(self, origin: str) -> ssl.SSLContext:
+        """The context with the client certificate for an authorized origin, else the plain one."""
+        auth = self._config.authorization
+        if self._tls_client is not None and auth is not None and origin in _origins(auth.endpoints):
+            return self._tls_client
+        return self._tls
 
     def records(self) -> tuple[Record, ...]:
         return tuple(self._records)
@@ -300,7 +336,9 @@ class PolicyTransport:
         # ``left`` is what remains of the total time of the whole fetch: every hop and attempt.
         timeout = max(0.001, min(policy.timeout_ms / 1000, left))
         connection: http.client.HTTPConnection = (
-            _PinnedHTTPSConnection(target.host, target.port, target.address, timeout)
+            _PinnedHTTPSConnection(
+                target.host, target.port, target.address, timeout, self._tls_for(target.origin)
+            )
             if target.scheme == "https"
             else _PinnedHTTPConnection(target.host, target.port, target.address, timeout)
         )

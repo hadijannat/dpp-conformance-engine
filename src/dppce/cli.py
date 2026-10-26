@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import base64
 import contextlib
+import hashlib
 import json
 import os
 import stat
@@ -23,6 +24,8 @@ from pathlib import Path
 from typing import Any, Final, get_args
 from urllib.parse import urlsplit
 
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
 from pydantic import ValidationError
 
 from dppce import __version__
@@ -79,6 +82,7 @@ from dppce.infrastructure.resources import data_root
 from dppce.infrastructure.transport import (
     ANONYMOUS,
     MIN_SECRET_LENGTH,
+    ClientIdentity,
     PolicyTransport,
     TransportConfig,
     origin_of,
@@ -527,6 +531,76 @@ def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
     return frozenset(origins)
 
 
+def _tls_file(path: Path, flag: str) -> bytes:
+    try:
+        return path.read_bytes()
+    except OSError as exc:
+        raise UsageError(f"TLS.FILE.UNREADABLE: cannot read {flag} {path}") from exc
+
+
+def _certificates(path: Path, flag: str, code: str) -> tuple[bytes, list[x509.Certificate]]:
+    data = _tls_file(path, flag)
+    try:
+        return data, x509.load_pem_x509_certificates(data)
+    except ValueError as exc:
+        raise UsageError(f"{code}: {flag} {path} holds no PEM certificate") from exc
+
+
+def _tls_options(args: argparse.Namespace, authorized: set[str]) -> tuple[Path | None, ClientIdentity | None]:
+    """Check the TLS files of the operator and log their SHA-256. The ICS and the IXIT name none of them.
+
+    The CA file adds trust anchors to the default store. The client certificate goes only to the
+    origins in ``authorized``: the origins of the validated authorization.
+    """
+    if args.ca_file is not None:
+        pem, _ = _certificates(args.ca_file, "--ca-file", "TLS.CA_FILE.INVALID")
+        print(f"tls: --ca-file {args.ca_file} sha256 {hashlib.sha256(pem).hexdigest()}", file=sys.stderr)
+    if args.client_cert is None and args.client_key is None and args.client_key_passphrase_ref is None:
+        return args.ca_file, None
+    if args.client_cert is None or args.client_key is None:
+        raise UsageError(
+            "TLS.CLIENT_CERT.INCOMPLETE: give --client-cert and --client-key together; "
+            "--client-key-passphrase-ref needs both"
+        )
+    if not authorized:
+        raise UsageError(
+            "TLS.CLIENT_CERT.NO_AUTHORIZATION: --client-cert needs a valid authorization; "
+            "the certificate is sent only to an origin that the authorization names"
+        )
+    _, chain = _certificates(args.client_cert, "--client-cert", "TLS.CLIENT_CERT.INVALID")
+    data = _tls_file(args.client_key, "--client-key")
+    ref = args.client_key_passphrase_ref
+    passphrase = None if ref is None else resolve_secret(ref, secrets_dir=args.secrets)
+    # Checked here, so that each cause has its own message. The transport loads the files again.
+    try:
+        key = serialization.load_pem_private_key(data, None if passphrase is None else passphrase.encode())
+    except (TypeError, ValueError) as exc:
+        # The message of the library is not shown: it adds nothing to these messages.
+        if b"ENCRYPTED" not in data:
+            reason = "is not an encrypted PEM private key; give no --client-key-passphrase-ref"
+            code = "TLS.CLIENT_KEY.PASSPHRASE"
+            if passphrase is None:
+                reason, code = "is not a PEM private key", "TLS.CLIENT_KEY.INVALID"
+        elif passphrase is None:
+            reason, code = "is encrypted; give --client-key-passphrase-ref", "TLS.CLIENT_KEY.PASSPHRASE"
+        else:
+            reason, code = "does not open with the passphrase", "TLS.CLIENT_KEY.PASSPHRASE"
+        raise UsageError(f"{code}: --client-key {args.client_key} {reason}") from exc
+    spki = (serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
+    if key.public_key().public_bytes(*spki) != chain[0].public_key().public_bytes(*spki):
+        raise UsageError(
+            f"TLS.CLIENT_KEY.MISMATCH: --client-key {args.client_key} is not the key of the first "
+            f"certificate in --client-cert {args.client_cert}"
+        )
+    fingerprint = chain[0].fingerprint(hashes.SHA256()).hex()
+    print(
+        f"tls: --client-cert {args.client_cert} sha256 {fingerprint}; sent only to "
+        + ", ".join(sorted(authorized)),
+        file=sys.stderr,
+    )
+    return args.ca_file, ClientIdentity(args.client_cert, args.client_key, passphrase)
+
+
 def cmd_plan(args: argparse.Namespace) -> int:
     inputs, _, _, _ = _inputs_from_args(args)
     plan = make_plan(inputs)
@@ -538,6 +612,16 @@ def cmd_plan(args: argparse.Namespace) -> int:
     )
     _emit(args, plan.model_dump(mode="json", by_alias=True), text)
     return EXIT_OK
+
+
+def _live_transport(config: TransportConfig) -> PolicyTransport:
+    try:
+        return PolicyTransport(config, SystemClock())
+    except ValueError as exc:
+        # OpenSSL refused a TLS file that the checks of _tls_options accepted. Nothing was sent.
+        if not str(exc).startswith("TLS."):
+            raise
+        raise UsageError(str(exc)) from exc
 
 
 def cmd_run(args: argparse.Namespace) -> int:
@@ -572,6 +656,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             f"the IXIT names role secrets, but no valid authorization names the origin {target}; "
             "a role credential is sent only to an origin that the owner authorized"
         )
+    ca_file, client_identity = _tls_options(args, authorized)
     samples = {
         name: path
         for name, value in ixit.samples.items()
@@ -595,7 +680,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             f"KEYS.DATA_KEY.UNAVAILABLE: data key {args.data_key_id!r} is not available in {args.keys}; "
             + hint
         ) from exc
-    transport = PolicyTransport(
+    transport = _live_transport(
         TransportConfig(
             policy=ixit.network,
             engine_version=__version__,
@@ -604,8 +689,9 @@ def cmd_run(args: argparse.Namespace) -> int:
             remote_read_origins=remote,
             private_origins=private,
             samples=samples,
-        ),
-        SystemClock(),
+            ca_file=ca_file,
+            client_identity=client_identity,
+        )
     )
     decision = evaluate(inputs, transport)
     envelope = EvidenceEnvelope(schema_version="dppce.envelope/1", decision=decision)
@@ -1317,6 +1403,22 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         default=[],
         metavar="ORIGIN",
         help="state that the owner of one public origin permits bounded read-only access; repeat for each",
+    )
+    run.add_argument(
+        "--ca-file",
+        type=Path,
+        help="PEM file of extra TLS trust anchors; they are added to the default store and never replace it",
+    )
+    run.add_argument(
+        "--client-cert",
+        type=Path,
+        help="PEM TLS client certificate; sent only to an origin that the authorization names",
+    )
+    run.add_argument("--client-key", type=Path, help="PEM private key of --client-cert; it can be encrypted")
+    run.add_argument(
+        "--client-key-passphrase-ref",
+        metavar="REFERENCE",
+        help="secret reference of the --client-key passphrase: env:DPPCE_SECRET_<NAME> or file:<name>",
     )
     run.add_argument(
         "--retention-days",
