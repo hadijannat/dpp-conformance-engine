@@ -181,11 +181,14 @@ def test_a_failed_step_shows_redacted_observed_fields_and_never_a_payload_value(
         "key": SENTINEL,
         "reason": SENTINEL,
         "value": {"nested": SENTINEL},
+        # status_list.py stores a list of JSON objects here. The depth limit hides them.
+        "findings": {"signature": "invalid", "lists": [{"id": SENTINEL}]},
     }
     page = render(_envelope(_step("completed", "fail", "DATA.SCHEMA.INVALID", summary)))
     assert SENTINEL not in page
     section = page.split('id="failed"', 1)[1]
-    for shown in ("404", "application/json", "batteryChemistry", "/capacity", "type"):
+    assert "(nested, not shown)" in section
+    for shown in ("404", "application/json", "batteryChemistry", "/capacity", "type", "signature invalid"):
         assert shown in section, shown
     # A field outside the allowlist is named, never shown with its value.
     assert "Other recorded fields, values not shown: key, reason, value" in section
