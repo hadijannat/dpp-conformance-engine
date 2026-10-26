@@ -125,6 +125,10 @@ class ReferenceSystem:
             for name in ("leaf", "expired-leaf", "untrusted-leaf")
         }
 
+    def signer(self, name: str) -> tuple[LocalSigner, x509.Certificate]:
+        """The TEST-ONLY signer and certificate of the fixture PKI, for a family module."""
+        return self._signers[name]
+
     # -- documents ------------------------------------------------------------------------------
 
     def role_of(self, authorization: str | None) -> str:

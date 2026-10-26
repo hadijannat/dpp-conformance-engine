@@ -11,7 +11,8 @@ Contract of a family module (``base.Family``):
 - ``respond(system, request) -> Reply | None``: the answer to a ``GET`` or ``HEAD`` request
   that the module serves, or ``None`` to pass the request on. ``system`` is the
   ``ReferenceSystem``. ``system.faults`` holds the active flags, and ``system.handle`` gives
-  the core answer. ``request`` is a ``base.Request``. Return the body of a ``GET``: the server
+  the core answer. ``system.signer(name)`` gives a TEST-ONLY signer and certificate of the
+  fixture PKI. ``request`` is a ``base.Request``. Return the body of a ``GET``: the server
   drops it for ``HEAD``. The module never changes state: the reference system has no write
   operation.
 

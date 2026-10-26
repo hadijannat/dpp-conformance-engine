@@ -65,8 +65,7 @@ def credential(subject: str) -> dict[str, Any]:
 
 def token(system: ReferenceSystem, subject: str) -> str:
     faults = system.faults
-    # ponytail: the core holds the TEST-ONLY leaf key. ReferenceSystem keeps no fixtures path.
-    signer, certificate = system._signers["leaf"]
+    signer, certificate = system.signer("leaf")
     document = credential(subject)
     if "vc_expired" in faults:
         document |= {"validFrom": "2025-01-01T00:00:00Z", "validUntil": "2026-01-01T00:00:00Z"}
