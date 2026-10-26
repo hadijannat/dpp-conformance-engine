@@ -80,7 +80,9 @@ usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PAC
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
                  [--data-key-id DATA_KEY_ID] [--create-data-key] [--secrets SECRETS]
                  [--role-secret ROLE=REFERENCE] [--allow-private-host ORIGIN]
-                 [--allow-remote-host ORIGIN] [--retention-days RETENTION_DAYS]
+                 [--allow-remote-host ORIGIN] [--ca-file CA_FILE] [--client-cert CLIENT_CERT]
+                 [--client-key CLIENT_KEY] [--client-key-passphrase-ref REFERENCE]
+                 [--retention-days RETENTION_DAYS]
 
 Execute the plan, record the observations, and write the report.
 
@@ -129,6 +131,16 @@ options:
   --allow-remote-host ORIGIN
                         state that the owner of one public origin permits bounded read-only
                         access; repeat for each
+  --ca-file CA_FILE     PEM file of extra TLS trust anchors; they are added to the default store
+                        and never replace it
+  --client-cert CLIENT_CERT
+                        PEM TLS client certificate; sent only to an origin that the authorization
+                        names
+  --client-key CLIENT_KEY
+                        PEM private key of --client-cert; it can be encrypted
+  --client-key-passphrase-ref REFERENCE
+                        secret reference of the --client-key passphrase: env:DPPCE_SECRET_<NAME>
+                        or file:<name>
   --retention-days RETENTION_DAYS
                         days to keep the recording; the operator decides; default: the value that
                         the IXIT asks for
