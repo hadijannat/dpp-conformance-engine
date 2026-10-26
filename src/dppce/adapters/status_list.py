@@ -51,6 +51,8 @@ _INDEX: Final = re.compile(r"[0-9]+")
 # An index with more digits is outside every list that the decoder accepts.
 _MAX_INDEX_DIGITS: Final = 64
 _UNSUPPORTED: Final = ExecutionStatus.UNSUPPORTED
+# The string members of a well-formed DataIntegrityProof, besides its type.
+_PROOF_MEMBERS: Final = ("cryptosuite", "proofPurpose", "verificationMethod", "proofValue")
 # The findings of integrity.jose on the list credential, as findings of the list.
 _LIST_FAILS: Final = {
     "INTEGRITY.JOSE.ISSUER_UNTRUSTED": "INTEGRITY.STATUS.LIST_UNTRUSTED",
@@ -250,7 +252,11 @@ def _payload_id(body: bytes) -> object:
 
 
 def _proof_secured(body: bytes) -> bool:
-    """A JSON credential with a proof of a known shape, for example Data Integrity, and no JWS form."""
+    """A JSON credential with well-formed Data Integrity proofs only, and no JWS form.
+
+    Any other proof falls through to the signature rule and fails, so a proof of an invented type
+    cannot turn an unsigned list into a limit of the engine.
+    """
     try:
         document = parse_strict(body)
     except (ValueError, RecursionError):
@@ -258,7 +264,12 @@ def _proof_secured(body: bytes) -> bool:
     if not isinstance(document, dict) or is_jws_json(document):
         return False
     proofs = _types(document.get("proof"))
-    return bool(proofs) and all(isinstance(p, dict) and isinstance(p.get("type"), str) for p in proofs)
+    return bool(proofs) and all(
+        isinstance(p, dict)
+        and p.get("type") == "DataIntegrityProof"
+        and all(isinstance(p.get(member), str) for member in _PROOF_MEMBERS)
+        for p in proofs
+    )
 
 
 class _Lists:
@@ -361,6 +372,12 @@ class _Lists:
 
     def _entry(self, entry: _Entry, item: dict[str, JsonValue], issuer: object) -> None:
         document = self._verify(self._record(entry.url, item))
+        # The signed id binds the list to the entry. Without it, a host can serve another list of
+        # the same issuer, with the bit clear, at the URL of the entry.
+        if document.get("id") != entry.url:
+            raise _list_malformed(
+                "The id of the verified status list credential is not the statusListCredential URL."
+            )
         item |= {
             "signature": "valid",
             "issuer": "the issuer of the credential"
@@ -389,9 +406,6 @@ class _Lists:
                 False, "INTEGRITY.STATUS.PURPOSE", "The status list does not serve the purpose of the entry."
             )
         item["purpose"] = "matches"
-        if entry.size != 1:
-            message = "The entry has a statusSize other than 1. This engine reads one-bit entries only."
-            raise _Stop(None, "INTEGRITY.STATUS.SIZE_UNSUPPORTED", message, limit=_UNSUPPORTED)
         try:
             bits = decode_list(subject["encodedList"])
         except StatusError as exc:
@@ -404,10 +418,15 @@ class _Lists:
             raise _Stop(
                 False, "INTEGRITY.STATUS.LIST_LENGTH", f"The status list has fewer than {MIN_BITS} entries."
             )
-        if entry.index >= size:
+        # An entry holds statusSize bits from index times statusSize. The rules above do not
+        # depend on the size, so the size limit comes after them.
+        if (entry.index + 1) * entry.size > size:
             raise _Stop(
                 False, "INTEGRITY.STATUS.INDEX_RANGE", "The statusListIndex is outside the status list."
             )
+        if entry.size != 1:
+            message = "The entry has a statusSize other than 1. This engine reads one-bit entries only."
+            raise _Stop(None, "INTEGRITY.STATUS.SIZE_UNSUPPORTED", message, limit=_UNSUPPORTED)
         stale = self._staleness(document, ttl, item)
         is_set = bit_is_set(bits, entry.index)
         item["bit"] = "set" if is_set else "not set"

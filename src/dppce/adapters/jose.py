@@ -206,18 +206,21 @@ def _did_key(
 ) -> tuple[PublicKey, TrustedKey]:
     """The key of a DID document that a pinned key of the DID matches. Resolution is not trust."""
     kid = signature.header.get("kid")
-    did, _, fragment = kid.partition("#") if isinstance(kid, str) else ("", "", "")
-    if not fragment or did_web_url(did) is None:
-        if isinstance(kid, str) and _DID_URL.fullmatch(kid) and not kid.startswith("did:web:"):
-            message = "The kid is a DID URL of a DID method that this engine does not resolve."
-            raise _Finding(None, "INTEGRITY.JOSE.UNSUPPORTED", message)
-        raise _untrusted("The kid is not a did:web DID URL with a fragment.", "no DID URL")
+    if not isinstance(kid, str) or not _DID_URL.fullmatch(kid):
+        raise _untrusted("The kid is not a DID URL with a fragment.", "no DID URL")
+    did = kid.partition("#")[0]
+    # The pin comes before the DID method, so an untrusted signer cannot pick a kid that gives a
+    # limit of the engine in place of this fail. Nothing pins the DID, so its host is not contacted.
     pinned = [k for k in trust.keys if k.issuer == did and "passport" in k.purposes]
     if not pinned:
-        # Nothing pins the DID, so its host is not contacted.
         raise _untrusted(
             "No passport key of the trust bundle has the DID of the kid as its issuer.", "no pin"
         )
+    if did_web_url(did) is None:
+        if not did.startswith("did:web:"):
+            message = "The kid is a DID URL of a DID method that this engine does not resolve."
+            raise _Finding(None, "INTEGRITY.JOSE.UNSUPPORTED", message)
+        raise _untrusted("The kid is not a did:web DID URL with a fragment.", "no DID URL")
     if did not in dids:
         dids[did] = resolve_did_web(ctx, did, params.did_sample)
     resolved = dids[did]

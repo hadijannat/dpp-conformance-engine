@@ -376,18 +376,28 @@ def test_a_list_without_a_securing_mechanism_fails_and_a_data_integrity_list_is_
         check(tmp_path, Routes(credential(key), {LIST_URL: (200, plain)}), trust),
         "INTEGRITY.STATUS.LIST_SIGNATURE",
     )
-    proof = {"type": "DataIntegrityProof", "cryptosuite": "ecdsa-rdfc-2019", "proofValue": "zTEST"}
+    proof = {
+        "type": "DataIntegrityProof",
+        "cryptosuite": "ecdsa-rdfc-2019",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:example:TEST#key-1",
+        "proofValue": "zTEST",
+    }
     secured = _json({**json.loads(plain), "proof": proof})
     unsupported(
         check(tmp_path, Routes(credential(key), {LIST_URL: (200, secured)}), trust),
         "INTEGRITY.STATUS.LIST_FORMAT",
     )
     # A proof member of another shape is no securing mechanism that the engine knows of: a fail.
-    odd = _json({**json.loads(plain), "proof": "TEST"})
-    failed(
-        check(tmp_path, Routes(credential(key), {LIST_URL: (200, odd)}), trust),
-        "INTEGRITY.STATUS.LIST_SIGNATURE",
-    )
+    # An unsigned list cannot become a limit by a proof of any type string.
+    revoked = json.loads(list_payload(encoded_list=encoded((INDEX,))))
+    lacking = {k: v for k, v in proof.items() if k != "verificationMethod"}
+    for odd_proof in ("TEST", {"type": "X"}, [proof, {"type": "X"}], lacking):
+        odd = _json({**revoked, "proof": odd_proof})
+        failed(
+            check(tmp_path, Routes(credential(key), {LIST_URL: (200, odd)}), trust),
+            "INTEGRITY.STATUS.LIST_SIGNATURE",
+        )
 
 
 def test_the_list_must_be_signed_by_a_pinned_key_of_its_own_issuer(
@@ -502,6 +512,15 @@ def test_the_list_comes_from_an_ixit_sample_that_names_the_entry_url(
     is_blocked(check(tmp_path, missing, trust, list_source="sample"), "INTEGRITY.STATUS.SAMPLE_MISSING")
 
 
+@pytest.mark.parametrize("list_id", ["https://status.example.test/credentials/status/4", None])
+def test_a_live_list_that_the_issuer_signed_for_another_url_fails(
+    tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle, list_id: str | None
+) -> None:
+    # A sibling list of the same pinned issuer, with the bit clear, must not hide a revocation.
+    routes = Routes(credential(key), {LIST_URL: (200, status_list(key, id=list_id))})
+    failed(check(tmp_path, routes, trust), "INTEGRITY.STATUS.LIST_MALFORMED")
+
+
 def test_a_revoked_bit_in_an_unbound_sample_is_not_a_fail(
     tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
 ) -> None:
@@ -572,10 +591,32 @@ def test_a_malformed_entry_fails_and_nothing_is_fetched(
 def test_a_status_size_other_than_one_is_unsupported_and_does_not_hide_a_list_fail(
     tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle
 ) -> None:
-    sized = credential(key, entry(statusSize=2))
+    # Index 7 of two-bit entries ends at bit 16, inside the list: a well-formed unsupported form.
+    sized = credential(key, entry(statusSize=2, statusListIndex="7"))
     unsupported(check(tmp_path, served(key, cred=sized), trust), "INTEGRITY.STATUS.SIZE_UNSUPPORTED")
     failed(check(tmp_path, served(key, cred=sized, purpose="suspension"), trust), "INTEGRITY.STATUS.PURPOSE")
     passed(check(tmp_path, served(key, cred=credential(key, entry(statusSize=1))), trust))
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        ("7", {"encoded_list": "not multibase"}, "INTEGRITY.STATUS.LIST_MALFORMED"),
+        ("7", {"encoded_list": encoded(size_bits=MIN_BITS - 8)}, "INTEGRITY.STATUS.LIST_LENGTH"),
+        # Two-bit entry 65,536 starts at bit 131,072, past the end of the list.
+        (str(MIN_BITS // 2), {}, "INTEGRITY.STATUS.INDEX_RANGE"),
+        (str(MIN_BITS), {}, "INTEGRITY.STATUS.INDEX_RANGE"),
+    ],
+)
+def test_a_status_size_other_than_one_does_not_hide_a_list_rule_that_fails(
+    tmp_path: Path, key: ec.EllipticCurvePrivateKey, trust: TrustBundle, case: tuple[str, dict[str, Any], str]
+) -> None:
+    index, list_changes, code = case
+    sized = credential(key, entry(statusSize=2, statusListIndex=index))
+    failed(check(tmp_path, served(key, cred=sized, **list_changes), trust), code)
+    # The last two-bit entry is inside the list, so the limit applies.
+    last = credential(key, entry(statusSize=2, statusListIndex=str(MIN_BITS // 2 - 1)))
+    unsupported(check(tmp_path, served(key, cred=last), trust), "INTEGRITY.STATUS.SIZE_UNSUPPORTED")
 
 
 def test_more_entries_than_the_limit_are_judged_before_the_limit_applies(
@@ -734,8 +775,14 @@ def test_a_kid_that_is_not_a_did_web_url_is_untrusted_or_unsupported(
     for kid in (KID, DID, DID + "#", "did:web:127.0.0.1#key-1"):
         routes = offline(did_credential(key, kid), did_document(jwk(key)))
         failed(jose(tmp_path, routes, trust, **DID_PARAMS), "INTEGRITY.JOSE.ISSUER_UNTRUSTED")
+    # Another DID method is an engine limit only for a DID that a passport key pins.
     other_method = offline(did_credential(key, "did:key:zTEST#zTEST"), did_document(jwk(key)))
-    is_blocked(jose(tmp_path, other_method, trust, **DID_PARAMS), "INTEGRITY.JOSE.UNSUPPORTED")
+    pinned = bundle({"TEST-ONLY-did-key-2": jwk(key)}, issuer="did:key:zTEST")
+    is_blocked(jose(tmp_path, other_method, pinned, **DID_PARAMS), "INTEGRITY.JOSE.UNSUPPORTED")
+    # An untrusted signer cannot turn the fail into a limit by the DID method of its kid.
+    for kid in ("did:key:zTEST#zTEST", "did:example:attacker#k1"):
+        routes = offline(did_credential(key, kid), did_document(jwk(key)))
+        failed(jose(tmp_path, routes, trust, **DID_PARAMS), "INTEGRITY.JOSE.ISSUER_UNTRUSTED")
 
 
 def test_a_did_method_without_a_jwk_is_an_engine_limit_that_does_not_hide_a_fail(

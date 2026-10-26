@@ -487,19 +487,22 @@ a token is never a pass.
 
 The key source `did` applies these rules to each signature, in this order, in row 9:
 
-1. The `kid` must be a did:web DID URL with a non-empty fragment. The DID part must map to a URL,
-   as for `identity.did`. Another `kid` gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. A DID URL of
-   another DID method gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`.
+1. The `kid` must be a DID URL with a non-empty fragment. Another `kid` gives
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
 2. No passport key of the trust bundle has the DID as its `issuer`:
-   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. The DID document is not fetched.
-3. The check resolves the DID with `resolve_did_web`, once for each DID. With `did_sample`, it
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. The DID document is not fetched. This rule comes before the
+   DID method, so the `kid` of an untrusted signer cannot turn this fail into a limit.
+3. The DID must be a did:web DID that maps to a URL, as for `identity.did`. A pinned DID of another
+   DID method gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`. Another did:web DID gives
+   `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+4. The check resolves the DID with `resolve_did_web`, once for each DID. With `did_sample`, it
    reads the sample and sends nothing. A host without an answer, a redirect out of the scope, or a
    host that the operator did not confirm gives no answer (`unreachable`). A `blocked` outcome of
    the resolver gives `blocked` with its code. Both are kept like an engine limit.
-4. A DID document that breaks a rule of `identity.did` gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
-5. The `kid` is not an `assertionMethod` entry of the document: `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
-6. The assertion method has no `publicKeyJwk`: `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`.
-7. No passport key of the DID has the same `kty`, `crv`, `x`, `y`, `n`, and `e` as the method:
+5. A DID document that breaks a rule of `identity.did` gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+6. The `kid` is not an `assertionMethod` entry of the document: `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+7. The assertion method has no `publicKeyJwk`: `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`.
+8. No passport key of the DID has the same `kty`, `crv`, `x`, `y`, `n`, and `e` as the method:
    `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. A matching key that is revoked, or outside its validity, gives
    `INTEGRITY.JOSE.KEY_NOT_VALID`.
 
@@ -855,8 +858,11 @@ The check takes the first rule that applies:
 8. Sample: a missing sample gives `blocked`, `INTEGRITY.STATUS.SAMPLE_MISSING`. A sample whose `id`
    is not the `statusListCredential` URL as exact text gives `blocked`, `INTEGRITY.STATUS.LIST_UNBOUND`.
    The engine cannot show that such a sample is the list of the entry.
-9. A JSON credential with a `proof` object that has a string `type`, and no JWS form, gives
-   `unsupported`, `INTEGRITY.STATUS.LIST_FORMAT`. This engine does not verify Data Integrity proofs.
+9. A JSON credential without a JWS form whose `proof` is one or more well-formed Data Integrity
+   proofs gives `unsupported`, `INTEGRITY.STATUS.LIST_FORMAT`. This engine does not verify such
+   proofs. A well-formed proof has the `type` `DataIntegrityProof` and the string members
+   `cryptosuite`, `proofPurpose`, `verificationMethod`, and `proofValue`. Any other `proof` goes to
+   row 10.
 10. The list credential: the rows of `integrity.jose` under `vc-jose` with the same key source. A
     refused signature, algorithm, header, or JWS shape, or a body that is not secured, gives
     `INTEGRITY.STATUS.LIST_SIGNATURE`. An untrusted key, a key that is not valid, a key of another
@@ -864,16 +870,19 @@ The check takes the first rule that applies:
 11. Claims of the wrong form give `INTEGRITY.STATUS.LIST_MALFORMED`. A list credential outside its
     `validFrom` and `validUntil` gives `INTEGRITY.STATUS.LIST_VALIDITY`. A list engine limit gives
     `blocked` or `unsupported` (`INTEGRITY.STATUS.LIST_FORMAT` for a key type).
-12. `INTEGRITY.STATUS.LIST_MALFORMED` for one of these: the `type` lacks
+12. `INTEGRITY.STATUS.LIST_MALFORMED` for one of these: the `id` of the verified list credential
+    is not the `statusListCredential` URL as exact text, also in live mode. The `type` lacks
     `BitstringStatusListCredential`. The `credentialSubject` is not an object with the type
     `BitstringStatusList` and a string `encodedList`. Its `statusPurpose` is not one or more
     strings. A `ttl` is not an integer of at least 0.
 13. The list does not name `purpose` in its `statusPurpose`: `INTEGRITY.STATUS.PURPOSE`.
-14. A `statusSize` other than 1: `unsupported`, `INTEGRITY.STATUS.SIZE_UNSUPPORTED`.
-15. An `encodedList` that does not decode gives `INTEGRITY.STATUS.LIST_MALFORMED`. A bitstring above
+14. An `encodedList` that does not decode gives `INTEGRITY.STATUS.LIST_MALFORMED`. A bitstring above
     16 MiB gives `blocked`, `INTEGRITY.STATUS.TOO_LARGE`. The decoder stops at that size.
-16. Fewer than 131,072 bits: `INTEGRITY.STATUS.LIST_LENGTH`. An index at or past the end:
-    `INTEGRITY.STATUS.INDEX_RANGE`.
+15. Fewer than 131,072 bits: `INTEGRITY.STATUS.LIST_LENGTH`. An entry that ends past the end of the
+    list: `INTEGRITY.STATUS.INDEX_RANGE`. An entry holds `statusSize` bits from the index times the
+    `statusSize`.
+16. A `statusSize` other than 1: `unsupported`, `INTEGRITY.STATUS.SIZE_UNSUPPORTED`. Rows 12 to 15
+    apply to every `statusSize` first.
 17. A set bit under `revocation`: `INTEGRITY.STATUS.REVOKED`, also from a stale list, because
     revocation is not reversible. A set bit under `suspension` in a list that is not stale:
     `INTEGRITY.STATUS.SUSPENDED`.
@@ -884,7 +893,7 @@ The check takes the first rule that applies:
 
 The issuer of the list credential can differ from the issuer of the credential, as the
 Recommendation permits. A pinned key of the list issuer must sign the list. The observation summary
-says which case applies. Only rows 6 to 9, 11, 14, 15, and 18 can give `blocked` or `unsupported`,
+says which case applies. Only rows 6 to 9, 11, 14, 16, and 18 can give `blocked` or `unsupported`,
 or no answer, after the credential is read. Each limit applies to one entry. The check judges every
 other entry first. A fail of any entry comes before any limit, in every order of the entries. A
 limit of a list ends its entry, because the engine does not judge a list that it did not verify.
