@@ -736,9 +736,9 @@ is an owner decision of 2026-10-18. The access check still searches such a body 
 signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.1).
 An answer with the status 429 is no answer too. It gives `TRANSPORT.RATE_LIMITED` with
 `unreachable: true` in every check, `integrity.jws` included. The access check still searches such
-a body for a leak. The transport waits for `Retry-After` once per fetch, only for a `GET` or a
-`HEAD`, only for a number of seconds up to 5, and only within the time limit and the request
-budget. It then sends the request one more time.
+a body for a leak. The transport waits for `Retry-After` once per fetch, for a `GET` or a `HEAD`
+only. The value must be a number of seconds up to 5. The wait must fit the time limit and the
+request budget. The transport then sends the request one more time.
 
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
