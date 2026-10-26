@@ -221,7 +221,7 @@ def test_a_token_from_before_a2352dc_with_userinfo_authorizes_only_the_reduced_o
 
     A token signed before a2352dc can still name an endpoint with userinfo. run validates it, and
     the transport compares origins only. The endpoint then authorizes its origin without the
-    userinfo. The engine sends no userinfo from a token.
+    userinfo. The engine uses the endpoints of a token only to compare origins.
     """
     endpoint = "http://TEST-ONLY-user:TEST-ONLY-password@127.0.0.1:8765"
     document = _authorization(issuer=ISSUER, endpoints=[endpoint])
