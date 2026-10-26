@@ -911,67 +911,62 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 def cmd_sign(args: argparse.Namespace) -> int:
     source: Path = args.envelope
-    if not args.in_place:
-        return _sign_to(args, source, None, None)
     link = f"SIGN.INPUT.LINK: {source} is a symbolic link; sign the target file, or use --out"
-    # os.replace would put a regular file in place of a link. One open both refuses a link and
-    # pins the file. The descriptor stays open until the rename: an open file keeps its inode, so
-    # an entry swapped in at the path has a different inode number. Some file systems reuse a freed
-    # number at once.
-    try:
-        handle = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
-    except OSError as exc:
-        if exc.errno != errno.ELOOP:
-            raise
-        raise UsageError(link) from exc
-    with os.fdopen(handle, "rb") as file:
-        return _sign_to(args, source, file.read(), os.fstat(file.fileno()))
-
-
-def _sign_to(
-    args: argparse.Namespace, source: Path, data: bytes | None, pinned: os.stat_result | None
-) -> int:
-    """Sign ``source`` and write it. ``pinned`` is the open input of ``--in-place``, else None."""
-    envelope = _checked_envelope(source, data)
-    if args.out is not None:
-        if args.out.resolve() == source.resolve():
-            raise UsageError(
-                "SIGN.OUTPUT.IS_INPUT: --out names the input envelope; use --in-place to replace it"
-            )
-        _new_path(args.out, "SIGN.OUTPUT.EXISTS")
-    signer = load_signing_key(
-        args.key, args.kid, _passphrase(args), allow_unencrypted=args.allow_unencrypted_key
-    )
-    if (args.status_list_id is None) != (args.status_index is None):
-        raise UsageError("SIGN.OPTION.INVALID: --status-list-id and --status-index go together")
-    try:
-        entry = (
-            None
-            if args.status_list_id is None
-            else StatusReference(list_id=args.status_list_id, index=args.status_index)
+    pinned, data = None, None
+    with contextlib.ExitStack() as held:
+        if args.in_place:
+            # os.replace would put a regular file in place of a link. One open both refuses a link
+            # and pins the file. The descriptor stays open until the rename: an open file keeps its
+            # inode, so an entry swapped in at the path has a different inode number. Some file
+            # systems reuse a freed number at once.
+            try:
+                handle = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+            except OSError as exc:
+                if exc.errno != errno.ELOOP:
+                    raise
+                raise UsageError(link) from exc
+            file = held.enter_context(os.fdopen(handle, "rb"))
+            pinned, data = os.fstat(file.fileno()), file.read()
+        envelope = _checked_envelope(source, data)
+        if args.out is not None:
+            if args.out.resolve() == source.resolve():
+                raise UsageError(
+                    "SIGN.OUTPUT.IS_INPUT: --out names the input envelope; use --in-place to replace it"
+                )
+            _new_path(args.out, "SIGN.OUTPUT.EXISTS")
+        signer = load_signing_key(
+            args.key, args.kid, _passphrase(args), allow_unencrypted=args.allow_unencrypted_key
         )
-        signed = sign_envelope(
-            envelope,
-            signer,
-            issuer=args.issuer,
-            signed_at=utc_stamp(_now()),
-            role=args.role,
-            status=entry,
-            valid_until=args.valid_until,
-            supersedes=args.supersedes,
-        )
-    except ValidationError as exc:
-        raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
-    signed_bytes = (signed.model_dump_json(by_alias=True) + "\n").encode("utf-8")
-    out: Path = source if pinned is not None else args.out
-    if pinned is not None:
-        if not _replace(source, signed_bytes, pinned):
-            raise UsageError(
-                f"SIGN.INPUT.LINK: {source} changed while it was signed, for example into a symbolic "
-                "link; nothing was written"
+        if (args.status_list_id is None) != (args.status_index is None):
+            raise UsageError("SIGN.OPTION.INVALID: --status-list-id and --status-index go together")
+        try:
+            entry = (
+                None
+                if args.status_list_id is None
+                else StatusReference(list_id=args.status_list_id, index=args.status_index)
             )
-    else:
-        write_new_file(out, signed_bytes)
+            signed = sign_envelope(
+                envelope,
+                signer,
+                issuer=args.issuer,
+                signed_at=utc_stamp(_now()),
+                role=args.role,
+                status=entry,
+                valid_until=args.valid_until,
+                supersedes=args.supersedes,
+            )
+        except ValidationError as exc:
+            raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
+        signed_bytes = (signed.model_dump_json(by_alias=True) + "\n").encode("utf-8")
+        out: Path = source if args.in_place else args.out
+        if pinned is not None:
+            if not _replace(source, signed_bytes, pinned):
+                raise UsageError(
+                    f"SIGN.INPUT.LINK: {source} changed while it was signed, for example into a "
+                    "symbolic link; nothing was written"
+                )
+        else:
+            write_new_file(out, signed_bytes)
     summary = {"written": str(out), "signatures": len(signed.signatures), "kid": args.kid, "role": args.role}
     _emit(args, summary, f"signed with key '{args.kid}'; wrote {out}")
     return EXIT_OK
