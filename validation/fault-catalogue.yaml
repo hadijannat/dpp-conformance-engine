@@ -438,6 +438,20 @@ sut_faults:
     test_purpose: TP-AAS-DPP-001
     profiles: [family/aas]
     expected: {verdict: fail, reason_code: AAS.DPP.ELEMENT_MISSING}
+  - id: F-67
+    class: binding_divergence
+    fault: vc_subject_differs
+    description: The credentialSubject id of the credential sample differs from the carrier identifier.
+    test_purpose: TP-VC-CONSISTENCY-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: IDENTIFIER.CROSS.MISMATCH}
+  - id: F-68
+    class: binding_divergence
+    fault: gs1_serial_differs_padded
+    description: The declared identifier has the GTIN in 13-digit form and a different serial.
+    test_purpose: TP-GS1-EQUIVALENCE-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: IDENTIFIER.EQUIVALENCE.DIFFERENT}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -559,6 +573,13 @@ boundary_cases:
     profiles: [family/aas]
     expected: {verdict: inconclusive, reason_code: AAS.VERSION.UNSUPPORTED}
     rationale: An unsupported version is a limit of the engine. A JSON sample names no version, so the XML namespace seeds this case.
+  - id: B-17
+    fault: gs1_padded_gtin
+    description: The declared identifier has the GTIN in 13-digit form and the same serial.
+    test_purpose: TP-GS1-EQUIVALENCE-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: pass, reason_code: IDENTIFIER.EQUIVALENCE.OK}
+    rationale: A GTIN-13 with a leading zero is the same GTIN-14, so both forms name the same key. The check does not judge which form the carrier must use.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:
