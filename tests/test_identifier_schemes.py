@@ -6,6 +6,8 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
+from validation import cases
+from validation.rig import ReferenceRig
 
 from dppce.adapters.identifier import parse
 from dppce.models import ICS, IXIT, CheckOutcome, ExecutionStatus
@@ -96,3 +98,26 @@ def _with_params(tmp_path: Path, identifier: str, scheme: str, params: dict[str,
     stimulus = base.purpose.stimulus.model_copy(update={"params": params})
     purpose = base.purpose.model_copy(update={"stimulus": stimulus})
     return parse(replace(base, ics=ics, ixit=ixit, purpose=purpose))
+
+
+# -- the reference system: control C-FAMILY-WEB and F-71 ------------------------------------------
+
+_PURPOSE = "TP-WEB-IDENTIFIER-001"
+
+
+def test_the_web_control_passes_the_identifier_syntax_step(tmp_path: Path) -> None:
+    with ReferenceRig(tmp_path, "family/web") as rig:
+        run = rig.run()
+    assert (run.step(_PURPOSE)["verdict"], run.step(_PURPOSE)["reason_code"]) == (
+        "pass",
+        "IDENTIFIER.SYNTAX.OK",
+    )
+
+
+def test_f71_gives_the_catalogue_outcome(tmp_path: Path) -> None:
+    case = next(c for c in cases.sut_faults() if c.id == "F-71")
+    assert case.test_purpose == _PURPOSE
+    with ReferenceRig(tmp_path, "family/web", faults=case.faults, **case.rig) as rig:
+        run = rig.run()
+    step = run.step(_PURPOSE)
+    assert (step["verdict"], step["reason_code"]) == ("fail", "IDENTIFIER.SYNTAX.INVALID")
