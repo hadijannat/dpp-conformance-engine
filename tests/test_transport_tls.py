@@ -125,6 +125,12 @@ def pki(tmp_path: Path) -> dict[str, Any]:
     paths["client-key"].write_bytes(
         client_key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, encryption)
     )
+    paths["client-plain-key"] = tmp_path / "TEST-ONLY-client.plain.key.pem"
+    paths["client-plain-key"].write_bytes(
+        client_key.private_bytes(
+            serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
+        )
+    )
     return paths
 
 
@@ -424,6 +430,22 @@ def test_a_run_with_the_tls_options_reaches_a_server_that_requires_a_client_cert
     assert hashlib.sha256(pki["ca"].read_bytes()).hexdigest() in err
     assert client.fingerprint(hashes.SHA256()).hex() in err
     assert PASSPHRASE not in err
+
+
+def test_a_run_with_an_unencrypted_client_key_needs_no_passphrase(
+    mutual: tuple[LoopbackServer, Peers],
+    pki: dict[str, Path],
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server, peers = mutual
+    monkeypatch.setenv("SSL_CERT_FILE", str(pki["ca"]))
+    options = ["--client-cert", str(pki["client"]), "--client-key", str(pki["client-plain-key"])]
+    code, err = _run(tmp_path, server.origin, capsys, *options)
+    assert code not in (cli.EXIT_USAGE, cli.EXIT_ERROR), err
+    assert server.seen
+    assert set(peers) == {"TEST-ONLY client"}
 
 
 def test_a_run_without_the_client_certificate_is_refused_by_that_server(
