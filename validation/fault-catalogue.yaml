@@ -60,8 +60,9 @@
 #   older than the entry commit. The entry commit comes before the commit that adds its rig setup.
 # - C-FAMILY-AAS: the entry commit names its new sample before the commit that adds that file. The
 #   rig uses the file from the later rig setup commit on.
-# The AAS commits after the entry commit were rewritten before they landed, to remove a vendored
-# file. Their order did not change.
+# The AAS commits from the one that names the template on were rewritten before they landed, to
+# remove a vendored file. The entry commit and the commit after it kept their hashes. The order
+# did not change.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
