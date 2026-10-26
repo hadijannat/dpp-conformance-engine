@@ -165,16 +165,16 @@ options:
 ### `dppce report`
 
 ```text
-usage: dppce report [-h] [--json] --envelope ENVELOPE [--format {html,json}] [--out OUT]
-                    [--trust TRUST] [--at AT] [--status-list STATUS_LIST]
+usage: dppce report [-h] [--json] --envelope ENVELOPE [--format {html,json,junit,sarif}]
+                    [--out OUT] [--trust TRUST] [--at AT] [--status-list STATUS_LIST]
 
-Render a report as HTML or JSON.
+Render a report as HTML, JSON, JUnit XML, or SARIF.
 
 options:
   -h, --help            show this help message and exit
   --json                write one JSON document to standard output
   --envelope ENVELOPE
-  --format {html,json}
+  --format {html,json,junit,sarif}
   --out OUT
   --trust TRUST         include a verification section (HTML only)
   --at AT
