@@ -74,13 +74,29 @@
 #   the three flags.
 # - C-FAMILY-GS1 and C-FAMILY-VC: their samples and rig setup come after the entry commit of F-67.
 #   The description change comes after the merge of the three packages of version 0.9.0.
+# Version 0.10.0 adds the faults F-71 to F-75. It adds no boundary case. The git history gives
+# this order:
+# - F-71: the check identifier.parse and the example ICS of family/web, which declares the scheme
+#   https-url, are older than the entry commit. The entry commit comes before the commit that adds
+#   the parsers of https-url, did-web, and urn-uuid. It also comes before the commit that adds the
+#   test purpose and the commit that adds the rig setup. The seed is a sample in
+#   validation/cases.py, not a flag.
+# - F-72 and F-73: the entry commit comes before the commit that adds the check
+#   identifier.negotiation and its test purpose. It also comes before the commit that adds the two
+#   flags to the resolver family.
+# - F-74 and F-75: the entry commit comes before the commit that adds the check aas.api_profile, its
+#   test purpose, the aas family of the reference system, and the changes to the aas example ICS
+#   and IXIT. It also comes before the commit that adds the two flags.
+# Each of the three packages ends with a review fix commit. These commits change the checks and a
+# test purpose comment, not the entries. The entries meet in the merge commits of the three
+# packages, and the merge keeps each entry as its package wrote it.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.9.0
+version: 0.10.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
