@@ -157,8 +157,8 @@ Without that permission, use an offline copy.
 2. Name the file in `IXIT.samples`, for example `status_list: list.jwt`.
 3. Give `list_source: sample` and `list_sample: status_list` in the parameters.
 
-The `id` of the copy must be the `statusListCredential` URL. The same applies to a DID document
-for `key_source: did`. Give its sample name in `did_sample`.
+The `id` of the copy must be the `statusListCredential` URL. For `key_source: did`, an offline
+DID document works the same way: name its sample in `did_sample`.
 
 ## Manual steps
 
