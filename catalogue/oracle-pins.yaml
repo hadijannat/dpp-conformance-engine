@@ -43,3 +43,263 @@ pins:
   license: Apache-2.0
   sha256: 8e687a06fe8359f4ec51480f1a9f73c8faebd6f4c01b818b843b44eee54fd5d9
   version: commit 7a325932231bd7a724c791c8b0d65ea4d6d2f435
+- id: jcs-input-arrays.json
+  path: tests/vectors/jcs/input/arrays.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/input/arrays.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/arrays.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: e503b6d71d1afa595b1c74b1016445c944cd89f90418066b23de1aeda7d17563
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-input-french.json
+  path: tests/vectors/jcs/input/french.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/input/french.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/french.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 03676a951cd8753ac62589f72eb2105cc782c33425418cfe1d517c111f6e5d5a
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-input-structures.json
+  path: tests/vectors/jcs/input/structures.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/input/structures.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/structures.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: d66893805be1784116af50af3110d08766c70a6b4aad93374723f72346e7aaa6
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-input-unicode.json
+  path: tests/vectors/jcs/input/unicode.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/input/unicode.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/unicode.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 4621864e014d4a805a563f55b9ea20aba4a2d2dc09c7394f625496998c00702c
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-input-values.json
+  path: tests/vectors/jcs/input/values.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/input/values.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/values.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: c4a041b503d6bc236036ef44db4dac499272f60fc22c40dc3b7a54870ba6f1c3
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-input-weird.json
+  path: tests/vectors/jcs/input/weird.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/input/weird.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/input/weird.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: a3a905266bd4a49a969274ea69baa14ee0c4af0ead926d6fa2b7612b4af75387
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-output-arrays.json
+  path: tests/vectors/jcs/output/arrays.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/output/arrays.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/arrays.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 099601b171cafed97c333f8878d68e7f8c8f795412adb34b2fdcf0e7c7beac42
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-output-french.json
+  path: tests/vectors/jcs/output/french.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/output/french.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/french.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: d99d0ebdcb0033cb858cfa830ae46bc0fb3309413b271f1da828c89901a27ed5
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-output-structures.json
+  path: tests/vectors/jcs/output/structures.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/output/structures.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/structures.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 605f65004ec2db7692522a0852c22f1c989e036d547e88963d1a3143cf3195d5
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-output-unicode.json
+  path: tests/vectors/jcs/output/unicode.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/output/unicode.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/unicode.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 0d99aad92a125196ff887876643fd3206786a84ddce2cee52ba4ad256d2381d3
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-output-values.json
+  path: tests/vectors/jcs/output/values.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/output/values.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/values.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 2d5e01a318d0f0879ab568c4be289c8b1f64ef8921a53c6277d5e069978baacb
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: jcs-output-weird.json
+  path: tests/vectors/jcs/output/weird.json
+  repo: cyberphone/json-canonicalization
+  upstream_path: testdata/output/weird.json
+  commit: 32a48195b9b20fe67b1795e39e4509f14d860b45
+  url: https://github.com/cyberphone/json-canonicalization/blob/32a48195b9b20fe67b1795e39e4509f14d860b45/testdata/output/weird.json
+  retrieval_date: '2026-10-18'
+  license: Apache-2.0
+  sha256: 6af595a9aa80110b964b4de3f82a05fa6ae7423005019bacfa2620dddc4e94d1
+  version: commit 32a48195b9b20fe67b1795e39e4509f14d860b45
+- id: x509-limbo-online-akamai.com.limbo.json
+  path: tests/vectors/x509-limbo/online/akamai.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/akamai.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/akamai.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 48ffafd3ae64bbb84ab60d0052abae02d20f0cf662b30abdc060b624c0292644
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-amazon.com.limbo.json
+  path: tests/vectors/x509-limbo/online/amazon.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/amazon.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/amazon.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 2464c86e50cbc1a0ff4599f8ccf695006e5b1393e1e7a4ff1fceccef4b6d88b7
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-apple.com.limbo.json
+  path: tests/vectors/x509-limbo/online/apple.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/apple.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/apple.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 82f8dea9311a32200454651da49804730c163062f0289500139fa73ac62f337a
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-aws.amazon.com.limbo.json
+  path: tests/vectors/x509-limbo/online/aws.amazon.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/aws.amazon.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/aws.amazon.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 8a429e5994de2edcd5880e1928e7135d366cfc66276aa6f4c355b6bb9774eb33
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-bing.com.limbo.json
+  path: tests/vectors/x509-limbo/online/bing.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/bing.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/bing.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: ae9ca5f69b1c88f7b07ba7ca7bf3dd4fabd590e0c008032b37425417163ab3bd
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-cloudflare.com.limbo.json
+  path: tests/vectors/x509-limbo/online/cloudflare.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/cloudflare.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/cloudflare.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 7b84b67abc7b6443ff9046498dbf0bf7d71e100d6f1d603183e58189cb0adae1
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-docs.python.org.limbo.json
+  path: tests/vectors/x509-limbo/online/docs.python.org.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/docs.python.org.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/docs.python.org.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: f198ef184a4fce96ed1c97c0129bc01828673d1407f9c3e25f353ea932f221d8
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-facebook.com.limbo.json
+  path: tests/vectors/x509-limbo/online/facebook.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/facebook.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/facebook.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: a1d8d24bd9c168b84068c5b3c6fad2be3ed488aa57559694198bd21dbb86c8eb
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-fastly.com.limbo.json
+  path: tests/vectors/x509-limbo/online/fastly.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/fastly.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/fastly.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 90c3e94d52f8ef3873a8bd234c08c55d7098f6e948bd0b7cfc46dd24c0c96915
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-google.com.limbo.json
+  path: tests/vectors/x509-limbo/online/google.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/google.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/google.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 6fd98a85002aa15800423346bfba7cfc00c9137f2a36d41a4e9092595f904281
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-microsoft.com.limbo.json
+  path: tests/vectors/x509-limbo/online/microsoft.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/microsoft.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/microsoft.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 7038ee4e48b5312e52a711b2eb0cc8c5a82dc49869c5a0d091e3099dbf55bc21
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-s3.amazonaws.com.limbo.json
+  path: tests/vectors/x509-limbo/online/s3.amazonaws.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/s3.amazonaws.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/s3.amazonaws.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: dfecb15ddb31f543b4596dc1b23db1235931ebe4bb8190aa58872221231c99f8
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-stackoverflow.com.limbo.json
+  path: tests/vectors/x509-limbo/online/stackoverflow.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/stackoverflow.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/stackoverflow.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: f359f52390b00d0a9acf67a586e3d323c4046a8c20b6083111839b84a57594dc
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+- id: x509-limbo-online-storage.googleapis.com.limbo.json
+  path: tests/vectors/x509-limbo/online/storage.googleapis.com.limbo.json
+  repo: C2SP/x509-limbo
+  upstream_path: limbo/_assets/online/storage.googleapis.com.limbo.json
+  commit: 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/storage.googleapis.com.limbo.json
+  retrieval_date: '2026-10-26'
+  license: Apache-2.0
+  sha256: 8ea30ee357c48c522a959693a27819bd8f756da5bdce4e3e474de4ec274e7e0e
+  version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20

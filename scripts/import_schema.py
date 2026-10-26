@@ -22,6 +22,9 @@ from urllib.parse import unquote, urldefrag, urljoin
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 
 
+_ANCHORS = {"$id", "$anchor", "$dynamicAnchor", "$dynamicRef", "$recursiveRef"}
+
+
 class BundleError(Exception):
     pass
 
@@ -94,6 +97,9 @@ class _Bundler:
         if top:
             for key in ("$schema", "$id"):
                 node.pop(key, None)
+        elif origin != self.root_path and _ANCHORS & node.keys():
+            # The rewritten pointers assume one base per moved file.
+            raise BundleError(f"a nested identifier or anchor in {origin.name} is not supported")
         out = {k: self._rewrite(v, origin, top=False) for k, v in node.items()}
         reference = out.get("$ref")
         if isinstance(reference, str):
@@ -103,6 +109,8 @@ class _Bundler:
     def _ref(self, reference: str, origin: Path) -> str:
         target = self._target(reference, origin)
         _, fragment = urldefrag(reference)
+        if fragment and not fragment.startswith("/"):
+            raise BundleError(f"reference {reference!r} in {origin.name} has a plain-name fragment")
         if target is None:
             return self._local(fragment, origin)
         if target == self.root_path:

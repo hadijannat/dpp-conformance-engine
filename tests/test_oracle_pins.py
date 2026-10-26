@@ -41,6 +41,9 @@ def test_the_manifest_matches_the_vendored_files() -> None:
     pins = pins_mod.load_pins(pins_mod.MANIFEST)
     assert len(pins) >= 4
     assert pins_mod.check(pins, ROOT) == []
+    # Every vendored test vector has a pin, so the manifest cannot lag behind the files.
+    vectors = {s.id for s in load_catalogue(ROOT).sources if s.source_type == "test_vector"}
+    assert {pin["path"] for pin in pins} == vectors
 
 
 def test_each_pin_has_every_field_and_a_url_at_its_commit() -> None:

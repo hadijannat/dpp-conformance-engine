@@ -115,3 +115,25 @@ def test_the_command_writes_the_bundle(tmp_path: Path) -> None:
     assert imp.main([str(_set(tmp_path)), "--out", str(out)]) == 0
     assert json.loads(out.read_text(encoding="utf-8"))["$schema"] == DRAFT07
     assert imp.main([str(tmp_path / "missing.json"), "--out", str(out)]) == 1
+
+
+def test_a_plain_name_fragment_in_a_moved_file_is_an_error(tmp_path: Path) -> None:
+    _write(tmp_path, "root.json", {"$schema": DRAFT07, "$ref": "b.json"})
+    _write(
+        tmp_path,
+        "b.json",
+        {"definitions": {"x": {"type": "integer"}}, "properties": {"y": {"$ref": "#pos"}}},
+    )
+    with pytest.raises(imp.BundleError, match="fragment"):
+        imp.bundle(tmp_path / "root.json")
+
+
+def test_a_nested_id_in_a_moved_file_is_an_error(tmp_path: Path) -> None:
+    _write(tmp_path, "root.json", {"$schema": DRAFT07, "$ref": "c.json"})
+    _write(
+        tmp_path,
+        "c.json",
+        {"definitions": {"m": {"$id": "https://e.test/sub/n.json", "type": "integer"}}},
+    )
+    with pytest.raises(imp.BundleError, match="nested"):
+        imp.bundle(tmp_path / "root.json")

@@ -422,6 +422,19 @@ def test_trust_path_finds_the_limbo_chain_and_only_with_its_anchor(name: str) ->
         assert _pem(path[-1]) in case["trusted_certs"]
         assert len(path) == len(case["untrusted_intermediates"]) + 2
         assert _limbo_path(case, anchors=False) is None
+        # A root of another chain must not anchor this one.
+        other = next(
+            pem for c in _limbo().values() for pem in c["trusted_certs"] if pem not in case["trusted_certs"]
+        )
+        wrong = [TrustAnchor(name="TEST-ONLY-limbo-other", certificate_pem=other)]
+        assert (
+            trust_path(
+                _cert(case["peer_certificate"]),
+                [_cert(pem) for pem in case["untrusted_intermediates"]],
+                wrong,
+            )
+            is None
+        )
 
 
 def _limbo_warned() -> set[str]:
