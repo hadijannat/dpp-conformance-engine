@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import base64
 import contextlib
+import errno
 import hashlib
 import json
 import os
@@ -193,10 +194,13 @@ def _read_capped(path: Path | None, limit: int) -> bytes | None:
         return handle.read(limit + 1)
 
 
-def _checked_envelope(path: Path) -> EvidenceEnvelope:
-    """Read an envelope whose body passes the checks that need no trust (section 11.4)."""
+def _checked_envelope(path: Path, data: bytes | None = None) -> EvidenceEnvelope:
+    """Read an envelope whose body passes the checks that need no trust (section 11.4).
+
+    ``data`` holds the bytes of ``path`` when the caller has read them already.
+    """
     try:
-        document = parse_strict(path.read_bytes())
+        document = parse_strict(path.read_bytes() if data is None else data)
     except CanonicalizationError as exc:
         # The verifier gives such a file `structure` fail, so the command names the same dimension.
         raise UsageError("ENVELOPE.BODY.INVALID: the envelope fails these checks: structure") from exc
@@ -220,22 +224,31 @@ def _passphrase(args: argparse.Namespace) -> str | None:
     return resolve_secret(args.passphrase_ref, secrets_dir=args.secrets)
 
 
-def _replace(path: Path, data: bytes) -> None:
-    """Replace ``path`` through a temporary file in its directory. The file keeps its mode."""
-    mode = stat.S_IMODE(path.stat().st_mode)
+def _replace(path: Path, data: bytes, pinned: os.stat_result) -> bool:
+    """Replace the file ``pinned`` at ``path`` through a temporary file in its directory.
+
+    The file keeps its mode. Returns False, and writes nothing, if ``path`` no longer names it.
+    """
     handle, temporary = tempfile.mkstemp(dir=path.parent, prefix=".dppce-sign-")
     try:
-        os.fchmod(handle, mode)
+        os.fchmod(handle, stat.S_IMODE(pinned.st_mode))
         with os.fdopen(handle, "wb") as out:
             out.write(data)
             out.flush()
             os.fsync(out.fileno())
+        now = os.lstat(path)
+        # A swap between this lstat and the rename is not seen: POSIX has no rename that checks its
+        # target. That rename replaces the new entry itself and writes nothing outside the directory.
+        if (now.st_dev, now.st_ino) != (pinned.st_dev, pinned.st_ino):
+            os.unlink(temporary)
+            return False
         os.replace(temporary, path)
     except BaseException:
         # The input stays as it was. Only the temporary file is removed.
         with contextlib.suppress(FileNotFoundError):
             os.unlink(temporary)
         raise
+    return True
 
 
 @dataclass(frozen=True)
@@ -898,45 +911,62 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 def cmd_sign(args: argparse.Namespace) -> int:
     source: Path = args.envelope
-    if args.in_place and source.is_symlink():
-        # os.replace would put a regular file in place of the link.
-        raise UsageError(f"SIGN.INPUT.LINK: {source} is a symbolic link; sign the target file, or use --out")
-    envelope = _checked_envelope(source)
-    if args.out is not None:
-        if args.out.resolve() == source.resolve():
-            raise UsageError(
-                "SIGN.OUTPUT.IS_INPUT: --out names the input envelope; use --in-place to replace it"
+    link = f"SIGN.INPUT.LINK: {source} is a symbolic link; sign the target file, or use --out"
+    pinned, data = None, None
+    with contextlib.ExitStack() as held:
+        if args.in_place:
+            # os.replace would put a regular file in place of a link. One open both refuses a link
+            # and pins the file. The descriptor stays open until the rename: an open file keeps its
+            # inode, so an entry swapped in at the path has a different inode number. Some file
+            # systems reuse a freed number at once.
+            try:
+                handle = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+            except OSError as exc:
+                if exc.errno != errno.ELOOP:
+                    raise
+                raise UsageError(link) from exc
+            file = held.enter_context(os.fdopen(handle, "rb"))
+            pinned, data = os.fstat(file.fileno()), file.read()
+        envelope = _checked_envelope(source, data)
+        if args.out is not None:
+            if args.out.resolve() == source.resolve():
+                raise UsageError(
+                    "SIGN.OUTPUT.IS_INPUT: --out names the input envelope; use --in-place to replace it"
+                )
+            _new_path(args.out, "SIGN.OUTPUT.EXISTS")
+        signer = load_signing_key(
+            args.key, args.kid, _passphrase(args), allow_unencrypted=args.allow_unencrypted_key
+        )
+        if (args.status_list_id is None) != (args.status_index is None):
+            raise UsageError("SIGN.OPTION.INVALID: --status-list-id and --status-index go together")
+        try:
+            entry = (
+                None
+                if args.status_list_id is None
+                else StatusReference(list_id=args.status_list_id, index=args.status_index)
             )
-        _new_path(args.out, "SIGN.OUTPUT.EXISTS")
-    signer = load_signing_key(
-        args.key, args.kid, _passphrase(args), allow_unencrypted=args.allow_unencrypted_key
-    )
-    if (args.status_list_id is None) != (args.status_index is None):
-        raise UsageError("SIGN.OPTION.INVALID: --status-list-id and --status-index go together")
-    try:
-        entry = (
-            None
-            if args.status_list_id is None
-            else StatusReference(list_id=args.status_list_id, index=args.status_index)
-        )
-        signed = sign_envelope(
-            envelope,
-            signer,
-            issuer=args.issuer,
-            signed_at=utc_stamp(_now()),
-            role=args.role,
-            status=entry,
-            valid_until=args.valid_until,
-            supersedes=args.supersedes,
-        )
-    except ValidationError as exc:
-        raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
-    data = (signed.model_dump_json(by_alias=True) + "\n").encode("utf-8")
-    out: Path = source if args.in_place else args.out
-    if args.in_place:
-        _replace(source, data)
-    else:
-        write_new_file(out, data)
+            signed = sign_envelope(
+                envelope,
+                signer,
+                issuer=args.issuer,
+                signed_at=utc_stamp(_now()),
+                role=args.role,
+                status=entry,
+                valid_until=args.valid_until,
+                supersedes=args.supersedes,
+            )
+        except ValidationError as exc:
+            raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
+        signed_bytes = (signed.model_dump_json(by_alias=True) + "\n").encode("utf-8")
+        out: Path = source if args.in_place else args.out
+        if pinned is not None:
+            if not _replace(source, signed_bytes, pinned):
+                raise UsageError(
+                    f"SIGN.INPUT.LINK: {source} changed while it was signed, for example into a "
+                    "symbolic link; nothing was written"
+                )
+        else:
+            write_new_file(out, signed_bytes)
     summary = {"written": str(out), "signatures": len(signed.signatures), "kid": args.kid, "role": args.role}
     _emit(args, summary, f"signed with key '{args.kid}'; wrote {out}")
     return EXIT_OK

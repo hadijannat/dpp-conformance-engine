@@ -163,15 +163,18 @@ The design review findings have no identifier in J1. This record numbers them in
 | SR-F2 | should_fix | A passphrase byte and its position appear on stderr, exit 3 | reproduced, fixed as S2 | `a2352dc` |
 | SR-F3 | should_fix, low | `authorize` accepts a query, a fragment, or userinfo | reproduced, fixed as S3 | `a2352dc` |
 | SR-N1 | note | Reading a key accepts any passphrase length and the old PEM encryption | owner decision 2, not changed | none |
-| SR-N2 | note | Loose JWK parsing in `add-key` | not changed | none |
+| SR-N2 | note | Loose JWK parsing in `add-key` | fixed later, except the JWK `kid` | `3b69216` |
 | SR-N3 | note | A duplicate JSON key gives no reason code | fixed with contract-F1 | `03a61d8` |
 | SR-N4 | note | A proof can pass when `ordering` fails | owner decision 3 | `5fe675d` |
 | SR-N5 | note | A case-insensitive file system gives `SIGN.OUTPUT.EXISTS` | not changed | none |
-| SR-N6 | note | A link swap race in `sign --in-place`, by inspection only | not reproduced, not changed | none |
-| SR-N7 | note | The salt string is malleable | not changed | none |
+| SR-N6 | note | A link swap race in `sign --in-place`, by inspection only | reproduced later with a test, fixed in part | `486bc2a`, `8c37e41`, `8280537` |
+| SR-N7 | note | The salt string is malleable | fixed later | `0ad8ffa` |
 
 SR states that SR-N2 and SR-N7 give no false outcome. The bundle stores the canonical key. The
 commitment binds the decoded salt bytes. SR-N5 is safe, because `O_EXCL` refuses the write.
+
+The "Closed after this record" section describes the later fixes of SR-N2, SR-N6, and SR-N7.
+The Summary table keeps the counts of the review stages.
 
 ### Adversarial review (J2)
 
@@ -306,7 +309,8 @@ the same identifiers on `origin/main`.
 - **docs1-DOC-2.** The standalone verifier paragraph names only
   `ENVELOPE --trust BUNDLE --at TIME`. It omits `--status-list`, `--opening`, and `--proof`. A
   `grep` in this run finds the text at `scripts/gen_reference_docs.py` line 88 and
-  `docs/reference/cli.md` line 467.
+  `docs/reference/cli.md` line 467. The paragraph comes from the generator. Package P2-18 does
+  not own the generator, so the item stays open. Later line numbers can differ.
 - **INT-4, the rest.** `OpenedRecord.acquired_at` (`src/dppce/models/results.py` line 328) and
   `Record.acquired_at` (`src/dppce/infrastructure/interfaces.py` line 60) are plain `str`. Both
   files are protected. The J4 contract reviewer states that the commitment binds the value.
@@ -319,8 +323,13 @@ the same identifiers on `origin/main`.
   `models/catalogue.py`, and `_ISO_DATE` without `re.ASCII` are not changed (J4 line 3).
 - **Tokens issued before `a2352dc`.** A token that names userinfo still authorizes the reduced
   origin (J3 line 5). The J3 security reviewer did not reproduce it end to end (J3 line 8).
-- **SR-N2, SR-N5, SR-N6, and SR-N7.** These notes are not changed. The coordinating agent told
-  the J3 fixer to leave SR-N2 and SR-N7. The owner decisions above do not name them.
+  The behavior is now described and pinned by a test. See "Closed after this record". The item
+  stays open for an owner decision: keep the behavior, or refuse such a token in `run`.
+- **SR-N5.** This note is not changed. The owner decisions above do not name it.
+- **SR-N2, the JWK `kid`.** A JWK `kid` that differs from `--kid` is still ignored. Section 11.3
+  permits a `kid` member, so a refusal is a contract change.
+- **SR-N6, the rest.** A swap between the last check and the rename is still possible. The
+  replaced file keeps the mode, but not the owner or the extended attributes.
 - **Mutation run.** The J4 fixer did not run `uv run just mutation` (J4 line 25). The later run
   at `8b3bfff` lists `x_validate_authorization__mutmut_18` as killed (MUT line 5634). Its logs
   are on the development host only. No record in `validation/records/` describes that run.
@@ -332,3 +341,25 @@ the same identifiers on `origin/main`.
 
 Closed items: the design open point on `TrustedKey` times (J1 line 7) is closed. `dae6117` made
 `TrustedKey.not_before` and `not_after` the `Stamp` type.
+
+## Closed after this record
+
+A development agent of package P2-18 made these changes. Each change has a test in
+`tests/test_review_open_items.py`. The tests are in `74f8f20`, which comes before the fixes. `8c37e41` adds one SR-N6 test
+together with its fix. `8280537` moves that fix back into `cmd_sign` and keeps the behavior. The
+commit identifiers are those of the package branch. A rebase can change them; then use
+`git patch-id --stable`, as in "Commit identifiers". No person has reviewed these changes.
+
+| Item | Change | Commit |
+| --- | --- | --- |
+| SR-N2 | `add-key` refuses a coordinate that is not the unpadded base64url of 32 bytes, with `TRUST.KEY.NOT_P256`. This covers padding, the standard alphabet, set unused bits, and x + p. | `3b69216` |
+| SR-N6 | `sign --in-place` opens the input once with `O_NOFOLLOW`, then reads from that descriptor and takes the mode from it. The descriptor stays open until the rename or the refusal, so a swapped-in entry cannot get the inode number of the input. Before the rename, it compares the path with that file. A change gives `SIGN.INPUT.LINK`, and nothing is written. | `486bc2a`, `8c37e41`, `8280537` |
+| SR-N7 | An opening whose salt is not the canonical base64 of its bytes gives `fail` with `OPENING.FILE.MALFORMED`. That fail comes before the root and ordering rules. | `0ad8ffa` |
+
+**Tokens issued before `a2352dc`.** Since `a2352dc`, `authorize` refuses an endpoint with
+userinfo, with `AUTHORIZE.ENDPOINT.INVALID`. A token signed before `a2352dc` can still hold such
+an endpoint. `validate_authorization` accepts the token, because it checks only the signature,
+the issuer, the system, and the period. The transport compares origins only. The endpoint
+therefore authorizes its origin without the userinfo. The engine uses the endpoints of a token
+only to compare origins, so no request carries that userinfo. The test `test_a_token_from_before_a2352dc_with_userinfo_authorizes_only_the_reduced_origin` pins this
+behavior in `74f8f20`. It does not change the behavior.
