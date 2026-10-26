@@ -294,6 +294,9 @@ def test_too_small_a_request_budget_is_no_answer(tmp_path: Path, loopback: Any) 
             {f"{BASE}/shells?limit=1": (200, b'{"paging_metadata": {"cursor": 7}, "result": []}')},
             "list_shape",
         ),
+        # An empty list without a cursor, while the declared id answers 200: the list is incomplete.
+        ({f"{BASE}/shells?limit=1": (200, b'{"paging_metadata": {}, "result": []}')}, "list_empty"),
+        ({f"{BASE}/shells?limit=1": (200, b'{"paging_metadata": {}}')}, "list_empty"),
         ({f"{BASE}/shells/{b64(SHELL)}": (404, b"{}")}, "item_status"),
         (
             {
@@ -322,6 +325,18 @@ def test_an_answer_that_breaks_the_profile_fails(
 ) -> None:
     server = _server(loopback, overrides)
     _failed(run(_ctx(tmp_path, server.origin)), rule)
+
+
+def test_a_paged_result_without_result_is_an_empty_page(tmp_path: Path, loopback: Any) -> None:
+    # Part2-API-Schemas at f7bb302f: PagedResult requires only paging_metadata.
+    refs = {f"{BASE}/shells/{b64(SHELL)}/submodel-refs": (200, b'{"paging_metadata": {}}')}
+    _passed(run(_ctx(tmp_path, _server(loopback, refs).origin)))
+
+
+def test_an_empty_submodel_list_with_a_served_submodel_fails(tmp_path: Path, loopback: Any) -> None:
+    server = _server(loopback, {f"{BASE}/submodels?limit=1": (200, b'{"paging_metadata": {}}')})
+    ctx = _ctx(tmp_path, server.origin, profile="submodel-repository-read", id_source="aas_submodel_id")
+    _failed(run(ctx), "list_empty")
 
 
 def test_a_cursor_page_that_repeats_the_first_page_fails(tmp_path: Path, loopback: Any) -> None:

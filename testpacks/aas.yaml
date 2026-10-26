@@ -143,8 +143,9 @@ test_purposes:
   permitted_modes: *modes
   requires_scope: none
 # Positive GET probes of an AAS server under the AAS Repository read profile of the AAS API 3.0.
-# The IXIT endpoint aas gives the base URL, and the IXIT sample aas_shell_id gives a shell id. A
-# validated authorization must name the origin. Without one, the step is blocked.
+# The IXIT endpoint aas gives the base URL, and the IXIT sample aas_shell_id gives a shell id.
+# With a validated authorization, an origin that it does not name is blocked. Without one, the
+# transport sends only to an origin that the operator confirmed.
 - id: TP-AAS-API-001
   title: Probe the AAS Repository read profile of the AAS server
   requirements:

@@ -855,15 +855,19 @@ a value of a closed set:
 - `profile_not_declared`: no profile is
   `https://admin-shell.io/aas/API/<major>/<minor>/<specification>/SSP-001` or `SSP-002` of the
   service specification of the profile. SSP-001 is the full profile, which holds the read profile.
-- `list_status`, `list_shape`: a list page does not answer 200, or is not an object with an object
-  `paging_metadata` and a list `result` of objects with a string `id`. A cursor is a string of 1
+- `list_status`, `list_shape`: a list page does not answer 200, or the answer is not a paged
+  result. A paged result is an object with an object `paging_metadata`. Its `result`, if present,
+  is a list of objects with a string `id`. No `result` is an empty page. A cursor is a string of 1
   to 2048 characters.
+- `list_empty`: the first page is empty and has no cursor, but the declared id answers 200 with a
+  valid shape. So the list does not hold every element.
 - `paging_limit`: a page with `limit=1` holds more than one element.
 - `paging_cursor`: the page of the cursor repeats an id of the first page.
 - `item_status`, `item_shape`: the declared id does not answer 200, or the answer does not have that
   `id` and the `modelType` of the profile. A shell also needs an object `assetInformation`.
-- `refs_status`, `refs_shape`: the submodel references do not answer 200, or are not a paged result
-  of references with a string `type` and a non-empty list of `keys` with a string `type` and `value`.
+- `refs_status`, `refs_shape`: the submodel references do not answer 200, or the answer is not a
+  paged result of references. A reference has a string `type` and a non-empty list of `keys`, each
+  with a string `type` and `value`.
 - `unknown_id_status`: the unknown id does not answer 404. A 200 is never accepted.
 
 Other outcomes:

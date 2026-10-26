@@ -79,8 +79,10 @@ RULES: Final = {
     "profile_not_declared": "The service description does not declare the read profile of the AAS API 3.0.",
     "list_status": "The list request does not answer 200.",
     "list_shape": (
-        "The list answer is not a paged result with paging_metadata and a result list of objects with an id."
+        "The list answer is not a paged result with paging_metadata and, if present, a result list of "
+        "objects with an id."
     ),
+    "list_empty": "The list is empty and has no cursor, but the declared id answers 200.",
     "paging_limit": "The list answer with limit=1 holds more than one element.",
     "paging_cursor": "The page of the returned cursor repeats an element of the first page.",
     "item_status": "The GET of the declared id does not answer 200.",
@@ -163,6 +165,7 @@ class _Probes:
     records: list[Record] = field(default_factory=list)
     seen: list[dict[str, JsonValue]] = field(default_factory=list)
     deferred: CheckOutcome | None = None
+    listed_none: bool = False
 
     def get(self, probe: str, path: str) -> Record:
         if len(self.seen) >= self.limit:
@@ -197,13 +200,19 @@ class _Probes:
             raise _BrokenError(f"{rule}_shape") from None
 
 
+def _result(document: dict[str, Any]) -> Any:
+    # The pinned PagedResult requires only paging_metadata, so a missing result is an empty page.
+    return document.get("result", [])
+
+
 def _is_paged(document: Any) -> bool:
     if not isinstance(document, dict) or not isinstance(document.get("paging_metadata"), dict):
         return False
     cursor = document["paging_metadata"].get("cursor", MISSING)
     if cursor is not MISSING and not (isinstance(cursor, str) and 1 <= len(cursor) <= _MAX_CURSOR):
         return False
-    return isinstance(document.get("result"), list) and all(isinstance(i, dict) for i in document["result"])
+    result = _result(document)
+    return isinstance(result, list) and all(isinstance(i, dict) for i in result)
 
 
 def _is_reference(value: Any) -> bool:
@@ -224,22 +233,24 @@ def _list(probes: _Probes, collection: str) -> None:
     first = probes.document("list", f"/{collection}?limit=1", "list")
     if first is MISSING:
         return
-    if not _is_paged(first) or not all(isinstance(i.get("id"), str) for i in first["result"]):
+    if not _is_paged(first) or not all(isinstance(i.get("id"), str) for i in _result(first)):
         raise _BrokenError("list_shape")
-    if len(first["result"]) > 1:
+    if len(_result(first)) > 1:
         raise _BrokenError("paging_limit")
     cursor = first["paging_metadata"].get("cursor")
     if cursor is None:
+        # _item fails this list if the declared id then answers.
+        probes.listed_none = not _result(first)
         return
     # A cursor can hold '+', '/', '=', or '#', so it is percent-encoded.
     second = probes.document("list_cursor", f"/{collection}?limit=1&cursor={quote(cursor, safe='')}", "list")
     if second is MISSING:
         return
-    if not _is_paged(second) or not all(isinstance(i.get("id"), str) for i in second["result"]):
+    if not _is_paged(second) or not all(isinstance(i.get("id"), str) for i in _result(second)):
         raise _BrokenError("list_shape")
-    if len(second["result"]) > 1:
+    if len(_result(second)) > 1:
         raise _BrokenError("paging_limit")
-    if {i["id"] for i in second["result"]} & {i["id"] for i in first["result"]}:
+    if {i["id"] for i in _result(second)} & {i["id"] for i in _result(first)}:
         raise _BrokenError("paging_cursor")
 
 
@@ -273,10 +284,12 @@ def _item(probes: _Probes, profile: _Profile, ident: str) -> None:
         and (profile.collection != "shells" or isinstance(document.get("assetInformation"), dict))
     ):
         raise _BrokenError("item_shape")
+    if document is not MISSING and probes.listed_none:
+        raise _BrokenError("list_empty")
     if profile.collection != "shells":
         return
     refs = probes.document("submodel_refs", path + "/submodel-refs", "refs")
-    if refs is not MISSING and not (_is_paged(refs) and all(_is_reference(r) for r in refs["result"])):
+    if refs is not MISSING and not (_is_paged(refs) and all(_is_reference(r) for r in _result(refs))):
         raise _BrokenError("refs_shape")
 
 
