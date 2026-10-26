@@ -24,394 +24,396 @@ A code with a run-time segment is listed once for each value of its closed set.
 
 Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` reports them.
 
-| Code | Area | Check | Produced in | Step verdict |
-| --- | --- | --- | --- | --- |
-| `AAS.API.BUDGET_EXHAUSTED` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive; fail under a non-default verdict rule |
-| `AAS.API.ID_MISSING` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive |
-| `AAS.API.NOT_AUTHORIZED` | AAS |  | `dppce.adapters.aas_api._target` | inconclusive |
-| `AAS.API.NOT_CONCLUSIVE` | AAS |  | `dppce.adapters.aas_api._Probes.document`, `dppce.adapters.aas_api._unknown` | inconclusive |
-| `AAS.API.NO_TARGET` | AAS |  | `dppce.adapters.aas_api._target` | inconclusive |
-| `AAS.API.OK` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | pass |
-| `AAS.API.PARAMS_INVALID` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive |
-| `AAS.API.PROFILE` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | fail; inconclusive under a non-default verdict rule |
-| `AAS.API.VERSION_UNSUPPORTED` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive |
-| `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
-| `AAS.DPP.ELEMENT_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
-| `AAS.DPP.ID_MISMATCH` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
-| `AAS.DPP.OK` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | pass |
-| `AAS.DPP.SUBMODEL_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
-| `AAS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | fail; inconclusive under a non-default verdict rule |
-| `AAS.PARAMS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
-| `AAS.SAMPLE.MISSING` | AAS | `aas.dpp_compose`, `aas.validate` | `dppce.adapters.aas.aas_dpp_compose`, `dppce.adapters.aas.aas_validate` | inconclusive |
-| `AAS.VALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | pass |
-| `AAS.VERSION.UNSUPPORTED` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
-| `ACCESS.ENTITLEMENT.MISSING` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |
-| `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive |
-| `ACCESS.ENTITLEMENT.REFUSED` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here |
-| `ACCESS.LEAK.ERROR` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule |
-| `ACCESS.LEAK.EXPORT` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule |
-| `ACCESS.LEAK.FETCH` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule |
-| `ACCESS.LEAK.HTML` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule |
-| `ACCESS.LEAK.SEARCH` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule |
-| `ACCESS.NO_TARGET` | ACCESS |  | `dppce.adapters.access._channel_urls` | inconclusive |
-| `ACCESS.POLICY.ENFORCED` | ACCESS |  | `dppce.adapters.access._probe` | pass |
-| `ACCESS.POLICY.ICS_MISMATCH` | ACCESS |  | `dppce.adapters.access._bound_policy` | inconclusive |
-| `ACCESS.POLICY.MISSING` | ACCESS |  | `dppce.adapters.access._bound_policy` | inconclusive |
-| `ACCESS.POLICY.NOTHING_TO_PROBE` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive |
-| `ACCESS.POLICY.NOT_DECLARED` | ACCESS |  | `dppce.adapters.access._bound_policy` | inconclusive |
-| `ACCESS.POLICY.NOT_FULLY_CHECKABLE` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive |
-| `ACCESS.RESPONSE.NOT_DECODABLE` | ACCESS |  | `dppce.adapters.access._look` | inconclusive |
-| `ACCESS.RESPONSE.NOT_JSON` | ACCESS |  | `dppce.adapters.access._entitlement`, `dppce.adapters.access._look` | inconclusive |
-| `API.CONTRACT.CONTENT_TYPE` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
-| `API.CONTRACT.ICS_MISMATCH` | API |  | `dppce.adapters.api._bound_contract` | inconclusive |
-| `API.CONTRACT.MISSING` | API |  | `dppce.adapters.api._bound_contract` | inconclusive |
-| `API.CONTRACT.NOT_DECLARED` | API |  | `dppce.adapters.api._bound_contract` | inconclusive |
-| `API.CONTRACT.NO_TARGET` | API |  | `dppce.adapters.api._operation`, `dppce.adapters.api._target` | inconclusive |
-| `API.CONTRACT.OK` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
-| `API.CONTRACT.PATH_MISMATCH` | API | `api.contract` | `dppce.adapters.api._operation`, `dppce.adapters.api._target`, `dppce.adapters.api.contract` | inconclusive |
-| `API.CONTRACT.SCHEMA` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
-| `API.CONTRACT.STATUS` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
-| `API.CONTRACT.UNSUPPORTED_FEATURE` | API |  | `dppce.adapters.api._unsupported` | inconclusive |
-| `API.CONTRACT.UNSUPPORTED_VERSION` | API |  | `dppce.adapters.api._translated`, `dppce.adapters.api._version_gate` | inconclusive |
-| `API.RESPONSE.NOT_JSON` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here |
-| `API.RESPONSE.TOO_DEEP` | API | `api.contract` | `dppce.adapters.api.contract` | inconclusive |
-| `AUTHORIZE.DOCUMENT.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
-| `AUTHORIZE.ENDPOINT.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
-| `AUTHORIZE.OUTPUT.EXISTS` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
-| `AUTHORIZE.PERIOD.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here |
-| `AUTHZ.EXPIRED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `AUTHZ.ISSUER.KEY_NOT_VALID` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `AUTHZ.ISSUER.MISMATCH` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `AUTHZ.ISSUER.UNTRUSTED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `AUTHZ.MALFORMED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `AUTHZ.SIGNATURE.INVALID` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `AUTHZ.SUT.MISMATCH` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here |
-| `CARRIER.QR.DEPENDENCY_MISSING` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
-| `CARRIER.QR.NOT_DECODED` | CARRIER |  | `dppce.adapters.common.decode_qr` | fail; inconclusive under a non-default verdict rule |
-| `CARRIER.QR.OK` | CARRIER | `carrier.qr_decode` | `dppce.adapters.carrier.qr_decode` | pass |
-| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.equivalence`, `identifier.granularity`, `identifier.negotiation`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.negotiation.negotiation`, `dppce.adapters.resolver._carrier` | inconclusive |
-| `CARRIER.SAMPLE.TOO_LARGE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
-| `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
-| `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here |
-| `DATA.CONTEXT.MISSING` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule |
-| `DATA.CONTEXT.NOT_ALLOWED` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule |
-| `DATA.CONTEXT.NO_ALLOWLIST` | DATA | `data.context` | `dppce.adapters.data.context_check` | inconclusive |
-| `DATA.CONTEXT.OK` | DATA | `data.context` | `dppce.adapters.data.context_check` | pass |
-| `DATA.FRESHNESS.STALE` | DATA |  | `dppce.adapters.data` | not fixed here |
-| `DATA.NO_TARGET` | DATA | `data.context`, `data.jsonschema`, `data.rules` | `dppce.adapters.data._fetch_document`, `dppce.adapters.data.context_check`, `dppce.adapters.data.jsonschema_check`, `dppce.adapters.data.rules_check` | inconclusive |
-| `DATA.RANGE.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here |
-| `DATA.RELATIONSHIP.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here |
-| `DATA.RESPONSE.NOT_CONCLUSIVE` | DATA |  | `dppce.adapters.data._fetch_document` | inconclusive |
-| `DATA.RESPONSE.NOT_JSON` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule |
-| `DATA.RESPONSE.STATUS` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule |
-| `DATA.RESPONSE.TOO_DEEP` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
-| `DATA.RULES.APPLICABILITY_UNKNOWN` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
-| `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
-| `DATA.RULES.NONE_APPLIED` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive |
-| `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass |
-| `DATA.SCHEMA.DIALECT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
-| `DATA.SCHEMA.INVALID` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | fail; inconclusive under a non-default verdict rule |
-| `DATA.SCHEMA.MALFORMED` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
-| `DATA.SCHEMA.MISSING` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
-| `DATA.SCHEMA.NOT_LOCAL` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
-| `DATA.SCHEMA.OK` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | pass |
-| `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive |
-| `DATA.UNIT.INVALID` | DATA |  | `dppce.adapters.data` | not fixed here |
-| `ENGINE.CHECK_EXCEPTION` | ENGINE |  | `dppce.orchestrator.run.execute` | error |
-| `ENVELOPE.BODY.INVALID` | ENVELOPE |  | `dppce.cli._checked_envelope` | not fixed here |
-| `IDENTIFIER.BINDING.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.BINDING.NOT_COMPARABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.CONSISTENT` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | pass |
-| `IDENTIFIER.CROSS.MISMATCH` | IDENTIFIER |  | `dppce.adapters.identifier._cross` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.CROSS.SOURCE_MISSING` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier._cross` | inconclusive |
-| `IDENTIFIER.EQUIVALENCE.DIFFERENT` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.EQUIVALENCE.NOT_PARSED` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | inconclusive |
-| `IDENTIFIER.EQUIVALENCE.OK` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | pass |
-| `IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
-| `IDENTIFIER.GRANULARITY.MISMATCH` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.GRANULARITY.NOT_DECLARED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
-| `IDENTIFIER.GRANULARITY.NOT_PARSED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
-| `IDENTIFIER.GRANULARITY.OK` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | pass |
-| `IDENTIFIER.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.NOT_RESOLVABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.NOT_RESOLVED` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.NO_TARGET` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.equivalence`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive |
-| `IDENTIFIER.RESOLUTION.STATUS` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.RESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass |
-| `IDENTIFIER.RESOLVED.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier._linkset_outcome`, `dppce.adapters.identifier.resolve` | pass |
-| `IDENTIFIER.RESPONSE.LINKSET` | IDENTIFIER |  | `dppce.adapters.identifier._linkset_outcome` | inconclusive |
-| `IDENTIFIER.RESPONSE.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.RESPONSE.NOT_JSON` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.SCHEME.NOT_HTTPS` | IDENTIFIER | `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.SCHEME.UNKNOWN` | IDENTIFIER |  | `dppce.adapters.identifier._scheme_problem` | inconclusive |
-| `IDENTIFIER.SCHEME.UNSUPPORTED` | IDENTIFIER |  | `dppce.adapters.identifier._scheme_problem` | inconclusive |
-| `IDENTIFIER.SYNTAX.COMPRESSED` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._compressed` | inconclusive |
-| `IDENTIFIER.SYNTAX.INVALID` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.SYNTAX.OK` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | pass |
-| `IDENTIFIER.UNRESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
-| `IDENTITY.DID.ASSERTION_UNRESOLVED` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
-| `IDENTITY.DID.ID_MISMATCH` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
-| `IDENTITY.DID.KEY_FORMAT` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document` | not fixed here |
-| `IDENTITY.DID.NOT_JSON` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | fail; inconclusive under a non-default verdict rule |
-| `IDENTITY.DID.OK` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document` | pass |
-| `IDENTITY.DID.PARAMS_INVALID` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document`, `dppce.adapters.did.resolve_did_web` | inconclusive |
-| `IDENTITY.DID.PRIVATE_KEY` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
-| `IDENTITY.DID.REDIRECTED` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | not fixed here |
-| `IDENTITY.DID.SAMPLE_MISSING` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | inconclusive |
-| `IDENTITY.DID.STATUS` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | fail; inconclusive under a non-default verdict rule |
-| `IDENTITY.DID.TOO_LARGE` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | not fixed here |
-| `IDENTITY.DID.VERIFICATION_METHOD` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here |
-| `INTEGRITY.CERT.EXPIRED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here |
-| `INTEGRITY.CERT.KEY_USAGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here |
-| `INTEGRITY.CERT.REVOKED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here |
-| `INTEGRITY.FORMAT.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
-| `INTEGRITY.ISSUER.UNTRUSTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.JOSE.ALGORITHM` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.verify` | not fixed here |
-| `INTEGRITY.JOSE.CLAIMS` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles._moment`, `dppce.evidence.jose_profiles._seconds`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
-| `INTEGRITY.JOSE.EXPIRED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
-| `INTEGRITY.JOSE.HEADER` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
-| `INTEGRITY.JOSE.ISSUER_MISMATCH` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
-| `INTEGRITY.JOSE.ISSUER_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.jose._pinned_key`, `dppce.adapters.jose._untrusted`, `dppce.adapters.status_list` | not fixed here |
-| `INTEGRITY.JOSE.KEY_NOT_VALID` | INTEGRITY |  | `dppce.adapters.jose._valid`, `dppce.adapters.status_list` | not fixed here |
-| `INTEGRITY.JOSE.MALFORMED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles._decode`, `dppce.evidence.jose_profiles._signature`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.parse` | not fixed here |
-| `INTEGRITY.JOSE.NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.jose.credential_gate` | not fixed here |
-| `INTEGRITY.JOSE.NOT_YET_VALID` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
-| `INTEGRITY.JOSE.OK` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here |
-| `INTEGRITY.JOSE.PARAMS` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | inconclusive |
-| `INTEGRITY.JOSE.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.jose._acquire` | inconclusive |
-| `INTEGRITY.JOSE.SIGNATURE` | INTEGRITY |  | `dppce.adapters.jose._signature`, `dppce.evidence.jose_profiles.verify` | not fixed here |
-| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.status_list`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here |
-| `INTEGRITY.JOSE.TYPE` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
-| `INTEGRITY.JOSE.UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._did_key`, `dppce.adapters.status_list`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.key_algorithm`, `dppce.evidence.jose_profiles.public_key_from_jwk` | not fixed here |
-| `INTEGRITY.KEY.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
-| `INTEGRITY.NO_TARGET` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._acquire` | inconclusive |
-| `INTEGRITY.OK` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings`, `dppce.adapters.jose._chain_key` | inconclusive / not fixed here |
-| `INTEGRITY.PAYLOAD.MISMATCH` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.PAYLOAD.NOT_COMPARABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
-| `INTEGRITY.SIGNATURE.INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.STATUS.ENTRY_MALFORMED` | INTEGRITY |  | `dppce.adapters.status_list._malformed` | not fixed here |
-| `INTEGRITY.STATUS.ENTRY_MISSING` | INTEGRITY |  | `dppce.adapters.status_list._entries` | not fixed here |
-| `INTEGRITY.STATUS.ENTRY_TYPE` | INTEGRITY |  | `dppce.adapters.status_list._entries` | not fixed here |
-| `INTEGRITY.STATUS.INDEX_RANGE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.LIST_FORMAT` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._verify` | not fixed here |
-| `INTEGRITY.STATUS.LIST_LENGTH` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.LIST_MALFORMED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._list_malformed` | not fixed here |
-| `INTEGRITY.STATUS.LIST_NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
-| `INTEGRITY.STATUS.LIST_SIGNATURE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._verify` | not fixed here |
-| `INTEGRITY.STATUS.LIST_UNBOUND` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
-| `INTEGRITY.STATUS.LIST_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.LIST_VALIDITY` | INTEGRITY |  | `dppce.adapters.status_list` | not fixed here |
-| `INTEGRITY.STATUS.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
-| `INTEGRITY.STATUS.OK` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | not fixed here |
-| `INTEGRITY.STATUS.PARAMS` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | inconclusive |
-| `INTEGRITY.STATUS.PURPOSE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.REVOKED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
-| `INTEGRITY.STATUS.SIZE_UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.STALE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.SUSPENDED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
-| `INTEGRITY.STATUS.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._entry`, `dppce.adapters.status_list._Lists._record`, `dppce.adapters.status_list._Lists.judge` | not fixed here |
-| `INTEGRITY.TOKEN.MALFORMED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.TOKEN.NOT_AVAILABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.TOKEN.NOT_PROCESSABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.TOKEN.NO_ANSWER` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
-| `INTEGRITY.TOKEN.TOO_LARGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive / not fixed here |
-| `INTEGRITY.TRUST.ANCHOR_INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
-| `INTEGRITY.TRUST.MISSING` | INTEGRITY | `integrity.jose`, `integrity.jws`, `integrity.status_list` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose.jose_check`, `dppce.adapters.status_list.status_list_check` | inconclusive |
-| `ISSUER.ACCREDITATION.NO_REFERENCE` | ISSUER |  | `dppce.cli._inputs_from_args`, `dppce.verifier.verify._issuer_problem` | not fixed here |
-| `ISSUER.STATEMENT.MISMATCH` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
-| `ISSUER.STATEMENT.UNSPECIFIED` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
-| `KEYS.DATA_KEY.UNAVAILABLE` | KEYS |  | `dppce.cli.cmd_run` | not fixed here |
-| `KEYS.FILE.EXISTS` | KEYS |  | `dppce.infrastructure.keys.generate_signing_key` | not fixed here |
-| `KEYS.KEY.NOT_P256` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
-| `KEYS.KEY.UNENCRYPTED` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
-| `KEYS.KEY.UNREADABLE` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
-| `KEYS.PASSPHRASE.LENGTH` | KEYS |  | `dppce.infrastructure.keys.generate_signing_key` | not fixed here |
-| `KEYS.PASSPHRASE.MISSING` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here |
-| `MANUAL.DIGEST.NOT_MANUAL` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here |
-| `MANUAL.DIGEST.PURPOSE_AMBIGUOUS` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here |
-| `MANUAL.DIGEST.PURPOSE_UNKNOWN` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here |
-| `MANUAL.EVIDENCE.MISMATCH` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here |
-| `MANUAL.KEY.NOT_VALID` | MANUAL |  | `dppce.evidence.manual._trusted_key` | not fixed here |
-| `MANUAL.KEY.UNTRUSTED` | MANUAL |  | `dppce.evidence.manual`, `dppce.evidence.manual._trusted_key` | not fixed here |
-| `MANUAL.PURPOSE.DIGEST_MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.PURPOSE.MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.RESULT.MALFORMED` | MANUAL |  | `dppce.adapters.manual.review`, `dppce.evidence.manual.claimed_test_purpose`, `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.RESULT.MISSING` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here |
-| `MANUAL.RESULT.TOO_LARGE` | MANUAL |  | `dppce.adapters.manual.review`, `dppce.evidence.manual` | not fixed here |
-| `MANUAL.REVIEW.FAILED` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here |
-| `MANUAL.REVIEW.OK` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here |
-| `MANUAL.SIGNATURE.INVALID` | MANUAL |  | `dppce.evidence.manual`, `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.SUT.MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.SUT.VERSION_MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.TIME.AFTER_EVALUATION` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.TIME.OUTSIDE_KEY_VALIDITY` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here |
-| `MANUAL.TRUST.MISSING` | MANUAL |  | `dppce.adapters.manual.review` | error |
-| `MODE.ILLUSTRATIVE_NOT_REVIEWABLE` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
-| `MODE.NOT_APPROVED` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
-| `MODE.NOT_ILLUSTRATIVE` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
-| `MODE.NOT_PERMITTED` | MODE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
-| `NEGOTIATION.BODY` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | fail; inconclusive under a non-default verdict rule |
-| `NEGOTIATION.MEDIA_TYPE` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
-| `NEGOTIATION.NO_TARGET` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | inconclusive |
-| `NEGOTIATION.OK` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | pass |
-| `NEGOTIATION.QUALITY` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
-| `NEGOTIATION.STATUS` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
-| `NEGOTIATION.UNSUPPORTED` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
-| `NEGOTIATION.VARY.MISSING` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
-| `OPEN.OUTPUT.EXISTS` | OPEN |  | `dppce.cli.cmd_open` | not fixed here |
-| `OPEN.RECORD.NOT_IN_REPORT` | OPEN |  | `dppce.evidence.disclosure.open_record` | not fixed here |
-| `OPEN.RECORD.UNKNOWN` | OPEN |  | `dppce.cli.cmd_open` | not fixed here |
-| `OPENING.COMMITMENT.MISMATCH` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
-| `OPENING.FILE.MALFORMED` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
-| `OPENING.FILE.TOO_LARGE` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
-| `OPENING.RECORD.OK` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here |
-| `PATH.APPLICABILITY_UNKNOWN` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
-| `PATH.NO_STEP` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
-| `PERSISTENCE.DIGEST.NOT_COMPARABLE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
-| `PERSISTENCE.NO_TARGET` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
-| `PERSISTENCE.OK` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | pass |
-| `PERSISTENCE.PARAMS.INVALID` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
-| `PERSISTENCE.RESPONSE.NOT_CONCLUSIVE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive |
-| `PERSISTENCE.RESPONSE.NOT_JSON` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
-| `PERSISTENCE.RESPONSE.STATUS` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
-| `PERSISTENCE.UNDECLARED_CHANGE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule |
-| `PLAN.BLOCKED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
-| `PLAN.MANUAL_UNAVAILABLE` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
-| `PLAN.NOT_RUN` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
-| `PLAN.SKIPPED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
-| `PLAN.STEP_MISSING` | PLAN |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
-| `PLAN.UNSUPPORTED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here |
-| `PROFILE.NOT_SELECTED` | PROFILE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
-| `PROOF.FILE.MALFORMED` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here |
-| `PROOF.FILE.TOO_LARGE` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here |
-| `PROOF.LEAF.OK` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here |
-| `PROOF.PATH.INVALID` | PROOF |  | `dppce.evidence.disclosure._check_proof` | not fixed here |
-| `PROOF.REPORT.MISMATCH` | PROOF |  | `dppce.evidence.disclosure._check_proof` | not fixed here |
-| `PROVE.OUTPUT.EXISTS` | PROVE |  | `dppce.cli.cmd_prove` | not fixed here |
-| `PROVE.RESULT.UNKNOWN` | PROVE |  | `dppce.evidence.disclosure.prove` | not fixed here |
-| `REGISTRY.FIELD.MISSING` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
-| `REGISTRY.INCONSISTENT` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
-| `REGISTRY.LOOKUP.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive; fail under a non-default verdict rule |
-| `REGISTRY.NO_TARGET` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
-| `REGISTRY.OK` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | pass |
-| `REGISTRY.PARAMS.INVALID` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
-| `REGISTRY.RESPONSE.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive |
-| `REGISTRY.RESPONSE.NOT_JSON` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
-| `REGISTRY.RESPONSE.STATUS` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule |
-| `REPLAY.DATA_ROOT.MISSING` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
-| `REPLAY.INPUT.CHANGED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
-| `REPLAY.INPUT.NOT_RECORDED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here |
-| `REPLAY.RECORDING_MISMATCH` | REPLAY |  | `dppce.orchestrator.run.execute` | error |
-| `RESOLVER.CONFORMANCE.INVALID_ACCEPTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
-| `RESOLVER.CONFORMANCE.INVALID_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
-| `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
-| `RESOLVER.CONFORMANCE.LINKSET_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
-| `RESOLVER.CONFORMANCE.NO_REDIRECT` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here |
-| `RESOLVER.CONFORMANCE.OK` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver.conformance` | pass |
-| `RESOLVER.LINKSET.ANCHOR` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
-| `RESOLVER.LINKSET.MEDIA_TYPE` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here |
-| `RESOLVER.LINKSET.OK` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | pass |
-| `RESOLVER.LINKSET.RELATION_MISSING` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
-| `RESOLVER.LINKSET.STATUS` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here |
-| `RESOLVER.LINKSET.STRUCTURE` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here |
-| `RESOLVER.NO_TARGET` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver._carrier`, `dppce.adapters.resolver.conformance` | inconclusive |
-| `RESOLVER.PARAMS.INVALID` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | inconclusive |
-| `RESOLVER.WELLKNOWN.MEDIA_TYPE` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
-| `RESOLVER.WELLKNOWN.NOT_JSON` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
-| `RESOLVER.WELLKNOWN.OK` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | pass |
-| `RESOLVER.WELLKNOWN.REDIRECTED` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | inconclusive |
-| `RESOLVER.WELLKNOWN.ROOT` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
-| `RESOLVER.WELLKNOWN.STATUS` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule |
-| `RESULT.MISSING` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
-| `RESULT.NOT_PLANNED` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here |
-| `SIGN.INPUT.LINK` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
-| `SIGN.OPTION.INVALID` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
-| `SIGN.OUTPUT.EXISTS` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
-| `SIGN.OUTPUT.IS_INPUT` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here |
-| `SIGNATURE.ISSUER.NONE` | SIGNATURE |  | `dppce.verifier.verify` | not fixed here |
-| `SIGNER.ISSUER.MISMATCH` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
-| `SIGNER.KEY.NOT_TRUSTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
-| `SIGNER.KEY.UNKNOWN` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here |
-| `SIGNER.LIFECYCLE.CONFLICT` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here |
-| `SIGNER.ROLE.NOT_GRANTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
-| `SIGNER.ROLE.OK` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here |
-| `SIGNER.SIGNATURE.INVALID` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here |
-| `STATUS.SUPERSEDED` | STATUS |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
-| `STATUS.SUPERSEDED_BY_SELECTED` | STATUS |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
-| `STATUS.WITHDRAWN` | STATUS |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
-| `STATUSLIST.FILE.MALFORMED` | STATUSLIST |  | `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
-| `STATUSLIST.FILE.MISSING` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.FILE.OPTION` | STATUSLIST |  | `dppce.cli.cmd_report` | not fixed here |
-| `STATUSLIST.FILE.TOO_LARGE` | STATUSLIST |  | `dppce.adapters.status_list._Lists._entry`, `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
-| `STATUSLIST.ID.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.INDEX.OUT_OF_RANGE` | STATUSLIST |  | `dppce.evidence.status.bit_is_set` | not fixed here |
-| `STATUSLIST.ISSUER.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.KEY.NOT_TRUSTED` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
-| `STATUSLIST.KEY.PURPOSE` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
-| `STATUSLIST.KEY.UNKNOWN` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
-| `STATUSLIST.REFERENCE.NONE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.REPORT.ACTIVE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.REPORT.REVOKED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.REPORT.SUSPENDED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.REPORT.UNSIGNED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STATUSLIST.SIGNATURE.INVALID` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here |
-| `STATUSLIST.TIME.STALE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
-| `STEP.NOT_APPLICABLE` | STEP |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
-| `TIMESTAMP.CMS.SIGNATURE_INVALID` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here |
-| `TIMESTAMP.CMS.SIGNING_CERT` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here |
-| `TIMESTAMP.CMS.UNSUPPORTED` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms`, `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.EVIDENCE.TOO_MANY` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.verifier.verify._timestamps` | not fixed here |
-| `TIMESTAMP.IMPRINT.ALGORITHM` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.IMPRINT.MISMATCH` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.OK` | TIMESTAMP |  | `dppce.verifier.verify._timestamps` | not fixed here |
-| `TIMESTAMP.RESPONSE.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here |
-| `TIMESTAMP.RESPONSE.REJECTED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here |
-| `TIMESTAMP.RESPONSE.TOO_LARGE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here |
-| `TIMESTAMP.SIGNATURE.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_imprint` | not fixed here |
-| `TIMESTAMP.SIGNATURE.NONE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_imprint`, `dppce.verifier.verify._timestamps` | not fixed here |
-| `TIMESTAMP.TIME.FUTURE` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TOKEN.DUPLICATE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here |
-| `TIMESTAMP.TOKEN.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp._malformed`, `dppce.verifier.verify._timestamps` | not fixed here |
-| `TIMESTAMP.TOKEN.TOO_LARGE` | TIMESTAMP |  | `dppce.evidence.timestamp.parse_token`, `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TSA.EKU` | TIMESTAMP |  | `dppce.evidence.timestamp._check_tsa` | not fixed here |
-| `TIMESTAMP.TSA.EXPIRED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TSA.KEY_USAGE` | TIMESTAMP |  | `dppce.evidence.timestamp._check_tsa` | not fixed here |
-| `TIMESTAMP.TSA.REVOKED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TSA.UNKNOWN` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TIMESTAMP.TSA.UNTRUSTED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
-| `TLS.CA_FILE.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CLIENT_CERT.INCOMPLETE` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CLIENT_CERT.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CLIENT_CERT.NO_AUTHORIZATION` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CLIENT_KEY.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CLIENT_KEY.MISMATCH` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CLIENT_KEY.PASSPHRASE` | TLS |  | `dppce.cli._tls_options` | not fixed here |
-| `TLS.CONTEXT.UNUSABLE` | TLS |  | `dppce.infrastructure.transport._tls_context` | not fixed here |
-| `TLS.FILE.UNREADABLE` | TLS |  | `dppce.cli._tls_file` | not fixed here |
-| `TRANSPORT.BODY_ENCODED` | TRANSPORT |  | `dppce.adapters.common.body_problem` | inconclusive |
-| `TRANSPORT.BODY_TRUNCATED` | TRANSPORT |  | `dppce.adapters.common.body_problem` | inconclusive |
-| `TRANSPORT.DENIED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
-| `TRANSPORT.RATE_LIMITED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
-| `TRANSPORT.REDIRECT_OUT_OF_SCOPE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
-| `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
-| `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
-| `TRUST.BUNDLE.NOT_OBJECT` | TRUST |  | `dppce.cli._trust`, `dppce.verifier.__main__.main` | not fixed here |
-| `TRUST.BUNDLE.OPTION` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
-| `TRUST.KEY.DUPLICATE_KID` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
-| `TRUST.KEY.NOT_P256` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
-| `TRUST.KEY.PERIOD_INVALID` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
-| `TRUST.KEY.PRIVATE` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
-| `TRUST.KEY.ROLE_CONFLICT` | TRUST |  | `dppce.models.trust.TrustBundle._review_keys_are_personal` | not fixed here |
-| `TRUST.MIGRATION.MALFORMED` | TRUST |  | `dppce.migrations._runinputs_2_to_3`, `dppce.migrations._trust_1_to_2` | not fixed here |
-| `TRUST.MIGRATION.UNSCOPED_SERIAL` | TRUST |  | `dppce.migrations._trust_1_to_2` | not fixed here |
-| `TRUST.OUTPUT.EXISTS` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here |
-| `TRUST.SNAPSHOT.STALE` | TRUST |  | `dppce.verifier.verify._status` | not fixed here |
-| `VALIDITY.PERIOD.EXPIRED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
-| `VALIDITY.PERIOD.NOT_STATED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
-| `VALIDITY.PERIOD.OK` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
-| `VALIDITY.REPORT.UNSIGNED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here |
+The last column comes from `dppce.report.hints`, the table that the HTML report uses. For a step that did not pass, it says what would make the step conclusive. For a failed step, it is the remediation. A step whose code has no entry gets the text of its execution status.
+
+| Code | Area | Check | Produced in | Step verdict | Next step or remediation |
+| --- | --- | --- | --- | --- | --- |
+| `AAS.API.BUDGET_EXHAUSTED` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive; fail under a non-default verdict rule | Engine limit: the probes used the request budget. Raise it or test fewer items. |
+| `AAS.API.ID_MISSING` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive | Declare the identifier of a shell or submodel that the system serves. |
+| `AAS.API.NOT_AUTHORIZED` | AAS |  | `dppce.adapters.aas_api._target` | inconclusive | Supply an authorization that grants the scope of the probe, then run again. |
+| `AAS.API.NOT_CONCLUSIVE` | AAS |  | `dppce.adapters.aas_api._Probes.document`, `dppce.adapters.aas_api._unknown` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |
+| `AAS.API.NO_TARGET` | AAS |  | `dppce.adapters.aas_api._target` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `AAS.API.OK` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | pass | None: the step passed. |
+| `AAS.API.PARAMS_INVALID` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `AAS.API.PROFILE` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | fail; inconclusive under a non-default verdict rule | Make each probed operation answer as the declared API profile requires. |
+| `AAS.API.VERSION_UNSUPPORTED` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive | Engine limit: this engine does not test the declared API version. |
+| `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive | Install the optional extra of the check. Without it, the engine cannot judge the step. |
+| `AAS.DPP.ELEMENT_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule | Add the missing elements to the passport metadata submodel. |
+| `AAS.DPP.ID_MISMATCH` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule | Make the identifiers in the passport metadata submodel agree with its shell. |
+| `AAS.DPP.OK` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | pass | None: the step passed. |
+| `AAS.DPP.SUBMODEL_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule | Add the passport metadata submodel to the shell. |
+| `AAS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | fail; inconclusive under a non-default verdict rule | Correct the shell file until the wrapped validator accepts it. |
+| `AAS.PARAMS.INVALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `AAS.SAMPLE.MISSING` | AAS | `aas.dpp_compose`, `aas.validate` | `dppce.adapters.aas.aas_dpp_compose`, `dppce.adapters.aas.aas_validate` | inconclusive | Supply the offline sample that the test purpose names, in the data directory of the run. |
+| `AAS.VALID` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | pass | None: the step passed. |
+| `AAS.VERSION.UNSUPPORTED` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive | Engine limit: this engine does not validate the declared metamodel version. |
+| `ACCESS.ENTITLEMENT.MISSING` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here | Serve each field that the access policy grants to the role. |
+| `ACCESS.ENTITLEMENT.NO_FETCH_CHANNEL` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive | Declare a fetch channel for the role, so that the check can see its fields. |
+| `ACCESS.ENTITLEMENT.REFUSED` | ACCESS |  | `dppce.adapters.access._entitlement` | not fixed here | Give the entitled role access to the resource that the policy grants. |
+| `ACCESS.LEAK.ERROR` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule | Remove the withheld field from the error responses of this role. |
+| `ACCESS.LEAK.EXPORT` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule | Remove the withheld field from the export responses of this role. |
+| `ACCESS.LEAK.FETCH` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule | Remove the withheld field from the fetch responses of this role. |
+| `ACCESS.LEAK.HTML` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule | Remove the withheld field from the HTML pages of this role. |
+| `ACCESS.LEAK.SEARCH` | ACCESS |  | `dppce.adapters.access._probe` | fail; inconclusive under a non-default verdict rule | Remove the withheld field from the search responses of this role. |
+| `ACCESS.NO_TARGET` | ACCESS |  | `dppce.adapters.access._channel_urls` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `ACCESS.POLICY.ENFORCED` | ACCESS |  | `dppce.adapters.access._probe` | pass | None: the step passed. |
+| `ACCESS.POLICY.ICS_MISMATCH` | ACCESS |  | `dppce.adapters.access._bound_policy` | inconclusive | Bind the access policy that the ICS names to the profile. |
+| `ACCESS.POLICY.MISSING` | ACCESS |  | `dppce.adapters.access._bound_policy` | inconclusive | Pin a readable, valid access policy in the profile. |
+| `ACCESS.POLICY.NOTHING_TO_PROBE` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive | Declare at least one withheld field and its canary in the access policy. |
+| `ACCESS.POLICY.NOT_DECLARED` | ACCESS |  | `dppce.adapters.access._bound_policy` | inconclusive | Name the expected access policy in the ICS. |
+| `ACCESS.POLICY.NOT_FULLY_CHECKABLE` | ACCESS |  | `dppce.adapters.access._probe` | inconclusive | Declare a canary for each withheld field, so that each channel can be checked. |
+| `ACCESS.RESPONSE.NOT_DECODABLE` | ACCESS |  | `dppce.adapters.access._look` | inconclusive | Serve the response in an encoding that the engine can decode. |
+| `ACCESS.RESPONSE.NOT_JSON` | ACCESS |  | `dppce.adapters.access._entitlement`, `dppce.adapters.access._look` | inconclusive | Serve the resource as one JSON document with a JSON media type. |
+| `API.CONTRACT.CONTENT_TYPE` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here | Serve the response with a media type that the pinned contract declares. |
+| `API.CONTRACT.ICS_MISMATCH` | API |  | `dppce.adapters.api._bound_contract` | inconclusive | Bind the API contract that the ICS names to the profile. |
+| `API.CONTRACT.MISSING` | API |  | `dppce.adapters.api._bound_contract` | inconclusive | Pin a readable API contract in the profile. |
+| `API.CONTRACT.NOT_DECLARED` | API |  | `dppce.adapters.api._bound_contract` | inconclusive | Name the expected API contract in the ICS. |
+| `API.CONTRACT.NO_TARGET` | API |  | `dppce.adapters.api._operation`, `dppce.adapters.api._target` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `API.CONTRACT.OK` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here | None: the step passed. |
+| `API.CONTRACT.PATH_MISMATCH` | API | `api.contract` | `dppce.adapters.api._operation`, `dppce.adapters.api._target`, `dppce.adapters.api.contract` | inconclusive | Make the URL template of the IXIT match a path of the pinned contract. |
+| `API.CONTRACT.SCHEMA` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here | Correct the response body at the listed paths until it matches the contract schema. |
+| `API.CONTRACT.STATUS` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here | Answer with a status code that the pinned contract declares for the operation. |
+| `API.CONTRACT.UNSUPPORTED_FEATURE` | API |  | `dppce.adapters.api._unsupported` | inconclusive | Engine limit: the contract uses a form that this engine does not support. |
+| `API.CONTRACT.UNSUPPORTED_VERSION` | API |  | `dppce.adapters.api._translated`, `dppce.adapters.api._version_gate` | inconclusive | Engine limit: this engine does not read the version of the contract. |
+| `API.RESPONSE.NOT_JSON` | API | `api.contract` | `dppce.adapters.api.contract` | not fixed here | Serve the resource as one JSON document with a JSON media type. |
+| `API.RESPONSE.TOO_DEEP` | API | `api.contract` | `dppce.adapters.api.contract` | inconclusive | Engine limit: the body is nested too deeply to judge. Serve a flatter document. |
+| `AUTHORIZE.DOCUMENT.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here | Correct the authorization document that the message names. |
+| `AUTHORIZE.ENDPOINT.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here | Give each endpoint of the authorization as a valid origin. |
+| `AUTHORIZE.OUTPUT.EXISTS` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here | Choose an output path that does not exist yet. The command does not overwrite a file. |
+| `AUTHORIZE.PERIOD.INVALID` | AUTHORIZE |  | `dppce.cli.cmd_authorize` | not fixed here | Give a validity period whose start is before its end. |
+| `AUTHZ.EXPIRED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Get a new authorization of the system owner whose period covers the evaluation time. |
+| `AUTHZ.ISSUER.KEY_NOT_VALID` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Sign the authorization with a key that is valid and not revoked. |
+| `AUTHZ.ISSUER.MISMATCH` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Sign the authorization with a key of the issuer that it names. |
+| `AUTHZ.ISSUER.UNTRUSTED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Sign the authorization with a key that the trust bundle trusts to authorize tests. |
+| `AUTHZ.MALFORMED` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Supply the authorization as a canonical, signed document. |
+| `AUTHZ.SIGNATURE.INVALID` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Supply an authorization whose signature verifies with the trusted key. |
+| `AUTHZ.SUT.MISMATCH` | AUTHZ |  | `dppce.infrastructure.authorization.validate_authorization` | not fixed here | Supply an authorization for this system under test. |
+| `CARRIER.QR.DEPENDENCY_MISSING` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive | Install the optional extra of the check. Without it, the engine cannot judge the step. |
+| `CARRIER.QR.NOT_DECODED` | CARRIER |  | `dppce.adapters.common.decode_qr` | fail; inconclusive under a non-default verdict rule | Supply a QR image with one symbol that a decoder can read. |
+| `CARRIER.QR.OK` | CARRIER | `carrier.qr_decode` | `dppce.adapters.carrier.qr_decode` | pass | None: the step passed. |
+| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.equivalence`, `identifier.granularity`, `identifier.negotiation`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.negotiation.negotiation`, `dppce.adapters.resolver._carrier` | inconclusive | Supply the offline sample that the test purpose names, in the data directory of the run. |
+| `CARRIER.SAMPLE.TOO_LARGE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive | Supply the carrier sample as an image file that the engine can read. |
+| `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here | Add the fields that the rule requires to the passport data. |
+| `DATA.CONTEXT.MISSING` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Add the JSON-LD context that the rule requires to the document. |
+| `DATA.CONTEXT.NOT_ALLOWED` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Use only the JSON-LD contexts on the allowlist of the test purpose. |
+| `DATA.CONTEXT.NO_ALLOWLIST` | DATA | `data.context` | `dppce.adapters.data.context_check` | inconclusive | Declare the allowlist of contexts in the test purpose. |
+| `DATA.CONTEXT.OK` | DATA | `data.context` | `dppce.adapters.data.context_check` | pass | None: the step passed. |
+| `DATA.FRESHNESS.STALE` | DATA |  | `dppce.adapters.data` | not fixed here | Update the passport data, so that its update time is within the allowed age. |
+| `DATA.NO_TARGET` | DATA | `data.context`, `data.jsonschema`, `data.rules` | `dppce.adapters.data._fetch_document`, `dppce.adapters.data.context_check`, `dppce.adapters.data.jsonschema_check`, `dppce.adapters.data.rules_check` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `DATA.RANGE.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Correct the value of the field that the message names, so that it is in range. |
+| `DATA.RELATIONSHIP.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Correct the related fields that the message names, so that they agree. |
+| `DATA.RESPONSE.NOT_CONCLUSIVE` | DATA |  | `dppce.adapters.data._fetch_document` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |
+| `DATA.RESPONSE.NOT_JSON` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `DATA.RESPONSE.STATUS` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
+| `DATA.RESPONSE.TOO_DEEP` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the body is nested too deeply to judge. Serve a flatter document. |
+| `DATA.RULES.APPLICABILITY_UNKNOWN` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Answer the ICS questions that decide whether the data rules apply. |
+| `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Pin the data rules that the test purpose names. |
+| `DATA.RULES.NONE_APPLIED` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Answer the ICS questions, so that at least one data rule applies. |
+| `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass | None: the step passed. |
+| `DATA.SCHEMA.DIALECT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the schema uses a dialect that this engine does not support. |
+| `DATA.SCHEMA.INVALID` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | fail; inconclusive under a non-default verdict rule | Correct the document at the listed paths until it matches the pinned schema. |
+| `DATA.SCHEMA.MALFORMED` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Pin a schema that is itself valid. |
+| `DATA.SCHEMA.MISSING` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Pin the schema that the test purpose names. |
+| `DATA.SCHEMA.NOT_LOCAL` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Pin a schema whose references resolve inside the data directory. |
+| `DATA.SCHEMA.OK` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | pass | None: the step passed. |
+| `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the schema uses a format that this engine does not check. |
+| `DATA.UNIT.INVALID` | DATA |  | `dppce.adapters.data` | not fixed here | Give the value with a unit that the rule accepts. |
+| `ENGINE.CHECK_EXCEPTION` | ENGINE |  | `dppce.orchestrator.run.execute` | error | An engine defect stopped the step. Report it with the run log. The result says nothing about the system. |
+| `ENVELOPE.BODY.INVALID` | ENVELOPE |  | `dppce.cli._checked_envelope` | not fixed here | Supply the report body unchanged, as the engine wrote it. |
+| `IDENTIFIER.BINDING.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule | Make the identifier in the passport agree with the identifier on the carrier. |
+| `IDENTIFIER.BINDING.NOT_COMPARABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive | Supply both identifiers in a form that the engine can compare. |
+| `IDENTIFIER.CONSISTENT` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | pass | None: the step passed. |
+| `IDENTIFIER.CROSS.MISMATCH` | IDENTIFIER |  | `dppce.adapters.identifier._cross` | fail; inconclusive under a non-default verdict rule | Make the identifiers of the named sources agree. |
+| `IDENTIFIER.CROSS.SOURCE_MISSING` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier._cross` | inconclusive | Supply the identifier source that the test purpose names. |
+| `IDENTIFIER.EQUIVALENCE.DIFFERENT` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | fail; inconclusive under a non-default verdict rule | Make the listed parts of the two identifiers agree. |
+| `IDENTIFIER.EQUIVALENCE.NOT_PARSED` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | inconclusive | Supply identifiers that parse in their declared scheme. |
+| `IDENTIFIER.EQUIVALENCE.OK` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | pass | None: the step passed. |
+| `IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive | Engine limit: this engine does not classify the level of this key. |
+| `IDENTIFIER.GRANULARITY.MISMATCH` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | fail; inconclusive under a non-default verdict rule | Encode the identifier at the granularity that the ICS declares. |
+| `IDENTIFIER.GRANULARITY.NOT_DECLARED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive | Declare the granularity of the identifier in the ICS. |
+| `IDENTIFIER.GRANULARITY.NOT_PARSED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive | Supply an identifier that parses in its declared scheme. |
+| `IDENTIFIER.GRANULARITY.OK` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | pass | None: the step passed. |
+| `IDENTIFIER.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule | Make the identifier in the passport agree with the identifier on the carrier. |
+| `IDENTIFIER.NOT_RESOLVABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive | Use an identifier form that resolves to the passport. |
+| `IDENTIFIER.NOT_RESOLVED` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive | Make the identifier resolve, so that the check can compare the passport. |
+| `IDENTIFIER.NO_TARGET` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.equivalence`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `IDENTIFIER.RESOLUTION.STATUS` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule | Answer the resolution request with a success or a redirect status code. |
+| `IDENTIFIER.RESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass | None: the step passed. |
+| `IDENTIFIER.RESOLVED.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier._linkset_outcome`, `dppce.adapters.identifier.resolve` | pass | None: the step passed. |
+| `IDENTIFIER.RESPONSE.LINKSET` | IDENTIFIER |  | `dppce.adapters.identifier._linkset_outcome` | inconclusive | Serve a linkset that the engine can read for the identifier. |
+| `IDENTIFIER.RESPONSE.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule | Serve the response with the media type that the rule expects. |
+| `IDENTIFIER.RESPONSE.NOT_JSON` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `IDENTIFIER.SCHEME.NOT_HTTPS` | IDENTIFIER | `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule | Encode the identifier as an HTTPS URI. |
+| `IDENTIFIER.SCHEME.UNKNOWN` | IDENTIFIER |  | `dppce.adapters.identifier._scheme_problem` | inconclusive | Declare an identifier scheme that this engine knows. |
+| `IDENTIFIER.SCHEME.UNSUPPORTED` | IDENTIFIER |  | `dppce.adapters.identifier._scheme_problem` | inconclusive | Engine limit: this engine does not check this identifier scheme. |
+| `IDENTIFIER.SYNTAX.COMPRESSED` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._compressed` | inconclusive | Engine limit: this engine does not decompress the identifier. Supply it plain. |
+| `IDENTIFIER.SYNTAX.INVALID` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | fail; inconclusive under a non-default verdict rule | Correct the identifier syntax that the message names. |
+| `IDENTIFIER.SYNTAX.OK` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | pass | None: the step passed. |
+| `IDENTIFIER.UNRESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule | Make the identifier resolve to the passport. |
+| `IDENTITY.DID.ASSERTION_UNRESOLVED` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here | List the assertion method in the DID document, so that it resolves. |
+| `IDENTITY.DID.ID_MISMATCH` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here | Make the id of the DID document equal the DID that it serves. |
+| `IDENTITY.DID.KEY_FORMAT` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document` | not fixed here | Publish each verification key in a format that the rule accepts. |
+| `IDENTITY.DID.NOT_JSON` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `IDENTITY.DID.OK` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document` | pass | None: the step passed. |
+| `IDENTITY.DID.PARAMS_INVALID` | IDENTITY | `identity.did` | `dppce.adapters.did.did_document`, `dppce.adapters.did.resolve_did_web` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `IDENTITY.DID.PRIVATE_KEY` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here | Remove the private key material from the DID document. |
+| `IDENTITY.DID.REDIRECTED` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | not fixed here | Serve the DID document at its own URL, without a redirect. |
+| `IDENTITY.DID.SAMPLE_MISSING` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | inconclusive | Supply the offline sample that the test purpose names, in the data directory of the run. |
+| `IDENTITY.DID.STATUS` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
+| `IDENTITY.DID.TOO_LARGE` | IDENTITY |  | `dppce.adapters.did.resolve_did_web` | not fixed here | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `IDENTITY.DID.VERIFICATION_METHOD` | IDENTITY |  | `dppce.adapters.did._failure` | not fixed here | Correct the verification method that the message names. |
+| `INTEGRITY.CERT.EXPIRED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here | Sign with a certificate that is valid at the evaluation time. |
+| `INTEGRITY.CERT.KEY_USAGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here | Sign with a certificate whose key usage permits signatures. |
+| `INTEGRITY.CERT.REVOKED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | not fixed here | Sign with a certificate that is not revoked. |
+| `INTEGRITY.FORMAT.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive | Engine limit: this engine does not verify this signature format. |
+| `INTEGRITY.ISSUER.UNTRUSTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | Sign with a certificate that chains to a trust anchor that the operator confirms. |
+| `INTEGRITY.JOSE.ALGORITHM` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.verify` | not fixed here | Sign with an algorithm on the allowlist that fits the key type. |
+| `INTEGRITY.JOSE.CLAIMS` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles._moment`, `dppce.evidence.jose_profiles._seconds`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here | Correct the claims of the token that the message names. |
+| `INTEGRITY.JOSE.EXPIRED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here | Issue a credential that is valid at the evaluation time. |
+| `INTEGRITY.JOSE.HEADER` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here | Use only the header members that the profile defines. |
+| `INTEGRITY.JOSE.ISSUER_MISMATCH` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here | Make the issuer claim equal the issuer of the credential. |
+| `INTEGRITY.JOSE.ISSUER_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.jose._pinned_key`, `dppce.adapters.jose._untrusted`, `dppce.adapters.status_list` | not fixed here | Sign with a key of an issuer that the operator confirms in the trust bundle. |
+| `INTEGRITY.JOSE.KEY_NOT_VALID` | INTEGRITY |  | `dppce.adapters.jose._valid`, `dppce.adapters.status_list` | not fixed here | Sign with a key that is valid and not revoked at the evaluation time. |
+| `INTEGRITY.JOSE.MALFORMED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles._decode`, `dppce.evidence.jose_profiles._signature`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.parse` | not fixed here | Serve the token as a well-formed JWS. |
+| `INTEGRITY.JOSE.NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.jose.credential_gate` | not fixed here | Make the signed token available at the declared location. |
+| `INTEGRITY.JOSE.NOT_YET_VALID` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here | Issue a credential that is already valid at the evaluation time. |
+| `INTEGRITY.JOSE.OK` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here | None: the step passed. |
+| `INTEGRITY.JOSE.PARAMS` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `INTEGRITY.JOSE.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.jose._acquire` | inconclusive | Supply the offline sample that the test purpose names, in the data directory of the run. |
+| `INTEGRITY.JOSE.SIGNATURE` | INTEGRITY |  | `dppce.adapters.jose._signature`, `dppce.evidence.jose_profiles.verify` | not fixed here | Sign the token again, so that the signature verifies with the key. |
+| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.status_list`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `INTEGRITY.JOSE.TYPE` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here | Set the token type that the profile requires. |
+| `INTEGRITY.JOSE.UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._did_key`, `dppce.adapters.status_list`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.key_algorithm`, `dppce.evidence.jose_profiles.public_key_from_jwk` | not fixed here | Engine limit: a well-formed token in a form that this engine does not verify. |
+| `INTEGRITY.KEY.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive | Engine limit: this engine does not verify this key type. |
+| `INTEGRITY.NO_TARGET` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._acquire` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `INTEGRITY.OK` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | None: the step passed. |
+| `INTEGRITY.PATH.UNSUPPORTED_CONSTRAINT` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings`, `dppce.adapters.jose._chain_key` | inconclusive / not fixed here | Engine limit: the certificate path has a constraint that this engine does not check. |
+| `INTEGRITY.PAYLOAD.MISMATCH` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | Sign the payload that the system serves, so that both agree. |
+| `INTEGRITY.PAYLOAD.NOT_COMPARABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive | Serve the signed and the served payload in a form that the engine can compare. |
+| `INTEGRITY.SIGNATURE.INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | Sign the payload again, so that the signature verifies. |
+| `INTEGRITY.STATUS.ENTRY_MALFORMED` | INTEGRITY |  | `dppce.adapters.status_list._malformed` | not fixed here | Correct the status entry of the credential. |
+| `INTEGRITY.STATUS.ENTRY_MISSING` | INTEGRITY |  | `dppce.adapters.status_list._entries` | not fixed here | Add a status entry of the tested purpose to the credential. |
+| `INTEGRITY.STATUS.ENTRY_TYPE` | INTEGRITY |  | `dppce.adapters.status_list._entries` | not fixed here | Engine limit: this engine does not check this type of status entry. |
+| `INTEGRITY.STATUS.INDEX_RANGE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | Give a status list index inside the status list. |
+| `INTEGRITY.STATUS.LIST_FORMAT` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._verify` | not fixed here | Engine limit: the status list has a format that this engine does not read. |
+| `INTEGRITY.STATUS.LIST_LENGTH` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | Publish a status list with at least the minimum number of entries. |
+| `INTEGRITY.STATUS.LIST_MALFORMED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._list_malformed` | not fixed here | Publish the status list as a well-formed, encoded bitstring. |
+| `INTEGRITY.STATUS.LIST_NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here | Publish the status list at the URL that the entry names. |
+| `INTEGRITY.STATUS.LIST_SIGNATURE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._verify` | not fixed here | Sign the status list, so that its signature verifies. |
+| `INTEGRITY.STATUS.LIST_UNBOUND` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here | Make the signed id of the status list equal its URL. |
+| `INTEGRITY.STATUS.LIST_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._entry` | not fixed here | Sign the status list with a key of the issuer of the credential. |
+| `INTEGRITY.STATUS.LIST_VALIDITY` | INTEGRITY |  | `dppce.adapters.status_list` | not fixed here | Publish a status list that is valid at the evaluation time. |
+| `INTEGRITY.STATUS.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here | Give the credential a status entry, or declare that it has none. |
+| `INTEGRITY.STATUS.OK` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | not fixed here | None: the step passed. |
+| `INTEGRITY.STATUS.PARAMS` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `INTEGRITY.STATUS.PURPOSE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | Publish a status list that serves the purpose of the entry. |
+| `INTEGRITY.STATUS.REVOKED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | The credential is revoked. Issue a new credential if the data are still valid. |
+| `INTEGRITY.STATUS.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here | Supply the offline sample that the test purpose names, in the data directory of the run. |
+| `INTEGRITY.STATUS.SIZE_UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | Engine limit: this engine does not read status entries of this size. |
+| `INTEGRITY.STATUS.STALE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | Publish a status list that is newer than its allowed age. |
+| `INTEGRITY.STATUS.SUSPENDED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here | The credential is suspended. Lift the suspension if the data are still valid. |
+| `INTEGRITY.STATUS.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._entry`, `dppce.adapters.status_list._Lists._record`, `dppce.adapters.status_list._Lists.judge` | not fixed here | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `INTEGRITY.TOKEN.MALFORMED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | Serve the signed token in a well-formed serialization. |
+| `INTEGRITY.TOKEN.NOT_AVAILABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | Make the signed token available at the declared location. |
+| `INTEGRITY.TOKEN.NOT_PROCESSABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | Serve a signed token that the engine can process. |
+| `INTEGRITY.TOKEN.NO_ANSWER` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here | No answer: the system did not answer usefully. Make the endpoint answer, then run the step again. |
+| `INTEGRITY.TOKEN.TOO_LARGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive / not fixed here | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `INTEGRITY.TRUST.ANCHOR_INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here | Correct the trust anchor that the operator confirms in the trust bundle. |
+| `INTEGRITY.TRUST.MISSING` | INTEGRITY | `integrity.jose`, `integrity.jws`, `integrity.status_list` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose.jose_check`, `dppce.adapters.status_list.status_list_check` | inconclusive | Supply a trust bundle that the operator confirms. |
+| `ISSUER.ACCREDITATION.NO_REFERENCE` | ISSUER |  | `dppce.cli._inputs_from_args`, `dppce.verifier.verify._issuer_problem` | not fixed here | Give the accreditation reference with the declared accreditation status. |
+| `ISSUER.STATEMENT.MISMATCH` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here | Make the issuer statement of the report agree with the issuer of the signing key. |
+| `ISSUER.STATEMENT.UNSPECIFIED` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here | Declare the issuer of the report in the run configuration. |
+| `KEYS.DATA_KEY.UNAVAILABLE` | KEYS |  | `dppce.cli.cmd_run` | not fixed here | Correct the key file or the passphrase that the message names, and run the command again. |
+| `KEYS.FILE.EXISTS` | KEYS |  | `dppce.infrastructure.keys.generate_signing_key` | not fixed here | Choose an output path that does not exist yet. The command does not overwrite a file. |
+| `KEYS.KEY.NOT_P256` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here | Use a P-256 key, the only report key type of this engine. |
+| `KEYS.KEY.UNENCRYPTED` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here | Store the private key encrypted with a passphrase. |
+| `KEYS.KEY.UNREADABLE` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here | Correct the key file or the passphrase that the message names, and run the command again. |
+| `KEYS.PASSPHRASE.LENGTH` | KEYS |  | `dppce.infrastructure.keys.generate_signing_key` | not fixed here | Use a passphrase of at least the length that the message names. |
+| `KEYS.PASSPHRASE.MISSING` | KEYS |  | `dppce.infrastructure.keys.load_signing_key` | not fixed here | Give the reference to the passphrase of the key. |
+| `MANUAL.DIGEST.NOT_MANUAL` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here | Ask for the digest of a manual test purpose only. |
+| `MANUAL.DIGEST.PURPOSE_AMBIGUOUS` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here | Name the test pack of the test purpose, so that one purpose matches. |
+| `MANUAL.DIGEST.PURPOSE_UNKNOWN` | MANUAL |  | `dppce.cli.cmd_manual_digest` | not fixed here | Name a test purpose of a selected test pack. |
+| `MANUAL.EVIDENCE.MISMATCH` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here | Supply the evidence files that the signed manual result names, unchanged. |
+| `MANUAL.KEY.NOT_VALID` | MANUAL |  | `dppce.evidence.manual._trusted_key` | not fixed here | Sign the manual result with a key that is valid and not revoked. |
+| `MANUAL.KEY.UNTRUSTED` | MANUAL |  | `dppce.evidence.manual`, `dppce.evidence.manual._trusted_key` | not fixed here | Sign the manual result with a key that the trust bundle names for manual results. |
+| `MANUAL.PURPOSE.DIGEST_MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign a new manual result for the current version of the test purpose. |
+| `MANUAL.PURPOSE.MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign a manual result for this test purpose. |
+| `MANUAL.RESULT.MALFORMED` | MANUAL |  | `dppce.adapters.manual.review`, `dppce.evidence.manual.claimed_test_purpose`, `dppce.evidence.manual.verify_manual_result` | not fixed here | Supply the signed manual result as one compact JWS. |
+| `MANUAL.RESULT.MISSING` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here | Supply a signed manual result for the step. |
+| `MANUAL.RESULT.TOO_LARGE` | MANUAL |  | `dppce.adapters.manual.review`, `dppce.evidence.manual` | not fixed here | Supply a signed manual result that is smaller than the limit. |
+| `MANUAL.REVIEW.FAILED` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here | Correct the finding that the reviewer recorded, then repeat the manual review. |
+| `MANUAL.REVIEW.OK` | MANUAL |  | `dppce.adapters.manual.review` | not fixed here | None: the step passed. |
+| `MANUAL.SIGNATURE.INVALID` | MANUAL |  | `dppce.evidence.manual`, `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign the manual result again with an allowed algorithm and the trusted key. |
+| `MANUAL.SUT.MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign a manual result for this system under test. |
+| `MANUAL.SUT.VERSION_MISMATCH` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign a manual result for the system version that the ICS declares. |
+| `MANUAL.TIME.AFTER_EVALUATION` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign a manual result of a review before the evaluation time. |
+| `MANUAL.TIME.OUTSIDE_KEY_VALIDITY` | MANUAL |  | `dppce.evidence.manual.verify_manual_result` | not fixed here | Sign the manual result with a key that is valid at the time of review. |
+| `MANUAL.TRUST.MISSING` | MANUAL |  | `dppce.adapters.manual.review` | error | Supply a trust bundle that names the key of the performer. |
+| `MODE.ILLUSTRATIVE_NOT_REVIEWABLE` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here | Run an illustrative rule in illustrative mode. It makes no claim. |
+| `MODE.NOT_APPROVED` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here | A reviewer must approve the interpretation (open question OQ-002). Until then, use exploratory mode. |
+| `MODE.NOT_ILLUSTRATIVE` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here | Run the requirement in exploratory or reviewed mode. |
+| `MODE.NOT_PERMITTED` | MODE |  | `dppce.orchestrator.plan.build_plan` | not fixed here | Run the step in a mode that its test purpose permits. |
+| `NEGOTIATION.BODY` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | fail; inconclusive under a non-default verdict rule | Serve the representation that the Accept value of the request asks for. |
+| `NEGOTIATION.MEDIA_TYPE` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here | Serve the response with the media type that the rule expects. |
+| `NEGOTIATION.NO_TARGET` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | inconclusive | Supply the carrier URL, so that the check can send its requests. |
+| `NEGOTIATION.OK` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | pass | None: the step passed. |
+| `NEGOTIATION.QUALITY` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here | Follow the quality values of the Accept header when you choose a representation. |
+| `NEGOTIATION.STATUS` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here | Answer with the status code that the rule expects for this request. |
+| `NEGOTIATION.UNSUPPORTED` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here | Answer an unsupported Accept value with the status code that the rule expects. |
+| `NEGOTIATION.VARY.MISSING` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here | Send a Vary header that names Accept with each negotiated response. |
+| `OPEN.OUTPUT.EXISTS` | OPEN |  | `dppce.cli.cmd_open` | not fixed here | Choose an output path that does not exist yet. The command does not overwrite a file. |
+| `OPEN.RECORD.NOT_IN_REPORT` | OPEN |  | `dppce.evidence.disclosure.open_record` | not fixed here | Open a record that the report commits to, from the recording of the same run. |
+| `OPEN.RECORD.UNKNOWN` | OPEN |  | `dppce.cli.cmd_open` | not fixed here | Name a record identifier of the recording. |
+| `OPENING.COMMITMENT.MISMATCH` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here | Supply the opening unchanged, as the engine wrote it. |
+| `OPENING.FILE.MALFORMED` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here | Supply the opening file unchanged, as the engine wrote it. |
+| `OPENING.FILE.TOO_LARGE` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here | Supply the opening file unchanged. It is larger than the limit. |
+| `OPENING.RECORD.OK` | OPENING |  | `dppce.evidence.disclosure.check_opening_file` | not fixed here | None: the opening matches the commitment. |
+| `PATH.APPLICABILITY_UNKNOWN` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here | Answer the ICS questions that decide whether the assessment path applies. |
+| `PATH.NO_STEP` | PATH |  | `dppce.verdicts.aggregate.aggregate` | not fixed here | Add at least one test purpose to the assessment path. |
+| `PERSISTENCE.DIGEST.NOT_COMPARABLE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive | Serve the versions in a form that the engine can compare. |
+| `PERSISTENCE.NO_TARGET` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `PERSISTENCE.OK` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | pass | None: the step passed. |
+| `PERSISTENCE.PARAMS.INVALID` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `PERSISTENCE.RESPONSE.NOT_CONCLUSIVE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |
+| `PERSISTENCE.RESPONSE.NOT_JSON` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `PERSISTENCE.RESPONSE.STATUS` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
+| `PERSISTENCE.UNDECLARED_CHANGE` | PERSISTENCE | `persistence.versions` | `dppce.adapters.lifecycle.versions` | fail; inconclusive under a non-default verdict rule | Record each change of the passport as a new, declared version. |
+| `PLAN.BLOCKED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here | Supply a signed authorization of the system owner that grants the scope of the step. |
+| `PLAN.MANUAL_UNAVAILABLE` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here | Supply a signed manual result for the step, signed with a performer key from the trust bundle. |
+| `PLAN.NOT_RUN` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here | The step did not run. Select a test pack that defines its test purpose and a check that this engine registers. |
+| `PLAN.SKIPPED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here | No applicable requirement needs the step, or its applicability is unknown. Answer the ICS questions that decide it. |
+| `PLAN.STEP_MISSING` | PLAN |  | `dppce.verdicts.aggregate.aggregate` | not fixed here | Select a test pack that defines the test purpose of the assessment path. |
+| `PLAN.UNSUPPORTED` | PLAN |  | `dppce.orchestrator.run.execute` | not fixed here | This engine cannot run the check here: an engine limit. Install the optional extra, or use a version that supports the form. |
+| `PROFILE.NOT_SELECTED` | PROFILE |  | `dppce.orchestrator.plan.build_plan` | not fixed here | Select a profile for which the test purpose is defined. |
+| `PROOF.FILE.MALFORMED` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here | Supply the proof file unchanged, as the engine wrote it. |
+| `PROOF.FILE.TOO_LARGE` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here | Supply the proof file unchanged. It is larger than the limit. |
+| `PROOF.LEAF.OK` | PROOF |  | `dppce.evidence.disclosure.check_proof_file` | not fixed here | None: the proof leads to the root of the report. |
+| `PROOF.PATH.INVALID` | PROOF |  | `dppce.evidence.disclosure._check_proof` | not fixed here | Supply the proof for this report, unchanged. |
+| `PROOF.REPORT.MISMATCH` | PROOF |  | `dppce.evidence.disclosure._check_proof` | not fixed here | Check the proof against the report that it was made for. |
+| `PROVE.OUTPUT.EXISTS` | PROVE |  | `dppce.cli.cmd_prove` | not fixed here | Choose an output path that does not exist yet. The command does not overwrite a file. |
+| `PROVE.RESULT.UNKNOWN` | PROVE |  | `dppce.evidence.disclosure.prove` | not fixed here | Name a result key that the report holds. |
+| `REGISTRY.FIELD.MISSING` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule | Add the listed fields to the registry record. |
+| `REGISTRY.INCONSISTENT` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule | Make the listed fields of the registry record agree with the passport. |
+| `REGISTRY.LOOKUP.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive; fail under a non-default verdict rule | No answer: the registry lookup gave no usable answer. Make it answer, then run again. |
+| `REGISTRY.NO_TARGET` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `REGISTRY.OK` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | pass | None: the step passed. |
+| `REGISTRY.PARAMS.INVALID` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `REGISTRY.RESPONSE.NOT_CONCLUSIVE` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |
+| `REGISTRY.RESPONSE.NOT_JSON` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `REGISTRY.RESPONSE.STATUS` | REGISTRY | `registry.consistency` | `dppce.adapters.lifecycle.registry_consistency` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
+| `REPLAY.DATA_ROOT.MISSING` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here | Give the data directory of the recorded run. |
+| `REPLAY.INPUT.CHANGED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here | Replay with the inputs of the recorded run, unchanged. |
+| `REPLAY.INPUT.NOT_RECORDED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here | Replay a recording that holds each input of the run. |
+| `REPLAY.RECORDING_MISMATCH` | REPLAY |  | `dppce.orchestrator.run.execute` | error | Replay with the inputs of the recorded run. A changed input sends other requests. |
+| `RESOLVER.CONFORMANCE.INVALID_ACCEPTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Reject an invalid identifier instead of resolving it. |
+| `RESOLVER.CONFORMANCE.INVALID_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Answer an invalid identifier with the status code that the rule expects. |
+| `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Serve the linkset at its own URL, without a redirect. |
+| `RESOLVER.CONFORMANCE.LINKSET_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Answer the request with a success status code. |
+| `RESOLVER.CONFORMANCE.NO_REDIRECT` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Redirect a resolution request to the default link. |
+| `RESOLVER.CONFORMANCE.OK` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver.conformance` | pass | None: the step passed. |
+| `RESOLVER.LINKSET.ANCHOR` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here | Set the anchor of the linkset to the resolved identifier. |
+| `RESOLVER.LINKSET.MEDIA_TYPE` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here | Serve the response with the media type that the rule expects. |
+| `RESOLVER.LINKSET.OK` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | pass | None: the step passed. |
+| `RESOLVER.LINKSET.RELATION_MISSING` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here | Add the link relations that the rule requires to the linkset. |
+| `RESOLVER.LINKSET.STATUS` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here | Answer the request with a success status code. |
+| `RESOLVER.LINKSET.STRUCTURE` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here | Serve the linkset in the structure that the rule requires. |
+| `RESOLVER.NO_TARGET` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver._carrier`, `dppce.adapters.resolver.conformance` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `RESOLVER.PARAMS.INVALID` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `RESOLVER.WELLKNOWN.MEDIA_TYPE` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule | Serve the response with the media type that the rule expects. |
+| `RESOLVER.WELLKNOWN.NOT_JSON` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `RESOLVER.WELLKNOWN.OK` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | pass | None: the step passed. |
+| `RESOLVER.WELLKNOWN.REDIRECTED` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | inconclusive | Serve the resolver description at its well-known URL, without a redirect. |
+| `RESOLVER.WELLKNOWN.ROOT` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule | Serve the resolver description with the root members that the rule requires. |
+| `RESOLVER.WELLKNOWN.STATUS` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
+| `RESULT.MISSING` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here | Run the planned step, so that the report holds its result. |
+| `RESULT.NOT_PLANNED` | RESULT |  | `dppce.verdicts.aggregate.aggregate` | not fixed here | Use only results from the plan of this run. |
+| `SIGN.INPUT.LINK` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here | Give the input as a regular file, not as a link. |
+| `SIGN.OPTION.INVALID` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here | Correct the option that the message names. |
+| `SIGN.OUTPUT.EXISTS` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here | Choose an output path that does not exist yet. The command does not overwrite a file. |
+| `SIGN.OUTPUT.IS_INPUT` | SIGN |  | `dppce.cli.cmd_sign` | not fixed here | Choose an output path that differs from the input path. |
+| `SIGNATURE.ISSUER.NONE` | SIGNATURE |  | `dppce.verifier.verify` | not fixed here | Sign the report with a key of its issuer. |
+| `SIGNER.ISSUER.MISMATCH` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here | Sign with a key of the issuer that the attestation names. |
+| `SIGNER.KEY.NOT_TRUSTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here | Sign with a key that is valid and not revoked at the signing time. |
+| `SIGNER.KEY.UNKNOWN` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here | Sign with a key that the trust bundle names. |
+| `SIGNER.LIFECYCLE.CONFLICT` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here | Remove the conflicting attestations of one signer from the report. |
+| `SIGNER.ROLE.NOT_GRANTED` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here | Sign with a key that the trust bundle grants the declared role. |
+| `SIGNER.ROLE.OK` | SIGNER |  | `dppce.verifier.verify._signer_code`, `dppce.verifier.verify._signers` | not fixed here | None: the trust bundle grants the declared role. |
+| `SIGNER.SIGNATURE.INVALID` | SIGNER |  | `dppce.verifier.verify._signers` | not fixed here | Supply the signature unchanged, so that it verifies. |
+| `STATUS.SUPERSEDED` | STATUS |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here | Select the requirement that supersedes this one. |
+| `STATUS.SUPERSEDED_BY_SELECTED` | STATUS |  | `dppce.orchestrator.plan.build_plan` | not fixed here | None: a selected requirement supersedes this one and is assessed instead. |
+| `STATUS.WITHDRAWN` | STATUS |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here | None: the requirement is withdrawn and is not assessed. |
+| `STATUSLIST.FILE.MALFORMED` | STATUSLIST |  | `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here | Supply the status list file unchanged, as the issuer signed it. |
+| `STATUSLIST.FILE.MISSING` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Give the status list file that the report names. |
+| `STATUSLIST.FILE.OPTION` | STATUSLIST |  | `dppce.cli.cmd_report` | not fixed here | Correct the status list option that the message names. |
+| `STATUSLIST.FILE.TOO_LARGE` | STATUSLIST |  | `dppce.adapters.status_list._Lists._entry`, `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here | Supply a status list file that is smaller than the limit. |
+| `STATUSLIST.ID.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Supply the status list that the report names. |
+| `STATUSLIST.INDEX.OUT_OF_RANGE` | STATUSLIST |  | `dppce.evidence.status.bit_is_set` | not fixed here | Give a status index inside the status list. |
+| `STATUSLIST.ISSUER.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Sign the status list with a key of the report issuer. |
+| `STATUSLIST.KEY.NOT_TRUSTED` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here | Sign the status list with a key that is valid and not revoked. |
+| `STATUSLIST.KEY.PURPOSE` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here | Sign the status list with a key that has the purpose status. |
+| `STATUSLIST.KEY.UNKNOWN` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here | Sign the status list with a key that the trust bundle names. |
+| `STATUSLIST.REFERENCE.NONE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Not a step result: a statement of the verifier on the report status list. |
+| `STATUSLIST.REPORT.ACTIVE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Not a step result: a statement of the verifier on the report status list. |
+| `STATUSLIST.REPORT.REVOKED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Not a step result: a statement of the verifier on the report status list. |
+| `STATUSLIST.REPORT.SUSPENDED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Not a step result: a statement of the verifier on the report status list. |
+| `STATUSLIST.REPORT.UNSIGNED` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Not a step result: a statement of the verifier on the report status list. |
+| `STATUSLIST.SIGNATURE.INVALID` | STATUSLIST |  | `dppce.evidence.status.read_status_list` | not fixed here | Supply the status list unchanged, so that its signature verifies. |
+| `STATUSLIST.TIME.STALE` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here | Supply a status list that is newer than the maximum age of the trust bundle. |
+| `STEP.NOT_APPLICABLE` | STEP |  | `dppce.orchestrator.plan.build_plan` | not fixed here | None: the step does not apply to the declared system. |
+| `TIMESTAMP.CMS.SIGNATURE_INVALID` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.CMS.SIGNING_CERT` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.CMS.UNSUPPORTED` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms`, `dppce.evidence.timestamp.verify_token` | not fixed here | Engine limit: the timestamp token uses a form that this engine does not verify. |
+| `TIMESTAMP.EVIDENCE.TOO_MANY` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.verifier.verify._timestamps` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.IMPRINT.ALGORITHM` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.IMPRINT.MISMATCH` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.OK` | TIMESTAMP |  | `dppce.verifier.verify._timestamps` | not fixed here | None: the timestamp token verifies. |
+| `TIMESTAMP.RESPONSE.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.RESPONSE.REJECTED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.RESPONSE.TOO_LARGE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.SIGNATURE.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_imprint` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.SIGNATURE.NONE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_imprint`, `dppce.verifier.verify._timestamps` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TIME.FUTURE` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TOKEN.DUPLICATE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TOKEN.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp._malformed`, `dppce.verifier.verify._timestamps` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TOKEN.TOO_LARGE` | TIMESTAMP |  | `dppce.evidence.timestamp.parse_token`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Engine limit: the timestamp token has an extension that this engine does not verify. |
+| `TIMESTAMP.TSA.EKU` | TIMESTAMP |  | `dppce.evidence.timestamp._check_tsa` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TSA.EXPIRED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TSA.KEY_USAGE` | TIMESTAMP |  | `dppce.evidence.timestamp._check_tsa` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TSA.REVOKED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TSA.UNKNOWN` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Engine limit: the certificate of the time-stamping authority has a constraint that this engine does not check. |
+| `TIMESTAMP.TSA.UNTRUSTED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TLS.CA_FILE.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.CLIENT_CERT.INCOMPLETE` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.CLIENT_CERT.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.CLIENT_CERT.NO_AUTHORIZATION` | TLS |  | `dppce.cli._tls_options` | not fixed here | Supply a signed authorization of the system owner with the client certificate. |
+| `TLS.CLIENT_KEY.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.CLIENT_KEY.MISMATCH` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.CLIENT_KEY.PASSPHRASE` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.CONTEXT.UNUSABLE` | TLS |  | `dppce.infrastructure.transport._tls_context` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TLS.FILE.UNREADABLE` | TLS |  | `dppce.cli._tls_file` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
+| `TRANSPORT.BODY_ENCODED` | TRANSPORT |  | `dppce.adapters.common.body_problem` | inconclusive | Serve the body without a content encoding that the engine does not decode. |
+| `TRANSPORT.BODY_TRUNCATED` | TRANSPORT |  | `dppce.adapters.common.body_problem` | inconclusive | Engine limit: the body is larger than the transport limit. Serve a smaller body. |
+| `TRANSPORT.DENIED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule | No answer: the request was refused. Grant the test role access, then run again. |
+| `TRANSPORT.RATE_LIMITED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule | No answer: the system limits the request rate. Run again later, or raise the limit. |
+| `TRANSPORT.REDIRECT_OUT_OF_SCOPE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule | No answer: a redirect leaves the authorized origins. Confirm the origin as the operator, or remove the redirect. |
+| `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule | No answer: the server answered with a server error. Correct the server, then run again. |
+| `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule | No answer: the system is not reachable. Make the endpoint reachable, then run again. |
+| `TRUST.BUNDLE.NOT_OBJECT` | TRUST |  | `dppce.cli._trust`, `dppce.verifier.__main__.main` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.BUNDLE.OPTION` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.KEY.DUPLICATE_KID` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.KEY.NOT_P256` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.KEY.PERIOD_INVALID` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.KEY.PRIVATE` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here | Remove the private key material from the trust bundle. |
+| `TRUST.KEY.ROLE_CONFLICT` | TRUST |  | `dppce.models.trust.TrustBundle._review_keys_are_personal` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.MIGRATION.MALFORMED` | TRUST |  | `dppce.migrations._runinputs_2_to_3`, `dppce.migrations._trust_1_to_2` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.MIGRATION.UNSCOPED_SERIAL` | TRUST |  | `dppce.migrations._trust_1_to_2` | not fixed here | Correct the trust bundle that the message names. Only the operator chooses the trust anchors. |
+| `TRUST.OUTPUT.EXISTS` | TRUST |  | `dppce.cli.cmd_trust_add_key` | not fixed here | Choose an output path that does not exist yet. The command does not overwrite a file. |
+| `TRUST.SNAPSHOT.STALE` | TRUST |  | `dppce.verifier.verify._status` | not fixed here | Supply a trust bundle snapshot that is newer than its allowed age. |
+| `VALIDITY.PERIOD.EXPIRED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here | Not a step result: the report is past its validity. Run the test again for a new report. |
+| `VALIDITY.PERIOD.NOT_STATED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here | Not a step result: the report states no validity period. |
+| `VALIDITY.PERIOD.OK` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here | None: the report is within its validity period. |
+| `VALIDITY.REPORT.UNSIGNED` | VALIDITY |  | `dppce.verifier.verify._validity` | not fixed here | Not a step result: sign the report, so that its validity can be checked. |

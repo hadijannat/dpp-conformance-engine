@@ -172,5 +172,6 @@ def test_the_reason_code_page_is_current() -> None:
     assert page == gen.reason_codes_page(), "run `uv run just reference`"
     assert (
         "| `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | "
-        "inconclusive; fail under a non-default verdict rule |"
+        "inconclusive; fail under a non-default verdict rule | No answer: the server answered with a "
+        "server error. Correct the server, then run again. |"
     ) in page.splitlines()
