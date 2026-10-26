@@ -348,6 +348,7 @@ Initial registry:
 | `data.rules` | `data.rules` | Rule pack: completeness, units, ranges, relationships, freshness. |
 | `access.restricted_fields` | `access.policy` | A role gets each field that the declared policy gives it, and no field that the policy withholds from it. |
 | `integrity.jws` | `integrity.jws` | Signature validity, issuer trust, and certificate validity, as separate findings. |
+| `integrity.jose` | `integrity.jose` | Verifies a JWS credential or token under a named profile with its own algorithm allowlist. Signature, issuer trust, and validity are separate findings. The report signing profile is unchanged. Experimental. |
 | `persistence.versions` | `persistence.versions` | Version history obeys the declared update rule. |
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
 | `aas.validate` | `aas.validate` | Wrap aas-test-engines for a JSON, XML, or AASX sample. A metamodel version that the pinned release does not verify is `unsupported`. Needs the `aas` extra. |
@@ -409,6 +410,68 @@ body that is not a compact JWS gives `INTEGRITY.TOKEN.MALFORMED`. A
 published passport that is a linkset gives `blocked` with `INTEGRITY.PAYLOAD.NOT_COMPARABLE`.
 With `item_target: resolved`, a resolver answer that is a linkset gives
 `INTEGRITY.NO_TARGET` first (section 9.2).
+
+`integrity.jose` verifies a JWS under a profile of `dppce.evidence.jose_profiles`. Its profiles
+are separate from the report signing profile (section 11.3). That profile, the allowlist of
+`dppce.evidence.jws`, and `integrity.jws` do not change. The sources are RFC 7515, RFC 7517,
+RFC 7518, RFC 8037, RFC 8725, and the W3C Recommendation VC-JOSE-COSE of 13 October 2026.
+
+The check takes six optional parameters:
+
+- `profile`, default `vc-jose`. The value `vc-jose` judges a credential. The value `jws` judges
+  any JWS and reads no `typ` and no claim.
+- `key_source`, default `trust_kid`. With `trust_kid`, the `kid` names a key of the trust bundle
+  with the purpose `passport`. With `x5c`, the chain in `x5c` must reach a passport anchor, as in
+  `integrity.jws`. The value `x5c` needs the profile `jws`, because no rule binds a credential
+  issuer to a certificate. The set is closed. A later version can add a DID key source.
+- `source`, default `signed`. The value `signed` fetches the resource `signed`. The value `sample`
+  reads the IXIT sample that `sample` names, default `credential`, and sends no request.
+- `accept` sets the `Accept` header of the fetch. The media type of the answer is not judged.
+- `algorithms` narrows the allowlist `ES256`, `ES384`, and `EdDSA`.
+
+The check reads a compact, a flattened JSON, or a general JSON serialization. The shape rules of
+`integrity.jws` above decide the JSON forms. Every signature must verify. The protected and the
+unprotected header of a signature must not share a member name. The check takes the first row
+that applies:
+
+1. Invalid parameters: `blocked`, `INTEGRITY.JOSE.PARAMS`. No trust bundle: `blocked`,
+   `INTEGRITY.TRUST.MISSING`. Nothing is read.
+2. A transport error or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
+   `INTEGRITY.JOSE.SAMPLE_MISSING`. A status other than 200: `INTEGRITY.JOSE.NOT_AVAILABLE`.
+3. A body above 2 MiB, or more than 8 signatures: `blocked`, `INTEGRITY.JOSE.TOO_LARGE`.
+4. A body of another shape, or a header that is not a JSON object: `INTEGRITY.JOSE.MALFORMED`.
+5. Then each signature in turn. A header without a string `alg` is `INTEGRITY.JOSE.MALFORMED`.
+   The `alg` value `none`, `HS256`, `HS384`, or `HS512` gives `INTEGRITY.JOSE.ALGORITHM`, before
+   any key is looked up.
+6. A `crit` that is not a list of protected member names is `INTEGRITY.JOSE.MALFORMED`. A `crit`
+   that names a member other than `b64` gives `INTEGRITY.JOSE.HEADER`.
+7. A `b64` that is unprotected, or that `crit` does not name, is `INTEGRITY.JOSE.MALFORMED`. A
+   protected `b64: false` that `crit` names gives `INTEGRITY.JOSE.HEADER` under `vc-jose`. Under
+   `jws` it gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`, because RFC 7797 defines this form.
+8. Under `vc-jose`, a present `typ` other than `vc+jwt` gives `INTEGRITY.JOSE.TYPE`. The check
+   compares it without case and accepts the prefix `application/`. An absent `typ` is permitted.
+9. With `trust_kid`, no passport key with the `kid` gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. A key
+   that is revoked, or outside its validity at the evaluation time, gives
+   `INTEGRITY.JOSE.KEY_NOT_VALID`. With `x5c`, a missing chain or a chain without a path to an
+   anchor gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`. An `x5c` entry that is not a certificate gives
+   `INTEGRITY.JOSE.MALFORMED`. A chain of certificates longer than the limit gives `blocked`.
+10. The key type gives the algorithm: P-256 gives `ES256`, P-384 gives `ES384`, and Ed25519 gives
+    `EdDSA`. Another key type gives `blocked`, `INTEGRITY.JOSE.UNSUPPORTED`. An algorithm outside
+    `algorithms`, or a header `alg` that differs from it, gives `INTEGRITY.JOSE.ALGORITHM`.
+11. A signature that does not verify gives `INTEGRITY.JOSE.SIGNATURE`. This includes a signature
+    of the wrong length.
+12. With `x5c`, the certificate findings of `integrity.jws` follow in its order, with its codes.
+13. Under `vc-jose`, the payload must be one JSON object with an `issuer` string or an `issuer`
+    object with a string `id`. A claim of the wrong form gives `INTEGRITY.JOSE.CLAIMS`. An `iss`
+    that differs from the issuer gives `INTEGRITY.JOSE.ISSUER_MISMATCH`.
+14. A `validFrom` or an `nbf` after the evaluation time gives `INTEGRITY.JOSE.NOT_YET_VALID`. A
+    `validUntil` before it, or an `exp` at or before it, gives `INTEGRITY.JOSE.EXPIRED`.
+15. With `trust_kid`, a trusted key of another issuer gives `INTEGRITY.JOSE.ISSUER_UNTRUSTED`.
+16. Otherwise: pass, `INTEGRITY.JOSE.OK`.
+
+Only rows 3, 7, 9, 10, and 12 can give `blocked` after the body is read. Each applies to a
+well-formed token only. A system under test therefore cannot reshape a defect into a step that is
+not judged.
 
 `identifier.parse` takes the optional parameter `form`. Its values are `dppce-item`, the default,
 and `gs1-dl`. The default keeps the strict grammar below, so existing decision digests do not

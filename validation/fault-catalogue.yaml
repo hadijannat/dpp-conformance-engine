@@ -338,6 +338,41 @@ sut_faults:
     description: The last raw-byte digest of the history is not the digest of the current item body.
     test_purpose: TP-PERSIST-002
     expected: {verdict: fail, reason_code: PERSISTENCE.UNDECLARED_CHANGE}
+  - id: F-56
+    class: invalid_signature
+    fault: vc_tampered
+    description: The payload of the VC-JOSE credential changes after signing.
+    test_purpose: TP-VC-JOSE-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.JOSE.SIGNATURE}
+  - id: F-57
+    class: invalid_signature
+    fault: vc_hs256_confusion
+    description: The credential header names HS256, and the credential is MACed with the bytes of the issuer public key.
+    test_purpose: TP-VC-JOSE-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.JOSE.ALGORITHM}
+  - id: F-58
+    class: certificate_expiry
+    fault: vc_expired
+    description: The validUntil of the validly signed credential is before the evaluation time.
+    test_purpose: TP-VC-JOSE-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.JOSE.EXPIRED}
+  - id: F-59
+    class: untrusted_issuer
+    fault: vc_untrusted_kid
+    description: The kid of the credential names no passport key of the trust bundle.
+    test_purpose: TP-VC-JOSE-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.JOSE.ISSUER_UNTRUSTED}
+  - id: F-60
+    class: invalid_signature
+    fault: vc_alg_none
+    description: The credential is an unsecured JWS with the algorithm none and an empty signature.
+    test_purpose: TP-VC-JOSE-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.JOSE.ALGORITHM}
   - id: F-63
     class: schema_fault
     fault: aas_invalid_json

@@ -48,7 +48,8 @@ A header value with a line break is never sent. The server answers `400` in its 
 
 The package `dppce.infrastructure.reference` holds family modules. A family module adds the
 behavior of one implementation family, for example a resolver. The families are `resolver`
-(section 4.6) and `jose`, which owns the flag `signed_jws_json`. The module docstring of the
+(section 4.6), `jose`, which owns the flag `signed_jws_json`, and `credentials` (section 4.7).
+The module docstring of the
 package states the contract. In short:
 
 - `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
@@ -247,6 +248,30 @@ of the GS1 Resolver Community Edition (Apache-2.0, commit `bf885fd`). The values
 
 A malformed GS1 path, for example a GTIN of 13 digits, still gets `404`. The engine sends such
 paths for the faults F-30 and F-31, so their answers stay the same.
+
+### 4.7 VC-JOSE credential (family module `credentials`)
+
+Module: `dppce.infrastructure.reference.credentials`. The behavior is synthetic. It follows the
+W3C Recommendation VC-JOSE-COSE and RFC 7515.
+
+A request for `/dpp/{id}/signed` with exactly `Accept: application/vc+jwt` gets `200` with the
+media type `application/vc+jwt`. The body is a compact JWS with the protected header
+`{"alg": "ES256", "kid": "TEST-ONLY-vc-issuer-key-1", "typ": "vc+jwt"}`. Every other request gets
+the core answer, so the answer to `Accept: */*` stays the `dpp+jws` token of section 4.5.
+
+The payload is `canonical_bytes` of this credential. The subject is the `id` of the anonymous
+item-level passport:
+
+```json
+{"@context": ["https://www.w3.org/ns/credentials/v2"], "type": ["VerifiableCredential"],
+ "issuer": "urn:example:operator:0001", "validFrom": "2026-01-01T00:00:00Z",
+ "validUntil": "2036-01-01T00:00:00Z",
+ "credentialSubject": {"id": "https://id.example.test/01/09506000134352/21/EV0001"}}
+```
+
+The TEST-ONLY leaf key of section 4.5 signs the credential. The TEST-ONLY trust bundle pins its
+public key as `TEST-ONLY-vc-issuer-key-1`, with the issuer `urn:example:operator:0001` and the
+purpose `passport`.
 
 ## 5. Local data formats
 
@@ -507,6 +532,11 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `wellknown_redirect` | family `resolver`: `/.well-known/gs1resolver` answers `301` to `/resolver-description.json`, which serves the description file |
 | `resolver_200_for_invalid` | family `resolver`: `/01/...` answers `200` with `{"status": "ok"}` for an unknown identifier, for example a GTIN with a wrong check digit |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
+| `vc_tampered` | family `credentials`: the payload of the credential of section 4.7 names serial `OTHER0001` after signing |
+| `vc_hs256_confusion` | family `credentials`: the credential header names `HS256`, and the signature is an HMAC-SHA256 with the DER public key of the TEST-ONLY leaf as the key |
+| `vc_expired` | family `credentials`: the validly signed credential has `validFrom` `2025-01-01T00:00:00Z` and `validUntil` `2026-01-01T00:00:00Z` |
+| `vc_untrusted_kid` | family `credentials`: the validly signed credential has the `kid` `TEST-ONLY-unknown-issuer-key`, which the trust bundle does not hold |
+| `vc_alg_none` | family `credentials`: the credential header names `none`, and the signature part is empty |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:
@@ -554,6 +584,8 @@ to rotate them. QR images are generated with zxing-cpp and Pillow (the `qr` extr
 rotates no key.
 `scripts/gen_fixtures.py --add-manual-key` adds only the manual signing key to the trust bundle.
 The rig signs manual results with it for the synthetic reference system only.
+The bundle entry `TEST-ONLY-vc-issuer-key-1` pins the public key of the TEST-ONLY leaf for the
+credential of section 4.7. It was added to the bundle by hand, and no key was rotated.
 
 ## 8. Check parameters and outcomes
 
@@ -641,6 +673,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
 | `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
+| `integrity.jose` | `profile`, `key_source`, `source`, `sample`, `accept`, `algorithms`; all optional | `INTEGRITY.JOSE.OK` | the architecture contract, section 8, gives each outcome and its order. The reference credential is in section 4.7 |
 | `persistence.versions` | `entries_pointer`, `version_field`, `time_field`, `digest_field`, `digest_of`, `version_kind` (the defaults are the layout of section 4.3) | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail); no canonical form of the passport with `jcs-sha256`: `blocked`, `PERSISTENCE.DIGEST.NOT_COMPARABLE` (section 4.3); malformed parameter: `blocked`, `PERSISTENCE.PARAMS.INVALID` |
 | `registry.consistency` | `fields` (1 to 16 pairs of `name`, `registry_pointer`, and `passport_pointer`; the default is the two pairs of section 4.4) | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail); malformed parameter: `blocked`, `REGISTRY.PARAMS.INVALID`. Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`), `format` (`json`, `xml`, or `aasx`; default `json`), `metamodel_version` (default `3.0`) | `AAS.VALID`. The message names the format and the version that the check covers | `AAS.INVALID` (fail): the wrapped validator read the sample and rejected it, or the sample is not readable as the declared format, or an AASX package has no AAS specification part; a `metamodel_version` that the wrapped release does not verify, or an XML namespace that names such a version: `unsupported`, `AAS.VERSION.UNSUPPORTED`, and the sample is not read; malformed parameter: `blocked`, `AAS.PARAMS.INVALID`; sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
