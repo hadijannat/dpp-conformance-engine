@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 45,
+    "cycle": 48,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-26: waves 1 and 2 of program P2 are on main (19451c4, 5d0037a, a95d17e), and wave 3 (P2-07, P2-08, P2-09, and the integrator commits) is on the integration branch worktree-wf_3d3517aa-872-1, based on main a95d17e, and is not yet on main.",
+    "state_at_end": "2026-10-26: waves 1 to 3 of program P2 are on main (19451c4, 5d0037a, a95d17e, d19a8f9), and wave 4 (P2-12, P2-10, P2-11, and the integrator commits) is on the integration branch worktree-wf_62c75a1d-0f2-10, based on main d19a8f9, and is not yet on main.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -619,6 +619,24 @@
       "kind": "implement-and-check",
       "milestone": "M8",
       "summary": "P2-09 (1c38b22 catalogue entries F-63 to F-66 and B-16 first, then 65eef74, 8554456, 2fad9e2, d3af4d0, 687ce22, ecfa48d, a6ab50f, db62523): the AAS file check moves to src/dppce/adapters/aas.py and the check aas.dpp_compose compares an AAS environment with the IDTA 02099-1 DPP metadata template through a table of identifiers, and the branch history was rewritten before landing to remove a vendored template file that held text taken from a European standard; in the package, uv run just check passed with 3590 tests and 1 skip, and just validate was not run."
+    },
+    {
+      "cycle": 46,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-12 (8ed11ba tests first, then 0843f75, ec2880e, 897f80a, 0d58a4f): the transport takes an operator CA file that adds to the default trust store and a client certificate that goes only to an origin of a validated authorization, with nine TLS.* input errors at exit 2 and no option that turns off certificate checks; after the wave 4 merges, uv run just check passed with 4026 tests and 1 skip, and just validate was not run."
+    },
+    {
+      "cycle": 47,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-10 (68a0b65 catalogue entries F-67, F-68, and B-17 first, then 9f5c7b4, eb66d47, 03c60be, 44d1e96, 4cae0c0): identifier.consistency compares further identifier sources at JSON Pointers, and the experimental check identifier.equivalence compares GS1 keys in a canonical form, with TEST-ONLY samples for the controls C-FAMILY-GS1 and C-FAMILY-VC; after the wave 4 merges, uv run just check passed with 4026 tests and 1 skip, and just validate was not run."
+    },
+    {
+      "cycle": 48,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-11 (e393eaf catalogue entries F-69, F-70, and B-18 first, and a036a5a tests first, then 3e46263, 808cec6, dc51e3e, 587acae): the experimental check integrity.status_list verifies a W3C Bitstring Status List entry of a credential, and integrity.jose gains the key source did, with no vendored W3C file because the test suite has no recorded open license; after the wave 4 merges, uv run just check passed with 4026 tests and 1 skip, and just validate was not run."
     }
   ],
   "blockers": [
