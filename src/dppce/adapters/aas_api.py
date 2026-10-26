@@ -8,8 +8,10 @@ the minimum that the check judges, written by hand.
 
 Every request is a GET through ``ctx.acquirer``, so the transport policy, the authorization, and
 the request budget apply. The check sends no write, no negative, and no fuzz request. A fail is
-raised at once. An engine limit or a missing answer waits until every probe ran, so that a system
-under test cannot turn a fail into a step that is not judged.
+raised at once. A missing answer or a refusal waits until every probe ran, so that a system under
+test cannot turn a fail into a step that is not judged. Two engine limits end the probes at once:
+a profile declared only in a version other than 3.0 (``AAS.API.VERSION_UNSUPPORTED``) and the end
+of the request budget (``AAS.API.BUDGET_EXHAUSTED``).
 """
 
 from __future__ import annotations
@@ -83,6 +85,7 @@ RULES: Final = {
         "objects with an id."
     ),
     "list_empty": "The list is empty and has no cursor, but the declared id answers 200.",
+    "list_incomplete": "The pages up to the last one do not list the declared id, but it answers 200.",
     "paging_limit": "The list answer with limit=1 holds more than one element.",
     "paging_cursor": "The page of the returned cursor repeats an element of the first page.",
     "item_status": "The GET of the declared id does not answer 200.",
@@ -165,7 +168,8 @@ class _Probes:
     records: list[Record] = field(default_factory=list)
     seen: list[dict[str, JsonValue]] = field(default_factory=list)
     deferred: CheckOutcome | None = None
-    listed_none: bool = False
+    # The ids of the whole list, known only when the walk reached a page without a cursor.
+    listed: set[str] | None = None
 
     def get(self, probe: str, path: str) -> Record:
         if len(self.seen) >= self.limit:
@@ -239,8 +243,8 @@ def _list(probes: _Probes, collection: str) -> None:
         raise _BrokenError("paging_limit")
     cursor = first["paging_metadata"].get("cursor")
     if cursor is None:
-        # _item fails this list if the declared id then answers.
-        probes.listed_none = not _result(first)
+        # _item fails this list if the declared id then answers and is not in it.
+        probes.listed = {i["id"] for i in _result(first)}
         return
     # A cursor can hold '+', '/', '=', or '#', so it is percent-encoded.
     second = probes.document("list_cursor", f"/{collection}?limit=1&cursor={quote(cursor, safe='')}", "list")
@@ -252,6 +256,8 @@ def _list(probes: _Probes, collection: str) -> None:
         raise _BrokenError("paging_limit")
     if {i["id"] for i in _result(second)} & {i["id"] for i in _result(first)}:
         raise _BrokenError("paging_cursor")
+    if second["paging_metadata"].get("cursor") is None:
+        probes.listed = {i["id"] for i in _result(first) + _result(second)}
 
 
 def _declared(probes: _Probes, profile: _Profile) -> None:
@@ -284,8 +290,8 @@ def _item(probes: _Probes, profile: _Profile, ident: str) -> None:
         and (profile.collection != "shells" or isinstance(document.get("assetInformation"), dict))
     ):
         raise _BrokenError("item_shape")
-    if document is not MISSING and probes.listed_none:
-        raise _BrokenError("list_empty")
+    if document is not MISSING and probes.listed is not None and ident not in probes.listed:
+        raise _BrokenError("list_incomplete" if probes.listed else "list_empty")
     if profile.collection != "shells":
         return
     refs = probes.document("submodel_refs", path + "/submodel-refs", "refs")

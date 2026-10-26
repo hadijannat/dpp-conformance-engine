@@ -316,6 +316,56 @@ def test_a_json_array_is_valid_json_ld(tmp_path: Path, loopback: Any) -> None:
     _passed(_check(tmp_path, api))
 
 
+def _redirecting(loopback: Any, negotiate_at_target: bool) -> Any:
+    """A carrier that answers 307 with ``Vary: Accept``. The targets answer without Vary.
+
+    With ``negotiate_at_target``, every request goes to one target that negotiates. Otherwise
+    text/html goes to /p.html and every other Accept value goes to /p.json.
+    """
+
+    def handle(request: http.server.BaseHTTPRequestHandler) -> None:
+        html = request.headers.get("Accept", "") == "text/html"
+        if request.path == RESOLVER_PATH:
+            target = "/p" if negotiate_at_target else ("/p.html" if html else "/p.json")
+            reply(request, 307, b"", {"Location": target, "Vary": "Accept"})
+        elif request.path == "/p.html" or (request.path == "/p" and html):
+            reply(request, 200, HTML, {"Content-Type": "text/html"})
+        else:
+            reply(request, 200, PASSPORT)
+
+    return loopback(handle)
+
+
+def test_a_carrier_that_negotiates_with_a_redirect_needs_no_vary_on_the_targets(
+    tmp_path: Path, loopback: Any
+) -> None:
+    # Each target is its own resource, so a cache keys it by URL. Vary is judged per final URL.
+    server = _redirecting(loopback, negotiate_at_target=False)
+    _passed(run(resolved_context(tmp_path, "identifier.negotiation", server.origin)))
+
+
+def test_answers_that_end_at_one_url_and_differ_need_vary(tmp_path: Path, loopback: Any) -> None:
+    server = _redirecting(loopback, negotiate_at_target=True)
+    outcome = run(resolved_context(tmp_path, "identifier.negotiation", server.origin))
+    _failed(outcome, "NEGOTIATION.VARY.MISSING")
+
+
+def test_a_url_that_redirects_one_request_and_serves_another_needs_vary(
+    tmp_path: Path, loopback: Any
+) -> None:
+    # The F-72 shape: a cache of the carrier URL would serve the HTML page to a JSON client.
+    def handle(request: http.server.BaseHTTPRequestHandler) -> None:
+        if request.path == RESOLVER_PATH and request.headers.get("Accept", "") == "text/html":
+            reply(request, 200, HTML, {"Content-Type": "text/html"})
+        elif request.path == RESOLVER_PATH:
+            reply(request, 307, b"", {"Location": "/p.json", "Vary": "Accept"})
+        else:
+            reply(request, 200, PASSPORT)
+
+    outcome = run(resolved_context(tmp_path, "identifier.negotiation", loopback(handle).origin))
+    _failed(outcome, "NEGOTIATION.VARY.MISSING")
+
+
 def test_a_carrier_that_is_not_a_url_is_not_probed(tmp_path: Path, loopback: Any) -> None:
     api = Server(loopback)
     ctx = resolved_context(

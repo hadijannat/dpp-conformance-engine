@@ -95,20 +95,36 @@ def _head_failure(answers: dict[str, Record], unsupported_answer: str) -> tuple[
         if refused or (weighted.status == 200 and not _is_json(media_type(weighted))):
             message = "The carrier ignores the weights of Accept: the heavier JSON range gets no JSON."
             return "NEGOTIATION.QUALITY", message
-    # The engine can attribute a difference of status or media type to Accept. A body can differ
-    # for other reasons (a timestamp), so bodies are not compared.
-    kinds = {
-        (r.status, media_type(r) if r.status == 200 else "")
-        for n, r in answers.items()
-        if n != "unsupported" or unsupported_answer == "default" or r.status == 406
-    }
-    served = [r for r in answers.values() if r.status == 200]
-    if len(kinds) > 1 and not all(_lists_accept(r) for r in served):
+    if _vary_missing(answers, unsupported_answer):
         return (
             "NEGOTIATION.VARY.MISSING",
             "The answers differ by Accept, and an answer does not list Accept in Vary.",
         )
     return None
+
+
+def _vary_missing(answers: dict[str, Record], unsupported_answer: str) -> bool:
+    """Rule 4: answers at one URL differ, and a 200 answer there does not list Accept in Vary.
+
+    The engine can attribute a difference of status or media type to Accept. A body can differ
+    for other reasons (a timestamp), so bodies are not compared. A cache keys each URL on its
+    own, so Vary is judged per URL. A URL that redirects one request and answers another
+    differs too. The engine does not observe the Vary of a redirect hop.
+    """
+    kinds: dict[str, set[str]] = {}
+    served: dict[str, list[Record]] = {}
+    for n, r in answers.items():
+        if n != "unsupported" or unsupported_answer == "default" or r.status == 406:
+            *hops, final = (r.url, *r.redirects)
+            for hop in hops:
+                kinds.setdefault(hop, set()).add("redirect")
+            kinds.setdefault(final, set()).add(f"{r.status} {media_type(r) if r.status == 200 else ''}")
+            if r.status == 200:
+                served.setdefault(final, []).append(r)
+    return any(
+        len(seen) > 1 and not all(_lists_accept(r) for r in served.get(url, []))
+        for url, seen in kinds.items()
+    )
 
 
 def _parses_as_json(record: Record) -> bool:

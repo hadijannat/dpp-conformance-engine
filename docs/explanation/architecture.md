@@ -793,9 +793,11 @@ fail on another answer into `blocked`.
    `NEGOTIATION.MEDIA_TYPE`. The check does not judge the media type of the other answers.
 3. The weighted request must get a 200 answer with a JSON media type when the `json` request got
    200. A 406 or a non-JSON type gives `NEGOTIATION.QUALITY`.
-4. If the answers differ in status or media type, each 200 answer must list `Accept` or `*` in
-   `Vary`: `NEGOTIATION.VARY.MISSING`. The check does not compare bodies, because a body can
-   differ for reasons other than `Accept`.
+4. `Vary` is judged per URL. If the answers at one URL differ in status or media type, each 200
+   answer there must list `Accept` or `*` in `Vary`: `NEGOTIATION.VARY.MISSING`. A URL that
+   redirects one request and answers another also differs. The engine does not observe the
+   `Vary` of a redirect hop. The check does not compare bodies, because a body can differ for
+   reasons other than `Accept`.
 5. A JSON media type needs a body that is valid JSON. A `text/html` answer needs a body with
    markup that is not valid JSON: `NEGOTIATION.BODY`. Other media types are not judged here.
 
@@ -909,6 +911,9 @@ a value of a closed set:
   to 2048 characters.
 - `list_empty`: the first page is empty and has no cursor, but the declared id answers 200 with a
   valid shape. So the list does not hold every element.
+- `list_incomplete`: the probes reach a page without a cursor, and the pages read do not list the
+  declared id. The declared id answers 200 with a valid shape. A cursor on the second page proves
+  nothing.
 - `paging_limit`: a page with `limit=1` holds more than one element.
 - `paging_cursor`: the page of the cursor repeats an id of the first page.
 - `item_status`, `item_shape`: the declared id does not answer 200, or the answer does not have that

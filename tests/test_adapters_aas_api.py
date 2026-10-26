@@ -297,6 +297,24 @@ def test_too_small_a_request_budget_is_no_answer(tmp_path: Path, loopback: Any) 
         # An empty list without a cursor, while the declared id answers 200: the list is incomplete.
         ({f"{BASE}/shells?limit=1": (200, b'{"paging_metadata": {}, "result": []}')}, "list_empty"),
         ({f"{BASE}/shells?limit=1": (200, b'{"paging_metadata": {}}')}, "list_empty"),
+        # The pages up to one without a cursor are the whole list, and it leaves out the declared id.
+        (
+            {f"{BASE}/shells?limit=1": (200, b'{"paging_metadata": {}, "result": [{"id": "urn:other"}]}')},
+            "list_incomplete",
+        ),
+        (
+            {
+                f"{BASE}/shells?limit=1": (
+                    200,
+                    b'{"paging_metadata": {"cursor": "c1"}, "result": [{"id": "urn:o1"}]}',
+                ),
+                f"{BASE}/shells?limit=1&cursor=c1": (
+                    200,
+                    b'{"paging_metadata": {}, "result": [{"id": "urn:o2"}]}',
+                ),
+            },
+            "list_incomplete",
+        ),
         ({f"{BASE}/shells/{b64(SHELL)}": (404, b"{}")}, "item_status"),
         (
             {
