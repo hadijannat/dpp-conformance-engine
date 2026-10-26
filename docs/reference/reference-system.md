@@ -48,8 +48,8 @@ A header value with a line break is never sent. The server answers `400` in its 
 
 The package `dppce.infrastructure.reference` holds family modules. A family module adds the
 behavior of one implementation family, for example a resolver. The families are `resolver`
-(section 4.6), `jose`, which owns the flag `signed_jws_json`, and `credentials` (section 4.7).
-The module docstring of the
+(section 4.6), `jose`, which owns the flag `signed_jws_json`, `credentials` (section 4.7),
+and `did` (section 4.8). The module docstring of the
 package states the contract. In short:
 
 - `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
@@ -272,6 +272,22 @@ item-level passport:
 The TEST-ONLY leaf key of section 4.5 signs the credential. The TEST-ONLY trust bundle pins its
 public key as `TEST-ONLY-vc-issuer-key-1`, with the issuer `urn:example:operator:0001` and the
 purpose `passport`.
+
+### 4.8 DID document (family module `did`)
+
+Module: `dppce.infrastructure.reference.did`. The behavior is synthetic. The public origin
+`https://id.example.test` gives the DID `did:web:id.example.test`. Its DID document is at
+`/.well-known/did.json`, with the media type `application/did+json`:
+
+```json
+{"id": "did:web:id.example.test",
+ "verificationMethod": [{"id": "did:web:id.example.test#key-1", "type": "JsonWebKey",
+   "controller": "did:web:id.example.test", "publicKeyJwk": {"kty": "EC", "crv": "P-256", "x": "...", "y": "..."}}],
+ "assertionMethod": ["did:web:id.example.test#key-1"]}
+```
+
+The key is the public key of `fixtures/reference/pki/TEST-ONLY-leaf.cert.pem`. The document has
+no `@context`, so a reader processes it as plain JSON. Every other path passes to the core.
 
 ## 5. Local data formats
 
@@ -537,6 +553,9 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `vc_expired` | family `credentials`: the validly signed credential has `validFrom` `2025-01-01T00:00:00Z` and `validUntil` `2026-01-01T00:00:00Z` |
 | `vc_untrusted_kid` | family `credentials`: the validly signed credential has the `kid` `TEST-ONLY-unknown-issuer-key`, which the trust bundle does not hold |
 | `vc_alg_none` | family `credentials`: the credential header names `none`, and the signature part is empty |
+| `did_id_mismatch` | family `did`: the `id` of the DID document is `did:web:other.example.test` |
+| `did_private_key` | family `did`: the JWK of the verification method also holds the synthetic private member `d` |
+| `did_redirect_off_host` | family `did`: `/.well-known/did.json` answers `302` to `https://other.example.test/.well-known/did.json`, outside the scope of the rig |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:

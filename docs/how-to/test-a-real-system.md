@@ -76,6 +76,35 @@ A step that does not fit these declarations is not applicable. It is never a fai
 Declare `product_category: unknown` in the ICS.
 An example ICS and IXIT for each family are in `profiles/family/examples/`.
 
+## Resolve a did:web DID
+
+The check `identity.did` reads the DID document of a credential issuer. Often a third party
+operates that host, not the owner of the system under test. The owner cannot give permission for
+a host of a third party. The check therefore has two modes.
+
+| Mode | Parameters | What the engine does |
+| --- | --- | --- |
+| Offline copy | `did` and `source` | Reads the IXIT sample that `source` names. It sends no request. |
+| Live fetch | `did` only | Fetches `https://<host>/.well-known/did.json` through the transport policy. |
+
+Use the offline copy when you have no permission for the DID host.
+
+1. Get the DID document from the owner as a file.
+2. Name the file in `IXIT.samples`, for example `did_document: did.json`.
+3. Give `source: did_document` in the parameters of the test purpose.
+
+For a live fetch, you need the permission of the operator of the DID host. Add the host to
+`network.allowed_hosts`. Give `--allow-remote-host ORIGIN` for the origin of the DID host.
+Without this confirmation, the transport refuses the request. The step is then inconclusive with
+`TRANSPORT.DENIED`, never a pass. The engine does not follow a redirect out of the scope.
+
+The test purpose `TP-VC-DID-001` names the DID of the reference system. For a different DID, import
+a test pack with that DID and the mode that you selected. The observation records the mode in
+`source`.
+
+A DID document that resolves is not trusted. Add the issuer key to your trust bundle with an
+issuer equal to the DID. Get the key through a channel that you trust.
+
 ## Manual steps
 
 A manual step needs a signed manual result. The engine does not perform the review.

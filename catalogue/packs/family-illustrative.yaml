@@ -452,3 +452,23 @@ requirements:
   - id: default
     tests:
     - TP-VC-JOSE-001
+- id: FAM-VC-DID-001
+  title: The did:web document of the issuer resolves
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The did:web document has the DID as its id, publishes public keys only, and resolves its assertion
+    methods.
+  applicability: *vc
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-DID-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. Resolution is not trust.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-DID-001

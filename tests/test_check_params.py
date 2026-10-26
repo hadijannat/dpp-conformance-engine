@@ -46,6 +46,7 @@ CONTRACT_CHECKS = (
     "identifier.granularity",
     "identifier.parse",
     "identifier.resolve",
+    "identity.did",
     "integrity.jose",
     "integrity.jws",
     "manual.review",
@@ -65,9 +66,10 @@ NO_PARAMETERS = (
 # Checks that took no parameter in the base version and now take a closed model (package P2-06).
 LIFECYCLE_CHECKS = ("persistence.versions", "registry.consistency")
 # The checks whose parameter model has a required field, so the empty parameters do not fit.
-REQUIRED_PARAMETERS = ("data.context", "resolver.linkset")
+REQUIRED_PARAMETERS = ("data.context", "identity.did", "resolver.linkset")
 ALLOWLIST: dict[str, Any] = {"allowed_contexts": ["https://example.test/c"]}
 RELATIONS: dict[str, Any] = {"relations": ["https://example.test/rel/passport"]}
+DID: dict[str, Any] = {"did": "did:web:id.example.test"}
 
 # Each check with a misspelled key, and the key that the problem must name.
 MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
@@ -83,6 +85,7 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "aas.validate": ({"artefact": "aas_file"}, "artefact"),
     "aas.dpp_compose": ({"artefact": "aas_json"}, "artefact"),
     "resolver.linkset": ({"relation": ["https://example.test/rel/passport"]}, "relation"),
+    "identity.did": ({**DID, "sourc": "did_document"}, "sourc"),
     "integrity.jose": ({"key_sorce": "x5c"}, "key_sorce"),
     **{name: ({"documnet": "item"}, "documnet") for name in (*NO_PARAMETERS, *LIFECYCLE_CHECKS)},
 }
@@ -92,6 +95,10 @@ UNKNOWN_VALUES: list[tuple[str, dict[str, Any]]] = [
     ("resolver.linkset", {"document": "nothing", **RELATIONS}),
     ("resolver.linkset", {"relations": ["Not A Relation"]}),
     ("resolver.linkset", {"relations": ["anchor"]}),
+    ("identity.did", {"did": "did:web:127.0.0.1"}),
+    ("identity.did", {"did": "did:key:z6MkTEST"}),
+    ("identity.did", {"did": "did:web:id.example.test:.."}),
+    ("identity.did", {**DID, "source": ""}),
     ("api.contract", {"resource": "nothing"}),
     ("api.contract", {"method": "post"}),
     ("identifier.resolve", {"accepted_media_types": ["Text/HTML"]}),
@@ -135,6 +142,8 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("resolver.linkset", {"relations": [7]}),
     ("resolver.linkset", {"relations": ["https://example.test/rel/a\n"]}),
     ("resolver.linkset", {"relations": []}),
+    ("identity.did", {"did": 7}),
+    ("identity.did", {**DID, "source": 7}),
     ("integrity.jose", {"accept": 7}),
     ("integrity.jose", {"accept": "application/vc+jwt\n"}),
     ("integrity.jose", {"algorithms": "ES256"}),
@@ -219,6 +228,7 @@ def test_the_shipped_parameters_and_the_empty_parameters_fit() -> None:
         assert (empty is None) is (name not in REQUIRED_PARAMETERS), name
     assert _problem("data.context", {"document": "item", **ALLOWLIST}) is None
     assert _problem("resolver.linkset", {"relations": ["describedby", "https://example.test/rel/a"]}) is None
+    assert _problem("identity.did", {**DID, "source": "did_document"}) is None
     assert (
         _problem("identifier.resolve", {"accept": "text/html", "accepted_media_types": ["text/html"]}) is None
     )

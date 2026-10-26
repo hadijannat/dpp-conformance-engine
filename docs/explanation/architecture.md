@@ -357,6 +357,7 @@ Initial registry:
 | `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
 | `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
+| `identity.did` | `identity.did` | Resolves a did:web DID, or reads an offline copy of its DID document. Checks the `id`, the verification methods, and the assertion methods. Resolution is not trust. Experimental. |
 
 `identifier.resolve` takes three optional parameters. `require_https`, default false, fails a
 carrier URL or a redirect target whose scheme is not https with `IDENTIFIER.SCHEME.NOT_HTTPS`.
@@ -718,6 +719,65 @@ The check judges each DPP metadata submodel and takes the first row that applies
 Each problem of the sample shape is a fail, never `blocked`. So a system under test cannot reshape
 a fail into a step that is not judged. The check does not judge value formats, value types,
 optional elements, or concept descriptions. An AAS environment is not by itself a DPP.
+
+`identity.did` takes the required parameter `did` and the optional parameter `source`. The URL
+mapping follows the did:web Method Specification, a W3C CCG report. The commit `ea423c1` of
+`github.com/w3c-ccg/did-method-web` was read on 2026-10-25. The document rules follow W3C DID
+Core 1.0. The mapping is:
+
+- The DID is `did:web:` and a domain name, then optional path segments after `:`. The domain name
+  is not an IP address.
+- A port follows the domain name as `%3A` and a number from 1 to 65535. `%3a` is the same.
+- Without a path, the URL is `https://<domain>[:<port>]/.well-known/did.json`. With a path, it is
+  `https://<domain>[:<port>]/<segment>/.../did.json`.
+- The URL is always https. The origin override of the test rig applies as to any other URL.
+- A path segment holds only `A-Z`, `a-z`, `0-9`, `.`, `_`, and `-`, and is not `.` or `..`. A
+  percent-encoded path segment is an engine limit.
+
+Another text gives `blocked` with `IDENTITY.DID.PARAMS_INVALID`, and nothing is sent. The lint and
+the run planner refuse such a DID.
+
+Without `source`, the check fetches the URL with `GET` through the transport (section 9). The
+DID host is often a third party. The operator must confirm its origin, as for any other origin.
+A host that the operator did not confirm gives `TRANSPORT.DENIED`, which is no answer and never a
+pass. A redirect out of the scope gives `TRANSPORT.REDIRECT_OUT_OF_SCOPE`. With `source`, the
+check reads the IXIT sample of that name as an offline copy of the DID document, and sends nothing.
+The observation summary names the source in `source`: `live` or `sample`.
+
+The check takes the first rule that applies:
+
+1. A transport error or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
+   `IDENTITY.DID.SAMPLE_MISSING`.
+2. A status other than 200: `IDENTITY.DID.STATUS`. The rule does not read the body.
+3. A body coding or a truncated body: `blocked`, as `unusable` gives. A document above 1 MiB:
+   `blocked`, `IDENTITY.DID.TOO_LARGE`.
+4. The body is not one JSON object for the strict parser of the engine: `IDENTITY.DID.NOT_JSON`.
+5. The `id` is not the DID as exact text: `IDENTITY.DID.ID_MISMATCH`.
+6. A `publicKeyJwk` holds a private member (`d`, `p`, `q`, `dp`, `dq`, `qi`, `oth`, or `k`), or
+   a method has a member whose name starts with `privateKey`: `IDENTITY.DID.PRIVATE_KEY`. The
+   rule reads each verification method and each embedded method of every verification
+   relationship, also a malformed one. A relationship can be a list or one object.
+7. `IDENTITY.DID.VERIFICATION_METHOD` for one of these: `verificationMethod` is not a list. A
+   method has no non-empty string `id`, `type`, or `controller`. A `publicKeyJwk` is not an object
+   with a string `kty`. Two methods have the same id. A relative id starts with `#` and resolves
+   against the DID.
+8. An `assertionMethod` entry is not an embedded method and not the id of a method of the
+   document: `IDENTITY.DID.ASSERTION_UNRESOLVED`. A reference to another DID document fails too.
+9. A redirect that the transport followed, with a document that passes rules 4 to 8: `blocked`,
+   `IDENTITY.DID.REDIRECTED`. So a redirect cannot hide a fail, and a redirected document never
+   passes.
+10. A method without `publicKeyJwk`, for example with `publicKeyMultibase`: `unsupported`,
+    `IDENTITY.DID.KEY_FORMAT`. The engine reads JWK keys only.
+
+Otherwise the check passes with `IDENTITY.DID.OK`. A document of an unexpected shape is a fail,
+never `blocked`. The check does no JSON-LD processing and does not judge the media type or the
+other members of the document. The observation summary holds counts, the status, and the media
+type. It never holds an id, a key, or a URL.
+
+Resolution is not trust. DNS and TLS name the host, not the issuer. A key of the document is
+trusted only through a pinned `TrustedKey` of the trust bundle whose `issuer` equals the DID.
+`dppce.adapters.did.resolve_did_web` gives the resolved document and its public keys by absolute
+method id to other checks.
 
 Digital consistency does not prove physical authenticity. A signature that verifies does not
 prove that the signed attributes are true. Each check states such a limit in its message.
