@@ -198,7 +198,11 @@ def public_jwk_from(document: object) -> dict[str, str]:
         key = numbers.public_key()
     except ValueError as exc:  # SignatureError is a ValueError too
         raise SignatureError("the JWK is not a point on P-256", "KEY") from exc
-    return public_jwk_of(key)
+    canonical = public_jwk_of(key)
+    # One spelling per point: no padding, no standard alphabet, no unused bits, no x + p.
+    if (canonical["x"], canonical["y"]) != (document["x"], document["y"]):
+        raise SignatureError("a coordinate of the JWK is not the unpadded base64url of 32 bytes", "KEY")
+    return canonical
 
 
 class LocalSigner:
