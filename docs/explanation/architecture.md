@@ -338,7 +338,7 @@ Initial registry:
 | Check | Capability | Purpose |
 | --- | --- | --- |
 | `carrier.qr_decode` | `carrier.qr` | Decode a QR image artifact with zxing-cpp. Needs the `qr` extra. |
-| `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. The parameter `form` selects the GS1 Digital Link grammar. |
+| `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. The parameter `form` selects the GS1 Digital Link grammar. The schemes `https-url`, `did-web`, and `urn-uuid` have a parser. |
 | `identifier.granularity` | `identifier.granularity` | Classifies a GS1 Digital Link carrier with a GTIN as model, batch, or item level, and compares the level with the granularity of the ICS. Experimental. |
 | `identifier.resolve` | `identifier.resolve` | Bounded resolution of the identifier to a passport. |
 | `identifier.consistency` | `identifier.consistency` | Compares the carrier identifier with the `id` of the resolved passport. With a QR image sample, it also compares the carrier identifier with the declared sample identifier. With `compare_item`, it also compares the resolved passport with the document at the target of the `item` template. With `sources`, it compares further values at JSON Pointers in place of the `id`. It does not read the ICS. |
@@ -545,6 +545,24 @@ follows the observation of the token.
 `identifier.parse` takes the optional parameter `form`. Its values are `dppce-item`, the default,
 and `gs1-dl`. The default keeps the strict grammar below, so existing decision digests do not
 change.
+
+The schemes `https-url`, `did-web`, and `urn-uuid` have a parser. Each other declared scheme
+stays `unsupported`, and `unknown` stays `blocked`. A payload that does not match the declared
+scheme gives `IDENTIFIER.SYNTAX.INVALID`, never `blocked`, because the payload comes from the
+system under test. The parameter `form` applies to `gs1-digital-link` only. With another scheme,
+a value of `form` other than the default gives `blocked` with `IDENTIFIER.PARAMS.INVALID`.
+
+- `https-url`: the payload matches the RFC 3986 URI grammar of the `uri` format checker. The scheme
+  is `https`. There is no user information and no fragment. The port, if any, is a number from 0
+  to 65535. The host is a domain name by the rule of the `did-web` mapping: no IP address and no
+  numeric shorthand such as `127.1`. One trailing dot in the host is allowed. A percent-encoded
+  host is not a domain name.
+- `did-web`: the payload maps to an https URL by the did:web mapping of `identity.did`. That
+  mapping refuses IP hosts and numeric shorthand.
+- `urn-uuid`: the payload is `urn:uuid:` and then a UUID in the textual form of RFC 9562, which is
+  8-4-4-4-12 ASCII hexadecimal digits. The check does not judge version or variant.
+
+With `require_https`, a valid `did-web` or `urn-uuid` identifier gives `IDENTIFIER.SCHEME.NOT_HTTPS`.
 
 With the form `dppce-item`, `identifier.parse` accepts one GS1 Digital Link form. The URL starts with
 `http://`, `https://`, `HTTP://`, or `HTTPS://`. With `require_https`, a valid identifier whose

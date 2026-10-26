@@ -38,6 +38,30 @@ requirements:
   - id: default
     tests:
     - TP-WEB-RESOLVE-001
+- id: FAM-WEB-IDENTIFIER-001
+  title: The carrier identifier is an https URL
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The carrier identifier is an absolute https URL with a domain-name host, no user information, and no fragment.
+  applicability:
+    all:
+    - *web
+    - fact: ics.identifier_scheme
+      op: eq
+      value: https-url
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-WEB-IDENTIFIER-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-WEB-IDENTIFIER-001
 - id: FAM-WEB-CONSISTENCY-001
   title: The passport member id equals the passport URL
   source:

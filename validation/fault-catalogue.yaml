@@ -477,6 +477,13 @@ sut_faults:
     test_purpose: TP-VC-STATUS-001
     profiles: [family/credentials]
     expected: {verdict: fail, reason_code: INTEGRITY.STATUS.LIST_SIGNATURE}
+  - id: F-71
+    class: carrier_fault
+    fault: identifier_https_url_userinfo
+    description: The carrier identifier is an https URL with user information, and the ICS declares the scheme https-url.
+    test_purpose: TP-WEB-IDENTIFIER-001
+    profiles: [family/web]
+    expected: {verdict: fail, reason_code: IDENTIFIER.SYNTAX.INVALID}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:

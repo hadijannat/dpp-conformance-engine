@@ -93,3 +93,23 @@ test_purposes:
   - The version entries and the digest comparison.
   permitted_modes: *modes
   severity: minor
+- id: TP-WEB-IDENTIFIER-001
+  title: Check the syntax of the carrier identifier
+  requirements:
+  - FAM-WEB-IDENTIFIER-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *web
+    - fact: ics.identifier_scheme
+      op: eq
+      value: https-url
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.parse
+  expected_evidence:
+  - The scheme and the syntax verdict of the carrier identifier.
+  permitted_modes: *modes
+  severity: major

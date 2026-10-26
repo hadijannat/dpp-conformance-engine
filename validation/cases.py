@@ -63,6 +63,12 @@ _SETUP: dict[str, dict[str, Any]] = {
         "samples": {"gs1_declared": "fixtures/reference/samples/TEST-ONLY-gs1-serial-differs-padded.json"}
     },
     "B-17": {"samples": {"gs1_declared": "fixtures/reference/samples/TEST-ONLY-gs1-padded-gtin.json"}},
+    # The carrier is an https URL with user information. The ICS of family/web declares https-url.
+    "F-71": {
+        "ixit_changes": {
+            "samples": {"identifier": "https://TEST-ONLY-user@id.example.test/01/09506000134352/21/EV0001"}
+        }
+    },
 }
 _NOT_A_FLAG = (
     "none",
@@ -82,6 +88,7 @@ _NOT_A_FLAG = (
     "vc_subject_differs",
     "gs1_serial_differs_padded",
     "gs1_padded_gtin",
+    "identifier_https_url_userinfo",
 )
 
 
