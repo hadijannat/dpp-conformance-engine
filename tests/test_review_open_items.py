@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import secrets
 from pathlib import Path
 from typing import Any
@@ -167,6 +168,38 @@ def test_sign_in_place_refuses_a_link_swapped_in_while_it_signs(
     assert envelope.is_symlink()
     assert target.read_bytes() == before
     assert not [p for p in tmp_path.iterdir() if p.name.startswith(".dppce-sign-")]
+
+
+def test_sign_in_place_holds_the_input_open_until_the_rename(
+    run: Run, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    key = _plain_key(tmp_path)
+    envelope = _envelope(tmp_path / "envelope.json")
+    pinned = os.stat(envelope)
+    original = cli.sign_envelope
+    held: list[bool] = []
+
+    def unlink_then_sign(*arguments: Any, **options: Any) -> Any:
+        # A file system can give a freed inode number to the next file. Only an open descriptor
+        # keeps the number of the unlinked input, so a swapped-in entry cannot match it.
+        envelope.unlink()
+        held.append(any(_names(fd, pinned) for fd in range(3, 1024)))
+        _envelope(envelope)
+        return original(*arguments, **options)
+
+    monkeypatch.setattr(cli, "sign_envelope", unlink_then_sign)
+    code, _, err = _sign(run, envelope, key, "--allow-unencrypted-key", "--in-place")
+    assert held == [True]
+    assert code == 2, err
+    assert "SIGN.INPUT.LINK" in err
+
+
+def _names(fd: int, pinned: os.stat_result) -> bool:
+    try:
+        now = os.fstat(fd)
+    except OSError:
+        return False
+    return (now.st_dev, now.st_ino) == (pinned.st_dev, pinned.st_ino)
 
 
 def test_sign_in_place_refuses_another_file_swapped_in_while_it_signs(

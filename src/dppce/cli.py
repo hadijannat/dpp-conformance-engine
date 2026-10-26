@@ -911,19 +911,27 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 def cmd_sign(args: argparse.Namespace) -> int:
     source: Path = args.envelope
+    if not args.in_place:
+        return _sign_to(args, source, None, None)
     link = f"SIGN.INPUT.LINK: {source} is a symbolic link; sign the target file, or use --out"
-    pinned, data = None, None
-    if args.in_place:
-        # os.replace would put a regular file in place of a link. One open both refuses a link and
-        # pins the file, so a link swapped in after it is seen before the rename.
-        try:
-            handle = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
-        except OSError as exc:
-            if exc.errno != errno.ELOOP:
-                raise
-            raise UsageError(link) from exc
-        with os.fdopen(handle, "rb") as file:
-            pinned, data = os.fstat(file.fileno()), file.read()
+    # os.replace would put a regular file in place of a link. One open both refuses a link and
+    # pins the file. The descriptor stays open until the rename: an open file keeps its inode, so
+    # an entry swapped in at the path has a different inode number. Some file systems reuse a freed
+    # number at once.
+    try:
+        handle = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+    except OSError as exc:
+        if exc.errno != errno.ELOOP:
+            raise
+        raise UsageError(link) from exc
+    with os.fdopen(handle, "rb") as file:
+        return _sign_to(args, source, file.read(), os.fstat(file.fileno()))
+
+
+def _sign_to(
+    args: argparse.Namespace, source: Path, data: bytes | None, pinned: os.stat_result | None
+) -> int:
+    """Sign ``source`` and write it. ``pinned`` is the open input of ``--in-place``, else None."""
     envelope = _checked_envelope(source, data)
     if args.out is not None:
         if args.out.resolve() == source.resolve():
@@ -955,7 +963,7 @@ def cmd_sign(args: argparse.Namespace) -> int:
     except ValidationError as exc:
         raise UsageError(f"SIGN.OPTION.INVALID: {_first_message(exc)}") from exc
     signed_bytes = (signed.model_dump_json(by_alias=True) + "\n").encode("utf-8")
-    out: Path = source if args.in_place else args.out
+    out: Path = source if pinned is not None else args.out
     if pinned is not None:
         if not _replace(source, signed_bytes, pinned):
             raise UsageError(
