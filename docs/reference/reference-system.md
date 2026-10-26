@@ -49,7 +49,7 @@ A header value with a line break is never sent. The server answers `400` in its 
 The package `dppce.infrastructure.reference` holds family modules. A family module adds the
 behavior of one implementation family, for example a resolver. The families are `resolver`
 (section 4.6), `jose`, which owns the flag `signed_jws_json`, `credentials` (section 4.7),
-and `did` (section 4.8). The module docstring of the
+`did` (section 4.8), and `aas` (section 4.9). The module docstring of the
 package states the contract. In short:
 
 - `FLAGS`: the fault flags that the module owns. Each flag name is in one place only.
@@ -308,6 +308,26 @@ Module: `dppce.infrastructure.reference.did`. The behavior is synthetic. The pub
 
 The key is the public key of `fixtures/reference/pki/TEST-ONLY-leaf.cert.pem`. The document has
 no `@context`, so a reader processes it as plain JSON. Every other path passes to the core.
+
+### 4.9 AAS repository (family module `aas`)
+
+Module: `dppce.infrastructure.reference.aas`. The behavior is synthetic. It follows the read
+profiles SSP-002 of the AAS Repository and the Submodel Repository of IDTA-01002 Part 2, version
+3.0.4. The repository is read-only and lives under `/api/v3.0`:
+
+| Path | Answer |
+| --- | --- |
+| `/description` | `{"profiles": [...]}` with the two read profiles of version 3.0 |
+| `/shells` | a paged result of two TEST-ONLY shells. With `limit=1`, the first page has a `cursor` for the second page |
+| `/shells/{id}` | the shell, or `404` with a `messages` list |
+| `/shells/{id}/submodel-refs` | a paged result of the references of the shell |
+| `/submodels`, `/submodels/{id}` | the same for one TEST-ONLY submodel |
+
+An `{id}` is the id, UTF-8, base64url-encoded without padding. The first shell has the id
+`https://example.test/TEST-ONLY/aas/dpp-1` and references the submodel
+`https://example.test/TEST-ONLY/submodel/dpp-metadata-1`. These are the ids of
+`fixtures/aas/TEST-ONLY-dpp-valid.json`. A cursor holds `+`, `/`, and `=`, so a client must
+percent-encode it. Every other path passes to the core.
 
 ## 5. Local data formats
 
@@ -579,6 +599,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `vc_status_revoked` | family `credentials`: the status list of section 4.7 sets the bit at index `41267` |
 | `vc_status_list_unsigned` | family `credentials`: the signature of the status list covers a list with the bit at index `41267` set, and the served payload has the bit not set |
 | `vc_status_list_stale` | family `credentials`: the `ttl` of the status list is `86400000`, one day after its `validFrom`, so the list is stale at the evaluation time of the rig |
+| `aas_api_wrong_status` | family `aas`: `/api/v3.0/shells/{id}` answers `200` with an empty body for an unknown shell id |
+| `aas_api_bad_paging` | family `aas`: `/api/v3.0/shells` and `/api/v3.0/submodels` ignore `limit` and answer every element without a `cursor` |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:
@@ -720,6 +742,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | `persistence.versions` | `entries_pointer`, `version_field`, `time_field`, `digest_field`, `digest_of`, `version_kind` (the defaults are the layout of section 4.3) | `PERSISTENCE.OK` | `PERSISTENCE.UNDECLARED_CHANGE` (fail); no canonical form of the passport with `jcs-sha256`: `blocked`, `PERSISTENCE.DIGEST.NOT_COMPARABLE` (section 4.3); malformed parameter: `blocked`, `PERSISTENCE.PARAMS.INVALID` |
 | `registry.consistency` | `fields` (1 to 16 pairs of `name`, `registry_pointer`, and `passport_pointer`; the default is the two pairs of section 4.4) | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail); malformed parameter: `blocked`, `REGISTRY.PARAMS.INVALID`. Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`), `format` (`json`, `xml`, or `aasx`; default `json`), `metamodel_version` (default `3.0`) | `AAS.VALID`. The message names the format and the version that the check covers | `AAS.INVALID` (fail): the wrapped validator read the sample and rejected it, or the sample is not readable as the declared format, or an AASX package has no AAS specification part; a `metamodel_version` that the wrapped release does not verify, or an XML namespace that names such a version: `unsupported`, `AAS.VERSION.UNSUPPORTED`, and the sample is not read; malformed parameter: `blocked`, `AAS.PARAMS.INVALID`; sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
+| `aas.api_profile` | `endpoint` (default `aas`), `profile` (default `aas-repository-read`), `id_source` (default `aas_shell_id`), `id_pointer`, `max_requests` (default 6) | `AAS.API.OK`. The message names the probes that ran | `AAS.API.PROFILE` (fail), with the broken rule in `summary.rule`; the architecture contract, section 8, gives each outcome and its order. The reference repository is in section 4.9 |
 
 ### 8.1 Outcomes of `integrity.jws`
 

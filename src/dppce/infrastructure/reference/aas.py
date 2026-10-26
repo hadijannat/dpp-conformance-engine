@@ -5,7 +5,10 @@ Repository service specifications of IDTA-01002 Part 2, version 3.0.4. The shape
 hand from the open OpenAPI files; no file is vendored. The repository lives under ``PREFIX`` and
 serves two TEST-ONLY shells, so that a list with ``limit=1`` has a second page, and one TEST-ONLY
 submodel that the first shell references. An identifier in a path is base64url-encoded without
-padding. Every other path passes to the core.
+padding. Every other path passes to the core. The flags:
+
+- ``aas_api_wrong_status`` (F-74): a GET of an unknown shell id answers 200 with an empty body.
+- ``aas_api_bad_paging`` (F-75): a list request ignores ``limit`` and returns every element.
 """
 
 from __future__ import annotations
@@ -21,15 +24,19 @@ from dppce.infrastructure.reference.base import Reply, Request, json_reply
 if TYPE_CHECKING:
     from dppce.infrastructure.reference_server import ReferenceSystem
 
-FLAGS: Final = frozenset[str]()
+FLAGS: Final = frozenset(
+    {
+        # F-74: a GET of an unknown shell id answers 200 with an empty body, not 404.
+        "aas_api_wrong_status",
+        # F-75: a list request ignores limit and returns every element without a cursor.
+        "aas_api_bad_paging",
+    }
+)
 PREFIX: Final = "/api/v3.0"
 # The first shell and the submodel have the ids of fixtures/aas/TEST-ONLY-dpp-valid.json, so the
 # family control can also take the shell id from that sample.
 SHELL_IDS: Final = ("https://example.test/TEST-ONLY/aas/dpp-1", "https://example.test/TEST-ONLY/aas/dpp-2")
 SUBMODEL_ID: Final = "https://example.test/TEST-ONLY/submodel/dpp-metadata-1"
-# The ids that the check asks for as unknown. The repository never holds them.
-UNKNOWN_SHELL_PROBE: Final = "urn:example:dppce:TEST-ONLY:unknown-shell"
-UNKNOWN_SUBMODEL_PROBE: Final = "urn:example:dppce:TEST-ONLY:unknown-submodel"
 PROFILES: Final = (
     "https://admin-shell.io/aas/API/3/0/AssetAdministrationShellRepositoryServiceSpecification/SSP-002",
     "https://admin-shell.io/aas/API/3/0/SubmodelRepositoryServiceSpecification/SSP-002",
@@ -76,7 +83,9 @@ def _not_found() -> Reply:
     return json_reply(404, {"messages": [message]})
 
 
-def _page(items: list[dict[str, Any]], query: str) -> Reply:
+def _page(items: list[dict[str, Any]], query: str, faults: frozenset[str]) -> Reply:
+    if "aas_api_bad_paging" in faults:
+        return json_reply(200, {"paging_metadata": {}, "result": items})
     fields = parse_qs(query)
     try:
         limit = int(fields["limit"][0]) if "limit" in fields else len(items)
@@ -97,9 +106,9 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
     if path == "/description":
         return json_reply(200, {"profiles": list(PROFILES)})
     if path == "/shells":
-        return _page([_shell(i) for i in SHELL_IDS], request.query)
+        return _page([_shell(i) for i in SHELL_IDS], request.query, system.faults)
     if path == "/submodels":
-        return _page([dict(_SUBMODEL)], request.query)
+        return _page([dict(_SUBMODEL)], request.query, system.faults)
     match = _ITEM.match(path)
     ident = _decoded(match["id"]) if match else None
     if match is None or ident is None:
@@ -107,6 +116,8 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
     if match["kind"] == "submodels":
         return json_reply(200, _SUBMODEL) if ident == SUBMODEL_ID and not match["refs"] else _not_found()
     if ident not in SHELL_IDS:
+        if "aas_api_wrong_status" in system.faults and not match["refs"]:
+            return 200, "application/json", b"", {}
         return _not_found()
     if match["refs"]:
         refs = [_reference(SUBMODEL_ID)] if ident == SHELL_IDS[0] else []

@@ -20,6 +20,8 @@ from urllib.parse import quote
 
 import pytest
 from pydantic import ValidationError
+from validation import cases
+from validation import run as vrun
 from validation.rig import FIXTURES
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
@@ -403,3 +405,32 @@ def test_the_defaults_name_the_shell_repository_read_profile() -> None:
         None,
         6,
     )
+
+
+# -- the seeded faults F-74 and F-75 ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("flag", "rule"), [("aas_api_wrong_status", "unknown_id_status"), ("aas_api_bad_paging", "paging_limit")]
+)
+def test_each_flag_of_the_reference_repository_breaks_the_profile(
+    tmp_path: Path, flag: str, rule: str
+) -> None:
+    with ReferenceServer(FIXTURES, faults=frozenset({flag})) as server:
+        outcome = run(_ctx(tmp_path, server.origin))
+    _failed(outcome, rule)
+
+
+def test_bad_paging_also_breaks_the_submodel_list_only_when_it_has_two_elements(tmp_path: Path) -> None:
+    # The repository holds one submodel, so a list that ignores limit=1 looks the same.
+    with ReferenceServer(FIXTURES, faults=frozenset({"aas_api_bad_paging"})) as server:
+        ctx = _ctx(tmp_path, server.origin, profile="submodel-repository-read", id_source="aas_submodel_id")
+        _passed(run(ctx))
+
+
+@pytest.mark.parametrize("case_id", ["F-74", "F-75"])
+def test_the_catalogue_case_gives_its_expected_outcome(tmp_path: Path, case_id: str) -> None:
+    case = next(c for c in cases.sut_faults() if c.id == case_id)
+    assert case.expected == {"verdict": "fail", "reason_code": "AAS.API.PROFILE"}
+    rows = vrun._sut_cases(tmp_path, [case], "fault", all_profiles=True)
+    assert [(r["profile"], r["as_expected"]) for r in rows] == [("family/aas", True)], rows
