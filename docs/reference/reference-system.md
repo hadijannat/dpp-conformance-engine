@@ -80,10 +80,12 @@ The helper `dppce.adapters.common.effective_url(ctx, url)` does this in one plac
 observation that used it lists the transformation `origin_override`.
 Identifier comparison always uses the public form.
 
-Identifier scheme `gs1-digital-link` (the only scheme with a parser in this version): an HTTP
-or HTTPS URL whose path has the form `/01/<14 digits>/21/<serial>`. The parser checks the GTIN
-check digit. Every other declared scheme gives the reason code `IDENTIFIER.SCHEME.UNSUPPORTED`
-with status `unsupported`.
+Identifier scheme `gs1-digital-link` with the default form `dppce-item`: an HTTP or HTTPS URL
+whose path has the form `/01/<14 digits>/21/<serial>`. The parser checks the GTIN check digit.
+The schemes `https-url`, `did-web`, and `urn-uuid` also have a parser, which is experimental.
+Section 8 of the architecture contract gives their rules. The scheme `unknown` gives `blocked`
+with `IDENTIFIER.SCHEME.UNKNOWN`. Every other declared scheme gives the reason code
+`IDENTIFIER.SCHEME.UNSUPPORTED` with status `unsupported`.
 
 Three synthetic items, one for each profile:
 
@@ -587,6 +589,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `wellknown_wrong_root` | family `resolver`: `resolverRoot` of `/.well-known/gs1resolver` is `https://other.example.test` |
 | `wellknown_redirect` | family `resolver`: `/.well-known/gs1resolver` answers `301` to `/resolver-description.json`, which serves the description file |
 | `resolver_200_for_invalid` | family `resolver`: `/01/...` answers `200` with `{"status": "ok"}` for an unknown identifier, for example a GTIN with a wrong check digit |
+| `negotiation_no_vary` | family `resolver`: `/01/...` answers `200` with an HTML page and no `Vary` header when the `Accept` weight of `text/html` is above that of `application/json` |
+| `negotiation_wrong_type` | family `resolver`: `/01/...` answers `200` with the HTML page and `Vary: Accept` when `Accept` lists `application/json` with a weight above 0, or prefers `text/html` |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
 | `vc_tampered` | family `credentials`: the payload of the credential of section 4.7 names serial `OTHER0001` after signing |
 | `vc_hs256_confusion` | family `credentials`: the credential header names `HS256`, and the signature is an HMAC-SHA256 with the DER public key of the TEST-ONLY leaf as the key |
@@ -728,7 +732,7 @@ signed passport of `integrity.jws` keeps `INTEGRITY.TOKEN.NO_ANSWER` (section 8.
 | Check | Parameters | Pass | Fail and other outcomes |
 | --- | --- | --- | --- |
 | `carrier.qr_decode` | `artifact` (default `qr_image`) | `CARRIER.QR.OK`: one symbol with text | `CARRIER.QR.NOT_DECODED` (fail); sample missing: `blocked`, `CARRIER.SAMPLE.MISSING`; an image above the pixel limit, also one that Pillow reports as a decompression bomb: `blocked`, `CARRIER.SAMPLE.TOO_LARGE`; an image that cannot be read: `blocked`, `CARRIER.SAMPLE.UNREADABLE` |
-| `identifier.parse` | `scheme` (default: `ics.identifier_scheme`), `require_https` (boolean, default `false`) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail); with `require_https`, a valid identifier whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN`; `require_https` not a boolean: `blocked`, `IDENTIFIER.PARAMS.INVALID` |
+| `identifier.parse` | `scheme` (default: `ics.identifier_scheme`), `require_https` (boolean, default `false`), `form` (`dppce-item` or `gs1-dl`, default `dppce-item`; for `gs1-digital-link` only) | `IDENTIFIER.SYNTAX.OK` | `IDENTIFIER.SYNTAX.INVALID` (fail), also for a payload that does not match the declared scheme `https-url`, `did-web`, or `urn-uuid`; with `require_https`, a valid identifier whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); a scheme without a parser: `IDENTIFIER.SCHEME.UNSUPPORTED` (`unsupported`); scheme `unknown`: `blocked`, `IDENTIFIER.SCHEME.UNKNOWN`; `require_https` not a boolean, or a `form` other than `dppce-item` with `https-url`, `did-web`, or `urn-uuid`: `blocked`, `IDENTIFIER.PARAMS.INVALID` |
 | `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case), `require_https` (boolean, default `false`); all optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); with `require_https`, a carrier URL whose scheme is not `https` (nothing is fetched) or a redirect target whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
