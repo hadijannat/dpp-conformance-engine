@@ -663,6 +663,12 @@ boundary_cases:
     profiles: [family/credentials]
     expected: {verdict: inconclusive, reason_code: INTEGRITY.STATUS.STALE}
     rationale: A stale list does not show the current status of the credential, so the engine does not judge it.
+  - id: B-20
+    fault: resolver_rate_limited
+    description: The resolver answers 429 with Retry-After 1 to the default request, also to the one retry.
+    test_purpose: TP-ID-002
+    expected: {verdict: inconclusive, reason_code: TRANSPORT.RATE_LIMITED}
+    rationale: A rate-limited answer is no answer. It does not prove a breach, and it is never a pass.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:

@@ -15,7 +15,6 @@ from typing import Final, Literal
 from pydantic import Field
 
 from dppce.adapters.common import (
-    SERVER_ERRORS,
     blocked,
     carrier_identifier,
     completed,
@@ -23,6 +22,7 @@ from dppce.adapters.common import (
     is_http_url,
     media_type,
     no_answer,
+    no_reply,
     unusable,
 )
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
@@ -161,7 +161,7 @@ def negotiation(ctx: CheckContext) -> CheckOutcome:
     missing: Record | None = None
     for index, (name, accept) in enumerate(PROBES):
         record = fetch_once(ctx, text, accept=accept)
-        if record.error is not None or record.status in SERVER_ERRORS:
+        if no_reply(record):
             # No answer proves nothing, but it must not hide what the other answers prove.
             missing = missing or record
             continue

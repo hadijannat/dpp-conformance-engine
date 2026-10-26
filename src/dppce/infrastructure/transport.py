@@ -39,6 +39,9 @@ ANONYMOUS: Final = "anonymous"
 _REDIRECTS: Final = (301, 302, 303, 307, 308)
 _ACTIVE_SCOPES: Final = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ)
 _RETRYABLE: Final = ("connect", "timeout")
+# The longest Retry-After delay that the transport waits for, once per fetch (P2-31). A longer
+# delay is not waited for: the 429 answer is recorded, and the check reports no answer.
+RETRY_AFTER_CAP_SECONDS: Final = 5
 # A shorter credential could match ordinary text, and its removal would change the evidence.
 MIN_SECRET_LENGTH: Final = 12
 # The shortest head of a credential that is removed where the body limit cut the credential.
@@ -334,6 +337,31 @@ class PolicyTransport:
             limit = min(limit, self._config.authorization.max_requests)
         return self._sent < limit
 
+    def _retry_delay(
+        self, method: str, status: int, headers: tuple[tuple[str, str], ...], deadline: float
+    ) -> int | None:
+        """The Retry-After delay in seconds that a 429 answer to a read asks for, if it fits.
+
+        Only the delta-seconds form counts. A date would depend on the clock of the system. The
+        delay must not exceed the cap, the time left for the fetch, or the request budget.
+        """
+        if status != 429 or method not in SAFE_METHODS:
+            return None
+        value = next((v.strip() for k, v in headers if k.lower() == "retry-after"), "")
+        # The system under test sets this header. A long value would make ``int`` raise, so a
+        # value with more digits than the cap has is above the cap and is not converted.
+        digits = value.lstrip("0") or "0"
+        if not (value.isascii() and value.isdigit()) or len(digits) > len(str(RETRY_AFTER_CAP_SECONDS)):
+            return None
+        delay = int(digits)
+        if (
+            delay > RETRY_AFTER_CAP_SECONDS
+            or delay >= deadline - self._monotonic()
+            or not self._budget_left()
+        ):
+            return None
+        return delay
+
     # -- one HTTP request -------------------------------------------------------------------
 
     def _send(
@@ -468,6 +496,7 @@ class PolicyTransport:
         sent_headers: dict[str, str] = {}
         redirects: list[str] = []
         attempts = 0
+        waited = False
         # One deadline for the whole fetch: every redirect hop and every retry share it.
         deadline = self._monotonic() + self._config.policy.total_timeout_ms / 1000
 
@@ -527,6 +556,11 @@ class PolicyTransport:
             if isinstance(result, str):
                 return done(result)
             status, headers, body, truncated = result
+            if not waited and (delay := self._retry_delay(method, status, headers, deadline)) is not None:
+                # One wait per fetch: a system cannot hold the engine with a chain of 429 answers.
+                waited = True
+                self._sleep(delay)
+                continue
             location = next((v for k, v in headers if k.lower() == "location"), None)
             if status not in _REDIRECTS or location is None or method not in SAFE_METHODS:
                 return done(None, status, headers, body, truncated)

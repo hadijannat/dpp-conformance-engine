@@ -38,6 +38,7 @@ from dppce.testdefs.registry import CheckContext
 MISSING: Final = object()
 _DENIED: Final = ("policy_denied", "authorization_denied", "budget_exhausted")
 SERVER_ERRORS: Final = range(500, 600)
+RATE_LIMITED: Final = 429
 LINKSET: Final = "application/linkset+json"
 # RFC 9264 defines the JSON format and the native format. Both name links, not a passport.
 LINKSET_TYPES: Final = frozenset({LINKSET, "application/linkset"})
@@ -115,10 +116,22 @@ def fetch_once(ctx: CheckContext, url: str, role: str = "anonymous", accept: str
     return ctx.acquirer.fetch(Request("GET", target, role=role, headers=headers))
 
 
+def no_reply(record: Record) -> bool:
+    """True if the record holds no answer: a transport error, a 429, or a status from 500 to 599.
+
+    Every check uses this test, so that a system cannot get a verdict from one check and avoid it
+    in another. A 429 counts like a 5xx answer: the system declined to answer (P2-31).
+    """
+    return record.error is not None or record.status == RATE_LIMITED or record.status in SERVER_ERRORS
+
+
 def no_answer(ctx: CheckContext, record: Record) -> CheckOutcome:
-    """The outcome for a transport error or a server error. A missing answer is not a failure."""
+    """The outcome for a record that ``no_reply`` finds. A missing answer is not a failure."""
     summary: dict[str, JsonValue] = {"transport_error": record.error}
-    if record.error is None:
+    if record.error is None and record.status == RATE_LIMITED:
+        code, text = "TRANSPORT.RATE_LIMITED", "The system answers 429. It limits the rate of requests."
+        summary = {"status": record.status}
+    elif record.error is None:
         # No transport error here means a 5xx answer (owner decision of 2026-10-18).
         code, text = "TRANSPORT.SERVER_ERROR", f"The system answers {record.status}, a server error."
         summary = {"status": record.status}
@@ -143,10 +156,16 @@ def unusable(
     """Return an outcome if the record cannot be judged, or None if its body can be used.
 
     A status from 500 to 599 is no answer, like a transport error. A check that judges such an
-    answer itself passes ``server_error_is_no_answer=False``.
+    answer itself passes ``server_error_is_no_answer=False``. A 429 is always no answer.
     """
-    if record.error is not None or (server_error_is_no_answer and record.status in SERVER_ERRORS):
+    judged_here = not server_error_is_no_answer and record.error is None and record.status in SERVER_ERRORS
+    if no_reply(record) and not judged_here:
         return no_answer(ctx, record)
+    return body_problem(record)
+
+
+def body_problem(record: Record) -> CheckOutcome | None:
+    """A blocked outcome if the body of an answer cannot be read as sent, or None."""
     if record.truncated:
         return blocked(
             "TRANSPORT.BODY_TRUNCATED", "The body is larger than the limit. A partial body proves nothing."
@@ -307,7 +326,7 @@ def item_url(ctx: CheckContext, area: str) -> str | CheckOutcome:
         message = "The IXIT asks for the resolved item target, and the carrier gives no URL to resolve."
         return blocked(f"{area}.NO_TARGET", message)
     record = fetch_once(ctx, text)
-    if record.error is not None or record.status in SERVER_ERRORS:
+    if no_reply(record):
         return no_answer(ctx, record)
     if record.status != 200:
         message = f"The IXIT asks for the resolved item target, and the resolver answers {record.status}."

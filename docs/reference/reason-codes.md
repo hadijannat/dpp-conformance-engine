@@ -393,9 +393,10 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `TLS.CLIENT_KEY.PASSPHRASE` | TLS |  | `dppce.cli._tls_options` | not fixed here |
 | `TLS.CONTEXT.UNUSABLE` | TLS |  | `dppce.infrastructure.transport._tls_context` | not fixed here |
 | `TLS.FILE.UNREADABLE` | TLS |  | `dppce.cli._tls_file` | not fixed here |
-| `TRANSPORT.BODY_ENCODED` | TRANSPORT |  | `dppce.adapters.common.unusable` | inconclusive |
-| `TRANSPORT.BODY_TRUNCATED` | TRANSPORT |  | `dppce.adapters.common.unusable` | inconclusive |
+| `TRANSPORT.BODY_ENCODED` | TRANSPORT |  | `dppce.adapters.common.body_problem` | inconclusive |
+| `TRANSPORT.BODY_TRUNCATED` | TRANSPORT |  | `dppce.adapters.common.body_problem` | inconclusive |
 | `TRANSPORT.DENIED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
+| `TRANSPORT.RATE_LIMITED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRANSPORT.REDIRECT_OUT_OF_SCOPE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRANSPORT.SERVER_ERROR` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |
 | `TRANSPORT.UNREACHABLE` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |

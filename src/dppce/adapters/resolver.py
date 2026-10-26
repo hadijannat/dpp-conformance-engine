@@ -16,7 +16,6 @@ from pydantic import Field, field_validator
 
 from dppce.adapters.common import (
     LINKSET,
-    SERVER_ERRORS,
     blocked,
     carrier_identifier,
     completed,
@@ -26,6 +25,7 @@ from dppce.adapters.common import (
     json_object,
     media_type,
     no_answer,
+    no_reply,
     unusable,
 )
 from dppce.adapters.identifier import gtin_check_digit_ok
@@ -119,7 +119,7 @@ def _structure_ok(document: dict[str, Any]) -> bool:
 def _no_reply(record: Record) -> bool:
     # Only a missing answer is tested before the rules. The body rules of ``unusable`` wait until a
     # rule needs the body: otherwise a body coding or a long body would turn a status fail into blocked.
-    return record.error is not None or record.status in SERVER_ERRORS
+    return no_reply(record)
 
 
 def _linkset_head_failure(record: Record) -> tuple[str, str] | None:

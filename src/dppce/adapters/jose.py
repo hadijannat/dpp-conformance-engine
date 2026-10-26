@@ -16,11 +16,11 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from pydantic import Field, ValidationError, field_validator, model_validator
 
 from dppce.adapters.common import (
-    SERVER_ERRORS,
     blocked,
     completed,
     fetch_once,
     no_answer,
+    no_reply,
     resource_url,
     unusable,
 )
@@ -173,7 +173,7 @@ def _acquire(ctx: CheckContext, params: JoseParams) -> Record | CheckOutcome:
     record = fetch_once(ctx, url, accept=params.accept)
     # Only a missing answer comes before the status rule: a body coding or a cut body must not
     # turn a status fail into blocked. jose_check applies the body rules after the status rule.
-    if record.error is not None or record.status in SERVER_ERRORS:
+    if no_reply(record):
         return no_answer(ctx, record)
     return record
 

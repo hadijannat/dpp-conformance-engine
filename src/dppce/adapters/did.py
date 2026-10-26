@@ -20,7 +20,6 @@ from typing import Any, Final, Literal
 from pydantic import Field, field_validator
 
 from dppce.adapters.common import (
-    SERVER_ERRORS,
     blocked,
     completed,
     effective_url,
@@ -28,6 +27,7 @@ from dppce.adapters.common import (
     json_object,
     media_type,
     no_answer,
+    no_reply,
     unusable,
 )
 from dppce.infrastructure.interfaces import Record
@@ -219,7 +219,7 @@ def resolve_did_web(ctx: CheckContext, did: str, source: str | None = None) -> D
     else:
         # Only a missing answer is tested before the status rule: a body coding or a long body
         # must not turn a status fail into blocked.
-        if record.error is not None or record.status in SERVER_ERRORS:
+        if no_reply(record):
             return no_answer(ctx, record)
         summary |= {
             "status": record.status,
