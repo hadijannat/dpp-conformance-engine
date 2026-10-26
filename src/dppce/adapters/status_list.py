@@ -496,9 +496,9 @@ def status_list_check(ctx: CheckContext) -> CheckOutcome:
         freshness = "Each list is fresh under its ttl."
     else:
         freshness = "For a list without a ttl or a validFrom, staleness was not judged."
-    entries = "entry" if count == 1 else "entries"
+    entries = "entry names" if count == 1 else "entries name"
     message = (
-        f"The credential verifies. Its {count} status {entries} for the purpose {params.purpose} name a "
+        f"The credential verifies. Its {count} status {entries} for the purpose {params.purpose} a "
         f"status list credential that verifies with a pinned issuer key, and the bit is not set. {freshness}"
     )
     return outcome(True, "INTEGRITY.STATUS.OK", message)
