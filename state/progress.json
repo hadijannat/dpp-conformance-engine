@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 48,
+    "cycle": 51,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-26: waves 1 to 3 of program P2 are on main (19451c4, 5d0037a, a95d17e, d19a8f9), and wave 4 (P2-12, P2-10, P2-11, and the integrator commits) is on the integration branch worktree-wf_62c75a1d-0f2-10, based on main d19a8f9, and is not yet on main.",
+    "state_at_end": "2026-10-26: waves 1 to 4 of program P2 are on main (latest 1a5f6a8), and wave 5 (P2-13, P2-14, P2-15, and the integrator commits) is on the integration branch worktree-wf_880afee1-954-1, based on main 1a5f6a8, and is not yet on main.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -636,7 +636,25 @@
       "cycle": 48,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-11 (e393eaf catalogue entries F-69, F-70, and B-18 first, and a036a5a tests first, then 3e46263, 808cec6, dc51e3e, 587acae): the experimental check integrity.status_list verifies a W3C Bitstring Status List entry of a credential, and integrity.jose gains the key source did, with no vendored W3C file because the test suite has no recorded open license; after the wave 4 merges, uv run just check passed with 4026 tests and 1 skip, and just validate was not run."
+      "summary": "P2-11 (e393eaf catalogue entries F-69, F-70, and B-18 first, and a036a5a tests first, then 3e46263, 808cec6, dc51e3e, 587acae): the experimental check integrity.status_list verifies a W3C Bitstring Status List entry of a credential, and integrity.jose gains the key source did, with no vendored W3C file because the test suite has no recorded open license; after the wave 4 merges, uv run just check passed with 4026 tests and 1 skip, and just validate was not run. Wave 4 landed on main after two security fix commits, 0979f81 and 1a5f6a8, that close downgrade findings in identifier.equivalence and integrity.status_list."
+    },
+    {
+      "cycle": 49,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-13 (1f96e5a catalogue entry F-71 first, and a4f92cd tests first, then 7a2f719, aaf7196, 8cfa0c1, e0a9aaf, 8be8bff): identifier.parse gains experimental parsers for the schemes https-url, did-web, and urn-uuid, with the test purpose TP-WEB-IDENTIFIER-001 and a TEST-ONLY user-information sample that seeds F-71; the package gate uv run just check passed with 4072 tests and 1 skip, and after the wave 5 merges it passed with 4159 tests and 1 skip."
+    },
+    {
+      "cycle": 50,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-14 (5d82375 catalogue entries F-72 and F-73 first, then 94661fc, dd22860, 5b3bcb6): the experimental check identifier.negotiation sends five GET requests that differ only in Accept and judges status, media type, weights, Vary, and body, with the resolver flags negotiation_no_vary and negotiation_wrong_type; the package gate uv run just check ended with 4071 tests passed and 1 skip, without a captured exit status, and after the wave 5 merges it passed with 4159 tests and 1 skip."
+    },
+    {
+      "cycle": 51,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-15 (406e521 catalogue entries F-74 and F-75 first, then 9ce2873, 4a1644c, 3f38549): the experimental check aas.api_profile sends positive GET probes of the AAS API 3.0 read profiles through the engine transport, with the reference family module aas and its flags aas_api_wrong_status and aas_api_bad_paging, and B-19 not seeded; the package gate uv run just check passed with 4086 tests and 1 skip, and after the wave 5 merges it passed with 4159 tests and 1 skip."
     }
   ],
   "blockers": [
