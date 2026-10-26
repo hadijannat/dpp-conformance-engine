@@ -215,6 +215,9 @@ connectivity failure (section 9). The check reports `unreachable`, and the step 
 `on_unreachable`. By default that is `inconclusive`. It is `fail` only under the approved rule
 below. This rule is an owner decision of 2026-10-18.
 
+A rate-limited answer (status 429) counts in the same way (P2-31). The check reports
+`unreachable` with `TRANSPORT.RATE_LIMITED`. It never reports a pass.
+
 `on_unreachable: fail` is for an approved test method only: a connectivity failure does not
 prove a breach. The engine reads the rule as written only in `reviewed` mode, and only if every
 requirement that the test purpose names is approved and not illustrative. Otherwise it reads
@@ -380,7 +383,8 @@ check does not follow the links. If `accepted_media_types` lists one of the two 
 types, a linkset gives
 `IDENTIFIER.RESOLVED.MEDIA_TYPE`. A linkset never gives `IDENTIFIER.RESOLVED`.
 
-`identifier.resolve` reports an answer with a status from 500 to 599 as `unreachable` (section 9).
+`identifier.resolve` reports an answer with a status of 429, or from 500 to 599, as `unreachable`
+(section 9).
 Any other status except 200, 404, and 410 gives `IDENTIFIER.RESOLUTION.STATUS`.
 
 `identifier.consistency` takes one optional parameter, `compare_item`. It is a boolean with the
@@ -475,7 +479,7 @@ that applies:
 
 1. Invalid parameters: `blocked`, `INTEGRITY.JOSE.PARAMS`. No trust bundle: `blocked`,
    `INTEGRITY.TRUST.MISSING`. Nothing is read.
-2. A transport error or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
+2. A transport error, a 429, or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
    `INTEGRITY.JOSE.SAMPLE_MISSING`. A status other than 200: `INTEGRITY.JOSE.NOT_AVAILABLE`. Only
    then, a body coding or a truncated body gives `blocked`, as `unusable` gives.
 3. A body above 2 MiB: `blocked`, `INTEGRITY.JOSE.TOO_LARGE`. With more than 8 signatures, the
@@ -741,7 +745,7 @@ translated, so it also gives `API.CONTRACT.UNSUPPORTED_VERSION`.
 
 The three `resolver.*` checks send `GET` requests only. Each needs a carrier identifier that is an
 `http` or `https` URL. Any other text gives `blocked` with `RESOLVER.NO_TARGET`, and nothing is
-sent. A transport error or a status from 500 to 599 gives `unreachable`. A body of an unexpected
+sent. A transport error, a 429, or a status from 500 to 599 gives `unreachable`. A body of an unexpected
 shape is a fail, never `blocked`. So a system under test cannot reshape a wrong answer into one
 that is not judged. A body coding or a body over the limit gives `blocked` only when a rule must
 read the body. `resolver.conformance` never reads a body.
@@ -778,7 +782,7 @@ gives `blocked` with `NEGOTIATION.NO_TARGET`, and nothing is sent. It sends five
 this order, with these `Accept` values: `application/json`, `text/html`, `application/ld+json`,
 `text/html;q=0.2, application/json;q=0.9`, and `application/x-dppce-unsupported`. It sends no
 other negotiation header. In particular, it sends no `Accept-Language`: a later package adds that
-header. A transport error or a status from 500 to 599 is no answer. The check sends all five
+header. A transport error, a 429, or a status from 500 to 599 is no answer. The check sends all five
 requests and judges the answers that it got. Only when no rule proves a fail does a missing answer
 give `unreachable`. So a system cannot hide a proven fail with an error on another request.
 The optional parameter `unsupported_answer` is `406` or `default`, and `default` is the default.
@@ -934,7 +938,7 @@ Other outcomes:
   that is not strict JSON fails with `body_json`. A truncated or coded body is not judged. The
   check judges no other status or shape. This limit also comes before a missing answer, a refusal,
   or an unusable body.
-- A transport error or a status from 500 to 599: `unreachable`, as `no_answer` gives. A 401 or 403
+- A transport error, a 429, or a status from 500 to 599: `unreachable`, as `no_answer` gives. A 401 or 403
   to the anonymous role: `blocked`, `AAS.API.NOT_CONCLUSIVE`. A body coding or a truncated body:
   `blocked`, as `unusable` gives.
 - The probes need more requests than `max_requests`: `unreachable`, `AAS.API.BUDGET_EXHAUSTED`.
@@ -974,7 +978,7 @@ The observation summary names the source in `source`: `live` or `sample`.
 
 The check takes the first rule that applies:
 
-1. A transport error or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
+1. A transport error, a 429, or a status from 500 to 599: `unreachable`. A missing sample: `blocked`,
    `IDENTITY.DID.SAMPLE_MISSING`.
 2. A status other than 200: `IDENTITY.DID.STATUS`. The rule does not read the body.
 3. A body coding or a truncated body: `blocked`, as `unusable` gives. A document above 1 MiB:
@@ -1043,7 +1047,7 @@ The check takes the first rule that applies:
    entries of another type only. Otherwise `INTEGRITY.STATUS.ENTRY_MISSING`. No list is fetched.
 6. Then each entry for `purpose` in turn, at most 4. With more entries, the check judges the first 4
    and gives `blocked`, `INTEGRITY.STATUS.TOO_LARGE`, only if no rule fails.
-7. Live: a transport error or a status from 500 to 599 gives `unreachable`. A status other than 200
+7. Live: a transport error, a 429, or a status from 500 to 599 gives `unreachable`. A status other than 200
    gives `INTEGRITY.STATUS.LIST_NOT_AVAILABLE`. A body coding or a truncated body gives `blocked`.
    One URL is fetched once for each step.
 8. Sample: a missing sample gives `blocked`, `INTEGRITY.STATUS.SAMPLE_MISSING`. A sample whose `id`
@@ -1178,7 +1182,8 @@ An answer cannot be judged in these cases:
 - It has a transport error, a truncated body, or an encoded body.
 - The role has a withheld path, and the body cannot be searched.
 - The role has an entitled path, and the `fetch` body is not JSON.
-- A channel answers with a status from 500 to 599. This applies to every channel and every role.
+- A channel answers with a status of 429, or from 500 to 599. This applies to every channel and
+  every role.
   The check still searches that body for a leak. A leak in it is a failing observation.
 
 Only a leak or an entitlement failure outranks such an answer.
@@ -1247,8 +1252,30 @@ such an answer, also if it is JSON. Two exceptions apply:
 - `access.restricted_fields` still searches such a body for a leak, on every channel. A leak is a
   failing observation. Otherwise the check reports `unreachable` (section 8.2).
 
-The shared helper `dppce.adapters.common.unusable` applies the rule. So every check that fetches
-applies it in the same way.
+A rate-limited answer counts the same way (P2-31). An answer with the status 429 gives
+`unreachable` with `TRANSPORT.RATE_LIMITED` in every check, `integrity.jws` included. The check
+does not judge its body. `access.restricted_fields` still searches that body for a leak.
+
+The shared helper `dppce.adapters.common.no_reply` decides what is no answer: a transport error,
+a 429, or a status from 500 to 599. The helper `unusable` and every check that judges a status
+itself use it. So every check that fetches applies the rule in the same way. A check that sends
+several requests sets a missing answer aside, and still judges the other answers. So a missing
+answer cannot hide a fail that another answer proves.
+
+The transport waits for `Retry-After` once per fetch, and only for these conditions:
+
+- The answer is a 429 to a `GET` or `HEAD` request. The transport never sends a write again.
+- `Retry-After` is a number of seconds. The transport does not read the date form, because it
+  depends on the clock of the system under test.
+- The delay is 5 seconds or less, and it ends before the total time limit of the fetch.
+- The request budget allows one more request.
+
+After the wait, the transport sends the request one more time. The record holds the last answer
+and the number of attempts. A 503 is not sent again: it stays a server error.
+
+Security note: a system under test can answer 429 to avoid a verdict, as it can with a 5xx
+answer. The conformance test report shows each rate-limited answer, and the step is
+`inconclusive`. It is never a pass.
 
 ### 9.1 The IXIT is untrusted input
 

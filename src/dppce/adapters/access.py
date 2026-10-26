@@ -20,14 +20,14 @@ from pydantic import Field, ValidationError, model_validator
 
 from dppce.adapters.common import (
     MISSING,
-    SERVER_ERRORS,
     blocked,
+    body_problem,
     completed,
     dig,
     fetch_once,
     no_answer,
+    no_reply,
     template_url,
-    unusable,
 )
 from dppce.catalogue import CatalogueError, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
@@ -390,19 +390,20 @@ def _read_channels(
             # A denied or unreachable origin gets no further attempt.
             seen.keep(no_answer(ctx, record))
             break
-        bad = unusable(ctx, record, server_error_is_no_answer=False)
-        server_error = record.status in SERVER_ERRORS
+        bad = body_problem(record)
+        missing = no_reply(record)
         if channel == "fetch":
             seen.fetched = record
             # A refusal is judged without its body. Any other answer needs a usable body.
-            if entitled and not server_error and (record.status in _REFUSALS or bad is None):
+            if entitled and not missing and (record.status in _REFUSALS or bad is None):
                 judged = _entitlement(record, entitled, role)
                 if isinstance(judged, CheckOutcome):
                     seen.keep(judged)
                 else:
                     seen.shortfall = judged
-        if server_error:
-            # A 5xx answer cannot be judged (owner decision of 2026-10-18). A leak in its body still counts.
+        if missing:
+            # A 429 or a 5xx answer cannot be judged (owner decision of 2026-10-18, P2-31). A leak
+            # in its body still counts.
             seen.keep(no_answer(ctx, record))
         if bad is not None:
             seen.keep(bad)

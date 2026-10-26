@@ -31,13 +31,13 @@ from pydantic import Field, field_validator
 
 from dppce.adapters.common import (
     MISSING,
-    SERVER_ERRORS,
     blocked,
     completed,
     effective_url,
     fetch_once,
     is_http_url,
     no_answer,
+    no_reply,
     unusable,
 )
 from dppce.adapters.pointer import parse_pointer, resolve_pointer
@@ -190,7 +190,7 @@ class _Probes:
     def document(self, probe: str, path: str, rule: str) -> Any:
         """The JSON body of a 200 answer, ``MISSING`` if the answer cannot be judged, or a fail."""
         record = self.get(probe, path)
-        if record.error is not None or record.status in SERVER_ERRORS:
+        if no_reply(record):
             self.defer(no_answer(self.ctx, record))
             return MISSING
         if record.status in (401, 403):
@@ -330,7 +330,7 @@ def _item(probes: _Probes, profile: _Profile, ident: str) -> None:
 
 def _unknown(probes: _Probes, profile: _Profile) -> None:
     record = probes.get("unknown_id", f"/{profile.collection}/{encoded(profile.unknown)}")
-    if record.error is not None or record.status in SERVER_ERRORS:
+    if no_reply(record):
         probes.defer(no_answer(probes.ctx, record))
     elif record.status in (401, 403):
         message = f"The AAS server answers {record.status} to an anonymous read. That proves nothing."

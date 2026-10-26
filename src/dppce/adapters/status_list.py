@@ -22,7 +22,7 @@ from typing import Any, Final, Literal
 
 from pydantic import Field, ValidationError, field_validator, model_validator
 
-from dppce.adapters.common import SERVER_ERRORS, blocked, fetch_once, is_http_url, no_answer, unusable
+from dppce.adapters.common import blocked, fetch_once, is_http_url, no_answer, no_reply, unusable
 from dppce.adapters.jose import (
     _ACCEPT,
     _DID_URL,
@@ -351,7 +351,7 @@ class _Lists:
                 raise _Stop(None, "INTEGRITY.STATUS.LIST_UNBOUND", message)
             return record
         # Only a missing answer comes before the status rule, as in integrity.jose.
-        if record.error is not None or record.status in SERVER_ERRORS:
+        if no_reply(record):
             missing = no_answer(self.ctx, record)
             raise _Stop(False, missing.reason_code, missing.message, no_answer=True)
         item["status"] = record.status
