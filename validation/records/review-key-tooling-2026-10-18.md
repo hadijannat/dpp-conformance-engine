@@ -167,7 +167,7 @@ The design review findings have no identifier in J1. This record numbers them in
 | SR-N3 | note | A duplicate JSON key gives no reason code | fixed with contract-F1 | `03a61d8` |
 | SR-N4 | note | A proof can pass when `ordering` fails | owner decision 3 | `5fe675d` |
 | SR-N5 | note | A case-insensitive file system gives `SIGN.OUTPUT.EXISTS` | not changed | none |
-| SR-N6 | note | A link swap race in `sign --in-place`, by inspection only | reproduced later with a test, fixed in part | `486bc2a`, `8c37e41` |
+| SR-N6 | note | A link swap race in `sign --in-place`, by inspection only | reproduced later with a test, fixed in part | `486bc2a`, `8c37e41`, `8280537` |
 | SR-N7 | note | The salt string is malleable | fixed later | `0ad8ffa` |
 
 SR states that SR-N2 and SR-N7 give no false outcome. The bundle stores the canonical key. The
@@ -346,14 +346,14 @@ Closed items: the design open point on `TrustedKey` times (J1 line 7) is closed.
 
 A development agent of package P2-18 made these changes. Each change has a test in
 `tests/test_review_open_items.py`. The tests are in `74f8f20`, which comes before the fixes. `8c37e41` adds one SR-N6 test
-together with its fix. The
+together with its fix. `8280537` moves that fix back into `cmd_sign` and keeps the behavior. The
 commit identifiers are those of the package branch. A rebase can change them; then use
 `git patch-id --stable`, as in "Commit identifiers". No person has reviewed these changes.
 
 | Item | Change | Commit |
 | --- | --- | --- |
 | SR-N2 | `add-key` refuses a coordinate that is not the unpadded base64url of 32 bytes, with `TRUST.KEY.NOT_P256`. This covers padding, the standard alphabet, set unused bits, and x + p. | `3b69216` |
-| SR-N6 | `sign --in-place` opens the input once with `O_NOFOLLOW`, then reads from that descriptor and takes the mode from it. The descriptor stays open until the rename or the refusal, so a swapped-in entry cannot get the inode number of the input. Before the rename, it compares the path with that file. A change gives `SIGN.INPUT.LINK`, and nothing is written. | `486bc2a`, `8c37e41` |
+| SR-N6 | `sign --in-place` opens the input once with `O_NOFOLLOW`, then reads from that descriptor and takes the mode from it. The descriptor stays open until the rename or the refusal, so a swapped-in entry cannot get the inode number of the input. Before the rename, it compares the path with that file. A change gives `SIGN.INPUT.LINK`, and nothing is written. | `486bc2a`, `8c37e41`, `8280537` |
 | SR-N7 | An opening whose salt is not the canonical base64 of its bytes gives `fail` with `OPENING.FILE.MALFORMED`. That fail comes before the root and ordering rules. | `0ad8ffa` |
 
 **Tokens issued before `a2352dc`.** Since `a2352dc`, `authorize` refuses an endpoint with
