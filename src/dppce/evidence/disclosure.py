@@ -194,12 +194,17 @@ def check_opening_file(
             too_large="OPENING.FILE.TOO_LARGE",
             malformed="OPENING.FILE.MALFORMED",
         )
+        salt = base64.b64decode(opening.salt, validate=True)
+        # One string per salt: the pattern of the model still lets the two unused bits vary.
+        if base64.b64encode(salt).decode("ascii") != opening.salt:
+            raise DisclosureError(
+                "OPENING.FILE.MALFORMED", "the salt is not the canonical base64 of 32 bytes"
+            )
         if not roots_ok["records"]:
             return "not_checked", NOT_CHECKED
         if not ordered:
             return "not_checked", NOT_ORDERED
         leaf = opening.proof.leaf
-        salt = base64.b64decode(opening.salt, validate=True)
         computed = commitment_of(salt, canonical_bytes(opening.record))
         if not isinstance(leaf, RecordCommitment) or not hmac.compare_digest(computed, leaf.commitment):
             raise DisclosureError(
