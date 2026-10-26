@@ -9,9 +9,13 @@ the minimum that the check judges, written by hand.
 Every request is a GET through ``ctx.acquirer``, so the transport policy, the authorization, and
 the request budget apply. The check sends no write, no negative, and no fuzz request. A fail is
 raised at once. A missing answer or a refusal waits until every probe ran, so that a system under
-test cannot turn a fail into a step that is not judged. Two engine limits end the probes at once:
-a profile declared only in a version other than 3.0 (``AAS.API.VERSION_UNSUPPORTED``) and the end
-of the request budget (``AAS.API.BUDGET_EXHAUSTED``).
+test cannot turn a fail into a step that is not judged. The end of the request budget
+(``AAS.API.BUDGET_EXHAUSTED``) ends the probes at once.
+
+A profile declared only in a version other than 3.0 is an engine limit
+(``AAS.API.VERSION_UNSUPPORTED``) that waits too. The check then runs only the rules that do not
+depend on the version: the unknown id does not answer 200, and each 200 answer is strict JSON. So a
+declared version cannot hide such a fail.
 """
 
 from __future__ import annotations
@@ -93,6 +97,7 @@ RULES: Final = {
     "refs_status": "The submodel-refs request does not answer 200.",
     "refs_shape": "The submodel-refs answer is not a paged result of references with keys.",
     "unknown_id_status": "The GET of an unknown id does not answer 404.",
+    "body_json": "A 200 answer of a probe is not JSON that the strict parser of the engine reads.",
 }
 
 
@@ -152,12 +157,8 @@ class _BrokenError(Exception):
         self.rule = rule
 
 
-class _LimitError(Exception):
-    """An engine limit that ends the probes: the version, or the request budget."""
-
-    def __init__(self, status: ExecutionStatus, code: str, message: str) -> None:
-        super().__init__(code)
-        self.status, self.code, self.message = status, code, message
+class _BudgetError(Exception):
+    """The end of the request budget, an engine limit that ends the probes."""
 
 
 @dataclass
@@ -168,13 +169,16 @@ class _Probes:
     records: list[Record] = field(default_factory=list)
     seen: list[dict[str, JsonValue]] = field(default_factory=list)
     deferred: CheckOutcome | None = None
+    # The message of AAS.API.VERSION_UNSUPPORTED when the profile is declared only in another version.
+    other_version: str | None = None
     # The ids of the whole list, known only when the walk reached a page without a cursor.
     listed: set[str] | None = None
 
     def get(self, probe: str, path: str) -> Record:
         if len(self.seen) >= self.limit:
-            message = f"The request budget of {self.limit} ends before the probes of the profile end."
-            raise _LimitError(ExecutionStatus.COMPLETED, "AAS.API.BUDGET_EXHAUSTED", message)
+            raise _BudgetError(
+                f"The request budget of {self.limit} ends before the probes of the profile end."
+            )
         record = fetch_once(self.ctx, self.base + path)
         self.records.append(record)
         self.seen.append({"probe": probe, "status": record.status if record.error is None else None})
@@ -273,11 +277,32 @@ def _declared(probes: _Probes, profile: _Profile) -> None:
         return
     if versions:
         named = ", ".join(sorted(".".join(v) for v in versions))
-        message = (
+        probes.other_version = (
             f"The AAS server declares the profile in version {named} only. This engine probes version 3.0."
         )
-        raise _LimitError(ExecutionStatus.UNSUPPORTED, "AAS.API.VERSION_UNSUPPORTED", message)
+        return
     raise _BrokenError("profile_not_declared")
+
+
+def _independent(probes: _Probes, profile: _Profile, ident: str) -> None:
+    """Under another declared version, only the rules that every version shares are judged."""
+    path = f"/{profile.collection}/{encoded(ident)}"
+    targets = [("list", f"/{profile.collection}?limit=1"), ("item", path)]
+    if profile.collection == "shells":
+        targets.append(("submodel_refs", path + "/submodel-refs"))
+    targets.append(("unknown_id", f"/{profile.collection}/{encoded(profile.unknown)}"))
+    for probe, target in targets:
+        record = probes.get(probe, target)
+        if record.error is not None or record.status != 200:
+            continue
+        if probe == "unknown_id":
+            raise _BrokenError("unknown_id_status")
+        # A truncated or coded body proves nothing, so it is not parsed.
+        if unusable(probes.ctx, record) is None:
+            try:
+                parse_strict(record.body)
+            except CanonicalizationError:
+                raise _BrokenError("body_json") from None
 
 
 def _item(probes: _Probes, profile: _Profile, ident: str) -> None:
@@ -370,17 +395,28 @@ def api_profile(ctx: CheckContext) -> CheckOutcome:
 
     try:
         _declared(probes, profile)
-        _list(probes, profile.collection)
-        _item(probes, profile, ident)
-        _unknown(probes, profile)
+        if probes.other_version is None:
+            _list(probes, profile.collection)
+            _item(probes, profile, ident)
+            _unknown(probes, profile)
+        else:
+            _independent(probes, profile, ident)
     except _BrokenError as fail:
-        message = RULES[fail.rule] + f" The {params.profile} profile of the AAS API 3.0 is broken."
-        return completed(False, "AAS.API.PROFILE", message, observed(rule=fail.rule))
-    except _LimitError as stop:
-        if stop.status is ExecutionStatus.COMPLETED:
-            return completed(False, stop.code, stop.message, observed(), no_answer=True)
+        scope = (
+            f"The {params.profile} profile of the AAS API 3.0 is broken."
+            if probes.other_version is None
+            else "The rule does not depend on the version that the AAS server declares."
+        )
+        return completed(False, "AAS.API.PROFILE", f"{RULES[fail.rule]} {scope}", observed(rule=fail.rule))
+    except _BudgetError as stop:
+        return completed(False, "AAS.API.BUDGET_EXHAUSTED", str(stop), observed(), no_answer=True)
+    if probes.other_version is not None:
+        # No version-independent rule fails. A missing answer gives no more than this limit does.
         return CheckOutcome(
-            status=stop.status, reason_code=stop.code, message=stop.message, observations=tuple(observed())
+            status=ExecutionStatus.UNSUPPORTED,
+            reason_code="AAS.API.VERSION_UNSUPPORTED",
+            message=probes.other_version,
+            observations=tuple(observed()),
         )
     if probes.deferred is not None:
         return probes.deferred.model_copy(update={"observations": tuple(observed())})

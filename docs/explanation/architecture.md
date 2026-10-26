@@ -922,11 +922,17 @@ a value of a closed set:
   paged result of references. A reference has a string `type` and a non-empty list of `keys`, each
   with a string `type` and `value`.
 - `unknown_id_status`: the unknown id does not answer 404. A 200 is never accepted.
+- `body_json`: under a declared version other than 3.0, a 200 answer is not JSON that the strict
+  parser of the engine reads.
 
 Other outcomes:
 
 - A profile that the description declares only in another version than 3.0: `unsupported`,
-  `AAS.API.VERSION_UNSUPPORTED`. The check sends no further probe.
+  `AAS.API.VERSION_UNSUPPORTED`, if no version-independent rule fails. Only these probes run: the
+  first list page, the declared id, its submodel references for a shell, and the unknown id. A 200
+  answer to the unknown id fails with `unknown_id_status`. Another 200 answer that is not strict
+  JSON fails with `body_json`. The check judges no other status or shape. This limit also comes
+  before a missing answer or a refusal.
 - A transport error or a status from 500 to 599: `unreachable`, as `no_answer` gives. A 401 or 403
   to the anonymous role: `blocked`, `AAS.API.NOT_CONCLUSIVE`. A body coding or a truncated body:
   `blocked`, as `unusable` gives.

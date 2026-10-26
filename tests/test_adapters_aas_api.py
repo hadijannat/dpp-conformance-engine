@@ -249,12 +249,52 @@ def test_an_endpoint_with_a_query_is_not_a_target(tmp_path: Path, loopback: Any)
     assert server.seen == []
 
 
-def test_a_declared_version_other_than_3_0_is_unsupported(tmp_path: Path, loopback: Any) -> None:
-    newer = AAS_PROFILE.replace("/3/0/", "/3/1/")
-    server = _server(loopback, {f"{BASE}/description": _description(newer)})
+NEWER = AAS_PROFILE.replace("/3/0/", "/3/1/")
+
+
+# The unknown id answers 404 or 400: a status other than 200 does not depend on the version.
+@pytest.mark.parametrize("unknown", [(404, b"{}"), (400, b"{}")])
+def test_a_declared_version_other_than_3_0_is_unsupported(
+    tmp_path: Path, loopback: Any, unknown: Route
+) -> None:
+    overrides = {f"{BASE}/description": _description(NEWER), f"{BASE}/shells/{b64(UNKNOWN_SHELL)}": unknown}
+    server = _server(loopback, overrides)
     outcome = run(_ctx(tmp_path, server.origin))
     _not_done(outcome, ExecutionStatus.UNSUPPORTED, "AAS.API.VERSION_UNSUPPORTED")
-    assert [s["path"] for s in server.seen] == [f"{BASE}/description"], "no probe of a 3.0 shape"
+    # Only the probes whose rules do not depend on the version run, and no cursor page.
+    assert [s["path"] for s in server.seen] == [
+        f"{BASE}/description",
+        f"{BASE}/shells?limit=1",
+        f"{BASE}/shells/{b64(SHELL)}",
+        f"{BASE}/shells/{b64(SHELL)}/submodel-refs",
+        f"{BASE}/shells/{b64(UNKNOWN_SHELL)}",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("overrides", "rule"),
+    [
+        ({f"{BASE}/shells/{b64(UNKNOWN_SHELL)}": (200, b"{}")}, "unknown_id_status"),
+        ({f"{BASE}/shells/{b64(SHELL)}": (200, b"not json")}, "body_json"),
+        # A repeated key: two parsers can read it differently.
+        ({f"{BASE}/shells?limit=1": (200, b'{"a": 1, "a": 2}')}, "body_json"),
+    ],
+)
+def test_a_declared_version_other_than_3_0_does_not_hide_a_version_independent_fail(
+    tmp_path: Path, loopback: Any, overrides: dict[str, Route], rule: str
+) -> None:
+    # A system under test must not turn a fail into unsupported by what it declares.
+    server = _server(loopback, {f"{BASE}/description": _description(NEWER)} | overrides)
+    _failed(run(_ctx(tmp_path, server.origin)), rule)
+
+
+@pytest.mark.parametrize("profiles", [(AAS_PROFILE,), (NEWER, AAS_PROFILE)])
+def test_a_declared_3_0_profile_keeps_every_rule_of_3_0(
+    tmp_path: Path, loopback: Any, profiles: tuple[str, ...]
+) -> None:
+    unknown = {f"{BASE}/shells/{b64(UNKNOWN_SHELL)}": (400, b"{}")}
+    server = _server(loopback, {f"{BASE}/description": _description(*profiles)} | unknown)
+    _failed(run(_ctx(tmp_path, server.origin)), "unknown_id_status")
 
 
 def test_the_full_profile_ssp_001_includes_the_read_profile(tmp_path: Path, loopback: Any) -> None:
