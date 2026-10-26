@@ -667,6 +667,7 @@ DEGRADED_EXPECTED = ROOT / "fixtures" / "reference" / "qr" / "degraded" / "expec
 DEGRADED_TEST = "tests/test_adapters_carrier.py::test_a_degraded_image_gives_the_expected_outcome"
 _HERE = "tests/test_adapters_identifier.py::"
 _GS1 = "tests/test_adapters_gs1.py::"
+_SOURCES = "tests/test_identifier_sources.py::"
 # Seeded faults F-20, F-30, F-31, F-33, F-34, and F-35 also produce identifier and carrier codes
 # in tests/test_e2e_reference.py. Their codes come from the fault catalogue, so they are not listed.
 # F-32 gives a transport code since the owner decision of 2026-10-18.
@@ -713,6 +714,8 @@ PRODUCERS: dict[str, list[str]] = {
     "IDENTIFIER.NOT_RESOLVED": [_HERE + "test_consistency_without_a_json_passport_is_blocked"],
     "IDENTIFIER.CONSISTENT": [_HERE + "test_consistency_of_the_same_identifier_is_consistent"],
     "IDENTIFIER.MISMATCH": [_HERE + "test_consistency_of_a_different_passport_id_is_a_mismatch"],
+    "IDENTIFIER.CROSS.MISMATCH": [_SOURCES + "test_a_different_sample_source_fails"],
+    "IDENTIFIER.CROSS.SOURCE_MISSING": [_SOURCES + "test_a_pointer_that_does_not_resolve_is_blocked"],
     "IDENTIFIER.BINDING.MISMATCH": [
         _HERE + "test_consistency_of_a_divergent_api_passport_is_a_binding_mismatch"
     ],
@@ -755,7 +758,7 @@ def test_every_identifier_and_carrier_reason_code_has_a_named_producing_test() -
         (ADAPTERS / name).read_text(encoding="utf-8") for name in ("identifier.py", "carrier.py", "common.py")
     )
     codes = set(re.findall(r"(?:IDENTIFIER|CARRIER)\.[A-Z_.]+", sources))
-    assert len(codes) == 31
+    assert len(codes) == 33
     assert codes == set(PRODUCERS)
     # The window of the last test must stop before the module constants, which name every code.
     assert '"CARRIER.QR.OK"' not in _test_source(

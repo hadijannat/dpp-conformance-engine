@@ -80,7 +80,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `CARRIER.QR.DEPENDENCY_MISSING` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `CARRIER.QR.NOT_DECODED` | CARRIER |  | `dppce.adapters.common.decode_qr` | fail; inconclusive under a non-default verdict rule |
 | `CARRIER.QR.OK` | CARRIER | `carrier.qr_decode` | `dppce.adapters.carrier.qr_decode` | pass |
-| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.granularity`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.resolver._carrier` | inconclusive |
+| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.equivalence`, `identifier.granularity`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.resolver._carrier` | inconclusive |
 | `CARRIER.SAMPLE.TOO_LARGE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here |
@@ -112,17 +112,22 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `ENVELOPE.BODY.INVALID` | ENVELOPE |  | `dppce.cli._checked_envelope` | not fixed here |
 | `IDENTIFIER.BINDING.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.BINDING.NOT_COMPARABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.CONSISTENT` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | pass |
+| `IDENTIFIER.CONSISTENT` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | pass |
+| `IDENTIFIER.CROSS.MISMATCH` | IDENTIFIER |  | `dppce.adapters.identifier._cross` | fail; inconclusive under a non-default verdict rule |
+| `IDENTIFIER.CROSS.SOURCE_MISSING` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier._cross` | inconclusive |
+| `IDENTIFIER.EQUIVALENCE.DIFFERENT` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | fail; inconclusive under a non-default verdict rule |
+| `IDENTIFIER.EQUIVALENCE.NOT_PARSED` | IDENTIFIER |  | `dppce.adapters.gs1._not_parsed` | inconclusive |
+| `IDENTIFIER.EQUIVALENCE.OK` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence` | pass |
 | `IDENTIFIER.GRANULARITY.KEY_UNSUPPORTED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
 | `IDENTIFIER.GRANULARITY.MISMATCH` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.GRANULARITY.NOT_DECLARED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
 | `IDENTIFIER.GRANULARITY.NOT_PARSED` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | inconclusive |
 | `IDENTIFIER.GRANULARITY.OK` | IDENTIFIER | `identifier.granularity` | `dppce.adapters.identifier.granularity` | pass |
-| `IDENTIFIER.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |
-| `IDENTIFIER.NOT_RESOLVABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.NOT_RESOLVED` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.NO_TARGET` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive |
-| `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive |
+| `IDENTIFIER.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule |
+| `IDENTIFIER.NOT_RESOLVABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive |
+| `IDENTIFIER.NOT_RESOLVED` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive |
+| `IDENTIFIER.NO_TARGET` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.gs1.source_value`, `dppce.adapters.identifier.consistency` | inconclusive |
+| `IDENTIFIER.PARAMS.INVALID` | IDENTIFIER | `identifier.consistency`, `identifier.equivalence`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | inconclusive |
 | `IDENTIFIER.RESOLUTION.STATUS` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.RESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | pass |
 | `IDENTIFIER.RESOLVED.MEDIA_TYPE` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier._linkset_outcome`, `dppce.adapters.identifier.resolve` | pass |
@@ -132,7 +137,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `IDENTIFIER.SCHEME.NOT_HTTPS` | IDENTIFIER | `identifier.parse`, `identifier.resolve` | `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.SCHEME.UNKNOWN` | IDENTIFIER |  | `dppce.adapters.identifier._scheme_problem` | inconclusive |
 | `IDENTIFIER.SCHEME.UNSUPPORTED` | IDENTIFIER |  | `dppce.adapters.identifier._scheme_problem` | inconclusive |
-| `IDENTIFIER.SYNTAX.COMPRESSED` | IDENTIFIER |  | `dppce.adapters.identifier._compressed` | inconclusive |
+| `IDENTIFIER.SYNTAX.COMPRESSED` | IDENTIFIER | `identifier.equivalence` | `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._compressed` | inconclusive |
 | `IDENTIFIER.SYNTAX.INVALID` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | fail; inconclusive under a non-default verdict rule |
 | `IDENTIFIER.SYNTAX.OK` | IDENTIFIER | `identifier.parse` | `dppce.adapters.identifier.parse` | pass |
 | `IDENTIFIER.UNRESOLVED` | IDENTIFIER | `identifier.resolve` | `dppce.adapters.identifier.resolve` | fail; inconclusive under a non-default verdict rule |

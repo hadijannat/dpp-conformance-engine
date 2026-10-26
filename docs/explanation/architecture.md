@@ -341,7 +341,8 @@ Initial registry:
 | `identifier.parse` | `identifier.parse` | Scheme-aware parse of the carrier payload. The parameter `form` selects the GS1 Digital Link grammar. |
 | `identifier.granularity` | `identifier.granularity` | Classifies a GS1 Digital Link carrier with a GTIN as model, batch, or item level, and compares the level with the granularity of the ICS. Experimental. |
 | `identifier.resolve` | `identifier.resolve` | Bounded resolution of the identifier to a passport. |
-| `identifier.consistency` | `identifier.consistency` | Compares the carrier identifier with the `id` of the resolved passport. With a QR image sample, it also compares the carrier identifier with the declared sample identifier. With `compare_item`, it also compares the resolved passport with the document at the target of the `item` template. It does not read the ICS. |
+| `identifier.consistency` | `identifier.consistency` | Compares the carrier identifier with the `id` of the resolved passport. With a QR image sample, it also compares the carrier identifier with the declared sample identifier. With `compare_item`, it also compares the resolved passport with the document at the target of the `item` template. With `sources`, it compares further values at JSON Pointers in place of the `id`. It does not read the ICS. |
+| `identifier.equivalence` | `identifier.equivalence` | Compares the carrier with a declared identifier in GS1 canonical form. It does not change the exact-text rule of `identifier.consistency`. Experimental. |
 | `api.contract` | `api.contract` | Response matches the pinned OpenAPI contract. |
 | `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. |
 | `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. |
@@ -398,6 +399,37 @@ payload. The check takes the first row that applies:
 
 A transport error or a server error on either fetch gives `unreachable`. The check always uses
 the `item` template, also with `item_target: resolved`, because it compares the two routes.
+
+`identifier.consistency` takes a second optional parameter, `sources`. It is experimental. It
+lists 1 to 8 sources. Each source has a `label`, a `kind`, and a `pointer`. The `pointer` is a
+JSON Pointer (RFC 6901). The `kind` selects the document:
+
+- `resolved`: the passport that the carrier identifier resolves to.
+- `resource`: the document at the IXIT resource template that the `label` names.
+- `sample`: the JSON file of the IXIT sample that the `label` names.
+
+The labels are unique. `sources` and `compare_item: true` are not used together. With `sources`,
+the check does not compare the `id` of the resolved passport, unless a source points to it. It
+fetches only for a source of the kind `resolved` or `resource`. A source of the kind `sample`
+sends no request. Each value is compared with the carrier identifier as exact text. A value that
+is present and is not text differs. The check takes the first row that applies:
+
+1. The parameters are not valid: `blocked`, `IDENTIFIER.PARAMS.INVALID`. Nothing is read.
+2. No carrier identifier is available: as without `sources`.
+3. A present value differs from the carrier identifier: fail. With a QR image sample, a declared
+   sample identifier that differs gives `IDENTIFIER.MISMATCH`. Otherwise the code is
+   `IDENTIFIER.CROSS.MISMATCH`.
+4. A source gives no document. The first such source in the list decides:
+   - the kind `resolved`: the outcome of rule 1 or 2 without `sources`.
+   - the kind `resource` without an IXIT template: `blocked`, `IDENTIFIER.NO_TARGET`.
+   - a transport error or a server error: `unreachable`.
+   - otherwise: `blocked`, `IDENTIFIER.CROSS.SOURCE_MISSING`.
+5. A pointer does not resolve: `blocked`, `IDENTIFIER.CROSS.SOURCE_MISSING`.
+6. Otherwise: pass, `IDENTIFIER.CONSISTENT`.
+
+Rule 3 comes before rules 4 and 5. A system under test thus cannot turn a difference into
+`blocked` when it changes the shape of another source. The observation summary names the
+compared, the different, and the missing labels. It holds no identifier value.
 
 `integrity.jws` verifies the JWS Compact Serialization only. A JWS JSON Serialization (RFC 7515,
 section 7.2) is a JSON object with a non-empty base64url `payload`. Here, base64url text holds only
@@ -541,6 +573,30 @@ also gives this outcome. It is never a pass.
 
 A key qualifier 21 (serial) or 235 (third-party controlled serialized extension) gives item
 level. Else a key qualifier 10 (lot) gives batch level. Else the level is model.
+
+`identifier.equivalence` takes one required parameter, `source`. It is one source as in the
+parameter `sources` of `identifier.consistency`. The check compares the carrier identifier with
+the source value in GS1 canonical form. It parses both with the form `gs1-dl`. In AI (01), a
+GTIN-8, GTIN-12, or GTIN-13 is padded with zeros to 14 digits. This is the dl.c option
+`permitZeroSuppressedGTINinDLuris`. `identifier.parse` keeps the default of dl.c: no padding.
+The comparison then ignores the case of the scheme and the host, the case of a percent-encoding,
+and a path prefix. It compares the scheme, the authority, and the primary key with its key
+qualifiers. Query data attributes are not compared. The check takes the first row that applies:
+
+1. The parameters are not valid: `blocked`, `IDENTIFIER.PARAMS.INVALID`. Nothing is read.
+2. No carrier identifier is available: as `identifier.parse`.
+3. The source gives no document: as rule 4 of `identifier.consistency` with `sources`.
+4. The pointer does not resolve: `blocked`, `IDENTIFIER.CROSS.SOURCE_MISSING`.
+5. The value is not text: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`.
+6. The carrier identifier looks compressed: `unsupported`, `IDENTIFIER.SYNTAX.COMPRESSED`.
+7. The carrier identifier or the value is not a valid uncompressed URI: `blocked`,
+   `IDENTIFIER.EQUIVALENCE.NOT_PARSED`.
+8. The canonical forms differ: fail, `IDENTIFIER.EQUIVALENCE.DIFFERENT`. The summary names the
+   parts that differ, from the set `scheme`, `authority`, `key`, and `type`.
+9. Otherwise: pass, `IDENTIFIER.EQUIVALENCE.OK`.
+
+`identifier.consistency` stays exact text. A test purpose that accepts a GTIN in another length
+uses `identifier.equivalence`.
 
 `persistence.versions` takes six optional parameters. Each default is the layout of the reference
 system. `entries_pointer`, default `/versions`, is a JSON Pointer (RFC 6901) to the list of

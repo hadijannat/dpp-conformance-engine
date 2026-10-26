@@ -69,9 +69,23 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "Compare the carrier identifier, as exact text, with the id of the resolved passport. "
         "With a QR image, also compare it with the declared sample identifier. "
         "With compare_item, also compare the resolved passport with the API item document as JSON values. "
+        "The parameter sources (experimental) compares further values at JSON Pointers of the resolved "
+        "passport, a resource, or a sample, in place of the id. "
         "Digital consistency does not prove physical authenticity.",
         None,
         "",
+    ),
+    (
+        "identifier.equivalence",
+        "identifier",
+        _E,
+        "Compare the carrier identifier with a declared identifier in GS1 canonical form: a GTIN-8, "
+        "GTIN-12, or GTIN-13 padded to 14 digits, scheme and host without case, percent-decoded values, "
+        "and no path prefix. It does not change the exact-text rule of identifier.consistency.",
+        None,
+        "A reviewer checks the canonical form against GS1 Digital Link URI Syntax 1.7.0. "
+        "A recorded test campaign compares carriers and declared identifiers of at least one "
+        "independent GS1 resolver.",
     ),
     (
         "resolver.linkset",
