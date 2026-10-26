@@ -15999,3 +15999,367 @@ sources:
   uncertainties:
   - 'Merged on 2026-10-19 from docs/research/raw/implementation-methods/ (files g02). Raw ids: new-zxing-cpp-python-binding.'
   - 'Independent check: 1 claim(s) with this exact evidence URL confirmed.'
+- id: tests/vectors/x509-limbo/online/akamai.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/akamai.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/akamai.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/akamai.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 48ffafd3ae64bbb84ab60d0052abae02d20f0cf662b30abdc060b624c0292644
+  hash_note: SHA-256 of the vendored bytes. Git blob fef1fa1bcab0400fe3b7ca9fe8a4b7f2d75ad800, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/akamai.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/amazon.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/amazon.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/amazon.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/amazon.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 2464c86e50cbc1a0ff4599f8ccf695006e5b1393e1e7a4ff1fceccef4b6d88b7
+  hash_note: SHA-256 of the vendored bytes. Git blob 86f7e66727856f8e2fef38340a9b81b9b12ee6d2, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/amazon.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/apple.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/apple.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/apple.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/apple.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 82f8dea9311a32200454651da49804730c163062f0289500139fa73ac62f337a
+  hash_note: SHA-256 of the vendored bytes. Git blob 8af704b988eb6877658409058cf0622f4c06ccac, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/apple.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/aws.amazon.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/aws.amazon.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/aws.amazon.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/aws.amazon.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 8a429e5994de2edcd5880e1928e7135d366cfc66276aa6f4c355b6bb9774eb33
+  hash_note: SHA-256 of the vendored bytes. Git blob 5b4debefc94623f1635fbbbcc5039e1020f42bc6, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/aws.amazon.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/bing.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/bing.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/bing.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/bing.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: ae9ca5f69b1c88f7b07ba7ca7bf3dd4fabd590e0c008032b37425417163ab3bd
+  hash_note: SHA-256 of the vendored bytes. Git blob 336ec751568f17cff1e5ba1fcc31c57fa97c12a5, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/bing.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/cloudflare.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/cloudflare.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/cloudflare.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/cloudflare.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 7b84b67abc7b6443ff9046498dbf0bf7d71e100d6f1d603183e58189cb0adae1
+  hash_note: SHA-256 of the vendored bytes. Git blob a097754289671e16b2562434c06656eebc15212c, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/cloudflare.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/docs.python.org.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/docs.python.org.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/docs.python.org.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/docs.python.org.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: f198ef184a4fce96ed1c97c0129bc01828673d1407f9c3e25f353ea932f221d8
+  hash_note: SHA-256 of the vendored bytes. Git blob 3508d857a14cc43d7f3a508b5362c5c9b89a6cfb, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/docs.python.org.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/facebook.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/facebook.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/facebook.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/facebook.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: a1d8d24bd9c168b84068c5b3c6fad2be3ed488aa57559694198bd21dbb86c8eb
+  hash_note: SHA-256 of the vendored bytes. Git blob 8179326b5a6bcbd89d15d845340c07ee8ead7a1f, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/facebook.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/fastly.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/fastly.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/fastly.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/fastly.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 90c3e94d52f8ef3873a8bd234c08c55d7098f6e948bd0b7cfc46dd24c0c96915
+  hash_note: SHA-256 of the vendored bytes. Git blob 866b224ee3000d249fe86649b7d205eda878c160, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/fastly.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/google.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/google.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/google.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/google.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 6fd98a85002aa15800423346bfba7cfc00c9137f2a36d41a4e9092595f904281
+  hash_note: SHA-256 of the vendored bytes. Git blob 659c66a183f629fba123b24626069e4271ab56ed, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/google.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/microsoft.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/microsoft.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/microsoft.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/microsoft.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 7038ee4e48b5312e52a711b2eb0cc8c5a82dc49869c5a0d091e3099dbf55bc21
+  hash_note: SHA-256 of the vendored bytes. Git blob fb5ed2347bd4ca1f82d76623ad320f555cf6ec2a, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/microsoft.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/s3.amazonaws.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/s3.amazonaws.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/s3.amazonaws.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/s3.amazonaws.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: dfecb15ddb31f543b4596dc1b23db1235931ebe4bb8190aa58872221231c99f8
+  hash_note: SHA-256 of the vendored bytes. Git blob 61d6b0674b72cbd3cc094a4cb5deaed26d5e1af9, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/s3.amazonaws.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/stackoverflow.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/stackoverflow.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/stackoverflow.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/stackoverflow.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: f359f52390b00d0a9acf67a586e3d323c4046a8c20b6083111839b84a57594dc
+  hash_note: SHA-256 of the vendored bytes. Git blob 2986e2a6d41baf49fac0195ae1c4f8ff0066be76, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/stackoverflow.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
+- id: tests/vectors/x509-limbo/online/storage.googleapis.com.limbo.json
+  title: 'x509-limbo test data: limbo/_assets/online/storage.googleapis.com.limbo.json'
+  identifier: C2SP/x509-limbo limbo/_assets/online/storage.googleapis.com.limbo.json
+  issuing_body: The Python Cryptographic Authority and individual contributors (GitHub repository C2SP/x509-limbo)
+  source_type: test_vector
+  official_url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/storage.googleapis.com.limbo.json
+  edition_or_version: commit 1080e565f26e544bbe9cf99953be8a57c08e7e20
+  publication_date: null
+  retrieval_date: '2026-10-26'
+  legal_or_spec_status: Third-party test data. Not a specification and not normative.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE and README.md at commit 1080e565f26e544bbe9cf99953be8a57c08e7e20.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/x509-limbo/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 8ea30ee357c48c522a959693a27819bd8f756da5bdce4e3e474de4ec274e7e0e
+  hash_note: SHA-256 of the vendored bytes. Git blob 56a462009d6a30240faf9caff05a3e456e4f1813, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/limbo/_assets/online/storage.googleapis.com.limbo.json
+    what_it_shows: The file at the pinned commit.
+    official: true
+  - url: https://github.com/C2SP/x509-limbo/blob/1080e565f26e544bbe9cf99953be8a57c08e7e20/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The LICENSE file holds the unfilled Apache-2.0 template. The upstream pyproject.toml names 'The Python Cryptographic Authority and individual contributors' as author, and the README.md states the Apache-2.0 license.
+  - The file holds a public certificate chain of a live website, with a fixed validation time. The engine path code ignores time, names, and usage.
