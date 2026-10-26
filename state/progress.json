@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 51,
+    "cycle": 55,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-26: waves 1 to 4 of program P2 are on main (latest 1a5f6a8), and wave 5 (P2-13, P2-14, P2-15, and the integrator commits) is on the integration branch worktree-wf_880afee1-954-1, based on main 1a5f6a8, and is not yet on main.",
+    "state_at_end": "2026-10-26: waves 1 to 5 of program P2 are on main (latest 5a6a6c8), and wave 6 (P2-31, P2-34, P2-18, P2-17, and the integrator commits) is on the integration branch worktree-wf_b915a32b-110-7, based on main 5a6a6c8, and is not yet on main.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -654,7 +654,31 @@
       "cycle": 51,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-15 (406e521 catalogue entries F-74 and F-75 first, then 9ce2873, 4a1644c, 3f38549): the experimental check aas.api_profile sends positive GET probes of the AAS API 3.0 read profiles through the engine transport, with the reference family module aas and its flags aas_api_wrong_status and aas_api_bad_paging, and B-19 not seeded; the package gate uv run just check passed with 4086 tests and 1 skip, and after the wave 5 merges it passed with 4159 tests and 1 skip."
+      "summary": "P2-15 (406e521 catalogue entries F-74 and F-75 first, then 9ce2873, 4a1644c, 3f38549): the experimental check aas.api_profile sends positive GET probes of the AAS API 3.0 read profiles through the engine transport, with the reference family module aas and its flags aas_api_wrong_status and aas_api_bad_paging, and B-19 not seeded; the package gate uv run just check passed with 4086 tests and 1 skip, and after the wave 5 merges it passed with 4159 tests and 1 skip. Wave 5 landed on main as 5a6a6c8 after the OQ6 fix (75b35ed, bf4e04e: under a declared AAS API version other than 3.0, the version-independent rules still run) and a CI fix (5a6a6c8: the fast-gates timeout rose from 20 to 45 minutes, because it had cancelled the runs of d19a8f9 and 1a5f6a8 before the method-validation job)."
+    },
+    {
+      "cycle": 52,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-31 (1a8007d catalogue entry B-20 first, then 186c739, f12e5d2, and the review fix 7ecb26e): a 429 answer is no answer with TRANSPORT.RATE_LIMITED in every check through common.no_reply, the transport waits for a delta-seconds Retry-After of at most 5 s once per GET or HEAD fetch within the time limit and the budget, and the flag resolver_rate_limited seeds B-20; the package gate figures did not reach the integrator, and after the wave 6 merges uv run just check passed with 4273 tests and 1 skip."
+    },
+    {
+      "cycle": 53,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-34 (2a24b14 tests first, then 2326c39, 07d803e, ff33984, 18749c1, and the review fixes 0bc52b6 and a427c1c): dppce.report.hints gives each reason code a next step or a remediation, the HTML report shows them, and the reason-code page has a new hint column; the package gate figures did not reach the integrator, and after the wave 6 merges uv run just check passed with 4273 tests and 1 skip."
+    },
+    {
+      "cycle": 54,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-18 (74f8f20 failing tests first, then 3b69216, 486bc2a, 0ad8ffa, 7aed6ac, and the review fixes 8c37e41, 45074ba, 8280537, d264639): add-key accepts each JWK coordinate in one spelling only, sign --in-place refuses an input that changes while it signs with SIGN.INPUT.LINK, an opening salt must be canonical, and the review record closes SR-N2 (except the JWK kid), SR-N6 in part, SR-N7, and, by the integrator in 49bd09b and 7b20881, docs1-DOC-2; the package run of uv run just check did not finish, and after the wave 6 merges it passed with 4273 tests and 1 skip."
+    },
+    {
+      "cycle": 55,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-17 (b93ba2c tests first, then 7b39330, fc22fa4, and the review fix ddbdfa8): 14 unchanged x509-limbo valid chains (C2SP/x509-limbo at 1080e56, Apache-2.0) run through trust_path, scripts/import_schema.py bundles a schema set, and scripts/check_oracle_pins.py checks catalogue/oracle-pins.yaml offline; the package gate figures did not reach the integrator, and after the wave 6 merges uv run just check passed with 4273 tests and 1 skip."
     }
   ],
   "blockers": [

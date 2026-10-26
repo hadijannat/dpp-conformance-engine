@@ -18,7 +18,7 @@ A check that was not executed is marked **not run**. It is never marked passed.
 | M5 | Method validation: faults, controls, replays, property and mutation tests, readiness | complete |
 | M6 | Release candidate: documentation, clean install, SBOM, workflows, capability report | complete: GitHub pre-release `v0.1.0rc1` on 2026-10-15 with the approval of the owner; release workflow green; not on PyPI |
 | M7 | T1 technical readiness: the agent-buildable T1 packages of `docs/research/gap-assessment-2026-10-15.md`, section 6.2 | in progress: the work of 2026-10-18 is on `main` up to `8b3bfff`; see "State after the T1 program (2026-10-18)" |
-| M8 | P2 practical-use program: `docs/research/practical-use-assessment-2026-10-25.md` | in progress: waves 1 to 4 on main (1a5f6a8), wave 5 integrated |
+| M8 | P2 practical-use program: `docs/research/practical-use-assessment-2026-10-25.md` | in progress: waves 1 to 5 on main (5a6a6c8), wave 6 integrated |
 
 "Complete" means that the local gates ran and passed for the milestone. It does not mean that
 a human reviewed the work. The evidence for each figure is in `docs/readiness.md`.
