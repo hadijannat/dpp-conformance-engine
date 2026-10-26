@@ -38,8 +38,6 @@ from tests.support import make_envelope, make_requirement_result
 with mock.patch.dict(os.environ):
     gen = importlib.import_module("scripts.gen_reference_docs")
 
-# P2-31 adds this code in the same wave. Remove the entry after the merge.
-PENDING = frozenset({"TRANSPORT.RATE_LIMITED"})
 SENTINEL = "SENTINEL-PAYLOAD-VALUE-7731"
 
 
@@ -95,7 +93,7 @@ def test_every_reason_code_that_the_generator_finds_has_a_hint() -> None:
 
 def test_every_hint_names_a_known_reason_code() -> None:
     # A typo or a removed code leaves a dead entry. A dead entry hides a missing hint.
-    assert sorted(set(HINTS) - set(_codes()) - PENDING) == []
+    assert sorted(set(HINTS) - set(_codes())) == []
 
 
 def test_every_hint_is_one_short_plain_line() -> None:
