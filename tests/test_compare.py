@@ -151,7 +151,9 @@ def test_different_plan_inputs_are_reported(tmp_path: Path) -> None:
 def test_a_changed_observation_names_the_field_and_never_the_value(tmp_path: Path) -> None:
     base = make_envelope()
     tests = base.decision.test_results
-    a = _rebuilt(base.decision, test_results=(_with_summary(tests[0], {"status": 200, "kept": "x"}), *tests[1:]))
+    a = _rebuilt(
+        base.decision, test_results=(_with_summary(tests[0], {"status": 200, "kept": "x"}), *tests[1:])
+    )
     b = _rebuilt(
         base.decision, test_results=(_with_summary(tests[0], {"status": SENTINEL, "kept": "x"}), *tests[1:])
     )
@@ -163,8 +165,9 @@ def test_a_changed_observation_names_the_field_and_never_the_value(tmp_path: Pat
     assert step["differences"] == []
     assert step["observation_fields"] == [{"observation": "TP-001#1", "field": "status"}]
     code, text = _compare(pa, pb)
-    assert SENTINEL not in text and SENTINEL not in json.dumps(document)
-    assert "TP-001#1" in text and "status" in text
+    assert SENTINEL not in text
+    assert SENTINEL not in json.dumps(document)
+    assert "observation TP-001#1: summary field 'status' differs" in text
 
 
 def test_a_step_on_one_side_only_is_a_verdict_difference(tmp_path: Path) -> None:

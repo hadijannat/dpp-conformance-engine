@@ -241,6 +241,25 @@ options:
   --proof PROOF         inclusion proof to check against the report
 ```
 
+### `dppce compare`
+
+```text
+usage: dppce compare [-h] [--json] [--format {text,json}] [--trust TRUST] [--at AT] A B
+
+Compare two envelopes of repeated runs: plan inputs, and each step that differs.
+
+positional arguments:
+  A                     envelope of the first run
+  B                     envelope of the second run
+
+options:
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
+  --format {text,json}  --json gives json too
+  --trust TRUST         verify both envelopes first against this trust bundle
+  --at AT               evaluation time of the verification; needed with --trust
+```
+
 ### `dppce authorize`
 
 ```text
