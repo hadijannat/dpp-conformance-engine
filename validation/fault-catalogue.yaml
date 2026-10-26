@@ -90,13 +90,18 @@
 # Each of the three packages ends with a review fix commit. These commits change no entry. The
 # entries meet in the merge commits of the three
 # packages, and the merge keeps each entry as its package wrote it.
+# Version 0.11.0 adds the boundary case B-20. It adds no fault. The git history gives this order:
+# the entry commit of B-20 comes before the commit that makes a 429 answer no answer with
+# TRANSPORT.RATE_LIMITED in the adapters and the transport. That commit comes before the commit
+# that adds the flag resolver_rate_limited to the reference system. The package ends with a review
+# fix commit, which changes no entry.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.10.0
+version: 0.11.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
