@@ -35,6 +35,7 @@ from dppce.models import (
     Verdict,
     VerdictRules,
 )
+from dppce.report.hints import hint_for_code
 from dppce.testdefs import registry
 from dppce.verdicts import claim_level, path_verdict, requirement_verdict, step_verdict
 
@@ -328,13 +329,19 @@ class _Template(NamedTuple):
     suffixes: set[tuple[str, str, str | None]]  # (parameter, suffix, effect)
 
 
+# The hint table names every code but writes none. Scanning it would list it as the producer of
+# each code, and a code without a hint would seem to have one.
+_NOT_PRODUCERS = frozenset({"dppce.report.hints"})
+
+
 def source_modules() -> dict[str, str]:
-    """Every module of the engine, by dotted name."""
-    return {
-        ".".join(path.relative_to(SRC.parent).with_suffix("").parts).removesuffix(
-            ".__init__"
-        ): path.read_text(encoding="utf-8")
+    """Every module of the engine that can write a reason code, by dotted name."""
+    modules = {
+        ".".join(path.relative_to(SRC.parent).with_suffix("").parts).removesuffix(".__init__"): path
         for path in sorted(SRC.rglob("*.py"))
+    }
+    return {
+        name: path.read_text(encoding="utf-8") for name, path in modules.items() if name not in _NOT_PRODUCERS
     }
 
 
@@ -733,7 +740,8 @@ def reason_codes_page() -> str:
         places = sorted({s.module if s.function == _TOP else f"{s.module}.{s.function}" for s in group})
         effects = " / ".join(sorted({s.effect or "not fixed here" for s in group}))
         produced = ", ".join(f"`{p}`" for p in places)
-        rows.append(f"| `{code}` | {code.split('.')[0]} | {checks} | {produced} | {effects} |")
+        hint = hint_for_code(code) or "no entry"
+        rows.append(f"| `{code}` | {code.split('.')[0]} | {checks} | {produced} | {effects} | {hint} |")
     parts = [
         "# Reason-code catalogue\n",
         "Audience: operators, assessors, and contributors who read a report.",
@@ -755,8 +763,11 @@ def reason_codes_page() -> str:
         "make a missing answer fail. See the truth table.\n",
         "A code with a run-time segment is listed once for each value of its closed set.\n",
         "Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` reports them.\n",
-        "| Code | Area | Check | Produced in | Step verdict |",
-        "| --- | --- | --- | --- | --- |",
+        "The last column comes from `dppce.report.hints`, the table that the HTML report uses. For a "
+        "step that did not pass, it says what would make the step conclusive. For a failed step, it is "
+        "the remediation. A step whose code has no entry gets the text of its execution status.\n",
+        "| Code | Area | Check | Produced in | Step verdict | Next step or remediation |",
+        "| --- | --- | --- | --- | --- | --- |",
         *rows,
     ]
     return "\n".join(parts) + "\n"
