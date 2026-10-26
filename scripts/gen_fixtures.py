@@ -343,6 +343,7 @@ def _trust_and_authorization(root: x509.Certificate) -> None:
     report = LocalSigner.generate("TEST-ONLY-report-key-1")
     owner = LocalSigner.generate("TEST-ONLY-owner-key-1")
     manual, manual_key = _manual_key()
+    leaf = LocalSigner.from_pem(OUT / "pki" / "TEST-ONLY-leaf.key.pem", "TEST-ONLY-leaf")
     _write(OUT / "trust" / "TEST-ONLY-report-signing.key.pem", report.to_pem())
     _write(OUT / "authorization" / "TEST-ONLY-owner.key.pem", owner.to_pem())
     _write(OUT / "trust" / "TEST-ONLY-manual-signing.key.pem", manual.to_pem())
@@ -359,6 +360,11 @@ def _trust_and_authorization(root: x509.Certificate) -> None:
                 not_before=VALID_FROM, not_after=VALID_TO,
             ),
             manual_key,
+            # The credentials family of the reference system signs its VC-JOSE credential with the leaf.
+            TrustedKey(
+                kid="TEST-ONLY-vc-issuer-key-1", issuer=OPERATOR, purposes=("passport",),
+                public_jwk=leaf.public_jwk(), not_before=VALID_FROM, not_after=VALID_TO,
+            ),
         ),
         anchors=(
             TrustAnchor(
