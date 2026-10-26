@@ -208,7 +208,9 @@ def test_a_server_error_is_no_answer(tmp_path: Path, loopback: Any) -> None:
     outcome, api = _run(tmp_path, loopback, status=503)
     assert (outcome.status, outcome.passed, outcome.unreachable) == (ExecutionStatus.COMPLETED, False, True)
     assert outcome.reason_code == "TRANSPORT.SERVER_ERROR"
-    assert len(api.accepts()) == 1, "the check stops at the first missing answer"
+    # Changed by the P2-14 review: the check now sends all five requests, so that a missing
+    # answer cannot hide a fail that the other answers prove.
+    assert len(api.accepts()) == 5
 
 
 def test_an_unrelated_status_on_the_json_request_fails(tmp_path: Path, loopback: Any) -> None:
@@ -240,6 +242,78 @@ def test_a_body_coding_blocks_a_step_that_has_no_head_fail(tmp_path: Path, loopb
     api.answer = encoded  # type: ignore[method-assign] # test double: every answer carries a coding
     outcome = run(resolved_context(tmp_path, "identifier.negotiation", api.origin))
     _blocked(outcome, "TRANSPORT.BODY_ENCODED")
+
+
+def _override(api: Server, rule: Any) -> None:
+    """Let ``rule(accept)`` replace the answer when it returns one. Test double."""
+    plain = api.answer
+
+    def answer(accept: str) -> Answer:
+        return rule(accept) or plain(accept)
+
+    api.answer = answer  # type: ignore[method-assign] # test double
+
+
+def _check(tmp_path: Path, api: Server, params: dict[str, Any] | None = None) -> CheckOutcome:
+    return run(resolved_context(tmp_path, "identifier.negotiation", api.origin, params=params))
+
+
+def test_a_later_server_error_does_not_hide_a_media_type_fail(tmp_path: Path, loopback: Any) -> None:
+    api = Server(loopback)
+    html = {"Content-Type": "text/html", "Vary": "Accept"}
+    _override(
+        api,
+        lambda a: (503, b"", {}) if "x-dppce-unsupported" in a else (200, HTML, html),
+    )
+    _failed(_check(tmp_path, api), "NEGOTIATION.MEDIA_TYPE")
+
+
+def test_an_encoded_answer_does_not_hide_a_body_fail(tmp_path: Path, loopback: Any) -> None:
+    api = Server(loopback, json_body=b"not json")
+    plain = api.answer
+
+    def answer(accept: str) -> Answer:
+        status, body, headers = plain(accept)
+        if accept == "text/html":
+            headers = {**headers, "Content-Encoding": "gzip"}
+        return status, body, headers
+
+    api.answer = answer  # type: ignore[method-assign] # test double
+    _failed(_check(tmp_path, api), "NEGOTIATION.BODY")
+
+
+def test_a_406_for_other_types_needs_vary(tmp_path: Path, loopback: Any) -> None:
+    api = Server(loopback, no_vary=True, unsupported="406")
+    _failed(_check(tmp_path, api, {"unsupported_answer": "406"}), "NEGOTIATION.VARY.MISSING")
+    api = Server(loopback, no_vary=True)
+    _override(api, lambda a: (406, b"{}", {}) if a == "text/html" else None)
+    _failed(_check(tmp_path, api), "NEGOTIATION.VARY.MISSING")
+
+
+def test_a_body_that_changes_without_accept_is_not_a_vary_fail(tmp_path: Path, loopback: Any) -> None:
+    api = Server(loopback, no_vary=True, ignore_accept=True)
+    count = iter(range(100))
+    _override(api, lambda a: (200, b'{"n": %d}' % next(count), {"Content-Type": "application/json"}))
+    _passed(_check(tmp_path, api))
+
+
+def test_a_406_for_the_weighted_range_fails_when_json_is_served(tmp_path: Path, loopback: Any) -> None:
+    api = Server(loopback)
+    _override(api, lambda a: (406, b"{}", {"Vary": "Accept"}) if ";q=" in a else None)
+    _failed(_check(tmp_path, api), "NEGOTIATION.QUALITY")
+
+
+def test_a_json_array_is_valid_json_ld(tmp_path: Path, loopback: Any) -> None:
+    api = Server(loopback)
+    _override(
+        api,
+        lambda a: (
+            (200, b'[{"@id": "x"}]', {"Content-Type": "application/ld+json", "Vary": "Accept"})
+            if a == "application/ld+json"
+            else None
+        ),
+    )
+    _passed(_check(tmp_path, api))
 
 
 def test_a_carrier_that_is_not_a_url_is_not_probed(tmp_path: Path, loopback: Any) -> None:

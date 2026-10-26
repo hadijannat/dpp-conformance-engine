@@ -759,21 +759,26 @@ gives `blocked` with `NEGOTIATION.NO_TARGET`, and nothing is sent. It sends five
 this order, with these `Accept` values: `application/json`, `text/html`, `application/ld+json`,
 `text/html;q=0.2, application/json;q=0.9`, and `application/x-dppce-unsupported`. It sends no
 other negotiation header. In particular, it sends no `Accept-Language`: a later package adds that
-header. A transport error or a status from 500 to 599 gives `unreachable` and ends the check.
+header. A transport error or a status from 500 to 599 is no answer. The check sends all five
+requests and judges the answers that it got. Only when no rule proves a fail does a missing answer
+give `unreachable`. So a system cannot hide a proven fail with an error on another request.
 The optional parameter `unsupported_answer` is `406` or `default`, and `default` is the default.
-The check judges the final answers by the first rule that applies. Rules on headers come before
-rules on bodies, so a body coding or a long body cannot turn a fail into `blocked`.
+The check judges the answers by the first rule that applies. Rules on headers come before
+rules on bodies. An answer with a body coding or a long body is set aside, so it cannot turn a
+fail on another answer into `blocked`.
 
 1. The `unsupported` answer must have the declared status: 406, or 200 for `default`:
    `NEGOTIATION.UNSUPPORTED`. The `json` request must get 200. The `html`, `json_ld`, and `weighted`
    requests get 200 or 406. Another status gives `NEGOTIATION.STATUS`.
 2. A 200 answer to `application/json` must have `application/json` or a `+json` media type:
    `NEGOTIATION.MEDIA_TYPE`. The check does not judge the media type of the other answers.
-3. A 200 answer to the weighted request must have a JSON media type: `NEGOTIATION.QUALITY`.
-4. If the 200 answers differ in media type or body, each of them must list `Accept` or `*` in
-   `Vary`: `NEGOTIATION.VARY.MISSING`.
-5. A JSON media type needs a body that is one JSON object. A `text/html` answer needs a body with
-   markup that is not a JSON object: `NEGOTIATION.BODY`. Other media types are not judged here.
+3. The weighted request must get a 200 answer with a JSON media type when the `json` request got
+   200. A 406 or a non-JSON type gives `NEGOTIATION.QUALITY`.
+4. If the answers differ in status or media type, each 200 answer must list `Accept` or `*` in
+   `Vary`: `NEGOTIATION.VARY.MISSING`. The check does not compare bodies, because a body can
+   differ for reasons other than `Accept`.
+5. A JSON media type needs a body that is valid JSON. A `text/html` answer needs a body with
+   markup that is not valid JSON: `NEGOTIATION.BODY`. Other media types are not judged here.
 
 Otherwise the check passes with `NEGOTIATION.OK`. The pass message names only these rules. The check
 does not judge caching, language, or a `Content-Location` header.
