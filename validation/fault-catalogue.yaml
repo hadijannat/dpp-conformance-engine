@@ -40,13 +40,35 @@
 #   It also comes before the commit that adds the resolver flags to the reference system.
 # - F-54 and F-55: the entry commit comes before the commit that adds the lifecycle field maps.
 #   It also comes before the commit that adds their flags to the reference system.
+# Version 0.8.0 adds the faults F-56 to F-66 and the boundary cases B-15 and B-16. F-66 holds the
+# fault aas_dpp_element_missing. B-16 is on TP-AAS-XML-001, not on TP-AAS-JSON-001. A JSON sample
+# names no metamodel version, so only the XML namespace gate gives AAS.VERSION.UNSUPPORTED from a
+# sample. Version 0.8.0 also changes the description of C-FAMILY-AAS, which now names the sample
+# fixtures/aas/TEST-ONLY-dpp-valid.json. The git history gives this order:
+# - F-56 to F-60: the entry commit comes before the commit that adds the check integrity.jose, its
+#   test purpose, and the credential of the reference system. It also comes before the commit that
+#   adds the five flags.
+# - F-61, F-62, and B-15: the entry commit comes before the commit that adds the test purpose. It
+#   also comes before the commit that adds the check identity.did and the commit that adds the flags.
+# - F-63: its check aas.validate and its sample fixtures/aas/environment-invalid.json are older than
+#   the entry commit. The entry commit comes before the commit that adds its rig setup.
+# - F-64: its sample fixtures/aas/environment-valid.json is older than the entry commit. The entry
+#   commit comes before the commit that adds the check aas.dpp_compose and before its rig setup.
+# - F-65 and F-66: the entry commit comes before the commit that adds the check aas.dpp_compose and
+#   their samples. It also comes before the commit that adds their rig setup.
+# - B-16: its sample fixtures/aas/environment-v3-1.xml and the namespace gate of aas.validate are
+#   older than the entry commit. The entry commit comes before the commit that adds its rig setup.
+# - C-FAMILY-AAS: the entry commit names its new sample before the commit that adds that file. The
+#   rig uses the file from the later rig setup commit on.
+# The AAS commits after the entry commit were rewritten before they landed, to remove a vendored
+# file. Their order did not change.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.7.0
+version: 0.8.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
