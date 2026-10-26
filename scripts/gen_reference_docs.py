@@ -86,8 +86,11 @@ def cli_page() -> str:
         parts += [f"### `{name}`\n", "```text", sub.format_help().rstrip(), "```\n"]
     parts += [
         "## Standalone verifier\n",
-        "`python -m dppce.verifier ENVELOPE --trust BUNDLE --at TIME` verifies a report without the "
-        "orchestrator and without the system under test. Exit codes: 0 complete, 4 failed or "
+        "`python -m dppce.verifier ENVELOPE --trust BUNDLE --at TIME [--status-list FILE] "
+        "[--opening FILE] [--proof FILE]` verifies a report without the orchestrator and without "
+        "the system under test. `--status-list` gives a signed status list file of the report "
+        "issuer; nothing is fetched. `--opening` checks a record opening against the report, and "
+        "`--proof` checks an inclusion proof against it. Exit codes: 0 complete, 4 failed or "
         "incomplete, 2 bad input.\n",
     ]
     return "\n".join(parts)
