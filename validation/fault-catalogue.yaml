@@ -438,6 +438,20 @@ sut_faults:
     test_purpose: TP-AAS-DPP-001
     profiles: [family/aas]
     expected: {verdict: fail, reason_code: AAS.DPP.ELEMENT_MISSING}
+  - id: F-69
+    class: revoked_credential
+    fault: vc_status_revoked
+    description: The W3C Bitstring Status List of the credential sets the bit of its index for the purpose revocation.
+    test_purpose: TP-VC-STATUS-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.STATUS.REVOKED}
+  - id: F-70
+    class: invalid_signature
+    fault: vc_status_list_unsigned
+    description: The status list credential carries a signature that does not verify over its payload.
+    test_purpose: TP-VC-STATUS-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: INTEGRITY.STATUS.LIST_SIGNATURE}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -559,6 +573,13 @@ boundary_cases:
     profiles: [family/aas]
     expected: {verdict: inconclusive, reason_code: AAS.VERSION.UNSUPPORTED}
     rationale: An unsupported version is a limit of the engine. A JSON sample names no version, so the XML namespace seeds this case.
+  - id: B-18
+    fault: vc_status_list_stale
+    description: The validFrom of the status list credential and its ttl end before the evaluation time. The bit of the credential is not set.
+    test_purpose: TP-VC-STATUS-001
+    profiles: [family/credentials]
+    expected: {verdict: inconclusive, reason_code: INTEGRITY.STATUS.STALE}
+    rationale: A stale list does not show the current status of the credential, so the engine does not judge it.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:
