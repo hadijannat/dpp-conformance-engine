@@ -976,6 +976,11 @@ does not let those files decide what the test host trusts or discloses:
   `http`, equals no port. An explicit port 0 is never the default port. `--allow-private-host`,
   `--allow-remote-host`, and `dppce authorize` refuse port 0. Role secrets for an origin that no
   authorization names are an input error, not a run without credentials.
+- TLS trust anchors and the TLS client certificate come only from the operator (`--ca-file`,
+  `--client-cert`, `--client-key`). The CA file adds to the default trust store and never replaces
+  it. The client certificate goes only to an origin that a validated authorization names. Every
+  other origin gets a context without it. `--client-cert` without an authorization is an input
+  error. No option turns off certificate or host-name checks, or lowers the TLS 1.2 minimum.
 - A path in the IXIT is resolved and must stay inside the directory of the IXIT file.
 - A URL template of the IXIT is a path under an endpoint that the IXIT names. It cannot select
   a scheme, a host, or a port (section 9.2).

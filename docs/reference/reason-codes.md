@@ -341,6 +341,15 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `TIMESTAMP.TSA.UNKNOWN` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
 | `TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
 | `TIMESTAMP.TSA.UNTRUSTED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here |
+| `TLS.CA_FILE.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CLIENT_CERT.INCOMPLETE` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CLIENT_CERT.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CLIENT_CERT.NO_AUTHORIZATION` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CLIENT_KEY.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CLIENT_KEY.MISMATCH` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CLIENT_KEY.PASSPHRASE` | TLS |  | `dppce.cli._tls_options` | not fixed here |
+| `TLS.CONTEXT.UNUSABLE` | TLS |  | `dppce.infrastructure.transport._tls_context` | not fixed here |
+| `TLS.FILE.UNREADABLE` | TLS |  | `dppce.cli._tls_file` | not fixed here |
 | `TRANSPORT.BODY_ENCODED` | TRANSPORT |  | `dppce.adapters.common.unusable` | inconclusive |
 | `TRANSPORT.BODY_TRUNCATED` | TRANSPORT |  | `dppce.adapters.common.unusable` | inconclusive |
 | `TRANSPORT.DENIED` | TRANSPORT |  | `dppce.adapters.common.no_answer` | inconclusive; fail under a non-default verdict rule |

@@ -15,6 +15,8 @@ Read-only access also needs the permission of the owner.
 | Requests to a loopback or private origin | An entry in the IXIT, and `--allow-private-host ORIGIN` for each origin, such as `http://127.0.0.1:8765` |
 | Requests as a role with a credential | A signed authorization that names the origin, and `--role-secret ROLE=REFERENCE` |
 | Access probes, writes, tampering, fuzzing | A signed authorization that grants that scope |
+| A server certificate from a private CA | `--ca-file` (see [Use a private CA or a client certificate](#use-a-private-ca-or-a-client-certificate)) |
+| A server that asks for a client certificate | A signed authorization that names the origin, `--client-cert`, and `--client-key` |
 
 In this version, writes, tampering, and fuzzing have no executable check. The transport
 refuses them without a matching authorization.
@@ -75,6 +77,40 @@ Each family profile reads only ICS fields: `identifier_scheme`, `signature_forma
 A step that does not fit these declarations is not applicable. It is never a fail.
 Declare `product_category: unknown` in the ICS.
 An example ICS and IXIT for each family are in `profiles/family/examples/`.
+
+## Use a private CA or a client certificate
+
+Some systems use a server certificate from a private certificate authority (CA).
+Some ask the test host for a client certificate (mutual TLS).
+Only you give these files, on the command line of `dppce run`. The ICS and the IXIT cannot name them.
+
+| Option | What it does |
+| --- | --- |
+| `--ca-file PATH` | Adds the PEM certificates in the file to the default trust store. It never replaces that store. |
+| `--client-cert PATH` | The PEM client certificate. Put the client certificate first and any intermediate certificates after it. |
+| `--client-key PATH` | The PEM private key of the client certificate. The key can be encrypted. |
+| `--client-key-passphrase-ref REFERENCE` | The secret reference of the key passphrase: `env:DPPCE_SECRET_<NAME>` or `file:<name>`. |
+
+1. Get the CA certificate and the client certificate from the owner through a channel that you trust.
+2. Make sure that the authorization names each origin that asks for the client certificate.
+3. Put the key passphrase in an environment variable or in a file in the `--secrets` directory.
+4. Give the four options to `dppce run`. Give `--client-cert` and `--client-key` together.
+5. Read the standard error of the run. Compare each SHA-256 value with the value from the owner.
+
+The engine applies these rules:
+
+- The CA file applies to each https origin of the run.
+- The engine sends the client certificate only to an origin that the validated authorization names.
+  Every other origin gets a connection without it.
+- `--client-cert` without a valid authorization is an input error.
+- No option turns off certificate checks or host-name checks. The minimum version stays TLS 1.2.
+- The log line of the CA file gives the SHA-256 of the file. The log line of the client certificate
+  gives the SHA-256 of the certificate in DER form. The run manifest does not record either value.
+- A file that is missing or cannot be used is an input error, with exit code 2. The run then sends no request.
+  The message starts with a reason code, for example `TLS.CLIENT_KEY.PASSPHRASE` or `TLS.CLIENT_KEY.MISMATCH`.
+
+The engine does not support an egress proxy. A proxy would connect to the system instead of the
+engine. The engine could then not check the resolved address of the system.
 
 ## Resolve a did:web DID
 
@@ -156,6 +192,7 @@ The dimension `opening` passes with `OPENING.RECORD.OK` when the record matches 
 - It refuses a host that is not in the allowlist, and a redirect that leaves the scope.
 - It refuses a request outside the authorization: origin, method, role, period, or count.
 - It sends a role credential only to an origin that the authorization names.
+- It sends a TLS client certificate only to an origin that the authorization names.
 - It removes secrets from records and encrypts each record.
 
 ## What stays your responsibility
