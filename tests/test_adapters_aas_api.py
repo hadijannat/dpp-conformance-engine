@@ -261,14 +261,35 @@ def test_a_declared_version_other_than_3_0_is_unsupported(
     server = _server(loopback, overrides)
     outcome = run(_ctx(tmp_path, server.origin))
     _not_done(outcome, ExecutionStatus.UNSUPPORTED, "AAS.API.VERSION_UNSUPPORTED")
-    # Only the probes whose rules do not depend on the version run, and no cursor page.
+    # Only the probes whose rules do not depend on the version run, and no cursor page. The
+    # unknown id comes first: its rule is the strongest, and a small budget must not skip it.
     assert [s["path"] for s in server.seen] == [
         f"{BASE}/description",
+        f"{BASE}/shells/{b64(UNKNOWN_SHELL)}",
         f"{BASE}/shells?limit=1",
         f"{BASE}/shells/{b64(SHELL)}",
         f"{BASE}/shells/{b64(SHELL)}/submodel-refs",
-        f"{BASE}/shells/{b64(UNKNOWN_SHELL)}",
     ]
+
+
+def test_a_small_budget_still_judges_the_unknown_id_under_another_version(
+    tmp_path: Path, loopback: Any
+) -> None:
+    # The description and the unknown id fit into two requests, so the 200 to the unknown id fails.
+    overrides = {
+        f"{BASE}/description": _description(NEWER),
+        f"{BASE}/shells/{b64(UNKNOWN_SHELL)}": (200, b"{}"),
+    }
+    server = _server(loopback, overrides)
+    outcome = run(_ctx(tmp_path, server.origin, max_requests=2))
+    assert (outcome.status, outcome.passed, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        "AAS.API.PROFILE",
+    )
+    # The message names the rule that ran: a 200, not "does not answer 404".
+    assert "answers 200" in outcome.message
+    assert "does not answer 404" not in outcome.message
 
 
 @pytest.mark.parametrize(

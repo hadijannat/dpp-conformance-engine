@@ -287,10 +287,14 @@ def _declared(probes: _Probes, profile: _Profile) -> None:
 def _independent(probes: _Probes, profile: _Profile, ident: str) -> None:
     """Under another declared version, only the rules that every version shares are judged."""
     path = f"/{profile.collection}/{encoded(ident)}"
-    targets = [("list", f"/{profile.collection}?limit=1"), ("item", path)]
+    # The unknown id first: its rule is the strongest, and a small budget must not skip it.
+    targets = [
+        ("unknown_id", f"/{profile.collection}/{encoded(profile.unknown)}"),
+        ("list", f"/{profile.collection}?limit=1"),
+        ("item", path),
+    ]
     if profile.collection == "shells":
         targets.append(("submodel_refs", path + "/submodel-refs"))
-    targets.append(("unknown_id", f"/{profile.collection}/{encoded(profile.unknown)}"))
     for probe, target in targets:
         record = probes.get(probe, target)
         if record.error is not None or record.status != 200:
@@ -407,7 +411,13 @@ def api_profile(ctx: CheckContext) -> CheckOutcome:
             if probes.other_version is None
             else "The rule does not depend on the version that the AAS server declares."
         )
-        return completed(False, "AAS.API.PROFILE", f"{RULES[fail.rule]} {scope}", observed(rule=fail.rule))
+        # Under another version, only a 200 to the unknown id is judged, not every answer but 404.
+        text = (
+            "The GET of an unknown id answers 200."
+            if probes.other_version is not None and fail.rule == "unknown_id_status"
+            else RULES[fail.rule]
+        )
+        return completed(False, "AAS.API.PROFILE", f"{text} {scope}", observed(rule=fail.rule))
     except _BudgetError as stop:
         return completed(False, "AAS.API.BUDGET_EXHAUSTED", str(stop), observed(), no_answer=True)
     if probes.other_version is not None:
