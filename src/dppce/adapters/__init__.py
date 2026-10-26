@@ -6,6 +6,7 @@ because one of the modules below registers it.
 
 from dppce.adapters import (
     aas,
+    aas_api,
     access,
     api,
     carrier,
@@ -25,6 +26,7 @@ from dppce.adapters.capabilities import manifest
 
 __all__ = [
     "aas",
+    "aas_api",
     "access",
     "api",
     "carrier",

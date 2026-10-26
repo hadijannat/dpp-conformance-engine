@@ -34,6 +34,7 @@ IXIT = {
 }
 # The initial registry of the architecture contract, section 8.
 CONTRACT_CHECKS = (
+    "aas.api_profile",
     "aas.dpp_compose",
     "aas.validate",
     "access.restricted_fields",

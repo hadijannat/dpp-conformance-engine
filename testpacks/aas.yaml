@@ -142,3 +142,31 @@ test_purposes:
   - The compared, the different, and the missing identifier sources.
   permitted_modes: *modes
   requires_scope: none
+# Positive GET probes of an AAS server under the AAS Repository read profile of the AAS API 3.0.
+# The IXIT endpoint aas gives the base URL, and the IXIT sample aas_shell_id gives a shell id.
+# With a validated authorization, an origin that it does not name is blocked. Without one, the
+# transport sends only to an origin that the operator confirmed.
+- id: TP-AAS-API-001
+  title: Probe the AAS Repository read profile of the AAS server
+  requirements:
+  - FAM-AAS-API-001
+  profiles:
+  - '*'
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_api
+      op: eq
+      value: true
+  roles:
+  - anonymous
+  stimulus:
+    check: aas.api_profile
+    params:
+      endpoint: aas
+      profile: aas-repository-read
+      id_source: aas_shell_id
+  expected_evidence:
+  - The status of each read probe, and the profile rule that an answer breaks.
+  permitted_modes: *modes
+  requires_scope: read

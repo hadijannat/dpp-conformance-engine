@@ -2,14 +2,19 @@
 # Project-authored example. The origin options equal those of fixtures/reference/ev.ixit.yaml.
 # The reference system serves no AAS file, and no sample file ships here. Put the AAS file of the
 # system under test next to this IXIT as aas.json. Without it, the step is blocked with
-# AAS.SAMPLE.MISSING, which is inconclusive. The check reads the file and sends no request.
+# AAS.SAMPLE.MISSING, which is inconclusive. The file checks read the file and send no request.
+# The endpoint aas is the base URL of the AAS API of the server. The reference system serves a
+# read-only TEST-ONLY AAS repository there. aas_shell_id names one of its shells. The transport
+# policy applies to the endpoint as to any other URL: the operator confirms its origin.
 schema_version: dppce.ixit/1
 endpoints:
   api: https://id.example.test
+  aas: https://id.example.test/api/v3.0
   public_origin: https://id.example.test
   origin_override: http://127.0.0.1:8765
 samples:
   aas_json: aas.json
+  aas_shell_id: https://example.test/TEST-ONLY/aas/dpp-1
 network:
   allowed_hosts:
   - 127.0.0.1

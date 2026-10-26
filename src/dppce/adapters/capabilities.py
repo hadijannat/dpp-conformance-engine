@@ -311,6 +311,17 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "recorded test campaign runs the check on DPP environments of at least two other AAS tools.",
     ),
     (
+        "aas.api_profile",
+        "aas_api",
+        _E,
+        "Send positive GET probes to an AAS server under the read profile SSP-002 of the AAS Repository "
+        "or the Submodel Repository of the AAS API 3.0: the service description, a paged list, the "
+        "declared id, its submodel references, and an unknown id. No write, negative, or fuzz request.",
+        None,
+        "Each seeded fault F-74 and F-75 gives its expected outcome in the method validation. A recorded "
+        "test campaign runs the check against at least two independent AAS server implementations.",
+    ),
+    (
         "manual.review",
         "manual",
         _S,
