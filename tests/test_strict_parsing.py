@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from dppce.adapters.lifecycle import aas_validate
+from dppce.adapters.aas import aas_validate
 from dppce.infrastructure.interfaces import Record, Request
 from tests.support import make_artifact
 from tests.test_url_templates import Canned, context

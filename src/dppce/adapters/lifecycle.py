@@ -16,7 +16,6 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, Field, ValidationError, model_validator
 
-from dppce.adapters.aas import aas_validate  # noqa: F401 - re-export: tests/test_strict_parsing.py imports it here
 from dppce.adapters.common import (
     MISSING,
     blocked,
