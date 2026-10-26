@@ -36,6 +36,7 @@ nav:
       - Install and verify a release: how-to/install-and-verify-a-release.md
       - Operate the engine in a laboratory: how-to/operate-in-a-laboratory.md
       - Add a check and a test pack: how-to/add-a-check-and-a-test-pack.md
+      - Pin an oracle: how-to/pin-an-oracle.md
   - Reference:
       - Command line: reference/cli.md
       - Capability manifest: reference/capabilities.md
