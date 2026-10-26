@@ -26,6 +26,15 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 
 | Code | Area | Check | Produced in | Step verdict |
 | --- | --- | --- | --- | --- |
+| `AAS.API.BUDGET_EXHAUSTED` | AAS |  | `dppce.adapters.aas_api._Probes.get` | not fixed here |
+| `AAS.API.ID_MISSING` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive |
+| `AAS.API.NOT_AUTHORIZED` | AAS |  | `dppce.adapters.aas_api._target` | inconclusive |
+| `AAS.API.NOT_CONCLUSIVE` | AAS |  | `dppce.adapters.aas_api._Probes.document`, `dppce.adapters.aas_api._unknown` | inconclusive |
+| `AAS.API.NO_TARGET` | AAS |  | `dppce.adapters.aas_api._target` | inconclusive |
+| `AAS.API.OK` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | pass |
+| `AAS.API.PARAMS_INVALID` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | inconclusive |
+| `AAS.API.PROFILE` | AAS | `aas.api_profile` | `dppce.adapters.aas_api.api_profile` | fail; inconclusive under a non-default verdict rule |
+| `AAS.API.VERSION_UNSUPPORTED` | AAS |  | `dppce.adapters.aas_api._declared` | not fixed here |
 | `AAS.DEPENDENCY_MISSING` | AAS | `aas.validate` | `dppce.adapters.aas.aas_validate` | inconclusive |
 | `AAS.DPP.ELEMENT_MISSING` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |
 | `AAS.DPP.ID_MISMATCH` | AAS | `aas.dpp_compose` | `dppce.adapters.aas.aas_dpp_compose` | fail; inconclusive under a non-default verdict rule |

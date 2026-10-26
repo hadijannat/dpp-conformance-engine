@@ -354,6 +354,7 @@ Initial registry:
 | `registry.consistency` | `registry.mock` | Registry record agrees with the passport. Passive lookup only. |
 | `aas.validate` | `aas.validate` | Wrap aas-test-engines for a JSON, XML, or AASX sample. A metamodel version that the pinned release does not verify is `unsupported`. Needs the `aas` extra. |
 | `aas.dpp_compose` | `aas.dpp_compose` | Checks the DPP metadata submodel of an AAS environment sample and its relation to the shell, as the pinned IDTA 02099-1 release states. Experimental. |
+| `aas.api_profile` | `aas.api_profile` | Sends positive GET probes to an AAS server through the engine transport under a read profile of the AAS API 3.0. It sends no write, negative, or fuzz request. Experimental. |
 | `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
 | `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
@@ -813,6 +814,74 @@ The check judges each DPP metadata submodel and takes the first row that applies
 Each problem of the sample shape is a fail, never `blocked`. So a system under test cannot reshape
 a fail into a step that is not judged. The check does not judge value formats, value types,
 optional elements, or concept descriptions. An AAS environment is not by itself a DPP.
+
+`aas.api_profile` probes an AAS server with `GET` requests through `ctx.acquirer`. So the transport
+policy, the authorization, and the request budget apply (section 9). It does not use the HTTP
+client of aas-test-engines, and it sends no write, negative, or fuzz request. The profiles follow
+IDTA-01002, Specification of the Asset Administration Shell, Part 2, version 3.0.4. The open
+OpenAPI files of `github.com/admin-shell-io/aas-specs-api` at commit `f7bb302f` were read on
+2026-10-26. No file is vendored. `tests/vectors/idta-01002-api/README.md` names the files.
+
+The parameters are:
+
+- `endpoint`, default `aas`: a key of `IXIT.endpoints`. Its value is the base URL of the API, an
+  http or https URL without a query or a fragment. Another value gives `blocked`,
+  `AAS.API.NO_TARGET`. The origin override of the test rig applies.
+- `profile`, default `aas-repository-read`: `aas-repository-read` (AAS Repository, SSP-002) or
+  `submodel-repository-read` (Submodel Repository, SSP-002).
+- `id_source`, default `aas_shell_id`, and `id_pointer`, default none: the IXIT sample that gives
+  the id of a shell, or of a submodel for `submodel-repository-read`. Without `id_pointer` the
+  sample value is the id. With it, the id is the string at that JSON Pointer of the sample file.
+  No id of 1 to 2000 characters gives `blocked`, `AAS.API.ID_MISSING`.
+- `max_requests`, default 6, from 1 to 16: the most probes that the check sends.
+
+ADR 0011 applies to the endpoint. With a validated authorization, an origin that it does not name
+gives `blocked`, `AAS.API.NOT_AUTHORIZED`, and nothing is sent. Without one, the transport sends
+only to an origin that the operator confirmed. Another origin gives `TRANSPORT.DENIED`.
+
+An id in a path is UTF-8, base64url-encoded, without padding. The probes are, in this order:
+
+1. `GET /description`.
+2. `GET /shells?limit=1`, or `/submodels?limit=1`. If the answer has a cursor, one more page:
+   `limit=1` and the percent-encoded `cursor`.
+3. `GET /shells/{id}` and `GET /shells/{id}/submodel-refs`, or `GET /submodels/{id}`.
+4. `GET` of a fixed unknown id: `/shells/{id}` or `/submodels/{id}`.
+
+A broken rule gives a fail, `AAS.API.PROFILE`. The observation summary names the rule in `rule`,
+a value of a closed set:
+
+- `description_status`, `description_shape`: the description does not answer 200, or is not an
+  object with a non-empty list of profile strings.
+- `profile_not_declared`: no profile is
+  `https://admin-shell.io/aas/API/<major>/<minor>/<specification>/SSP-001` or `SSP-002` of the
+  service specification of the profile. SSP-001 is the full profile, which holds the read profile.
+- `list_status`, `list_shape`: a list page does not answer 200, or is not an object with an object
+  `paging_metadata` and a list `result` of objects with a string `id`. A cursor is a string of 1
+  to 2048 characters.
+- `paging_limit`: a page with `limit=1` holds more than one element.
+- `paging_cursor`: the page of the cursor repeats an id of the first page.
+- `item_status`, `item_shape`: the declared id does not answer 200, or the answer does not have that
+  `id` and the `modelType` of the profile. A shell also needs an object `assetInformation`.
+- `refs_status`, `refs_shape`: the submodel references do not answer 200, or are not a paged result
+  of references with a string `type` and a non-empty list of `keys` with a string `type` and `value`.
+- `unknown_id_status`: the unknown id does not answer 404. A 200 is never accepted.
+
+Other outcomes:
+
+- A profile that the description declares only in another version than 3.0: `unsupported`,
+  `AAS.API.VERSION_UNSUPPORTED`. The check sends no further probe.
+- A transport error or a status from 500 to 599: `unreachable`, as `no_answer` gives. A 401 or 403
+  to the anonymous role: `blocked`, `AAS.API.NOT_CONCLUSIVE`. A body coding or a truncated body:
+  `blocked`, as `unusable` gives.
+- The probes need more requests than `max_requests`: `unreachable`, `AAS.API.BUDGET_EXHAUSTED`.
+  A transport budget that ends gives `TRANSPORT.DENIED`.
+- Every probe passes: `pass`, `AAS.API.OK`. The message names the probes that ran.
+
+A fail ends the probes at once. After a missing answer or a refusal, the other probes still run.
+Only the cursor page needs the first list page. The first missing answer or refusal is the
+outcome only if no probe fails. So a system under test cannot turn a fail into a
+step that is not judged. The check does not judge the body of the 404 answer, the media type, or
+any operation outside the probes above.
 
 `identity.did` takes the required parameter `did` and the optional parameter `source`. The URL
 mapping follows the did:web Method Specification, a W3C CCG report. The commit `ea423c1` of

@@ -1,6 +1,7 @@
 # Synthetic declaration for the profile family/aas.
 # Project-authored example. It makes no normative statement. Replace every value for a real system.
-# Declare each serialization as true or false. An undeclared one makes its requirement inconclusive.
+# Declare each serialization, and the AAS API (aas_api), as true or false. An undeclared one makes
+# its requirement inconclusive.
 schema_version: dppce.ics/1
 sut:
   name: dppce reference DPP system (synthetic)
@@ -13,3 +14,4 @@ features:
   aas_json: true
   aas_xml: false
   aas_aasx: false
+  aas_api: true

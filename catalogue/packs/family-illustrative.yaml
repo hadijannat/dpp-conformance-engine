@@ -427,6 +427,32 @@ requirements:
   - id: default
     tests:
     - TP-AAS-CONSISTENCY-001
+- id: FAM-AAS-API-001
+  title: The AAS server answers the AAS Repository read profile
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The declared AAS server declares the AAS Repository read profile of the AAS API 3.0, pages a
+    shell list, serves the declared shell and its submodel references, and answers 404 for an unknown shell.
+  applicability:
+    all:
+    - *aas
+    - fact: ics.features.aas_api
+      op: eq
+      value: true
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-AAS-API-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. Positive read probes do not show
+      that the server conforms to the whole profile.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-AAS-API-001
 # -- family/credentials: verifiable credentials, VC and UNTP style -----------------------------
 - id: FAM-VC-RESOLVE-001
   title: The credential URL resolves
