@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import http.server
 from collections.abc import Callable
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -40,7 +41,7 @@ from tests.test_review_findings import Passport, integrity_context, pki, token  
 from tests.test_server_errors import CANARY_BODY, FETCHING, _fetching
 from tests.test_status_list_w3c import LIST_URL, Routes, check, credential, key, trust  # noqa: F401 - fixtures
 from tests.test_transport import LOCAL, authorization
-from tests.test_url_templates import run
+from tests.test_url_templates import Canned, context, run
 
 NOW_CLOCK = FrozenClock(datetime(2026, 10, 13, 12, tzinfo=UTC))
 
@@ -127,6 +128,38 @@ def test_a_rate_limited_negotiation_probe_alone_is_no_answer(tmp_path: Path, loo
     _rate_limited(_check(tmp_path, api))
 
 
+# -- persistence: a rate-limited history does not hide a status fail of the item ------------------
+
+
+class _Statuses(Canned):
+    """An acquirer that answers the requests with the given statuses, in order."""
+
+    def __init__(self, *statuses: int) -> None:
+        super().__init__(b"{}")
+        self._statuses = list(statuses)
+
+    def fetch(self, request: Request) -> Record:
+        record = replace(super().fetch(request), status=self._statuses.pop(0))
+        self._records[-1] = record
+        return record
+
+
+@pytest.mark.parametrize("statuses", [(429, 418), (418, 429), (503, 418)])
+def test_a_missing_version_answer_does_not_hide_a_status_fail(
+    statuses: tuple[int, int], tmp_path: Path
+) -> None:
+    outcome = run(context(tmp_path, "persistence.versions", acquirer=_Statuses(*statuses)))
+    assert (outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        False,
+        False,
+        "PERSISTENCE.RESPONSE.STATUS",
+    )
+
+
+def test_a_rate_limited_version_history_alone_is_no_answer(tmp_path: Path) -> None:
+    _rate_limited(run(context(tmp_path, "persistence.versions", acquirer=_Statuses(429, 200))))
+
+
 # -- status list and AAS ---------------------------------------------------------------------------
 
 
@@ -202,7 +235,10 @@ def test_a_second_429_is_not_retried_again(loopback: Any) -> None:
     assert waits == [1.0]
 
 
-@pytest.mark.parametrize("value", ["6", "3600", "Wed, 21 Oct 2026 07:28:00 GMT", "-1", ""])
+# The 5000-digit values exceed the integer conversion limit of Python: no exception, no wait.
+@pytest.mark.parametrize(
+    "value", ["6", "3600", "Wed, 21 Oct 2026 07:28:00 GMT", "-1", "", "9" * 5000, "0" * 4999 + "9"]
+)
 def test_a_retry_after_beyond_the_cap_or_not_a_number_is_not_waited_for(value: str, loopback: Any) -> None:
     server = loopback(_answers((429, {"Retry-After": value}), (200, {})))
     waits: list[float] = []

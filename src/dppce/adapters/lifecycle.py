@@ -22,6 +22,8 @@ from dppce.adapters.common import (
     completed,
     fetch_once,
     json_object,
+    no_answer,
+    no_reply,
     not_200,
     resource_url,
     same_json,
@@ -114,11 +116,17 @@ def versions(ctx: CheckContext) -> CheckOutcome:
     if isinstance(item_url, CheckOutcome):
         return item_url
     history, item = fetch_once(ctx, versions_url), fetch_once(ctx, item_url)
+    # A missing answer is set aside, so it cannot hide a problem that the other answer proves.
+    missing = [record for record in (history, item) if no_reply(record)]
     for record in (history, item):
         if (
-            problem := unusable(ctx, record) or not_200(ctx, "PERSISTENCE", record, [history, item])
-        ) is not None:
+            not no_reply(record)
+            and (problem := unusable(ctx, record) or not_200(ctx, "PERSISTENCE", record, [history, item]))
+            is not None
+        ):
             return problem
+    if missing:
+        return no_answer(ctx, missing[0])
     try:
         listing = parse_strict(history.body)
     except CanonicalizationError:

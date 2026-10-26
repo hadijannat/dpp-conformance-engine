@@ -158,9 +158,8 @@ def unusable(
     A status from 500 to 599 is no answer, like a transport error. A check that judges such an
     answer itself passes ``server_error_is_no_answer=False``. A 429 is always no answer.
     """
-    if record.error is not None or record.status == RATE_LIMITED:
-        return no_answer(ctx, record)
-    if server_error_is_no_answer and record.status in SERVER_ERRORS:
+    judged_here = not server_error_is_no_answer and record.error is None and record.status in SERVER_ERRORS
+    if no_reply(record) and not judged_here:
         return no_answer(ctx, record)
     return body_problem(record)
 

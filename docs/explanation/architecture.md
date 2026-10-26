@@ -1257,10 +1257,15 @@ A rate-limited answer counts the same way (P2-31). An answer with the status 429
 does not judge its body. `access.restricted_fields` still searches that body for a leak.
 
 The shared helper `dppce.adapters.common.no_reply` decides what is no answer: a transport error,
-a 429, or a status from 500 to 599. The helper `unusable` and every check that judges a status
-itself use it. So every check that fetches applies the rule in the same way. A check that sends
-several requests sets a missing answer aside, and still judges the other answers. So a missing
-answer cannot hide a fail that another answer proves.
+a 429, or a status from 500 to 599. The helper `unusable` calls it. `integrity.jws` tells
+`unusable` to leave a server error to its own rule. Under another declared version,
+`aas.api_profile` judges only the answers with the status 200.
+
+These checks set a missing answer aside and still judge the other answers: `identifier.negotiation`,
+`aas.api_profile`, `integrity.status_list`, `persistence.versions`, and the channels of
+`access.restricted_fields`. In them, a missing answer cannot hide a fail that another answer proves.
+`resolver.conformance`, `registry.consistency`, and `identifier.consistency` stop at the first
+missing answer, as they do for a server error.
 
 The transport waits for `Retry-After` once per fetch, and only for these conditions:
 

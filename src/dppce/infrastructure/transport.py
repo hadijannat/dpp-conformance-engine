@@ -348,9 +348,12 @@ class PolicyTransport:
         if status != 429 or method not in SAFE_METHODS:
             return None
         value = next((v.strip() for k, v in headers if k.lower() == "retry-after"), "")
-        if not (value.isascii() and value.isdigit()):
+        # The system under test sets this header. A long value would make ``int`` raise, so a
+        # value with more digits than the cap has is above the cap and is not converted.
+        digits = value.lstrip("0") or "0"
+        if not (value.isascii() and value.isdigit()) or len(digits) > len(str(RETRY_AFTER_CAP_SECONDS)):
             return None
-        delay = int(value)
+        delay = int(digits)
         if (
             delay > RETRY_AFTER_CAP_SECONDS
             or delay >= deadline - self._monotonic()
