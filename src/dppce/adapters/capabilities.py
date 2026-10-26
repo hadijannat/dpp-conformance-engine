@@ -89,6 +89,18 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "independent GS1 resolver.",
     ),
     (
+        "identifier.negotiation",
+        "negotiation",
+        _E,
+        "Send five fixed GET requests to the carrier URL with different Accept values. Check the "
+        "status, the media type against the Accept value, the weights, Vary, and the shape of a JSON "
+        "or HTML body. An unsupported type gets 406 or the declared default. Accept-Language is not sent.",
+        None,
+        "Tested against at least two independent servers that negotiate content, in a recorded test "
+        "campaign. A person reviews the rules against RFC 9110, section 12. The check also judges "
+        "Accept-Language once a later package sends it.",
+    ),
+    (
         "resolver.linkset",
         "resolver",
         _E,

@@ -93,3 +93,20 @@ test_purposes:
   - The version entries and the digest comparison.
   permitted_modes: *modes
   severity: minor
+- id: TP-WEB-NEGOTIATION-001
+  title: Probe the content negotiation of the passport URL
+  requirements:
+  - FAM-WEB-NEGOTIATION-001
+  profiles:
+  - '*'
+  applicability: *web
+  roles:
+  - anonymous
+  stimulus:
+    check: identifier.negotiation
+    params:
+      unsupported_answer: default
+  expected_evidence:
+  - Five exchanges that differ only in the Accept header, with status, media type, and Vary.
+  permitted_modes: *modes
+  severity: minor

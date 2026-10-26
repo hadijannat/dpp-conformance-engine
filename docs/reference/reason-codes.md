@@ -80,7 +80,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `CARRIER.QR.DEPENDENCY_MISSING` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `CARRIER.QR.NOT_DECODED` | CARRIER |  | `dppce.adapters.common.decode_qr` | fail; inconclusive under a non-default verdict rule |
 | `CARRIER.QR.OK` | CARRIER | `carrier.qr_decode` | `dppce.adapters.carrier.qr_decode` | pass |
-| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.equivalence`, `identifier.granularity`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.resolver._carrier` | inconclusive |
+| `CARRIER.SAMPLE.MISSING` | CARRIER | `identifier.consistency`, `identifier.equivalence`, `identifier.granularity`, `identifier.negotiation`, `identifier.parse`, `identifier.resolve` | `dppce.adapters.common.carrier_identifier`, `dppce.adapters.common.decode_qr`, `dppce.adapters.gs1.equivalence`, `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency`, `dppce.adapters.identifier.granularity`, `dppce.adapters.identifier.parse`, `dppce.adapters.identifier.resolve`, `dppce.adapters.negotiation.negotiation`, `dppce.adapters.resolver._carrier` | inconclusive |
 | `CARRIER.SAMPLE.TOO_LARGE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive |
 | `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here |
@@ -244,6 +244,14 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `MODE.NOT_APPROVED` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
 | `MODE.NOT_ILLUSTRATIVE` | MODE |  | `dppce.orchestrator.plan.mode_exclusion` | not fixed here |
 | `MODE.NOT_PERMITTED` | MODE |  | `dppce.orchestrator.plan.build_plan` | not fixed here |
+| `NEGOTIATION.BODY` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | fail; inconclusive under a non-default verdict rule |
+| `NEGOTIATION.MEDIA_TYPE` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
+| `NEGOTIATION.NO_TARGET` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | inconclusive |
+| `NEGOTIATION.OK` | NEGOTIATION | `identifier.negotiation` | `dppce.adapters.negotiation.negotiation` | pass |
+| `NEGOTIATION.QUALITY` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
+| `NEGOTIATION.STATUS` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
+| `NEGOTIATION.UNSUPPORTED` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
+| `NEGOTIATION.VARY.MISSING` | NEGOTIATION |  | `dppce.adapters.negotiation._head_failure` | not fixed here |
 | `OPEN.OUTPUT.EXISTS` | OPEN |  | `dppce.cli.cmd_open` | not fixed here |
 | `OPEN.RECORD.NOT_IN_REPORT` | OPEN |  | `dppce.evidence.disclosure.open_record` | not fixed here |
 | `OPEN.RECORD.UNKNOWN` | OPEN |  | `dppce.cli.cmd_open` | not fixed here |

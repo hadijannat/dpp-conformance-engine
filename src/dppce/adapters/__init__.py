@@ -17,6 +17,7 @@ from dppce.adapters import (
     jose,
     lifecycle,
     manual,
+    negotiation,
     resolver,
     status_list,
 )
@@ -36,6 +37,7 @@ __all__ = [
     "lifecycle",
     "manifest",
     "manual",
+    "negotiation",
     "resolver",
     "status_list",
 ]

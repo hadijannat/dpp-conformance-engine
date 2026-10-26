@@ -105,6 +105,25 @@ requirements:
   - id: default
     tests:
     - TP-WEB-VERSIONS-001
+- id: FAM-WEB-NEGOTIATION-001
+  title: The passport URL negotiates its content by Accept
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: recommended
+  paraphrase: The passport URL answers by the Accept header with a media type that fits the body. A cache key lists Accept.
+  applicability: *web
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-WEB-NEGOTIATION-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-WEB-NEGOTIATION-001
 # -- family/gs1-resolver: a GS1 Digital Link resolver ------------------------------------------
 - id: FAM-GS1-SYNTAX-001
   title: The item identifier has GS1 Digital Link syntax
