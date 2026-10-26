@@ -391,13 +391,19 @@ def test_a_list_without_a_securing_mechanism_fails_and_a_data_integrity_list_is_
         check(tmp_path, Routes(credential(key), {LIST_URL: (200, plain)}), trust),
         "INTEGRITY.STATUS.LIST_SIGNATURE",
     )
-    # The DID of the verificationMethod is the issuer of a pinned passport key.
-    pinned = with_keys(trust, bundle({"TEST-ONLY-di-key": jwk(p256())}, issuer="did:example:TEST"))
-    secured = _json({**json.loads(plain), "proof": PROOF})
+    # The DID of the verificationMethod is the issuer of the credential, of the list, and of a
+    # pinned passport key. Only then is the Data Integrity form a limit of the engine.
+    did_issuer = "did:example:TEST"
+    secured = _json({**json.loads(list_payload(issuer=did_issuer)), "proof": PROOF})
     unsupported(
-        check(tmp_path, Routes(credential(key), {LIST_URL: (200, secured)}), pinned),
+        check(
+            tmp_path,
+            Routes(credential(key, issuer=did_issuer), {LIST_URL: (200, secured)}),
+            bundle({KID: jwk(key)}, issuer=did_issuer),
+        ),
         "INTEGRITY.STATUS.LIST_FORMAT",
     )
+    pinned = with_keys(trust, bundle({"TEST-ONLY-di-key": jwk(p256())}, issuer=did_issuer))
     # A proof member of another shape is no securing mechanism that the engine knows of: a fail.
     # An unsigned list cannot become a limit by a proof of any type string.
     revoked = json.loads(list_payload(encoded_list=encoded((INDEX,))))
@@ -419,8 +425,18 @@ def test_a_list_without_a_securing_mechanism_fails_and_a_data_integrity_list_is_
         ({}, "did:example:TEST", "did:example:TEST"),
         ({"issuer": "did:example:TEST"}, "did:example:TEST#key-1", "did:example:TEST"),
         ({"id": LIST_URL + "/other"}, "did:example:TEST#key-1", "did:example:TEST"),
+        # The proof names a pinned DID, but the credential and the list name another issuer.
+        ({}, "did:example:TEST#key-1", "did:example:TEST"),
     ],
-    ids=["unpinned-did", "pinned-other-issuer", "not-a-did", "no-fragment", "list-issuer", "list-id"],
+    ids=[
+        "unpinned-did",
+        "pinned-other-issuer",
+        "not-a-did",
+        "no-fragment",
+        "list-issuer",
+        "list-id",
+        "proof-did-not-the-issuer",
+    ],
 )
 def test_a_data_integrity_proof_not_tied_to_the_trust_bundle_fails(
     tmp_path: Path,

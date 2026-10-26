@@ -252,11 +252,16 @@ def _payload_id(body: bytes) -> object:
     return document.get("id") if isinstance(document, dict) else None
 
 
-def _pinned_method(trust: TrustBundle, method: str) -> bool:
-    """A DID URL whose DID is the issuer of a pinned passport key."""
+def _pinned_method(trust: TrustBundle, method: str, issuer: object) -> bool:
+    """A DID URL whose DID is the credential issuer and the issuer of a pinned passport key.
+
+    A pinned DID of another issuer is no tie: it would let a made-up proof make a limit.
+    """
     did = method.partition("#")[0]
-    return bool(_DID_URL.fullmatch(method)) and any(
-        k.issuer == did and "passport" in k.purposes for k in trust.keys
+    return (
+        bool(_DID_URL.fullmatch(method))
+        and did == issuer
+        and any(k.issuer == did and "passport" in k.purposes for k in trust.keys)
     )
 
 
@@ -280,7 +285,7 @@ def _proof_secured(body: bytes, url: str, issuer: object, trust: TrustBundle) ->
         isinstance(p, dict)
         and p.get("type") == "DataIntegrityProof"
         and all(isinstance(p.get(member), str) for member in _PROOF_MEMBERS)
-        and _pinned_method(trust, p["verificationMethod"])
+        and _pinned_method(trust, p["verificationMethod"], issuer)
         for p in proofs
     )
 

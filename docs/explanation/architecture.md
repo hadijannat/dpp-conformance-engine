@@ -921,8 +921,8 @@ The check takes the first rule that applies:
    proofs. A well-formed proof has the `type` `DataIntegrityProof` and the string members
    `cryptosuite`, `proofPurpose`, `verificationMethod`, and `proofValue`. The list must name the
    issuer of the credential. Its `id` must be the `statusListCredential` URL. Each
-   `verificationMethod` must be a DID URL whose DID is the issuer of a pinned `passport` key. Any
-   other list goes to row 10.
+   `verificationMethod` must be a DID URL whose DID is the issuer of the credential. That DID must
+   also be the issuer of a pinned `passport` key. Any other list goes to row 10.
 10. The list credential: the rows of `integrity.jose` under `vc-jose` with the same key source. A
     refused signature, algorithm, header, or JWS shape, or a body that is not secured, gives
     `INTEGRITY.STATUS.LIST_SIGNATURE`. An untrusted key, a key that is not valid, a key of another
