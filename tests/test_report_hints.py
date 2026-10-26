@@ -192,6 +192,30 @@ def test_a_failed_step_shows_redacted_observed_fields_and_never_a_payload_value(
         assert shown in section, shown
     # A field outside the allowlist is named, never shown with its value.
     assert "Other recorded fields, values not shown: key, reason, value" in section
+    # The access checks record field paths, channel names, and a status code only.
+    access = {
+        "policy": SENTINEL,
+        "role": SENTINEL,
+        "leaks": {"fetch": ["/serial"]},
+        "entitlement_missing": ["/repairManual"],
+        "channels_probed": ["fetch"],
+        "fetch_status": 200,
+    }
+    page = render(_envelope(_step("completed", "fail", "ACCESS.LEAK.FETCH", access)))
+    assert SENTINEL not in page
+    section = page.split('id="failed"', 1)[1]
+    for shown in ("fetch /serial", "/repairManual", "fetch status: 200"):
+        assert shown in section, shown
+    assert "Other recorded fields, values not shown: policy, role" in section
+
+
+def test_an_engine_limit_of_the_timestamp_verifier_reads_as_an_engine_limit() -> None:
+    for code in (
+        "TIMESTAMP.CMS.UNSUPPORTED",
+        "TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT",
+        "TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION",
+    ):
+        assert HINTS[code].startswith("Engine limit: "), code
 
 
 def test_every_hint_and_observed_value_is_escaped() -> None:

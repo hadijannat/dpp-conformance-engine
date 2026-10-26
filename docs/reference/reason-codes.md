@@ -364,7 +364,7 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `STEP.NOT_APPLICABLE` | STEP |  | `dppce.orchestrator.plan.build_plan` | not fixed here | None: the step does not apply to the declared system. |
 | `TIMESTAMP.CMS.SIGNATURE_INVALID` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.CMS.SIGNING_CERT` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
-| `TIMESTAMP.CMS.UNSUPPORTED` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.CMS.UNSUPPORTED` | TIMESTAMP |  | `dppce.evidence.timestamp._check_cms`, `dppce.evidence.timestamp.verify_token` | not fixed here | Engine limit: the timestamp token uses a form that this engine does not verify. |
 | `TIMESTAMP.EVIDENCE.TOO_MANY` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.verifier.verify._timestamps` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.IMPRINT.ALGORITHM` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.IMPRINT.MISMATCH` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
@@ -378,13 +378,13 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `TIMESTAMP.TOKEN.DUPLICATE` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.TOKEN.MALFORMED` | TIMESTAMP |  | `dppce.cli.cmd_timestamp_attach`, `dppce.evidence.timestamp._malformed`, `dppce.verifier.verify._timestamps` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.TOKEN.TOO_LARGE` | TIMESTAMP |  | `dppce.evidence.timestamp.parse_token`, `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
-| `TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Engine limit: the timestamp token has an extension that this engine does not verify. |
 | `TIMESTAMP.TSA.EKU` | TIMESTAMP |  | `dppce.evidence.timestamp._check_tsa` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.TSA.EXPIRED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.TSA.KEY_USAGE` | TIMESTAMP |  | `dppce.evidence.timestamp._check_tsa` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.TSA.REVOKED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TIMESTAMP.TSA.UNKNOWN` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
-| `TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
+| `TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Engine limit: the certificate of the time-stamping authority has a constraint that this engine does not check. |
 | `TIMESTAMP.TSA.UNTRUSTED` | TIMESTAMP |  | `dppce.evidence.timestamp.verify_token` | not fixed here | Get a valid timestamp token for the report from a trusted time-stamping authority. |
 | `TLS.CA_FILE.INVALID` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |
 | `TLS.CLIENT_CERT.INCOMPLETE` | TLS |  | `dppce.cli._tls_options` | not fixed here | Correct the TLS file or option that the message names, and run the command again. |

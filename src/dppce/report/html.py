@@ -198,10 +198,14 @@ def _manual_row(t: TestResult) -> tuple[str, ...]:
 # words. Any other field is named without its value: it can hold text that the system chose.
 _SHOWN_FIELDS = frozenset(
     {
+        "channels_probed",
         "compared",
         "different",
         "document",
+        "entitlement_missing",
+        "fetch_status",
         "findings",
+        "leaks",
         "https",
         "media_type",
         "missing",

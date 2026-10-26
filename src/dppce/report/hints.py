@@ -505,7 +505,6 @@ HINTS: Final[dict[str, str]] = {
         (
             "TIMESTAMP.CMS.SIGNATURE_INVALID",
             "TIMESTAMP.CMS.SIGNING_CERT",
-            "TIMESTAMP.CMS.UNSUPPORTED",
             "TIMESTAMP.EVIDENCE.TOO_MANY",
             "TIMESTAMP.IMPRINT.ALGORITHM",
             "TIMESTAMP.IMPRINT.MISMATCH",
@@ -518,17 +517,20 @@ HINTS: Final[dict[str, str]] = {
             "TIMESTAMP.TOKEN.DUPLICATE",
             "TIMESTAMP.TOKEN.MALFORMED",
             "TIMESTAMP.TOKEN.TOO_LARGE",
-            "TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION",
             "TIMESTAMP.TSA.EKU",
             "TIMESTAMP.TSA.EXPIRED",
             "TIMESTAMP.TSA.KEY_USAGE",
             "TIMESTAMP.TSA.REVOKED",
             "TIMESTAMP.TSA.UNKNOWN",
-            "TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT",
             "TIMESTAMP.TSA.UNTRUSTED",
         ),
         _TIMESTAMP,
     ),
+    "TIMESTAMP.CMS.UNSUPPORTED": _LIMIT + "the timestamp token uses a form that this engine does not verify.",
+    "TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION": _LIMIT
+    + "the timestamp token has an extension that this engine does not verify.",
+    "TIMESTAMP.TSA.UNSUPPORTED_CONSTRAINT": _LIMIT
+    + "the certificate of the time-stamping authority has a constraint that this engine does not check.",
     "TIMESTAMP.OK": "None: the timestamp token verifies.",
     # --- TLS options ----------------------------------------------------------------------------
     **dict.fromkeys(
