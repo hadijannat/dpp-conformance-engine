@@ -139,13 +139,16 @@ PASSPHRASE_ENV = "DPPCE_SECRET_TEST_ONLY_CLIENT_KEY"
 Peers = list[str | None]
 
 
-def _client_ca_server(pki: dict[str, Path], verify: ssl.VerifyMode) -> tuple[LoopbackServer, Peers]:
+def _client_ca_server(
+    pki: dict[str, Path], verify: ssl.VerifyMode, tls12_only: bool = True
+) -> tuple[LoopbackServer, Peers]:
     """A server that asks for a client certificate of the lab CA. It records the subject it got."""
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.minimum_version = ssl.TLSVersion.TLSv1_2
-    # TLS 1.2: the server refuses a missing client certificate inside the handshake, so the client
-    # sees "tls" every time. With TLS 1.3 the refusal arrives later, at the first read.
-    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    # TLS 1.2: the server refuses a missing client certificate inside the handshake. With TLS 1.3
+    # the refusal arrives after the handshake, while the client writes or reads the request.
+    if tls12_only:
+        context.maximum_version = ssl.TLSVersion.TLSv1_2
     context.load_cert_chain(pki["chain"], pki["key"])
     context.load_verify_locations(pki["ca"])
     context.verify_mode = verify
@@ -318,6 +321,18 @@ def test_a_server_that_requires_a_client_certificate_refuses_a_transport_without
     assert (record.error, record.status, server.seen, peers) == ("tls", None, [], [])
 
 
+def test_a_tls_1_3_refusal_of_a_missing_client_certificate_is_tls_every_time(pki: dict[str, Path]) -> None:
+    # The alert can arrive while the client still writes the request. The race must not turn the
+    # refusal into a "connect" error, which the transport would send again.
+    server, peers = _client_ca_server(pki, ssl.CERT_REQUIRED, tls12_only=False)
+    try:
+        transport = _transport(ca_file=pki["ca"], authorization=_grant(server.origin))
+        errors = {transport.fetch(Request("GET", f"{server.origin}/dpp/1")).error for _ in range(20)}
+        assert (errors, server.seen, peers) == ({"tls"}, [], [])
+    finally:
+        server.close()
+
+
 def test_a_server_that_requires_a_client_certificate_accepts_the_configured_one(
     mutual: tuple[LoopbackServer, Peers], pki: dict[str, Path]
 ) -> None:
@@ -473,6 +488,15 @@ TLS_ERRORS: list[tuple[str, list[str], str]] = [
      "TLS.CLIENT_KEY.PASSPHRASE"),
     ("wrong passphrase", ["--client-cert", "{client}", "--client-key", "{client_key}",
                           "--client-key-passphrase-ref", "env:{wrong_env}"], "TLS.CLIENT_KEY.PASSPHRASE"),
+    ("passphrase reference that is not set", ["--client-cert", "{client}", "--client-key", "{client_key}",
+                                              "--client-key-passphrase-ref", "env:{unset_env}"],
+     "TLS.CLIENT_KEY.PASSPHRASE"),
+    ("unencrypted key with passphrase", ["--client-cert", "{client}", "--client-key", "{plain_key}",
+                                         "--client-key-passphrase-ref", "env:{env}"],
+     "TLS.CLIENT_KEY.PASSPHRASE"),
+    ("key that is not a key, with passphrase", ["--client-cert", "{client}", "--client-key", "{client}",
+                                                "--client-key-passphrase-ref", "env:{env}"],
+     "TLS.CLIENT_KEY.INVALID"),
     ("key of another certificate", ["--client-cert", "{client}", "--client-key", "{key}"],
      "TLS.CLIENT_KEY.MISMATCH"),
     ("certificate that is not PEM", ["--client-cert", "{key}", "--client-key", "{key}"],
@@ -481,12 +505,14 @@ TLS_ERRORS: list[tuple[str, list[str], str]] = [
 
 
 WRONG_ENV = "DPPCE_SECRET_TEST_ONLY_WRONG"
+UNSET_ENV = "DPPCE_SECRET_TEST_ONLY_UNSET"
 
 
 @pytest.fixture
 def passphrases(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(PASSPHRASE_ENV, PASSPHRASE)
     monkeypatch.setenv(WRONG_ENV, "TEST-ONLY-wrong-passphrase")
+    monkeypatch.delenv(UNSET_ENV, raising=False)
 
 
 @pytest.mark.usefixtures("passphrases")
@@ -502,7 +528,8 @@ def test_an_unusable_tls_option_is_an_input_error_before_any_request(
     server, _ = mutual
     names = {
         "tmp": str(tmp_path), "key": str(pki["key"]), "client": str(pki["client"]),
-        "client_key": str(pki["client-key"]), "env": PASSPHRASE_ENV, "wrong_env": WRONG_ENV,
+        "client_key": str(pki["client-key"]), "plain_key": str(pki["client-plain-key"]),
+        "env": PASSPHRASE_ENV, "wrong_env": WRONG_ENV, "unset_env": UNSET_ENV,
     }  # fmt: skip
     exit_code, err = _run(tmp_path, server.origin, capsys, *(o.format(**names) for o in options))
     assert (exit_code, err.startswith(f"error: {code}: ")) == (cli.EXIT_USAGE, True), err

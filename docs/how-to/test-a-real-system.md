@@ -104,6 +104,9 @@ The engine applies these rules:
   Every other origin gets a connection without it.
 - `--client-cert` without a valid authorization is an input error.
 - No option turns off certificate checks or host-name checks. The minimum version stays TLS 1.2.
+- A server that refuses the run for a missing client certificate gives the transport error `tls`.
+  The engine does not send that request again. With TLS 1.3, a server can reset the connection before
+  the engine reads the refusal. The error is then `connect`.
 - The log line of the CA file gives the SHA-256 of the file. The log line of the client certificate
   gives the SHA-256 of the certificate in DER form. The run manifest does not record either value.
 - A file that is missing or cannot be used is an input error, with exit code 2. The run then sends no request.

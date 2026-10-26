@@ -546,6 +546,14 @@ def _certificates(path: Path, flag: str, code: str) -> tuple[bytes, list[x509.Ce
         raise UsageError(f"{code}: {flag} {path} holds no PEM certificate") from exc
 
 
+def _loads_without_password(data: bytes) -> bool:
+    try:
+        serialization.load_pem_private_key(data, None)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
 def _tls_options(args: argparse.Namespace, authorized: set[str]) -> tuple[Path | None, ClientIdentity | None]:
     """Check the TLS files of the operator and log their SHA-256. The ICS and the IXIT name none of them.
 
@@ -570,17 +578,23 @@ def _tls_options(args: argparse.Namespace, authorized: set[str]) -> tuple[Path |
     _, chain = _certificates(args.client_cert, "--client-cert", "TLS.CLIENT_CERT.INVALID")
     data = _tls_file(args.client_key, "--client-key")
     ref = args.client_key_passphrase_ref
-    passphrase = None if ref is None else resolve_secret(ref, secrets_dir=args.secrets)
+    try:
+        passphrase = None if ref is None else resolve_secret(ref, secrets_dir=args.secrets)
+    except KeyError_ as exc:
+        # The text names the variable or the file of the reference, never a secret value.
+        raise UsageError(
+            f"TLS.CLIENT_KEY.PASSPHRASE: --client-key-passphrase-ref {ref} cannot be resolved: {exc}"
+        ) from exc
     # Checked here, so that each cause has its own message. The transport loads the files again.
     try:
         key = serialization.load_pem_private_key(data, None if passphrase is None else passphrase.encode())
     except (TypeError, ValueError) as exc:
         # The message of the library is not shown: it adds nothing to these messages.
         if b"ENCRYPTED" not in data:
-            reason = "is not an encrypted PEM private key; give no --client-key-passphrase-ref"
-            code = "TLS.CLIENT_KEY.PASSPHRASE"
-            if passphrase is None:
-                reason, code = "is not a PEM private key", "TLS.CLIENT_KEY.INVALID"
+            reason, code = "is not a PEM private key", "TLS.CLIENT_KEY.INVALID"
+            if passphrase is not None and _loads_without_password(data):
+                reason = "is not an encrypted PEM private key; give no --client-key-passphrase-ref"
+                code = "TLS.CLIENT_KEY.PASSPHRASE"
         elif passphrase is None:
             reason, code = "is encrypted; give --client-key-passphrase-ref", "TLS.CLIENT_KEY.PASSPHRASE"
         else:

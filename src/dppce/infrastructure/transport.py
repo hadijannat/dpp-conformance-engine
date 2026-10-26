@@ -199,6 +199,19 @@ def _tls_context(ca_file: Path | None = None, client: ClientIdentity | None = No
     return context
 
 
+def _pending_alert(sock: socket.socket | None) -> bool:
+    """True if the next read of a broken TLS connection gives a TLS alert."""
+    if not isinstance(sock, ssl.SSLSocket):
+        return False
+    try:
+        sock.recv(1)
+    except ssl.SSLError:
+        return True
+    except OSError:
+        return False
+    return False
+
+
 class _PinnedHTTPSConnection(http.client.HTTPSConnection):
     def __init__(
         self, host: str, port: int, address: str, timeout: float, context: ssl.SSLContext | None = None
@@ -352,11 +365,13 @@ class PolicyTransport:
                 sock.shutdown(socket.SHUT_RDWR)
 
         timer: threading.Timer | None = None
+        sock: socket.socket | None = None
         try:
             connection.connect()
             # Keep the socket itself. http.client forgets it when a response says that the
             # connection closes, and the body is still being read at that time.
-            timer = threading.Timer(left, expire, (connection.sock,))
+            sock = connection.sock
+            timer = threading.Timer(left, expire, (sock,))
             timer.daemon = True
             timer.start()
             connection.request(method, target.path, body=body, headers=dict(headers))
@@ -374,8 +389,14 @@ class PolicyTransport:
             return "timeout" if expired.is_set() else "tls"
         except http.client.HTTPException:
             return "timeout" if expired.is_set() else "protocol"
-        except OSError:
-            return "timeout" if expired.is_set() else "connect"
+        except OSError as exc:
+            if expired.is_set():
+                return "timeout"
+            # With TLS 1.3 a server refuses a client certificate after the handshake. Its alert can
+            # arrive while the request is written. The alert is still unread: read it, so that the
+            # refusal is "tls" and not a "connect" error that the fetch sends again.
+            broken = isinstance(exc, BrokenPipeError | ConnectionResetError)
+            return "tls" if broken and _pending_alert(sock) else "connect"
         except (UnicodeError, ValueError):
             # A transport failure is data. It is never raised to the check.
             return "protocol"
