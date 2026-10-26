@@ -18,6 +18,7 @@ from dppce.adapters import (
     lifecycle,
     manual,
     resolver,
+    status_list,
 )
 from dppce.adapters.capabilities import manifest
 
@@ -36,4 +37,5 @@ __all__ = [
     "manifest",
     "manual",
     "resolver",
+    "status_list",
 ]

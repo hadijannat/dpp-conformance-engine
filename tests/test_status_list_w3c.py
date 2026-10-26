@@ -22,11 +22,11 @@ import pytest
 import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from dppce.adapters.status_list import StatusListParams
 from validation.rig import FIXTURES
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce.adapters.jose import JoseParams
+from dppce.adapters.status_list import StatusListParams
 from dppce.evidence.status import MAX_BITSTRING_BYTES, MIN_BITS
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.infrastructure.reference import credentials as reference_credentials
@@ -808,6 +808,7 @@ def test_a_live_did_document_of_the_reference_system_gives_the_key_through_the_t
     with ReferenceServer(FIXTURES) as server:
         endpoints = {
             "api": server.origin,
+            "registry": server.origin,
             "public_origin": "https://id.example.test",
             "origin_override": server.origin,
         }

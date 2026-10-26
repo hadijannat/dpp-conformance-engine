@@ -610,7 +610,10 @@ def test_the_signed_resource_must_answer_200(tmp_path: Path, trust: TrustBundle)
     "params",
     [
         {"profile": "jwt"},
-        {"key_source": "did"},
+        # P2-11 made "did" a key source. The set stays closed.
+        {"key_source": "jwks"},
+        {"did_sample": "did_document"},
+        {"key_source": "did", "did_sample": ""},
         {"source": "resource"},
         {"algorithms": []},
         {"algorithms": ["HS256"]},

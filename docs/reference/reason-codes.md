@@ -154,22 +154,22 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `INTEGRITY.FORMAT.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.ISSUER.UNTRUSTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.JOSE.ALGORITHM` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.verify` | not fixed here |
-| `INTEGRITY.JOSE.CLAIMS` | INTEGRITY |  | `dppce.evidence.jose_profiles._moment`, `dppce.evidence.jose_profiles._seconds`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
-| `INTEGRITY.JOSE.EXPIRED` | INTEGRITY |  | `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.CLAIMS` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles._moment`, `dppce.evidence.jose_profiles._seconds`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.EXPIRED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
 | `INTEGRITY.JOSE.HEADER` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
-| `INTEGRITY.JOSE.ISSUER_MISMATCH` | INTEGRITY |  | `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
-| `INTEGRITY.JOSE.ISSUER_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.jose._pinned_key` | not fixed here |
-| `INTEGRITY.JOSE.KEY_NOT_VALID` | INTEGRITY |  | `dppce.adapters.jose._pinned_key` | not fixed here |
+| `INTEGRITY.JOSE.ISSUER_MISMATCH` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.ISSUER_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.jose._pinned_key`, `dppce.adapters.jose._untrusted`, `dppce.adapters.status_list` | not fixed here |
+| `INTEGRITY.JOSE.KEY_NOT_VALID` | INTEGRITY |  | `dppce.adapters.jose._valid`, `dppce.adapters.status_list` | not fixed here |
 | `INTEGRITY.JOSE.MALFORMED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles._decode`, `dppce.evidence.jose_profiles._signature`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.parse` | not fixed here |
-| `INTEGRITY.JOSE.NOT_AVAILABLE` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here |
-| `INTEGRITY.JOSE.NOT_YET_VALID` | INTEGRITY |  | `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
+| `INTEGRITY.JOSE.NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.jose.credential_gate` | not fixed here |
+| `INTEGRITY.JOSE.NOT_YET_VALID` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.evidence.jose_profiles.credential_issuer` | not fixed here |
 | `INTEGRITY.JOSE.OK` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | not fixed here |
 | `INTEGRITY.JOSE.PARAMS` | INTEGRITY | `integrity.jose` | `dppce.adapters.jose.jose_check` | inconclusive |
 | `INTEGRITY.JOSE.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.jose._acquire` | inconclusive |
 | `INTEGRITY.JOSE.SIGNATURE` | INTEGRITY |  | `dppce.adapters.jose._signature`, `dppce.evidence.jose_profiles.verify` | not fixed here |
-| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here |
+| `INTEGRITY.JOSE.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.jose._acquire`, `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._judge`, `dppce.adapters.status_list`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.parse` | inconclusive / not fixed here |
 | `INTEGRITY.JOSE.TYPE` | INTEGRITY |  | `dppce.evidence.jose_profiles.check_header` | not fixed here |
-| `INTEGRITY.JOSE.UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.key_algorithm`, `dppce.evidence.jose_profiles.public_key_from_jwk` | not fixed here |
+| `INTEGRITY.JOSE.UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.jose._chain_key`, `dppce.adapters.jose._did_key`, `dppce.adapters.status_list`, `dppce.evidence.jose_profiles`, `dppce.evidence.jose_profiles.check_header`, `dppce.evidence.jose_profiles.key_algorithm`, `dppce.evidence.jose_profiles.public_key_from_jwk` | not fixed here |
 | `INTEGRITY.KEY.UNSUPPORTED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.NO_TARGET` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._acquire` | inconclusive |
 | `INTEGRITY.OK` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
@@ -177,14 +177,35 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `INTEGRITY.PAYLOAD.MISMATCH` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.PAYLOAD.NOT_COMPARABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive |
 | `INTEGRITY.SIGNATURE.INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
+| `INTEGRITY.STATUS.ENTRY_MALFORMED` | INTEGRITY |  | `dppce.adapters.status_list._malformed` | not fixed here |
+| `INTEGRITY.STATUS.ENTRY_MISSING` | INTEGRITY |  | `dppce.adapters.status_list._entries` | not fixed here |
+| `INTEGRITY.STATUS.ENTRY_TYPE` | INTEGRITY |  | `dppce.adapters.status_list._entries` | not fixed here |
+| `INTEGRITY.STATUS.INDEX_RANGE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.LIST_FORMAT` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._verify` | not fixed here |
+| `INTEGRITY.STATUS.LIST_LENGTH` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.LIST_MALFORMED` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._list_malformed` | not fixed here |
+| `INTEGRITY.STATUS.LIST_NOT_AVAILABLE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
+| `INTEGRITY.STATUS.LIST_SIGNATURE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._verify` | not fixed here |
+| `INTEGRITY.STATUS.LIST_UNBOUND` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
+| `INTEGRITY.STATUS.LIST_UNTRUSTED` | INTEGRITY |  | `dppce.adapters.status_list` | not fixed here |
+| `INTEGRITY.STATUS.LIST_VALIDITY` | INTEGRITY |  | `dppce.adapters.status_list` | not fixed here |
 | `INTEGRITY.STATUS.MISSING` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
+| `INTEGRITY.STATUS.OK` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | not fixed here |
+| `INTEGRITY.STATUS.PARAMS` | INTEGRITY | `integrity.status_list` | `dppce.adapters.status_list.status_list_check` | inconclusive |
+| `INTEGRITY.STATUS.PURPOSE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.REVOKED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.SAMPLE_MISSING` | INTEGRITY |  | `dppce.adapters.status_list._Lists._record` | not fixed here |
+| `INTEGRITY.STATUS.SIZE_UNSUPPORTED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.STALE` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.SUSPENDED` | INTEGRITY |  | `dppce.adapters.status_list._Lists._entry` | not fixed here |
+| `INTEGRITY.STATUS.TOO_LARGE` | INTEGRITY |  | `dppce.adapters.status_list`, `dppce.adapters.status_list._Lists._entry`, `dppce.adapters.status_list._Lists._record`, `dppce.adapters.status_list._Lists.judge` | not fixed here |
 | `INTEGRITY.TOKEN.MALFORMED` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.NOT_AVAILABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.NOT_PROCESSABLE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.NO_ANSWER` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | not fixed here |
 | `INTEGRITY.TOKEN.TOO_LARGE` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check` | inconclusive / not fixed here |
 | `INTEGRITY.TRUST.ANCHOR_INVALID` | INTEGRITY | `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose._chain_findings` | inconclusive / not fixed here |
-| `INTEGRITY.TRUST.MISSING` | INTEGRITY | `integrity.jose`, `integrity.jws` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose.jose_check` | inconclusive |
+| `INTEGRITY.TRUST.MISSING` | INTEGRITY | `integrity.jose`, `integrity.jws`, `integrity.status_list` | `dppce.adapters.integrity.jws_check`, `dppce.adapters.jose.jose_check`, `dppce.adapters.status_list.status_list_check` | inconclusive |
 | `ISSUER.ACCREDITATION.NO_REFERENCE` | ISSUER |  | `dppce.cli._inputs_from_args`, `dppce.verifier.verify._issuer_problem` | not fixed here |
 | `ISSUER.STATEMENT.MISMATCH` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
 | `ISSUER.STATEMENT.UNSPECIFIED` | ISSUER |  | `dppce.verifier.verify._issuer_problem` | not fixed here |
@@ -302,7 +323,7 @@ Lint findings such as `CAT019` are not reason codes. `dppce catalogue lint` repo
 | `STATUSLIST.FILE.MALFORMED` | STATUSLIST |  | `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
 | `STATUSLIST.FILE.MISSING` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
 | `STATUSLIST.FILE.OPTION` | STATUSLIST |  | `dppce.cli.cmd_report` | not fixed here |
-| `STATUSLIST.FILE.TOO_LARGE` | STATUSLIST |  | `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
+| `STATUSLIST.FILE.TOO_LARGE` | STATUSLIST |  | `dppce.adapters.status_list._Lists._entry`, `dppce.evidence.status`, `dppce.evidence.status.decode_list`, `dppce.evidence.status.read_status_list` | not fixed here |
 | `STATUSLIST.ID.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
 | `STATUSLIST.INDEX.OUT_OF_RANGE` | STATUSLIST |  | `dppce.evidence.status.bit_is_set` | not fixed here |
 | `STATUSLIST.ISSUER.MISMATCH` | STATUSLIST |  | `dppce.verifier.verify._status` | not fixed here |
