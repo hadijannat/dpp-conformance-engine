@@ -42,7 +42,7 @@ keys, issuer, evaluation time, and loopback origin are the same as for the batte
 | `C-FAMILY-WEB` | `family/web` |
 | `C-FAMILY-GS1` | `family/gs1-resolver` |
 | `C-FAMILY-VC` | `family/credentials` |
-| `C-FAMILY-AAS` | `family/aas`, with the synthetic file `fixtures/aas/environment-valid.json` |
+| `C-FAMILY-AAS` | `family/aas`, with the synthetic file `fixtures/aas/TEST-ONLY-dpp-valid.json`. It holds an IDTA 02099-1 DPP metadata submodel. |
 
 `C-FAMILY-AAS` needs the optional `aas` extra. Without it, the AAS check gives `unsupported`,
 and the control does not pass.
