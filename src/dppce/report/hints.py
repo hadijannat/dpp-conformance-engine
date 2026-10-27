@@ -463,6 +463,9 @@ HINTS: Final[dict[str, str]] = {
         "Replay with the inputs of the recorded run. A changed input sends other requests."
     ),
     # --- Resolver -------------------------------------------------------------------------------
+    "RESOLVER.CONFORMANCE.HOP_STATUS_NOT_RECORDED": (
+        "Run the test again with this engine version, which records the status of each redirect hop."
+    ),
     "RESOLVER.CONFORMANCE.INVALID_ACCEPTED": "Reject an invalid identifier instead of resolving it.",
     "RESOLVER.CONFORMANCE.INVALID_STATUS": (
         "Answer an invalid identifier with the status code that the rule expects."
@@ -471,6 +474,9 @@ HINTS: Final[dict[str, str]] = {
     "RESOLVER.CONFORMANCE.LINKSET_STATUS": _SUCCESS,
     "RESOLVER.CONFORMANCE.NO_REDIRECT": "Redirect a resolution request to the default link.",
     "RESOLVER.CONFORMANCE.OK": _NOTHING,
+    "RESOLVER.CONFORMANCE.REDIRECT_STATUS": (
+        "Redirect a default request with the status code that the test purpose declares."
+    ),
     "RESOLVER.LINKSET.ANCHOR": "Set the anchor of the linkset to the resolved identifier.",
     "RESOLVER.LINKSET.MEDIA_TYPE": _MEDIA_TYPE,
     "RESOLVER.LINKSET.OK": _NOTHING,

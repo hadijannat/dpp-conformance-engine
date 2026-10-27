@@ -406,6 +406,19 @@ class OpenedRecord(Model):
     error: str | None
     redirects: tuple[str, ...]
     attempts: int
+    redirect_statuses: tuple[int, ...] = Field(
+        default=(),
+        description="The status of each answer that redirected, one per redirect target. "
+        "Absent in a record from before hop statuses.",
+    )
+
+    @model_serializer(mode="wrap")
+    def _omit_absent(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # The record form leaves an empty list out, so the opening must too: same commitment.
+        data: dict[str, Any] = handler(self)
+        if not self.redirect_statuses:
+            data.pop("redirect_statuses", None)
+        return data
 
 
 class RecordOpening(Model):

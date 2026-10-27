@@ -36,6 +36,12 @@ PURPOSES = {
     "resolver.well_known": "TP-GS1-WELLKNOWN-001",
     "resolver.conformance": "TP-GS1-CONFORMANCE-001",
 }
+# P2-25: a second test purpose of resolver.conformance declares the redirect status 303 (F-78).
+RESOLVER_PURPOSES = (*PURPOSES.values(), "TP-GS1-CONFORMANCE-002")
+SIBLINGS = {
+    "TP-GS1-CONFORMANCE-001": "TP-GS1-CONFORMANCE-002",
+    "TP-GS1-CONFORMANCE-002": "TP-GS1-CONFORMANCE-001",
+}
 LINKTYPE = RESOLVER_PATH + "?linkType=linkset"
 WELL_KNOWN = "/.well-known/gs1resolver"
 # The carrier GTIN 09506000134352 with a wrong check digit.
@@ -53,7 +59,7 @@ def _gs1_cases() -> list[dict[str, Any]]:
     document = yaml.safe_load(CATALOGUE.read_text(encoding="utf-8"))
     entries = [*document["sut_faults"], *document["boundary_cases"]]
     # Other cases of the family profile (identifier syntax and granularity) are not resolver cases.
-    return [e for e in entries if PROFILE in e.get("profiles", ()) and e["test_purpose"] in PURPOSES.values()]
+    return [e for e in entries if PROFILE in e.get("profiles", ()) and e["test_purpose"] in RESOLVER_PURPOSES]
 
 
 GS1_CASES = _gs1_cases()
@@ -91,15 +97,16 @@ def _step(envelope: EvidenceEnvelope, test_purpose: str) -> tuple[str, str]:
 
 
 def test_the_catalogue_names_the_gs1_resolver_cases() -> None:
-    assert sorted(e["id"] for e in GS1_CASES) == ["B-14", "F-48", "F-49", "F-50", "F-51", "F-52", "F-76"]
-    assert {e["test_purpose"] for e in GS1_CASES} == set(PURPOSES.values())
+    ids = ["B-14", "F-48", "F-49", "F-50", "F-51", "F-52", "F-76", "F-78"]
+    assert sorted(e["id"] for e in GS1_CASES) == ids
+    assert {e["test_purpose"] for e in GS1_CASES} == set(RESOLVER_PURPOSES)
 
 
 def test_the_unmodified_reference_resolver_passes_each_resolver_check(tmp_path: Path) -> None:
     envelope = _family_run(tmp_path)
-    for test_purpose in PURPOSES.values():
+    for test_purpose in RESOLVER_PURPOSES:
         assert _step(envelope, test_purpose)[0] == "pass", test_purpose
-    codes = {_step(envelope, t)[1] for t in PURPOSES.values()}
+    codes = {_step(envelope, t)[1] for t in RESOLVER_PURPOSES}
     assert codes == {"RESOLVER.LINKSET.OK", "RESOLVER.WELLKNOWN.OK", "RESOLVER.CONFORMANCE.OK"}
 
 
@@ -108,9 +115,17 @@ def test_each_seeded_resolver_fault_gives_the_catalogue_outcome(case: dict[str, 
     envelope = _family_run(tmp_path, frozenset({case["fault"]}))
     expected = case["expected"]
     assert _step(envelope, case["test_purpose"]) == (expected["verdict"], expected["reason_code"])
-    # Each flag changes one behavior: the other resolver steps still pass.
-    for test_purpose in set(PURPOSES.values()) - {case["test_purpose"]}:
+    # Each flag changes one behavior: the other resolver steps still pass. The two test purposes of
+    # resolver.conformance send the same probes, so a flag gives both the same outcome. Only the
+    # redirect status of F-78 differs: the default set of TP-GS1-CONFORMANCE-001 accepts 302.
+    sibling = SIBLINGS.get(case["test_purpose"])
+    for test_purpose in set(RESOLVER_PURPOSES) - {case["test_purpose"], sibling}:
         assert _step(envelope, test_purpose)[0] == "pass", test_purpose
+    if sibling is not None:
+        same = (expected["verdict"], expected["reason_code"])
+        assert _step(envelope, sibling) == (
+            ("pass", "RESOLVER.CONFORMANCE.OK") if case["id"] == "F-78" else same
+        )
     if expected["verdict"] == "fail":
         assert envelope.decision.overall is Verdict.FAIL
 

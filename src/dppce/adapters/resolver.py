@@ -1,8 +1,8 @@
 """Resolver adapter: the GS1 Digital Link resolver surface of the carrier identifier.
 
 The checks judge what the resolver answers to a few fixed GET requests, plus one GET of a linkset
-that a Link header of an answer advertises. They never follow a link of a linkset, and they do not
-judge the status of a followed redirect hop: the transport does not record it.
+that a Link header of an answer advertises. They never follow a link of a linkset. Only
+resolver.conformance judges a redirect hop status: the first one of the default request.
 A body of an unexpected shape is a fail, never a blocked step, so that a system under test cannot
 reshape a wrong answer into one that is not judged.
 """
@@ -10,10 +10,10 @@ reshape a wrong answer into one that is not judged.
 from __future__ import annotations
 
 import re
-from typing import Any, Final
+from typing import Any, Final, Literal
 from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 
-from pydantic import Field, field_validator
+from pydantic import Field, ValidationError, field_validator
 
 from dppce.adapters.common import (
     LINKSET,
@@ -31,6 +31,7 @@ from dppce.adapters.common import (
     unusable,
 )
 from dppce.adapters.identifier import gtin_check_digit_ok
+from dppce.evidence.recording import REDIRECT_STATUSES
 from dppce.infrastructure.interfaces import Record
 from dppce.infrastructure.redaction import REMOVED, parse_link
 from dppce.infrastructure.transport import origin_of
@@ -320,10 +321,39 @@ def _invalid_variant(carrier: str) -> str | None:
     return urlunsplit((parts.scheme, parts.netloc, path, parts.query, ""))
 
 
-def _conformance_failure(probe: str, record: Record) -> tuple[str, str] | None:
+RedirectStatus = Literal[301, 302, 303, 307, 308]
+
+
+class ConformanceParams(Model):
+    expected_redirect_statuses: tuple[RedirectStatus, ...] = Field(
+        default=REDIRECT_STATUSES,
+        min_length=1,
+        description=(
+            "The redirect statuses that the first answer to the default request may have, each at "
+            "most once. The default accepts 301, 302, 303, 307, and 308: GS1-Conformant Resolver "
+            "1.2.1 fixes no code. A test purpose that needs one code declares it here."
+        ),
+    )
+
+    @field_validator("expected_redirect_statuses")
+    @classmethod
+    def _distinct(cls, value: tuple[int, ...]) -> tuple[int, ...]:
+        if len(set(value)) != len(value):
+            raise ValueError("each status may appear only once")
+        return value
+
+
+def _conformance_failure(probe: str, record: Record, expected: tuple[int, ...]) -> tuple[str, str] | None:
     if probe == "default":
         if not record.redirects:
             return "RESOLVER.CONFORMANCE.NO_REDIRECT", "The resolver does not redirect a default request."
+        # A record without hop statuses passes here only under the full set: see conformance().
+        if record.redirect_statuses and record.redirect_statuses[0] not in expected:
+            message = (
+                f"The resolver answers the default request with {record.redirect_statuses[0]}. "
+                "The test purpose does not declare that redirect status."
+            )
+            return "RESOLVER.CONFORMANCE.REDIRECT_STATUS", message
     elif probe == "link_type":
         if record.redirects:
             message = "The resolver redirects a request with linkType=linkset."
@@ -340,8 +370,13 @@ def _conformance_failure(probe: str, record: Record) -> tuple[str, str] | None:
     return None
 
 
-@register("resolver.conformance", capability="resolver.conformance", params=NoParams)
+@register("resolver.conformance", capability="resolver.conformance", params=ConformanceParams)
 def conformance(ctx: CheckContext) -> CheckOutcome:
+    try:
+        expected = ConformanceParams.model_validate(dict(ctx.params)).expected_redirect_statuses
+    except ValidationError:
+        message = "The parameter 'expected_redirect_statuses' is not valid. Nothing is fetched."
+        return blocked("RESOLVER.PARAMS.INVALID", message)
     target = _carrier(ctx)
     if isinstance(target, CheckOutcome):
         return target
@@ -352,12 +387,16 @@ def conformance(ctx: CheckContext) -> CheckOutcome:
         return blocked("RESOLVER.NO_TARGET", message)
     probes = (("default", carrier), ("link_type", _with_link_type(carrier)), ("invalid", invalid))
     observations: list[Observation] = []
+    hop_status_judged = False
     for index, (probe, url) in enumerate(probes):
         record = fetch_once(ctx, url)
         # The rules judge status and redirects only, never the body, so the body rules do not apply.
         # A redirect that the transport does not follow keeps its 3xx status. It is judged for the
         # probes link_type and invalid, so that a system cannot hide a fail behind such a redirect.
-        if _no_reply(record) and not (probe != "default" and record.error in _UNFOLLOWED):
+        # For the default probe, rule 1 judges the recorded status of a refused or looping hop. A
+        # followed hop to a target that does not answer is still no answer.
+        unfollowed = record.error in _UNFOLLOWED and (probe != "default" or bool(record.redirect_statuses))
+        if _no_reply(record) and not unfollowed:
             return no_answer(ctx, record)
         observations.append(
             ctx.observation(
@@ -368,10 +407,30 @@ def conformance(ctx: CheckContext) -> CheckOutcome:
                 transformations=transformations,
             )
         )
-        if (failure := _conformance_failure(probe, record)) is not None:
+        if (failure := _conformance_failure(probe, record, expected)) is not None:
             return completed(False, *failure, observations)
-    message = (
-        "The resolver redirects a default request, answers a linkset request with 200 and no redirect, "
-        "and refuses an invalid identifier. Only final statuses are judged, not the status of a redirect hop."
-    )
+        # A record from before hop statuses. The transport follows only the five redirect statuses,
+        # so a followed hop meets the full set, but a declared subset cannot be judged.
+        if probe == "default" and not record.redirect_statuses and set(expected) != set(REDIRECT_STATUSES):
+            return CheckOutcome(
+                status=ExecutionStatus.BLOCKED,
+                reason_code="RESOLVER.CONFORMANCE.HOP_STATUS_NOT_RECORDED",
+                message="The record of the default request holds no redirect status to compare.",
+                observations=tuple(observations),
+            )
+        hop_status_judged = hop_status_judged or (probe == "default" and bool(record.redirect_statuses))
+    if hop_status_judged:
+        message = (
+            "The resolver redirects a default request with a declared status at the first hop, answers a "
+            "linkset request with 200 and no redirect, and refuses an invalid identifier. Later hop "
+            "statuses are not judged."
+        )
+    else:
+        # A record from before hop statuses. The text of that time is still true, and keeping it
+        # keeps the decision digest of an old recording on replay.
+        message = (
+            "The resolver redirects a default request, answers a linkset request with 200 and no redirect, "
+            "and refuses an invalid identifier. Only final statuses are judged, not the status of a "
+            "redirect hop."
+        )
     return completed(True, "RESOLVER.CONFORMANCE.OK", message, observations)

@@ -18,8 +18,9 @@ only link, so every other ``linkType`` gets the core redirect.
 The other flags of this module change the linkset, the description file, or the answer for an
 unknown identifier. The flag ``resolver_rate_limited`` answers each default request with 429
 (B-20). The flag ``resolver_linkset_link_broken`` adds a Link header to each linkset answer that
-advertises a linkset of another identifier (F-76). Each answer without one of these flags stays
-the same.
+advertises a linkset of another identifier (F-76). The flag ``resolver_redirect_302`` answers a
+default request with 302 in place of the core 303, to the same target (F-78). Each answer without
+one of these flags stays the same.
 """
 
 from __future__ import annotations
@@ -53,6 +54,8 @@ FLAGS: Final = frozenset(
         "resolver_rate_limited",
         # F-76: a Link header of each linkset answer advertises a linkset of another identifier.
         "resolver_linkset_link_broken",
+        # F-78: the default request gets 302, not 303, to the same passport.
+        "resolver_redirect_302",
     }
 )
 # The query of the linkset that the flag resolver_linkset_link_broken advertises.
@@ -161,6 +164,9 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
     if "resolver_rate_limited" in system.faults and default and RESOLVER_PATH.match(request.path):
         # B-20: every default request is rate limited, also the one retry after Retry-After.
         return 429, "text/plain", b"", {"Retry-After": "1"}
+    if "resolver_redirect_302" in system.faults and default and RESOLVER_PATH.match(request.path):
+        status, media, body, headers = system.handle(request.path, request.header("authorization"))
+        return (302 if status == 303 else status), media, body, headers
     wanted = (
         link_type in ("linkset", "all")
         or prefers_linkset(request.header("accept"))

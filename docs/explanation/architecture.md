@@ -364,7 +364,7 @@ Initial registry:
 | `identifier.negotiation` | `identifier.negotiation` | Sends five fixed `GET` requests to the carrier URL that differ only in the `Accept` header. Checks status, media type, weights, `Vary`, and the body shape. Experimental. |
 | `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier, and a linkset that a `Link` header of its answers advertises. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
-| `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
+| `resolver.conformance` | `resolver.conformance` | Probes the status behavior of a GS1 resolver: the first redirect status of a default request, and the final status of two other requests. |
 | `identity.did` | `identity.did` | Resolves a did:web DID, or reads an offline copy of its DID document. Checks the `id`, the verification methods, and the assertion methods. Resolution is not trust. Experimental. |
 | `integrity.status_list` | `integrity.status_list` | Verifies a VC-JOSE credential, reads its W3C Bitstring Status List entry, gets and verifies the status list credential, and checks the bit. An unsigned, untrusted, unreachable, or stale list never gives `pass`. Experimental. |
 
@@ -827,7 +827,8 @@ check digit. Otherwise it gives `blocked` with `RESOLVER.NO_TARGET`, and nothing
 three requests in this order and stops at the first failure:
 
 1. The carrier URL. The answer must come through at least one redirect:
-   `RESOLVER.CONFORMANCE.NO_REDIRECT`.
+   `RESOLVER.CONFORMANCE.NO_REDIRECT`. The status of the first hop must be in the parameter
+   `expected_redirect_statuses`: `RESOLVER.CONFORMANCE.REDIRECT_STATUS`. Later hops are not judged.
 2. The carrier URL with the query `linkType=linkset`. A redirect gives
    `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`. A final status other than 200 gives
    `RESOLVER.CONFORMANCE.LINKSET_STATUS`.
@@ -838,10 +839,23 @@ three requests in this order and stops at the first failure:
 A redirect that the transport does not follow, out of the scope or past the redirect limit, still
 counts as a redirect. For the second request, it gives `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`.
 For the third request, its 3xx status gives `RESOLVER.CONFORMANCE.INVALID_STATUS`. For the first
-request, it gives `unreachable`.
+request, the record keeps the status of the refused hop (section 10), and rule 1 judges it. So
+neither a redirect out of the scope nor a redirect loop turns a fail into `blocked`. A followed
+hop to a target that gives no answer, such as a 5xx status or a failed connection, gives
+`unreachable` for the first request.
 
-Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`. The transport does not record the
-status of a followed redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
+`expected_redirect_statuses` is a list of distinct values from 301, 302, 303, 307, and 308. Its
+default holds all five, because GS1-Conformant Resolver 1.2.1 fixes no code. A test purpose that
+needs one code declares it. Any other value gives `blocked` with `RESOLVER.PARAMS.INVALID`, and
+nothing is sent. A record from before hop statuses has redirects but no status. Under the default
+set it meets rule 1, because the transport follows only these five statuses. Under a declared
+subset it gives `blocked` with `RESOLVER.CONFORMANCE.HOP_STATUS_NOT_RECORDED`.
+
+The three requests use the transport default, `follow_redirects` true. Another check can reuse a
+record of the same request (`fetch_once`). A record that follows no hop would give that check a 3xx
+answer in place of the final answer.
+
+Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`.
 
 `aas.validate` has a limit of the wrapped release. The release accepts an empty environment `{}`
 as valid. So `AAS.VALID` does not show that the file has a shell or a submodel.
@@ -1223,6 +1237,11 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
   An out-of-scope hop ends the request with `redirect_out_of_scope`. So does a `Location` that
   is not a URL. A URL that cannot be parsed is never raised: it is `policy_denied`.
+- The transport follows only the statuses 301, 302, 303, 307, and 308, with a `Location`, for
+  `GET`, `HEAD`, and `OPTIONS`. The record keeps each redirect target and, in parallel, the status
+  of the answer that named it. A refused hop keeps its target and its status too.
+- A request with `follow_redirects` false follows no hop. The record then holds the first answer,
+  a redirect included, with no redirect target and no hop status.
 - A URL with a control character or a space is `policy_denied`. The URL parser would drop or
   strip such a character, and the record would name a request that was never sent.
 - A non-public origin is reached only if the operator confirmed that origin
@@ -1476,6 +1495,13 @@ records/<id>.enc   one encrypted record each
   name and then the empty directories, never recursively: a file that appears later stays,
   with the directory. A directory that was renamed or replaced during the purge is not removed.
 - `read_recording` returns the records in acquisition order (numeric order of the identifiers).
+- The record form holds `redirects` and, from P2-25 on, `redirect_statuses`: one status for each
+  redirect target, in the same order. Each status is 301, 302, 303, 307, or 308. The form leaves
+  out `redirect_statuses` when the list is empty. So a record from before P2-25 keeps its plaintext,
+  its commitment, and the records root. A reader gives such a record an empty list. A check gives
+  such a record the outcome and the message that it gave before P2-25. So an old recording replays
+  to the same decision digest, unless a test pack or the catalogue changed. An empty list in the
+  form, or a list of a different length than `redirects`, is a malformed record.
 - A response header is recorded only if its name is in a fixed list of safe names. Each other
   value is replaced with `<removed>`. The list includes six CORS names (OD-06):
   `access-control-allow-origin`, `-allow-methods`, `-allow-headers`, `-expose-headers`,
@@ -1559,7 +1585,8 @@ plaintext of the record. Protect it as you protect the recording.
 The schema version is `dppce.opening/1`, and the JSON Schema is `opening`.
 
 - `record` holds every field of the record except the salt. `JCS(record)` is the plaintext of
-  the commitment.
+  the commitment. Like the record form, it leaves out an empty `redirect_statuses`. This field is
+  an addition to `dppce.opening/1`: an opening of a record from before P2-25 does not change.
 - `salt` is the salt of the record, as standard base64 with padding.
 - `proof` is the inclusion proof of the record commitment in the `records` tree (section 11.2).
 - The command reads the recording with `read_recording`. A recording that does not authenticate
