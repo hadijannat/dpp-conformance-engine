@@ -21,6 +21,7 @@ from dppce.models import DecisionBody, EvidenceEnvelope, Observation, TestResult
 from tests.support import make_envelope, make_manifest
 
 RC1_ENVELOPE = Path(__file__).parent / "fixtures" / "rc1-envelope-decision-v1.json"
+V2_ENVELOPE = Path(__file__).parent / "fixtures" / "envelope-decision-v2.json"
 VERIFY_AT = "2026-10-14T00:00:00Z"
 SENTINEL = "SENTINEL-PAYLOAD-VALUE-4402"
 
@@ -184,11 +185,16 @@ def test_a_decision_version_1_envelope_compares_with_itself_and_with_version_2(t
     code, document = _compare_json(rc1, rc1)
     assert (code, document["same_plan_inputs"], document["steps"]) == (0, True, [])
     assert document["a"]["schema_version"] == "dppce.decision/1"
-    code, document = _compare_json(rc1, _write(tmp_path / "v2.json", make_envelope()))
+    # The pinned version 2 envelope: a new run writes version 3 (P2-21).
+    code, document = _compare_json(rc1, str(V2_ENVELOPE))
     assert code == 0
     fields = {d["field"]: (d["a"], d["b"]) for d in document["plan_inputs"]}
     # A version 1 body records no bound files, so they are not compared, as in a replay.
     assert fields == {"schema_version": ("dppce.decision/1", "dppce.decision/2")}
+    code, document = _compare_json(rc1, _write(tmp_path / "v3.json", make_envelope()))
+    assert code == 0
+    fields = {d["field"]: (d["a"], d["b"]) for d in document["plan_inputs"]}
+    assert fields == {"schema_version": ("dppce.decision/1", "dppce.decision/3")}
 
 
 def test_an_unreadable_envelope_is_an_input_error(tmp_path: Path) -> None:

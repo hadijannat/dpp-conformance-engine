@@ -87,6 +87,10 @@ TAMPER: dict[str, Tamper] = {
     "substitute_commitment": lambda d: _decision(d)["record_commitments"][0].update(commitment="0" * 64),
     "alg_none": lambda d: _set_algorithm(d, "none", keep_signature=False),
     "flip_manual_outcome": _flip_manual_outcome,
+    # Set, not changed: the field is absent from a run without an authorization.
+    "change_authorization": lambda d: _decision(d)["manifest"].update(
+        authorization_digest="sha256:" + "0" * 64
+    ),
 }
 # These two need a different key or a different evaluation time, not a changed document.
 NEEDS_SETUP = ("untrusted_key", "expired_key")

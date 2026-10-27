@@ -5,7 +5,8 @@ new version and one step here. A document with an unknown version is rejected: t
 never guesses how to read it.
 
 A decision body has no step. It is signed, so it is never rewritten: the verifier reads
-``dppce.decision/1`` and ``dppce.decision/2`` as written, and a new run writes version 2.
+``dppce.decision/1``, ``/2``, and ``/3`` as written, and a new run writes version 3. Version 3
+only adds optional manifest fields, which an earlier body leaves out, so no step is needed.
 
 The record of run inputs (``inputs.json``) has two steps: from ``dppce.runinputs/1`` to version 2,
 and from version 2 to version 3. The second step upgrades only the embedded trust bundle.

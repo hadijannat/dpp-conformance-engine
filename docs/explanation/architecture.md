@@ -1410,9 +1410,10 @@ one in `api.contract` and `access.policy`.
 - The run manifest records `sha256:<hex>` of the raw bytes of each bound file in `bound_files`.
   These files are the contract, the policy, the schemas, and the rule packs.
   An unreadable file is recorded as `unavailable`.
-- The decision body schema version is `dppce.decision/2`. In version 2, `bound_files` is
-  required. A `dppce.decision/1` body has no `bound_files`. The verifier reads both versions
-  as written and rejects any other pairing as a structure error. The JSON Schema lists the two
+- A new run writes the decision body schema version `dppce.decision/3`. In versions 2 and 3,
+  `bound_files` is required. A `dppce.decision/1` body has no `bound_files`. Only version 3
+  can hold the provenance fields of section 11.1. The verifier reads the three versions as
+  written and rejects any other pairing as a structure error. The JSON Schema lists the three
   versions. The model checks the pairing.
 - A replay reads the bound files again. The input check of section 10.1 stops a replay with a
   changed bound file before it evaluates (exit code 2).
@@ -1568,6 +1569,32 @@ exists. The models refuse a date such as `2026-02-30` and a second `60`.
 
 JCS is the canonical form of the engine's own decision body only. It does not replace the
 processing rules of any credential securing specification.
+
+Run provenance. Version 3 of the decision body adds these optional fields to the run manifest.
+They are part of the signed body, so a change to one of them breaks the signature (fault E-16).
+The body leaves out a field while it has its absent value: `null`, `false`, or an empty list.
+A body that writes an absent value is not in the canonical form and fails the structure.
+
+| Field | Value |
+| --- | --- |
+| `authorization_id` | The `authorization_id` of the validated test authorization. |
+| `authorization_digest` | `sha256:<hex>` of the ASCII text of the validated authorization token. |
+| `remote_read_without_authorization` | `true` if the run had no validated authorization and the operator confirmed public origins for bounded read-only access. |
+| `passport_trust_hash` | Canonical digest of the operator trust bundle that the checks used. |
+| `trust_anchor_fingerprints` | `sha256:<hex>` of the DER bytes of each passport trust anchor of that bundle, sorted. |
+| `ca_file_digest` | `sha256:<hex>` of the raw bytes of the operator CA file (`--ca-file`). |
+| `test_items` | The tested items, sorted by sample name. See below. |
+
+A test item has `sample`, `kind`, and `value`. The kind `declared_identifier` holds the text of
+the IXIT sample `identifier` or `passport_id`. The kind `sample_file` holds `sha256:<hex>` of
+the bytes of a sample file that the run read. A manual result is not a test item. A test item
+never holds a value that the system under test returned.
+
+A replay computes the authorization fields, the trust fields, and the test items again from
+`inputs.json` and the recording. The record of run inputs does not hold the CA file or the
+remote read confirmation. A replay therefore takes `ca_file_digest` and
+`remote_read_without_authorization` from the manifest of the run. These two fields decide no
+verdict. `dppce compare` reports a difference in a provenance field as a plan input difference.
 
 ### 11.2 Merkle tree
 

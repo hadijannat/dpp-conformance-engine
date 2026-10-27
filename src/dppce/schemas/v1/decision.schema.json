@@ -538,6 +538,33 @@
             "last": null
           }
         },
+        "authorization_digest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "sha256 of the ASCII text of the validated authorization token.",
+          "title": "Authorization Digest"
+        },
+        "authorization_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The authorization_id of the validated test authorization.",
+          "title": "Authorization Id"
+        },
         "authorization_ref": {
           "anyOf": [
             {
@@ -564,8 +591,22 @@
             }
           ],
           "default": null,
-          "description": "sha256 of the raw bytes of each file that the profile binds, keyed by its path under the data root. Required in dppce.decision/2. Absent in dppce.decision/1.",
+          "description": "sha256 of the raw bytes of each file that the profile binds, keyed by its path under the data root. Required in dppce.decision/2 and /3. Absent in dppce.decision/1.",
           "title": "Bound Files"
+        },
+        "ca_file_digest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "sha256 of the raw bytes of the operator CA file (--ca-file).",
+          "title": "Ca File Digest"
         },
         "catalogue_hash": {
           "title": "Catalogue Hash",
@@ -633,6 +674,20 @@
           "title": "Pack Hashes",
           "type": "object"
         },
+        "passport_trust_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Canonical digest of the operator trust bundle that the checks used.",
+          "title": "Passport Trust Hash"
+        },
         "profile_hash": {
           "title": "Profile Hash",
           "type": "string"
@@ -640,6 +695,12 @@
         "profile_id": {
           "title": "Profile Id",
           "type": "string"
+        },
+        "remote_read_without_authorization": {
+          "default": false,
+          "description": "True if the run had no validated authorization and the operator confirmed public origins for bounded read-only access (--allow-remote-host).",
+          "title": "Remote Read Without Authorization",
+          "type": "boolean"
         },
         "seeds": {
           "additionalProperties": {
@@ -655,12 +716,31 @@
         "sut": {
           "$ref": "#/$defs/SutIdentity"
         },
+        "test_items": {
+          "default": [],
+          "description": "The tested items as the operator declared them, sorted by sample.",
+          "items": {
+            "$ref": "#/$defs/TestItem"
+          },
+          "title": "Test Items",
+          "type": "array"
+        },
         "testpack_hashes": {
           "additionalProperties": {
             "type": "string"
           },
           "title": "Testpack Hashes",
           "type": "object"
+        },
+        "trust_anchor_fingerprints": {
+          "default": [],
+          "description": "sha256 of the DER bytes of each passport trust anchor, sorted.",
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Trust Anchor Fingerprints",
+          "type": "array"
         },
         "trust_policy_version": {
           "title": "Trust Policy Version",
@@ -741,6 +821,37 @@
         "identifier"
       ],
       "title": "SutIdentity",
+      "type": "object"
+    },
+    "TestItem": {
+      "additionalProperties": false,
+      "description": "One tested item as the operator declared it in the IXIT. Never a value from the system under test.\n\n``declared_identifier``: the text of the sample ``identifier`` or ``passport_id``.\n``sample_file``: the sha256 of the raw bytes of a sample file that the run read.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "declared_identifier",
+            "sample_file"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "sample": {
+          "minLength": 1,
+          "title": "Sample",
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sample",
+        "kind",
+        "value"
+      ],
+      "title": "TestItem",
       "type": "object"
     },
     "TestResult": {
@@ -844,7 +955,7 @@
   "$id": "urn:dppce:schema:v1:decision",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "The canonical statement of one run. Its RFC 8785 form is what gets hashed and signed.\n\nLists are sorted by identifier. The verifier rejects a body whose lists are out of order\nor hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.\n\nVersion 2 adds ``manifest.bound_files``. A version 1 body is still read and verified as written.",
+  "description": "The canonical statement of one run. Its RFC 8785 form is what gets hashed and signed.\n\nLists are sorted by identifier. The verifier rejects a body whose lists are out of order\nor hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.\n\nVersion 2 adds ``manifest.bound_files``. Version 3 adds the provenance fields of the manifest\n(``PROVENANCE_FIELDS``). An earlier body is still read and verified as written.",
   "properties": {
     "conflicts": {
       "items": {
@@ -905,7 +1016,8 @@
     "schema_version": {
       "enum": [
         "dppce.decision/1",
-        "dppce.decision/2"
+        "dppce.decision/2",
+        "dppce.decision/3"
       ],
       "title": "Schema Version",
       "type": "string"

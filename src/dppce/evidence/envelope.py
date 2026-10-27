@@ -15,6 +15,7 @@ from dppce.evidence.canonical import canonical_bytes, digest, parse_strict
 from dppce.evidence.jws import header_of, payload_of, sign_compact
 from dppce.infrastructure.interfaces import Signer
 from dppce.models import (
+    PROVENANCE_FIELDS,
     Attestation,
     Conflict,
     CoverageSummary,
@@ -74,7 +75,7 @@ def build_decision(
     tests = tuple(sorted(test_results, key=lambda t: t.test_purpose_id))
     commitments = tuple(sorted(record_commitments, key=lambda c: c.record_id))
     return DecisionBody(
-        schema_version="dppce.decision/2",
+        schema_version="dppce.decision/3",
         manifest=manifest,
         overall=overall,
         overall_reason=overall_reason,
@@ -99,12 +100,16 @@ def in_layout_of(decision: DecisionBody, version: str) -> DecisionBody:
     """Return a new body in the layout of ``version``, so that a replay compares like with like.
 
     A dppce.decision/1 body has no bound_files. A replay of a version 1 run therefore does not
-    detect a changed bound file, exactly as version 1 did not.
+    detect a changed bound file, exactly as version 1 did not. A body before version 3 has no
+    provenance fields, so a replay of such a run does not compare them.
     """
-    if version == "dppce.decision/1" and decision.schema_version != version:
-        manifest = decision.manifest.model_copy(update={"bound_files": None})
-        return decision.model_copy(update={"schema_version": version, "manifest": manifest})
-    return decision
+    if version == decision.schema_version or version not in ("dppce.decision/1", "dppce.decision/2"):
+        return decision
+    absent: dict[str, object] = {name: RunManifest.model_fields[name].default for name in PROVENANCE_FIELDS}
+    if version == "dppce.decision/1":
+        absent["bound_files"] = None
+    manifest = decision.manifest.model_copy(update=absent)
+    return decision.model_copy(update={"schema_version": version, "manifest": manifest})
 
 
 def sign_envelope(

@@ -53,6 +53,7 @@ from dppce.models.expr import ALWAYS, All, AnyOf, Compare, Const, Expr, Not, Op
 from dppce.models.results import (
     MAX_STATUS_INDEX,
     NOT_ACCREDITED,
+    PROVENANCE_FIELDS,
     AcquisitionWindow,
     Attestation,
     Capability,
@@ -74,6 +75,7 @@ from dppce.models.results import (
     SignerRole,
     StatusList,
     StatusReference,
+    TestItem,
     VerificationDimension,
     VerificationReport,
 )
@@ -128,6 +130,7 @@ __all__ = [
     "NOT_ACCREDITED",
     "PATH_TEMPLATE_PATTERN",
     "PLACEHOLDER_PATTERN",
+    "PROVENANCE_FIELDS",
     "SCHEMA_MODELS",
     "UNKNOWN",
     "AccessDeclaration",
@@ -205,6 +208,7 @@ __all__ = [
     "StatusReference",
     "Stimulus",
     "SutIdentity",
+    "TestItem",
     "TestPack",
     "TestPurpose",
     "TestResult",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Annotated, Any, Final, Literal, Self
 
@@ -96,6 +97,41 @@ class AcquisitionWindow(Model):
     last: str | None = None
 
 
+Sha256 = Annotated[str, Field(pattern=r"^sha256:[0-9a-f]{64}$")]
+
+
+class TestItem(Model):
+    """One tested item as the operator declared it in the IXIT. Never a value from the system under test.
+
+    ``declared_identifier``: the text of the sample ``identifier`` or ``passport_id``.
+    ``sample_file``: the sha256 of the raw bytes of a sample file that the run read.
+    """
+
+    __test__ = False  # not a pytest class
+
+    sample: str = Field(min_length=1)
+    kind: Literal["declared_identifier", "sample_file"]
+    value: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _file_value_is_a_digest(self) -> Self:
+        if self.kind == "sample_file" and re.fullmatch(r"sha256:[0-9a-f]{64}", self.value) is None:
+            raise ValueError("the value of a sample_file item is sha256:<hex>")
+        return self
+
+
+# Added in dppce.decision/3 (OD-09). Each is left out of the body while it has its absent value.
+PROVENANCE_FIELDS: Final = (
+    "authorization_id",
+    "authorization_digest",
+    "remote_read_without_authorization",
+    "passport_trust_hash",
+    "trust_anchor_fingerprints",
+    "ca_file_digest",
+    "test_items",
+)
+
+
 class RunManifest(Model):
     engine_version: str
     dependency_versions: dict[str, str]
@@ -120,7 +156,30 @@ class RunManifest(Model):
     bound_files: dict[str, BoundFileHash] | None = Field(
         default=None,
         description="sha256 of the raw bytes of each file that the profile binds, keyed by its path "
-        "under the data root. Required in dppce.decision/2. Absent in dppce.decision/1.",
+        "under the data root. Required in dppce.decision/2 and /3. Absent in dppce.decision/1.",
+    )
+    authorization_id: str | None = Field(
+        default=None, description="The authorization_id of the validated test authorization."
+    )
+    authorization_digest: Sha256 | None = Field(
+        default=None, description="sha256 of the ASCII text of the validated authorization token."
+    )
+    remote_read_without_authorization: bool = Field(
+        default=False,
+        description="True if the run had no validated authorization and the operator confirmed "
+        "public origins for bounded read-only access (--allow-remote-host).",
+    )
+    passport_trust_hash: Sha256 | None = Field(
+        default=None, description="Canonical digest of the operator trust bundle that the checks used."
+    )
+    trust_anchor_fingerprints: tuple[Sha256, ...] = Field(
+        default=(), description="sha256 of the DER bytes of each passport trust anchor, sorted."
+    )
+    ca_file_digest: Sha256 | None = Field(
+        default=None, description="sha256 of the raw bytes of the operator CA file (--ca-file)."
+    )
+    test_items: tuple[TestItem, ...] = Field(
+        default=(), description="The tested items as the operator declared them, sorted by sample."
     )
 
     @model_serializer(mode="wrap")
@@ -130,7 +189,13 @@ class RunManifest(Model):
         data: dict[str, Any] = handler(self)
         if self.bound_files is None:
             data.pop("bound_files", None)
+        for name in PROVENANCE_FIELDS:
+            if getattr(self, name) in (None, False, ()):
+                data.pop(name, None)
         return data
+
+    def has_provenance(self) -> bool:
+        return any(getattr(self, name) not in (None, False, ()) for name in PROVENANCE_FIELDS)
 
 
 class RecordCommitment(Model):
@@ -146,10 +211,11 @@ class DecisionBody(Model):
     Lists are sorted by identifier. The verifier rejects a body whose lists are out of order
     or hold a duplicate, so an omitted, repeated, replaced, or moved result is detected.
 
-    Version 2 adds ``manifest.bound_files``. A version 1 body is still read and verified as written.
+    Version 2 adds ``manifest.bound_files``. Version 3 adds the provenance fields of the manifest
+    (``PROVENANCE_FIELDS``). An earlier body is still read and verified as written.
     """
 
-    schema_version: Literal["dppce.decision/1", "dppce.decision/2"]
+    schema_version: Literal["dppce.decision/1", "dppce.decision/2", "dppce.decision/3"]
     manifest: RunManifest
     overall: Verdict
     overall_reason: str
@@ -169,10 +235,13 @@ class DecisionBody(Model):
         # A verifier of 0.1.0rc1 rejects a body with bound_files, so the field needs version 2.
         # ponytail: the JSON Schema states only the two versions, not this pairing. An if/then
         # sub-schema would be an open object, which the closed-schema test forbids.
-        if (self.manifest.bound_files is not None) != (self.schema_version == "dppce.decision/2"):
+        if (self.manifest.bound_files is not None) != (self.schema_version != "dppce.decision/1"):
             raise ValueError(
-                "manifest.bound_files is required in dppce.decision/2 and absent in dppce.decision/1"
+                "manifest.bound_files is required in dppce.decision/2 and /3 and absent in dppce.decision/1"
             )
+        # A verifier before version 3 rejects these fields, so a body that holds one needs version 3.
+        if self.manifest.has_provenance() and self.schema_version != "dppce.decision/3":
+            raise ValueError("the provenance fields of the manifest need dppce.decision/3")
         return self
 
 

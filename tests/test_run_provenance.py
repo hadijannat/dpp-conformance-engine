@@ -18,6 +18,7 @@ import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from pydantic import ValidationError
+from validation.evidence_cases import TAMPER
 
 from dppce import cli, schemas
 from dppce.compare import compare
@@ -54,9 +55,9 @@ PROVENANCE: dict[str, Any] = {
 NEW_FIELDS = tuple(PROVENANCE)
 
 
-def _with(manifest: RunManifest) -> EvidenceEnvelope:
+def _with(manifest: RunManifest, template: DecisionBody | None = None) -> EvidenceEnvelope:
     """The default test envelope with another manifest, built and validated as a run builds it."""
-    t = make_envelope().decision
+    t = template or make_envelope().decision
     decision = build_decision(
         manifest=manifest,
         overall=t.overall,
@@ -124,7 +125,7 @@ def test_a_version_1_or_2_body_with_a_provenance_field_is_a_structure_error(
     document["decision"]["schema_version"] = version
     if version == "dppce.decision/1":
         del document["decision"]["manifest"]["bound_files"]
-    with pytest.raises(ValidationError, match="dppce.decision/3"):
+    with pytest.raises(ValidationError, match=r"dppce\.decision/3"):
         DecisionBody.model_validate(document["decision"])
     outcomes, _ = _outcomes(document, trust)
     assert outcomes["structure"] == "fail"
@@ -174,11 +175,16 @@ def test_a_pinned_version_2_envelope_keeps_its_bytes_digest_and_verdicts(
 
 
 def test_a_version_2_layout_drops_the_provenance_and_keeps_bound_files() -> None:
-    v3 = _with(make_manifest(**PROVENANCE)).decision
+    # make_envelope draws new record salts, so both bodies come from one template.
+    template = make_envelope().decision
+    v3 = _with(make_manifest(**PROVENANCE), template).decision
     v2 = in_layout_of(v3, "dppce.decision/2")
     assert v2.schema_version == "dppce.decision/2"
     assert v2.manifest.bound_files == {}
-    assert decision_digest(v2) == V2_DIGEST, "the layout of a default body is the pinned version 2 body"
+    expected = template.model_copy(update={"schema_version": "dppce.decision/2"})
+    assert canonical_bytes(v2) == canonical_bytes(expected)
+    assert not in_layout_of(v3, "dppce.decision/1").manifest.has_provenance()
+    assert in_layout_of(v3, "dppce.decision/3") is v3
 
 
 # -- E-16: the provenance is part of the signed body ----------------------------------------------
@@ -215,7 +221,6 @@ def test_e16_a_changed_provenance_field_breaks_the_signature(
 def test_e16_the_validation_tamper_breaks_the_signature_also_without_an_authorization(
     signer: LocalSigner, trust: TrustBundle
 ) -> None:
-    from validation.evidence_cases import TAMPER  # noqa: PLC0415 - the validation package is optional here
 
     for manifest in (make_manifest(), make_manifest(**PROVENANCE)):
         signed = sign_envelope(_with(manifest), signer, issuer=ISSUER, signed_at="2026-10-13T12:05:00Z")
@@ -326,7 +331,8 @@ def test_a_run_records_authorization_trust_ca_file_and_test_items(
     assert run.envelope.decision.schema_version == "dppce.decision/3"
     token = TOKEN.read_text(encoding="ascii").strip()
     assert m.authorization_digest == "sha256:" + hashlib.sha256(token.encode("ascii")).hexdigest()
-    assert m.authorization_id is not None and m.authorization_id.startswith("TEST-ONLY")
+    assert m.authorization_id is not None
+    assert m.authorization_id.startswith("TEST-ONLY")
     assert m.remote_read_without_authorization is False
     bundle = TrustBundle.model_validate_json(TRUST_FILE.read_bytes())
     assert m.passport_trust_hash == digest(bundle)

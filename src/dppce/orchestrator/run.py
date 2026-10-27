@@ -8,12 +8,15 @@ same recording gives the same decision digest.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from importlib import metadata
 from pathlib import Path
 from typing import Final
+
+from cryptography import x509
+from cryptography.hazmat.primitives import serialization
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce import __version__
@@ -22,10 +25,10 @@ from dppce.catalogue import Catalogue, sanitized_ixit
 from dppce.catalogue.lint import params_problem
 from dppce.evidence.canonical import digest
 from dppce.evidence.envelope import build_decision
-from dppce.evidence.manual import MANUAL_CHECK
+from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX
 from dppce.evidence.recording import record_commitments
 from dppce.infrastructure.clock import utc_stamp
-from dppce.infrastructure.interfaces import Acquirer
+from dppce.infrastructure.interfaces import Acquirer, Record
 from dppce.models import (
     ICS,
     IXIT,
@@ -45,6 +48,7 @@ from dppce.models import (
     ReviewStatus,
     RunManifest,
     Severity,
+    TestItem,
     TestPack,
     TestPurpose,
     TestResult,
@@ -56,6 +60,8 @@ from dppce.testdefs import registry
 from dppce.verdicts import aggregate, overall_verdict, step_verdict
 from dppce.verdicts.coverage import summarize
 
+# The IXIT samples that declare the tested passport identifier (section 9.1).
+_DECLARED: Final = ("identifier", "passport_id")
 _PINNED: Final = ("pydantic", "pyyaml", "jsonschema", "rfc8785", "cryptography", "joserfc")
 _OPTIONAL: Final = ("zxing-cpp", "pillow", "aas-test-engines")
 
@@ -93,6 +99,10 @@ class RunInputs:
     image_digest: str | None = None
     # Test purposes with a manual result that the operator supplied (--manual-result).
     manual_results: frozenset[str] = frozenset()
+    # Run provenance that the models above do not hold (section 11.1). sha256:<hex> values.
+    authorization_digest: str | None = None
+    ca_file_digest: str | None = None
+    remote_read_without_authorization: bool = False
 
 
 def check_infos() -> dict[str, CheckInfo]:
@@ -271,6 +281,43 @@ def input_hashes(
     )
 
 
+def _sha256(data: bytes) -> str:
+    return "sha256:" + hashlib.sha256(data).hexdigest()
+
+
+def tested_items(ixit: IXIT, records: Sequence[Record]) -> tuple[TestItem, ...]:
+    """The tested items: the identifiers that the IXIT declares, and each sample file that was read.
+
+    A file is named by the sha256 of the bytes that the run read, so a replay gives the same items.
+    A manual result is an operator statement, not a test item.
+    """
+    items = {
+        TestItem(sample=name, kind="declared_identifier", value=ixit.samples[name])
+        for name in _DECLARED
+        if ixit.samples.get(name)
+    }
+    items |= {
+        TestItem(sample=name, kind="sample_file", value=_sha256(r.body))
+        for r in records
+        if r.kind == "artifact"
+        and r.error is None
+        and not (name := r.url.removeprefix("artifact:")).startswith(SAMPLE_PREFIX)
+    }
+    return tuple(sorted(items, key=lambda i: (i.sample, i.kind, i.value)))
+
+
+def _anchor_fingerprints(trust: TrustBundle | None) -> tuple[str, ...]:
+    if trust is None:
+        return ()
+    der = (
+        x509.load_pem_x509_certificate(a.certificate_pem.encode("ascii")).public_bytes(
+            serialization.Encoding.DER
+        )
+        for a in trust.anchors
+    )
+    return tuple(sorted({_sha256(d) for d in der}))
+
+
 def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
     acquired = sorted(r.acquired_at for r in acquirer.records())
     hashes = input_hashes(
@@ -304,6 +351,13 @@ def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
         issuer=inputs.issuer,
         limitations=(*_LIMITATIONS, _MODE_LIMITATIONS[inputs.mode]),
         bound_files=hashes.bound_files,
+        authorization_id=inputs.authorization.authorization_id if inputs.authorization else None,
+        authorization_digest=inputs.authorization_digest,
+        remote_read_without_authorization=inputs.remote_read_without_authorization,
+        passport_trust_hash=digest(inputs.trust) if inputs.trust else None,
+        trust_anchor_fingerprints=_anchor_fingerprints(inputs.trust),
+        ca_file_digest=inputs.ca_file_digest,
+        test_items=tested_items(inputs.ixit, acquirer.records()),
     )
 
 
