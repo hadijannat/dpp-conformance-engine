@@ -1,0 +1,6 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "TEST-ONLY. Project-authored and synthetic. It makes no normative statement. TP-VC-PASSPORT-001 uses it for boundary case B-09: a passport with an id must name its operator.",
+  "type": "object",
+  "dependencies": {"id": ["operator"]}
+}

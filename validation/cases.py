@@ -32,6 +32,8 @@ _SETUP: dict[str, dict[str, Any]] = {
     "B-05": {"ics_changes": {"characteristics": {"capacity_wh": "unknown"}}},
     "B-06": {"profile": "battery/lmt"},
     "B-08": {"ics_changes": {"features": {"item_data": False}}},
+    # The model-level document has an id and no operator, so it breaks the draft-07 dependencies.
+    "B-09": {"ixit_changes": {"resources": {"item": {"path": "/dpp/{id}/model"}}}},
     "F-40": {"samples": {"qr_image": "fixtures/reference/qr/TEST-ONLY-qualifier-order.png"}},
     "F-41": {"samples": {"qr_image": "fixtures/reference/qr/TEST-ONLY-model-level.png"}},
     "F-42": {"samples": {"qr_image": "fixtures/reference/qr/TEST-ONLY-http-scheme.png"}},

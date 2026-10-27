@@ -604,7 +604,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `did_redirect_off_host` | family `did`: `/.well-known/did.json` answers `302` to `https://other.example.test/.well-known/did.json`, outside the scope of the rig |
 | `vc_status_revoked` | family `credentials`: the status list of section 4.7 sets the bit at index `41267` |
 | `vc_status_list_unsigned` | family `credentials`: the signature of the status list covers a list with the bit at index `41267` set, and the served payload has the bit not set |
-| `vc_status_list_stale` | family `credentials`: the `ttl` of the status list is `86400000`, one day after its `validFrom`, so the list is stale at the evaluation time of the rig || `aas_api_wrong_status` | family `aas`: `/api/v3.0/shells/{id}` answers `200` with an empty body for an unknown shell id |
+| `vc_status_list_stale` | family `credentials`: the `ttl` of the status list is `86400000`, one day after its `validFrom`, so the list is stale at the evaluation time of the rig |
+| `vc_payload_schema_broken` | family `credentials`: the `credentialSubject` of the credential of section 4.7 is an empty object. The credential is signed validly || `aas_api_wrong_status` | family `aas`: `/api/v3.0/shells/{id}` answers `200` with an empty body for an unknown shell id |
 | `aas_api_bad_paging` | family `aas`: `/api/v3.0/shells` and `/api/v3.0/submodels` ignore `limit` and answer every element without a `cursor` |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
