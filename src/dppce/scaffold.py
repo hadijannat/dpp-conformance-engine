@@ -197,6 +197,7 @@ Step = tuple[str, str | None]
 def next_steps(family: str, ics: Path, ixit: Path) -> list[Step]:
     """The commands that the operator must still run. A decision names what a person decides."""
     files = f"--profile family/{family} --ics {shlex.quote(str(ics))} --ixit {shlex.quote(str(ixit))}"
+    period = "--not-before <START> --not-after <END>"
     return [
         (
             "dppce keys generate --out <REPORT-KEY> --passphrase-ref env:DPPCE_SECRET_<NAME> > <PUBLIC-JWK>",
@@ -204,13 +205,25 @@ def next_steps(family: str, ics: Path, ixit: Path) -> list[Step]:
         ),
         (
             "dppce trust-bundle add-key --policy-version <POLICY-VERSION> --kid <KID> --issuer <ISSUER-ID> "
-            "--purpose report --public-key <PUBLIC-JWK> --not-before <START> --not-after <END> "
-            "--out <TRUST-BUNDLE>",
+            f"--purpose report --public-key <PUBLIC-JWK> {period} --out <REPORT-BUNDLE>",
             "The operator decides what the test host trusts. The IXIT cannot decide it.",
         ),
         (
+            "dppce trust-bundle add-key --bundle <REPORT-BUNDLE> --kid <PASSPORT-KID> "
+            "--issuer <PASSPORT-ISSUER-ID> --purpose passport --public-key <PASSPORT-PUBLIC-JWK> "
+            f"{period} --out <PASSPORT-BUNDLE>",
+            "The operator decides which passport signer of the system the test host trusts. "
+            "Without it, each signature step finds the issuer untrusted.",
+        ),
+        (
+            "dppce trust-bundle add-key --bundle <PASSPORT-BUNDLE> --kid <OWNER-KID> --issuer <OWNER-ID> "
+            f"--purpose authorization --public-key <OWNER-PUBLIC-JWK> {period} --out <TRUST-BUNDLE>",
+            "The operator decides to trust the key of the system owner. Add it only for dppce "
+            "authorize. If you skip it, use <PASSPORT-BUNDLE> as <TRUST-BUNDLE>.",
+        ),
+        (
             "dppce authorize --document <AUTHORIZATION-DOCUMENT> --key <OWNER-KEY> --kid <OWNER-KID> "
-            "--out <AUTHORIZATION>",
+            "--passphrase-ref <OWNER-PASSPHRASE-REF> --out <AUTHORIZATION>",
             "Only the system owner signs it. Run it for role secrets, for a write, or for a public "
             "origin without a remote-host confirmation.",
         ),

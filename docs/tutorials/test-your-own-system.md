@@ -87,7 +87,7 @@ The trust bundle is a TEST-ONLY bundle. It fits the reference system only.
 
 | Decision | Who decides | Where |
 | --- | --- | --- |
-| Which keys the test host trusts | the operator | `--trust`, a bundle from `dppce trust-bundle add-key` |
+| Which keys the test host trusts: report, passport signer, system owner | the operator | `--trust`, a bundle from `dppce trust-bundle add-key` |
 | Which key signs the conformance test reports | the operator | `dppce keys generate` |
 | Each loopback or private origin to contact | the operator | `--allow-private-host ORIGIN` |
 | Each public origin to contact | the system owner permits it, the operator confirms it | `--allow-remote-host ORIGIN` or `--authorization` |

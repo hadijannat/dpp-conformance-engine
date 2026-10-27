@@ -10,6 +10,7 @@ import contextlib
 import io
 import json
 import re
+import shlex
 import stat
 from pathlib import Path
 from typing import Any
@@ -149,6 +150,42 @@ def test_init_writes_no_confirmation_no_secret_and_no_trust_choice(tmp_path: Pat
     assert "TEST-ONLY" not in text
     decided = [step for step in result["next_steps"] if step["decision"]]
     assert any("dppce run " in step["command"] for step in decided)
+
+
+def _parsed_next_steps(tmp_path: Path) -> list[Any]:
+    """Each printed command, parsed by the real command line with each placeholder filled."""
+    code, result = _init(tmp_path, "credentials")
+    assert code == 0
+    parsed = []
+    for step in result["next_steps"]:
+        argv = shlex.split(re.sub(r"<[A-Z-]+>", "x", step["command"]))
+        assert argv[0] == "dppce", step["command"]
+        argv = argv[1 : argv.index(">")] if ">" in argv else argv[1:]
+        parsed.append(cli._parser().parse_args(argv))  # a wrong or a missing required flag exits
+    return parsed
+
+
+def test_each_next_command_parses_and_each_key_has_its_passphrase(tmp_path: Path) -> None:
+    for namespace in _parsed_next_steps(tmp_path):
+        # dppce keys generate writes only encrypted keys: a key without its passphrase exits 2.
+        if getattr(namespace, "key", None) is not None:
+            assert namespace.passphrase_ref, namespace.command
+
+
+def test_the_trust_bundle_steps_add_each_key_that_the_run_needs(tmp_path: Path) -> None:
+    code, result = _init(tmp_path, "credentials")
+    assert code == 0
+    commands = [shlex.split(step["command"]) for step in result["next_steps"]]
+    adds = [argv for argv in commands if argv[1:3] == ["trust-bundle", "add-key"]]
+    purposes = {argv[argv.index("--purpose") + 1] for argv in adds}
+    assert {"report", "authorization", "passport"} <= purposes
+    # The steps form one chain: each step extends the bundle of the step before it.
+    outs = [argv[argv.index("--out") + 1] for argv in adds]
+    for previous, argv in zip(outs, adds[1:], strict=False):
+        assert argv[argv.index("--bundle") + 1] == previous
+    for argv in commands:
+        if argv[1] in ("plan", "run"):
+            assert argv[argv.index("--trust") + 1] == outs[-1]
 
 
 def test_init_refuses_to_overwrite_without_force(tmp_path: Path) -> None:
