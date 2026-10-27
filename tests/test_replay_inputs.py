@@ -26,6 +26,8 @@ RID, TID = "TEST-ONLY-R-001", "TEST-ONLY-TP-001"
 PACK, TESTPACK = "test-only/reviewed", "test-only/reviewed-tests"
 CITED = {**b.CITED, "source_id": "dppce-illustrative"}
 RULES = "profiles/battery/rules/illustrative-rules.yaml"
+# A file that no profile binds. Only the parameter of a test purpose names it.
+PARAM_FILE = "testpacks/data/TEST-ONLY-replay.schema.json"
 IXIT = {
     "schema_version": "dppce.ixit/1",
     "endpoints": {"api": "https://id.example.test"},
@@ -34,7 +36,9 @@ IXIT = {
 Imports = Literal["select", "load", "none"]
 
 
-def write_pair(directory: Path, title: str | None = None) -> tuple[Path, Path]:
+def write_pair(
+    directory: Path, title: str | None = None, stimulus: dict[str, Any] | None = None
+) -> tuple[Path, Path]:
     """Write the TEST-ONLY pack and test pack. ``title`` changes a model field of both."""
     changed = {"title": title} if title else {}
     requirement = b.requirement(
@@ -50,7 +54,7 @@ def write_pair(directory: Path, title: str | None = None) -> tuple[Path, Path]:
         TID,
         requirements=[RID],
         permitted_modes=["reviewed"],
-        stimulus={"check": "identifier.parse"},
+        stimulus=stimulus or {"check": "identifier.parse"},
         requires_scope="none",
         **changed,
     )
@@ -66,12 +70,20 @@ def write_pair(directory: Path, title: str | None = None) -> tuple[Path, Path]:
 class Run:
     """One run on a copied data root ``tmp/root-a``. Nothing here contacts a host."""
 
-    def __init__(self, tmp_path: Path, imports: Imports = "select", trust: Path | None = None) -> None:
+    def __init__(
+        self,
+        tmp_path: Path,
+        imports: Imports = "select",
+        trust: Path | None = None,
+        stimulus: dict[str, Any] | None = None,
+    ) -> None:
         self.root = tmp_path / "root-a"
         for name in ("catalogue", "profiles", "testpacks"):
             shutil.copytree(ROOT / name, self.root / name)
         self.imports_dir = tmp_path / "imports"
-        self.pack, self.testpack = write_pair(self.imports_dir)
+        self.pack, self.testpack = write_pair(self.imports_dir, stimulus=stimulus)
+        if stimulus is not None:
+            (self.root / PARAM_FILE).write_text("{}\n", encoding="utf-8")
         ixit = tmp_path / "ixit.json"
         ixit.write_text(json.dumps(IXIT), encoding="utf-8")
         self.dir, self.keys = tmp_path / "run", tmp_path / "keys"
@@ -207,6 +219,23 @@ def test_a_changed_input_stops_the_replay_before_it_evaluates(
     assert "REPLAY.INPUT.CHANGED" in error
     assert label in error
     assert "the ICS does not fit the profile" not in error
+
+
+def test_a_changed_file_that_a_test_purpose_parameter_names_stops_the_replay(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Section 9.2 (OD-07): each file that a test purpose names in a parameter is a bound file."""
+    run = Run(tmp_path, stimulus={"check": "data.jsonschema", "params": {"schema": PARAM_FILE}})
+    manifest = run.envelope.decision.manifest
+    assert manifest.bound_files is not None
+    assert manifest.bound_files[PARAM_FILE].startswith("sha256:")
+    with (run.root / PARAM_FILE).open("ab") as handle:
+        handle.write(b"\n")
+    capsys.readouterr()
+    assert run.replay() == 2
+    error = capsys.readouterr().err
+    assert "REPLAY.INPUT.CHANGED" in error
+    assert f"bound file {PARAM_FILE}" in error
 
 
 def _as_version_1(run: Run, *, rc1: bool) -> None:
