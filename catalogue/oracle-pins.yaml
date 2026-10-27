@@ -13,6 +13,16 @@ pins:
   license: Apache-2.0
   sha256: ff902c5a13f197727169cb8579e29ab598940bc266d90e8702191d7df392cf04
   version: commit bedc11ec56527255369909509b7d06e471180472
+- id: gs1-webvoc
+  path: tests/vectors/gs1-webvoc/gs1Voc.jsonld
+  repo: gs1/WebVoc
+  upstream_path: v1.16/gs1Voc.jsonld
+  commit: f8f407bf717233c871dca2f62f4e45b0940e8cad
+  url: https://github.com/gs1/WebVoc/blob/f8f407bf717233c871dca2f62f4e45b0940e8cad/v1.16/gs1Voc.jsonld
+  retrieval_date: '2026-10-27'
+  license: Apache-2.0
+  sha256: 5b417c158cca7e55766dc5e35a1fa480273f036720b6c7382d61ea6939a7ee66
+  version: v1.16 at commit f8f407bf717233c871dca2f62f4e45b0940e8cad
 - id: gs1-syntax-dictionary
   path: testpacks/data/gs1-syntax-engine/gs1-syntax-dictionary.txt
   repo: gs1/gs1-syntax-engine
