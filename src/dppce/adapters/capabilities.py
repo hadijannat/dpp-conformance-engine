@@ -105,9 +105,9 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "resolver.linkset",
         "resolver",
         _E,
-        "Fetch the linkset of the carrier identifier by Accept header and by linkType query. Check "
-        "status, media type, RFC 9264 structure, the anchor, and a declared relation. Link targets "
-        "are not fetched.",
+        "Fetch the linkset of the carrier identifier by Accept header and by linkType query, and a "
+        "linkset that a Link header of these answers advertises. Check status, media type, RFC 9264 "
+        "structure, the anchor, and a declared relation. Link targets are not fetched.",
         None,
         "Tested against a GS1 conformant resolver in a recorded test campaign. The structure rule "
         "is reviewed against RFC 9264 by a person.",

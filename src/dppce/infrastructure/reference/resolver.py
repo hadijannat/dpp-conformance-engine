@@ -17,7 +17,9 @@ only link, so every other ``linkType`` gets the core redirect.
 
 The other flags of this module change the linkset, the description file, or the answer for an
 unknown identifier. The flag ``resolver_rate_limited`` answers each default request with 429
-(B-20). Each answer without one of these flags stays the same.
+(B-20). The flag ``resolver_linkset_link_broken`` adds a Link header to each linkset answer that
+advertises a linkset of another identifier (F-76). Each answer without one of these flags stays
+the same.
 """
 
 from __future__ import annotations
@@ -49,8 +51,12 @@ FLAGS: Final = frozenset(
         "negotiation_wrong_type",
         # B-20: the default request gets 429 with Retry-After 1, every time.
         "resolver_rate_limited",
+        # F-76: a Link header of each linkset answer advertises a linkset of another identifier.
+        "resolver_linkset_link_broken",
     }
 )
+# The query of the linkset that the flag resolver_linkset_link_broken advertises.
+ADVERTISED_QUERY: Final = "linkType=linkset&view=advertised"
 LINKSET: Final = "application/linkset+json"
 # A synthetic relation type in the reserved example domain. It is not a GS1 link type.
 PASSPORT_RELATION: Final = "https://dppce.example.test/rel/passport"
@@ -168,5 +174,11 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
         # A seeded resolver fault applies to the linkset request too.
         return reply
     anchor = PUBLIC_ORIGIN + request.path
-    body = linkset(anchor, urljoin(anchor, headers["Location"]), system.faults)
-    return 200, LINKSET, body, {"Vary": "Accept"}
+    faults = system.faults
+    extra: dict[str, str] = {}
+    if "resolver_linkset_link_broken" in faults:
+        extra = {"Link": f'<{request.path}?{ADVERTISED_QUERY}>; rel="linkset"'}
+        if request.query == ADVERTISED_QUERY:
+            faults = faults | {"resolver_linkset_anchor_mismatch"}
+    body = linkset(anchor, urljoin(anchor, headers["Location"]), faults)
+    return 200, LINKSET, body, {"Vary": "Accept", **extra}

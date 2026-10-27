@@ -24,21 +24,49 @@ SAFE_RESPONSE_HEADERS: Final = frozenset(
         "accept-ranges", "allow", "cache-control", "content-encoding", "content-language",
         "content-length", "content-type", "date", "etag", "expires", "last-modified",
         "retry-after", "transfer-encoding", "vary",
+        # CORS (OD-06). The allowed origin is a URL, so it is redacted below, not kept as sent.
+        "access-control-allow-credentials", "access-control-allow-headers",
+        "access-control-allow-methods", "access-control-expose-headers", "access-control-max-age",
     }
 )  # fmt: skip
 # These hold URLs. They are kept, with each URL redacted.
-_URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location"})
+_URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location", "access-control-allow-origin"})
 # One link: a target and at most one "rel" parameter. Any other parameter can hold any text.
-_LINK: Final = re.compile(r'\s*<([^<>\s]*)>(?:\s*;\s*rel="?([A-Za-z][A-Za-z0-9 .-]*)"?)?\s*')
-# Registered relation names that an API uses for paging and description. A word outside this
-# list can be a secret, so a value with one is removed.
+# Only the quoted form can hold ":", "/", or "#": an extension relation is an IRI (RFC 8288, 3.3).
+_LINK: Final = re.compile(
+    r'\s*<([^<>\s]*)>(?:\s*;\s*rel=(?:"([A-Za-z][A-Za-z0-9 .:/#-]*)"|"?([A-Za-z][A-Za-z0-9 .-]*)"?))?\s*'
+)
+# The link types of the GS1 Web Vocabulary: each sub-property of gs1:linkType in v1.16/gs1Voc.jsonld
+# of github.com/gs1/WebVoc at commit f8f407bf717233c871dca2f62f4e45b0940e8cad (Apache-2.0, read on
+# 2026-10-27, SHA-256 5b417c158cca7e55766dc5e35a1fa480273f036720b6c7382d61ea6939a7ee66). The file marks
+# productSustainabilityInfo as deprecated. The names are fixed, so they cannot carry a secret.
+_GS1_LINK_TYPES: Final = (
+    "activityIdeas", "allergenInfo", "appDownload", "backgroundInfo", "brandHomepageClinical",
+    "brandHomepagePatient", "careersInfo", "certificationInfo", "consumerHandlingStorageInfo",
+    "defaultLink", "defaultLinkMulti", "dpp", "eifu", "epcis", "epil", "eventsInfo", "faqs", "handledBy",
+    "hasRetailers", "homepage", "ingredientsInfo", "instructions", "jws", "leaveReview", "locationInfo",
+    "logisticsInfo", "loyaltyProgram", "masterData", "menuInfo", "nutritionalInfo", "openingHoursInfo",
+    "paymentLink", "pip", "productSustainabilityInfo", "promotion", "purchaseSuppliesOrAccessories",
+    "quickStartGuide", "recallStatus", "recipeInfo", "registerProduct", "registryEntry", "relatedImage",
+    "relatedVideo", "reportFound", "review", "safetyInfo", "scheduleTime", "serviceInfo", "smartLabel",
+    "smpc", "socialMedia", "statisticInfo", "subscribe", "support", "sustainabilityInfo", "traceability",
+    "tutorial", "userAgreement", "verificationService", "whatsInTheBox",
+)  # fmt: skip
+# The two spellings of a GS1 link type: the compact gs1: form and the IRI of the vocabulary context.
+_GS1_FORMS: Final = ("gs1:", "https://ref.gs1.org/voc/")
+JSONLD_CONTEXT: Final = "http://www.w3.org/ns/json-ld#context"
+# Registered relation names that an API uses for paging and description, linkset (RFC 9264), the
+# JSON-LD context relation, and the GS1 link types. A word outside this list can be a secret, so a
+# value with one is removed. An extension relation is compared as exact text.
 _RELATIONS: Final = frozenset(
     {
         "alternate", "canonical", "collection", "describedby", "first", "help", "item", "last",
-        "license", "next", "prev", "previous", "profile", "related", "self", "service-desc",
-        "service-doc", "service-meta", "type", "up",
+        "license", "linkset", "next", "prev", "previous", "profile", "related", "self", "service-desc",
+        "service-doc", "service-meta", "type", "up", JSONLD_CONTEXT,
     }
+    | {form + name for form in _GS1_FORMS for name in _GS1_LINK_TYPES}
 )  # fmt: skip
+_EXTENSION: Final = re.compile(r"[:/#]")
 
 _SENSITIVE_PARAMETER: Final = re.compile(
     r"token|secret|passw|pwd|sig|key|auth|credential|session|code|jwt|bearer", re.IGNORECASE
@@ -78,17 +106,29 @@ def redact_link(value: str) -> str:
     A value with any other parameter, or one that this simple reading cannot split, is removed
     as a whole: a title or an anchor is free text that a system can fill with anything.
     """
-    links: list[str] = []
+    links = parse_link(value)
+    if links is None or not all(set(relations) <= _RELATIONS for _, relations in links):
+        return REMOVED
+    return ", ".join(
+        f"<{redact_url(target)}>" + (f'; rel="{" ".join(relations)}"' if relations else "")
+        for target, relations in links
+    )
+
+
+def parse_link(value: str) -> list[tuple[str, tuple[str, ...]]] | None:
+    """Split a ``Link`` value into its targets and their relations, or None for any other form.
+
+    A registered relation name is case-insensitive, so it is given in lower case. An extension
+    relation keeps its case.
+    """
+    links: list[tuple[str, tuple[str, ...]]] = []
     for part in value.split(","):
         match = _LINK.fullmatch(part)
         if match is None:
-            return REMOVED
-        relations = (match.group(2) or "").lower().split()
-        if not set(relations) <= _RELATIONS:
-            return REMOVED
-        rel = f'; rel="{" ".join(relations)}"' if relations else ""
-        links.append(f"<{redact_url(match.group(1))}>{rel}")
-    return ", ".join(links)
+            return None
+        words = (match.group(2) or match.group(3) or "").split()
+        links.append((match.group(1), tuple(w if _EXTENSION.search(w) else w.lower() for w in words)))
+    return links
 
 
 def redact_request_headers(headers: dict[str, str]) -> tuple[tuple[str, str], ...]:

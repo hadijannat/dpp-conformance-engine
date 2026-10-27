@@ -362,7 +362,7 @@ Initial registry:
 | `aas.api_profile` | `aas.api_profile` | Sends positive GET probes to an AAS server through the engine transport under a read profile of the AAS API 3.0. It sends no write, negative, or fuzz request. Experimental. |
 | `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
 | `identifier.negotiation` | `identifier.negotiation` | Sends five fixed `GET` requests to the carrier URL that differ only in the `Accept` header. Checks status, media type, weights, `Vary`, and the body shape. Experimental. |
-| `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
+| `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier, and a linkset that a `Link` header of its answers advertises. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
 | `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
 | `identity.did` | `identity.did` | Resolves a did:web DID, or reads an offline copy of its DID document. Checks the `id`, the verification methods, and the assertion methods. Resolution is not trust. Experimental. |
@@ -769,6 +769,18 @@ It judges each answer by the first rule that applies:
 
 Otherwise the check passes with `RESOLVER.LINKSET.OK`. It does not fetch a link target, and it does
 not judge the other target attributes.
+
+An answer can also advertise its linkset in a `Link` header with the relation `linkset` (RFC 9264,
+section 6). After both answers pass, the check reads the recorded `Link` headers of the two
+answers. It takes the first `http` or `https` target with that relation and resolves a relative
+target against the final URL of its answer. It fetches that target once with
+`Accept: application/linkset+json` and judges the answer by rules 1 to 5. The transport policy
+applies to that request as to every other request. The check reads only the recorded form of the
+header (section 10). A `Link` value with another parameter, such as `type`, is therefore not read.
+A target that redaction changed is not fetched.
+No usable `Link` value, no answer, or a body that cannot be read leaves the pass unchanged. The
+check sends the extra request only after both answers pass. So a broken `Link` value cannot turn
+a fail into a missing answer.
 
 `resolver.well_known` fetches `/.well-known/gs1resolver` at the origin of the carrier URL. The
 rules judge the final answer, also after a redirect. A status other than 200 gives
@@ -1228,7 +1240,7 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - One fetch has a total time limit (`total_timeout_ms`), apart from the limit for one read.
   Every redirect hop and every retry of that fetch share it.
 - The transport asks for an unencoded body. A check does not assess an encoded body.
-- Methods other than `GET` and `HEAD` need a valid authorization with the matching scope.
+- Methods other than `GET`, `HEAD`, and `OPTIONS` need a valid authorization with the matching scope.
 - Limits: timeout, maximum body size (the body is truncated and flagged), maximum redirects,
   maximum request count, and minimum interval. Each limit that triggers is recorded.
 - Secrets are removed from request headers before a record is created. If the tested system
@@ -1271,7 +1283,7 @@ missing answer, as they do for a server error.
 
 The transport waits for `Retry-After` once per fetch, and only for these conditions:
 
-- The answer is a 429 to a `GET` or `HEAD` request. The transport never sends a write again.
+- The answer is a 429 to a `GET`, `HEAD`, or `OPTIONS` request. The transport never sends a write again.
 - `Retry-After` is a number of seconds. The transport does not read the date form, because it
   depends on the clock of the system under test.
 - The delay is 5 seconds or less, and it ends before the total time limit of the fetch.
@@ -1464,9 +1476,18 @@ records/<id>.enc   one encrypted record each
   with the directory. A directory that was renamed or replaced during the purge is not removed.
 - `read_recording` returns the records in acquisition order (numeric order of the identifiers).
 - A response header is recorded only if its name is in a fixed list of safe names. Each other
-  value is replaced with `<removed>`. A URL in a recorded header is redacted: userinfo, the
-  fragment, and credential-like query values are removed. A `Link` value keeps only its targets
-  and registered relation names.
+  value is replaced with `<removed>`. The list includes six CORS names (OD-06):
+  `access-control-allow-origin`, `-allow-methods`, `-allow-headers`, `-expose-headers`,
+  `-max-age`, and `-allow-credentials`. A URL in a recorded header is redacted: userinfo, the
+  fragment, and credential-like query values are removed. The value of
+  `access-control-allow-origin` is redacted in the same way.
+- A `Link` value keeps only its targets and a closed list of relations. The list holds the
+  registered relation names, `linkset`, the JSON-LD context relation, and the GS1 link types.
+  The GS1 link types are those of the pinned GS1 Web Vocabulary file, in the `gs1:` form and the
+  `https://ref.gs1.org/voc/` form. An extension relation is compared as exact text, and only a
+  quoted `rel` value can hold one. A value with another relation or another parameter is removed
+  as a whole. The pinned file is `v1.16/gs1Voc.jsonld` of `github.com/gs1/WebVoc` at commit
+  `f8f407bf717233c871dca2f62f4e45b0940e8cad`.
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in
 method, URL, or role gives `recording_mismatch`, which is an execution error.

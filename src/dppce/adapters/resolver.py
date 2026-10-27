@@ -1,7 +1,8 @@
 """Resolver adapter: the GS1 Digital Link resolver surface of the carrier identifier.
 
-The checks judge what the resolver answers to a few fixed GET requests. They never follow a link
-of a linkset, and they do not judge the status of a followed redirect hop: the transport does not record it.
+The checks judge what the resolver answers to a few fixed GET requests, plus one GET of a linkset
+that a Link header of an answer advertises. They never follow a link of a linkset, and they do not
+judge the status of a followed redirect hop: the transport does not record it.
 A body of an unexpected shape is a fail, never a blocked step, so that a system under test cannot
 reshape a wrong answer into one that is not judged.
 """
@@ -10,13 +11,14 @@ from __future__ import annotations
 
 import re
 from typing import Any, Final
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 
 from pydantic import Field, field_validator
 
 from dppce.adapters.common import (
     LINKSET,
     blocked,
+    body_problem,
     carrier_identifier,
     completed,
     fetch_once,
@@ -30,6 +32,7 @@ from dppce.adapters.common import (
 )
 from dppce.adapters.identifier import gtin_check_digit_ok
 from dppce.infrastructure.interfaces import Record
+from dppce.infrastructure.redaction import REMOVED, parse_link
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -43,6 +46,9 @@ WELL_KNOWN: Final = "/.well-known/gs1resolver"
 # The transport errors of a redirect that it does not follow. The record keeps the 3xx status.
 _UNFOLLOWED: Final = ("redirect_out_of_scope", "too_many_redirects")
 _NO_TARGET: Final = "The carrier identifier is not an http or https URL. There is no resolver to probe."
+_NOT_JUDGED: Final = (
+    " A Link header advertises a linkset, but its answer cannot be judged, so it is not judged."
+)
 
 
 def _is_relation(value: object) -> bool:
@@ -154,6 +160,30 @@ def _linkset_body_failure(record: Record, carrier: str, relations: list[str]) ->
     return None
 
 
+def _advertised(answers: list[Record]) -> str | None:
+    """The first http or https target of a Link with the relation linkset in the answers, or None.
+
+    The record keeps a Link value only in the form that redaction keeps, so this reads that form.
+    A relative target is resolved against the final URL of its answer. A target that redaction
+    changed is skipped: the record no longer holds the URL that the system advertised.
+    """
+    for record in answers:
+        base = record.redirects[-1] if record.redirects else record.url
+        for name, value in record.headers:
+            if name.lower() != "link":
+                continue
+            for target, relations in parse_link(value) or []:
+                try:
+                    url = urljoin(base, target)
+                except ValueError:
+                    continue
+                if REMOVED in unquote(url):
+                    continue
+                if "linkset" in relations and is_http_url(url):
+                    return url
+    return None
+
+
 @register("resolver.linkset", capability="resolver.linkset", params=LinksetParams)
 def linkset(ctx: CheckContext) -> CheckOutcome:
     relations = ctx.params.get("relations")
@@ -171,10 +201,12 @@ def linkset(ctx: CheckContext) -> CheckOutcome:
     carrier, transformations = target
     probes = (("accept", carrier, LINKSET), ("link_type", _with_link_type(carrier), None))
     observations: list[Observation] = []
+    answers: list[Record] = []
     for index, (request, url, accept) in enumerate(probes):
         record = fetch_once(ctx, url, accept=accept)
         if _no_reply(record):
             return no_answer(ctx, record)
+        answers.append(record)
         observations.append(
             ctx.observation(
                 index,
@@ -195,7 +227,34 @@ def linkset(ctx: CheckContext) -> CheckOutcome:
         "The resolver answers both linkset requests with a linkset of the carrier identifier that has "
         "a declared relation. Link targets are not fetched, and target attributes are not judged."
     )
-    return completed(True, "RESOLVER.LINKSET.OK", message, observations)
+    # RFC 9264, section 6: an answer can advertise its linkset in a Link header. It is judged only
+    # after both probes pass, and an advertised linkset without a usable answer changes nothing. So a
+    # system cannot turn a fail into a missing answer with a broken Link value.
+    advertised = _advertised(answers)
+    if advertised is None:
+        return completed(True, "RESOLVER.LINKSET.OK", message, observations)
+    record = fetch_once(ctx, advertised, accept=LINKSET)
+    observations.append(
+        ctx.observation(
+            len(observations),
+            kind="exchange",
+            records=[record],
+            summary=_summary(record, "advertised"),
+            transformations=transformations,
+        )
+    )
+    if _no_reply(record):
+        return completed(True, "RESOLVER.LINKSET.OK", message + _NOT_JUDGED, observations)
+    failure = _linkset_head_failure(record)
+    if failure is None:
+        if body_problem(record) is not None:
+            return completed(True, "RESOLVER.LINKSET.OK", message + _NOT_JUDGED, observations)
+        failure = _linkset_body_failure(record, carrier, [str(r) for r in relations])
+    if failure is not None:
+        return completed(False, *failure, observations)
+    return completed(
+        True, "RESOLVER.LINKSET.OK", message + " The advertised linkset passes too.", observations
+    )
 
 
 def _is_json(media: str) -> bool:

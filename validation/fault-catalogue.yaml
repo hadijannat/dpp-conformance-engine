@@ -533,6 +533,13 @@ sut_faults:
     test_purpose: TP-AAS-API-001
     profiles: [family/aas]
     expected: {verdict: fail, reason_code: AAS.API.PROFILE}
+  - id: F-76
+    class: contract_violation
+    fault: resolver_linkset_link_broken
+    description: A Link header of the linkset answers advertises a linkset whose anchor is a different identifier.
+    test_purpose: TP-GS1-LINKSET-001
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.LINKSET.ANCHOR}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
