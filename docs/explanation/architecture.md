@@ -1496,8 +1496,9 @@ records/<id>.enc   one encrypted record each
 - The record form holds `redirects` and, from P2-25 on, `redirect_statuses`: one status for each
   redirect target, in the same order. Each status is 301, 302, 303, 307, or 308. The form leaves
   out `redirect_statuses` when the list is empty. So a record from before P2-25 keeps its plaintext,
-  its commitment, the records root, and the decision digest. A reader gives such a record an empty
-  list. An empty list in the form, or a list of a different length than `redirects`, is a
+  its commitment, and the records root. A reader gives such a record an empty list. A replay of an
+  old recording gives a different decision digest only where a check reads the new field or a
+  test pack changed. An empty list in the form, or a list of a different length than `redirects`, is a
   malformed record.
 - A response header is recorded only if its name is in a fixed list of safe names. Each other
   value is replaced with `<removed>`. The list includes six CORS names (OD-06):
