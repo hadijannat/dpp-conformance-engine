@@ -6,13 +6,14 @@
 # The applicability of a requirement starts with `profile.id eq family/<family>` and equals the
 # applicability of its test purpose. A step that does not apply then leaves a requirement that
 # does not apply, never a requirement with an empty path. Requirement ids are FAM-<FAMILY>-...;
-# the test purposes are in testpacks/web.yaml, gs1-resolver.yaml, aas.yaml, and credentials.yaml.
+# the test purposes are in testpacks/web.yaml, gs1-resolver.yaml, aas.yaml, credentials.yaml, and
+# oauth.yaml.
 schema_version: dppce.pack/1
 pack_id: family/illustrative
 version: 0.1.0
 title: Illustrative family rules
-description: Synthetic rules for the family profiles family/web, family/gs1-resolver, family/aas, and
-  family/credentials.
+description: Synthetic rules for the family profiles family/web, family/gs1-resolver, family/aas,
+  family/credentials, and family/oauth.
 scope_statement: Synthetic demonstration rules only. This pack covers no law and no standard.
 requirements:
 # -- family/web: a plain web passport ----------------------------------------------------------
@@ -700,3 +701,28 @@ requirements:
   - id: default
     tests:
     - TP-VC-PASSPORT-001
+# -- family/oauth: a web passport whose restricted view needs an OAuth 2.0 token ----------------
+- id: FAM-OAUTH-ACCESS-001
+  title: A role with an OAuth 2.0 token sees its own view only
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: With the bearer token that the token endpoint issues to its client, a role receives the
+    fields that the declared access policy gives it, and no field that the policy withholds from it.
+  applicability:
+    fact: profile.id
+    op: eq
+    value: family/oauth
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-OAUTH-ACCESS-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. A refused token gives no
+      answer, never a pass.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-OAUTH-ACCESS-001

@@ -63,7 +63,7 @@ refuses them without a matching authorization.
 ## Choose a profile
 
 Use a battery profile only for a battery passport. For another system, use a family profile.
-A family profile pins no schema, no API contract, and no access policy.
+A family profile pins no schema and no API contract. Only `family/oauth` pins an access policy.
 Its requirements are illustrative and make no normative statement.
 
 | Profile | Use it when the system |
@@ -72,6 +72,7 @@ Its requirements are illustrative and make no normative statement.
 | `family/gs1-resolver` | Resolves a GS1 Digital Link identifier to a passport |
 | `family/aas` | Supplies Asset Administration Shell files in JSON, XML, or AASX form |
 | `family/credentials` | Issues the passport as a verifiable credential, in the VC or UNTP style |
+| `family/oauth` | Serves a restricted view to a role that has a token from an OAuth 2.0 token endpoint |
 
 Each family profile reads only ICS fields: `identifier_scheme`, `signature_format`, `granularity`, and `features`.
 A step that does not fit these declarations is not applicable. It is never a fail.
@@ -86,7 +87,8 @@ It points at the loopback reference system, and it makes no normative statement.
 Copy the pair for your family. Then replace every value, including the origins and the samples.
 Run `dppce plan` before `dppce run`, as in the steps above.
 
-Every family profile selects every family test pack.
+Every family profile selects every family test pack, except `family/oauth-core`. Only
+`family/oauth` selects that pack.
 A step of another family is not applicable. It is never a fail.
 A step that needs a value that you did not declare is not a pass.
 An undeclared feature skips its step, and its requirement is inconclusive.
@@ -209,15 +211,46 @@ Limits:
 - A DID document that resolves is not trusted until your trust bundle holds its key.
 - A pass shows a valid proof. It does not show that the claims in the credential are true.
 
+### Web passport with OAuth 2.0 client credentials
+
+- Profile: `family/oauth`. It selects the family test pack `family/oauth-core`. No other profile selects it.
+- Example: `oauth.ics.yaml` and `oauth.ixit.yaml`.
+- Checks:
+  - `TP-OAUTH-ACCESS-001`: the channels of the access policy as the role `legitimate_interest`.
+
+The IXIT declares the role with `scheme: oauth2_client_credentials`. It names a key of `endpoints`
+in `token_endpoint`, and two references: `client_id_ref` and `secret_ref`.
+Before the first request of the role, the engine asks the token endpoint for a token, once.
+See the [architecture contract](../explanation/architecture.md), section 9.3.
+
+Operator decisions:
+
+- Confirm both references: `--role-client-id ROLE=REFERENCE` and `--role-secret ROLE=REFERENCE`.
+- Give the directory of file secrets with `--secrets`.
+- Get an authorization that names the origin of the token endpoint, the role, and the scopes
+  `credential` and `access_probe`. Give it with `--authorization`.
+- Write a profile with your own access policy for a real system. The example pins the policy of
+  the reference system.
+
+Limits:
+
+- The engine supports only the client credentials grant with HTTP Basic client authentication.
+- It does not renew a token during a run. It does not read `expires_in`.
+- A refused token gives `inconclusive` with `TRANSPORT.DENIED`. The report shows no token exchange,
+  because the exchange is not a record.
+- A pass shows the view of the role with that token. It does not show that the token endpoint
+  gives tokens only to entitled clients.
+
 ### Dataspace sample
 
 The engine does not run a dataspace protocol. It has no catalog request, no contract negotiation,
 and no transfer process. The capability manifest (`dppce capabilities`) lists `dataspace.protocol`
 and `dataspace.catalog` as `interface_only`. No check uses them, so the engine plans no step for them.
-The capability `access.oauth2` has the same state. The engine does not request a token.
+The capability `access.oauth2` is `experimental`. It requests a token only with the OAuth 2.0
+client credentials grant.
 
-The example set has no dataspace pair. No family profile declares a role other than `anonymous`,
-and the anonymous role never carries a credential. A dataspace example would not test anything.
+The example set has no dataspace pair. A dataspace example would need a connector, and the
+reference system has none.
 
 An operator can test the data plane of a connector with a token that the operator obtained.
 The token comes from outside the engine, for example an endpoint data reference (EDR) token
@@ -243,8 +276,8 @@ from the connector.
 
 The engine sends the token as `Authorization: Bearer <token>` to the origin that the authorization names.
 It sends it to no other origin. It removes the token from records.
-A data plane that expects another header form refuses the request.
-The step then fails with `ACCESS.ENTITLEMENT.REFUSED`.
+A data plane that expects the token in another header needs `scheme: header` and `header_name`
+in the identity. Otherwise it refuses the request, and the step fails with `ACCESS.ENTITLEMENT.REFUSED`.
 
 What the run shows:
 
@@ -261,7 +294,9 @@ What the run does not show:
 A token expires. An expired token makes the step fail with `ACCESS.ENTITLEMENT.REFUSED`.
 This fail can come from the operator's token, not from the system.
 Renew the token before each run.
-A later version can add the OAuth 2.0 client credentials grant. That change would not add the dataspace protocol.
+A connector that issues tokens with the OAuth 2.0 client credentials grant can use the scheme
+`oauth2_client_credentials` (see the section on `family/oauth`). That scheme does not add the
+dataspace protocol.
 
 ## Use a private CA or a client certificate
 

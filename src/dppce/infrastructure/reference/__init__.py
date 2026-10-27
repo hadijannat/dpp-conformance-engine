@@ -14,7 +14,8 @@ Contract of a family module (``base.Family``):
   the core answer. ``system.signer(name)`` gives a TEST-ONLY signer and certificate of the
   fixture PKI. ``request`` is a ``base.Request``. Return the body of a ``GET``: the server
   drops it for ``HEAD``. The module never changes state: the reference system has no write
-  operation.
+  operation. The one ``POST`` route is the token endpoint of ``oauth``: the core passes each
+  ``POST`` request to that module alone, and its answer changes no state either.
 
 The reference system asks each family in ``FAMILIES`` order, before the core. Under
 ``deny_all`` no family is asked. A family must not change the answer to a request of the
@@ -35,7 +36,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from dppce.infrastructure.reference import aas, credentials, did, jose, resolver
+from dppce.infrastructure.reference import aas, credentials, did, jose, oauth, resolver
 from dppce.infrastructure.reference.base import Family
 
-FAMILIES: Final[tuple[Family, ...]] = (resolver, jose, credentials, did, aas)
+FAMILIES: Final[tuple[Family, ...]] = (resolver, jose, credentials, did, aas, oauth)

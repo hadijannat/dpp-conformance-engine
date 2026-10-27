@@ -2,7 +2,8 @@
 
 Specification: docs/reference/reference-system.md. All data are synthetic. The server is an
 example and not a normative authority. It only reads: there is no write operation. It answers
-GET, HEAD, and OPTIONS. Fault flags seed one defect each, for the method validation in
+GET, HEAD, and OPTIONS, and POST only at the token endpoint of the oauth family, which changes
+no state. Fault flags seed one defect each, for the method validation in
 validation/. Family modules in ``dppce.infrastructure.reference`` add more behavior.
 """
 
@@ -27,6 +28,7 @@ from cryptography.hazmat.primitives import serialization
 from dppce.evidence.canonical import canonical_bytes, digest
 from dppce.evidence.jws import LocalSigner
 from dppce.infrastructure import reference
+from dppce.infrastructure.reference import oauth
 from dppce.infrastructure.reference.base import PUBLIC_ORIGIN, Reply, Request
 from dppce.infrastructure.reference.base import RESOLVER_PATH as _RESOLVER_PATH
 from dppce.infrastructure.reference.base import json_reply as _json
@@ -61,6 +63,7 @@ def known_faults() -> frozenset[str]:
 
 FAULTS: Final = known_faults()
 _READ_METHODS: Final = "GET, HEAD, OPTIONS"
+_MAX_POST_BYTES: Final = 4096
 # The answer to OPTIONS: a CORS preflight for any origin, read methods only.
 _OPTIONS_HEADERS: Final = {
     "Allow": _READ_METHODS,
@@ -262,10 +265,21 @@ class ReferenceSystem:
         return 303, "text/plain", b"", {"Location": f"/dpp/{ident}"}
 
     def respond(self, request: Request) -> Reply:
-        """Answer GET, HEAD, and OPTIONS. Family modules come first, then the core routes."""
+        """Answer GET, HEAD, and OPTIONS. Family modules come first, then the core routes.
+
+        The token endpoint of the oauth family is the one POST route. It changes no state.
+        """
         denied = "deny_all" in self.faults
         if request.method == "OPTIONS":
             return _json(403, {"error": "forbidden"}) if denied else (204, "", b"", dict(_OPTIONS_HEADERS))
+        if request.method == "POST":
+            if denied:
+                return _json(403, {"error": "forbidden"})
+            token = oauth.respond(self, request)
+            if token is not None:
+                return token
+            status, media_type, body, _ = _json(405, {"error": "method_not_allowed"})
+            return status, media_type, body, {"Allow": _READ_METHODS}
         # Under deny_all the core answers alone, as in version 1, also for a subclass layout.
         for family in () if denied else reference.FAMILIES:
             if (reply := family.respond(self, request)) is not None:
@@ -325,9 +339,9 @@ class ReferenceServer:
             def log_message(self, format: str, *args: object) -> None:
                 return
 
-            def _answer(self) -> None:
+            def _answer(self, body_in: bytes = b"") -> None:
                 headers_in = {name.lower(): value for name, value in self.headers.items()}
-                request = Request(self.command, self.path, headers_in)
+                request = Request(self.command, self.path, headers_in, body_in)
                 status, media_type, body, headers = behavior.respond(request)
                 if any("\r" in value or "\n" in value for value in headers.values()):
                     # A value built from the request path must never start a new header line.
@@ -357,6 +371,18 @@ class ReferenceServer:
 
             def do_OPTIONS(self) -> None:
                 self._answer()
+
+            def do_POST(self) -> None:
+                # The body of a token request is small. A larger or unstated body is not read.
+                length = self.headers.get("Content-Length", "")
+                if not length.isdigit() or int(length) > _MAX_POST_BYTES:
+                    self.send_response(413 if length.isdigit() else 411)
+                    self.send_header("Content-Length", "0")
+                    self.send_header("Connection", "close")
+                    self.end_headers()
+                    self.close_connection = True
+                    return
+                self._answer(self.rfile.read(int(length)))
 
         self._server = http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler)
         self._thread: threading.Thread | None = None

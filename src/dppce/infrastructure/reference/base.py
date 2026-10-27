@@ -30,6 +30,8 @@ class Request:
     method: str
     target: str
     headers: Mapping[str, str] = field(default_factory=dict)
+    # Only the token request of the oauth family has a body (P2-28).
+    body: bytes = b""
 
     @property
     def path(self) -> str:
