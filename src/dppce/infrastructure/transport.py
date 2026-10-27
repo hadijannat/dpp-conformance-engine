@@ -289,8 +289,20 @@ class PolicyTransport:
         if recorded:
             # The record keeps the value of these headers, or the transport sets it.
             raise ValueError(f"a credential cannot go in the header {recorded}")
-        # Longest first: a credential that begins with a shorter one is removed as a whole.
-        self._secrets = tuple(sorted(set(tokens), key=len, reverse=True))
+        # RFC 6749, section 2.3.1: HTTP Basic with the form-encoded client id and secret. The
+        # engine builds this value, so an echo of it is removed like the secret itself.
+        self._basic = {
+            role: base64.b64encode(
+                f"{quote(client.client_id, safe='')}:{quote(client.client_secret, safe='')}".encode()
+            ).decode("ascii")
+            for role, client in config.oauth_clients.items()
+        }
+        tokens += self._basic.values()
+        # The forms of each credential and the text that replaces them. Longest first: a
+        # credential that begins with a shorter one is removed as a whole.
+        self._scrubs: tuple[tuple[tuple[str, ...], str], ...] = ()
+        for token in set(tokens):
+            self._add_scrub(_forms(token), REMOVED)
         # The issued access token of each OAuth role, or why it has none. One request per role and run.
         self._tokens: dict[str, str] = {}
         self._refused: dict[str, TransportError] = {}
@@ -525,14 +537,12 @@ class PolicyTransport:
             return "authorization_denied"
         if not self._budget_left():
             return "budget_exhausted"
-        # RFC 6749, section 2.3.1: HTTP Basic with the form-encoded client id and secret.
-        pair = f"{quote(client.client_id, safe='')}:{quote(client.client_secret, safe='')}"
         contact = f" (+{self._config.policy.contact})" if self._config.policy.contact else ""
         headers = {
             "User-Agent": f"dppce/{self._config.engine_version}{contact}",
             "Accept": "application/json",
             "Accept-Encoding": "identity",
-            "Authorization": "Basic " + base64.b64encode(pair.encode("utf-8")).decode("ascii"),
+            "Authorization": f"Basic {self._basic[role]}",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         body = b"grant_type=client_credentials"
@@ -554,10 +564,17 @@ class PolicyTransport:
             or _BEARER_TOKEN.fullmatch(token) is None
         ):
             return "authorization_denied"
-        # From now on, every record is scrubbed of the token, as of any other credential.
-        self._secrets = tuple(sorted({*self._secrets, token}, key=len, reverse=True))
+        # The token endpoint belongs to the system under test, so it chooses this string. Its
+        # bare removal could hide a withheld field or break a JSON body. So every later record
+        # loses the token only in its credential form, ``Bearer <token>``.
+        forms = {f"Bearer{gap}{form}" for gap in (" ", "%20") for form in _forms(token)}
+        self._add_scrub(tuple(sorted(forms, key=len, reverse=True)), f"Bearer {REMOVED}")
         self._tokens[role] = token
         return None
+
+    def _add_scrub(self, forms: tuple[str, ...], replacement: str) -> None:
+        entries = (*self._scrubs, (forms, replacement))
+        self._scrubs = tuple(sorted(entries, key=lambda entry: len(entry[0][0]), reverse=True))
 
     def _headers(self, request: Request, target: _Target, first_origin: str) -> dict[str, str]:
         contact = f" (+{self._config.policy.contact})" if self._config.policy.contact else ""
@@ -586,14 +603,15 @@ class PolicyTransport:
         Each form of ``_forms`` is removed from header names and values, from redirect targets,
         and from the body. Where the body limit cut the body, a cut head of a form is removed
         too. A complete body keeps its tail: it is evidence. Other encodings, such as base64 or a
-        mix of forms, are not recognized.
+        mix of forms, are not recognized. An issued token is removed only with its scheme word.
         """
-        removed = REMOVED.encode("ascii")
-        for token in self._secrets:
-            forms = _forms(token)
+        for forms, replacement in self._scrubs:
+            removed = replacement.encode("ascii")
             for form in forms:
-                headers = tuple((k.replace(form, REMOVED), v.replace(form, REMOVED)) for k, v in headers)
-                redirects = [target.replace(form, REMOVED) for target in redirects]
+                headers = tuple(
+                    (k.replace(form, replacement), v.replace(form, replacement)) for k, v in headers
+                )
+                redirects = [target.replace(form, replacement) for target in redirects]
                 body = body.replace(form.encode("utf-8"), removed)
             heads = [form.encode("utf-8") for form in forms] if truncated else []
             # The longest cut head of any form first, so that no shorter head leaves a remainder.

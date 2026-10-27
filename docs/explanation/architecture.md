@@ -1544,9 +1544,13 @@ The scheme `oauth2_client_credentials` follows RFC 6749, section 4.4:
 - The answer must be a 200 answer within the body limit. The strict JSON parser reads it. It
   must hold a string `access_token` in the bearer token form of RFC 6750 and a `token_type` of
   `Bearer` in any case. The token needs 12 characters or more.
-- The engine registers the issued token as a secret. Each later record is scrubbed of it in each
-  form of section 9. The client secret is a secret from the start of the run. The request headers
-  of a record never hold either of them.
+- The engine registers the issued token as a secret in its credential form, `Bearer <token>`.
+  Each later record is scrubbed of that form, in each spelling of section 9.
+- The token endpoint belongs to the system under test, so it chooses the token. A bare token is
+  therefore not removed. Its removal could hide a withheld field or make a JSON body unreadable.
+  Limit: an echo of the bare issued token stays in a record.
+- The client secret is a secret from the start of the run. So is the HTTP Basic value that the
+  engine builds from the client id and secret. The request headers of a record never hold them.
 - The engine asks once per role and run. It does not read `expires_in` and does not renew a token.
 - The token exchange is not a record. Its request holds the client secret, and its answer holds
   the token. No check judges it. A replay therefore needs no token endpoint and sends no secret.

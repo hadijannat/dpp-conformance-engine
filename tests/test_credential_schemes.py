@@ -20,7 +20,9 @@ import pytest
 from pydantic import ValidationError
 from validation.rig import FIXTURES, ReferenceRig
 
+from dppce.adapters import access
 from dppce.cli import main
+from dppce.evidence.canonical import parse_strict
 from dppce.evidence.jws import LocalSigner
 from dppce.infrastructure.authorization import issue_authorization
 from dppce.infrastructure.clock import FrozenClock
@@ -72,12 +74,18 @@ def _body(request: http.server.BaseHTTPRequestHandler) -> bytes:
 class TokenSystem:
     """A loopback token endpoint at /token and a resource at /data that echoes the token."""
 
-    def __init__(self, token_reply: tuple[int, bytes] | None = None, resource_status: int = 200) -> None:
+    def __init__(
+        self,
+        token_reply: tuple[int, bytes] | None = None,
+        resource_status: int = 200,
+        resource_body: bytes | None = None,
+    ) -> None:
         self.token_reply = token_reply or (
             200,
             json.dumps({"access_token": TOKEN, "token_type": "Bearer", "expires_in": 300}).encode(),
         )
         self.resource_status = resource_status
+        self.resource_body = resource_body
         self.posts: list[dict[str, Any]] = []
         self.server = LoopbackServer(self.handle)
         self.origin = self.server.origin
@@ -87,6 +95,9 @@ class TokenSystem:
             self.posts.append({"headers": dict(request.headers.items()), "body": _body(request)})
             status, body = self.token_reply
             reply(request, status, body)
+            return
+        if self.resource_body is not None:
+            reply(request, self.resource_status, self.resource_body)
             return
         # The resource echoes the Authorization value. The engine must scrub it from the record.
         echo = json.dumps({"seen": request.headers.get("Authorization", "")}).encode()
@@ -255,13 +266,50 @@ def test_an_oauth_role_gets_one_token_and_sends_it_as_a_bearer_token(tokens: Any
 
 
 def test_an_oauth_client_secret_is_scrubbed_if_the_resource_echoes_it(loopback: Any, tokens: Any) -> None:
+    # The engine builds the Basic value of the token request itself. An echo of it is scrubbed too.
+    basic = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
     system = tokens()
-    echo = loopback(lambda r: reply(r, body=json.dumps({"leak": CLIENT_SECRET}).encode()))
+    leak = json.dumps({"leak": CLIENT_SECRET, "auth": f"Basic {basic}"}).encode()
+    echo = loopback(lambda r: reply(r, body=leak))
     clients = {"auditor": OAuthClient(system.origin, f"{system.origin}/token", CLIENT_ID, CLIENT_SECRET)}
-    engine = _transport(oauth_clients=clients, authorization=_authorization(system.origin))
+    authorization = _authorization(system.origin, endpoints=(system.origin, echo.origin))
+    engine = _transport(oauth_clients=clients, authorization=authorization)
     engine.fetch(Request("GET", f"{system.origin}/data", role="auditor"))
     anonymous = engine.fetch(Request("GET", f"{echo.origin}/x"))
+    assert anonymous.status == 200, "the echo is recorded"
+    assert basic not in repr(anonymous), "the client secret never reaches a record in base64"
     _no_secret(anonymous)
+
+
+def _issuing(tokens: Any, token: str, body: bytes) -> tuple[Record, Record]:
+    """A role record and a later anonymous record of a system that issues ``token``."""
+    system = tokens(
+        token_reply=(200, json.dumps({"access_token": token, "token_type": "Bearer"}).encode()),
+        resource_body=body,
+    )
+    engine = _transport(oauth_clients=system.client(), authorization=_authorization(system.origin))
+    role = engine.fetch(Request("GET", f"{system.origin}/data", role="auditor"))
+    return role, engine.fetch(Request("GET", f"{system.origin}/data"))
+
+
+def test_an_issued_token_cannot_hide_a_withheld_field(tokens: Any) -> None:
+    # The token endpoint belongs to the system under test. It must not choose what the engine
+    # removes from a record: a token equal to a withheld key would hide that key.
+    body = b'{"batteryChemistryInternal": "lithium", "id": "x"}'
+    for record in _issuing(tokens, "batteryChemistryInternal", body):
+        assert record.body == body
+        assert access._look(record, "fetch", ["batteryChemistryInternal"], []) == (
+            ["batteryChemistryInternal"],
+            True,
+        ), "the leak is still found"
+
+
+def test_a_numeric_token_never_makes_a_body_unreadable(tokens: Any) -> None:
+    body = b'{"leaked": 123456789012}'
+    for record in _issuing(tokens, "123456789012", body):
+        assert record.body == body
+        assert parse_strict(record.body) == {"leaked": 123456789012}
+        assert access._look(record, "fetch", ["leaked"], []) == (["leaked"], True)
 
 
 def test_the_anonymous_role_never_asks_for_a_token(tokens: Any) -> None:
