@@ -41,15 +41,19 @@ A family profile reads only a few ICS fields. Copy the example for your family f
 | `features` | `version_history`, `aas_json`, `aas_xml`, `aas_aasx`, `aas_api` | The steps of that feature |
 
 Set `product_category: unknown`. A family profile reads no product fact.
-Declare a feature as `true` or `false`. Leave out a feature, or write `unknown`, and its step is inconclusive.
+Declare a feature as `true` or `false`. Leave out a feature, or write `unknown`. The plan then skips its step, and its requirement is inconclusive.
 
 Each identifier scheme has a syntax check:
 
-- `gs1-digital-link`: an uncompressed GS1 Digital Link URI. A compressed URI gives `unsupported`.
+- `gs1-digital-link`: an uncompressed GS1 Digital Link URI.
+  With item granularity, `TP-GS1-SYNTAX-001` accepts only `/01/<GTIN>/21/<serial>`.
+  It fails any other form, a compressed URI included.
+  `TP-GS1-SYNTAX-002` checks an uncompressed URI of any granularity. It gives `unsupported` for a compressed URI.
 - `https-url`: an https URL with a domain-name host, no user information, and no fragment.
 - `did-web`: a `did:web` identifier.
 - `urn-uuid`: a `urn:uuid` URN with the textual form of a UUID.
 
+The value `unknown` gives `blocked` with `IDENTIFIER.SCHEME.UNKNOWN`.
 Another value gives `unsupported` with `IDENTIFIER.SCHEME.UNSUPPORTED`. It never gives a pass.
 A syntax check shows that a text has the form of its scheme. It does not show that the identifier exists.
 
