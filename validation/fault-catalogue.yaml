@@ -132,6 +132,12 @@
 # The package of F-79 and F-80 also has a documentation fix commit and two data fix commits. Each
 # of the two packages ends with a review fix commit. These commits change no entry. The entries
 # meet in the merge commits.
+# Version 0.14.0 also adds the family control C-FAMILY-OAUTH for the profile family/oauth. Its entry
+# commit comes after the merge commits of the two packages. It comes before the commit that bounds the
+# pattern work of data.rules and the commit that changes how a Link value is read. It also comes
+# before the commit that adds the control to the tests of the family controls. The rig needed no
+# change: it already gave family/oauth its role secrets and the scope credential. A data fix commit
+# follows these commits. It changes no entry.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
