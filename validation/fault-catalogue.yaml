@@ -143,6 +143,12 @@
 # record cannot show as a marker, and before the commit that adds DATA.CONTEXT.LINK_MALFORMED. It
 # also comes before the commit that adds the flags context_link_malformed and
 # context_link_backslash, which are the seeds. The rig needed no change.
+# Version 0.14.0 also adds the faults F-86 and F-87. Their entry commit comes after the commit that
+# stops Link reading where a comma-splitting processor disagrees. It comes before the commit that
+# adds the linear processor model and the gate, the commit for a parameter named target, and the
+# commit for joined Link lines. It also comes before the commit for a special-scheme target and the
+# commit that adds the flags context_link_target_param and context_link_split_lines, which are the
+# seeds. A documentation commit follows. The rig needed no change.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
