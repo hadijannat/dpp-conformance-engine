@@ -30,10 +30,12 @@ from dppce import __version__
 from dppce.evidence.canonical import parse_strict
 from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import LocalSigner
+from dppce.evidence.recording import read_recording
+from dppce.infrastructure.keys import FileDataKeyProvider
 from dppce.models import DecisionBody, EvidenceEnvelope, ExecutionStatus, TrustBundle, Verdict
 from dppce.verifier import verify
 from validation import cases
-from validation.evidence_cases import SETUP, TAMPER
+from validation.evidence_cases import SETUP, TAMPER, change_redirect_status
 from validation.rig import LAB, REPORT_KEY, REPORT_KID, TRUST, ReferenceRig, RunResult
 
 RECORDS = Path(__file__).resolve().parent / "records"
@@ -163,13 +165,13 @@ def _sut_cases(work: Path, group: list[cases.Case], label: str, all_profiles: bo
     return rows
 
 
-def _evidence(signed: EvidenceEnvelope, trust: TrustBundle) -> list[dict[str, Any]]:
+def _evidence(signed: EvidenceEnvelope, trust: TrustBundle, run_dir: Path) -> list[dict[str, Any]]:
     document = json.loads(signed.model_dump_json(by_alias=True))
     rows: list[dict[str, Any]] = []
     for entry in cases.load()["evidence_faults"]:
         name, dimension = entry["tamper"], entry["dimension"]
         at, subject = VERIFY_AT, copy.deepcopy(document)
-        bundle, status_list = trust, None
+        bundle, status_list, opening = trust, None, None
         try:
             if name in SETUP:
                 prepared = SETUP[name](signed, LocalSigner.from_pem(REPORT_KEY, REPORT_KID), trust, at)
@@ -181,6 +183,10 @@ def _evidence(signed: EvidenceEnvelope, trust: TrustBundle) -> list[dict[str, An
                 subject = json.loads(resigned.model_dump_json(by_alias=True))
             elif name == "expired_key":
                 at = AFTER_KEY_EXPIRY
+            elif name == "change_redirect_status":
+                # The rig keeps the data key beside the run directory.
+                keys = FileDataKeyProvider(run_dir.parent / "keys")
+                opening = change_redirect_status(signed.decision, read_recording(run_dir / "recording", keys))
             else:
                 TAMPER[name](subject)
         except LookupError as exc:
@@ -194,7 +200,7 @@ def _evidence(signed: EvidenceEnvelope, trust: TrustBundle) -> list[dict[str, An
                 }
             )
             continue
-        report = verify(subject, bundle, at, status_list=status_list)
+        report = verify(subject, bundle, at, status_list=status_list, opening=opening)
         outcome = next(d.outcome for d in report.dimensions if d.name == dimension)
         rows.append(
             {
@@ -219,13 +225,13 @@ def main() -> int:
     trust = TrustBundle.model_validate(parse_strict(TRUST.read_bytes()))
     with tempfile.TemporaryDirectory(prefix="dppce-validation-") as tmp:
         work = Path(tmp)
-        controls, signed, _ = _controls(work)
+        controls, signed, run_dir = _controls(work)
         faults = _sut_cases(work, cases.sut_faults(), "fault", all_profiles=True)
         boundary = _sut_cases(work, cases.boundary_cases(), "boundary", all_profiles=False)
         control_report = (
             verify(json.loads(signed.model_dump_json(by_alias=True)), trust, VERIFY_AT) if signed else None
         )
-        evidence = _evidence(signed, trust) if signed else []
+        evidence = _evidence(signed, trust, run_dir) if signed and run_dir else []
 
     control_steps = sum(c["executed_steps"] for c in controls)
     false_positives = sum(len(c["executed_steps_not_passed"]) for c in controls)

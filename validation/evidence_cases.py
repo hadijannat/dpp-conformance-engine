@@ -8,15 +8,18 @@ from __future__ import annotations
 
 import base64
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
+from dppce.evidence.canonical import canonical_bytes
+from dppce.evidence.disclosure import open_record
 from dppce.evidence.envelope import sign_envelope
 from dppce.evidence.jws import LocalSigner
 from dppce.evidence.status import encode_list, sign_status_list
-from dppce.models import EvidenceEnvelope, StatusList, StatusReference, TrustBundle, TrustedKey
+from dppce.infrastructure.interfaces import Record
+from dppce.models import DecisionBody, EvidenceEnvelope, StatusList, StatusReference, TrustBundle, TrustedKey
 
 Tamper = Callable[[dict[str, Any]], None]
 
@@ -94,6 +97,21 @@ TAMPER: dict[str, Tamper] = {
 }
 # These two need a different key or a different evaluation time, not a changed document.
 NEEDS_SETUP = ("untrusted_key", "expired_key")
+
+
+def change_redirect_status(decision: DecisionBody, records: Sequence[Record]) -> bytes:
+    """E-17: open the first record with a hop status, then change its first hop status.
+
+    The envelope holds commitments only, so the change is visible in a record opening, not in the
+    envelope. The verifier must then fail the dimension ``opening``.
+    """
+    record = next((r for r in records if r.redirect_statuses), None)
+    if record is None:
+        raise LookupError("the recording has no record with a redirect hop status")
+    document = json.loads(canonical_bytes(open_record(decision, record)))
+    statuses = document["record"]["redirect_statuses"]
+    statuses[0] = 308 if statuses[0] == 307 else 307
+    return canonical_bytes(document)
 
 
 @dataclass(frozen=True)
