@@ -105,13 +105,27 @@
 #   change_authorization. The seed is that tamper, not a flag.
 # Each of the two packages ends with a review fix commit. The package of F-76 also has a test pack
 # fix commit. These commits change no entry. The entries meet in the merge commits.
+# Version 0.13.0 adds the faults F-77 and F-78, the boundary case B-09, and the evidence fault
+# E-17. The git history gives this order:
+# - F-77 and B-09: an earlier commit reserved the id B-09 in a test of the draft-07 dialect. The
+#   entry commit of F-77 and B-09 comes before the commit that adds the document sources and the
+#   bound parameter files of the data checks. It also comes before the commit that adds the flag
+#   vc_payload_schema_broken, the two test purposes, their schemas, and the rig setup of B-09.
+# - F-78 and E-17: the entry commit comes before the commit that records the status of each
+#   redirect hop. It also comes before the commit that adds the parameter
+#   expected_redirect_statuses of resolver.conformance and the test purpose
+#   TP-GS1-CONFORMANCE-002, and before the commit that adds the flag resolver_redirect_302 and the
+#   tamper change_redirect_status. The seed of E-17 is that tamper, not a flag. E-17 is the first
+#   evidence fault of the dimension opening.
+# The package of F-78 also has a documentation fix commit. Each of the two packages ends with a
+# review fix commit. These commits change no entry. The entries meet in the merge commits.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.12.0
+version: 0.13.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
