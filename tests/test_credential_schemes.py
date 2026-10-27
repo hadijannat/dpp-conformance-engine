@@ -511,11 +511,11 @@ def _credential_authorization(rig: ReferenceRig, scopes: tuple[str, ...]) -> tup
 
 
 def _oauth_run(tmp_path: Path, faults: frozenset[str] = frozenset()) -> tuple[ReferenceRig, Any, str]:
+    # The rig confirms both references of the role and grants the scope credential for this profile.
     with ReferenceRig(tmp_path, "family/oauth", faults=faults) as rig:
-        granted = _credential_authorization(rig, ("read", "access_probe", "credential"))
         captured = io.StringIO()
         with contextlib.redirect_stderr(captured):
-            result = rig.run(extra=(*OAUTH_ARGUMENTS, *granted))
+            result = rig.run()
         return rig, result, captured.getvalue()
 
 
@@ -550,9 +550,17 @@ def test_a_refused_token_gives_no_answer_never_a_pass(tmp_path: Path) -> None:
 
 
 def _usage(rig: ReferenceRig, extra: tuple[str, ...]) -> str:
+    """Run with the rig arguments, minus its confirmations of the OAuth role, plus ``extra``."""
+    arguments = rig.run_arguments(rig.work / "out")
+    kept: list[str] = []
+    for flag, value in zip(arguments, [*arguments[1:], ""], strict=True):
+        if value.startswith("legitimate_interest="):
+            continue
+        if not flag.startswith("legitimate_interest="):
+            kept.append(flag)
     captured = io.StringIO()
     with contextlib.redirect_stderr(captured):
-        code = main([*rig.run_arguments(rig.work / "out"), "--create-data-key", *extra])
+        code = main([*kept, "--create-data-key", *extra])
     assert code == 2
     return captured.getvalue()
 

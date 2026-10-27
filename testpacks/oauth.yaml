@@ -4,7 +4,7 @@
 #
 # Rules for a new entry:
 # - The id starts with TP-OAUTH-. It names one FAM-OAUTH-... requirement in
-#   catalogue/packs/family-illustrative.yaml, and that requirement names it back.
+#   catalogue/packs/family-oauth.yaml, and that requirement names it back.
 # - The applicability starts with `profile.id eq family/oauth` and equals the applicability of the
 #   requirement.
 schema_version: dppce.testpack/1

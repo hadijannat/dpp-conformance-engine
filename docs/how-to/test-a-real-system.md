@@ -87,8 +87,8 @@ It points at the loopback reference system, and it makes no normative statement.
 Copy the pair for your family. Then replace every value, including the origins and the samples.
 Run `dppce plan` before `dppce run`, as in the steps above.
 
-Every family profile selects every family test pack, except `family/oauth-core`. Only
-`family/oauth` selects that pack.
+Every family profile selects every family test pack, except `family/oauth`. That profile selects
+only the pack `family/oauth` and the test pack `family/oauth-core`, and no other profile selects them.
 A step of another family is not applicable. It is never a fail.
 A step that needs a value that you did not declare is not a pass.
 An undeclared feature skips its step, and its requirement is inconclusive.
@@ -213,7 +213,7 @@ Limits:
 
 ### Web passport with OAuth 2.0 client credentials
 
-- Profile: `family/oauth`. It selects the family test pack `family/oauth-core`. No other profile selects it.
+- Profile: `family/oauth`. It selects only the pack `family/oauth` and the test pack `family/oauth-core`.
 - Example: `oauth.ics.yaml` and `oauth.ixit.yaml`.
 - Checks:
   - `TP-OAUTH-ACCESS-001`: the channels of the access policy as the role `legitimate_interest`.

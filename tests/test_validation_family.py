@@ -95,6 +95,7 @@ def test_a_case_without_profiles_runs_under_the_catalogue_profiles() -> None:
         "B-16": "family/aas",
         "B-17": "family/gs1-resolver",
         "B-18": "family/credentials",
+        "B-21": "family/oauth",
     }
 
 
