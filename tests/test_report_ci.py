@@ -11,7 +11,7 @@ import pytest
 
 from dppce import __version__
 from dppce.cli import main
-from dppce.models import EvidenceEnvelope, TestResult
+from dppce.models import EvidenceEnvelope, Exclusion, TestResult, Verdict
 from dppce.report.junit import render_junit
 from dppce.report.sarif import render_sarif
 from tests.support import make_envelope
@@ -46,7 +46,7 @@ def _step(tp: str, status: str, verdict: str, code: str, applicability: str = "t
 
 
 def _envelope() -> EvidenceEnvelope:
-    base = make_envelope(("pass",))
+    base = make_envelope(("fail",))
     steps = (
         _step("TP-PASS", "completed", "pass", "DATA.RULES.OK"),
         _step("TP-FAIL", "completed", "fail", "DATA.RULES.VIOLATED"),
@@ -54,7 +54,16 @@ def _envelope() -> EvidenceEnvelope:
         _step("TP-NA", "skipped", "not_applicable", "APPLICABILITY.NOT_APPLICABLE", "false"),
         _step("TP-ERR", "error", "error", "EXECUTION.CHECK.ERROR"),
     )
-    decision = base.decision.model_copy(update={"test_results": steps})
+    exclusion = Exclusion(kind="test_purpose", id="TP-EXC", reason_code="PROFILE.NOT_SELECTED", reason="no")
+    decision = base.decision.model_copy(update={"test_results": steps, "exclusions": (exclusion,)})
+    return base.model_copy(update={"decision": decision})
+
+
+def _all_pass_inconclusive() -> EvidenceEnvelope:
+    base = make_envelope(("pass", "pass"))
+    decision = base.decision.model_copy(
+        update={"overall": Verdict.INCONCLUSIVE, "overall_reason": "Reviewed mode cannot claim a pass"}
+    )
     return base.model_copy(update={"decision": decision})
 
 
@@ -69,15 +78,15 @@ def _suites(root: ET.Element) -> list[ET.Element]:
 def test_junit_counts_and_no_false_pass() -> None:
     root = _parse(render_junit(_envelope()))
     cases = {c.get("classname"): c for c in root.iter("testcase")}
-    assert set(cases) == {"TP-PASS", "TP-FAIL", "TP-INC", "TP-NA", "TP-ERR"}
+    assert set(cases) == {"TP-PASS", "TP-FAIL", "TP-INC", "TP-NA", "TP-ERR", "TP-EXC"} | {"battery/ev"}
     assert len(_suites(root)) == 1
     suite = _suites(root)[0]
     assert (suite.get("tests"), suite.get("failures"), suite.get("errors"), suite.get("skipped")) == (
-        "5",
-        "1",
-        "1",
+        "7",
         "2",
-    )
+        "1",
+        "3",
+    )  # five steps, one exclusion, and one overall case (the overall verdict is fail)
     assert cases["TP-FAIL"].find("failure") is not None
     assert cases["TP-ERR"].find("error") is not None
     for tp in ("TP-INC", "TP-NA"):
@@ -112,13 +121,52 @@ def test_sarif_structure_and_levels() -> None:
     assert {(r["ruleId"], r["level"]) for r in results} == {
         ("DATA.RULES.VIOLATED", "error"),
         ("DATA.RULES.BLOCKED", "warning"),
+        ("EXECUTION.CHECK.ERROR", "error"),
+        ("DECISION.OVERALL.FAIL", "error"),
     }
+    assert run["invocations"] == [{"executionSuccessful": False}]
     rule_ids = {r["id"] for r in driver["rules"]}
-    assert rule_ids == {"DATA.RULES.VIOLATED", "DATA.RULES.BLOCKED"}
+    assert rule_ids == {
+        "DATA.RULES.VIOLATED",
+        "DATA.RULES.BLOCKED",
+        "EXECUTION.CHECK.ERROR",
+        "DECISION.OVERALL.FAIL",
+    }
     assert all(r["help"]["text"] for r in driver["rules"])
     names = {r["locations"][0]["logicalLocations"][0]["name"] for r in results}
-    assert names == {"TP-FAIL", "TP-INC"}
+    assert names == {"TP-FAIL", "TP-INC", "TP-ERR", "battery/ev"}
     assert SENTINEL not in json.dumps(doc)
+
+
+def test_all_pass_but_inconclusive_overall_is_not_green() -> None:
+    env = _all_pass_inconclusive()
+    suite = _suites(_parse(render_junit(env)))[0]
+    assert suite.get("failures") == "0"
+    assert suite.get("skipped") == "1"
+    overall = next(c for c in suite.iter("testcase") if c.get("name") == "overall")
+    skipped = overall.find("skipped")
+    assert skipped is not None
+    assert "Reviewed mode" in (skipped.get("message") or "")
+    (run,) = json.loads(render_sarif(env))["runs"]
+    assert [(r["ruleId"], r["level"]) for r in run["results"]] == [
+        ("DECISION.OVERALL.INCONCLUSIVE", "warning")
+    ]
+    assert run["invocations"] == [{"executionSuccessful": True}]
+
+
+def test_lone_surrogate_is_rejected_for_every_format(tmp_path: Path) -> None:
+    text = (
+        _envelope()
+        .model_dump_json(by_alias=True)
+        .replace("<b>", "\\ud800<b>")
+        .replace("&lt;b&gt;", "\\ud800")
+    )
+    env = tmp_path / "e.json"
+    env.write_text(text, encoding="utf-8")
+    assert "ud800" in env.read_text(encoding="utf-8")
+    for fmt in ("html", "junit", "sarif"):
+        out = tmp_path / f"o.{fmt}"
+        assert main(["report", "--envelope", str(env), "--format", fmt, "--out", str(out)]) == 2, fmt
 
 
 @pytest.mark.parametrize("fmt", ["junit", "sarif"])

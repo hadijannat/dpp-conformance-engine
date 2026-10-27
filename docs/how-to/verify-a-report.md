@@ -86,7 +86,12 @@ The SARIF file has one result for each failed step and each inconclusive step.
 The rule identifier is the reason code. A failed step has the level `error`.
 An inconclusive step has the level `warning`. The location is the test purpose identifier.
 
-Both files hold no payload value. They show the same redacted fields as the HTML report.
+Both files also show the overall verdict. A verdict that is not a pass gives a case named `overall` in JUnit.
+In SARIF, it gives a result with the rule `DECISION.OVERALL.` and the verdict name, for example `DECISION.OVERALL.INCONCLUSIVE`.
+An excluded test purpose is a skipped testcase in JUnit.
+
+Both files hold no payload value and no observation field.
+They show the reason code, the hint, and the step message.
 
 ## Check the status of a report
 

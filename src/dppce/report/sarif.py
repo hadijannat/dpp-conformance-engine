@@ -1,7 +1,9 @@
 """Render an evidence envelope as SARIF 2.1.0.
 
-One result per failed step (level error) and per inconclusive step (level warning). The location
-is a logical location: the test purpose identifier. No payload value is written.
+One result per failed or errored step (level error) and per inconclusive step (level warning). A
+non-pass overall verdict gives one more result with the rule DECISION.OVERALL.<VERDICT>, located at
+the profile. The location is a logical location: the test purpose identifier. No payload value is
+written.
 """
 
 from __future__ import annotations
@@ -14,7 +16,13 @@ from dppce.models import EvidenceEnvelope, Verdict
 from dppce.report.hints import hint_for_step
 
 _SCHEMA = "https://json.schemastore.org/sarif-2.1.0.json"
-_LEVEL = {Verdict.FAIL: "error", Verdict.INCONCLUSIVE: "warning"}
+_OVERALL_RULE = {
+    Verdict.FAIL: "DECISION.OVERALL.FAIL",
+    Verdict.ERROR: "DECISION.OVERALL.ERROR",
+    Verdict.INCONCLUSIVE: "DECISION.OVERALL.INCONCLUSIVE",
+    Verdict.NOT_APPLICABLE: "DECISION.OVERALL.NOT_APPLICABLE",
+}
+_LEVEL = {Verdict.FAIL: "error", Verdict.ERROR: "error", Verdict.INCONCLUSIVE: "warning"}
 
 
 def render_sarif(envelope: EvidenceEnvelope) -> str:
@@ -39,6 +47,23 @@ def render_sarif(envelope: EvidenceEnvelope) -> str:
                 "properties": {"execution_status": step.execution_status.value},
             }
         )
+    overall = envelope.decision.overall
+    if overall in _OVERALL_RULE:
+        # The overall verdict can be worse than every step. CI must still see it.
+        rule = _OVERALL_RULE[overall]
+        text = f"{overall.value}: {envelope.decision.overall_reason}"
+        rules.setdefault(rule, {"id": rule, "shortDescription": {"text": rule}, "help": {"text": text}})
+        results.append(
+            {
+                "ruleId": rule,
+                "level": _LEVEL.get(overall, "note"),
+                "message": {"text": text},
+                "locations": [
+                    {"logicalLocations": [{"name": envelope.decision.manifest.profile_id, "kind": "module"}]}
+                ],
+            }
+        )
+    failed = Verdict.ERROR in {s.verdict for s in envelope.decision.test_results} | {overall}
     doc = {
         "version": "2.1.0",
         "$schema": _SCHEMA,
@@ -51,6 +76,7 @@ def render_sarif(envelope: EvidenceEnvelope) -> str:
                         "rules": list(rules.values()),
                     }
                 },
+                "invocations": [{"executionSuccessful": not failed}],
                 "results": results,
             }
         ],

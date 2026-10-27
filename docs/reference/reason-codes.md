@@ -119,8 +119,12 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `DATA.SCHEMA.OK` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | pass | None: the step passed. |
 | `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the schema uses a format that this engine does not check. |
 | `DATA.UNIT.INVALID` | DATA |  | `dppce.adapters.data` | not fixed here | Give the value with a unit that the rule accepts. |
+| `DECISION.OVERALL.ERROR` | DECISION |  | `dppce.report.sarif` | not fixed here | An engine defect stopped the step. Report it with the run log. The result says nothing about the system. |
+| `DECISION.OVERALL.FAIL` | DECISION |  | `dppce.report.sarif` | not fixed here | Fix the failed requirements that the report lists, then run the tests again. |
+| `DECISION.OVERALL.INCONCLUSIVE` | DECISION |  | `dppce.report.sarif` | not fixed here | The run is not conclusive. Read the reason in the message and remove its cause. |
+| `DECISION.OVERALL.NOT_APPLICABLE` | DECISION |  | `dppce.report.sarif` | not fixed here | No requirement applies to this scope. Check the ICS answers. |
 | `ENGINE.CHECK_EXCEPTION` | ENGINE |  | `dppce.orchestrator.run.execute` | error | An engine defect stopped the step. Report it with the run log. The result says nothing about the system. |
-| `ENVELOPE.BODY.INVALID` | ENVELOPE |  | `dppce.cli._checked_envelope` | not fixed here | Supply the report body unchanged, as the engine wrote it. |
+| `ENVELOPE.BODY.INVALID` | ENVELOPE |  | `dppce.cli._checked_envelope`, `dppce.cli.cmd_report` | not fixed here | Supply the report body unchanged, as the engine wrote it. |
 | `IDENTIFIER.BINDING.MISMATCH` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | fail; inconclusive under a non-default verdict rule | Make the identifier in the passport agree with the identifier on the carrier. |
 | `IDENTIFIER.BINDING.NOT_COMPARABLE` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier.consistency` | inconclusive | Supply both identifiers in a form that the engine can compare. |
 | `IDENTIFIER.CONSISTENT` | IDENTIFIER | `identifier.consistency` | `dppce.adapters.identifier._cross`, `dppce.adapters.identifier.consistency` | pass | None: the step passed. |

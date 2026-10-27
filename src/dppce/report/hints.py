@@ -190,6 +190,13 @@ HINTS: Final[dict[str, str]] = {
     "DATA.SCHEMA.OK": _NOTHING,
     "DATA.SCHEMA.UNSUPPORTED_FORMAT": _LIMIT + "the schema uses a format that this engine does not check.",
     "DATA.UNIT.INVALID": "Give the value with a unit that the rule accepts.",
+    # --- Overall verdict, used by the CI formats --------------------------------------------------
+    "DECISION.OVERALL.ERROR": BY_STATUS[ExecutionStatus.ERROR],
+    "DECISION.OVERALL.FAIL": "Fix the failed requirements that the report lists, then run the tests again.",
+    "DECISION.OVERALL.INCONCLUSIVE": (
+        "The run is not conclusive. Read the reason in the message and remove its cause."
+    ),
+    "DECISION.OVERALL.NOT_APPLICABLE": "No requirement applies to this scope. Check the ICS answers.",
     # --- Engine, envelope, and issuer ---------------------------------------------------------
     "ENGINE.CHECK_EXCEPTION": BY_STATUS[ExecutionStatus.ERROR],
     "ENVELOPE.BODY.INVALID": "Supply the report body unchanged, as the engine wrote it.",

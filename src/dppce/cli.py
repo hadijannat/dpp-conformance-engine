@@ -887,10 +887,12 @@ def cmd_report(args: argparse.Namespace) -> int:
         raise UsageError("STATUSLIST.FILE.OPTION: a status list needs --trust and --at")
     if args.format == "json":
         text = envelope.model_dump_json(by_alias=True, indent=2) + "\n"
-    elif args.format == "junit":
-        text = render_junit(envelope)
-    elif args.format == "sarif":
-        text = render_sarif(envelope)
+    elif args.format in ("junit", "sarif"):
+        try:
+            decision_digest(envelope.decision)  # same input rejection as the HTML path
+        except CanonicalizationError as exc:
+            raise UsageError(f"ENVELOPE.BODY.INVALID: the envelope holds an unusable value: {exc}") from exc
+        text = render_junit(envelope) if args.format == "junit" else render_sarif(envelope)
     else:
         trust = _trust(args.trust)
         if trust is not None and args.at is None:
