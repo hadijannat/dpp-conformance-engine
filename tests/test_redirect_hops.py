@@ -176,6 +176,9 @@ def test_e17_a_changed_hop_status_in_an_opening_fails_the_opening() -> None:
     assert (outcome, detail.split(":")[0]) == ("fail", "OPENING.COMMITMENT.MISMATCH")
 
 
+# The baseline run reaches the resolver redirect only after the QR carrier step decodes the
+# qr_image sample, and that step needs the qr extra.
+@pytest.mark.qr
 def test_e17_runs_on_the_signed_baseline_control(tmp_path: Path) -> None:
     """The method validation seeds E-17 into the first control, battery/ev on the reference system."""
     trust = TrustBundle.model_validate(parse_strict(TRUST.read_bytes()))
