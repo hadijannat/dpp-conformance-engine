@@ -638,16 +638,21 @@ Two more context sources are experimental:
   each `@context` string and each `@import` value in the copy. It follows a reference only into
   another pinned copy. An allowed context without a copy is judged by its URL only.
 
-The check reads the recorded form of the header. Redaction reads each value as RFC 8288
-link-values, so a quoted `,` or `;` does not split a value. It keeps a `type` of
+The check reads the recorded form of the header. Redaction reads each value as RFC 8288,
+appendix B, reads it, so a quoted `,` or `;` does not split a value. Only the first `rel` of a
+link counts, and a relation is compared without case. It keeps a `type` of
 `application/ld+json`, `application/linkset+json`, or `application/json`. It replaces each other
 parameter, and each relation outside its closed list, with one marker.
 
 - A link with the context relation names its target, whatever its other parameters are, for
   example `type="application/ld+json"` or a title.
 - A link without the context relation is ignored, for example `rel=preload`.
-- Redaction removes a value as a whole only if the value is not well-formed. Such a value names
-  no context, so a document without a top-level context still gives `DATA.CONTEXT.MISSING`.
+- Reading stops where a link-value does not start with a target. The links before that point
+  are kept, so a context link before a malformed part still names its target.
+- The rest of the value names no context, so a document without a top-level context still gives
+  `DATA.CONTEXT.MISSING`.
+- A target that is not a URI reference is recorded as a marker. As a context target, it gives
+  `DATA.CONTEXT.NOT_ALLOWED`.
 - A target that redaction changed, for example one with a `token` query parameter, is compared in
   its redacted form. It gives `DATA.CONTEXT.NOT_ALLOWED`.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted

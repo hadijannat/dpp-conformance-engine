@@ -174,7 +174,7 @@ def _advertised(answers: list[Record]) -> str | None:
         for name, value in record.headers:
             if name.lower() != "link":
                 continue
-            for link in parse_link(value) or []:
+            for link in parse_link(value).links:
                 if link.other:  # a removed parameter, such as an anchor, can change what the link means
                     continue
                 try:

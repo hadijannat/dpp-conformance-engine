@@ -61,9 +61,15 @@ def test_several_kept_relations_in_one_value_stay_in_their_order() -> None:
             '<https://sut.example/a>; rel="linkset https://sut.example/S3CRET"',
             f'<https://sut.example/a>; rel="linkset"; {REMOVED}',
         ),
-        # An extension relation is compared as exact text, so another case is not on the list.
-        ('<https://sut.example/a>; rel="gs1:activityideas"', f"<https://sut.example/a>; {REMOVED}"),
-        ('<https://sut.example/a>; rel="https://REF.gs1.org/voc/pip"', f"<https://sut.example/a>; {REMOVED}"),
+        # RFC 8288, section 2.1.2: a relation is compared without case, so it is kept in the listed spelling.
+        (
+            '<https://sut.example/a>; rel="gs1:activityideas"',
+            '<https://sut.example/a>; rel="gs1:activityIdeas"',
+        ),
+        (
+            '<https://sut.example/a>; rel="https://REF.gs1.org/voc/pip"',
+            '<https://sut.example/a>; rel="https://ref.gs1.org/voc/pip"',
+        ),
         # The GS1 link types of the list are in the gs1: and the ref.gs1.org form only.
         ('<https://sut.example/a>; rel="https://gs1.org/voc/pip"', f"<https://sut.example/a>; {REMOVED}"),
         # A quoted comma does not split the value, so "gs1:pip," is one word outside the list.
@@ -76,17 +82,24 @@ def test_a_relation_outside_the_list_is_dropped_and_its_link_gets_the_marker(val
 
 
 @pytest.mark.parametrize(
-    "value",
+    ("value", "kept"),
     [
-        # Only the quoted form permits ":" and "/".
-        "<https://sut.example/a>; rel=gs1:pip",
-        "<https://sut.example/a>; rel=http://www.w3.org/ns/json-ld#context",
-        # The rel parameter is given once. A second one is not read, so the value is removed.
-        '<https://sut.example/a>; rel="linkset"; REL="next"',
+        # RFC 8288, appendix B.3: an unquoted value is read up to the next ";" or ",".
+        ("<https://sut.example/a>; rel=gs1:pip", '<https://sut.example/a>; rel="gs1:pip"'),
+        (
+            "<https://sut.example/a>; rel=http://www.w3.org/ns/json-ld#context",
+            f'<https://sut.example/a>; rel="{JSONLD_CONTEXT}"',
+        ),
+        # RFC 8288, section 3.3: only the first rel counts. A later one gets the marker.
+        (
+            '<https://sut.example/a>; rel="linkset"; REL="next"',
+            f'<https://sut.example/a>; rel="linkset"; {REMOVED}',
+        ),
     ],
 )
-def test_a_link_value_that_is_not_well_formed_is_removed_as_a_whole(value: str) -> None:
-    assert redact_link(value) == REMOVED
+def test_a_lenient_link_value_is_read_as_rfc_8288_appendix_b_reads_it(value: str, kept: str) -> None:
+    assert redact_link(value) == kept
+    assert redact_link(kept) == kept
 
 
 @pytest.mark.parametrize(

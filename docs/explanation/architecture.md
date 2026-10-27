@@ -733,11 +733,13 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   are. The JSON-LD 1.1 API, section 9.4.1, reads only the relation and the target of such a link.
   The check ignores the header for `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
 - The record keeps a `Link` value only in the form that redaction keeps (section 10). A link
-  without the context relation is ignored. Redaction removes a value as a whole only if it is not
-  well-formed, so such a value names no context. A malformed value of the system therefore never
-  turns `DATA.CONTEXT.MISSING` into `blocked`.
+  without the context relation is ignored. Redaction keeps each link that RFC 8288, appendix B,
+  reads before a malformed part. A context link before such a part still names its target. The
+  rest of the value names no context, so a malformed value of the system never turns
+  `DATA.CONTEXT.MISSING` or `DATA.CONTEXT.NOT_ALLOWED` into `blocked` or `pass`.
 - A context target that redaction changed is compared in its redacted form. That form is not on
-  the allowlist, so it gives `DATA.CONTEXT.NOT_ALLOWED`. It gives `blocked` with
+  the allowlist, so it gives `DATA.CONTEXT.NOT_ALLOWED`. A target that is not a URI reference is
+  recorded as a marker, so it gives `DATA.CONTEXT.NOT_ALLOWED` too. It gives `blocked` with
   `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted form of an allowed URL. Then the
   engine cannot compare the two exactly. `DATA.CONTEXT.MISSING` and `DATA.CONTEXT.NOT_ALLOWED`
   come first.
@@ -1664,21 +1666,25 @@ records/<id>.enc   one encrypted record each
   `-max-age`, and `-allow-credentials`. A URL in a recorded header is redacted: userinfo, the
   fragment, and credential-like query values are removed. The value of
   `access-control-allow-origin` is redacted in the same way.
-- A `Link` value is read as RFC 8288 link-values. A quoted string can hold `,` and `;`, and
-  these do not split the value. A value keeps only its targets, a closed list of relations, and a
+- A `Link` value is read as RFC 8288, appendix B, reads it. A quoted string can hold `,` and
+  `;`, and these do not split the value. An unquoted parameter value runs up to the next `;` or
+  `,`. Only the first `rel` of a link counts, as section 3.3 states. A later `rel` is another
+  parameter. A value keeps only its targets, a closed list of relations, and a
   fixed `type`. The list holds the registered relation names, `linkset`, the JSON-LD context
   relation, and the GS1 link types. The GS1 link types are those of the pinned GS1 Web Vocabulary
   file, in the `gs1:` form and the `https://ref.gs1.org/voc/` form. The pinned file is
   `v1.16/gs1Voc.jsonld` of `github.com/gs1/WebVoc` at commit
   `f8f407bf717233c871dca2f62f4e45b0940e8cad`.
-- An extension relation is compared as exact text, and only a quoted `rel` value can hold one. A
-  relation outside the list is dropped one word at a time. A `type` with the value
+- Each relation, an extension relation too, is compared without case, as RFC 8288, section 2.1.2,
+  states. A kept relation has the spelling of the list. A relation outside the list is dropped one
+  word at a time. A `type` with the value
   `application/linkset+json`, `application/ld+json`, or `application/json` is kept in lower case.
   These fixed values cannot carry a secret. Each other parameter, and each dropped relation, gives
   the link one marker, `<removed>`, after its relations and its type.
-- Only a value that is not well-formed is removed as a whole. Such a value has a link without a
-  target, a target that is not a URI reference, or a second `rel`. It can also have a parameter
-  that is not a name, a name with a token, or a name with a quoted string. The output of
+- Reading stops where a link-value does not start with a target in `<` and `>`, or where a link
+  is followed by text other than `,`. The links before that point are kept, and one marker
+  replaces the rest of the value. A value without a link becomes the marker. A target that is not
+  a URI reference becomes the marker `%3Cremoved%3E`, and the other links stay. The output of
   redaction parses to the same links, and redaction of the output gives the same text.
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in

@@ -698,16 +698,18 @@ def test_f12_a_response_header_value_is_kept_only_if_its_name_is_known_to_be_saf
 
 
 @pytest.mark.parametrize(
-    "value",
+    ("value", "kept"),
     [
-        '<http://h/a>; rel="next", S3CRET',
-        "S3CRET",
-        '<http://h/a>; rel="next"; rel="prev"',
+        # RFC 8288, appendix B.2: the links before the free text are kept, the rest gets the marker.
+        ('<http://h/a>; rel="next", S3CRET', '<http://h/a>; rel="next", <removed>'),
+        ("S3CRET", "<removed>"),
+        # RFC 8288, section 3.3: only the first rel counts. A later one gets the marker.
+        ('<http://h/a>; rel="next"; rel="prev"', '<http://h/a>; rel="next"; <removed>'),
     ],
 )
-def test_f12_a_link_header_that_is_not_well_formed_is_removed(value: str) -> None:
+def test_f12_a_link_header_that_is_not_well_formed_keeps_only_what_was_read(value: str, kept: str) -> None:
     """Found by the review of the fix: a link parameter is free text."""
-    assert dict(redact_response_headers((("Link", value),)))["Link"] == "<removed>"
+    assert dict(redact_response_headers((("Link", value),)))["Link"] == kept
 
 
 @pytest.mark.parametrize(

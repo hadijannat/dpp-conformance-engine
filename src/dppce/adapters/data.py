@@ -773,10 +773,10 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
 
     JSON-LD 1.1 API, section 9.4.1: a processor reads the href of such a link and ignores the
     header for application/ld+json. The record holds the form that redaction keeps. A link with
-    the relation names its target, whatever its other parameters are. A value that redaction
-    removed as a whole was not well-formed, so it names no context. A target that redaction
-    changed holds the marker and is compared in that form. It cannot be compared only if it equals
-    the redacted form of an allowed URL that redaction changes too.
+    the relation names its target, whatever its other parameters are. Redaction keeps the links
+    that RFC 8288, appendix B, reads before a malformed part; the rest names no context. A target
+    that redaction changed holds the marker and is compared in that form. It cannot be compared
+    only if it equals the redacted form of an allowed URL that redaction changes too.
     """
     if record.kind != "http" or media_type(record) == "application/ld+json":
         return [], 0
@@ -787,7 +787,7 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
     for name, value in record.headers:
         if name.lower() != "link":
             continue
-        for link in parse_link(value) or []:
+        for link in parse_link(value).links:
             if JSONLD_CONTEXT not in link.relations:
                 continue
             try:

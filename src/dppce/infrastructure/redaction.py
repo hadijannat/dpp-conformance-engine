@@ -31,17 +31,19 @@ SAFE_RESPONSE_HEADERS: Final = frozenset(
 )  # fmt: skip
 # These hold URLs. They are kept, with each URL redacted.
 _URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location", "access-control-allow-origin"})
-# A link-value of RFC 8288, section 3: a target, then parameters that are a name, name=token, or
-# name=quoted-string. A token cannot hold ":" or "/", so only a quoted rel can hold an extension
-# relation (an IRI, section 3.3). A quoted string can hold "," and ";". The marker REMOVED that
-# redaction leaves reads as a parameter too. Only "rel", at most once, and a fixed "type" are kept.
-_TARGET: Final = re.compile(r"\s*<([^<>\s]*)>\s*")
-_TCHARS: Final = r"[!#$%&'*+.^_`|~0-9A-Za-z-]+"
+# Link values are read as RFC 8288, appendix B, reads them: a target in "<" and ">", then parameters
+# after ";". A value is a quoted string (a "," or ";" in it does not split) or the text up to the
+# next ";" or ",". Reading stops where a link-value does not start with a target; the links before
+# that point count. The marker REMOVED that redaction leaves reads as a parameter name.
+_OWS: Final = re.compile(r"[ \t]*")
+_SEPARATORS: Final = re.compile(r"[ \t,]*")
 _PARAMETER: Final = re.compile(
-    rf';\s*(?:({_TCHARS})(?:\s*=\s*({_TCHARS}|"(?:[^"\\]|\\.)*"))?|{re.escape(REMOVED)})\s*'
+    r";[ \t]*(?P<name>[^ \t=;,]*)[ \t]*"
+    r'(?:=[ \t]*(?:"(?P<quoted>(?:[^"\\]|\\.)*)"?|(?P<token>[^;,]*)))?'
 )
-_NEXT_LINK: Final = re.compile(r",\s*")
 _QUOTED_PAIR: Final = re.compile(r"\\(.)")
+# A target that is not a URI reference is recorded as this marker, so its free text never reaches a record.
+_TARGET_REMOVED: Final = "%3Cremoved%3E"
 # Fixed media types cannot carry a secret, so a type parameter with one of them is kept.
 _KEPT_TYPES: Final = frozenset({"application/linkset+json", "application/ld+json", "application/json"})
 # The link types of the GS1 Web Vocabulary: each sub-property of gs1:linkType in v1.16/gs1Voc.jsonld
@@ -66,7 +68,8 @@ _GS1_FORMS: Final = ("gs1:", "https://ref.gs1.org/voc/")
 JSONLD_CONTEXT: Final = "http://www.w3.org/ns/json-ld#context"
 # Registered relation names that an API uses for paging and description, linkset (RFC 9264), the
 # JSON-LD context relation, and the GS1 link types. A word outside this list can be a secret, so it
-# is dropped and its link gets the marker. An extension relation is compared as exact text.
+# is dropped and its link gets the marker. RFC 8288, section 2.1.2: every relation, an extension
+# relation too, is compared without case, so a word is read in the spelling of the list.
 _RELATIONS: Final = frozenset(
     {
         "alternate", "canonical", "collection", "describedby", "first", "help", "item", "last",
@@ -75,7 +78,7 @@ _RELATIONS: Final = frozenset(
     }
     | {form + name for form in _GS1_FORMS for name in _GS1_LINK_TYPES}
 )  # fmt: skip
-_EXTENSION: Final = re.compile(r"[:/#]")
+_SPELLING: Final = {r.lower(): r for r in _RELATIONS}
 
 _SENSITIVE_PARAMETER: Final = re.compile(
     r"token|secret|passw|pwd|sig|key|auth|credential|session|code|jwt|bearer", re.IGNORECASE
@@ -112,8 +115,9 @@ def redact_url(url: str) -> str:
 class Link(NamedTuple):
     """One link of a ``Link`` value.
 
-    ``media_type`` is a kept type parameter in lower case. ``other`` is true if the link has another
-    parameter, such as a title, a type with another value, or the marker that redaction leaves.
+    ``relations`` holds each word of the first rel in lower case, or in the spelling of the closed
+    list. ``media_type`` is a kept type parameter in lower case. ``other`` is true if the link has
+    another parameter, such as a title, a later rel, a type with another value, or the marker.
     """
 
     target: str
@@ -122,66 +126,77 @@ class Link(NamedTuple):
     other: bool
 
 
+class LinkValue(NamedTuple):
+    """The links of a ``Link`` value, and whether reading reached the end of the value."""
+
+    links: tuple[Link, ...]
+    complete: bool
+
+
 def redact_link(value: str) -> str:
     """Keep the redacted targets, the relations of the closed list, and a fixed type parameter.
 
     Each other parameter, and each relation outside the list, is replaced with one marker per link:
-    a title or an anchor is free text that a system can fill with anything. Only a value that is not
-    well-formed is removed as a whole. The output parses to the same links and redacts to itself.
+    a title or an anchor is free text that a system can fill with anything. A target that is not a
+    URI reference becomes a marker. Where reading stopped, one marker stands for the rest of the
+    value. The output parses to the same links and redacts to itself.
     """
-    links = parse_link(value)
-    if links is None:
-        return REMOVED
+    parsed = parse_link(value)
     out: list[str] = []
-    for link in links:
+    for link in parsed.links:
+        target = redact_url(link.target)
         kept = tuple(r for r in link.relations if r in _RELATIONS)
         out.append(
-            f"<{redact_url(link.target)}>"
+            f"<{_TARGET_REMOVED if target == REMOVED else target}>"
             + (f'; rel="{" ".join(kept)}"' if kept else "")
             + (f'; type="{link.media_type}"' if link.media_type else "")
             + (f"; {REMOVED}" if link.other or len(kept) < len(link.relations) else "")
         )
+    if not parsed.complete or not out:
+        out.append(REMOVED)
     return ", ".join(out)
 
 
-def parse_link(value: str) -> list[Link] | None:
-    """Read a ``Link`` value as RFC 8288 link-values, or None for a value that is not well-formed.
+def parse_link(value: str) -> LinkValue:
+    """Read a ``Link`` value as RFC 8288, appendix B, reads it.
 
-    A value is not well-formed if a link has no target, a target that is not a URI reference, a
-    parameter of another form, or a second rel. A registered relation name is case-insensitive,
-    so it is given in lower case. An extension relation keeps its case.
+    Reading stops where a link-value does not start with a target in "<" and ">", or where a link
+    is followed by something other than "," or the end. The links before that point are kept. A
+    value that ends with the marker REMOVED as its own link-value stopped in redaction, so it is
+    not complete. Section 3.3: only the first rel counts, and a later one is another parameter.
     """
     links: list[Link] = []
-    at = 0
-    while True:
-        found = _TARGET.match(value, at)
-        if found is None or redact_url(found.group(1)) == REMOVED:
-            return None
-        at = found.end()
-        rels: list[str] = []
+    at = _skip(_SEPARATORS, value, 0)
+    while at < len(value):
+        if value[at:] == REMOVED or value[at] != "<" or (close := value.find(">", at)) < 0:
+            return LinkValue(tuple(links), complete=False)
+        target, at = value[at + 1 : close], close + 1
+        rel: str | None = None
         media: str | None = None
         other = False
-        while (parameter := _PARAMETER.match(value, at)) is not None:
+        while (parameter := _PARAMETER.match(value, _skip(_OWS, value, at))) is not None:
             at = parameter.end()
-            name, raw = (parameter.group(1) or "").lower(), parameter.group(2) or ""
-            text = _QUOTED_PAIR.sub(r"\1", raw[1:-1]) if raw.startswith('"') else raw
-            if name == "rel":
-                rels.append(text)
+            name = parameter["name"].lower()
+            quoted, token = parameter["quoted"], parameter["token"]
+            text = _QUOTED_PAIR.sub(r"\1", quoted) if quoted is not None else (token or "").strip(" \t")
+            if name == "rel" and rel is None:
+                rel = text
             elif name == "type" and media is None and text.lower() in _KEPT_TYPES:
                 media = text.lower()
             else:
                 other = True
-        if len(rels) > 1:
-            return None
-        words = rels[0].split() if rels else []
-        relations = tuple(w if _EXTENSION.search(w) else w.lower() for w in words)
-        links.append(Link(found.group(1), relations, media, other))
-        if at == len(value):
-            return links
-        separator = _NEXT_LINK.match(value, at)
-        if separator is None:
-            return None
-        at = separator.end()
+        words = (rel or "").split()
+        links.append(Link(target, tuple(_SPELLING.get(w.lower(), w.lower()) for w in words), media, other))
+        at = _skip(_OWS, value, at)
+        if at < len(value) and value[at] != ",":
+            return LinkValue(tuple(links), complete=False)
+        at = _skip(_SEPARATORS, value, at)
+    return LinkValue(tuple(links), complete=True)
+
+
+def _skip(pattern: re.Pattern[str], value: str, at: int) -> int:
+    found = pattern.match(value, at)
+    return found.end() if found else at
 
 
 def redact_request_headers(headers: dict[str, str]) -> tuple[tuple[str, str], ...]:
