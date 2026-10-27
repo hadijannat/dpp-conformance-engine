@@ -139,7 +139,7 @@ def make_test_result(index: int, verdict: str) -> TestResult:
 
 
 def make_manifest(**changes: Any) -> RunManifest:
-    """A manifest for a dppce.decision/2 body. ``bound_files=None`` gives one for a /1 body.
+    """A manifest for a dppce.decision/3 body. ``bound_files=None`` gives one for a /1 body.
 
     The issuer identifier is ``ISSUER``, the issuer of the TEST-ONLY report key (ADR 0014).
     """

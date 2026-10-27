@@ -37,7 +37,7 @@ These changes are not in `v0.1.0rc1`, and they affect a laboratory:
 - The unreleased source upgrades a version 1 trust bundle when it loads it. It refuses a bundle
   that lists revoked serial numbers (`TRUST.MIGRATION.UNSCOPED_SERIAL`).
 - The run-inputs file `inputs.json` with version `dppce.runinputs/3`. `v0.1.0rc1` writes version 1.
-- The decision body `dppce.decision/2`. The verifier of `v0.1.0rc1` rejects it.
+- The decision body `dppce.decision/3` (and `/2`). The verifier of `v0.1.0rc1` rejects both.
 - RFC 3161 timestamps (ADR 0015) and the commands `dppce timestamp imprint` and
   `dppce timestamp attach`.
 - An answer with a status from 500 to 599 counts as no answer. Most checks then give
