@@ -684,7 +684,7 @@
       "cycle": 56,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-20 (603a77a tests first, then 1bd7de5 and the review fix 272eaf0): test-a-real-system.md gets a section per family and a dataspace data-plane procedure, write-an-ics-and-an-ixit.md explains the ICS for a family profile, and the capabilities dataspace.protocol, dataspace.catalog, and access.oauth2 are named as interface_only, so such a system shows unsupported against a named capability; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
+      "summary": "P2-20 (603a77a tests first, then 1bd7de5 and the review fix 272eaf0): test-a-real-system.md gets a section per family and a dataspace data-plane procedure, write-an-ics-and-an-ixit.md explains the ICS for a family profile, and the capabilities dataspace.protocol, dataspace.catalog, and access.oauth2 are named as interface_only capabilities in the capability manifest; no check uses them, so a run plans no step for them; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
     },
     {
       "cycle": 57,
@@ -702,7 +702,7 @@
       "cycle": 59,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-32 (6d8f8f9 failing tests first, then a44b84e, 87b115e, c4f4ad8, and the review fix 2dd73bb): dppce compare compares two envelopes of repeated runs, states whether the plan inputs are equal, lists each step that differs by name and summary field without its value, and exits 1 when a step verdict differs; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
+      "summary": "P2-32 (6d8f8f9 failing tests first, then a44b84e, 87b115e, c4f4ad8, and the review fix 2dd73bb): dppce compare compares two envelopes of repeated runs, states whether the plan inputs are equal, lists each step that differs by name and summary field without its value, and exits 1 when a step verdict differs; the review fix 2dd73bb also added the section 2 row of dppce.compare to architecture.md, outside the section 12 edits that the brief allowed, and the P2-32 return value said it had not added that row, so the row waits for the owner as its own protected diff; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
     }
   ],
   "blockers": [

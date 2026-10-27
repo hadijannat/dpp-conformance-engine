@@ -1,8 +1,8 @@
 """Every example ICS and IXIT under profiles/family/examples/ loads, lints, and plans on loopback.
 
 The operator guide names each example. The deferred dataspace and OAuth 2.0 integrations are
-named capabilities in the state interface_only, so that a system that needs them shows
-unsupported against a named capability.
+named as interface_only capabilities in the capability manifest; no check uses them, so a run
+plans no step for them.
 """
 
 from __future__ import annotations
