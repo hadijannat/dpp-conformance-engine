@@ -24,6 +24,7 @@ from dppce.infrastructure.clock import FrozenClock
 from dppce.infrastructure.interfaces import Request
 from dppce.infrastructure.keys import FileDataKeyProvider, KeyError_, resolve_secret
 from dppce.infrastructure.redaction import is_public_address, redact_url
+from dppce.infrastructure.reference_server import ReferenceServer
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.transport import PolicyTransport, TransportConfig
 from dppce.migrations import migrate
@@ -31,6 +32,8 @@ from dppce.models import Authorization, NetworkPolicy, RevokedKey, TrustBundle
 from tests.support import ISSUER, Handler, LoopbackServer, reply
 
 NOW = datetime(2026, 10, 13, 12, tzinfo=UTC)
+FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "reference"
+GS1_RESOLVER_PATH = "/01/09506000134352/21/EV0001"
 LOCAL: dict[str, Any] = {
     "allowed_hosts": ("127.0.0.1", "localhost"),
     "allow_private_hosts": ("127.0.0.1", "localhost"),
@@ -286,6 +289,24 @@ def test_a_write_needs_an_authorization_with_an_active_scope(loopback: Start) ->
         transport(authorization=writer).fetch(Request("POST", f"{server.origin}/x", body=b"1")).status == 200
     )
     assert len(server.seen) == 1
+
+
+def test_options_is_a_read_and_records_the_cors_headers() -> None:
+    # OD-06: OPTIONS joins GET and HEAD. It needs no authorization with an active scope.
+    with ReferenceServer(FIXTURES) as server:
+        record = transport().fetch(Request("OPTIONS", f"{server.origin}{GS1_RESOLVER_PATH}"))
+    assert (record.method, record.status, record.error) == ("OPTIONS", 204, None)
+    assert record.header("access-control-allow-origin") == "*"
+    assert record.header("access-control-allow-methods") == "GET, HEAD, OPTIONS"
+    assert record.header("access-control-allow-headers") == "Accept, Authorization"
+    assert record.header("allow") == "GET, HEAD, OPTIONS"
+
+
+def test_an_authorization_still_names_options_to_permit_it(loopback: Start) -> None:
+    server = loopback(reply)
+    engine = transport(authorization=authorization(endpoints=(server.origin,), methods=("GET",)))
+    assert engine.fetch(Request("OPTIONS", f"{server.origin}/x")).error == "authorization_denied"
+    assert server.seen == []
 
 
 @pytest.mark.parametrize(

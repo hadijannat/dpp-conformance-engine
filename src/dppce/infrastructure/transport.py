@@ -34,7 +34,7 @@ from dppce.infrastructure.redaction import (
 )
 from dppce.models import Authorization, NetworkPolicy, Scope
 
-SAFE_METHODS: Final = ("GET", "HEAD")
+SAFE_METHODS: Final = ("GET", "HEAD", "OPTIONS")
 ANONYMOUS: Final = "anonymous"
 _REDIRECTS: Final = (301, 302, 303, 307, 308)
 _ACTIVE_SCOPES: Final = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ)
