@@ -768,26 +768,34 @@ def _pinned_contexts(ctx: CheckContext, params: ContextParams) -> dict[str, list
     return pinned
 
 
-def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
-    """The targets of the links with the JSON-LD context relation, and how many cannot be compared.
+def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int, int]:
+    """The targets of the links with the JSON-LD context relation, how many cannot be compared,
+    and how many Link values are malformed.
 
     JSON-LD 1.1 API, section 9.4.1: a processor reads the href of such a link and ignores the
     header for application/ld+json. The record holds the form that redaction keeps. A link with
     the relation names its target, whatever its other parameters are. Redaction keeps the links
-    that RFC 8288, appendix B, reads before a malformed part; the rest names no context. A target
-    that redaction changed holds the marker and is compared in that form. It cannot be compared
-    only if it equals the redacted form of an allowed URL that redaction changes too.
+    that RFC 8288, appendix B, reads before a malformed part. A JSON-LD processor can read a context
+    link after that part, so a malformed value counts. A target that redaction changed holds the
+    marker and is compared in that form. It cannot be compared only if it equals the redacted form
+    of an allowed URL that redaction changes too.
     """
     if record.kind != "http" or media_type(record) == "application/ld+json":
-        return [], 0
+        return [], 0, 0
     base = record.redirects[-1] if record.redirects else record.url
     changed = {redact_url(a) for a in allowed if isinstance(a, str)}
     found: list[str] = []
-    limited = 0
+    limited = malformed = 0
     for name, value in record.headers:
         if name.lower() != "link":
             continue
-        for link in parse_link(value).links:
+        # Before P2-26, redaction recorded the bare marker for each Link value that it did not keep.
+        # An empty value records so too. Neither names a context, so an old recording keeps its digest.
+        if value.strip(" \t") == REMOVED:
+            continue
+        parsed = parse_link(value)
+        malformed += not parsed.complete
+        for link in parsed.links:
             if JSONLD_CONTEXT not in link.relations:
                 continue
             try:
@@ -798,7 +806,7 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
                 limited += 1
             else:
                 found.append(url)
-    return found, limited
+    return found, limited, malformed
 
 
 def _imported(start: list[str], pinned: dict[str, list[str]], allowed: list[Any]) -> set[str]:
@@ -837,7 +845,7 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     # A Link header applies to the one fetched document. It never applies to a sample, a
     # credential payload, or an HTML page.
     fetched = params.source in (None, "item", "model")
-    linked, limited = _link_contexts(got.record, allowed) if fetched else ([], 0)
+    linked, limited, malformed = _link_contexts(got.record, allowed) if fetched else ([], 0, 0)
     if linked or limited:
         entries, found = counted[0]
         counted[0] = (entries + len(linked) + limited, found | {url for url in linked if url not in allowed})
@@ -857,6 +865,17 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     if foreign:
         message = f"{len(foreign)} context references are not in the pinned allowlist. No context is fetched."
         return completed(False, "DATA.CONTEXT.NOT_ALLOWED", message, [observation])
+    if malformed:
+        # A malformed value of the system is a fail, as an unparsable document is.
+        what = (
+            "A Link value of the answer is"
+            if malformed == 1
+            else f"{malformed} Link values of the answer are"
+        )
+        message = (
+            f"{what} not well-formed. A JSON-LD processor can read a context link after the malformed part."
+        )
+        return completed(False, "DATA.CONTEXT.LINK_MALFORMED", message, [observation])
     if limited:
         message = (
             "A context link of the answer has a target that redaction changed. It equals the redacted "

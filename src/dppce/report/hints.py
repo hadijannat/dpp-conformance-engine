@@ -167,6 +167,7 @@ HINTS: Final[dict[str, str]] = {
     # --- Data -----------------------------------------------------------------------------------
     "DATA.COMPLETENESS.MISSING": "Add the fields that the rule requires to the passport data.",
     "DATA.CONTEXT.FILE_INVALID": "Pin a context copy that is a JSON object with string @import values.",
+    "DATA.CONTEXT.LINK_MALFORMED": "Send each Link value of the document as a well-formed RFC 8288 value.",
     "DATA.CONTEXT.LINK_UNREADABLE": _LIMIT
     + "a changed context link target equals a changed allowed URL. Allow the URL without a credential.",
     "DATA.CONTEXT.MISSING": "Add the JSON-LD context that the rule requires to the document.",

@@ -96,6 +96,7 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive | Supply the carrier sample as an image file that the engine can read. |
 | `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here | Add the fields that the rule requires to the passport data. |
 | `DATA.CONTEXT.FILE_INVALID` | DATA |  | `dppce.adapters.data._pinned_contexts` | inconclusive | Pin a context copy that is a JSON object with string @import values. |
+| `DATA.CONTEXT.LINK_MALFORMED` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Send each Link value of the document as a well-formed RFC 8288 value. |
 | `DATA.CONTEXT.LINK_UNREADABLE` | DATA | `data.context` | `dppce.adapters.data.context_check` | inconclusive | Engine limit: a changed context link target equals a changed allowed URL. Allow the URL without a credential. |
 | `DATA.CONTEXT.MISSING` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Add the JSON-LD context that the rule requires to the document. |
 | `DATA.CONTEXT.NOT_ALLOWED` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Use only the JSON-LD contexts on the allowlist of the test purpose. |

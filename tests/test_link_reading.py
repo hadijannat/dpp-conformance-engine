@@ -21,6 +21,10 @@ from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts
 
 CTX = f'rel="{JSONLD_CONTEXT}"'
 SECRET = "S3CRET"
+# The record of a malformed value without a link: one link with the target marker, then the stop.
+PLACEHOLDER = f"<%3Cremoved%3E>, {REMOVED}"
+# Reading stops after the first link, but a JSON-LD processor still loads the second context.
+JUNK = f'<https://a.example/x> junk, <https://evil.test/ctx>; rel="{JSONLD_CONTEXT}"'
 # Targets that the record cannot show as the system sent them. URL parsers disagree on the host of
 # the first two: Python reads example.test, and the WHATWG URL parser reads evil.test.
 UNSHOWABLE = (
@@ -85,10 +89,10 @@ def test_a_relation_is_compared_without_case() -> None:
     [
         # RFC 8288, appendix B.2: reading stops where a link-value does not start with a target.
         ("", REMOVED),
-        (SECRET, REMOVED),
+        (SECRET, PLACEHOLDER),
         (f'<https://a.test/x>; rel="next", {SECRET}', f'<https://a.test/x>; rel="next", {REMOVED}'),
         (f"<https://a.test/x> {SECRET}", f"<https://a.test/x>, {REMOVED}"),
-        (f"<https://a.test/{SECRET}", REMOVED),  # a target without ">"
+        (f"<https://a.test/{SECRET}", PLACEHOLDER),  # a target without ">"
         # The links before the stop are kept, whatever follows.
         (
             f'<https://a.test/x>; rel="next", <https://a.test/y>; rel=prev, {SECRET} <https://a.test/z>',
@@ -99,6 +103,25 @@ def test_a_relation_is_compared_without_case() -> None:
 def test_reading_stops_where_a_link_value_is_not_well_formed(value: str, kept: str) -> None:
     assert redact_link(value) == kept
     assert not parse_link(value).complete or not value
+
+
+@pytest.mark.parametrize("value", ["", " ", " , ", ",\t,"])
+def test_a_well_formed_value_without_a_link_records_as_the_bare_marker(value: str) -> None:
+    assert parse_link(value) == ((), True)
+    assert redact_link(value) == REMOVED
+
+
+@pytest.mark.parametrize("value", [SECRET, REMOVED, f" {REMOVED} ", f"{REMOVED}\t", "<", "<x", ", <x"])
+def test_a_malformed_value_without_a_link_records_as_the_placeholder(value: str) -> None:
+    # The bare marker stays the form of an old recording, so a new one never writes it for this value.
+    assert redact_link(value) == PLACEHOLDER
+
+
+def test_the_placeholder_is_malformed_names_no_relation_and_redacts_to_itself() -> None:
+    parsed = parse_link(PLACEHOLDER)
+    assert not parsed.complete
+    assert [(x.relations, x.media_type, x.other) for x in parsed.links] == [((), None, False)]
+    assert redact_link(PLACEHOLDER) == PLACEHOLDER
 
 
 @pytest.mark.parametrize(
@@ -207,6 +230,10 @@ def test_a_secret_never_reaches_the_record(value: str) -> None:
         f'<https://x.test/a>; rel="next", {SECRET}',
         "<http://[::1>; REL=Next; rel=prev, <https://x.test/b>; rel=HTTP://WWW.W3.ORG/NS/JSON-LD#CONTEXT",
         *(f"<{target}>; {CTX}" for target in UNSHOWABLE),
+        SECRET,
+        f" {REMOVED} ",
+        "<x",
+        f"<https://a.example/x> junk, <{JSONLD_CONTEXT}>; {CTX}",
     ],
 )
 def test_redaction_is_idempotent_and_its_output_parses(value: str) -> None:
@@ -263,12 +290,59 @@ def test_a_context_link_with_another_parameter_names_its_target(tmp_path: Path, 
         f"{SECRET}, <{ALLOWED[0]}>; {CTX}",  # reading stops before the first target
         f"<{ALLOWED[0]}> {SECRET}; {CTX}",  # reading stops after a target without parameters
         f"<{ALLOWED[0]}; {CTX}",  # a target without ">"
+        REMOVED,  # sent by the system, so its record is the placeholder
+        JUNK,
     ],
 )
-def test_a_malformed_link_names_no_context_and_cannot_hide_a_missing_context(
+def test_a_malformed_link_fails_and_cannot_hide_a_missing_context(tmp_path: Path, value: str) -> None:
+    # A JSON-LD processor splits a Link value on each comma outside "<...>" and quotes, and reads each part.
+    plain = contexts(tmp_path, Linked(PLAIN, recorded(value)))
+    assert verdict(plain) == failed("DATA.CONTEXT.MISSING")
+    assert plain.observations[0].summary["contexts"] == 0
+    outcome = contexts(tmp_path, Linked(BODY, recorded(value)))
+    assert verdict(outcome) == failed("DATA.CONTEXT.LINK_MALFORMED")
+    assert SECRET not in repr(outcome)
+    assert "junk" not in outcome.message
+
+
+def test_a_malformed_link_counts_the_values_and_never_echoes_one(tmp_path: Path) -> None:
+    outcome = contexts(tmp_path, Linked(BODY, recorded(JUNK, f"<{ALLOWED[0]}>; {CTX}", SECRET)))
+    assert verdict(outcome) == failed("DATA.CONTEXT.LINK_MALFORMED")
+    assert "2 Link values" in outcome.message
+    assert "evil" not in outcome.message
+    assert SECRET not in outcome.message
+
+
+def test_a_foreign_body_context_comes_before_a_malformed_link(tmp_path: Path) -> None:
+    foreign = b'{"@context": "https://other.test/ctx"}'
+    outcome = contexts(tmp_path, Linked(foreign, recorded(JUNK)))
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+
+
+def test_a_malformed_link_comes_before_an_engine_limit(tmp_path: Path) -> None:
+    allowed = [f"{ALLOWED[0]}?token=TEST-ONLY-1"]
+    linked = Linked(PLAIN, recorded(f"<{ALLOWED[0]}?token={SECRET}>; {CTX}", JUNK))
+    outcome = contexts(tmp_path, linked, allowed_contexts=allowed)
+    assert verdict(outcome) == failed("DATA.CONTEXT.LINK_MALFORMED")
+
+
+def test_a_json_ld_answer_ignores_a_malformed_link(tmp_path: Path) -> None:
+    acquirer = Linked(BODY, recorded(JUNK), media="application/ld+json")
+    assert verdict(contexts(tmp_path, acquirer)) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize("value", [REMOVED, f" {REMOVED}\t", f"\t{REMOVED} "])
+def test_the_bare_marker_of_an_old_recording_names_no_context_and_is_not_malformed(
     tmp_path: Path, value: str
 ) -> None:
-    assert verdict(contexts(tmp_path, Linked(PLAIN, recorded(value)))) == failed("DATA.CONTEXT.MISSING")
+    # Before P2-26, redaction recorded the bare marker for each Link value that it did not keep.
+    assert verdict(contexts(tmp_path, Linked(BODY, (("Link", value),)))) == passed("DATA.CONTEXT.OK")
+    assert verdict(contexts(tmp_path, Linked(PLAIN, (("Link", value),)))) == failed("DATA.CONTEXT.MISSING")
+
+
+@pytest.mark.parametrize("value", ["", " , "])
+def test_an_empty_link_value_keeps_a_pass(tmp_path: Path, value: str) -> None:
+    assert recorded(value) == (("Link", REMOVED),)
     assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == passed("DATA.CONTEXT.OK")
 
 

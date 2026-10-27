@@ -141,7 +141,8 @@ def redact_link(value: str) -> str:
     Each other parameter, and each relation outside the list, is replaced with one marker per link:
     a title or an anchor is free text that a system can fill with anything. A target that is not a
     URI reference becomes a marker. Where reading stopped, one marker stands for the rest of the
-    value. The output parses to the same links and redacts to itself.
+    value. The output parses to the same links and redacts to itself, except the bare marker of a
+    value without a link: it reads as a malformed value.
     """
     parsed = parse_link(value)
     out: list[str] = []
@@ -153,6 +154,10 @@ def redact_link(value: str) -> str:
             + (f'; type="{link.media_type}"' if link.media_type else "")
             + (f"; {REMOVED}" if link.other or len(kept) < len(link.relations) else "")
         )
+    # The bare marker is the form of an old recording and of a value without a link. So a malformed
+    # value without a link gets one link with the target marker before the stop marker.
+    if not parsed.complete and not out:
+        out.append(f"<{_TARGET_REMOVED}>")
     if not parsed.complete or not out:
         out.append(REMOVED)
     return ", ".join(out)
@@ -181,13 +186,14 @@ def parse_link(value: str) -> LinkValue:
 
     Reading stops where a link-value does not start with a target in "<" and ">", or where a link
     is followed by something other than "," or the end. The links before that point are kept. A
-    value that ends with the marker REMOVED as its own link-value stopped in redaction, so it is
-    not complete. Section 3.3: only the first rel counts, and a later one is another parameter.
+    value that ends with the marker REMOVED as its own link-value, also before spaces or tabs,
+    stopped in redaction, so it is not complete. Section 3.3: only the first rel counts, and a
+    later one is another parameter.
     """
     links: list[Link] = []
     at = _skip(_SEPARATORS, value, 0)
     while at < len(value):
-        if value[at:] == REMOVED or value[at] != "<" or (close := value.find(">", at)) < 0:
+        if value[at:].rstrip(" \t") == REMOVED or value[at] != "<" or (close := value.find(">", at)) < 0:
             return LinkValue(tuple(links), complete=False)
         target, at = value[at + 1 : close], close + 1
         rel: str | None = None

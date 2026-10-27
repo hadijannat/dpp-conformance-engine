@@ -626,7 +626,8 @@ A profile constant `allowed_contexts` is not expressive enough, so the test purp
 The allowlist holds ASCII URIs, so give an IRI in its percent-encoded form.
 The check reads every `@context` in the document, also in nested nodes and `@graph` members.
 `DATA.CONTEXT.MISSING` depends on the top-level `@context` only.
-Reason codes: `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, `DATA.CONTEXT.OK`.
+Reason codes: `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, `DATA.CONTEXT.LINK_MALFORMED`,
+`DATA.CONTEXT.OK`.
 
 Two more context sources are experimental:
 
@@ -650,8 +651,12 @@ parameter, and each relation outside its closed list, with one marker.
 - A link without the context relation is ignored, for example `rel=preload`.
 - Reading stops where a link-value does not start with a target. The links before that point
   are kept, so a context link before a malformed part still names its target.
-- The rest of the value names no context, so a document without a top-level context still gives
-  `DATA.CONTEXT.MISSING`.
+- A JSON-LD processor can read a context link after the malformed part. So a value that reading
+  did not finish gives a fail, `DATA.CONTEXT.LINK_MALFORMED`.
+- A malformed value is not a context, so a document without a top-level context still gives
+  `DATA.CONTEXT.MISSING`. `DATA.CONTEXT.NOT_ALLOWED` also comes before `DATA.CONTEXT.LINK_MALFORMED`.
+- A recorded value that is only the marker `<removed>` names no context and is not malformed. An
+  old recording and an empty value have this form.
 - A target that is not a URI reference is recorded as a marker. A target with userinfo or a
   fragment is recorded as a marker too. As a context target, the marker gives
   `DATA.CONTEXT.NOT_ALLOWED`.
