@@ -126,11 +126,12 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "resolver.conformance",
         "resolver",
         _E,
-        "Probe the final status of a default, a linkType=linkset, and an invalid-check-digit request. "
-        "The status of a redirect hop is not judged.",
+        "Probe a default, a linkType=linkset, and an invalid-check-digit request. The first hop of "
+        "the default request must have a redirect status that the test purpose declares (default: "
+        "301, 302, 303, 307, or 308). The other two are judged by their final status.",
         None,
-        "The transport records the status of each redirect hop, and the check asserts it. Tested "
-        "against a GS1 conformant resolver in a recorded test campaign.",
+        "Tested against a GS1 conformant resolver in a recorded test campaign, with the redirect "
+        "status that its documentation declares.",
     ),
     (
         "api.contract",

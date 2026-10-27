@@ -311,12 +311,14 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `REPLAY.INPUT.CHANGED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here | Replay with the inputs of the recorded run, unchanged. |
 | `REPLAY.INPUT.NOT_RECORDED` | REPLAY |  | `dppce.cli.cmd_replay` | not fixed here | Replay a recording that holds each input of the run. |
 | `REPLAY.RECORDING_MISMATCH` | REPLAY |  | `dppce.orchestrator.run.execute` | error | Replay with the inputs of the recorded run. A changed input sends other requests. |
+| `RESOLVER.CONFORMANCE.HOP_STATUS_NOT_RECORDED` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver.conformance` | inconclusive | Run the test again with this engine version, which records the status of each redirect hop. |
 | `RESOLVER.CONFORMANCE.INVALID_ACCEPTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Reject an invalid identifier instead of resolving it. |
 | `RESOLVER.CONFORMANCE.INVALID_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Answer an invalid identifier with the status code that the rule expects. |
 | `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Serve the linkset at its own URL, without a redirect. |
 | `RESOLVER.CONFORMANCE.LINKSET_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Answer the request with a success status code. |
 | `RESOLVER.CONFORMANCE.NO_REDIRECT` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Redirect a resolution request to the default link. |
 | `RESOLVER.CONFORMANCE.OK` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver.conformance` | pass | None: the step passed. |
+| `RESOLVER.CONFORMANCE.REDIRECT_STATUS` | RESOLVER |  | `dppce.adapters.resolver._conformance_failure` | not fixed here | Redirect a default request with the status code that the test purpose declares. |
 | `RESOLVER.LINKSET.ANCHOR` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here | Set the anchor of the linkset to the resolved identifier. |
 | `RESOLVER.LINKSET.MEDIA_TYPE` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here | Serve the response with the media type that the rule expects. |
 | `RESOLVER.LINKSET.OK` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | pass | None: the step passed. |
@@ -324,7 +326,7 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `RESOLVER.LINKSET.STATUS` | RESOLVER |  | `dppce.adapters.resolver._linkset_head_failure` | not fixed here | Answer the request with a success status code. |
 | `RESOLVER.LINKSET.STRUCTURE` | RESOLVER |  | `dppce.adapters.resolver._linkset_body_failure` | not fixed here | Serve the linkset in the structure that the rule requires. |
 | `RESOLVER.NO_TARGET` | RESOLVER | `resolver.conformance` | `dppce.adapters.resolver._carrier`, `dppce.adapters.resolver.conformance` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
-| `RESOLVER.PARAMS.INVALID` | RESOLVER | `resolver.linkset` | `dppce.adapters.resolver.linkset` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `RESOLVER.PARAMS.INVALID` | RESOLVER | `resolver.conformance`, `resolver.linkset` | `dppce.adapters.resolver.conformance`, `dppce.adapters.resolver.linkset` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
 | `RESOLVER.WELLKNOWN.MEDIA_TYPE` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule | Serve the response with the media type that the rule expects. |
 | `RESOLVER.WELLKNOWN.NOT_JSON` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
 | `RESOLVER.WELLKNOWN.OK` | RESOLVER | `resolver.well_known` | `dppce.adapters.resolver.well_known` | pass | None: the step passed. |

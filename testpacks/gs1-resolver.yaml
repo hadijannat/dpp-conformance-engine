@@ -155,6 +155,25 @@ test_purposes:
   expected_evidence:
   - The three resolver exchanges with their redirect chains.
   permitted_modes: *modes
+# The reference resolver redirects a default request with 303. A test purpose declares the code
+# that the documentation of the resolver names. The default of the check accepts all five codes.
+- id: TP-GS1-CONFORMANCE-002
+  title: Probe the declared redirect status of a default resolver request
+  requirements:
+  - FAM-GS1-CONFORMANCE-002
+  profiles:
+  - '*'
+  applicability: *gs1_dl
+  roles:
+  - anonymous
+  stimulus:
+    check: resolver.conformance
+    params:
+      expected_redirect_statuses:
+      - 303
+  expected_evidence:
+  - The three resolver exchanges with their redirect chains and hop statuses.
+  permitted_modes: *modes
 # The IXIT sample gs1_declared is a JSON file whose member id holds the declared identifier. Without
 # it, the step is blocked, which is inconclusive. TP-GS1-CONSISTENCY-001 stays exact text.
 - id: TP-GS1-EQUIVALENCE-001

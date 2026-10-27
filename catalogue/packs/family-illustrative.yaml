@@ -322,6 +322,26 @@ requirements:
   - id: default
     tests:
     - TP-GS1-CONFORMANCE-001
+- id: FAM-GS1-CONFORMANCE-002
+  title: The resolver redirects a default request with the declared status
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The first answer of the resolver to a default request has a redirect status that the test purpose
+    declares.
+  applicability: *gs1_dl
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-GS1-CONFORMANCE-002-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-GS1-CONFORMANCE-002
 - id: FAM-GS1-EQUIVALENCE-001
   title: The declared identifier is GS1-equivalent to the carrier identifier
   source:

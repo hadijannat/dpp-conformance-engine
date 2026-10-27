@@ -64,7 +64,6 @@ NO_PARAMETERS = (
     "identifier.granularity",
     "integrity.jws",
     "manual.review",
-    "resolver.conformance",
     "resolver.well_known",
 )
 # Checks that took no parameter in the base version and now take a closed model (package P2-06).
@@ -92,6 +91,8 @@ MISSPELLED: dict[str, tuple[dict[str, Any], str]] = {
     "aas.validate": ({"artefact": "aas_file"}, "artefact"),
     "aas.dpp_compose": ({"artefact": "aas_json"}, "artefact"),
     "resolver.linkset": ({"relation": ["https://example.test/rel/passport"]}, "relation"),
+    # P2-25: resolver.conformance takes one closed parameter now.
+    "resolver.conformance": ({"expected_redirect_status": [303]}, "expected_redirect_status"),
     "identity.did": ({**DID, "sourc": "did_document"}, "sourc"),
     "integrity.jose": ({"key_sorce": "x5c"}, "key_sorce"),
     "integrity.status_list": ({"list_sorce": "live"}, "list_sorce"),
@@ -158,6 +159,10 @@ WRONG_TYPES: list[tuple[str, dict[str, Any]]] = [
     ("registry.consistency", {"fields": "identifier"}),
     ("resolver.linkset", {"relations": "https://example.test/rel/passport"}),
     ("resolver.linkset", {"relations": [7]}),
+    ("resolver.conformance", {"expected_redirect_statuses": [200]}),
+    ("resolver.conformance", {"expected_redirect_statuses": []}),
+    ("resolver.conformance", {"expected_redirect_statuses": [303, 303]}),
+    ("resolver.conformance", {"document": 7}),
     ("resolver.linkset", {"relations": ["https://example.test/rel/a\n"]}),
     ("resolver.linkset", {"relations": []}),
     ("identity.did", {"did": 7}),

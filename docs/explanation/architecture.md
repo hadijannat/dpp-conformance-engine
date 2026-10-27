@@ -364,7 +364,7 @@ Initial registry:
 | `identifier.negotiation` | `identifier.negotiation` | Sends five fixed `GET` requests to the carrier URL that differ only in the `Accept` header. Checks status, media type, weights, `Vary`, and the body shape. Experimental. |
 | `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier, and a linkset that a `Link` header of its answers advertises. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
-| `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
+| `resolver.conformance` | `resolver.conformance` | Probes the status behavior of a GS1 resolver: the first redirect status of a default request, and the final status of two other requests. |
 | `identity.did` | `identity.did` | Resolves a did:web DID, or reads an offline copy of its DID document. Checks the `id`, the verification methods, and the assertion methods. Resolution is not trust. Experimental. |
 | `integrity.status_list` | `integrity.status_list` | Verifies a VC-JOSE credential, reads its W3C Bitstring Status List entry, gets and verifies the status list credential, and checks the bit. An unsigned, untrusted, unreachable, or stale list never gives `pass`. Experimental. |
 
@@ -827,7 +827,8 @@ check digit. Otherwise it gives `blocked` with `RESOLVER.NO_TARGET`, and nothing
 three requests in this order and stops at the first failure:
 
 1. The carrier URL. The answer must come through at least one redirect:
-   `RESOLVER.CONFORMANCE.NO_REDIRECT`.
+   `RESOLVER.CONFORMANCE.NO_REDIRECT`. The status of the first hop must be in the parameter
+   `expected_redirect_statuses`: `RESOLVER.CONFORMANCE.REDIRECT_STATUS`. Later hops are not judged.
 2. The carrier URL with the query `linkType=linkset`. A redirect gives
    `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`. A final status other than 200 gives
    `RESOLVER.CONFORMANCE.LINKSET_STATUS`.
@@ -838,10 +839,21 @@ three requests in this order and stops at the first failure:
 A redirect that the transport does not follow, out of the scope or past the redirect limit, still
 counts as a redirect. For the second request, it gives `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`.
 For the third request, its 3xx status gives `RESOLVER.CONFORMANCE.INVALID_STATUS`. For the first
-request, it gives `unreachable`.
+request, the record keeps the status of the refused hop (section 10), and rule 1 judges it. So
+neither a redirect out of the scope nor a redirect loop turns a fail into `blocked`.
 
-Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`. The transport does not record the
-status of a followed redirect hop, so the check does not compare 301, 302, 303, 307, or 308.
+`expected_redirect_statuses` is a list of distinct values from 301, 302, 303, 307, and 308. Its
+default holds all five, because GS1-Conformant Resolver 1.2.1 fixes no code. A test purpose that
+needs one code declares it. Any other value gives `blocked` with `RESOLVER.PARAMS.INVALID`, and
+nothing is sent. A record from before hop statuses has redirects but no status. Under the default
+set it meets rule 1, because the transport follows only these five statuses. Under a declared
+subset it gives `blocked` with `RESOLVER.CONFORMANCE.HOP_STATUS_NOT_RECORDED`.
+
+The three requests use the transport default, `follow_redirects` true. Another check can reuse a
+record of the same request (`fetch_once`). A record that follows no hop would give that check a 3xx
+answer in place of the final answer.
+
+Otherwise the check passes with `RESOLVER.CONFORMANCE.OK`.
 
 `aas.validate` has a limit of the wrapped release. The release accepts an empty environment `{}`
 as valid. So `AAS.VALID` does not show that the file has a shell or a submodel.
