@@ -637,11 +637,23 @@ Two more context sources are experimental:
   each `@context` string and each `@import` value in the copy. It follows a reference only into
   another pinned copy. An allowed context without a copy is judged by its URL only.
 
-Redaction replaces each link parameter other than `rel` with one marker, for example
-`type="application/ld+json"`. A removed value, or a context link with a marker or a changed target,
-gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. A link with another relation never blocks.
-`DATA.CONTEXT.NOT_ALLOWED` comes first. Without a top-level context, an unreadable value gives
-`blocked`, not `DATA.CONTEXT.MISSING`.
+The check reads the recorded form of the header. Redaction reads each value as RFC 8288
+link-values, so a quoted `,` or `;` does not split a value. It keeps a `type` of
+`application/ld+json`, `application/linkset+json`, or `application/json`. It replaces each other
+parameter, and each relation outside its closed list, with one marker.
+
+- A link with the context relation names its target, whatever its other parameters are, for
+  example `type="application/ld+json"` or a title.
+- A link without the context relation is ignored, for example `rel=preload`.
+- Redaction removes a value as a whole only if the value is not well-formed. Such a value names
+  no context, so a document without a top-level context still gives `DATA.CONTEXT.MISSING`.
+- A target that redaction changed, for example one with a `token` query parameter, is compared in
+  its redacted form. It gives `DATA.CONTEXT.NOT_ALLOWED`.
+- Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
+  form of an allowed URL. `DATA.CONTEXT.MISSING` and `DATA.CONTEXT.NOT_ALLOWED` come first.
+
+The check judges the target of each context link. The JSON-LD 1.1 API, section 9.4.1, rejects
+more than one context link.
 A copy that is not a JSON object, or an `@import`
 value that is not a string, gives `blocked` with `DATA.CONTEXT.FILE_INVALID`.
 

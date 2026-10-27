@@ -165,7 +165,8 @@ def _advertised(answers: list[Record]) -> str | None:
     """The first http or https target of a Link with the relation linkset in the answers, or None.
 
     The record keeps a Link value only in the form that redaction keeps, so this reads that form.
-    A relative target is resolved against the final URL of its answer. A target that redaction
+    A kept type parameter is read. A link with the marker of another parameter is skipped. A
+    relative target is resolved against the final URL of its answer. A target that redaction
     changed is skipped: the record no longer holds the URL that the system advertised.
     """
     for record in answers:
@@ -173,16 +174,16 @@ def _advertised(answers: list[Record]) -> str | None:
         for name, value in record.headers:
             if name.lower() != "link":
                 continue
-            for target, relations, other in parse_link(value) or []:
-                if other:  # a removed parameter, such as an anchor, can change what the link means
+            for link in parse_link(value) or []:
+                if link.other:  # a removed parameter, such as an anchor, can change what the link means
                     continue
                 try:
-                    url = urljoin(base, target)
+                    url = urljoin(base, link.target)
                 except ValueError:
                     continue
                 if REMOVED in unquote(url):
                     continue
-                if "linkset" in relations and is_http_url(url):
+                if "linkset" in link.relations and is_http_url(url):
                     return url
     return None
 

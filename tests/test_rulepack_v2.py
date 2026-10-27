@@ -506,11 +506,13 @@ def test_a_json_ld_answer_ignores_the_link_context(tmp_path: Path) -> None:
     ) == failed("DATA.CONTEXT.MISSING")
 
 
-def test_a_link_value_that_redaction_removed_is_not_judged_and_never_passes(tmp_path: Path) -> None:
+def test_a_link_value_that_redaction_removed_names_no_context(tmp_path: Path) -> None:
+    # Only a value that is not well-formed is removed as a whole, so it names no context.
     unreadable = Linked(BODY, (("Link", REMOVED),))
-    assert verdict(contexts(tmp_path, unreadable)) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+    assert verdict(contexts(tmp_path, unreadable)) == passed("DATA.CONTEXT.OK")
+    # A changed target is compared in its redacted form, and that form is not on the allowlist.
     redacted = Linked(BODY, (link("https://example.test/ctx?token=%3Cremoved%3E"),))
-    assert verdict(contexts(tmp_path, redacted)) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+    assert verdict(contexts(tmp_path, redacted)) == failed("DATA.CONTEXT.NOT_ALLOWED")
     # A fail in the body comes first, so a reshaped header cannot hide it.
     foreign = b'{"@context": "https://other.test/ctx"}'
     assert verdict(contexts(tmp_path, Linked(foreign, (("Link", REMOVED),)))) == failed(
@@ -527,13 +529,13 @@ def test_a_link_with_another_parameter_and_another_relation_does_not_block(tmp_p
     assert verdict(outcome) == passed("DATA.CONTEXT.OK")
 
 
-def test_a_context_link_with_another_parameter_is_not_judged(tmp_path: Path) -> None:
-    # An anchor or a title can change what the link means, and the record keeps only a marker.
+def test_a_context_link_with_another_parameter_names_its_target(tmp_path: Path) -> None:
+    # JSON-LD 1.1 API, section 9.4.1, reads the href of a context link. Its other parameters do not count.
     raw = (("Link", f'<https://example.test/ctx>; rel="{JSONLD_CONTEXT}"; title="ctx"'),)
     outcome = contexts(tmp_path, Linked(BODY, redact_response_headers(raw)))
-    assert verdict(outcome) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
-    assert verdict(contexts(tmp_path, Linked(PLAIN, redact_response_headers(raw)))) == blocked(
-        "DATA.CONTEXT.LINK_UNREADABLE"
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+    assert verdict(contexts(tmp_path, Linked(PLAIN, redact_response_headers(raw)))) == passed(
+        "DATA.CONTEXT.OK"
     )
 
 

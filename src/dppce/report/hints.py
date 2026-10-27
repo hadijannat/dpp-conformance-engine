@@ -168,7 +168,7 @@ HINTS: Final[dict[str, str]] = {
     "DATA.COMPLETENESS.MISSING": "Add the fields that the rule requires to the passport data.",
     "DATA.CONTEXT.FILE_INVALID": "Pin a context copy that is a JSON object with string @import values.",
     "DATA.CONTEXT.LINK_UNREADABLE": _LIMIT
-    + "the record does not keep this Link header, so a context that it names cannot be judged.",
+    + "a changed context link target equals a changed allowed URL. Allow the URL without a credential.",
     "DATA.CONTEXT.MISSING": "Add the JSON-LD context that the rule requires to the document.",
     "DATA.CONTEXT.NOT_ALLOWED": "Use only the JSON-LD contexts on the allowlist of the test purpose.",
     "DATA.CONTEXT.NO_ALLOWLIST": "Declare the allowlist of contexts in the test purpose.",

@@ -729,14 +729,21 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
 `data.context` reads two more context sources. Both are experimental. No context is fetched.
 
 - The `Link` header of the fetched document, when `source` is absent, `item`, or `model`. A link
-  with the JSON-LD context relation names a context. The check ignores the header for
-  `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
-- The record keeps a `Link` value only in the form that redaction keeps (section 10). A removed
-  value gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. So does a context link with a
-  target that redaction changed or with a removed parameter. A link with another relation is
-  not read. `DATA.CONTEXT.NOT_ALLOWED` comes first. A document without a
-  top-level context and with an unreadable `Link` value gives `blocked`, not
-  `DATA.CONTEXT.MISSING`, because the value can name the context.
+  with the JSON-LD context relation names its target as a context, whatever its other parameters
+  are. The JSON-LD 1.1 API, section 9.4.1, reads only the relation and the target of such a link.
+  The check ignores the header for `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
+- The record keeps a `Link` value only in the form that redaction keeps (section 10). A link
+  without the context relation is ignored. Redaction removes a value as a whole only if it is not
+  well-formed, so such a value names no context. A malformed value of the system therefore never
+  turns `DATA.CONTEXT.MISSING` into `blocked`.
+- A context target that redaction changed is compared in its redacted form. That form is not on
+  the allowlist, so it gives `DATA.CONTEXT.NOT_ALLOWED`. It gives `blocked` with
+  `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted form of an allowed URL. Then the
+  engine cannot compare the two exactly. `DATA.CONTEXT.MISSING` and `DATA.CONTEXT.NOT_ALLOWED`
+  come first.
+- The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
+  error code is `multiple context link headers`, section 9.6.2. The check judges the target of
+  each context link.
 - `context_files` maps an allowed context URL to a pinned copy under the data root. The check
   reads each `@context` reference and each `@import` value of a pinned context. It follows a
   reference only into another pinned context.
@@ -861,7 +868,8 @@ answers. It takes the first `http` or `https` target with that relation and reso
 target against the final URL of its answer. It fetches that target once with
 `Accept: application/linkset+json` and judges the answer by rules 1 to 5. The transport policy
 applies to that request as to every other request. The check reads only the recorded form of the
-header (section 10). A link with another parameter, such as `type`, is therefore not read.
+header (section 10). It reads a link whose only other parameter is a kept `type`. It does not
+read a link with the marker of another parameter, such as `anchor`.
 A target that redaction changed is not fetched.
 No usable `Link` value, no answer, or a body that cannot be read leaves the pass unchanged. The
 check sends the extra request only after both answers pass. So a broken `Link` value cannot turn
@@ -1656,14 +1664,22 @@ records/<id>.enc   one encrypted record each
   `-max-age`, and `-allow-credentials`. A URL in a recorded header is redacted: userinfo, the
   fragment, and credential-like query values are removed. The value of
   `access-control-allow-origin` is redacted in the same way.
-- A `Link` value keeps only its targets and a closed list of relations. The list holds the
-  registered relation names, `linkset`, the JSON-LD context relation, and the GS1 link types.
-  The GS1 link types are those of the pinned GS1 Web Vocabulary file, in the `gs1:` form and the
-  `https://ref.gs1.org/voc/` form. An extension relation is compared as exact text, and only a
-  quoted `rel` value can hold one. Each other parameter of a link is replaced with one marker,
-  `<removed>`, after its relations. A value with another relation, a second `rel`, or a form
-  that the parser cannot split is removed as a whole. The pinned file is `v1.16/gs1Voc.jsonld` of `github.com/gs1/WebVoc` at commit
+- A `Link` value is read as RFC 8288 link-values. A quoted string can hold `,` and `;`, and
+  these do not split the value. A value keeps only its targets, a closed list of relations, and a
+  fixed `type`. The list holds the registered relation names, `linkset`, the JSON-LD context
+  relation, and the GS1 link types. The GS1 link types are those of the pinned GS1 Web Vocabulary
+  file, in the `gs1:` form and the `https://ref.gs1.org/voc/` form. The pinned file is
+  `v1.16/gs1Voc.jsonld` of `github.com/gs1/WebVoc` at commit
   `f8f407bf717233c871dca2f62f4e45b0940e8cad`.
+- An extension relation is compared as exact text, and only a quoted `rel` value can hold one. A
+  relation outside the list is dropped one word at a time. A `type` with the value
+  `application/linkset+json`, `application/ld+json`, or `application/json` is kept in lower case.
+  These fixed values cannot carry a secret. Each other parameter, and each dropped relation, gives
+  the link one marker, `<removed>`, after its relations and its type.
+- Only a value that is not well-formed is removed as a whole. Such a value has a link without a
+  target, a target that is not a URI reference, or a second `rel`. It can also have a parameter
+  that is not a name, a name with a token, or a name with a quoted string. The output of
+  redaction parses to the same links, and redaction of the output gives the same text.
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in
 method, URL, or role gives `recording_mismatch`, which is an execution error.

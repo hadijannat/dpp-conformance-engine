@@ -51,27 +51,41 @@ def test_several_kept_relations_in_one_value_stay_in_their_order() -> None:
 
 
 @pytest.mark.parametrize(
-    "value",
+    ("value", "kept"),
     [
         # Free text with ":" and "/" is not a relation of the closed list.
-        '<https://sut.example/a>; rel="https://sut.example/S3CRET"',
-        '<https://sut.example/a>; rel="gs1:S3CRET"',
-        '<https://sut.example/a>; rel="urn:S3CRET"',
-        '<https://sut.example/a>; rel="linkset https://sut.example/S3CRET"',
+        ('<https://sut.example/a>; rel="https://sut.example/S3CRET"', f"<https://sut.example/a>; {REMOVED}"),
+        ('<https://sut.example/a>; rel="gs1:S3CRET"', f"<https://sut.example/a>; {REMOVED}"),
+        ('<https://sut.example/a>; rel="urn:S3CRET"', f"<https://sut.example/a>; {REMOVED}"),
+        (
+            '<https://sut.example/a>; rel="linkset https://sut.example/S3CRET"',
+            f'<https://sut.example/a>; rel="linkset"; {REMOVED}',
+        ),
         # An extension relation is compared as exact text, so another case is not on the list.
-        '<https://sut.example/a>; rel="gs1:activityideas"',
-        '<https://sut.example/a>; rel="https://REF.gs1.org/voc/pip"',
+        ('<https://sut.example/a>; rel="gs1:activityideas"', f"<https://sut.example/a>; {REMOVED}"),
+        ('<https://sut.example/a>; rel="https://REF.gs1.org/voc/pip"', f"<https://sut.example/a>; {REMOVED}"),
         # The GS1 link types of the list are in the gs1: and the ref.gs1.org form only.
-        '<https://sut.example/a>; rel="https://gs1.org/voc/pip"',
+        ('<https://sut.example/a>; rel="https://gs1.org/voc/pip"', f"<https://sut.example/a>; {REMOVED}"),
+        # A quoted comma does not split the value, so "gs1:pip," is one word outside the list.
+        ('<https://sut.example/a>; rel="gs1:pip, S3CRET"', f"<https://sut.example/a>; {REMOVED}"),
+    ],
+)
+def test_a_relation_outside_the_list_is_dropped_and_its_link_gets_the_marker(value: str, kept: str) -> None:
+    assert redact_link(value) == kept
+    assert redact_link(kept) == kept
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
         # Only the quoted form permits ":" and "/".
         "<https://sut.example/a>; rel=gs1:pip",
         "<https://sut.example/a>; rel=http://www.w3.org/ns/json-ld#context",
-        '<https://sut.example/a>; rel="gs1:pip, S3CRET"',
         # The rel parameter is given once. A second one is not read, so the value is removed.
         '<https://sut.example/a>; rel="linkset"; REL="next"',
     ],
 )
-def test_a_link_with_free_text_is_removed_as_a_whole(value: str) -> None:
+def test_a_link_value_that_is_not_well_formed_is_removed_as_a_whole(value: str) -> None:
     assert redact_link(value) == REMOVED
 
 
@@ -79,7 +93,7 @@ def test_a_link_with_free_text_is_removed_as_a_whole(value: str) -> None:
     ("value", "kept"),
     [
         (
-            '<https://sut.example/a>; rel="linkset"; type="application/linkset+json"',
+            '<https://sut.example/a>; rel="linkset"; type="text/plain"',
             f'<https://sut.example/a>; rel="linkset"; {REMOVED}',
         ),
         (
@@ -199,7 +213,7 @@ def test_an_advertised_linkset_is_judged_by_the_same_rules(
     [
         "<ftp://sut.example/l>; rel=linkset",
         "<http://[::1>; rel=linkset",
-        f'<{ADVERTISED}>; rel="linkset"; type="application/linkset+json"',
+        f'<{ADVERTISED}>; rel="linkset"; title="x"',
         f'<{ADVERTISED}>; rel="next"',
         # Redaction changed these targets, so the record no longer holds the advertised URL.
         f'<{ADVERTISED}?X-Amz-Signature=abc123>; rel="linkset"',

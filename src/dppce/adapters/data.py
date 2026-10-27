@@ -20,7 +20,7 @@ from decimal import Decimal
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Final, Literal, Self
-from urllib.parse import unquote, urljoin
+from urllib.parse import urljoin
 
 from jsonschema import SchemaError
 from jsonschema.protocols import Validator
@@ -52,7 +52,7 @@ from dppce.evidence.jose_profiles import JoseError
 from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link
+from dppce.infrastructure.redaction import JSONLD_CONTEXT, parse_link, redact_url
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
 
@@ -766,39 +766,37 @@ def _pinned_contexts(ctx: CheckContext, params: ContextParams) -> dict[str, list
     return pinned
 
 
-def _link_contexts(record: Record) -> tuple[list[str], bool]:
-    """The targets of the Link values with the JSON-LD context relation, and whether one is unreadable.
+def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
+    """The targets of the links with the JSON-LD context relation, and how many cannot be compared.
 
-    JSON-LD 1.1, section 6.1: a processor ignores this header for application/ld+json. The record
-    holds a Link value in the form that redaction keeps. A value that redaction removed no longer
-    shows what the system sent, so it is unreadable. So is a context link with a target that
-    redaction changed or with another parameter, such as an anchor. A link with another relation
-    and another parameter is not a context, so it is not read.
+    JSON-LD 1.1 API, section 9.4.1: a processor reads the href of such a link and ignores the
+    header for application/ld+json. The record holds the form that redaction keeps. A link with
+    the relation names its target, whatever its other parameters are. A value that redaction
+    removed as a whole was not well-formed, so it names no context. A target that redaction
+    changed is compared in that form. It cannot be compared only if it equals the redacted form of
+    an allowed URL that redaction changes too.
     """
     if record.kind != "http" or media_type(record) == "application/ld+json":
-        return [], False
+        return [], 0
     base = record.redirects[-1] if record.redirects else record.url
+    changed = {redact_url(a) for a in allowed if isinstance(a, str)}
     found: list[str] = []
-    unreadable = False
+    limited = 0
     for name, value in record.headers:
         if name.lower() != "link":
             continue
-        links = parse_link(value)
-        if links is None or value == REMOVED:  # "<removed>" itself reads as a link without a relation
-            unreadable = True
-            continue
-        for target, relations, other in links:
-            if JSONLD_CONTEXT not in relations:
+        for link in parse_link(value) or []:
+            if JSONLD_CONTEXT not in link.relations:
                 continue
             try:
-                url = urljoin(base, target)
+                url = urljoin(base, link.target)
             except ValueError:
-                url = REMOVED
-            if other or REMOVED in unquote(url):
-                unreadable = True
+                continue  # a target that cannot be resolved names no context
+            if url not in allowed and url in changed:
+                limited += 1
             else:
                 found.append(url)
-    return found, unreadable
+    return found, limited
 
 
 def _imported(start: list[str], pinned: dict[str, list[str]], allowed: list[Any]) -> set[str]:
@@ -837,10 +835,10 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     # A Link header applies to the one fetched document. It never applies to a sample, a
     # credential payload, or an HTML page.
     fetched = params.source in (None, "item", "model")
-    linked, unreadable = _link_contexts(got.record) if fetched else ([], False)
-    if linked:
+    linked, limited = _link_contexts(got.record, allowed) if fetched else ([], 0)
+    if linked or limited:
         entries, found = counted[0]
-        counted[0] = (entries + len(linked), found | {url for url in linked if url not in allowed})
+        counted[0] = (entries + len(linked) + limited, found | {url for url in linked if url not in allowed})
     start = [r for document in got.documents for r in _references(document)[0] if isinstance(r, str)] + linked
     foreign = sorted(set().union(*(found for _, found in counted), _imported(start, pinned, allowed)))
     summary: dict[str, JsonValue] = {
@@ -849,8 +847,7 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
         "not_allowed": list[JsonValue](foreign),
     }
     observation = got.observation(ctx, summary)
-    # An unreadable Link value can hold the context, so a document without one is not judged.
-    if (missing := sum(1 for entries, _ in counted if not entries)) and not unreadable:
+    if missing := sum(1 for entries, _ in counted if not entries):
         message = (
             "The document names no context." if len(counted) == 1 else f"{missing} documents name no context."
         )
@@ -858,10 +855,10 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     if foreign:
         message = f"{len(foreign)} context references are not in the pinned allowlist. No context is fetched."
         return completed(False, "DATA.CONTEXT.NOT_ALLOWED", message, [observation])
-    if unreadable:
+    if limited:
         message = (
-            "A Link header of the answer is not in a form that the record keeps, so a context that it "
-            "names cannot be judged."
+            "A context link of the answer has a target that redaction changed. It equals the redacted "
+            "form of an allowed context, so the two cannot be compared exactly."
         )
         return CheckOutcome(
             status=ExecutionStatus.BLOCKED,
