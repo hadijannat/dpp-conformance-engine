@@ -38,6 +38,7 @@ deterministic code and versioned data.
 | `dppce.infrastructure` | Transport, recorder, replay, clock, key providers, reference server. | `models`, `evidence` |
 | `dppce.orchestrator` | Plan, run, replay. | all of the above except `verifier` |
 | `dppce.report` | JSON and HTML rendering. | `models`, `evidence` |
+| `dppce.compare` | Compare the decision bodies of two runs. | `models` |
 | `dppce.cli` | Command-line entry point. | all |
 
 Rules:
