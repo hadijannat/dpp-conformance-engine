@@ -91,7 +91,7 @@ def _step(envelope: EvidenceEnvelope, test_purpose: str) -> tuple[str, str]:
 
 
 def test_the_catalogue_names_the_gs1_resolver_cases() -> None:
-    assert sorted(e["id"] for e in GS1_CASES) == ["B-14", "F-48", "F-49", "F-50", "F-51", "F-52"]
+    assert sorted(e["id"] for e in GS1_CASES) == ["B-14", "F-48", "F-49", "F-50", "F-51", "F-52", "F-76"]
     assert {e["test_purpose"] for e in GS1_CASES} == set(PURPOSES.values())
 
 
