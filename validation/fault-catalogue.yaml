@@ -550,6 +550,13 @@ sut_faults:
     test_purpose: TP-GS1-LINKSET-001
     profiles: [family/gs1-resolver]
     expected: {verdict: fail, reason_code: RESOLVER.LINKSET.ANCHOR}
+  - id: F-77
+    class: schema_fault
+    fault: vc_payload_schema_broken
+    description: The TEST-ONLY VC-JOSE credential verifies, but its payload has no credentialSubject id, which the pinned payload schema requires.
+    test_purpose: TP-VC-PAYLOAD-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: DATA.SCHEMA.INVALID}
   - id: F-78
     class: contract_violation
     fault: resolver_redirect_302
@@ -614,6 +621,13 @@ boundary_cases:
     requirement: ILL-DATA-001
     expected: {verdict: fail}
     rationale: An ICS declaration cannot waive a mandatory requirement.
+  - id: B-09
+    fault: none
+    description: A test purpose pins a draft-07 schema that uses dependencies, and the passport breaks that keyword. The IXIT item template names the model-level document, which has an id and no operator.
+    test_purpose: TP-VC-PASSPORT-001
+    profiles: [family/credentials]
+    expected: {verdict: fail, reason_code: DATA.SCHEMA.INVALID}
+    rationale: The engine validates a draft-07 schema with the draft-07 rules. A keyword is never ignored.
   - id: B-10
     fault: resolver_linkset_as_passport
     description: The resolver answers 200 with an application/linkset+json linkset to the default request.

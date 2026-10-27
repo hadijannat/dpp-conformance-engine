@@ -21,6 +21,7 @@ from cryptography.hazmat.primitives import serialization
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce import __version__
 from dppce.adapters.capabilities import manifest as capability_manifest
+from dppce.adapters.data import param_files
 from dppce.catalogue import Catalogue, sanitized_ixit
 from dppce.catalogue.lint import params_problem
 from dppce.evidence.canonical import digest
@@ -256,11 +257,22 @@ def _dependency_versions() -> dict[str, str]:
     return dict(sorted(versions.items()))
 
 
-def bound_files(profile: Profile, data_root: Path) -> dict[str, str]:
-    """sha256 of the raw bytes of each file that the profile binds, keyed by its path."""
+def bound_files(profile: Profile, data_root: Path, testpacks: Mapping[str, TestPack]) -> dict[str, str]:
+    """sha256 of the raw bytes of each bound file, keyed by its path (section 9.2).
+
+    The bound files are the files that the profile binds, and each file that a test purpose of a
+    selected test pack names in a parameter.
+    """
     named = (profile.api_contract, profile.access_policy, profile.item_schema, profile.model_schema)
+    parameters = (
+        path
+        for name in profile.testpacks
+        if name in testpacks
+        for purpose in testpacks[name].test_purposes
+        for path in param_files(purpose.stimulus.check, purpose.stimulus.params)
+    )
     bound: dict[str, str] = {}
-    for path in sorted({p for p in (*named, *profile.rule_packs) if p}):
+    for path in sorted({p for p in (*named, *profile.rule_packs, *parameters) if p}):
         try:
             bound[path] = "sha256:" + hashlib.sha256((data_root / path).read_bytes()).hexdigest()
         except OSError:
@@ -323,7 +335,10 @@ def _anchor_fingerprints(trust: TrustBundle | None) -> tuple[str, ...]:
 def _manifest(inputs: RunInputs, acquirer: Acquirer) -> RunManifest:
     acquired = sorted(r.acquired_at for r in acquirer.records())
     hashes = input_hashes(
-        inputs.profile, inputs.catalogue, inputs.testpacks, bound_files(inputs.profile, inputs.data_root)
+        inputs.profile,
+        inputs.catalogue,
+        inputs.testpacks,
+        bound_files(inputs.profile, inputs.data_root, inputs.testpacks),
     )
     return RunManifest(
         engine_version=__version__,

@@ -349,9 +349,9 @@ Initial registry:
 | `identifier.consistency` | `identifier.consistency` | Compares the carrier identifier with the `id` of the resolved passport. With a QR image sample, it also compares the carrier identifier with the declared sample identifier. With `compare_item`, it also compares the resolved passport with the document at the target of the `item` template. With `sources`, it compares further values at JSON Pointers in place of the `id`. It does not read the ICS. |
 | `identifier.equivalence` | `identifier.equivalence` | Compares the carrier with a declared identifier in GS1 canonical form. It does not change the exact-text rule of `identifier.consistency`. Experimental. |
 | `api.contract` | `api.contract` | Response matches the pinned OpenAPI contract. |
-| `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. |
-| `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. |
-| `data.rules` | `data.rules` | Rule pack: completeness, units, ranges, relationships, freshness. |
+| `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. With `source`, the document can be an IXIT sample, a verified credential payload, or embedded JSON-LD. |
+| `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. `source` applies as for `data.jsonschema`. |
+| `data.rules` | `data.rules` | Rule pack: completeness, units, ranges, relationships, freshness. `source` applies as for `data.jsonschema`. |
 | `access.restricted_fields` | `access.policy` | A role gets each field that the declared policy gives it, and no field that the policy withholds from it. |
 | `integrity.jws` | `integrity.jws` | Signature validity, issuer trust, and certificate validity, as separate findings. |
 | `integrity.jose` | `integrity.jose` | Verifies a JWS credential or token under a named profile with its own algorithm allowlist. Signature, issuer trust, and validity are separate findings. The report signing profile is unchanged. Experimental. |
@@ -680,6 +680,50 @@ no value, or to `null`, makes the pair missing. A missing pair is not compared. 
 a compared pair gives `REGISTRY.INCONSISTENT` before a missing pair gives
 `REGISTRY.FIELD.MISSING`. Declared pairs other than the default are experimental. Invalid parameters that reach the check give `blocked` with
 `REGISTRY.PARAMS.INVALID`.
+
+`data.jsonschema`, `data.context`, and `data.rules` take the optional parameter `source` (OD-07).
+It selects where the judged document comes from. It is experimental. The parameter `document`
+still selects the profile schema and the rules of the document kind.
+
+- No `source` reads the resource that `document` names, as before. The observation summary does
+  not change, so a recorded run keeps its decision digest.
+- `item` or `model` reads that resource. The summary adds `source`.
+- `credential_payload` reads the payload of a JWS credential. The credential is at the resource
+  `signed`, or in an IXIT sample. The parameter `credential` holds the parameters of
+  `integrity.jose`, with the profile `vc-jose` and the key source `trust_kid` as defaults.
+- `embedded_jsonld` reads each `<script type="application/ld+json">` element of an HTML page. The
+  page is at the resource that `document` names, or in the IXIT sample that `sample` names. The
+  check asks for the resource with `Accept: text/html`.
+- Any other value names an IXIT sample. The check reads the sample and sends no request.
+
+A sample name that starts with `manual/` is refused. This applies to `source`, `sample`, and the
+sample names in `credential`.
+
+`data.jsonschema` takes the optional parameter `schema`, and `data.rules` takes `rule_pack`. Each
+names a file under the data root, in place of the profile schema or the profile rule packs. The
+path is relative and has no `.` or `..` segment. A file that a link takes out of the data root
+gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run binds each such file
+(section 9.2).
+
+The check takes the first row that applies. The rows of the schema or the rule packs come after
+row 1 and before row 2.
+
+1. Invalid parameters: `blocked`, `DATA.PARAMS.INVALID`. Nothing is read.
+2. `credential_payload` without a trust bundle: `blocked`, `DATA.CREDENTIAL.UNVERIFIED`.
+3. A missing sample: `blocked`, `DATA.SAMPLE.MISSING`. A fetch follows the rules of the item
+   document: a missing answer is `unreachable`, and a status other than 200 is not judged.
+4. A credential that does not verify under `credential`: `blocked`,
+   `DATA.CREDENTIAL.UNVERIFIED`. The message and the summary name the code of `integrity.jose`.
+   An unverified payload is never judged. `integrity.jose` reports the signature itself.
+5. A page above 2 MiB: `blocked`, `DATA.EMBEDDED.TOO_LARGE`.
+6. A sample, a payload, or a script that is not one JSON object gives a fail,
+   `DATA.RESPONSE.NOT_JSON`. So does a page that is not UTF-8 text.
+7. A page without such a script: fail, `DATA.EMBEDDED.MISSING`.
+8. The check judges each embedded document. Any document that breaks the rule gives a fail.
+
+A system under test therefore cannot turn a fail into `blocked` with a second script or with a
+document that does not parse. The engine reads the page with the `html.parser` module of the
+standard library. It never renders the page or runs a script.
 
 `data.jsonschema` selects the dialect from the top-level `$schema` of the pinned schema:
 
@@ -1443,7 +1487,8 @@ one in `api.contract` and `access.policy`.
 - If the IXIT template path differs from the marked path, `api.contract` gives `blocked` with
   `API.CONTRACT.PATH_MISMATCH`. Nothing is fetched.
 - The run manifest records `sha256:<hex>` of the raw bytes of each bound file in `bound_files`.
-  These files are the contract, the policy, the schemas, and the rule packs.
+  These files are the contract, the policy, the schemas and rule packs of the profile, and each
+  file that a test purpose names in a parameter.
   An unreadable file is recorded as `unavailable`.
 - A new run writes the decision body schema version `dppce.decision/3`. In versions 2 and 3,
   `bound_files` is required. A `dppce.decision/1` body has no `bound_files`. Only version 3

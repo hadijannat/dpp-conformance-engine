@@ -48,6 +48,8 @@ FLAGS: Final = frozenset(
         "vc_status_list_unsigned",
         # B-18: the ttl of the list is one day, so the list is stale at the evaluation time of the rig.
         "vc_status_list_stale",
+        # F-77: a validly signed credential whose credentialSubject has no id.
+        "vc_payload_schema_broken",
     }
 )
 MEDIA_TYPE: Final = "application/vc+jwt"
@@ -120,6 +122,8 @@ def token(system: ReferenceSystem, subject: str) -> str:
     document = credential(subject)
     if "vc_expired" in faults:
         document |= {"validFrom": "2025-01-01T00:00:00Z", "validUntil": "2026-01-01T00:00:00Z"}
+    if "vc_payload_schema_broken" in faults:
+        document["credentialSubject"] = {}
     alg = "none" if "vc_alg_none" in faults else "HS256" if "vc_hs256_confusion" in faults else "ES256"
     kid = UNKNOWN_KID if "vc_untrusted_kid" in faults else KID
     header = _b64(canonical_bytes({"alg": alg, "kid": kid, "typ": "vc+jwt"}))

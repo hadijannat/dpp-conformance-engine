@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "TEST-ONLY. Project-authored and synthetic. It makes no normative statement. TP-VC-PAYLOAD-001 judges the verified payload of the reference VC-JOSE credential with it.",
+  "type": "object",
+  "required": ["@context", "type", "issuer", "credentialSubject"],
+  "properties": {
+    "type": {"type": "array", "contains": {"const": "VerifiableCredential"}},
+    "issuer": {"type": "string"},
+    "credentialSubject": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {"id": {"type": "string", "format": "uri"}}
+    }
+  }
+}

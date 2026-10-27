@@ -605,6 +605,7 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `vc_status_revoked` | family `credentials`: the status list of section 4.7 sets the bit at index `41267` |
 | `vc_status_list_unsigned` | family `credentials`: the signature of the status list covers a list with the bit at index `41267` set, and the served payload has the bit not set |
 | `vc_status_list_stale` | family `credentials`: the `ttl` of the status list is `86400000`, one day after its `validFrom`, so the list is stale at the evaluation time of the rig |
+| `vc_payload_schema_broken` | family `credentials`: the `credentialSubject` of the credential of section 4.7 is an empty object. The credential is signed validly |
 | `aas_api_wrong_status` | family `aas`: `/api/v3.0/shells/{id}` answers `200` with an empty body for an unknown shell id |
 | `aas_api_bad_paging` | family `aas`: `/api/v3.0/shells` and `/api/v3.0/submodels` ignore `limit` and answer every element without a `cursor` |
 
@@ -747,9 +748,9 @@ request budget. The transport then sends the request one more time.
 | `identifier.resolve` | `accept` (the `Accept` request header, printable ASCII), `accepted_media_types` (1 to 16 media types in lower case), `require_https` (boolean, default `false`); all optional | `IDENTIFIER.RESOLVED`: final status 200 with a JSON object; `IDENTIFIER.RESOLVED.MEDIA_TYPE`: final status 200 with a listed media type that is not JSON | 404 or 410: `IDENTIFIER.UNRESOLVED` (fail); 429: `TRANSPORT.RATE_LIMITED` (`unreachable: true`); 500 to 599: `TRANSPORT.SERVER_ERROR` (`unreachable: true`); other status: `IDENTIFIER.RESOLUTION.STATUS` (fail); body not a JSON object where JSON is needed: `IDENTIFIER.RESPONSE.NOT_JSON` (fail); media type not listed: `IDENTIFIER.RESPONSE.MEDIA_TYPE` (fail); with `require_https`, a carrier URL whose scheme is not `https` (nothing is fetched) or a redirect target whose scheme is not `https`: `IDENTIFIER.SCHEME.NOT_HTTPS` (fail); malformed parameter: `blocked`, `IDENTIFIER.PARAMS.INVALID`. The summary always records `media_type` |
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
-| `data.jsonschema` | `document`: `item` or `model` | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP`. A schema that is not valid in its dialect, or a local reference that does not resolve: `blocked`, `DATA.SCHEMA.MALFORMED`. A `$schema` other than 2020-12 or draft-07: `blocked`, `DATA.SCHEMA.DIALECT`. A keyword that the dialect ignores: `blocked`, `DATA.SCHEMA.MALFORMED` |
-| `data.context` | `document`, `allowed_contexts` | `DATA.CONTEXT.OK` | see section 5.4 |
-| `data.rules` | `document` (default `item`) | `DATA.RULES.OK` | see section 5.1 |
+| `data.jsonschema` | `document`: `item` or `model`; optional `schema`, `source`, `sample`, `credential` (see below the table) | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP`. A schema that is not valid in its dialect, or a local reference that does not resolve: `blocked`, `DATA.SCHEMA.MALFORMED`. A `$schema` other than 2020-12 or draft-07: `blocked`, `DATA.SCHEMA.DIALECT`. A keyword that the dialect ignores: `blocked`, `DATA.SCHEMA.MALFORMED` |
+| `data.context` | `document`, `allowed_contexts`; optional `source`, `sample`, `credential` | `DATA.CONTEXT.OK` | see section 5.4 |
+| `data.rules` | `document` (default `item`); optional `rule_pack`, `source`, `sample`, `credential` | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
 | `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
 | `integrity.jose` | `profile`, `key_source`, `did_sample`, `source`, `sample`, `accept`, `algorithms`; all optional | `INTEGRITY.JOSE.OK` | the architecture contract, section 8, gives each outcome and its order. The reference credential is in section 4.7 |
@@ -758,6 +759,21 @@ request budget. The transport then sends the request one more time.
 | `registry.consistency` | `fields` (1 to 16 pairs of `name`, `registry_pointer`, and `passport_pointer`; the default is the two pairs of section 4.4) | `REGISTRY.OK` | `REGISTRY.INCONSISTENT` (fail); a compared field absent on either side: `REGISTRY.FIELD.MISSING` (fail); malformed parameter: `blocked`, `REGISTRY.PARAMS.INVALID`. Values compare as JSON values, so `true` is not `1`. Lookup status 401, 403, or 404: `REGISTRY.LOOKUP.NOT_CONCLUSIVE` with `unreachable: true`, because a failed lookup does not prove a missing registration |
 | `aas.validate` | `artifact` (default `aas_file`), `format` (`json`, `xml`, or `aasx`; default `json`), `metamodel_version` (default `3.0`) | `AAS.VALID`. The message names the format and the version that the check covers | `AAS.INVALID` (fail): the wrapped validator read the sample and rejected it, or the sample is not readable as the declared format, or an AASX package has no AAS specification part; a `metamodel_version` that the wrapped release does not verify, or an XML namespace that names such a version: `unsupported`, `AAS.VERSION.UNSUPPORTED`, and the sample is not read; malformed parameter: `blocked`, `AAS.PARAMS.INVALID`; sample missing: `blocked`, `AAS.SAMPLE.MISSING` |
 | `aas.api_profile` | `endpoint` (default `aas`), `profile` (default `aas-repository-read`), `id_source` (default `aas_shell_id`), `id_pointer`, `max_requests` (default 6) | `AAS.API.OK`. The message names the probes that ran | `AAS.API.PROFILE` (fail), with the broken rule in `summary.rule`; the architecture contract, section 8, gives each outcome and its order. The reference repository is in section 4.9 |
+
+The data checks take these optional parameters. Each one is experimental.
+
+| Parameter | Checks | Meaning |
+| --- | --- | --- |
+| `source` | all three | No value: the resource that `document` names. `item` or `model`: that resource. `credential_payload`: the payload of a credential that verifies first. `embedded_jsonld`: each JSON-LD script of an HTML page. Any other value: the IXIT sample of that name |
+| `sample` | all three | With `embedded_jsonld`: the IXIT sample that holds the HTML page. Without it, the check asks for the resource with `Accept: text/html` |
+| `credential` | all three | With `credential_payload`: the parameters of `integrity.jose`, for example `accept` and `source` |
+| `schema` | `data.jsonschema` | A schema file under the data root, in place of the profile schema |
+| `rule_pack` | `data.rules` | A rule pack file under the data root, in place of the profile rule packs |
+
+A run binds each file that `schema` or `rule_pack` names. The outcomes of the sources are in the
+architecture contract, section 8. An unverified credential gives `blocked`,
+`DATA.CREDENTIAL.UNVERIFIED`. A page without a JSON-LD script gives a fail,
+`DATA.EMBEDDED.MISSING`.
 
 ### 8.1 Outcomes of `integrity.jws`
 

@@ -654,3 +654,49 @@ requirements:
   - id: default
     tests:
     - TP-VC-STATUS-001
+- id: FAM-VC-PAYLOAD-001
+  title: The verified credential payload matches its pinned schema
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The payload of the credential verifies with a pinned issuer key and matches the pinned
+    payload schema.
+  applicability:
+    all:
+    - *vc
+    - fact: ics.signature_format
+      op: eq
+      value: jws
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-PAYLOAD-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. An unverified payload is
+      not judged.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-PAYLOAD-001
+- id: FAM-VC-PASSPORT-001
+  title: The item passport matches a pinned draft-07 schema
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: The item passport of the credential system matches the pinned draft-07 schema, including
+    its dependencies keyword.
+  applicability: *vc
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-VC-PASSPORT-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-VC-PASSPORT-001

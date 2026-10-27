@@ -156,7 +156,10 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "data.jsonschema",
         "data",
         _S,
-        "Validate a document against a pinned JSON Schema in the 2020-12 or the draft-07 dialect.",
+        "Validate a document against a pinned JSON Schema in the 2020-12 or the draft-07 dialect. "
+        "The parameter schema (experimental) names a schema file under the data root. The parameter "
+        "source (experimental) reads an IXIT sample, the payload of a credential that verifies first, "
+        "or each JSON-LD script of an HTML page.",
         None,
         "",
     ),
@@ -164,7 +167,8 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "data.context",
         "data",
         _S,
-        "Check JSON-LD context references against a pinned allowlist. No context is fetched.",
+        "Check JSON-LD context references against a pinned allowlist. No context is fetched. "
+        "The parameter source (experimental) applies as for data.jsonschema.",
         None,
         "",
     ),
@@ -172,7 +176,9 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "data.rules",
         "data",
         _S,
-        "Versioned rule packs: completeness, units, ranges, relationships, freshness.",
+        "Versioned rule packs: completeness, units, ranges, relationships, freshness. The parameter "
+        "rule_pack (experimental) names a rule pack file under the data root. The parameter source "
+        "(experimental) applies as for data.jsonschema.",
         None,
         "",
     ),
