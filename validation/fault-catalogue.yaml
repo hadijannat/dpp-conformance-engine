@@ -692,3 +692,4 @@ evidence_faults:
   - {id: E-13, tamper: flip_manual_outcome, description: The outcome of a completed manual step is changed., dimension: manual_results}
   - {id: E-14, tamper: revoked_bit, description: The status list sets the bit of the report to revoked., dimension: status}
   - {id: E-15, tamper: role_swap, description: The report key adds a second signature that declares the role reviewer., dimension: signers}
+  - {id: E-16, tamper: change_authorization, description: The authorization digest in the manifest is changed after signing., dimension: signature}
