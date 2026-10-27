@@ -593,6 +593,7 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `negotiation_no_vary` | family `resolver`: `/01/...` answers `200` with an HTML page and no `Vary` header when the `Accept` weight of `text/html` is above that of `application/json` |
 | `negotiation_wrong_type` | family `resolver`: `/01/...` answers `200` with the HTML page and `Vary: Accept` when `Accept` lists `application/json` with a weight above 0, or prefers `text/html` |
 | `resolver_rate_limited` | family `resolver`: `/01/...` answers each default request (no `linkType`, and an `Accept` that does not prefer the linkset) with `429` and `Retry-After: 1`, every time |
+| `resolver_redirect_302` | family `resolver`: `/01/...` answers each default request (no `linkType`, and an `Accept` that does not prefer the linkset) with `302` in place of `303`, to the same `Location` |
 | `signed_jws_json` | family `jose`: `/dpp/{id}/signed` answers `200` with `Content-Type: application/jose+json` and the flattened JWS JSON serialization of the compact token. The members `protected`, `payload`, and `signature` are the three parts of that token. |
 | `vc_tampered` | family `credentials`: the payload of the credential of section 4.7 names serial `OTHER0001` after signing |
 | `vc_hs256_confusion` | family `credentials`: the credential header names `HS256`, and the signature is an HMAC-SHA256 with the DER public key of the TEST-ONLY leaf as the key |
