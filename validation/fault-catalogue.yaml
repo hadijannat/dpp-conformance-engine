@@ -95,13 +95,23 @@
 # TRANSPORT.RATE_LIMITED in the adapters and the transport. That commit comes before the commit
 # that adds the flag resolver_rate_limited to the reference system. The package ends with a review
 # fix commit, which changes no entry.
+# Version 0.12.0 adds the fault F-76 and the evidence fault E-16. It adds no boundary case. The
+# git history gives this order:
+# - F-76: the entry commit comes before the commit that makes OPTIONS a read and keeps more Link
+#   relations in the records. It also comes before the commit that adds the Link-header form of
+#   resolver.linkset and the commit that adds the flag resolver_linkset_link_broken.
+# - E-16: the entry commit comes before the commit that adds the tests of dppce.decision/3. It also
+#   comes before the commit that adds the provenance fields of the manifest and the tamper
+#   change_authorization. The seed is that tamper, not a flag.
+# Each of the two packages ends with a review fix commit. The package of F-76 also has a test pack
+# fix commit. These commits change no entry. The entries meet in the merge commits.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.11.0
+version: 0.12.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
