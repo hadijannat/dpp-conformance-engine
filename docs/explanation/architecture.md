@@ -715,9 +715,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   regular expressions without nested quantifiers and without backreferences. It has at most three
   variable choices: quantifiers other than `{m}`, and `|` outside a character class. A value
   longer than `max_length` characters breaks the rule.
-  One answer has a pattern work budget of 2^24 units, and each match costs the square of the value
-  length. A rule that would exceed it is not judged and gives `blocked` with
-  `DATA.RULES.WORK_LIMIT`, unless another rule fails.
+  Each rule has a pattern work budget of 2^24 units on one answer, and each match costs the square
+  of the value length. A rule that would exceed its budget is not judged and gives `blocked` with
+  `DATA.RULES.WORK_LIMIT`, unless another rule fails. One rule cannot use the budget of another.
 - `forbidden` breaks if the field at a pointer is present, also with the value `null`.
 - `equals` compares the string at a pointer with a constant or with the string at a second pointer.
 - `each` applies one rule of another kind to each element of the array at a pointer.

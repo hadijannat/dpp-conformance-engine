@@ -212,8 +212,8 @@ def test_max_length_has_an_engine_limit() -> None:
         Rule.model_validate(rule("pattern", path="/n", pattern="a*", max_length=0))
 
 
-# -- the pattern work budget of one answer ------------------------------------------------------------
-# Each match costs len(value) ** 2 units, and one answer has MAX_PATTERN_WORK units: 64 values of 512
+# -- the pattern work budget of one rule --------------------------------------------------------------
+# Each match costs len(value) ** 2 units, and each rule has MAX_PATTERN_WORK units: 64 values of 512
 # characters. The system under test supplies the values, so it must not buy unbounded match time.
 
 LONG = "a" * 511 + "1"  # passes LONG_PATTERN and costs 512 ** 2 units
@@ -253,6 +253,22 @@ def test_a_limit_never_hides_the_fail_of_another_rule(tmp_path: Path) -> None:
     # The rule after the limited rule is still judged.
     later = judge(tmp_path, body, rule("forbidden", path="/secret"), LONG_PATTERN)
     assert verdict(later) == failed("DATA.FIELD.FORBIDDEN")
+
+
+def test_an_exhausted_rule_never_turns_the_fail_of_a_later_pattern_rule_into_blocked(
+    tmp_path: Path,
+) -> None:
+    # Each rule has its own budget, so a large array cannot use up the budget of another rule.
+    serial = {"list": [LONG] * 65, "serial": "NOPE"}
+    assert verdict(judge(tmp_path, serial, LONG_PATTERN, SERIAL)) == failed("DATA.PATTERN.MISMATCH")
+    assert verdict(judge(tmp_path, serial, SERIAL, LONG_PATTERN)) == failed("DATA.PATTERN.MISMATCH")
+
+
+def test_the_limit_message_names_only_the_limited_rules(tmp_path: Path) -> None:
+    outcome = judge(tmp_path, {"list": [LONG] * 65, "serial": "EV0001"}, LONG_PATTERN, SERIAL)
+    assert verdict(outcome) == blocked("DATA.RULES.WORK_LIMIT")
+    assert "R-each" in outcome.message
+    assert SERIAL["id"] not in outcome.message
 
 
 def test_a_value_longer_than_max_length_costs_nothing(tmp_path: Path) -> None:

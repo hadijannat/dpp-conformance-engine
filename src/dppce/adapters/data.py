@@ -89,10 +89,12 @@ _V2_KEYS: Final = frozenset({"path", "pattern", "max_length", "value", "other", 
 # ponytail: with k such choices the worst case is O(n^k); k <= 3 and n <= 512 bound it.
 MAX_PATTERN: Final = 256
 MAX_SUBJECT: Final = 512
-# The pattern work of one answer: each match costs len(value) ** 2 units. The system under test
-# supplies the values, and ``each`` applies a rule to every element of an array, so one bounded
-# subject does not bound an answer. A rule that would exceed the budget is not judged.
-# ponytail: 2**24 units is 64 values of 512 characters, about 10 s per answer at the worst pattern.
+# The pattern work of one rule on one answer: each match costs len(value) ** 2 units. The system
+# under test supplies the values, and ``each`` applies a rule to every element of an array, so one
+# bounded subject does not bound an answer. A rule that would exceed its budget is not judged. Each
+# rule has its own budget, so an array for one rule cannot use up the budget of another rule.
+# ponytail: 2**24 units is 64 values of 512 characters, about 10 s per rule at the worst pattern;
+# the pinned rule pack, not the system, sets the number of rules.
 MAX_PATTERN_WORK: Final = 2**24
 _MAX_VARIABLE: Final = 3
 _MAX_REPEAT: Final = 1000
@@ -894,7 +896,7 @@ def _string_at(document: Any, path: str) -> Any:
 
 @dataclass
 class PatternBudget:
-    """The pattern work that one answer can still use, and whether a match did not run."""
+    """The pattern work that one rule can still use on an answer, and whether a match did not run."""
 
     left: int = MAX_PATTERN_WORK
     limited: bool = False
@@ -998,9 +1000,6 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one exit 
     facts = facts_from(ctx.ics, ctx.profile)
     failed: list[Rule] = []
     limited: list[Rule] = []
-    # One budget for the answer: the documents of an HTML page share it, so a page of many
-    # scripts cannot multiply it.
-    budget = PatternBudget()
     applied = 0
     for rule in (r for pack in packs for r in pack.rules if r.document == kind):
         if rule.when is not None:
@@ -1017,7 +1016,8 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one exit 
                 continue
         applied += 1
         # A rule fails if any embedded document breaks it. A fail found before the budget ends counts.
-        budget.limited = False
+        # The documents of an HTML page share the budget of the rule, so many scripts cannot multiply it.
+        budget = PatternBudget()
         if not all(rule_holds(rule, document, ctx.evaluation_time, budget) for document in got.documents):
             failed.append(rule)
         elif budget.limited:
@@ -1039,8 +1039,8 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one exit 
     if not failed and limited:
         # A limit never hides a fail: it applies only when no rule failed.
         message = (
-            f"The pattern work of the answer exceeds {MAX_PATTERN_WORK} units, so these rules are not "
-            f"judged: {', '.join(r.id for r in limited)}."
+            f"The pattern work of these rules on the answer exceeds {MAX_PATTERN_WORK} units each, so "
+            f"they are not judged: {', '.join(r.id for r in limited)}."
         )
         return CheckOutcome(
             status=ExecutionStatus.BLOCKED,
