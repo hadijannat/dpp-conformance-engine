@@ -550,6 +550,13 @@ sut_faults:
     test_purpose: TP-GS1-LINKSET-001
     profiles: [family/gs1-resolver]
     expected: {verdict: fail, reason_code: RESOLVER.LINKSET.ANCHOR}
+  - id: F-78
+    class: contract_violation
+    fault: resolver_redirect_302
+    description: The resolver answers the default request with 302 where the test purpose declares the redirect status 303.
+    test_purpose: TP-GS1-CONFORMANCE-002
+    profiles: [family/gs1-resolver]
+    expected: {verdict: fail, reason_code: RESOLVER.CONFORMANCE.REDIRECT_STATUS}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -710,3 +717,4 @@ evidence_faults:
   - {id: E-14, tamper: revoked_bit, description: The status list sets the bit of the report to revoked., dimension: status}
   - {id: E-15, tamper: role_swap, description: The report key adds a second signature that declares the role reviewer., dimension: signers}
   - {id: E-16, tamper: change_authorization, description: The authorization digest in the manifest is changed after signing., dimension: signature}
+  - {id: E-17, tamper: change_redirect_status, description: A redirect status of a record in a record opening is changed after signing., dimension: opening}
