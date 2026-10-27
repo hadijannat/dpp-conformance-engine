@@ -120,6 +120,7 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data._rule_packs`, `dppce.adapters.data.rules_check` | inconclusive | Pin the data rules that the test purpose names. |
 | `DATA.RULES.NONE_APPLIED` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Answer the ICS questions, so that at least one data rule applies. |
 | `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass | None: the step passed. |
+| `DATA.RULES.WORK_LIMIT` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Engine limit: the pattern values of the answer exceed the work budget. Judge fewer or shorter values. |
 | `DATA.SAMPLE.MISSING` | DATA |  | `dppce.adapters.data._sample` | inconclusive | Supply the offline sample that the test purpose names, in the data directory of the run. |
 | `DATA.SCHEMA.DIALECT` | DATA |  | `dppce.adapters.data._compiled` | inconclusive | Engine limit: the schema uses a dialect that this engine does not support. |
 | `DATA.SCHEMA.INVALID` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | fail; inconclusive under a non-default verdict rule | Correct the document at the listed paths until it matches the pinned schema. |

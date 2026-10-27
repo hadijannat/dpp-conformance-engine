@@ -20,7 +20,7 @@ import yaml
 from pydantic import ValidationError
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
-from dppce.adapters.data import Rule, RulePack, param_files, rule_holds
+from dppce.adapters.data import MAX_PATTERN_WORK, MAX_SUBJECT, Rule, RulePack, param_files, rule_holds
 from dppce.infrastructure.interfaces import Record, Request
 from dppce.infrastructure.redaction import REMOVED, redact_response_headers
 from tests.support import make_record
@@ -212,7 +212,64 @@ def test_max_length_has_an_engine_limit() -> None:
         Rule.model_validate(rule("pattern", path="/n", pattern="a*", max_length=0))
 
 
-# -- forbidden ----------------------------------------------------------------------------------------
+# -- the pattern work budget of one answer ------------------------------------------------------------
+# Each match costs len(value) ** 2 units, and one answer has MAX_PATTERN_WORK units: 64 values of 512
+# characters. The system under test supplies the values, so it must not buy unbounded match time.
+
+LONG = "a" * 511 + "1"  # passes LONG_PATTERN and costs 512 ** 2 units
+LONG_PATTERN = rule(
+    "each", path="/list", rule={"kind": "pattern", "pattern": "[a-z]+[0-9]", "max_length": 512}
+)
+
+
+def test_the_budget_holds_64_values_of_the_longest_length() -> None:
+    assert MAX_PATTERN_WORK == 2**24 == 64 * MAX_SUBJECT**2
+
+
+def test_values_within_the_budget_pass(tmp_path: Path) -> None:
+    assert verdict(judge(tmp_path, {"list": [LONG] * 64}, LONG_PATTERN)) == passed("DATA.RULES.OK")
+
+
+def test_passing_values_above_the_budget_are_blocked_and_never_pass(tmp_path: Path) -> None:
+    outcome = judge(tmp_path, {"list": [LONG] * 65}, LONG_PATTERN)
+    assert verdict(outcome) == blocked("DATA.RULES.WORK_LIMIT")
+    assert "R-each" in outcome.message
+
+
+def test_an_early_failing_element_still_fails_a_large_array(tmp_path: Path) -> None:
+    body = {"list": ["a" * 511 + "!"] + [LONG] * 1000}
+    assert verdict(judge(tmp_path, body, LONG_PATTERN)) == failed("DATA.PATTERN.MISMATCH")
+
+
+def test_a_failing_element_within_the_budget_fails_after_many_passing_ones(tmp_path: Path) -> None:
+    body = {"list": [LONG] * 63 + ["a" * 511 + "!"] + [LONG] * 1000}
+    assert verdict(judge(tmp_path, body, LONG_PATTERN)) == failed("DATA.PATTERN.MISMATCH")
+
+
+def test_a_limit_never_hides_the_fail_of_another_rule(tmp_path: Path) -> None:
+    body = {"list": [LONG] * 65, "secret": "x"}
+    outcome = judge(tmp_path, body, LONG_PATTERN, rule("forbidden", path="/secret"))
+    assert verdict(outcome) == failed("DATA.FIELD.FORBIDDEN")
+    # The rule after the limited rule is still judged.
+    later = judge(tmp_path, body, rule("forbidden", path="/secret"), LONG_PATTERN)
+    assert verdict(later) == failed("DATA.FIELD.FORBIDDEN")
+
+
+def test_a_value_longer_than_max_length_costs_nothing(tmp_path: Path) -> None:
+    # Each long value breaks the first rule without a match, so the second rule has the whole budget.
+    short = rule("pattern", path="/long", pattern="[a-z]+", max_length=8)
+    body = {"long": "a" * 512, "list": [LONG] * 64}
+    assert verdict(judge(tmp_path, body, short, LONG_PATTERN)) == failed("DATA.PATTERN.MISMATCH")
+    assert verdict(judge(tmp_path, {"list": [LONG] * 64}, LONG_PATTERN, SERIAL)) == passed("DATA.RULES.OK")
+
+
+def test_an_ordinary_document_keeps_its_outcome(tmp_path: Path) -> None:
+    assert verdict(judge(tmp_path, {"serial": "EV0001"}, SERIAL)) == passed("DATA.RULES.OK")
+    assert verdict(judge(tmp_path, {"serial": "EV01"}, SERIAL)) == failed("DATA.PATTERN.MISMATCH")
+    assert holds(LONG_PATTERN, {"list": [LONG] * 65}), "rule_holds without a budget is unchanged"
+
+
+# -- forbidden----------------------------------------------------------------------------------------
 
 FORBIDDEN = rule("forbidden", path="/restricted/usage_log")
 

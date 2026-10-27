@@ -89,6 +89,11 @@ _V2_KEYS: Final = frozenset({"path", "pattern", "max_length", "value", "other", 
 # ponytail: with k such choices the worst case is O(n^k); k <= 3 and n <= 512 bound it.
 MAX_PATTERN: Final = 256
 MAX_SUBJECT: Final = 512
+# The pattern work of one answer: each match costs len(value) ** 2 units. The system under test
+# supplies the values, and ``each`` applies a rule to every element of an array, so one bounded
+# subject does not bound an answer. A rule that would exceed the budget is not judged.
+# ponytail: 2**24 units is 64 values of 512 characters, about 10 s per answer at the worst pattern.
+MAX_PATTERN_WORK: Final = 2**24
 _MAX_VARIABLE: Final = 3
 _MAX_REPEAT: Final = 1000
 _CLASS_ESCAPES: Final = frozenset("dDwWsS")
@@ -890,30 +895,48 @@ def _string_at(document: Any, path: str) -> Any:
     return value if value is MISSING or isinstance(value, str) else None
 
 
-def rule_holds(rule: _Judgment, document: Any, now: datetime) -> bool:  # noqa: PLR0912 - one branch per rule kind
+@dataclass
+class PatternBudget:
+    """The pattern work that one answer can still use, and whether a match did not run."""
+
+    left: int = MAX_PATTERN_WORK
+    limited: bool = False
+
+
+def rule_holds(  # noqa: PLR0912 - one branch per rule kind
+    rule: _Judgment, document: Any, now: datetime, budget: PatternBudget | None = None
+) -> bool:
     """True if the document obeys the rule. ``required_fields`` and ``forbidden`` judge absence.
 
     A present value of the wrong type breaks the rule, so a reshaped document fails and is
-    never blocked.
+    never blocked. With a budget, a match that would exceed it does not run: the value counts as
+    holding, and ``budget.limited`` is set, so the caller reports the rule as not judged.
     """
     if rule.kind == "each":
         items = resolve_pointer(document, parse_pointer(rule.path))
         if items is MISSING:
             return True
         inner = rule.rule if isinstance(rule, Rule) else None
-        return isinstance(items, list) and inner is not None and all(rule_holds(inner, e, now) for e in items)
+        return (
+            isinstance(items, list)
+            and inner is not None
+            and all(rule_holds(inner, e, now, budget) for e in items)
+        )
     if rule.kind == "forbidden":
         return resolve_pointer(document, parse_pointer(rule.path)) is MISSING
     if rule.kind == "pattern":
         value = _string_at(document, rule.path)
         if value is MISSING:
             return True
-        # A bounded subject bounds the work. A longer value breaks the rule: it is not an engine limit.
-        return (
-            value is not None
-            and len(value) <= rule.max_length
-            and bool(re.fullmatch(rule.pattern, value, re.ASCII))
-        )
+        # A longer value breaks the rule without a match: it is not an engine limit.
+        if value is None or len(value) > rule.max_length:
+            return False
+        if budget is not None:
+            if len(value) ** 2 > budget.left:
+                budget.limited = True
+                return True  # not judged; a later element can still fail within the budget
+            budget.left -= len(value) ** 2
+        return bool(re.fullmatch(rule.pattern, value, re.ASCII))
     if rule.kind == "equals":
         left = _string_at(document, rule.path)
         right = rule.value if rule.other is None else _string_at(document, rule.other)
@@ -962,7 +985,7 @@ def _rule_packs(ctx: CheckContext, params: RulesParams) -> list[RulePack] | Chec
 
 
 @register("data.rules", capability="data.rules", params=RulesParams)
-def rules_check(ctx: CheckContext) -> CheckOutcome:
+def rules_check(ctx: CheckContext) -> CheckOutcome:  # noqa: PLR0912 - one exit per outcome of the check
     params = _params(ctx, RulesParams)
     if isinstance(params, CheckOutcome):
         return params
@@ -977,6 +1000,10 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
         return got
     facts = facts_from(ctx.ics, ctx.profile)
     failed: list[Rule] = []
+    limited: list[Rule] = []
+    # One budget for the answer: the documents of an HTML page share it, so a page of many
+    # scripts cannot multiply it.
+    budget = PatternBudget()
     applied = 0
     for rule in (r for pack in packs for r in pack.rules if r.document == kind):
         if rule.when is not None:
@@ -992,9 +1019,12 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
             if applies is Tri.FALSE:
                 continue
         applied += 1
-        # A rule fails if any embedded document breaks it.
-        if not all(rule_holds(rule, document, ctx.evaluation_time) for document in got.documents):
+        # A rule fails if any embedded document breaks it. A fail found before the budget ends counts.
+        budget.limited = False
+        if not all(rule_holds(rule, document, ctx.evaluation_time, budget) for document in got.documents):
             failed.append(rule)
+        elif budget.limited:
+            limited.append(rule)
     summary: dict[str, JsonValue] = {
         "document": kind,
         "rule_packs": [f"{p.rulepack_id} {p.version}" for p in packs],
@@ -1008,6 +1038,18 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
         return blocked(
             "DATA.RULES.NONE_APPLIED",
             f"No rule of the pinned rule packs applies to the {kind}-level document.",
+        )
+    if not failed and limited:
+        # A limit never hides a fail: it applies only when no rule failed.
+        message = (
+            f"The pattern work of the answer exceeds {MAX_PATTERN_WORK} units, so these rules are not "
+            f"judged: {', '.join(r.id for r in limited)}."
+        )
+        return CheckOutcome(
+            status=ExecutionStatus.BLOCKED,
+            reason_code="DATA.RULES.WORK_LIMIT",
+            message=message,
+            observations=(observation,),
         )
     if not failed:
         return completed(

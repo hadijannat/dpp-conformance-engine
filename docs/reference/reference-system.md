@@ -445,6 +445,10 @@ read.
 
 These limits bound the work of the backtracking matcher on each value. With three choices, the
 work grows at most with the cube of the value length.
+One answer has a budget of 2^24 units of pattern work, and each match costs the square of the value length.
+A value longer than `max_length` costs nothing.
+A rule that would exceed the budget is not judged. If no rule fails, the check gives `blocked`
+with `DATA.RULES.WORK_LIMIT` and names the rules.
 
 ### 5.2 Access policy (`profiles/battery/access/*.yaml`)
 

@@ -192,6 +192,8 @@ HINTS: Final[dict[str, str]] = {
     "DATA.RULES.MISSING": "Pin the data rules that the test purpose names.",
     "DATA.RULES.NONE_APPLIED": "Answer the ICS questions, so that at least one data rule applies.",
     "DATA.RULES.OK": _NOTHING,
+    "DATA.RULES.WORK_LIMIT": _LIMIT
+    + "the pattern values of the answer exceed the work budget. Judge fewer or shorter values.",
     "DATA.SAMPLE.MISSING": _SAMPLE,
     "DATA.SCHEMA.DIALECT": _LIMIT + "the schema uses a dialect that this engine does not support.",
     "DATA.SCHEMA.INVALID": "Correct the document at the listed paths until it matches the pinned schema.",
