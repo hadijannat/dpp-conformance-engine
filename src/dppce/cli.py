@@ -109,6 +109,8 @@ from dppce.models import (
 from dppce.orchestrator.plan import PlanError
 from dppce.orchestrator.run import RunInputs, bound_files, evaluate, input_hashes, make_plan
 from dppce.report import render
+from dppce.report.junit import render_junit
+from dppce.report.sarif import render_sarif
 from dppce.testdefs import registry
 from dppce.verifier import verify_json
 from dppce.verifier.verify import body_dimensions
@@ -885,6 +887,12 @@ def cmd_report(args: argparse.Namespace) -> int:
         raise UsageError("STATUSLIST.FILE.OPTION: a status list needs --trust and --at")
     if args.format == "json":
         text = envelope.model_dump_json(by_alias=True, indent=2) + "\n"
+    elif args.format in ("junit", "sarif"):
+        try:
+            decision_digest(envelope.decision)  # same input rejection as the HTML path
+        except CanonicalizationError as exc:
+            raise UsageError(f"ENVELOPE.BODY.INVALID: the envelope holds an unusable value: {exc}") from exc
+        text = render_junit(envelope) if args.format == "junit" else render_sarif(envelope)
     else:
         trust = _trust(args.trust)
         if trust is not None and args.at is None:
@@ -1476,9 +1484,9 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     replay.add_argument("--data-root", type=Path)
     replay.add_argument("--times", type=int, default=1)
 
-    report = add("report", cmd_report, "Render a report as HTML or JSON.")
+    report = add("report", cmd_report, "Render a report as HTML, JSON, JUnit XML, or SARIF.")
     report.add_argument("--envelope", type=Path, required=True)
-    report.add_argument("--format", choices=["html", "json"], default="html")
+    report.add_argument("--format", choices=["html", "json", "junit", "sarif"], default="html")
     report.add_argument("--out", type=Path)
     report.add_argument("--trust", type=Path, help="include a verification section (HTML only)")
     report.add_argument("--at")

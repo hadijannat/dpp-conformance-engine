@@ -37,7 +37,7 @@ deterministic code and versioned data.
 | `dppce.migrations` | Upgrade a stored document to the current schema version. | nothing in `dppce` |
 | `dppce.infrastructure` | Transport, recorder, replay, clock, key providers, reference server. | `models`, `evidence` |
 | `dppce.orchestrator` | Plan, run, replay. | all of the above except `verifier` |
-| `dppce.report` | JSON and HTML rendering. | `models`, `evidence` |
+| `dppce.report` | JSON, HTML, JUnit XML, and SARIF rendering (JUnit and SARIF: P2-authorized). | `models`, `evidence` |
 | `dppce.cli` | Command-line entry point. | all |
 
 Rules:

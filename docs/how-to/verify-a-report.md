@@ -56,6 +56,43 @@ To check manual steps, your trust bundle must hold the keys of the performers wi
 To check timestamps, list the certificate of each timestamp authority that you trust in
 `timestamp_anchors`. Use the certificate of its CA, or the authority certificate itself.
 
+## Use a report in CI
+
+Audience: platform engineers who run `dppce` in a CI system.
+Purpose: give a CI system the steps of a report as JUnit XML or SARIF.
+Prerequisites: a report file. The formats render an existing report and do not verify it.
+
+1. Render JUnit XML.
+
+```bash
+dppce report --envelope envelope.json --format junit --out report.xml
+```
+
+2. Render SARIF 2.1.0.
+
+```bash
+dppce report --envelope envelope.json --format sarif --out report.sarif
+```
+
+The JUnit file has one testsuite for the profile and one testcase for each step.
+The class name of a testcase is the test purpose identifier.
+A failed step is a failure. A step with an execution error is an error.
+
+A step that is inconclusive, blocked, unsupported, not run, or not applicable is `skipped`.
+The message holds the reason code and a hint. A property holds the execution status.
+No such step is ever a pass.
+
+The SARIF file has one result for each failed step and each inconclusive step.
+The rule identifier is the reason code. A failed step has the level `error`.
+An inconclusive step has the level `warning`. The location is the test purpose identifier.
+
+Both files also show the overall verdict. A verdict that is not a pass gives a case named `overall` in JUnit.
+In SARIF, it gives a result with the rule `DECISION.OVERALL.` and the verdict name, for example `DECISION.OVERALL.INCONCLUSIVE`.
+An excluded test purpose is a skipped testcase in JUnit.
+
+Both files hold no payload value and no observation field.
+They show the reason code, the hint, and the step message.
+
 ## Check the status of a report
 
 The issuer can withdraw a report after signing it. It then sets the bit of the report in a signed
