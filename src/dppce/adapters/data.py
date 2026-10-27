@@ -20,7 +20,7 @@ from decimal import Decimal
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Final, Literal, Self
-from urllib.parse import urljoin
+from urllib.parse import unquote, urljoin
 
 from jsonschema import SchemaError
 from jsonschema.protocols import Validator
@@ -52,7 +52,7 @@ from dppce.evidence.jose_profiles import JoseError
 from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import JSONLD_CONTEXT, parse_link, redact_url
+from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link, redact_url
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
 
@@ -773,8 +773,8 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
     header for application/ld+json. The record holds the form that redaction keeps. A link with
     the relation names its target, whatever its other parameters are. A value that redaction
     removed as a whole was not well-formed, so it names no context. A target that redaction
-    changed is compared in that form. It cannot be compared only if it equals the redacted form of
-    an allowed URL that redaction changes too.
+    changed holds the marker and is compared in that form. It cannot be compared only if it equals
+    the redacted form of an allowed URL that redaction changes too.
     """
     if record.kind != "http" or media_type(record) == "application/ld+json":
         return [], 0
@@ -792,7 +792,7 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int]:
                 url = urljoin(base, link.target)
             except ValueError:
                 continue  # a target that cannot be resolved names no context
-            if url not in allowed and url in changed:
+            if url not in allowed and REMOVED in unquote(url) and url in changed:
                 limited += 1
             else:
                 found.append(url)

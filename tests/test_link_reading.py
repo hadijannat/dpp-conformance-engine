@@ -217,6 +217,13 @@ def test_a_changed_target_equal_to_a_changed_allowed_url_is_blocked(tmp_path: Pa
     assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
 
 
+def test_an_unchanged_target_is_never_blocked_by_a_changed_allowed_url(tmp_path: Path) -> None:
+    # Redaction drops the fragment of the allowed URL, but the recorded target has no marker.
+    allowed = [f"{ALLOWED[0]}#v1"]
+    outcome = contexts(tmp_path, Linked(PLAIN, recorded(f"<{ALLOWED[0]}>; {CTX}")), allowed_contexts=allowed)
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+
+
 def test_a_value_that_redaction_removed_names_no_context(tmp_path: Path) -> None:
     assert verdict(contexts(tmp_path, Linked(PLAIN, (("Link", REMOVED),)))) == failed("DATA.CONTEXT.MISSING")
     assert verdict(contexts(tmp_path, Linked(BODY, (("Link", REMOVED),)))) == passed("DATA.CONTEXT.OK")
