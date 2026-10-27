@@ -13,6 +13,7 @@ import re
 import time
 from dataclasses import replace
 from pathlib import Path
+from urllib.parse import urljoin
 
 import pytest
 
@@ -303,3 +304,39 @@ def test_resolver_linkset_reads_each_recorded_line_after_a_joined_disagreement()
     assert _advertised([record]) == "https://id.example.test/linksets/EV0001"
     joined = _processor_read(", ".join(lines), _JS_SPACE)
     assert [(target, dict(pairs).get("rel")) for target, pairs in joined] == [("/other", "linkset")]
+
+
+# -- a special scheme without "//" ------------------------------------------------------------------------
+
+SCHEME_ONLY = ("https:user:pw@example.test/ctx", "https:/contexts/battery/v1", "https:contexts/battery/v1")
+
+
+@pytest.mark.parametrize("target", SCHEME_ONLY)
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_special_scheme_target_without_an_authority_is_not_allowed(
+    tmp_path: Path, target: str, body: bytes
+) -> None:
+    # Python urljoin resolves such a target against the host of the answer. pyld 3.0.0 keeps it as it is.
+    assert recorded(f"<{target}>; {CTX}") == (("Link", f"<%3Cremoved%3E>; {CTX}"),)
+    first = contexts(tmp_path, Linked(body, recorded(f"<{target}>; {CTX}")))
+    assert verdict(first) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    # Even with the URL that urljoin gives on the allowlist, the marker is not allowed.
+    resolved = urljoin(first.observations[0].summary["not_allowed"][0], target)
+    outcome = contexts(
+        tmp_path, Linked(body, recorded(f"<{target}>; {CTX}")), allowed_contexts=[ALLOWED[0], resolved]
+    )
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert "user:pw" not in repr(outcome)
+
+
+@pytest.mark.parametrize(
+    "target", ["https://example.test/ctx", "HTTPS://example.test/ctx", "urn:x:ctx", "/ctx", "ctx"]
+)
+def test_a_target_with_an_authority_or_another_scheme_is_kept(target: str) -> None:
+    assert recorded(f"<{target}>; {CTX}") == (("Link", f"<{target}>; {CTX}"),)
+
+
+@pytest.mark.parametrize("target", ["https:/linksets/EV0001", "https:linksets/EV0001"])
+def test_resolver_linkset_does_not_fetch_a_special_scheme_target_without_an_authority(target: str) -> None:
+    lines = recorded(f'<{target}>; rel="linkset"')
+    assert _advertised([replace(make_record(1, url="https://id.example.test/01/1"), headers=lines)]) is None

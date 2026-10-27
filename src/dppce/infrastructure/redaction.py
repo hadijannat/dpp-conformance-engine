@@ -58,6 +58,8 @@ _NOT_IN_FIELD: Final = re.compile(r"[\x00-\x08\x0a-\x1f\x7f\u0100-\U0010ffff]")
 _PART_STOP: Final = re.compile(r'[<",]')
 # A scheme, if any, and then "//": the start of an authority.
 _AUTHORITY_START: Final = re.compile(r"(?:[A-Za-z][A-Za-z0-9+.-]*:)?//")
+# The schemes whose URLs always have an authority, so "//" must follow the scheme.
+_SPECIAL_SCHEMES: Final = frozenset({"http", "https", "ws", "wss", "ftp", "file"})
 # A target that is not a URI reference is recorded as this marker, so its free text never reaches a record.
 _TARGET_REMOVED: Final = "%3Cremoved%3E"
 # RFC 3986, section 2: unreserved and reserved characters, and "%" only before two hex digits.
@@ -197,15 +199,20 @@ def _link_target(target: str) -> str:
     """The recorded form of a Link target.
 
     A target that is not a URI reference, or that has userinfo, a fragment, or an empty authority,
-    becomes the marker. Redaction would remove userinfo or a fragment without a trace. URL parsers
-    disagree on the host of a target with "\\" before "@" or with an empty authority. A
-    credential-like query value is redacted in place, because its marker shows in the recorded target.
+    becomes the marker. So does a target with a scheme such as https that "//" does not follow.
+    Redaction would remove userinfo or a fragment without a trace. URL parsers disagree on the host
+    of a target with "\\" before "@", with an empty authority, or with such a scheme. A credential-like
+    query value is redacted in place, because its marker shows in the recorded target.
     """
     if _URI_REFERENCE.fullmatch(target) is None or "#" in target:
         return _TARGET_REMOVED
     try:
-        netloc = urlsplit(target).netloc
+        parts = urlsplit(target)
     except ValueError:
+        return _TARGET_REMOVED
+    netloc = parts.netloc
+    # Python joins "https:/ctx" or "https:ctx" to the base host. pyld keeps a value with ":" as it is.
+    if parts.scheme in _SPECIAL_SCHEMES and not target[len(parts.scheme) + 1 :].startswith("//"):
         return _TARGET_REMOVED
     # Python joins the path of an empty authority to the base host. WHATWG reads its first segment as host.
     empty_authority = not netloc and _AUTHORITY_START.match(target) is not None
