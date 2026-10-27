@@ -119,7 +119,8 @@ CHECK_STATES: dict[str, CheckInfo | None] = {
     "unsupported": CheckInfo(state=CapabilityState.UNSUPPORTED, available=True),
     "not_installed": CheckInfo(state=CapabilityState.SUPPORTED, available=False),
 }
-ABOVE_READ = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ, Scope.ACCESS_PROBE)
+# Scope.CREDENTIAL (P2-28) is above read too: base.Scope says each scope above read needs an authorization.
+ABOVE_READ = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ, Scope.ACCESS_PROBE, Scope.CREDENTIAL)
 
 
 class Cell(NamedTuple):
@@ -187,7 +188,8 @@ def test_planned_status_matches_the_table_in_every_cell() -> None:
             cell = Cell(step, parent, manual, check, scope, granted)
             assert_cell(cell, planned_oracle(cell))
             cells += 1
-    assert cells == 3 * 3 * 2 * 6 * 6 * 3
+    # Seven scopes since P2-28 added Scope.CREDENTIAL.
+    assert cells == 3 * 3 * 2 * 6 * 7 * 3
 
 
 READ, WRITE = Scope.READ, Scope.WRITE

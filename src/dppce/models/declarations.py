@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import re
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
 
 from dppce.models.base import Model, Scope, Unknown
 from dppce.models.trust import Stamp
@@ -74,11 +74,78 @@ class ICS(Model):
     features: dict[str, bool | Unknown] = Field(default_factory=dict)
 
 
+_REFERENCE = r"^(env|file):.+$"
+# RFC 9110, section 5.6.2: a field name is a token.
+_HEADER_NAME = r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]{1,64}$"
+# A role secret must not go in one of these headers. Host and Cookie change what the request
+# means, a hop-by-hop header does not reach the system, the transport sets the others, and the
+# record keeps the value of each safe request header of dppce.infrastructure.redaction.
+_RESERVED_HEADERS: frozenset[str] = frozenset(
+    {
+        "host", "cookie", "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+        "proxy-connection", "te", "trailer", "transfer-encoding", "upgrade", "content-length",
+        "accept", "accept-encoding", "accept-language", "content-type", "if-modified-since",
+        "if-none-match", "user-agent",
+    }
+)  # fmt: skip
+# The fields that only a scheme other than bearer uses. A default leaves them out of the dump.
+_SCHEME_FIELDS = ("header_name", "token_endpoint", "client_id_ref")
+
+
 class RoleIdentity(Model):
+    """How the engine presents one role (OD-13). Each secret is a reference, never the value.
+
+    ``bearer`` sends the secret as a bearer token. ``header`` sends it as the value of
+    ``header_name``. ``oauth2_client_credentials`` sends the secret as the client secret to the
+    token endpoint and the issued access token as a bearer token.
+    """
+
     role: str
     # A reference such as "env:DPPCE_ROLE_AUDITOR". Never the secret itself.
-    secret_ref: str | None = Field(default=None, pattern=r"^(env|file):.+$")
+    secret_ref: str | None = Field(default=None, pattern=_REFERENCE)
     description: str = ""
+    scheme: Literal["bearer", "header", "oauth2_client_credentials"] = "bearer"
+    header_name: str | None = Field(
+        default=None, pattern=_HEADER_NAME, description="The request header of the header scheme."
+    )
+    token_endpoint: str | None = Field(
+        default=None,
+        pattern=PLACEHOLDER_NAME,
+        description="Key of IXIT.endpoints: the token endpoint of the client credentials scheme.",
+    )
+    client_id_ref: str | None = Field(
+        default=None,
+        pattern=_REFERENCE,
+        description="Reference of the client id of the client credentials scheme.",
+    )
+
+    @model_validator(mode="after")
+    def _fields_of_the_scheme(self) -> Self:
+        wanted = {
+            "bearer": (),
+            "header": ("header_name",),
+            "oauth2_client_credentials": ("token_endpoint", "client_id_ref"),
+        }[self.scheme]
+        for name in _SCHEME_FIELDS:
+            if (getattr(self, name) is None) == (name in wanted):
+                raise ValueError(
+                    f"the scheme '{self.scheme}' {'needs' if name in wanted else 'takes no'} {name}"
+                )
+        if self.scheme != "bearer" and self.secret_ref is None:
+            raise ValueError(f"the scheme '{self.scheme}' needs secret_ref")
+        if self.header_name is not None and self.header_name.lower() in _RESERVED_HEADERS:
+            raise ValueError(f"a role secret cannot go in the header '{self.header_name}'")
+        return self
+
+    @model_serializer(mode="wrap")
+    def _without_defaults(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # An identity of the bearer scheme keeps the form that it had before OD-13, so that the
+        # sanitized IXIT hash and the decision digest of an earlier recording do not change.
+        data: dict[str, Any] = handler(self)
+        if self.scheme == "bearer":
+            for name in ("scheme", *_SCHEME_FIELDS):
+                data.pop(name, None)
+        return data
 
 
 class NetworkPolicy(Model):

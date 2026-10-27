@@ -220,7 +220,9 @@ def test_the_reference_system_has_no_write_operation() -> None:
         before = _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}")
         for method in ("POST", "PUT", "PATCH", "DELETE"):
             status, _, _ = _call(server.origin, method, f"/dpp/{EV[0]}-{EV[1]}")
-            assert status == 501, method
+            # P2-28: the server has a POST handler for the token endpoint of the oauth family.
+            # Every other POST target gets 405 from it, and nothing is written.
+            assert status == (405 if method == "POST" else 501), method
         assert _call(server.origin, "GET", f"/dpp/{EV[0]}-{EV[1]}") == before
 
 

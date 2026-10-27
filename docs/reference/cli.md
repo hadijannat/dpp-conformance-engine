@@ -79,10 +79,10 @@ usage: dppce run [-h] [--json] [--data-root DATA_ROOT] [--import-pack IMPORT_PAC
                  [--accreditation-status ACCREDITATION_STATUS]
                  [--accreditation-reference ACCREDITATION_REFERENCE] --out OUT --keys KEYS
                  [--data-key-id DATA_KEY_ID] [--create-data-key] [--secrets SECRETS]
-                 [--role-secret ROLE=REFERENCE] [--allow-private-host ORIGIN]
-                 [--allow-remote-host ORIGIN] [--ca-file CA_FILE] [--client-cert CLIENT_CERT]
-                 [--client-key CLIENT_KEY] [--client-key-passphrase-ref REFERENCE]
-                 [--retention-days RETENTION_DAYS]
+                 [--role-secret ROLE=REFERENCE] [--role-client-id ROLE=REFERENCE]
+                 [--allow-private-host ORIGIN] [--allow-remote-host ORIGIN] [--ca-file CA_FILE]
+                 [--client-cert CLIENT_CERT] [--client-key CLIENT_KEY]
+                 [--client-key-passphrase-ref REFERENCE] [--retention-days RETENTION_DAYS]
 
 Execute the plan, record the observations, and write the report.
 
@@ -125,6 +125,9 @@ options:
   --role-secret ROLE=REFERENCE
                         confirm the secret reference that the IXIT declares for one role; repeat
                         for each role
+  --role-client-id ROLE=REFERENCE
+                        confirm the client id reference that the IXIT declares for one OAuth 2.0
+                        client credentials role; repeat for each such role
   --allow-private-host ORIGIN
                         confirm one loopback or private origin, such as http://127.0.0.1:8765;
                         repeat for each origin

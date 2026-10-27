@@ -202,7 +202,8 @@
         "write",
         "tamper",
         "fuzz",
-        "access_probe"
+        "access_probe",
+        "credential"
       ],
       "title": "Scope",
       "type": "string"

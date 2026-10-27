@@ -6,8 +6,10 @@ data in ``Record.error``. It is never raised, and it is never a verdict by itsel
 
 from __future__ import annotations
 
+import base64
 import contextlib
 import http.client
+import ipaddress
 import os
 import re
 import socket
@@ -22,11 +24,13 @@ from pathlib import Path
 from typing import Final, Protocol
 from urllib.parse import quote, urljoin, urlsplit
 
+from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.recording import REDIRECT_STATUSES, new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Clock, Record, Request, TransportError
 from dppce.infrastructure.redaction import (
     REMOVED,
+    SAFE_REQUEST_HEADERS,
     is_public_address,
     redact_request_headers,
     redact_response_headers,
@@ -46,6 +50,10 @@ RETRY_AFTER_CAP_SECONDS: Final = 5
 MIN_SECRET_LENGTH: Final = 12
 # The shortest head of a credential that is removed where the body limit cut the credential.
 _MIN_CUT_HEAD: Final = 8
+# Headers whose value the record keeps or the transport sets. No credential goes in one of them.
+_CLEAR_HEADERS: Final = SAFE_REQUEST_HEADERS | {"accept-encoding"}
+# RFC 6750, section 2.1: the b64token form of a bearer token. Any other text could break a header.
+_BEARER_TOKEN: Final = re.compile(r"[A-Za-z0-9\-._~+/]+=*")
 
 
 class Resolver(Protocol):
@@ -134,11 +142,29 @@ class ClientIdentity:
 
 
 @dataclass(frozen=True)
+class OAuthClient:
+    """The OAuth 2.0 client credentials of one role (RFC 6749, section 4.4), from the operator.
+
+    ``origin`` is the origin of the resources that the issued token is for. ``token_url`` is the
+    token endpoint. The client secret goes only to that endpoint.
+    """
+
+    origin: str
+    token_url: str
+    client_id: str = field(repr=False)
+    client_secret: str = field(repr=False)
+
+
+@dataclass(frozen=True)
 class TransportConfig:
     policy: NetworkPolicy
     engine_version: str
-    # role -> (origin, bearer token). A token is sent only to its own origin.
+    # role -> (origin, secret). A secret is sent only to its own origin, as a bearer token.
     credentials: Mapping[str, tuple[str, str]] = field(default_factory=dict)
+    # role -> request header name: the header scheme sends the secret of the role in that header.
+    credential_headers: Mapping[str, str] = field(default_factory=dict)
+    # role -> client. The transport asks for the token of the role before its first request.
+    oauth_clients: Mapping[str, OAuthClient] = field(default_factory=dict)
     authorization: Authorization | None = None
     # Public origins for which the operator states that the owner permits bounded read-only access.
     remote_read_origins: frozenset[str] = frozenset()
@@ -256,10 +282,30 @@ class PolicyTransport:
                 pins.append(handle)
         weakref.finalize(self, _close_all, tuple(pins))
         tokens = [token for _, token in config.credentials.values()]
+        tokens += [client.client_secret for client in config.oauth_clients.values()]
         if any(len(token) < MIN_SECRET_LENGTH for token in tokens):
             raise ValueError(f"a credential needs {MIN_SECRET_LENGTH} characters or more")
-        # Longest first: a credential that begins with a shorter one is removed as a whole.
-        self._secrets = tuple(sorted(set(tokens), key=len, reverse=True))
+        recorded = sorted(n for n in config.credential_headers.values() if n.lower() in _CLEAR_HEADERS)
+        if recorded:
+            # The record keeps the value of these headers, or the transport sets it.
+            raise ValueError(f"a credential cannot go in the header {recorded}")
+        # RFC 6749, section 2.3.1: HTTP Basic with the form-encoded client id and secret. The
+        # engine builds this value, so an echo of it is removed like the secret itself.
+        self._basic = {
+            role: base64.b64encode(
+                f"{quote(client.client_id, safe='')}:{quote(client.client_secret, safe='')}".encode()
+            ).decode("ascii")
+            for role, client in config.oauth_clients.items()
+        }
+        tokens += self._basic.values()
+        # The forms of each credential and the text that replaces them. Longest first: a
+        # credential that begins with a shorter one is removed as a whole.
+        self._scrubs: tuple[tuple[tuple[str, ...], str], ...] = ()
+        for token in set(tokens):
+            self._add_scrub(_forms(token), REMOVED)
+        # The issued access token of each OAuth role, or why it has none. One request per role and run.
+        self._tokens: dict[str, str] = {}
+        self._refused: dict[str, TransportError] = {}
         self._sent = 0
         self._last_sent: float | None = None
         # Built once, so that a file that cannot be used stops the run before its first request.
@@ -279,8 +325,12 @@ class PolicyTransport:
 
     # -- policy -----------------------------------------------------------------------------
 
-    def _target(self, url: str, method: str, role: str) -> _Target:
-        """Check one hop against the policy and pin its address. Raises ``_DeniedError``."""
+    def _target(self, url: str, method: str, role: str, *, credential: bool = False) -> _Target:
+        """Check one hop against the policy and pin its address. Raises ``_DeniedError``.
+
+        ``credential`` marks the token request of a role. The scope ``credential`` permits it,
+        in place of the method list of the authorization.
+        """
         policy, auth = self._config.policy, self._config.authorization
         try:
             parts = urlsplit(url)
@@ -320,7 +370,7 @@ class PolicyTransport:
             now = self._clock.now()
             permitted = (
                 origin in _origins(auth.endpoints)
-                and method in auth.methods
+                and (Scope.CREDENTIAL in auth.scopes if credential else method in auth.methods)
                 and role in auth.roles
                 and parse_stamp(auth.not_before) <= now <= parse_stamp(auth.not_after)
             )
@@ -438,7 +488,93 @@ class PolicyTransport:
         if role == ANONYMOUS:
             return True
         credential = self._config.credentials.get(role)
-        return credential is not None and origin_of(credential[0]) == target.origin
+        client = self._config.oauth_clients.get(role)
+        origin = credential[0] if credential is not None else client.origin if client is not None else None
+        return origin is not None and origin_of(origin) == target.origin
+
+    def _secret_of(self, role: str, origin: str) -> str | None:
+        """The secret that a request of ``role`` carries to ``origin``, or None."""
+        if role == ANONYMOUS:
+            return None
+        credential = self._config.credentials.get(role)
+        if credential is not None and origin_of(credential[0]) == origin:
+            return credential[1]
+        client = self._config.oauth_clients.get(role)
+        if client is not None and origin_of(client.origin) == origin:
+            return self._tokens.get(role)
+        return None
+
+    def _token(self, role: str) -> TransportError | None:
+        """Why the OAuth 2.0 client credentials role has no access token, or None if it has one.
+
+        One token request per role and run (RFC 6749, section 4.4), through the policy, with its
+        own time limit. It needs a valid authorization with the scope ``credential`` for the
+        origin of the token endpoint. The client secret goes only to that origin, and only over
+        https or to a loopback address. The engine follows no redirect of it. The exchange is
+        not a record: its request holds the client secret and its answer the token. A refusal,
+        or an answer that is not a usable token, gives ``authorization_denied``. A role of
+        another scheme needs no token.
+        """
+        if role == ANONYMOUS or role not in self._config.oauth_clients:
+            return None
+        if role not in self._tokens and role not in self._refused:
+            refused = self._request_token(role)
+            if refused is not None:
+                self._refused[role] = refused
+        return None if role in self._tokens else self._refused[role]
+
+    def _request_token(self, role: str) -> TransportError | None:
+        """Send the token request of ``role`` and store the token. Returns why there is none."""
+        client, auth = self._config.oauth_clients[role], self._config.authorization
+        if auth is None or Scope.CREDENTIAL not in auth.scopes:
+            return "authorization_denied"
+        try:
+            target = self._target(client.token_url, "POST", role, credential=True)
+        except _DeniedError as denied:
+            return "dns" if denied.error == "dns" else "authorization_denied"
+        if target.scheme != "https" and not ipaddress.ip_address(target.address).is_loopback:
+            # The client secret would cross a network in clear text.
+            return "authorization_denied"
+        if not self._budget_left():
+            return "budget_exhausted"
+        contact = f" (+{self._config.policy.contact})" if self._config.policy.contact else ""
+        headers = {
+            "User-Agent": f"dppce/{self._config.engine_version}{contact}",
+            "Accept": "application/json",
+            "Accept-Encoding": "identity",
+            "Authorization": f"Basic {self._basic[role]}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        body = b"grant_type=client_credentials"
+        result = self._send(target, "POST", headers, body, self._config.policy.total_timeout_ms / 1000)
+        if isinstance(result, str):
+            return result
+        status, _, answer, truncated = result
+        try:
+            document = None if status != 200 or truncated else parse_strict(answer)
+        except CanonicalizationError:
+            document = None
+        token = document.get("access_token") if isinstance(document, dict) else None
+        kind = document.get("token_type") if isinstance(document, dict) else None
+        if (
+            not isinstance(token, str)
+            or not isinstance(kind, str)
+            or kind.lower() != "bearer"
+            or len(token) < MIN_SECRET_LENGTH
+            or _BEARER_TOKEN.fullmatch(token) is None
+        ):
+            return "authorization_denied"
+        # The token endpoint belongs to the system under test, so it chooses this string. Its
+        # bare removal could hide a withheld field or break a JSON body. So every later record
+        # loses the token only in its credential form, ``Bearer <token>``.
+        forms = {f"Bearer{gap}{form}" for gap in (" ", "%20") for form in _forms(token)}
+        self._add_scrub(tuple(sorted(forms, key=len, reverse=True)), f"Bearer {REMOVED}")
+        self._tokens[role] = token
+        return None
+
+    def _add_scrub(self, forms: tuple[str, ...], replacement: str) -> None:
+        entries = (*self._scrubs, (forms, replacement))
+        self._scrubs = tuple(sorted(entries, key=lambda entry: len(entry[0][0]), reverse=True))
 
     def _headers(self, request: Request, target: _Target, first_origin: str) -> dict[str, str]:
         contact = f" (+{self._config.policy.contact})" if self._config.policy.contact else ""
@@ -452,10 +588,11 @@ class PolicyTransport:
         # Caller headers are bound to the first origin. A redirect to a different origin gets none.
         if target.origin == first_origin:
             headers.update(request.headers)
-        credential = self._config.credentials.get(request.role)
         # The anonymous role never carries a credential, also if one is configured under its name.
-        if request.role != ANONYMOUS and credential is not None and origin_of(credential[0]) == target.origin:
-            headers["Authorization"] = f"Bearer {credential[1]}"
+        secret = self._secret_of(request.role, target.origin)
+        if secret is not None:
+            name = self._config.credential_headers.get(request.role)
+            headers[name or "Authorization"] = secret if name else f"Bearer {secret}"
         return headers
 
     def _scrub(
@@ -466,14 +603,15 @@ class PolicyTransport:
         Each form of ``_forms`` is removed from header names and values, from redirect targets,
         and from the body. Where the body limit cut the body, a cut head of a form is removed
         too. A complete body keeps its tail: it is evidence. Other encodings, such as base64 or a
-        mix of forms, are not recognized.
+        mix of forms, are not recognized. An issued token is removed only with its scheme word.
         """
-        removed = REMOVED.encode("ascii")
-        for token in self._secrets:
-            forms = _forms(token)
+        for forms, replacement in self._scrubs:
+            removed = replacement.encode("ascii")
             for form in forms:
-                headers = tuple((k.replace(form, REMOVED), v.replace(form, REMOVED)) for k, v in headers)
-                redirects = [target.replace(form, REMOVED) for target in redirects]
+                headers = tuple(
+                    (k.replace(form, replacement), v.replace(form, replacement)) for k, v in headers
+                )
+                redirects = [target.replace(form, replacement) for target in redirects]
                 body = body.replace(form.encode("utf-8"), removed)
             heads = [form.encode("utf-8") for form in forms] if truncated else []
             # The longest cut head of any form first, so that no shorter head leaves a remainder.
@@ -499,8 +637,6 @@ class PolicyTransport:
         statuses: list[int] = []
         attempts = 0
         waited = False
-        # One deadline for the whole fetch: every redirect hop and every retry share it.
-        deadline = self._monotonic() + self._config.policy.total_timeout_ms / 1000
 
         def done(
             error: TransportError | None,
@@ -539,9 +675,17 @@ class PolicyTransport:
         except _DeniedError as denied:
             return done(denied.error)
         first_origin = target.origin
-        if not self._credential_fits(request.role, target):
-            # The answer would be the anonymous view, recorded under the name of the role.
-            return done("authorization_denied")
+        # Without a credential, or without the token of an OAuth role, the request is not sent:
+        # the answer would be the anonymous view, recorded under the name of the role.
+        refused = (
+            self._token(request.role)
+            if self._credential_fits(request.role, target)
+            else "authorization_denied"
+        )
+        if refused is not None:
+            return done(refused)
+        # One deadline for the whole fetch: every redirect hop and every retry share it.
+        deadline = self._monotonic() + self._config.policy.total_timeout_ms / 1000
 
         while True:
             sent_headers = self._headers(request, target, first_origin)

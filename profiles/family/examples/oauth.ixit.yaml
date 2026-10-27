@@ -1,0 +1,46 @@
+# Synthetic test information for the profile family/oauth against the loopback reference system.
+# Project-authored example. The origin options equal those of fixtures/reference/ev.ixit.yaml.
+# Start the reference system first: python -m dppce.infrastructure.reference_server
+# The role legitimate_interest gets its bearer token from the token endpoint of the oauth family.
+# Confirm both references of the role with --role-secret and --role-client-id, and give a
+# --secrets directory that holds the two files, for example fixtures/reference/secrets. The
+# authorization needs the scope credential for the origin of the token endpoint.
+schema_version: dppce.ixit/1
+endpoints:
+  api: https://id.example.test
+  public_origin: https://id.example.test
+  origin_override: http://127.0.0.1:8765
+  token: https://id.example.test/oauth/token
+samples:
+  identifier: https://id.example.test/01/09506000134352/21/EV0001
+  passport_id: 09506000134352-EV0001
+resources:
+  item:
+    endpoint: api
+    path: /dpp/{id}
+# The search channel of the access policy names the serial part of the passport id.
+id_parts:
+  separator: '-'
+  names:
+  - gtin
+  - serial
+identities:
+- role: anonymous
+- role: legitimate_interest
+  scheme: oauth2_client_credentials
+  token_endpoint: token
+  client_id_ref: file:TEST-ONLY-oauth-client-id
+  secret_ref: file:TEST-ONLY-oauth-client-secret
+# The test rig writes its authorization here. For a real system, give your own with --authorization.
+authorization_ref: authorization/TEST-ONLY-authorization.jws
+network:
+  allowed_hosts:
+  - 127.0.0.1
+  allow_private_hosts:
+  - 127.0.0.1
+  max_requests: 100
+  contact: reference-rig@example.test
+trust:
+  policy_version: TEST-ONLY-reference-1
+observation:
+  retention_days: 30

@@ -100,6 +100,12 @@ Three synthetic items, one for each profile:
 All are `GET` or `HEAD` (section 1). `{id}` is `<gtin>-<serial>`, for example
 `09506000134352-EV0001`.
 
+The one exception is `POST /oauth/token` of the family `oauth`. It is the token endpoint of the
+OAuth 2.0 client credentials grant. The client authenticates with HTTP Basic, and the form body is
+`grant_type=client_credentials`. The answer is the TEST-ONLY bearer token of the role
+`legitimate_interest` from `roles.json`. A wrong client gives `401`, and another grant gives `400`.
+The endpoint changes no state. Each other `POST` gets `405`. A `POST` body above 4096 bytes gets `413`.
+
 These paths are the URL layout of the reference system only. The engine does not assume them.
 The IXIT declares a URL template for each fetched resource (architecture contract, section 9.2).
 The test rig also serves a second layout, `/passports/{gtin}/{serial}/data`, to show this.
@@ -696,6 +702,8 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `vc_payload_schema_broken` | family `credentials`: the `credentialSubject` of the credential of section 4.7 is an empty object. The credential is signed validly |
 | `aas_api_wrong_status` | family `aas`: `/api/v3.0/shells/{id}` answers `200` with an empty body for an unknown shell id |
 | `aas_api_bad_paging` | family `aas`: `/api/v3.0/shells` and `/api/v3.0/submodels` ignore `limit` and answer every element without a `cursor` |
+| `oauth_token_wrong_role` | family `oauth`: `POST /oauth/token` issues the token of the role `authority` to the TEST-ONLY client of the role `legitimate_interest` |
+| `oauth_token_refused` | family `oauth`: `POST /oauth/token` answers `401` with `{"error": "invalid_client"}` to each client |
 
 The fault `qr_payload_invalid` is a fixture, not a flag: `fixtures/reference/qr/invalid.png`
 encodes plain text that is not a URL. Three more QR faults are fixtures too:
@@ -722,6 +730,7 @@ fixtures/reference/
   models/{ev,lmt,industrial}.json    model-level data
   roles.json                         role -> TEST-ONLY token
   secrets/TEST-ONLY-<role>.token     the same tokens, one file for each role, for `--secrets`
+  secrets/TEST-ONLY-oauth-client-*   the TEST-ONLY client id and client secret of the oauth family
   pki/TEST-ONLY-*.pem                fixture PKI (section 4.5)
   qr/{ev,lmt,industrial,invalid}.png QR images
   qr/TEST-ONLY-wrong-shape.png       QR image of fault F-30

@@ -123,3 +123,5 @@ class Scope(StrEnum):
     TAMPER = "tamper"
     FUZZ = "fuzz"
     ACCESS_PROBE = "access_probe"
+    # The token request of an OAuth 2.0 client credentials role (P2-28). No check can use it.
+    CREDENTIAL = "credential"

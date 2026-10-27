@@ -44,6 +44,7 @@ DEFAULT_AT = "2026-10-13T12:00:00Z"
 # Nothing listens here, so a connection is refused at once.
 UNREACHABLE_ORIGIN = "http://127.0.0.1:1"
 _ROLES = ("legitimate_interest", "authority")
+OAUTH_PROFILE: Final = "family/oauth"
 
 # -- a second URL layout (gap D3-01, criterion 3) -----------------------------------------------
 
@@ -265,7 +266,10 @@ class ReferenceRig:
             endpoints=(origin,),
             methods=("GET",),
             roles=("anonymous", *_ROLES),
-            scopes=("read", "access_probe"),
+            # Only family/oauth gets the token scope, so the authorization of each other run is unchanged.
+            scopes=("read", "access_probe", "credential")
+            if self.profile == OAUTH_PROFILE
+            else ("read", "access_probe"),
             not_before="2026-01-01T00:00:00Z",
             not_after="2036-01-01T00:00:00Z",
             max_requests=1000,
@@ -340,9 +344,15 @@ class ReferenceRig:
             "--issuer-id", LAB,
             *self._data_arguments(),
         ]  # fmt: skip
-        # A family example declares the anonymous role only, so it confirms no role secret.
+        # A family example declares the anonymous role only, so it confirms no role secret. The
+        # example of family/oauth declares one OAuth role: the rig confirms both of its references.
         for role in () if self._family else _ROLES:
             arguments += ["--role-secret", f"{role}=file:TEST-ONLY-{role}.token"]
+        if self.profile == OAUTH_PROFILE:
+            arguments += [
+                "--role-secret", "legitimate_interest=file:TEST-ONLY-oauth-client-secret",
+                "--role-client-id", "legitimate_interest=file:TEST-ONLY-oauth-client-id",
+            ]  # fmt: skip
         for path in self._manual_files:
             arguments += ["--manual-result", str(path)]
         return arguments

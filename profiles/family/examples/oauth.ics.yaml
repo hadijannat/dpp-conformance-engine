@@ -1,0 +1,17 @@
+# Synthetic declaration for the profile family/oauth against the loopback reference system.
+# Project-authored example. It makes no normative statement. Replace every value for a real system.
+schema_version: dppce.ics/1
+sut:
+  name: dppce reference DPP system (synthetic)
+  version: '1'
+  operator: Example Battery Works (synthetic)
+  identifier: urn:example:sut:reference-dpp
+profile: family/oauth
+product_category: unknown
+granularity: item
+identifier_scheme: https-url
+access:
+  tiers:
+  - anonymous
+  - legitimate_interest
+  policy: battery/reference-policy

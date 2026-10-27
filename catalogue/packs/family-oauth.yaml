@@ -1,0 +1,38 @@
+# Audience: contributors and assessors.
+# Purpose: demonstrate the profile family/oauth with a synthetic rule. No rule here states a legal or standard requirement.
+# This file is project-authored and synthetic. It makes no normative statement.
+#
+# Only the profile family/oauth selects this pack and its test pack testpacks/oauth.yaml. The
+# other family profiles therefore plan no step of it. Requirement ids are FAM-OAUTH-...; the
+# applicability of a requirement equals the applicability of its test purpose.
+schema_version: dppce.pack/1
+pack_id: family/oauth
+version: 0.1.0
+title: Illustrative OAuth 2.0 client credentials rules
+description: A synthetic rule for the family profile family/oauth.
+scope_statement: Synthetic demonstration rules only. This pack covers no law and no standard.
+requirements:
+- id: FAM-OAUTH-ACCESS-001
+  title: A role with an OAuth 2.0 token sees its own view only
+  source:
+    source_id: dppce-illustrative
+  authority_class: illustrative
+  modality: mandatory
+  paraphrase: With the bearer token that the token endpoint issues to its client, a role receives the
+    fields that the declared access policy gives it, and no field that the policy withholds from it.
+  applicability:
+    fact: profile.id
+    op: eq
+    value: family/oauth
+  testability: automated
+  review_status: draft-needs-review
+  interpretations:
+  - id: FAM-OAUTH-ACCESS-001-I1
+    text: Project-authored illustrative rule. It makes no normative statement. A refused token gives no
+      answer, never a pass.
+    status: draft-needs-review
+    author_kind: agent
+  assessment_paths:
+  - id: default
+    tests:
+    - TP-OAUTH-ACCESS-001

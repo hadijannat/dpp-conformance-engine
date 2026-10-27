@@ -154,14 +154,53 @@
     },
     "RoleIdentity": {
       "additionalProperties": false,
+      "description": "How the engine presents one role (OD-13). Each secret is a reference, never the value.\n\n``bearer`` sends the secret as a bearer token. ``header`` sends it as the value of\n``header_name``. ``oauth2_client_credentials`` sends the secret as the client secret to the\ntoken endpoint and the issued access token as a bearer token.",
       "properties": {
+        "client_id_ref": {
+          "anyOf": [
+            {
+              "pattern": "^(env|file):.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Reference of the client id of the client credentials scheme.",
+          "title": "Client Id Ref"
+        },
         "description": {
           "default": "",
           "title": "Description",
           "type": "string"
         },
+        "header_name": {
+          "anyOf": [
+            {
+              "pattern": "^[!#$%&'*+\\-.^_`|~0-9A-Za-z]{1,64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The request header of the header scheme.",
+          "title": "Header Name"
+        },
         "role": {
           "title": "Role",
+          "type": "string"
+        },
+        "scheme": {
+          "default": "bearer",
+          "enum": [
+            "bearer",
+            "header",
+            "oauth2_client_credentials"
+          ],
+          "title": "Scheme",
           "type": "string"
         },
         "secret_ref": {
@@ -176,6 +215,20 @@
           ],
           "default": null,
           "title": "Secret Ref"
+        },
+        "token_endpoint": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,31}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Key of IXIT.endpoints: the token endpoint of the client credentials scheme.",
+          "title": "Token Endpoint"
         }
       },
       "required": [

@@ -1,0 +1,23 @@
+# Audience: contributors and assessors.
+# Purpose: select the family pack and the family test packs for a plain web passport whose
+# restricted view needs an OAuth 2.0 client credentials token.
+# This file is project-authored and synthetic. It makes no normative statement.
+# This profile selects only the pack family/oauth and the test pack family/oauth-core, and no
+# other profile selects them. A run therefore plans no step of another family. An example ICS
+# and IXIT are in profiles/family/examples/.
+schema_version: dppce.profile/1
+id: family/oauth
+title: Web passport with OAuth 2.0 client credentials
+description: A passport at an https URL whose restricted view needs a bearer token from an OAuth 2.0
+  token endpoint. The profile pins the access policy of the reference system and no schema or API
+  contract.
+product_category: any
+access_policy: profiles/battery/access/reference-policy.yaml
+packs:
+- family/oauth
+testpacks:
+- family/oauth-core
+roles:
+- anonymous
+- legitimate_interest
+- authority
