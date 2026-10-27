@@ -639,6 +639,18 @@ sut_faults:
     description: The passport answer carries a context link whose target holds a backslash before an "@", so URL parsers disagree on its host.
     test_purpose: TP-DATA-003
     expected: {verdict: fail, reason_code: DATA.CONTEXT.NOT_ALLOWED}
+  - id: F-86
+    class: invalid_context
+    fault: context_link_target_param
+    description: The passport answer carries an allowed context link with a parameter named target that names a context outside the pinned allowlist.
+    test_purpose: TP-DATA-003
+    expected: {verdict: fail, reason_code: DATA.CONTEXT.LINK_MALFORMED}
+  - id: F-87
+    class: invalid_context
+    fault: context_link_split_lines
+    description: The passport answer carries two Link lines that read differently once joined, and the joined value names a context outside the pinned allowlist.
+    test_purpose: TP-DATA-003
+    expected: {verdict: fail, reason_code: DATA.CONTEXT.LINK_MALFORMED}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
