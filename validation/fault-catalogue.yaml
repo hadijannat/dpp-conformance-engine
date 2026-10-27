@@ -165,6 +165,10 @@ controls:
     profile: family/aas
     description: The synthetic AAS file fixtures/aas/TEST-ONLY-dpp-valid.json for the family profile family/aas. It holds a DPP metadata submodel of the pinned IDTA 02099-1 template.
     expected: Every executed test purpose of the profile gives `pass`.
+  - id: C-FAMILY-OAUTH
+    profile: family/oauth
+    description: The unmodified reference system for the family profile family/oauth.
+    expected: Every executed test purpose of the profile gives `pass`.
 
 # Faults in the system under test. `fault` is the flag that the reference system accepts.
 # `profiles` is optional: the full profile ids that the case runs under. Without it, the case
