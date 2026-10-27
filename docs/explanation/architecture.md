@@ -840,7 +840,9 @@ A redirect that the transport does not follow, out of the scope or past the redi
 counts as a redirect. For the second request, it gives `RESOLVER.CONFORMANCE.LINKSET_REDIRECTED`.
 For the third request, its 3xx status gives `RESOLVER.CONFORMANCE.INVALID_STATUS`. For the first
 request, the record keeps the status of the refused hop (section 10), and rule 1 judges it. So
-neither a redirect out of the scope nor a redirect loop turns a fail into `blocked`.
+neither a redirect out of the scope nor a redirect loop turns a fail into `blocked`. A followed
+hop to a target that gives no answer, such as a 5xx status or a failed connection, gives
+`unreachable` for the first request.
 
 `expected_redirect_statuses` is a list of distinct values from 301, 302, 303, 307, and 308. Its
 default holds all five, because GS1-Conformant Resolver 1.2.1 fixes no code. A test purpose that
@@ -1496,10 +1498,10 @@ records/<id>.enc   one encrypted record each
 - The record form holds `redirects` and, from P2-25 on, `redirect_statuses`: one status for each
   redirect target, in the same order. Each status is 301, 302, 303, 307, or 308. The form leaves
   out `redirect_statuses` when the list is empty. So a record from before P2-25 keeps its plaintext,
-  its commitment, and the records root. A reader gives such a record an empty list. A replay of an
-  old recording gives a different decision digest only where a check reads the new field or a
-  test pack changed. An empty list in the form, or a list of a different length than `redirects`, is a
-  malformed record.
+  its commitment, and the records root. A reader gives such a record an empty list. A check gives
+  such a record the outcome and the message that it gave before P2-25. So an old recording replays
+  to the same decision digest, unless a test pack or the catalogue changed. An empty list in the
+  form, or a list of a different length than `redirects`, is a malformed record.
 - A response header is recorded only if its name is in a fixed list of safe names. Each other
   value is replaced with `<removed>`. The list includes six CORS names (OD-06):
   `access-control-allow-origin`, `-allow-methods`, `-allow-headers`, `-expose-headers`,

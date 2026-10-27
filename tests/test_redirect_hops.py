@@ -32,6 +32,8 @@ from dppce.evidence.recording import (
 )
 from dppce.infrastructure.interfaces import Acquirer, Record, Request
 from dppce.infrastructure.keys import FileDataKeyProvider
+from dppce.infrastructure.replay import ReplayAcquirer
+from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, EvidenceEnvelope, ExecutionStatus, OpenedRecord, TrustBundle
 from dppce.verifier import verify
 from tests.support import make_envelope, make_record, reply
@@ -42,7 +44,7 @@ from tests.test_url_templates import run
 
 BASE = Path(__file__).resolve().parent / "fixtures" / "recording-f114b50"
 # Printed by `dppce run` at f114b50 for this fixture (see its README).
-BASE_DIGEST = "sha256:221faaa0d983c3c710239ae4bdcd227747c2b7bbb36d64831a7adc3fc114aa1b"
+BASE_DIGEST = "sha256:6bb7dfe16661e291f291b7d548e482f72484eacd8c2728ad6e7838d08dbf6997"
 LINKSET_TYPE = "application/linkset+json"
 CODES = (301, 302, 303, 307, 308)
 
@@ -226,6 +228,31 @@ def test_a_record_from_f114b50_opens_and_its_opening_verifies() -> None:
     assert (outcome, detail.split(":")[0]) == ("pass", "OPENING.RECORD.OK")
 
 
+def test_a_recording_from_f114b50_gives_the_same_conformance_result(tmp_path: Path) -> None:
+    # TestResult.message is in the decision body: a changed text changes the replay digest.
+    envelope, records = _base()
+    stored = next(t for t in envelope.decision.test_results if t.check == "resolver.conformance")
+    used = {i for o in stored.observations for i in o.record_ids}
+    replayed = [r for r in records if r.record_id in used]
+    carrier = replayed[0].url
+    acquirer = ReplayAcquirer(replayed)
+    ctx = resolved_context(
+        tmp_path,
+        "resolver.conformance",
+        origin_of(carrier),
+        samples={"identifier": carrier},
+        acquirer=acquirer,
+    )
+    outcome = run(ctx)
+    assert (outcome.passed, outcome.reason_code, outcome.message) == (
+        True,
+        stored.reason_code,
+        stored.message,
+    )
+    assert [o.summary for o in outcome.observations] == [o.summary for o in stored.observations]
+    assert acquirer.complete()
+
+
 # -- resolver.conformance ---------------------------------------------------------------------------
 
 
@@ -274,6 +301,34 @@ def test_an_undeclared_first_hop_status_fails(
     assert outcome.status is ExecutionStatus.COMPLETED
     assert (outcome.passed, outcome.reason_code) == (False, "RESOLVER.CONFORMANCE.REDIRECT_STATUS")
     assert api.hits(LINKTYPE) == 0, "the check stops at the first rule that breaks"
+
+
+@pytest.mark.parametrize(
+    ("answer", "code"),
+    [
+        ((500, b"", {}), "TRANSPORT.SERVER_ERROR"),
+        ((503, b"", {}), "TRANSPORT.SERVER_ERROR"),
+        (None, "TRANSPORT.UNREACHABLE"),
+    ],
+    ids=["500", "503", "connect"],
+)
+def test_a_followed_hop_to_a_target_without_an_answer_is_no_answer(
+    answer: tuple[int, bytes, dict[str, str]] | None, code: str, tmp_path: Path, loopback: Any
+) -> None:
+    # A declared first hop status does not make up for a final answer that is missing: no false pass.
+    api = Origin(loopback)
+    if answer is None:
+        _resolver(api, 303, "http://127.0.0.1:1/dpp/x")
+    else:
+        _resolver(api, 303)
+        api.routes[ITEM_PATH] = answer
+    outcome = _conformance(tmp_path, api)
+    assert (outcome.status, outcome.passed, outcome.unreachable, outcome.reason_code) == (
+        ExecutionStatus.COMPLETED,
+        False,
+        True,
+        code,
+    ), outcome.message
 
 
 @pytest.mark.parametrize("target", [OUT_OF_SCOPE, RESOLVER_PATH], ids=["out_of_scope", "loop"])

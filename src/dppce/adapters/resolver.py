@@ -387,13 +387,15 @@ def conformance(ctx: CheckContext) -> CheckOutcome:
         return blocked("RESOLVER.NO_TARGET", message)
     probes = (("default", carrier), ("link_type", _with_link_type(carrier)), ("invalid", invalid))
     observations: list[Observation] = []
+    hop_status_judged = False
     for index, (probe, url) in enumerate(probes):
         record = fetch_once(ctx, url)
         # The rules judge status and redirects only, never the body, so the body rules do not apply.
         # A redirect that the transport does not follow keeps its 3xx status. It is judged for the
         # probes link_type and invalid, so that a system cannot hide a fail behind such a redirect.
-        # The default probe judges the first hop only, so a recorded hop status is enough for it.
-        unfollowed = record.error in _UNFOLLOWED if probe != "default" else bool(record.redirect_statuses)
+        # For the default probe, rule 1 judges the recorded status of a refused or looping hop. A
+        # followed hop to a target that does not answer is still no answer.
+        unfollowed = record.error in _UNFOLLOWED and (probe != "default" or bool(record.redirect_statuses))
         if _no_reply(record) and not unfollowed:
             return no_answer(ctx, record)
         observations.append(
@@ -416,9 +418,19 @@ def conformance(ctx: CheckContext) -> CheckOutcome:
                 message="The record of the default request holds no redirect status to compare.",
                 observations=tuple(observations),
             )
-    message = (
-        "The resolver redirects a default request with a declared status at the first hop, answers a "
-        "linkset request with 200 and no redirect, and refuses an invalid identifier. Later hop "
-        "statuses are not judged."
-    )
+        hop_status_judged = hop_status_judged or (probe == "default" and bool(record.redirect_statuses))
+    if hop_status_judged:
+        message = (
+            "The resolver redirects a default request with a declared status at the first hop, answers a "
+            "linkset request with 200 and no redirect, and refuses an invalid identifier. Later hop "
+            "statuses are not judged."
+        )
+    else:
+        # A record from before hop statuses. The text of that time is still true, and keeping it
+        # keeps the decision digest of an old recording on replay.
+        message = (
+            "The resolver redirects a default request, answers a linkset request with 200 and no redirect, "
+            "and refuses an invalid identifier. Only final statuses are judged, not the status of a "
+            "redirect hop."
+        )
     return completed(True, "RESOLVER.CONFORMANCE.OK", message, observations)
