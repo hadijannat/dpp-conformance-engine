@@ -344,6 +344,38 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
     ),
     ("evidence.cose", "evidence", _I, "COSE report signatures.", None, "A separately tested COSE profile."),
     (
+        "dataspace.protocol",
+        "dataspace",
+        _I,
+        "Run a dataspace protocol exchange: contract negotiation and data transfer. The engine runs "
+        "none of it. An operator can test a data plane with a token that the operator obtained.",
+        None,
+        "A client for the exchange exists and runs against a local fixture connector without a network. "
+        "Its acceptance tests cover a refused negotiation and an expired token. The documentation states "
+        "which protocol version it implements and which parts it leaves out.",
+    ),
+    (
+        "dataspace.catalog",
+        "dataspace",
+        _I,
+        "Read the catalog of a dataspace connector and check its offers.",
+        None,
+        "A catalog reader exists and runs against a local fixture connector without a network. "
+        "The transport policy applies to every request. The documentation states what a catalog check "
+        "shows and what it does not show.",
+    ),
+    (
+        "access.oauth2",
+        "access",
+        _I,
+        "Obtain an access token with the OAuth 2.0 client credentials grant. The engine sends only a "
+        "bearer token that the operator supplies as a secret reference.",
+        None,
+        "A client credentials exchange exists and runs against a local fixture token endpoint. The "
+        "signed authorization names the token endpoint. The IXIT cannot choose it, and no secret reaches "
+        "a record, a report, or a log.",
+    ),
+    (
         "evidence.rfc3161",
         "evidence",
         _S,

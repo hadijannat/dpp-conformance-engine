@@ -77,6 +77,191 @@ Each family profile reads only ICS fields: `identifier_scheme`, `signature_forma
 A step that does not fit these declarations is not applicable. It is never a fail.
 Declare `product_category: unknown` in the ICS.
 An example ICS and IXIT for each family are in `profiles/family/examples/`.
+The next section describes each family.
+
+## Test a system by family
+
+Every example ICS and IXIT in `profiles/family/examples/` is synthetic.
+It points at the loopback reference system, and it makes no normative statement.
+Copy the pair for your family. Then replace every value, including the origins and the samples.
+Run `dppce plan` before `dppce run`, as in the steps above.
+
+Every family profile selects every family test pack.
+A step of another family is not applicable. It is never a fail.
+A step that needs a value that you did not declare is not a pass.
+An undeclared feature skips its step, and its requirement is inconclusive.
+
+The reference system is the only system that the examples test as shipped.
+A run on it shows that the engine works. It says nothing about your system.
+
+### Plain web passport
+
+- Profile: `family/web`.
+- Example: `web.ics.yaml` and `web.ixit.yaml`.
+- Checks:
+  - `TP-WEB-RESOLVE-001`: resolution of the passport URL.
+  - `TP-WEB-CONSISTENCY-001`: the identifier against the member id of the JSON passport.
+  - `TP-WEB-INTEGRITY-001`: the signed passport (`signature_format: jws`).
+  - `TP-WEB-VERSIONS-001`: the version history (`features.version_history`).
+  - `TP-WEB-IDENTIFIER-001`: the syntax of an `https-url` identifier.
+  - `TP-WEB-NEGOTIATION-001`: content negotiation.
+
+Operator decisions:
+
+- Get the owner's permission. Then confirm each public origin with `--allow-remote-host`.
+- Give the `item`, `signed`, and `versions` templates in the IXIT. A resource with no template is not tested.
+- Give a trust bundle with `--trust`. Without the signer key in it, the signature step is inconclusive.
+- Add `--ca-file` or the client certificate options if the server needs them.
+  See [Use a private CA or a client certificate](#use-a-private-ca-or-a-client-certificate).
+
+Limits:
+
+- The engine does not validate the passport content against a schema. The profile pins none.
+- A passing signature step shows that the signature matches a key in your trust bundle.
+  It does not show that the signer is entitled to sign.
+- The engine does not run scripts of a page.
+
+### GS1 Digital Link resolver
+
+- Profile: `family/gs1-resolver`.
+- Example: `gs1-resolver.ics.yaml` and `gs1-resolver.ixit.yaml`.
+- Checks:
+  - `TP-GS1-SYNTAX-001`: the syntax of an item-level identifier.
+  - `TP-GS1-SYNTAX-002`: the syntax of an uncompressed identifier of any granularity.
+  - `TP-GS1-RESOLVE-001`: resolution of the identifier.
+  - `TP-GS1-CONSISTENCY-001`: the identifier against the declaration and the passport.
+  - `TP-GS1-GRANULARITY-001`: the granularity.
+  - `TP-GS1-LINKSET-001`: the linkset.
+  - `TP-GS1-WELLKNOWN-001`: the resolver description file.
+  - `TP-GS1-CONFORMANCE-001`: the final status of a default, a linkset, and an invalid request.
+  - `TP-GS1-EQUIVALENCE-001`: the identifier against a declared identifier in canonical form.
+
+Operator decisions:
+
+- Declare `identifier_scheme: gs1-digital-link` and the `granularity` in the ICS.
+- Give the identifier as `samples.identifier`. Give the declared identifier file as `samples.gs1_declared`.
+- Confirm the origin of the resolver with `--allow-remote-host`.
+  The conformance step sends bounded read requests, including one for an invalid identifier.
+  Name that request in the permission of the owner.
+
+Limits:
+
+- The engine parses uncompressed GS1 Digital Link URIs only.
+- With item granularity, `TP-GS1-SYNTAX-001` accepts only the form `/01/<GTIN>/21/<serial>`.
+  It fails any other form, a compressed URI and a URI with a path prefix included.
+  This fail shows that the identifier has another form. It does not show a fault of the resolver.
+- `TP-GS1-SYNTAX-002` accepts an uncompressed URI of any granularity. It gives `unsupported` for a compressed URI.
+- The checks observe the answers of the resolver. They do not grade the resolver against a GS1 test suite.
+
+### Asset Administration Shell file
+
+- Profile: `family/aas`.
+- Example: `aas.ics.yaml` and `aas.ixit.yaml`.
+- Checks:
+  - `TP-AAS-JSON-001`, `TP-AAS-XML-001`, and `TP-AAS-AASX-001`: validation of an AAS file in each form.
+  - `TP-AAS-DPP-001`: the digital product passport metadata submodel of the JSON file.
+  - `TP-AAS-CONSISTENCY-001`: the carrier identifier against the global asset identifier.
+  - `TP-AAS-API-001`: a read probe of the AAS Repository API.
+
+Operator decisions:
+
+- Declare each form that you supply as `features.aas_json`, `aas_xml`, `aas_aasx`, and `aas_api`.
+  Declare a form as `false` to leave its step out. An undeclared form skips its step.
+  The requirement of a skipped step is inconclusive.
+- Put your files next to the IXIT. Name them in `samples`. The example ships no AAS file.
+  Without `aas.json`, the step is blocked with `AAS.SAMPLE.MISSING`.
+- For the API probe, give the base URL as `endpoints.aas` and a shell identifier as `samples.aas_shell_id`.
+  Confirm the origin of that endpoint like any other origin.
+
+Limits:
+
+- The file checks read the file and send no request. They show nothing about the server that holds the file.
+- The API probe covers the read profile of the AAS Repository only. It does not write or change anything.
+- A valid file does not show that the content is true.
+
+### Verifiable credential and UNTP-style passport
+
+- Profile: `family/credentials`.
+- Example: `credentials.ics.yaml` and `credentials.ixit.yaml`.
+- Checks:
+  - `TP-VC-RESOLVE-001`: resolution of the credential URL.
+  - `TP-VC-INTEGRITY-001`: the signed credential.
+  - `TP-VC-JOSE-001`: the VC-JOSE credential with a pinned issuer key.
+  - `TP-VC-DID-001`: the `did:web` document.
+  - `TP-VC-CONSISTENCY-001`: the credential subject against the carrier identifier.
+  - `TP-VC-STATUS-001`: the status list entry.
+
+Operator decisions:
+
+- Put the issuer key in your trust bundle, with the issuer equal to the DID. Get the key through a trusted channel.
+- Decide for each third-party host whether you have permission for a live fetch.
+  Without permission, use an offline sample.
+  See [Resolve a did:web DID](#resolve-a-didweb-did) and [Check a credential status list](#check-a-credential-status-list).
+- Replace `vc_json` in the IXIT with a credential of the system under test.
+- `TP-VC-DID-001` names the DID of the reference system, and `TP-VC-STATUS-001` fetches the list live.
+  For your issuer, or for an offline sample, import a test pack with your DID and mode.
+- Add the TLS options if the server needs them.
+
+Limits:
+
+- The engine does not check an UNTP vocabulary or schema in this version. It checks the signature,
+  the DID document, the status list, and the subject identifier.
+- A DID document that resolves is not trusted until your trust bundle holds its key.
+- A pass shows a valid proof. It does not show that the claims in the credential are true.
+
+### Dataspace sample
+
+The engine does not run a dataspace protocol. It has no catalog request, no contract negotiation,
+and no transfer process. The capability manifest (`dppce capabilities`) lists `dataspace.protocol`
+and `dataspace.catalog` as `interface_only`. No check uses them, so the engine plans no step for them.
+The capability `access.oauth2` has the same state. The engine does not request a token.
+
+The example set has no dataspace pair. No family profile declares a role other than `anonymous`,
+and the anonymous role never carries a credential. A dataspace example would not test anything.
+
+An operator can test the data plane of a connector with a token that the operator obtained.
+The token comes from outside the engine, for example an endpoint data reference (EDR) token
+from the connector.
+
+1. Agree the scope with the owner. Include the data plane URL and the access probe.
+2. Run the exchange with your own tools to get the token and the data plane URL.
+3. Put the token in an environment variable, for example `DPPCE_SECRET_EDR`. Never put it in a file of the IXIT.
+4. Copy the data root. Write a profile that declares a role, for example `bearer`, and an access policy.
+   See [Add a check and a test pack](add-a-check-and-a-test-pack.md).
+   The policy format is in the [reference system](../reference/reference-system.md).
+5. Put the asset path in the `channels.fetch` template of the access policy, not in `resources.item`.
+   The check `access.restricted_fields` reads only the `channels` templates.
+6. Put the data plane base URL in `endpoints.api` in the IXIT. Set no `origin_override`.
+   The check builds each channel URL under `endpoints.api`. The role credential is bound to that origin.
+7. In the ICS, set `access.policy` to the `policy_id` of your policy.
+   Without it, the step is blocked with `ACCESS.POLICY.NOT_DECLARED`.
+8. Write a test pack with the step `access.restricted_fields` for that role.
+   Set `requires_scope: access_probe` on the test purpose. The default scope is `read`.
+9. Declare the identity in the IXIT: `role: bearer` and `secret_ref: env:DPPCE_SECRET_EDR`.
+10. Get an authorization that names the data plane origin, the role, and the scope `access_probe`.
+11. Run with `--role-secret bearer=env:DPPCE_SECRET_EDR`, `--trust`, and `--authorization`.
+
+The engine sends the token as `Authorization: Bearer <token>` to the origin that the authorization names.
+It sends it to no other origin. It removes the token from records.
+A data plane that expects another header form refuses the request.
+The step then fails with `ACCESS.ENTITLEMENT.REFUSED`.
+
+What the run shows:
+
+- The data plane gives the fields that your policy grants to that role, and it withholds the others.
+- The answer was observed on the channels that your policy names.
+
+What the run does not show:
+
+- That the dataspace protocol steps are correct. The engine did not run them.
+- That the token is well formed, has the right scope, or expires on time.
+- That the catalog offer or the contract matches the data that the data plane serves.
+- That the policy you wrote is the policy of the contract.
+
+A token expires. An expired token makes the step fail with `ACCESS.ENTITLEMENT.REFUSED`.
+This fail can come from the operator's token, not from the system.
+Renew the token before each run.
+A later version can add the OAuth 2.0 client credentials grant. That change would not add the dataspace protocol.
 
 ## Use a private CA or a client certificate
 
