@@ -243,3 +243,63 @@ def test_only_the_exact_name_target_replaces_the_target(tmp_path: Path, name: st
 def test_a_target_parameter_never_reaches_the_record() -> None:
     kept = recorded(f'<{ALLOWED[0]}>; {CTX}; target="https://{SECRET}.test/ctx"')
     assert SECRET not in repr(kept)
+
+
+# -- Link lines joined ------------------------------------------------------------------------------
+
+# Each line reads the same alone in the engine and in the model. Joined with ", ", as every HTTP
+# client hands the value to the application, the model reads the foreign context.
+QUOTE_SHIFT = (f'<{EVIL}>; title="x', f'<{ALLOWED[0]}>; t="p, <{EVIL}>; rel={JSONLD_CONTEXT}, q"')
+ANGLE_SWALLOW = (f"<{EVIL}>; title=x<", f"<{ALLOWED[0]}>; {CTX}")
+
+
+@pytest.mark.parametrize("lines", [QUOTE_SHIFT, ANGLE_SWALLOW])
+def test_lines_that_read_differently_once_joined_fail(tmp_path: Path, lines: tuple[str, str]) -> None:
+    assert all(parse_link(line).complete for line in lines)
+    assert any(context for _, context in _processor_links(", ".join(lines), _JS_SPACE))
+    kept = recorded(*lines)
+    assert [parse_link(value).complete for _, value in kept] == [True, False]
+    assert kept[-1][1] == redact_link(lines[-1]) + f", {REMOVED}"
+    assert verdict(contexts(tmp_path, Linked(BODY, kept))) == failed("DATA.CONTEXT.LINK_MALFORMED")
+
+
+def test_the_joined_check_reads_the_header_name_without_case_and_in_wire_order() -> None:
+    kept = redact_response_headers(
+        (("link", QUOTE_SHIFT[0]), ("Content-Type", "application/json"), ("LINK", QUOTE_SHIFT[1]))
+    )
+    assert [name for name, _ in kept] == ["link", "Content-Type", "LINK"]
+    assert kept[2][1].endswith(f", {REMOVED}")
+    # In the other order the lines read the same joined, so nothing stops.
+    swapped = recorded(QUOTE_SHIFT[1], QUOTE_SHIFT[0])
+    assert all(parse_link(value).complete for _, value in swapped)
+
+
+def test_a_last_line_without_a_link_records_as_the_placeholder(tmp_path: Path) -> None:
+    kept = recorded(*QUOTE_SHIFT, "")
+    assert kept[-1] == ("Link", PLACEHOLDER)
+    assert verdict(contexts(tmp_path, Linked(BODY, kept))) == failed("DATA.CONTEXT.LINK_MALFORMED")
+
+
+def test_the_joined_check_is_skipped_when_a_line_already_stopped() -> None:
+    junk = f"<https://a.example/x> junk, <{EVIL}>; {CTX}"
+    kept = recorded(junk, QUOTE_SHIFT[1])
+    assert kept[1][1] == redact_link(QUOTE_SHIFT[1])
+    assert kept[0][1].endswith(f", {REMOVED}")
+
+
+def test_a_recorded_value_is_read_line_by_line_so_an_old_record_keeps_its_reading(tmp_path: Path) -> None:
+    # A recorded value holds stop markers that a comma-splitting model reads as a target. So data.context
+    # never joins recorded lines: each recorded line is canonical and reads the same alone.
+    kept = (("Link", f"<{ALLOWED[0]}>; {CTX}"), ("Link", f"<https://x.test/a>; {REMOVED}"))
+    assert verdict(contexts(tmp_path, Linked(BODY, kept))) == passed("DATA.CONTEXT.OK")
+
+
+def test_resolver_linkset_reads_each_recorded_line_after_a_joined_disagreement() -> None:
+    # Joined, a comma-splitting reader takes the first target with the relation linkset. The engine
+    # reads each recorded line, so it takes the target of the second line. The record shows the stop.
+    lines = ("</other>; title=x<", '</linksets/EV0001>; rel="linkset"')
+    record = replace(make_record(1, url="https://id.example.test/01/1"), headers=recorded(*lines))
+    assert not parse_link(record.headers[-1][1]).complete
+    assert _advertised([record]) == "https://id.example.test/linksets/EV0001"
+    joined = _processor_read(", ".join(lines), _JS_SPACE)
+    assert [(target, dict(pairs).get("rel")) for target, pairs in joined] == [("/other", "linkset")]

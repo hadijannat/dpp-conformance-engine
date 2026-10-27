@@ -387,8 +387,15 @@ def redact_request_headers(headers: dict[str, str]) -> tuple[tuple[str, str], ..
 
 
 def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple[str, str], ...]:
-    """Keep the names. Keep a value only if its name is known to be safe."""
+    """Keep the names. Keep a value only if its name is known to be safe.
+
+    An HTTP client hands the application one ``Link`` value: the lines in wire order, joined with
+    ", ". If the processor model reads that value differently than the engine reads the lines, the
+    record of the last line gets the stop marker. A recorded value is never joined: its markers read
+    as targets to the model.
+    """
     out: list[tuple[str, str]] = []
+    lines: list[tuple[int, str, LinkValue]] = []
     for name, value in headers:
         lowered = name.lower()
         if lowered in SAFE_RESPONSE_HEADERS:
@@ -396,9 +403,18 @@ def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple
         elif lowered in _URL_RESPONSE_HEADERS:
             out.append((name, redact_url(value)))
         elif lowered == "link":
-            out.append((name, redact_link(value)))
+            parsed = _live(value)
+            lines.append((len(out), value, parsed))
+            out.append((name, _recorded(parsed)))
         else:
             out.append((name, REMOVED))
+    # A line whose reading stopped is already not complete, so its record shows the stop.
+    if len(lines) > 1 and all(parsed.complete for _, _, parsed in lines):
+        links = [link for _, _, parsed in lines for link in parsed.links]
+        if not _agrees(links, ", ".join(value for _, value, _ in lines)):
+            index = lines[-1][0]
+            name, kept = out[index]
+            out[index] = (name, f"{f'<{_TARGET_REMOVED}>' if kept == REMOVED else kept}, {REMOVED}")
     return tuple(out)
 
 
