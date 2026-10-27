@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 64,
+    "cycle": 67,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-27: waves 1 to 8 of program P2 are on main (latest f114b50, followed on main by the test marker fix 30ca637), and wave 9 (P2-25, P2-24, and the integrator commits) is on the integration branch worktree-wf_dc3cd52f-c71-7 and is not yet on main.",
+    "state_at_end": "2026-10-27: waves 1 to 9 of program P2 are on main (latest b6ec388, followed on main by the test marker fix 8ef3dcd), and wave 10 (P2-26, P2-28, and the integrator commits; P2-27 landed nothing) is on the integration branch worktree-wf_0819cc18-d2b-9 and is not yet on main.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -732,7 +732,25 @@
       "cycle": 64,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-24 (138b028 catalogue entries F-77 and B-09 first, then b1be010 failing tests, b4f0e7e, 619bd5e, and the review fix f35a8bf): data.jsonschema, data.context, and data.rules take the parameter source, which reads an IXIT sample, a verified credential payload, or embedded JSON-LD, and the run binds each schema or rule pack file that a test purpose names; the package gate figures did not reach the integrator, and after the wave 9 merges uv run just check passed with 4519 tests and 1 skip."
+      "summary": "P2-24 (138b028 catalogue entries F-77 and B-09 first, then b1be010 failing tests, b4f0e7e, 619bd5e, and the review fix f35a8bf): data.jsonschema, data.context, and data.rules take the parameter source, which reads an IXIT sample, a verified credential payload, or embedded JSON-LD, and the run binds each schema or rule pack file that a test purpose names; the package gate figures did not reach the integrator, and after the wave 9 merges uv run just check passed with 4519 tests and 1 skip. Wave 9 landed on main as b6ec388, after the CI fix 30ca637 that marks two provenance tests as needing the qr extra, and the test marker fix 8ef3dcd followed it on main."
+    },
+    {
+      "cycle": 65,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-26 (1779bba catalogue entries F-79 and F-80 first, then 4bc1be0, the seed 046badd, the documentation fix 12a3bd3, the data fixes 483c6d4 and 5fd212d, and the review fix 15ee068): data.rules takes rule packs of version 2 with pattern, forbidden, equals, and each, and data.context reads a context from the Link header and follows @context and @import into pinned copies only; the package gate figures did not reach the integrator, and after the wave 10 merges uv run just check passed with 4711 tests and 1 skip."
+    },
+    {
+      "cycle": 66,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-28 (24566da catalogue entries F-83 and B-21 first, then 2737471, d471ae5, the rig setup b1e75ca, and the review fix 00ae981): a role identity takes the scheme bearer, header, or oauth2_client_credentials, and the OAuth 2.0 scheme requests one token per role and run from an operator-confirmed token endpoint under the scope credential, with no token or client secret in a record or a log; the package gate figures did not reach the integrator, and after the wave 10 merges uv run just check passed with 4711 tests and 1 skip."
+    },
+    {
+      "cycle": 67,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-27 (no commits): its license gate fired, because pyld 3.3.0 needs frozendict 2.4.7 under LGPL-3.0, so the package reverted pyproject.toml and uv.lock, left its worktree clean at b6ec388, and landed nothing until the owner decides OD-12."
     }
   ],
   "blockers": [
