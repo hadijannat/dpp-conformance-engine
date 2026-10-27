@@ -12,7 +12,13 @@ from typing import Any
 import pytest
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
-from dppce.infrastructure.redaction import REMOVED, parse_link, redact_link, redact_response_headers
+from dppce.infrastructure.redaction import (
+    _NOT_IN_FIELD,
+    REMOVED,
+    parse_link,
+    redact_link,
+    redact_response_headers,
+)
 from dppce.models import ExecutionStatus
 from tests.test_adapters_resolver import LINKSET_TYPE
 from tests.test_data_document_source import ALLOWED, blocked, failed, passed, verdict
@@ -181,7 +187,9 @@ def test_a_lenient_link_value_is_read_as_appendix_b_reads_it(value: str, kept: s
 def test_a_target_that_the_record_cannot_show_becomes_the_marker(target: str) -> None:
     # Redaction would remove userinfo or a fragment without a trace, so the whole target goes.
     recorded = dict(redact_response_headers((("Link", f"<{target}>; {CTX}, <https://x.test/b>"),)))["Link"]
-    assert recorded == f"<%3Cremoved%3E>; {CTX}, <https://x.test/b>"
+    # A line break cannot be in a field value, so reading stops at the end of that value.
+    stop = f", {REMOVED}" if _NOT_IN_FIELD.search(target) else ""
+    assert recorded == f"<%3Cremoved%3E>; {CTX}, <https://x.test/b>{stop}"
 
 
 @pytest.mark.parametrize(
@@ -277,8 +285,9 @@ def test_redaction_is_idempotent_and_its_output_parses(value: str) -> None:
     once = redact_link(value)
     assert redact_link(once) == once
     assert parse_link(once) == parse_link(redact_link(once))
-    # The record shows whether reading stopped before the end of the value.
-    assert parse_link(once).complete is parse_link(value).complete
+    # The record shows whether reading stopped before the end of the value, or at a character that a
+    # field value cannot hold.
+    assert parse_link(once).complete is (parse_link(value).complete and not _NOT_IN_FIELD.search(value))
 
 
 # -- data.context reads the recorded form --------------------------------------------------------------

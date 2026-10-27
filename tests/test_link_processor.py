@@ -1,0 +1,209 @@
+"""The processor model of Link reading: the linear scanner, the gate, the target parameter, joined lines.
+
+The agreement check compares the engine reading with a model of the Link parsers of jsonld.js 8.3.3
+and pyld 3.0.0. A system under test must not get a false pass, or turn a fail into blocked, with a
+value that these parsers read differently. A common valid value keeps its pass. Architecture
+sections 8 and 10. No test contacts a host.
+"""
+
+from __future__ import annotations
+
+import random
+import re
+import time
+from dataclasses import replace
+from pathlib import Path
+
+import pytest
+
+import dppce.adapters  # noqa: F401 - importing the package registers every check
+from dppce.adapters.resolver import _advertised
+from dppce.infrastructure.redaction import (
+    _JS_SPACE,
+    _PY_SPACE,
+    REMOVED,
+    _processor_links,
+    _processor_read,
+    parse_link,
+    redact_link,
+    redact_response_headers,
+)
+from tests.support import make_record
+from tests.test_data_document_source import ALLOWED, failed, passed, verdict
+from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, Linked, contexts
+
+CTX = f'rel="{JSONLD_CONTEXT}"'
+EVIL = "https://evil.test/ctx"
+SECRET = "S3CRET"
+PLACEHOLDER = f"<%3Cremoved%3E>, {REMOVED}"
+
+# The three regular expressions of jsonld.js 8.3.3 (lib/util.js, parseLinkHeader) and pyld 3.0.0
+# (parse_link_header), in Python syntax. They are the reference of the scanner. In Python, "\s" also
+# matches "\x85", and "." also matches "\r". The JavaScript forms below replace both.
+PART = re.compile(r'(?:<[^>]*>|"[^"]*"|[^,])+')
+LINK = re.compile(r"\s*<([^>]*)>\s*(?:;\s*(.*))?")
+PARAMETER = re.compile(r'(.*?)=(?:"([^"]*)"|([^"]*?))\s*(?:;\s*|\Z)')
+
+
+def javascript(pattern: re.Pattern[str]) -> re.Pattern[str]:
+    return re.compile(pattern.pattern.replace(r"\s", r"[\t\n\x0b\x0c\r \xa0]").replace(".", r"[^\n\r]"))
+
+
+JS = (javascript(PART), javascript(LINK), javascript(PARAMETER))
+PY = (PART, LINK, PARAMETER)
+
+
+def reference(value: str, regexes: tuple[re.Pattern[str], ...]) -> list[tuple[str, list[tuple[str, str]]]]:
+    """Each target and its parameters as the three regular expressions read them."""
+    part, link, parameter = regexes
+    out: list[tuple[str, list[tuple[str, str]]]] = []
+    for text in part.findall(value):
+        if (found := link.search(text)) is None:
+            continue
+        pairs = [(m[1], m[3] if m[2] is None else m[2]) for m in parameter.finditer(found[2] or "")]
+        out.append((found[1], pairs))
+    return out
+
+
+# The alphabet of the differential tests: every character that the three expressions treat apart,
+# the two spaces that only one language reads as white space, and one plain letter.
+ALPHABET = '<>",;= \t\xa0\x85a'
+
+
+# Most samples start with a link, so that the parameter expression sees many inputs.
+PREFIXES = ("", "<a>", "<a>;", "<a>; ", "<a>, <a>;")
+
+
+def samples(seed: int, count: int = 20000) -> list[str]:
+    rng = random.Random(seed)  # noqa: S311 - fixed test samples, not a secret
+    return [
+        rng.choice(PREFIXES) + "".join(rng.choice(ALPHABET) for _ in range(rng.randrange(16)))
+        for _ in range(count)
+    ]
+
+
+# -- the linear scanner ------------------------------------------------------------------------------
+
+
+def test_the_scanner_reads_as_the_python_regular_expressions() -> None:
+    for value in samples(20261027):
+        assert _processor_read(value, _PY_SPACE) == reference(value, PY), repr(value)
+
+
+def test_the_scanner_reads_as_the_javascript_regular_expressions() -> None:
+    for value in samples(20261028):
+        assert _processor_read(value, _JS_SPACE) == reference(value, JS), repr(value)
+
+
+def test_the_two_space_models_differ_and_each_is_checked() -> None:
+    # Python skips "\x85" after ";", so pyld reads the relation. JavaScript keeps it in the name.
+    value = f"<{EVIL}>; \x85rel={JSONLD_CONTEXT}"
+    assert _processor_links(value, _PY_SPACE) == [(EVIL, True)]
+    assert _processor_links(value, _JS_SPACE) == [(EVIL, False)]
+    assert not parse_link(value).complete
+
+
+# Values of 64 KiB in each shape that made a backtracking expression slow, and their mixes.
+SIZE = 64 * 1024
+ADVERSARIAL = (
+    "<https://a.test/>, " + " " * SIZE + "x",
+    "<x>; " + "a=" * (SIZE // 2) + '"',
+    "<x>; " + "=" * SIZE,
+    "<" * SIZE,
+    "<x>; t=" + "<" * SIZE,
+    '"' * SIZE,
+    "<x>; " + '="' * (SIZE // 2),
+    "<x>; a=" + '"' * SIZE,
+    "<x>" + ";" * SIZE,
+    "<x>; a=" + ";" * SIZE,
+    "," * SIZE,
+    "<x>," * (SIZE // 4),
+    '<x>; a="b"' + " " * SIZE + "c",
+    "<x>; " + 'a="b" ' * (SIZE // 6),
+    "<x>; " + "a=b \xa0\x85" * (SIZE // 6),
+    "<x>; a=" + "\xa0" * SIZE + "b",
+    "<" + "a" * SIZE + ">",
+    "<" + "%" * SIZE + ">",
+    "<https://" + "@" * SIZE + ">",
+    "<" + ":" * SIZE + ">",
+    "<https://x.test/?" + "token=a&" * (SIZE // 8) + ">",
+    "<x>; title=" + '\\"' * (SIZE // 2),
+    '<x>; title="' + "\\" * SIZE,
+    f"{REMOVED}," * (SIZE // 10),
+)
+
+
+def test_the_link_path_is_linear_on_adversarial_values() -> None:
+    start = time.perf_counter()
+    for value in ADVERSARIAL:
+        recorded = redact_response_headers((("Link", value), ("Link", value)))
+        parse_link(value)
+        for _, kept in recorded:
+            parse_link(kept)
+    # The scanner takes milliseconds per value. A backtracking expression took seconds on one.
+    assert time.perf_counter() - start < 5
+
+
+def test_the_link_checks_are_linear_on_adversarial_records(tmp_path: Path) -> None:
+    start = time.perf_counter()
+    lines = tuple(("Link", value) for value in ADVERSARIAL)
+    record = replace(make_record(1), headers=redact_response_headers(lines))
+    _advertised([record])
+    contexts(tmp_path, Linked(BODY, redact_response_headers(lines)))
+    assert time.perf_counter() - start < 5
+
+
+# -- the record-time gate ------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "character", ["\x00", "\x01", "\x08", "\n", "\x0b", "\r", "\x1c", "\x1f", "\x7f", "\u0100", "\u2028"]
+)
+def test_a_character_that_a_field_value_cannot_hold_stops_reading(tmp_path: Path, character: str) -> None:
+    value = f'<{ALLOWED[0]}>; {CTX}; title="a{character}b"'
+    assert redact_link(value) == f"<{ALLOWED[0]}>; {CTX}; {REMOVED}, {REMOVED}"
+    assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == failed("DATA.CONTEXT.LINK_MALFORMED")
+
+
+def test_an_obs_fold_line_break_left_in_a_value_stops_reading(tmp_path: Path) -> None:
+    value = f"<{ALLOWED[0]}>;\r\n {CTX}"
+    assert not parse_link(recorded(value)[0][1]).complete
+    assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == failed("DATA.CONTEXT.LINK_MALFORMED")
+
+
+def recorded(*values: str) -> tuple[tuple[str, str], ...]:
+    return redact_response_headers(tuple(("Link", v) for v in values))
+
+
+# Common valid values. Each keeps its pass, and its record is complete. A header value arrives as
+# latin-1 text, so UTF-8 text such as u-umlaut (C3 BC) or A-ring (C3 85) arrives as two characters.
+COMMON = (
+    '</doc>; rel="alternate"; title="f\xc3\xbcr"',
+    '</doc>; rel="alternate"; title="\xc3\x85r"',
+    "</doc>; rel=alternate; title=\xc3\x85r",
+    "</doc>; rel=alternate; title=a\tb",
+    "</s.css>; rel=preload; as=style, </f.woff2>; rel=preload; as=font; type=font/woff2; crossorigin",
+    '<https://x.test/p?page=2>; rel="next", <https://x.test/p?page=9>; rel="last"',
+    '<https://x.test/ls>; rel="linkset"; type="application/linkset+json"',
+    '</x>; rel="related"; title="say \\"hi\\""',
+    "</x>; rel=related; title*=UTF-8''f%C3%BCr",
+    f'<{ALLOWED[0]}>; {CTX}; type="application/ld+json"',
+)
+
+
+@pytest.mark.parametrize("value", COMMON)
+def test_a_common_value_keeps_a_pass_and_records_complete(tmp_path: Path, value: str) -> None:
+    kept = recorded(value)
+    assert parse_link(kept[0][1]).complete
+    assert verdict(contexts(tmp_path, Linked(BODY, kept))) == passed("DATA.CONTEXT.OK")
+
+
+def test_paging_on_two_lines_and_several_lines_keep_a_pass(tmp_path: Path) -> None:
+    lines = recorded(*COMMON)
+    assert all(parse_link(kept).complete for _, kept in lines)
+    assert verdict(contexts(tmp_path, Linked(BODY, lines))) == passed("DATA.CONTEXT.OK")
+    paging = recorded('<https://x.test/p?page=2>; rel="next"', '<https://x.test/p?page=1>; rel="prev"')
+    assert paging == (
+        ("Link", '<https://x.test/p?page=2>; rel="next"'),
+        ("Link", '<https://x.test/p?page=1>; rel="prev"'),
+    )

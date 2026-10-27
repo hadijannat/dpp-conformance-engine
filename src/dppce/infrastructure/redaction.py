@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ipaddress
 import re
+from collections.abc import Callable
 from typing import Final, NamedTuple
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -42,12 +43,19 @@ _PARAMETER: Final = re.compile(
     r'(?:=[ \t]*(?:"(?P<quoted>(?:[^"\\]|\\.)*)"?|(?P<token>[^;,]*)))?'
 )
 _QUOTED_PAIR: Final = re.compile(r"\\(.)")
-# jsonld.js 8.3.3 (lib/util.js, parseLinkHeader) and pyld split a Link value at each "," outside
+# jsonld.js 8.3.3 (lib/util.js, parseLinkHeader) and pyld 3.0.0 split a Link value at each "," outside
 # "<...>" and outside a quoted string that ends at the next '"'. Of each part they read the first
-# target and the last parameter named exactly "rel", without unescaping.
-_PROCESSOR_PART: Final = re.compile(r'(?:<[^>]*>|"[^"]*"|[^,])+')
-_PROCESSOR_LINK: Final = re.compile(r"\s*<([^>]*)>\s*(?:;\s*(.*))?")
-_PROCESSOR_PARAMETER: Final = re.compile(r'(.*?)=(?:"([^"]*)"|([^"]*?))\s*(?:;\s*|\Z)')
+# target and its parameters, without unescaping. A later parameter replaces one of the same name.
+# They use three regular expressions with "\s". A scanner in linear time gives the same results:
+# tests/test_link_processor.py compares the two. "\s" is white space after the gate below: of
+# JavaScript for jsonld.js, and of Python, which adds "\x85", for pyld.
+_JS_SPACE: Final = " \t\xa0"
+_PY_SPACE: Final = " \t\xa0\x85"
+# A control character other than HTAB, or a character above "\xff", is not valid in an HTTP field
+# value (RFC 9110, section 5.5). A header value arrives as latin-1 text, so "\x80" to "\xff" are bytes
+# of UTF-8 text. The Python header parser can leave the line break of an obs-fold in a value.
+_NOT_IN_FIELD: Final = re.compile(r"[\x00-\x08\x0a-\x1f\x7f\u0100-\U0010ffff]")
+_PART_STOP: Final = re.compile(r'[<",]')
 # A scheme, if any, and then "//": the start of an authority.
 _AUTHORITY_START: Final = re.compile(r"(?:[A-Za-z][A-Za-z0-9+.-]*:)?//")
 # A target that is not a URI reference is recorded as this marker, so its free text never reaches a record.
@@ -152,7 +160,21 @@ def redact_link(value: str) -> str:
     value. The output parses to the same links and redacts to itself, except the bare marker of a
     value without a link: it reads as a malformed value.
     """
+    return _recorded(_live(value))
+
+
+def _live(value: str) -> LinkValue:
+    """Read a ``Link`` value as the system sent it.
+
+    A value with a character that a field value cannot hold is not complete. The gate is here, not in
+    ``parse_link``: before P2-26, a recorded target could hold such a character, and an old recording
+    must keep its reading.
+    """
     parsed = parse_link(value)
+    return parsed if _NOT_IN_FIELD.search(value) is None else LinkValue(parsed.links, complete=False)
+
+
+def _recorded(parsed: LinkValue) -> str:
     out: list[str] = []
     for link in parsed.links:
         kept = tuple(r for r in link.relations if r in _RELATIONS)
@@ -204,7 +226,8 @@ def parse_link(value: str) -> LinkValue:
     links: list[Link] = []
     at = _skip(_SEPARATORS, value, 0)
     while at < len(value):
-        if value[at:].rstrip(" \t") == REMOVED or value[at] != "<" or (close := value.find(">", at)) < 0:
+        stopped = value.startswith(REMOVED, at) and _skip(_OWS, value, at + len(REMOVED)) == len(value)
+        if stopped or value[at] != "<" or (close := value.find(">", at)) < 0:
             return LinkValue(tuple(links), complete=False)
         target, at = value[at + 1 : close], close + 1
         rel: str | None = None
@@ -227,23 +250,133 @@ def parse_link(value: str) -> LinkValue:
         if at < len(value) and value[at] != ",":
             return LinkValue(tuple(links), complete=False)
         at = _skip(_SEPARATORS, value, at)
-    # A processor that splits on commas must read the same targets and the same context links.
+    return LinkValue(tuple(links), complete=_agrees(links, value))
+
+
+def _agrees(links: list[Link] | tuple[Link, ...], value: str) -> bool:
+    """True if both processor models read the targets of ``links`` in order, with the same context links."""
     read = [(x.target, JSONLD_CONTEXT in x.relations) for x in links]
-    return LinkValue(tuple(links), complete=read == _processor_links(value))
+    return read == _processor_links(value, _JS_SPACE) == _processor_links(value, _PY_SPACE)
 
 
-def _processor_links(value: str) -> list[tuple[str, bool]]:
-    """Each target that jsonld.js reads in ``value``, and whether its rel names the JSON-LD context."""
+def _processor_links(value: str, space: str) -> list[tuple[str, bool]]:
+    """Each target that the processor model reads in ``value``, and whether its rel names the context."""
     out: list[tuple[str, bool]] = []
-    for part in _PROCESSOR_PART.findall(value):
-        if (link := _PROCESSOR_LINK.search(part)) is None:
-            continue
+    for target, parameters in _processor_read(value, space):
         rel = ""
-        for parameter in _PROCESSOR_PARAMETER.finditer(link[2] or ""):
-            if parameter[1] == "rel":
-                rel = parameter[3] if parameter[2] is None else parameter[2]
-        out.append((link[1], JSONLD_CONTEXT in rel.lower().split()))
+        for name, text in parameters:
+            if name == "rel":
+                rel = text
+        out.append((target, JSONLD_CONTEXT in rel.lower().split()))
     return out
+
+
+def _processor_read(value: str, space: str) -> list[tuple[str, list[tuple[str, str]]]]:
+    """Each target and its parameters, as the regular expressions of jsonld.js and pyld read them.
+
+    ``space`` is the set of characters that "\\s" matches. The results equal findall of the part
+    expression, search of the link expression on each part, and finditer of the parameter expression.
+    """
+    out: list[tuple[str, list[tuple[str, str]]]] = []
+    for part in _processor_parts(value):
+        # "\s*<([^>]*)>": the first "<" of the part, if a ">" follows it.
+        opening = part.find("<")
+        closing = part.find(">", opening + 1) if opening >= 0 else -1
+        if closing < 0:
+            continue
+        # "\s*(?:;\s*(.*))?": the parameters start after ";" and white space.
+        after = _skip_space(part, closing + 1, space)
+        parameters = part[_skip_space(part, after + 1, space) :] if part.startswith(";", after) else ""
+        out.append((part[opening + 1 : closing], _processor_parameters(parameters, space)))
+    return out
+
+
+def _processor_parts(value: str) -> list[str]:
+    """The matches of '(?:<[^>]*>|"[^"]*"|[^,])+': runs without a "," outside "<...>" and "\\"...\\""."""
+    parts: list[str] = []
+    after = {">": _finder(value, ">"), '"': _finder(value, '"')}
+    start = at = 0
+    while (found := _PART_STOP.search(value, at)) is not None:
+        at = found.start()
+        if value[at] == ",":
+            if start < at:
+                parts.append(value[start:at])
+            start = at = at + 1
+            continue
+        closing = after[">" if value[at] == "<" else '"'](at + 1)
+        # Without a closing character, "<" or '"' is one character of the part.
+        at = closing + 1 if closing < len(value) else at + 1
+    if start < len(value):
+        parts.append(value[start:])
+    return parts
+
+
+def _processor_parameters(text: str, space: str) -> list[tuple[str, str]]:
+    """The name and value of each match of '(.*?)=(?:"([^"]*)"|([^"]*?))\\s*(?:;\\s*|\\Z)' in ``text``.
+
+    A match at a position does not depend on where its name starts. So if no "=" after the start of
+    a name gives a match, no later start does, and the matches end.
+    """
+    out: list[tuple[str, str]] = []
+    quote, semicolon = _finder(text, '"'), _finder(text, ";")
+    start, equals = 0, text.find("=")
+    while equals >= 0:
+        found = _processor_value(text, equals, space, quote, semicolon)
+        if found is None:
+            equals = text.find("=", equals + 1)
+            continue
+        value, end = found
+        out.append((text[start:equals], value))
+        start, equals = end, text.find("=", end)
+    return out
+
+
+def _processor_value(
+    text: str, equals: int, space: str, quote: Callable[[int], int], semicolon: Callable[[int], int]
+) -> tuple[str, int] | None:
+    """The value after the "=" at ``equals``, and the end of the match, or None if no match ends there."""
+    size = len(text)
+    if text.startswith('"', equals + 1):
+        # '"([^"]*)"': the quoted value must be followed by white space, and then ";" or the end.
+        closing = quote(equals + 2)
+        after = _skip_space(text, closing + 1, space) if closing < size else size + 1
+        if after == size:
+            return text[equals + 2 : closing], size
+        if text.startswith(";", after):
+            return text[equals + 2 : closing], _skip_space(text, after + 1, space)
+        return None  # the unquoted form cannot start with '"'
+    # '([^"]*?)': the shortest value without '"' that white space and then ";" or the end follow.
+    stop = semicolon(equals + 1)
+    if quote(equals + 1) < stop:
+        return None
+    value_end = stop
+    while value_end > equals + 1 and text[value_end - 1] in space:
+        value_end -= 1
+    return text[equals + 1 : value_end], (_skip_space(text, stop + 1, space) if stop < size else size)
+
+
+def _finder(text: str, char: str) -> Callable[[int], int]:
+    """A function that gives the index of the next ``char`` at or after a position, or ``len(text)``.
+
+    The positions of the calls must not decrease. So each scan of ``text`` starts after the last
+    result, and all calls together read ``text`` once.
+    """
+    found = -1
+
+    def at_or_after(position: int) -> int:
+        nonlocal found
+        if found < position:
+            found = text.find(char, position)
+            found = len(text) if found < 0 else found
+        return found
+
+    return at_or_after
+
+
+def _skip_space(text: str, at: int, space: str) -> int:
+    while at < len(text) and text[at] in space:
+        at += 1
+    return at
 
 
 def _skip(pattern: re.Pattern[str], value: str, at: int) -> int:
