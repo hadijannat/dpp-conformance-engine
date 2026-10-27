@@ -130,3 +130,20 @@ test_purposes:
   - Five exchanges that differ only in the Accept header, with status, media type, and Vary.
   permitted_modes: *modes
   severity: minor
+- id: TP-WEB-RULES-001
+  title: Judge the passport with a pinned rule pack of version 2
+  requirements:
+  - FAM-WEB-RULES-001
+  profiles:
+  - '*'
+  applicability: *web
+  roles:
+  - anonymous
+  stimulus:
+    check: data.rules
+    params:
+      rule_pack: testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml
+  expected_evidence:
+  - The rule pack, the applied rules, and each failed rule id.
+  permitted_modes: *modes
+  severity: major
