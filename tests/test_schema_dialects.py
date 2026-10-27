@@ -53,7 +53,7 @@ def test_a_draft_07_schema_enforces_dependencies(uri: str) -> None:
 
 
 def test_data_jsonschema_fails_a_document_that_breaks_a_draft_07_keyword(tmp_path: Path) -> None:
-    """The regression that fault B-09 (reserved, package P2-24) will seed through a test purpose."""
+    """The regression that the boundary case B-09 seeds through TP-VC-PASSPORT-001."""
     schema = {"$schema": DRAFT_07, "type": "object", **DEPENDENCIES}
     assert _jsonschema(tmp_path, schema, b'{"credit_card": 1}') == (
         ExecutionStatus.COMPLETED,
