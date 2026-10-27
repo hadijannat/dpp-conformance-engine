@@ -119,13 +119,26 @@
 #   evidence fault of the dimension opening.
 # The package of F-78 also has a documentation fix commit. Each of the two packages ends with a
 # review fix commit. These commits change no entry. The entries meet in the merge commits.
+# Version 0.14.0 adds the faults F-79, F-80, and F-83 and the boundary case B-21. F-81 and F-82
+# are not used: their package did not start. The git history gives this order:
+# - F-79 and F-80: their flags id_mismatch and leak_usage_log_anonymous are older than the entry
+#   commit. The entry commit comes before the commit that adds the rule pack of version 2, the
+#   context sources of data.context, and the TEST-ONLY rule pack. It also comes before the commit
+#   that adds the test purpose TP-WEB-RULES-001. That test purpose is the seed, not a flag.
+# - F-83 and B-21: the entry commit comes before the commit that adds the credential schemes and
+#   the OAuth 2.0 token request. It also comes before the commit that adds the oauth family, the
+#   flags oauth_token_wrong_role and oauth_token_refused, the test purpose TP-OAUTH-ACCESS-001, and
+#   the profile family/oauth. The commit that adds their rig setup comes last.
+# The package of F-79 and F-80 also has a documentation fix commit and two data fix commits. Each
+# of the two packages ends with a review fix commit. These commits change no entry. The entries
+# meet in the merge commits.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
 # All faults are synthetic and are seeded into the local reference system or into copies of
 # its outputs. The reference system is an example. It is not a normative authority.
 schema_version: dppce.faultcatalogue/1
-version: 0.13.0
+version: 0.14.0
 profiles: [battery/ev, battery/lmt, battery/industrial]
 
 controls:
