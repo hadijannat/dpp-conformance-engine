@@ -22,12 +22,14 @@ FAMILY_CONTROLS = {
     "C-FAMILY-GS1": "family/gs1-resolver",
     "C-FAMILY-VC": "family/credentials",
     "C-FAMILY-AAS": "family/aas",
+    "C-FAMILY-OAUTH": "family/oauth",
 }
 PREFIX = {
     "family/web": "TP-WEB-",
     "family/gs1-resolver": "TP-GS1-",
     "family/credentials": "TP-VC-",
     "family/aas": "TP-AAS-",
+    "family/oauth": "TP-OAUTH-",
 }
 # Without the extra, aas.validate gives unsupported, so the AAS control cannot pass.
 _AAS = [
