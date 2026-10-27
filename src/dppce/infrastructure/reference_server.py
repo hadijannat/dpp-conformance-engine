@@ -48,7 +48,8 @@ CORE_FAULTS: Final = frozenset(
         "leak_error", "leak_html", "sig_invalid", "sig_untrusted_issuer", "cert_expired", "id_mismatch",
         "resolver_404", "redirect_out_of_scope", "data_wrong_type", "data_missing_required", "data_stale",
         "data_wrong_unit", "data_relationship", "context_invalid", "context_link_malformed",
-        "context_link_backslash", "registry_inconsistent",
+        "context_link_backslash", "context_link_target_param", "context_link_split_lines",
+        "registry_inconsistent",
         "version_undeclared_change", "over_restrict_legitimate_interest",
         "leak_supplier_to_legitimate_interest", "leak_usage_log_anonymous", "deny_all",
         "resolver_5xx", "resolver_html", "resolver_divergent", "registry_extra_field_differs",
@@ -64,7 +65,7 @@ def known_faults() -> frozenset[str]:
 
 FAULTS: Final = known_faults()
 _CONTEXT_RELATION: Final = 'rel="http://www.w3.org/ns/json-ld#context"'
-# The Link header of the passport answer under each context link flag (F-84 and F-85).
+# The Link header of the passport answer under each context link flag (F-84 to F-87).
 _CONTEXT_LINKS: Final = {
     "context_link_malformed": (
         f"<https://dppce.example.test/x> junk, <https://unpinned.example.test/ctx>; {_CONTEXT_RELATION}"
@@ -73,7 +74,19 @@ _CONTEXT_LINKS: Final = {
     "context_link_backslash": (
         rf"<https://unpinned.example.test\@dppce.example.test/contexts/battery/v1>; {_CONTEXT_RELATION}"
     ),
+    # jsonld.js and pyld read the parameter target as the target of the link.
+    "context_link_target_param": (
+        f"<https://dppce.example.test/contexts/battery/v1>; {_CONTEXT_RELATION}; "
+        'target="https://unpinned.example.test/ctx"'
+    ),
+    # The first of two Link lines. Joined with the second, the quote ends later.
+    "context_link_split_lines": '<https://unpinned.example.test/ctx>; title="x',
 }
+# The second Link line of context_link_split_lines.
+_SPLIT_SECOND_LINE: Final = (
+    '<https://dppce.example.test/contexts/battery/v1>; t="p, <https://unpinned.example.test/ctx>; '
+    'rel=http://www.w3.org/ns/json-ld#context, q"'
+)
 _READ_METHODS: Final = "GET, HEAD, OPTIONS"
 _MAX_POST_BYTES: Final = 4096
 # The answer to OPTIONS: a CORS preflight for any origin, read methods only.
@@ -333,7 +346,12 @@ class ReferenceSystem:
             200, self.item(ident, role, leak="leak_fetch" in faults), media_type
         )
         links = [value for flag, value in _CONTEXT_LINKS.items() if flag in faults]
-        return status, media_type, body, ({"Link": ", ".join(links)} if links else headers)
+        if links:
+            headers = {"Link": ", ".join(links)}
+        if "context_link_split_lines" in faults:
+            # A header name has no case, so this key sends a second Link line.
+            headers["link"] = _SPLIT_SECOND_LINE
+        return status, media_type, body, headers
 
 
 class ReferenceServer:
