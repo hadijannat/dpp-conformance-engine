@@ -461,6 +461,25 @@ def test_a_link_value_that_redaction_removed_is_not_judged_and_never_passes(tmp_
     )
 
 
+def test_a_link_with_another_parameter_and_another_relation_does_not_block(tmp_path: Path) -> None:
+    raw = (
+        ("Link", '<https://id.example.test/01/1>; rel="linkset"; type="application/linkset+json"'),
+        ("Link", "<https://example.test/style.css>; rel=next; title=S3CRET"),
+    )
+    outcome = contexts(tmp_path, Linked(BODY, redact_response_headers(raw)))
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+def test_a_context_link_with_another_parameter_is_not_judged(tmp_path: Path) -> None:
+    # An anchor or a title can change what the link means, and the record keeps only a marker.
+    raw = (("Link", f'<https://example.test/ctx>; rel="{JSONLD_CONTEXT}"; title="ctx"'),)
+    outcome = contexts(tmp_path, Linked(BODY, redact_response_headers(raw)))
+    assert verdict(outcome) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+    assert verdict(contexts(tmp_path, Linked(PLAIN, redact_response_headers(raw)))) == blocked(
+        "DATA.CONTEXT.LINK_UNREADABLE"
+    )
+
+
 def test_the_transport_record_keeps_the_link_context_that_the_check_reads(tmp_path: Path) -> None:
     raw = (("Link", f'<https://other.test/ctx>; rel="{JSONLD_CONTEXT}"'),)
     outcome = contexts(tmp_path, Linked(BODY, redact_response_headers(raw)))

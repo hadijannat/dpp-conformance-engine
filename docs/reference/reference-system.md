@@ -633,10 +633,11 @@ Two more context sources are experimental:
   each `@context` string and each `@import` value in the copy. It follows a reference only into
   another pinned copy. An allowed context without a copy is judged by its URL only.
 
-Redaction removes a `Link` value with a parameter other than `rel`, for example
-`type="application/ld+json"`. A removed value, or a context target that redaction changed, gives
-`blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. `DATA.CONTEXT.NOT_ALLOWED` comes first. Without a
-top-level context, an unreadable value gives `blocked`, not `DATA.CONTEXT.MISSING`.
+Redaction replaces each link parameter other than `rel` with one marker, for example
+`type="application/ld+json"`. A removed value, or a context link with a marker or a changed target,
+gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. A link with another relation never blocks.
+`DATA.CONTEXT.NOT_ALLOWED` comes first. Without a top-level context, an unreadable value gives
+`blocked`, not `DATA.CONTEXT.MISSING`.
 A copy that is not a JSON object, or an `@import`
 value that is not a string, gives `blocked` with `DATA.CONTEXT.FILE_INVALID`.
 

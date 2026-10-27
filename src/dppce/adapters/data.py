@@ -765,8 +765,10 @@ def _link_contexts(record: Record) -> tuple[list[str], bool]:
     """The targets of the Link values with the JSON-LD context relation, and whether one is unreadable.
 
     JSON-LD 1.1, section 6.1: a processor ignores this header for application/ld+json. The record
-    holds a Link value in the form that redaction keeps. A value that redaction removed, or a
-    target that it changed, no longer shows what the system sent, so it is unreadable.
+    holds a Link value in the form that redaction keeps. A value that redaction removed no longer
+    shows what the system sent, so it is unreadable. So is a context link with a target that
+    redaction changed or with another parameter, such as an anchor. A link with another relation
+    and another parameter is not a context, so it is not read.
     """
     if record.kind != "http" or media_type(record) == "application/ld+json":
         return [], False
@@ -780,14 +782,14 @@ def _link_contexts(record: Record) -> tuple[list[str], bool]:
         if links is None or value == REMOVED:  # "<removed>" itself reads as a link without a relation
             unreadable = True
             continue
-        for target, relations in links:
+        for target, relations, other in links:
             if JSONLD_CONTEXT not in relations:
                 continue
             try:
                 url = urljoin(base, target)
             except ValueError:
                 url = REMOVED
-            if REMOVED in unquote(url):
+            if other or REMOVED in unquote(url):
                 unreadable = True
             else:
                 found.append(url)

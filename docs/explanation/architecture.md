@@ -729,8 +729,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   with the JSON-LD context relation names a context. The check ignores the header for
   `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
 - The record keeps a `Link` value only in the form that redaction keeps (section 10). A removed
-  value, or a context target that redaction changed, gives `blocked` with
-  `DATA.CONTEXT.LINK_UNREADABLE`. `DATA.CONTEXT.NOT_ALLOWED` comes first. A document without a
+  value gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. So does a context link with a
+  target that redaction changed or with a removed parameter. A link with another relation is
+  not read. `DATA.CONTEXT.NOT_ALLOWED` comes first. A document without a
   top-level context and with an unreadable `Link` value gives `blocked`, not
   `DATA.CONTEXT.MISSING`, because the value can name the context.
 - `context_files` maps an allowed context URL to a pinned copy under the data root. The check
@@ -857,7 +858,7 @@ answers. It takes the first `http` or `https` target with that relation and reso
 target against the final URL of its answer. It fetches that target once with
 `Accept: application/linkset+json` and judges the answer by rules 1 to 5. The transport policy
 applies to that request as to every other request. The check reads only the recorded form of the
-header (section 10). A `Link` value with another parameter, such as `type`, is therefore not read.
+header (section 10). A link with another parameter, such as `type`, is therefore not read.
 A target that redaction changed is not fetched.
 No usable `Link` value, no answer, or a body that cannot be read leaves the pass unchanged. The
 check sends the extra request only after both answers pass. So a broken `Link` value cannot turn
@@ -1557,8 +1558,9 @@ An IXIT identity names how the engine presents a role (OD-13). `scheme` has thre
 - An identity of the `bearer` scheme keeps the form that it had before OD-13. The sanitized IXIT
   hash and the decision digest of an earlier recording therefore do not change.
 - `header_name` is a field-name token of 64 characters or less. It must not be `Host`, `Cookie`,
-  `Content-Length`, a hop-by-hop header, or a header that the transport sets. It must not be a
-  header whose value a record keeps (section 10). The transport refuses such a name too.
+  `Content-Length`, a hop-by-hop header, a name that starts with `Proxy-`, or a header that the
+  transport sets. It must not be a header whose value a record keeps (section 10). The transport
+  refuses such a name too.
 - The rules of sections 9 and 9.1 apply to each scheme. A secret goes only to its origin, and
   the anonymous role carries none.
 
@@ -1655,8 +1657,9 @@ records/<id>.enc   one encrypted record each
   registered relation names, `linkset`, the JSON-LD context relation, and the GS1 link types.
   The GS1 link types are those of the pinned GS1 Web Vocabulary file, in the `gs1:` form and the
   `https://ref.gs1.org/voc/` form. An extension relation is compared as exact text, and only a
-  quoted `rel` value can hold one. A value with another relation or another parameter is removed
-  as a whole. The pinned file is `v1.16/gs1Voc.jsonld` of `github.com/gs1/WebVoc` at commit
+  quoted `rel` value can hold one. Each other parameter of a link is replaced with one marker,
+  `<removed>`, after its relations. A value with another relation, a second `rel`, or a form
+  that the parser cannot split is removed as a whole. The pinned file is `v1.16/gs1Voc.jsonld` of `github.com/gs1/WebVoc` at commit
   `f8f407bf717233c871dca2f62f4e45b0940e8cad`.
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in

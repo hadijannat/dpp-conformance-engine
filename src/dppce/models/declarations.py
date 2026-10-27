@@ -133,7 +133,10 @@ class RoleIdentity(Model):
                 )
         if self.scheme != "bearer" and self.secret_ref is None:
             raise ValueError(f"the scheme '{self.scheme}' needs secret_ref")
-        if self.header_name is not None and self.header_name.lower() in _RESERVED_HEADERS:
+        # A proxy- header is meant for a proxy, which can consume it before it reaches the system.
+        if self.header_name is not None and (
+            self.header_name.lower() in _RESERVED_HEADERS or self.header_name.lower().startswith("proxy-")
+        ):
             raise ValueError(f"a role secret cannot go in the header '{self.header_name}'")
         return self
 

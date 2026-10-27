@@ -744,7 +744,7 @@
       "cycle": 66,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-28 (24566da catalogue entries F-83 and B-21 first, then 2737471, d471ae5, the rig setup b1e75ca, and the review fix 00ae981): a role identity takes the scheme bearer, header, or oauth2_client_credentials, and the OAuth 2.0 scheme requests one token per role and run from an operator-confirmed token endpoint under the scope credential, with no token or client secret in a record or a log; the package gate figures did not reach the integrator, and after the wave 10 merges uv run just check passed with 4711 tests and 1 skip."
+      "summary": "P2-28 (24566da catalogue entries F-83 and B-21 first, then 2737471, d471ae5, the rig setup b1e75ca, and the review fix 00ae981): a role identity takes the scheme bearer, header, or oauth2_client_credentials, and the OAuth 2.0 scheme requests one token per role and run from an operator-confirmed token endpoint under the scope credential, with no client secret in a record or a log; an issued token is removed in its Bearer form only (architecture section 9.3); the package gate figures did not reach the integrator, and after the wave 10 merges uv run just check passed with 4711 tests and 1 skip."
     },
     {
       "cycle": 67,

@@ -31,10 +31,13 @@ SAFE_RESPONSE_HEADERS: Final = frozenset(
 )  # fmt: skip
 # These hold URLs. They are kept, with each URL redacted.
 _URL_RESPONSE_HEADERS: Final = frozenset({"location", "content-location", "access-control-allow-origin"})
-# One link: a target and at most one "rel" parameter. Any other parameter can hold any text.
+# One link is a target and its parameters. Only "rel" is read, at most once. Any other parameter
+# can hold any text, so only the marker REMOVED shows that one was there.
+_TARGET: Final = re.compile(r"\s*<([^<>\s]*)>\s*")
+_REL_NAME: Final = re.compile(r"\s*rel\s*=", re.IGNORECASE)
 # Only the quoted form can hold ":", "/", or "#": an extension relation is an IRI (RFC 8288, 3.3).
-_LINK: Final = re.compile(
-    r'\s*<([^<>\s]*)>(?:\s*;\s*rel=(?:"([A-Za-z][A-Za-z0-9 .:/#-]*)"|"?([A-Za-z][A-Za-z0-9 .-]*)"?))?\s*'
+_REL: Final = re.compile(
+    r'\s*rel\s*=\s*(?:"([A-Za-z][A-Za-z0-9 .:/#-]*)"|"?([A-Za-z][A-Za-z0-9 .-]*)"?)\s*', re.IGNORECASE
 )
 # The link types of the GS1 Web Vocabulary: each sub-property of gs1:linkType in v1.16/gs1Voc.jsonld
 # of github.com/gs1/WebVoc at commit f8f407bf717233c871dca2f62f4e45b0940e8cad (Apache-2.0, read on
@@ -104,31 +107,40 @@ def redact_url(url: str) -> str:
 def redact_link(value: str) -> str:
     """Keep the redacted targets and the relation names of a ``Link`` header.
 
-    A value with any other parameter, or one that this simple reading cannot split, is removed
-    as a whole: a title or an anchor is free text that a system can fill with anything.
+    Each other parameter of a link is replaced with one marker: a title or an anchor is free
+    text that a system can fill with anything. A value with a relation outside the closed list,
+    or one that this simple reading cannot split, is removed as a whole.
     """
     links = parse_link(value)
-    if links is None or not all(set(relations) <= _RELATIONS for _, relations in links):
+    if links is None or not all(set(relations) <= _RELATIONS for _, relations, _ in links):
         return REMOVED
     return ", ".join(
-        f"<{redact_url(target)}>" + (f'; rel="{" ".join(relations)}"' if relations else "")
-        for target, relations in links
+        f"<{redact_url(target)}>"
+        + (f'; rel="{" ".join(relations)}"' if relations else "")
+        + (f"; {REMOVED}" if other else "")
+        for target, relations, other in links
     )
 
 
-def parse_link(value: str) -> list[tuple[str, tuple[str, ...]]] | None:
-    """Split a ``Link`` value into its targets and their relations, or None for any other form.
+def parse_link(value: str) -> list[tuple[str, tuple[str, ...], bool]] | None:
+    """Split a ``Link`` value into links, or None for a form that this reading does not know.
 
-    A registered relation name is case-insensitive, so it is given in lower case. An extension
-    relation keeps its case.
+    Each link is its target, its relations, and whether it has another parameter, such as the
+    marker that redaction leaves. A registered relation name is case-insensitive, so it is given
+    in lower case. An extension relation keeps its case.
     """
-    links: list[tuple[str, tuple[str, ...]]] = []
+    links: list[tuple[str, tuple[str, ...], bool]] = []
+    # ponytail: no quoted-string scan; a quoted "," or ";" splits wrong and fails closed or marks.
     for part in value.split(","):
-        match = _LINK.fullmatch(part)
-        if match is None:
+        target, *parameters = part.split(";")
+        found = _TARGET.fullmatch(target)
+        rels = [p for p in parameters if _REL_NAME.match(p)]
+        rel = _REL.fullmatch(rels[0]) if len(rels) == 1 else None
+        if found is None or (rels and rel is None):
             return None
-        words = (match.group(2) or match.group(3) or "").split()
-        links.append((match.group(1), tuple(w if _EXTENSION.search(w) else w.lower() for w in words)))
+        words = (rel.group(1) or rel.group(2) or "").split() if rel else []
+        relations = tuple(w if _EXTENSION.search(w) else w.lower() for w in words)
+        links.append((found.group(1), relations, len(parameters) > len(rels)))
     return links
 
 

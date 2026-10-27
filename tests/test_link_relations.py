@@ -66,14 +66,37 @@ def test_several_kept_relations_in_one_value_stay_in_their_order() -> None:
         # Only the quoted form permits ":" and "/".
         "<https://sut.example/a>; rel=gs1:pip",
         "<https://sut.example/a>; rel=http://www.w3.org/ns/json-ld#context",
-        # A parameter other than rel stays a reason to remove the whole value.
-        '<https://sut.example/a>; rel="linkset"; type="application/linkset+json"',
-        '<https://sut.example/a>; rel="gs1:pip"; title="S3CRET"',
         '<https://sut.example/a>; rel="gs1:pip, S3CRET"',
+        # The rel parameter is given once. A second one is not read, so the value is removed.
+        '<https://sut.example/a>; rel="linkset"; REL="next"',
     ],
 )
 def test_a_link_with_free_text_is_removed_as_a_whole(value: str) -> None:
     assert redact_link(value) == REMOVED
+
+
+@pytest.mark.parametrize(
+    ("value", "kept"),
+    [
+        (
+            '<https://sut.example/a>; rel="linkset"; type="application/linkset+json"',
+            f'<https://sut.example/a>; rel="linkset"; {REMOVED}',
+        ),
+        (
+            '<https://sut.example/a>; title="S3CRET"; REL="gs1:pip"',
+            f'<https://sut.example/a>; rel="gs1:pip"; {REMOVED}',
+        ),
+        ("<https://sut.example/a>; anchor=S3CRET", f"<https://sut.example/a>; {REMOVED}"),
+        (
+            '<https://sut.example/a>; rel=next; hreflang=de, <https://sut.example/b>; rel="prev"',
+            f'<https://sut.example/a>; rel="next"; {REMOVED}, <https://sut.example/b>; rel="prev"',
+        ),
+    ],
+)
+def test_a_link_keeps_its_target_and_relations_and_marks_another_parameter(value: str, kept: str) -> None:
+    # A title or an anchor is free text, so only a marker shows that the system sent one.
+    assert redact_link(value) == kept
+    assert redact_link(kept) == kept
 
 
 def test_the_cors_headers_are_kept_and_an_origin_is_redacted_like_a_url() -> None:

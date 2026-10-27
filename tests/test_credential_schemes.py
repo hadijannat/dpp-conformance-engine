@@ -164,7 +164,7 @@ def test_a_header_role_needs_a_header_name_that_is_a_token() -> None:
     "name",
     sorted(
         {
-            "Host", "cookie", "Connection", "Keep-Alive", "Proxy-Authorization", "TE", "Trailer",
+            "Host", "cookie", "Connection", "Keep-Alive", "Proxy-Authorization", "Proxy-Foo", "TE", "Trailer",
             "Transfer-Encoding", "Upgrade", "Content-Length", "Accept-Encoding",
             *SAFE_REQUEST_HEADERS,
         }
