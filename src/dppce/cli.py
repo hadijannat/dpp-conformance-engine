@@ -820,7 +820,10 @@ def cmd_replay(args: argparse.Namespace) -> int:
     input_check = "not_run"
     if record.input_hashes is not None:
         now = input_hashes(
-            loaded.profile, loaded.catalogue, loaded.testpacks, bound_files(loaded.profile, root)
+            loaded.profile,
+            loaded.catalogue,
+            loaded.testpacks,
+            bound_files(loaded.profile, root, loaded.testpacks),
         )
         if changed := _changed_inputs(record.input_hashes, now):
             raise UsageError(

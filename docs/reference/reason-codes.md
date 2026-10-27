@@ -99,25 +99,30 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `DATA.CONTEXT.NOT_ALLOWED` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Use only the JSON-LD contexts on the allowlist of the test purpose. |
 | `DATA.CONTEXT.NO_ALLOWLIST` | DATA | `data.context` | `dppce.adapters.data.context_check` | inconclusive | Declare the allowlist of contexts in the test purpose. |
 | `DATA.CONTEXT.OK` | DATA | `data.context` | `dppce.adapters.data.context_check` | pass | None: the step passed. |
+| `DATA.CREDENTIAL.UNVERIFIED` | DATA |  | `dppce.adapters.data._credential` | inconclusive | Serve a credential that verifies. Its payload was not judged. |
+| `DATA.EMBEDDED.MISSING` | DATA |  | `dppce.adapters.data._embedded` | fail; inconclusive under a non-default verdict rule | Embed the passport data in the page in a JSON-LD script element. |
+| `DATA.EMBEDDED.TOO_LARGE` | DATA |  | `dppce.adapters.data._Documents.limit`, `dppce.adapters.data._embedded` | inconclusive | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
 | `DATA.FRESHNESS.STALE` | DATA |  | `dppce.adapters.data` | not fixed here | Update the passport data, so that its update time is within the allowed age. |
-| `DATA.NO_TARGET` | DATA | `data.context`, `data.jsonschema`, `data.rules` | `dppce.adapters.data._fetch_document`, `dppce.adapters.data.context_check`, `dppce.adapters.data.jsonschema_check`, `dppce.adapters.data.rules_check` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `DATA.NO_TARGET` | DATA |  | `dppce.adapters.data._answer`, `dppce.adapters.data._documents` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
+| `DATA.PARAMS.INVALID` | DATA |  | `dppce.adapters.data._params` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
 | `DATA.RANGE.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Correct the value of the field that the message names, so that it is in range. |
 | `DATA.RELATIONSHIP.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Correct the related fields that the message names, so that they agree. |
-| `DATA.RESPONSE.NOT_CONCLUSIVE` | DATA |  | `dppce.adapters.data._fetch_document` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |
-| `DATA.RESPONSE.NOT_JSON` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
-| `DATA.RESPONSE.STATUS` | DATA |  | `dppce.adapters.data._fetch_document` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
+| `DATA.RESPONSE.NOT_CONCLUSIVE` | DATA |  | `dppce.adapters.data._answer` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |
+| `DATA.RESPONSE.NOT_JSON` | DATA |  | `dppce.adapters.data._fetch_document`, `dppce.adapters.data._not_json` | fail; inconclusive under a non-default verdict rule | Serve the resource as one JSON document with a JSON media type. |
+| `DATA.RESPONSE.STATUS` | DATA |  | `dppce.adapters.data._answer` | fail; inconclusive under a non-default verdict rule | Answer the request with a success status code. |
 | `DATA.RESPONSE.TOO_DEEP` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the body is nested too deeply to judge. Serve a flatter document. |
 | `DATA.RULES.APPLICABILITY_UNKNOWN` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Answer the ICS questions that decide whether the data rules apply. |
-| `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Pin the data rules that the test purpose names. |
+| `DATA.RULES.MISSING` | DATA | `data.rules` | `dppce.adapters.data._rule_packs`, `dppce.adapters.data.rules_check` | inconclusive | Pin the data rules that the test purpose names. |
 | `DATA.RULES.NONE_APPLIED` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | inconclusive | Answer the ICS questions, so that at least one data rule applies. |
 | `DATA.RULES.OK` | DATA | `data.rules` | `dppce.adapters.data.rules_check` | pass | None: the step passed. |
-| `DATA.SCHEMA.DIALECT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the schema uses a dialect that this engine does not support. |
+| `DATA.SAMPLE.MISSING` | DATA |  | `dppce.adapters.data._sample` | inconclusive | Supply the offline sample that the test purpose names, in the data directory of the run. |
+| `DATA.SCHEMA.DIALECT` | DATA |  | `dppce.adapters.data._compiled` | inconclusive | Engine limit: the schema uses a dialect that this engine does not support. |
 | `DATA.SCHEMA.INVALID` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | fail; inconclusive under a non-default verdict rule | Correct the document at the listed paths until it matches the pinned schema. |
-| `DATA.SCHEMA.MALFORMED` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Pin a schema that is itself valid. |
+| `DATA.SCHEMA.MALFORMED` | DATA |  | `dppce.adapters.data` | inconclusive | Pin a schema that is itself valid. |
 | `DATA.SCHEMA.MISSING` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Pin the schema that the test purpose names. |
-| `DATA.SCHEMA.NOT_LOCAL` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Pin a schema whose references resolve inside the data directory. |
+| `DATA.SCHEMA.NOT_LOCAL` | DATA |  | `dppce.adapters.data._compiled` | inconclusive | Pin a schema whose references resolve inside the data directory. |
 | `DATA.SCHEMA.OK` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | pass | None: the step passed. |
-| `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA | `data.jsonschema` | `dppce.adapters.data.jsonschema_check` | inconclusive | Engine limit: the schema uses a format that this engine does not check. |
+| `DATA.SCHEMA.UNSUPPORTED_FORMAT` | DATA |  | `dppce.adapters.data._compiled` | inconclusive | Engine limit: the schema uses a format that this engine does not check. |
 | `DATA.UNIT.INVALID` | DATA |  | `dppce.adapters.data` | not fixed here | Give the value with a unit that the rule accepts. |
 | `DECISION.OVERALL.ERROR` | DECISION |  | `dppce.report.sarif` | not fixed here | An engine defect stopped the step. Report it with the run log. The result says nothing about the system. |
 | `DECISION.OVERALL.FAIL` | DECISION |  | `dppce.report.sarif` | not fixed here | Fix the failed requirements that the report lists, then run the tests again. |

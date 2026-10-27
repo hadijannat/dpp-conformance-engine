@@ -27,7 +27,7 @@ PACK, TESTPACK = "test-only/reviewed", "test-only/reviewed-tests"
 CITED = {**b.CITED, "source_id": "dppce-illustrative"}
 RULES = "profiles/battery/rules/illustrative-rules.yaml"
 # A file that no profile binds. Only the parameter of a test purpose names it.
-PARAM_FILE = "testpacks/data/TEST-ONLY-replay.schema.json"
+PARAM_FILE = "TEST-ONLY-replay.schema.json"
 IXIT = {
     "schema_version": "dppce.ixit/1",
     "endpoints": {"api": "https://id.example.test"},

@@ -88,6 +88,7 @@ def test_a_case_without_profiles_runs_under_the_catalogue_profiles() -> None:
     # A boundary case keeps its single profile: the rig setup, else the first catalogue profile.
     assert {c.id: c.profile for c in cases.boundary_cases() if c.profile} == {
         "B-06": "battery/lmt",
+        "B-09": "family/credentials",
         "B-12": "family/gs1-resolver",
         "B-14": "family/gs1-resolver",
         "B-15": "family/credentials",

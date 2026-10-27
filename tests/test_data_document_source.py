@@ -57,13 +57,13 @@ def check(
     name: str,
     acquirer: Any,
     *,
-    schema: Any = None,
+    profile_schema: Any = None,
     trust: TrustBundle | None = None,
     **params: Any,
 ) -> CheckOutcome:
     write_data(tmp_path)
-    if schema is not None:
-        (tmp_path / "schema.json").write_text(json.dumps(schema), encoding="utf-8")
+    if profile_schema is not None:
+        (tmp_path / "schema.json").write_text(json.dumps(profile_schema), encoding="utf-8")
     (tmp_path / "rules.json").write_text(json.dumps(REQUIRED_NAME), encoding="utf-8")
     ctx = context(tmp_path, name, params=params, trust=trust)
     return run(replace(ctx, acquirer=acquirer, evaluation_time=NOW))
@@ -91,7 +91,7 @@ def blocked(code: str) -> tuple[ExecutionStatus, bool | None, str]:
 def test_the_default_source_keeps_the_observation_summary_of_today(tmp_path: Path) -> None:
     """A changed summary key would change the decision digest of every existing recording."""
     body = b'{"@context": "https://example.test/ctx", "id": "x", "name": "n"}'
-    schema = check(tmp_path, "data.jsonschema", Canned(body), schema=ID_SCHEMA)
+    schema = check(tmp_path, "data.jsonschema", Canned(body), profile_schema=ID_SCHEMA)
     assert verdict(schema) == passed("DATA.SCHEMA.OK")
     assert set(schema.observations[0].summary) == {"document", "schema", "schema_errors"}
     contexts = check(tmp_path, "data.context", Canned(body), allowed_contexts=ALLOWED)
@@ -111,7 +111,7 @@ def test_the_default_source_keeps_the_observation_summary_of_today(tmp_path: Pat
 @pytest.mark.parametrize("source", ["item", "model"])
 def test_the_source_item_or_model_reads_that_resource(tmp_path: Path, source: str) -> None:
     acquirer = Canned(b'{"id": 1}')
-    outcome = check(tmp_path, "data.jsonschema", acquirer, schema=ID_SCHEMA, source=source)
+    outcome = check(tmp_path, "data.jsonschema", acquirer, profile_schema=ID_SCHEMA, source=source)
     assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
     path = acquirer.records()[0].url.split("example.test", 1)[1]
     assert path == ("/dpp/09506000134352-EV0001" + ("/model" if source == "model" else ""))
@@ -123,11 +123,11 @@ def test_the_source_item_or_model_reads_that_resource(tmp_path: Path, source: st
 
 def test_a_sample_source_reads_the_ixit_sample_and_sends_no_request(tmp_path: Path) -> None:
     acquirer = ArtifactAcquirer({"passport_json": make_artifact("passport_json", b'{"id": 1}')})
-    outcome = check(tmp_path, "data.jsonschema", acquirer, schema=ID_SCHEMA, source="passport_json")
+    outcome = check(tmp_path, "data.jsonschema", acquirer, profile_schema=ID_SCHEMA, source="passport_json")
     assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
     assert outcome.observations[0].kind == "artifact"
     good = ArtifactAcquirer({"passport_json": make_artifact("passport_json", b'{"id": "x"}')})
-    outcome = check(tmp_path, "data.jsonschema", good, schema=ID_SCHEMA, source="passport_json")
+    outcome = check(tmp_path, "data.jsonschema", good, profile_schema=ID_SCHEMA, source="passport_json")
     assert verdict(outcome) == passed("DATA.SCHEMA.OK")
 
 
@@ -239,7 +239,7 @@ def test_the_payload_of_a_verified_credential_is_judged(
 ) -> None:
     served = Served(compact(VC_HEADER, vc(), key))
     outcome = check(
-        tmp_path, "data.jsonschema", served, schema=SUBJECT_SCHEMA, trust=trust,
+        tmp_path, "data.jsonschema", served, profile_schema=SUBJECT_SCHEMA, trust=trust,
         source="credential_payload", credential=CREDENTIAL,
     )  # fmt: skip
     assert verdict(outcome) == passed("DATA.SCHEMA.OK")
@@ -247,7 +247,7 @@ def test_the_payload_of_a_verified_credential_is_judged(
     assert served.requests[0].url.endswith("/dpp/09506000134352-EV0001/signed")
     broken = Served(compact(VC_HEADER, vc(credentialSubject={}), key))
     outcome = check(
-        tmp_path, "data.jsonschema", broken, schema=SUBJECT_SCHEMA, trust=trust,
+        tmp_path, "data.jsonschema", broken, profile_schema=SUBJECT_SCHEMA, trust=trust,
         source="credential_payload", credential=CREDENTIAL,
     )  # fmt: skip
     assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
@@ -261,7 +261,7 @@ def test_an_unverified_credential_payload_is_not_judged(
     tampered = compact(VC_HEADER, vc(credentialSubject={}), key).split(".")[1]
     served = Served(f"{header}.{tampered}.{signature}")
     outcome = check(
-        tmp_path, "data.jsonschema", served, schema=SUBJECT_SCHEMA, trust=trust,
+        tmp_path, "data.jsonschema", served, profile_schema=SUBJECT_SCHEMA, trust=trust,
         source="credential_payload", credential=CREDENTIAL,
     )  # fmt: skip
     assert verdict(outcome) == blocked("DATA.CREDENTIAL.UNVERIFIED")
@@ -280,7 +280,7 @@ def test_a_credential_sample_is_verified_and_sends_no_request(
 ) -> None:
     served = Served(artifacts={"credential": compact(VC_HEADER, vc(credentialSubject={}), key).encode()})
     outcome = check(
-        tmp_path, "data.jsonschema", served, schema=SUBJECT_SCHEMA, trust=trust,
+        tmp_path, "data.jsonschema", served, profile_schema=SUBJECT_SCHEMA, trust=trust,
         source="credential_payload", credential={"source": "sample"},
     )  # fmt: skip
     assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
@@ -304,7 +304,9 @@ def test_a_verified_payload_that_is_not_a_json_object_fails(
 
 def page(*scripts: str, kind: str = "application/ld+json") -> bytes:
     body = "".join(f'<script type="{kind}">{s}</script>' for s in scripts)
-    return f'<!doctype html><html><head><script>var x = "<b>";</script>{body}</head><body></body></html>'.encode()
+    # A script of another type holds markup-like text, which must not end or open a JSON-LD script.
+    other = '<script>var x = "<b>";</script>'
+    return f"<!doctype html><html><head>{other}{body}</head><body></body></html>".encode()
 
 
 GOOD = '{"@context": "https://example.test/ctx", "id": "x", "name": "n"}'
@@ -316,7 +318,11 @@ def test_every_embedded_document_is_judged_and_one_failing_script_fails(
     tmp_path: Path, scripts: tuple[str, str]
 ) -> None:
     schema = check(
-        tmp_path, "data.jsonschema", Canned(page(*scripts)), schema=ID_SCHEMA, source="embedded_jsonld"
+        tmp_path,
+        "data.jsonschema",
+        Canned(page(*scripts)),
+        profile_schema=ID_SCHEMA,
+        source="embedded_jsonld",
     )
     assert verdict(schema) == failed("DATA.SCHEMA.INVALID")
     assert schema.observations[0].summary["documents"] == 2
@@ -330,13 +336,17 @@ def test_every_embedded_document_is_judged_and_one_failing_script_fails(
 
 def test_embedded_documents_that_all_pass_give_a_pass(tmp_path: Path) -> None:
     body = page(GOOD, f"\n  {GOOD}\n", kind=" Application/LD+JSON ")
-    outcome = check(tmp_path, "data.jsonschema", Canned(body), schema=ID_SCHEMA, source="embedded_jsonld")
+    outcome = check(
+        tmp_path, "data.jsonschema", Canned(body), profile_schema=ID_SCHEMA, source="embedded_jsonld"
+    )
     assert verdict(outcome) == passed("DATA.SCHEMA.OK")
     assert outcome.observations[0].summary["documents"] == 2
 
 
 def test_a_page_without_embedded_json_ld_fails(tmp_path: Path) -> None:
-    outcome = check(tmp_path, "data.jsonschema", Canned(page()), schema=ID_SCHEMA, source="embedded_jsonld")
+    outcome = check(
+        tmp_path, "data.jsonschema", Canned(page()), profile_schema=ID_SCHEMA, source="embedded_jsonld"
+    )
     assert verdict(outcome) == failed("DATA.EMBEDDED.MISSING")
     other = page(GOOD, kind="application/json")
     outcome = check(tmp_path, "data.rules", Canned(other), source="embedded_jsonld")
@@ -346,30 +356,47 @@ def test_a_page_without_embedded_json_ld_fails(tmp_path: Path) -> None:
 @pytest.mark.parametrize("broken", ["{not json", "[1]", '{"a": 1, "a": 2}'])
 def test_an_embedded_script_that_is_not_one_json_object_fails(tmp_path: Path, broken: str) -> None:
     outcome = check(
-        tmp_path, "data.jsonschema", Canned(page(GOOD, broken)), schema=ID_SCHEMA, source="embedded_jsonld"
+        tmp_path,
+        "data.jsonschema",
+        Canned(page(GOOD, broken)),
+        profile_schema=ID_SCHEMA,
+        source="embedded_jsonld",
     )
     assert verdict(outcome) == failed("DATA.RESPONSE.NOT_JSON")
 
 
 def test_a_page_that_is_not_utf_8_fails(tmp_path: Path) -> None:
     body = page(GOOD).replace(b'"n"', b'"\xff"')
-    outcome = check(tmp_path, "data.jsonschema", Canned(body), schema=ID_SCHEMA, source="embedded_jsonld")
+    outcome = check(
+        tmp_path, "data.jsonschema", Canned(body), profile_schema=ID_SCHEMA, source="embedded_jsonld"
+    )
     assert verdict(outcome) == failed("DATA.RESPONSE.NOT_JSON")
 
 
 def test_too_many_scripts_are_blocked_only_when_none_of_the_judged_ones_fails(tmp_path: Path) -> None:
     many = check(
-        tmp_path, "data.jsonschema", Canned(page(*[GOOD] * 17)), schema=ID_SCHEMA, source="embedded_jsonld"
+        tmp_path,
+        "data.jsonschema",
+        Canned(page(*[GOOD] * 17)),
+        profile_schema=ID_SCHEMA,
+        source="embedded_jsonld",
     )
     assert verdict(many) == blocked("DATA.EMBEDDED.TOO_LARGE")
     mixed = page(*[GOOD] * 3, BAD, *[GOOD] * 13)
-    outcome = check(tmp_path, "data.jsonschema", Canned(mixed), schema=ID_SCHEMA, source="embedded_jsonld")
+    outcome = check(
+        tmp_path, "data.jsonschema", Canned(mixed), profile_schema=ID_SCHEMA, source="embedded_jsonld"
+    )
     assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
 
 
 def test_an_embedded_sample_page_is_read_from_the_ixit(tmp_path: Path) -> None:
     acquirer = ArtifactAcquirer({"view_html": make_artifact("view_html", page(BAD))})
     outcome = check(
-        tmp_path, "data.jsonschema", acquirer, schema=ID_SCHEMA, source="embedded_jsonld", sample="view_html"
+        tmp_path,
+        "data.jsonschema",
+        acquirer,
+        profile_schema=ID_SCHEMA,
+        source="embedded_jsonld",
+        sample="view_html",
     )
     assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
