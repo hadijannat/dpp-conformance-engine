@@ -319,7 +319,12 @@
               "model",
               "signed",
               "versions",
-              "registry_record"
+              "registry_record",
+              "description",
+              "shells",
+              "submodels",
+              "view",
+              "credential"
             ]
           },
           "title": "Resources",

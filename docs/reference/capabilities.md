@@ -75,7 +75,7 @@ Each check has a closed parameter model. The model refuses an unknown key, a val
 | `aas.validate` | `aas.validate` | `format` | one of `json`, `xml`, `aasx` | `"json"` | Serialization of the sample: json, xml, or an aasx package. |
 | `aas.validate` | `aas.validate` | `metamodel_version` | string | `"3.0"` | AAS metamodel version that the sample claims. A version that the wrapped release does not verify gives unsupported, not a fail. |
 | `access.restricted_fields` | `access.policy` | `role` | string | `"anonymous"` | Role whose view is probed. |
-| `api.contract` | `api.contract` | `resource` | one of `item`, `model`, `signed`, `versions`, `registry_record` | `"item"` | Passport resource whose marked operation is judged. |
+| `api.contract` | `api.contract` | `resource` | one of `item`, `model`, `signed`, `versions`, `registry_record`, `description`, `shells`, `submodels`, `view`, `credential` | `"item"` | Passport resource whose marked operation is judged. |
 | `api.contract` | `api.contract` | `path` | string or none | none | Expected IXIT template path. A different template gives blocked. |
 | `api.contract` | `api.contract` | `method` | `get` | `"get"` | HTTP method. Only get is supported. |
 | `carrier.qr_decode` | `carrier.qr` | `artifact` | string | `"qr_image"` | Name of the IXIT sample that holds the QR image. |

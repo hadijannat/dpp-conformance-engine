@@ -19,7 +19,18 @@ PATH_TEMPLATE_PATTERN = (
     r"(?:[A-Za-z0-9\-._~!$&'()*+,;=:@%/?]|\{[a-z][a-z0-9_]{0,31}\})*)?$"
 )
 
-ResourceName = Literal["item", "model", "signed", "versions", "registry_record"]
+ResourceName = Literal[
+    "item",
+    "model",
+    "signed",
+    "versions",
+    "registry_record",
+    "description",
+    "shells",
+    "submodels",
+    "view",
+    "credential",
+]
 ItemTarget = Literal["template", "resolved"]
 
 
