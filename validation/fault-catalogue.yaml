@@ -622,6 +622,18 @@ sut_faults:
     test_purpose: TP-OAUTH-ACCESS-001
     profiles: [family/oauth]
     expected: {verdict: fail, reason_code: ACCESS.LEAK.FETCH}
+  - id: F-84
+    class: invalid_context
+    fault: context_link_malformed
+    description: The passport answer carries a Link value that is not well-formed before a context link to a context outside the pinned allowlist.
+    test_purpose: TP-DATA-003
+    expected: {verdict: fail, reason_code: DATA.CONTEXT.LINK_MALFORMED}
+  - id: F-85
+    class: invalid_context
+    fault: context_link_backslash
+    description: The passport answer carries a context link whose target holds a backslash before an "@", so URL parsers disagree on its host.
+    test_purpose: TP-DATA-003
+    expected: {verdict: fail, reason_code: DATA.CONTEXT.NOT_ALLOWED}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
