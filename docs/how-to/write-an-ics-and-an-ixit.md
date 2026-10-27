@@ -28,6 +28,31 @@ If the ICS names a different identifier, the check is blocked and its result is 
 A declaration cannot waive a requirement. If you declare that a mandatory, applicable feature
 is not implemented, the report shows a failure for that requirement.
 
+## The ICS for a family profile
+
+A family profile reads only a few ICS fields. Copy the example for your family from
+`profiles/family/examples/`. See [Test a system by family](test-a-real-system.md#test-a-system-by-family).
+
+| Field | Values | Used by |
+| --- | --- | --- |
+| `identifier_scheme` | `gs1-digital-link`, `https-url`, `did-web`, `urn-uuid` | The identifier syntax steps |
+| `granularity` | `item`, `model`, `batch` | The GS1 resolver steps |
+| `signature_format` | `jws`, `cose`, `none` | The signature steps. Only `jws` selects a step in this version. |
+| `features` | `version_history`, `aas_json`, `aas_xml`, `aas_aasx`, `aas_api` | The steps of that feature |
+
+Set `product_category: unknown`. A family profile reads no product fact.
+Declare a feature as `true` or `false`. Leave out a feature, or write `unknown`, and its step is inconclusive.
+
+Each identifier scheme has a syntax check:
+
+- `gs1-digital-link`: an uncompressed GS1 Digital Link URI. A compressed URI gives `unsupported`.
+- `https-url`: an https URL with a domain-name host, no user information, and no fragment.
+- `did-web`: a `did:web` identifier.
+- `urn-uuid`: a `urn:uuid` URN with the textual form of a UUID.
+
+Another value gives `unsupported` with `IDENTIFIER.SCHEME.UNSUPPORTED`. It never gives a pass.
+A syntax check shows that a text has the form of its scheme. It does not show that the identifier exists.
+
 ## The IXIT: what the tester needs
 
 Copy `fixtures/reference/ev.ixit.yaml` and change it. The schema is `ixit`.
