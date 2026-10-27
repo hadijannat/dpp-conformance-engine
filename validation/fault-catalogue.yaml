@@ -138,6 +138,11 @@
 # before the commit that adds the control to the tests of the family controls. The rig needed no
 # change: it already gave family/oauth its role secrets and the scope credential. A data fix commit
 # follows these commits. It changes no entry.
+# Version 0.14.0 also adds the faults F-84 and F-85. Their entry commit comes after the review
+# follow-up of the wave 10 fixes. It comes before the commit that records a Link target that the
+# record cannot show as a marker, and before the commit that adds DATA.CONTEXT.LINK_MALFORMED. It
+# also comes before the commit that adds the flags context_link_malformed and
+# context_link_backslash, which are the seeds. The rig needed no change.
 # A fault counts as detected only if the named test purpose gives the expected verdict
 # with the expected reason code. A crash of the runner is not a detection.
 #
