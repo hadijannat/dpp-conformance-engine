@@ -377,8 +377,7 @@ The observation summary lists every failed rule id.
 Version 2 is experimental (OD-11). It keeps the five kinds of version 1, with dotted `field`
 paths. It adds four kinds that read a JSON Pointer (RFC 6901) in `path`. A pack of version 1
 that uses a kind or a key of version 2 cannot be read.
-[`testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml`](../../testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml)
-is an example.
+`testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml` is an example.
 
 ```yaml
 schema_version: dppce.rulepack/2
