@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Final, Protocol
 from urllib.parse import quote, urljoin, urlsplit
 
-from dppce.evidence.recording import new_salt
+from dppce.evidence.recording import REDIRECT_STATUSES, new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Clock, Record, Request, TransportError
 from dppce.infrastructure.redaction import (
@@ -36,7 +36,7 @@ from dppce.models import Authorization, NetworkPolicy, Scope
 
 SAFE_METHODS: Final = ("GET", "HEAD", "OPTIONS")
 ANONYMOUS: Final = "anonymous"
-_REDIRECTS: Final = (301, 302, 303, 307, 308)
+_REDIRECTS: Final = REDIRECT_STATUSES
 _ACTIVE_SCOPES: Final = (Scope.WRITE, Scope.TAMPER, Scope.FUZZ)
 _RETRYABLE: Final = ("connect", "timeout")
 # The longest Retry-After delay that the transport waits for, once per fetch (P2-31). A longer
@@ -495,6 +495,8 @@ class PolicyTransport:
         method = request.method.upper()
         sent_headers: dict[str, str] = {}
         redirects: list[str] = []
+        # One status per entry of ``redirects``: the status of the answer that named that target.
+        statuses: list[int] = []
         attempts = 0
         waited = False
         # One deadline for the whole fetch: every redirect hop and every retry share it.
@@ -524,6 +526,7 @@ class PolicyTransport:
                 redirects=kept_redirects,
                 attempts=attempts,
                 salt=new_salt(),
+                redirect_statuses=tuple(statuses),
             )
             self._records.append(record)
             return record
@@ -562,7 +565,8 @@ class PolicyTransport:
                 self._sleep(delay)
                 continue
             location = next((v for k, v in headers if k.lower() == "location"), None)
-            if status not in _REDIRECTS or location is None or method not in SAFE_METHODS:
+            redirect = status in _REDIRECTS and location is not None and method in SAFE_METHODS
+            if not redirect or not request.follow_redirects:
                 return done(None, status, headers, body, truncated)
             if len(redirects) >= self._config.policy.max_redirects:
                 return done("too_many_redirects", status, headers)
@@ -572,6 +576,7 @@ class PolicyTransport:
                 # The system sent a Location that is not a URL. The engine does not follow it.
                 return done("redirect_out_of_scope", status, headers)
             redirects.append(redact_url(next_url))
+            statuses.append(status)
             try:
                 target = self._target(next_url, method, request.role)
             except _DeniedError as denied:

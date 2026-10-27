@@ -1223,6 +1223,11 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
   An out-of-scope hop ends the request with `redirect_out_of_scope`. So does a `Location` that
   is not a URL. A URL that cannot be parsed is never raised: it is `policy_denied`.
+- The transport follows only the statuses 301, 302, 303, 307, and 308, with a `Location`, for
+  `GET`, `HEAD`, and `OPTIONS`. The record keeps each redirect target and, in parallel, the status
+  of the answer that named it. A refused hop keeps its target and its status too.
+- A request with `follow_redirects` false follows no hop. The record then holds the first answer,
+  a redirect included, with no redirect target and no hop status.
 - A URL with a control character or a space is `policy_denied`. The URL parser would drop or
   strip such a character, and the record would name a request that was never sent.
 - A non-public origin is reached only if the operator confirmed that origin
@@ -1476,6 +1481,12 @@ records/<id>.enc   one encrypted record each
   name and then the empty directories, never recursively: a file that appears later stays,
   with the directory. A directory that was renamed or replaced during the purge is not removed.
 - `read_recording` returns the records in acquisition order (numeric order of the identifiers).
+- The record form holds `redirects` and, from P2-25 on, `redirect_statuses`: one status for each
+  redirect target, in the same order. Each status is 301, 302, 303, 307, or 308. The form leaves
+  out `redirect_statuses` when the list is empty. So a record from before P2-25 keeps its plaintext,
+  its commitment, the records root, and the decision digest. A reader gives such a record an empty
+  list. An empty list in the form, or a list of a different length than `redirects`, is a
+  malformed record.
 - A response header is recorded only if its name is in a fixed list of safe names. Each other
   value is replaced with `<removed>`. The list includes six CORS names (OD-06):
   `access-control-allow-origin`, `-allow-methods`, `-allow-headers`, `-expose-headers`,
@@ -1559,7 +1570,8 @@ plaintext of the record. Protect it as you protect the recording.
 The schema version is `dppce.opening/1`, and the JSON Schema is `opening`.
 
 - `record` holds every field of the record except the salt. `JCS(record)` is the plaintext of
-  the commitment.
+  the commitment. Like the record form, it leaves out an empty `redirect_statuses`. This field is
+  an addition to `dppce.opening/1`: an opening of a record from before P2-25 does not change.
 - `salt` is the salt of the record, as standard base64 with padding.
 - `proof` is the inclusion proof of the record commitment in the `records` tree (section 11.2).
 - The command reads the recording with `read_recording`. A recording that does not authenticate

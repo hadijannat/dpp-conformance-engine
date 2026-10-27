@@ -21,7 +21,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Final, Literal
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -32,6 +32,8 @@ from dppce.infrastructure.interfaces import DataKeyProvider, Record
 from dppce.models import Model, RecordCommitment
 
 SCHEMA = "dppce.recording/1"
+# The statuses that the transport follows. A recorded hop has one of them.
+REDIRECT_STATUSES: Final = (301, 302, 303, 307, 308)
 _COMMIT_TAG = b"dppce.record.v1\x00"
 _RECORD_ID = re.compile(r"^r\d{4,6}$")
 _SALT_BYTES = 32
@@ -83,9 +85,25 @@ def record_to_json(record: Record, *, with_salt: bool) -> dict[str, Any]:
         "redirects": list(record.redirects),
         "attempts": record.attempts,
     }
+    # Left out when empty, so that a record from before hop statuses keeps its commitment.
+    if record.redirect_statuses:
+        data["redirect_statuses"] = list(record.redirect_statuses)
     if with_salt:
         data["salt"] = _b64(record.salt)
     return data
+
+
+def _hop_statuses(data: dict[str, Any]) -> tuple[int, ...]:
+    """The hop statuses of a record form: absent, or one redirect status per redirect target."""
+    if "redirect_statuses" not in data:
+        return ()
+    value = data["redirect_statuses"]
+    # Present means not empty: the writer leaves an empty list out, so "[]" has another commitment.
+    if not (isinstance(value, list) and value and len(value) == len(data["redirects"])):
+        raise ValueError("redirect_statuses must hold one status for each redirect target")
+    if not all(isinstance(s, int) and not isinstance(s, bool) and s in REDIRECT_STATUSES for s in value):
+        raise ValueError(f"each redirect status must be one of {REDIRECT_STATUSES}")
+    return tuple(value)
 
 
 def record_from_json(data: dict[str, Any]) -> Record:
@@ -106,6 +124,7 @@ def record_from_json(data: dict[str, Any]) -> Record:
             redirects=tuple(data["redirects"]),
             attempts=data["attempts"],
             salt=base64.b64decode(data["salt"], validate=True),
+            redirect_statuses=_hop_statuses(data),
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise RecordingError(f"a record is malformed: {exc}") from exc

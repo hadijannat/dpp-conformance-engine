@@ -27,6 +27,8 @@ class Request:
     role: str = "anonymous"
     headers: Mapping[str, str] = field(default_factory=dict)
     body: bytes | None = None
+    # False: the transport returns the first answer, a redirect included, and follows no hop.
+    follow_redirects: bool = True
 
 
 # Why a record holds no response. A check maps these to "unreachable", never to "fail" by itself.
@@ -53,6 +55,8 @@ class Record:
 
     Request headers are stored after secrets are removed. ``body`` holds the raw bytes.
     ``salt`` is random, is drawn when the record is acquired, and is stored with the record.
+    ``redirect_statuses[i]`` is the status of the answer that redirected to ``redirects[i]``. A
+    record made before this field existed has none, also where it has redirects.
     """
 
     record_id: str
@@ -70,6 +74,7 @@ class Record:
     redirects: tuple[str, ...]
     attempts: int
     salt: bytes
+    redirect_statuses: tuple[int, ...] = ()
 
     def header(self, name: str) -> str | None:
         wanted = name.lower()

@@ -291,6 +291,15 @@
           "title": "Record Id",
           "type": "string"
         },
+        "redirect_statuses": {
+          "default": [],
+          "description": "The status of each answer that redirected, one per redirect target. Absent in a record from before hop statuses.",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Redirect Statuses",
+          "type": "array"
+        },
         "redirects": {
           "items": {
             "type": "string"
