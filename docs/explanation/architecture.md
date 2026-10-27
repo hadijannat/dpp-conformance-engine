@@ -39,6 +39,7 @@ deterministic code and versioned data.
 | `dppce.orchestrator` | Plan, run, replay. | all of the above except `verifier` |
 | `dppce.report` | JSON, HTML, JUnit XML, and SARIF rendering (JUnit and SARIF: P2-authorized). | `models`, `evidence` |
 | `dppce.compare` | Compare the decision bodies of two runs. | `models` |
+| `dppce.scaffold` | Draft an ICS and an IXIT from a shipped family example (`dppce init`). | `models`, `catalogue`, `adapters`, `infrastructure` |
 | `dppce.cli` | Command-line entry point. | all |
 
 Rules:
