@@ -378,7 +378,7 @@ Version 2 is experimental (OD-11). It keeps the five kinds of version 1, with do
 paths. It adds four kinds that read a JSON Pointer (RFC 6901) in `path`. A pack of version 1
 that uses a kind of version 2, or a key of version 2 with a value other than its default,
 cannot be read. A rule of a new kind other than `forbidden` needs a `path` other than the root.
-`testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml` is an example.
+`fixtures/rules/TEST-ONLY-web-rules-v2.yaml` is an example.
 
 ```yaml
 schema_version: dppce.rulepack/2

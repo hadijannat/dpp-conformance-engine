@@ -166,6 +166,9 @@ HINTS: Final[dict[str, str]] = {
     "CARRIER.SAMPLE.UNREADABLE": "Supply the carrier sample as an image file that the engine can read.",
     # --- Data -----------------------------------------------------------------------------------
     "DATA.COMPLETENESS.MISSING": "Add the fields that the rule requires to the passport data.",
+    "DATA.CONTEXT.FILE_INVALID": "Pin a context copy that is a JSON object with string @import values.",
+    "DATA.CONTEXT.LINK_UNREADABLE": _LIMIT
+    + "the record does not keep this Link header. Send the context relation without other parameters.",
     "DATA.CONTEXT.MISSING": "Add the JSON-LD context that the rule requires to the document.",
     "DATA.CONTEXT.NOT_ALLOWED": "Use only the JSON-LD contexts on the allowlist of the test purpose.",
     "DATA.CONTEXT.NO_ALLOWLIST": "Declare the allowlist of contexts in the test purpose.",
@@ -173,9 +176,12 @@ HINTS: Final[dict[str, str]] = {
     "DATA.CREDENTIAL.UNVERIFIED": "Serve a credential that verifies. Its payload was not judged.",
     "DATA.EMBEDDED.MISSING": "Embed the passport data in the page in a JSON-LD script element.",
     "DATA.EMBEDDED.TOO_LARGE": _TOO_LARGE,
+    "DATA.EQUALITY.VIOLATED": "Make the strings that the rule compares the same text.",
+    "DATA.FIELD.FORBIDDEN": "Remove the field that the rule forbids from the passport data.",
     "DATA.FRESHNESS.STALE": "Update the passport data, so that its update time is within the allowed age.",
     "DATA.NO_TARGET": _NO_TARGET,
     "DATA.PARAMS.INVALID": _PARAMS,
+    "DATA.PATTERN.MISMATCH": "Give the field a string value that matches the pattern of the rule.",
     "DATA.RANGE.VIOLATED": "Correct the value of the field that the message names, so that it is in range.",
     "DATA.RELATIONSHIP.VIOLATED": "Correct the related fields that the message names, so that they agree.",
     "DATA.RESPONSE.NOT_CONCLUSIVE": _NOT_CONCLUSIVE,

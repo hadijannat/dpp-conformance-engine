@@ -28,7 +28,7 @@ from tests.test_data_document_source import ALLOWED, blocked, check, failed, pas
 from tests.test_url_templates import Canned
 
 ROOT = Path(__file__).resolve().parents[1]
-SHIPPED = "testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml"
+SHIPPED = "fixtures/rules/TEST-ONLY-web-rules-v2.yaml"
 NOW = datetime(2026, 10, 14, tzinfo=UTC)
 BASIS = {"class": "illustrative"}
 JSONLD_CONTEXT = "http://www.w3.org/ns/json-ld#context"
