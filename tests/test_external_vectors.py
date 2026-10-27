@@ -45,6 +45,7 @@ from dppce.catalogue import load_catalogue
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, parse_strict
 from dppce.evidence.jws import SignatureError, header_of, verify_compact
 from dppce.evidence.x509path import trust_path
+from dppce.infrastructure import redaction
 from dppce.infrastructure.resources import data_root
 from dppce.models import TrustAnchor
 
@@ -445,3 +446,24 @@ def _limbo_warned() -> set[str]:
         except CryptographyDeprecationWarning:
             warned.add(name)
     return warned
+
+
+# -- GS1 Web Vocabulary -------------------------------------------------------------------------
+
+
+def _ids(value: Any) -> list[str]:
+    # JSON-LD gives one node reference as an object and several as a list.
+    return [item["@id"] for item in (value if isinstance(value, list) else [value]) if item]
+
+
+def test_the_kept_gs1_link_types_are_the_sub_properties_of_link_type_in_the_pinned_vocabulary() -> None:
+    # The upstream file starts with a byte order mark.
+    text = (VECTORS / "gs1-webvoc" / "gs1Voc.jsonld").read_bytes().decode("utf-8-sig")
+    graph = json.loads(text)["@graph"]
+    names = [
+        node["@id"].removeprefix("gs1:")
+        for node in graph
+        if "gs1:linkType" in _ids(node.get("rdfs:subPropertyOf"))
+    ]
+    assert sorted(names) == sorted(redaction._GS1_LINK_TYPES)
+    assert len(names) == len(set(names)) == 60

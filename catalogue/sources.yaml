@@ -7273,6 +7273,34 @@ sources:
   uncertainties:
   - The repository is a place to try out the format. The relation between this file and the GS1 resolver standard was not determined.
   - The schema is stricter than RFC 9264. It requires an anchor and permits only four target attributes. The engine does not use it as a check rule.
+- id: tests/vectors/gs1-webvoc/gs1Voc.jsonld
+  title: 'GS1 Web Vocabulary, version 1.16: gs1Voc.jsonld'
+  identifier: gs1/WebVoc v1.16/gs1Voc.jsonld
+  issuing_body: GS1 AISBL (GitHub repository gs1/WebVoc)
+  source_type: test_vector
+  official_url: https://github.com/gs1/WebVoc/blob/f8f407bf717233c871dca2f62f4e45b0940e8cad/v1.16/gs1Voc.jsonld
+  edition_or_version: commit f8f407bf717233c871dca2f62f4e45b0940e8cad
+  publication_date: '2025-09-21'
+  retrieval_date: '2026-10-27'
+  legal_or_spec_status: Development repository of the GS1 Web Vocabulary. The file states owl:versionInfo 1.16. The project
+    uses it as the oracle of the GS1 link types that the Link-header redaction keeps.
+  license_or_reuse_terms: Apache-2.0, read in LICENSE at commit f8f407bf717233c871dca2f62f4e45b0940e8cad. The LICENSE names
+    no copyright holder. The file also holds a schema:license literal with the GS1 IP policy.
+  permitted_use_basis: Redistributed unchanged under Apache-2.0. tests/vectors/gs1-webvoc/README.md names the source and the license.
+  verification_level: substantive
+  independent_check: not_checked
+  sha256: 5b417c158cca7e55766dc5e35a1fa480273f036720b6c7382d61ea6939a7ee66
+  hash_note: SHA-256 of the vendored bytes. Git blob decf184e8134083fed8d5520fcdc438006d32a6f, the same object as the upstream path at the commit.
+  evidence:
+  - url: https://github.com/gs1/WebVoc/blob/f8f407bf717233c871dca2f62f4e45b0940e8cad/v1.16/gs1Voc.jsonld
+    what_it_shows: The file at the pinned commit. The last commit that changed it is 36fd19352373f6532097fdd2e6d16923c6a55a7d of 2025-09-21.
+    official: true
+  - url: https://github.com/gs1/WebVoc/blob/f8f407bf717233c871dca2f62f4e45b0940e8cad/LICENSE
+    what_it_shows: The Apache-2.0 license of the repository.
+    official: true
+  uncertainties:
+  - The repository holds version folders up to v1.16 at the commit. The record gs1-webvoc-archive names versions up to 1.18.0.
+    The project pins v1.16 only, so a link type of a later version is not kept.
 - id: idta-02099-1-template-1-0-2
   title: 'IDTA 02099-1 Digital Product Passport - Part 1: Metadata, version 1.0: JSON template, release 1.0.2'
   identifier: IDTA 02099-1 template 1.0.2 (admin-shell-io/submodel-templates)
@@ -11287,7 +11315,8 @@ sources:
   verification_level: substantive
   independent_check: not_checked
   sha256: null
-  hash_note: 'not hashed: the raw artifact was not retrieved in this session (BL-001)'
+  hash_note: 'not hashed: this record is the repository. The file v1.16/gs1Voc.jsonld at commit f8f407bf717233c871dca2f62f4e45b0940e8cad
+    was retrieved on 2026-10-27 and is hashed in the record tests/vectors/gs1-webvoc/gs1Voc.jsonld.'
   evidence:
   - url: https://github.com/gs1/WebVoc
     what_it_shows: 'Research file f01 (2026-10-19): gs1:epcis and gs1:traceability: labels, comments, subPropertyOf gs1:linkType,

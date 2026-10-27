@@ -40,6 +40,7 @@ _LINK: Final = re.compile(
 # of github.com/gs1/WebVoc at commit f8f407bf717233c871dca2f62f4e45b0940e8cad (Apache-2.0, read on
 # 2026-10-27, SHA-256 5b417c158cca7e55766dc5e35a1fa480273f036720b6c7382d61ea6939a7ee66). The file marks
 # productSustainabilityInfo as deprecated. The names are fixed, so they cannot carry a secret.
+# The file is vendored in tests/vectors/gs1-webvoc/, and tests/test_external_vectors.py checks this list.
 _GS1_LINK_TYPES: Final = (
     "activityIdeas", "allergenInfo", "appDownload", "backgroundInfo", "brandHomepageClinical",
     "brandHomepagePatient", "careersInfo", "certificationInfo", "consumerHandlingStorageInfo",

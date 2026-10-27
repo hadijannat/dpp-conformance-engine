@@ -68,6 +68,23 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   their new output file when the write fails, for example on a full disk. A retry then works.
   `run --create-data-key` removes a partial data key in the same way.
   `dppce open` prints its warning before it writes the file.
+- Run provenance in `dppce.decision/3`. The run manifest records the authorization id and digest,
+  the remote read flag, the trust bundle digest, the passport trust anchor fingerprints, the CA
+  file digest, and the test items. Each field is left out while it has its absent value.
+- A replay computes the provenance fields again, except the CA file digest and the remote read
+  flag. The HTML report shows them in the scope section. `dppce compare` reports them as plan
+  inputs. The fault catalogue version 0.12.0 adds `E-16` and `F-76`.
+- OPTIONS is a read, like GET and HEAD. It needs no active scope, but an authorization must name
+  it in its methods. Records keep the six access-control response headers. The allowed origin is
+  redacted like a URL.
+- A recorded Link value keeps the relation `linkset`, the JSON-LD context relation, and the GS1
+  link types in `gs1:` and IRI form. The list of GS1 link types comes from the pinned file in
+  `tests/vectors/gs1-webvoc/`. A test compares the two.
+- `resolver.linkset` judges a linkset that a Link header of the linkset answers advertises
+  (RFC 9264, section 6). The extra request comes only after both answers pass.
+- The IXIT resource names `description`, `shells`, `submodels`, `view`, and `credential`.
+  `api.contract` can judge the AAS description and shell list operations. The IXIT version stays
+  `dppce.ixit/1`.
 
 ### Changed
 
@@ -127,12 +144,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A recording with such inputs can no longer be replayed. Replay it with the engine version that
   made it.
 
-- A new run writes the decision body as `dppce.decision/2`. Version 2 adds the required field
-  `manifest.bound_files`, the hash of each file that the profile binds. A verifier of 0.1.0rc1
-  rejects a version 2 body.
-- The verifier and `dppce replay` still read a `dppce.decision/1` body as written, with the same
-  decision digest. A version 1 body with `bound_files`, or a version 2 body without it, is a
-  structure error.
+- A new run writes the decision body as `dppce.decision/3`. Version 2 adds the required field
+  `manifest.bound_files`, the hash of each file that the profile binds. Version 3 also requires
+  it. Only version 3 holds the run provenance fields of the manifest. A verifier of 0.1.0rc1
+  rejects a version 2 or version 3 body.
+- The verifier and `dppce replay` still read a `dppce.decision/1`, `/2`, or `/3` body as written,
+  with the same decision digest. A version 1 body with `bound_files`, a version 2 or 3 body
+  without it, or a version 1 or 2 body with a provenance field, is a structure error.
 
 ### Fixed
 
