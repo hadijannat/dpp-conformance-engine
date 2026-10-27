@@ -153,6 +153,8 @@ def test_a_value_longer_than_max_length_fails_the_rule_and_is_not_blocked(tmp_pa
         "*a",
         r"\bword",  # an escape outside the accepted set
         "a*b*c*d*",  # more than three variable quantifiers
+        "(a|a)" * 20 + "b",  # a chain of alternations: each "|" doubles the backtracking
+        "(|a)(|a)(|a)(|a)b",
         "a" * 257,  # a pattern above 256 characters
         "",
     ],
@@ -195,6 +197,12 @@ def test_a_fixed_count_is_not_a_variable_quantifier() -> None:
     Rule.model_validate(rule("pattern", path="/n", pattern="a{2}b{3,3}c{1000}d*e+f?"))  # three variable
     with pytest.raises(ValidationError):
         Rule.model_validate(rule("pattern", path="/n", pattern="a{2}b{3,}d*e+f?"))  # four variable
+
+
+def test_an_alternative_counts_as_a_variable_choice() -> None:
+    Rule.model_validate(rule("pattern", path="/n", pattern=r"(a|b)[0-9]*x?[|]\|"))  # three choices
+    with pytest.raises(ValidationError):
+        Rule.model_validate(rule("pattern", path="/n", pattern="(a|b)(c|d)[0-9]*x?"))  # four choices
 
 
 def test_max_length_has_an_engine_limit() -> None:

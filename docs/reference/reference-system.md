@@ -376,8 +376,8 @@ The observation summary lists every failed rule id.
 
 Version 2 is experimental (OD-11). It keeps the five kinds of version 1, with dotted `field`
 paths. It adds four kinds that read a JSON Pointer (RFC 6901) in `path`. A pack of version 1
-that uses a kind of version 2, or a key of version 2 with a value other than its default,
-cannot be read. A rule of a new kind other than `forbidden` needs a `path` other than the root.
+cannot use a kind of version 2. It also cannot give a key of version 2 a value other than its
+default. The engine cannot read such a pack. A rule of a new kind other than `forbidden` needs a `path` other than the root.
 `fixtures/rules/TEST-ONLY-web-rules-v2.yaml` is an example.
 
 ```yaml
@@ -434,9 +434,11 @@ read.
 - A quantifier `*`, `+`, `?`, `{m}`, `{m,}`, or `{m,n}` applies to one item only, never to a
   group. Nested quantifiers are therefore refused. The bounds are 1000 at most.
 - A lazy or a possessive quantifier is refused. A literal `{` is written `\{`.
-- A pattern has at most three quantifiers other than `{m}`.
+- A pattern has at most three variable choices. A variable choice is a quantifier other than
+  `{m}`, or a `|` outside a character class. A chain of alternatives is therefore refused.
 
-These limits bound the work of the backtracking matcher on each value.
+These limits bound the work of the backtracking matcher on each value. With three choices, the
+work grows at most with the cube of the value length.
 
 ### 5.2 Access policy (`profiles/battery/access/*.yaml`)
 

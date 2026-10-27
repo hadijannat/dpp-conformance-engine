@@ -708,12 +708,13 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
 `data.rules` reads rule packs of version 1 and version 2 (OD-11). Version 2 is experimental. The
 [reference system page](../reference/reference-system.md), section 5.1, gives the format.
 
-- A pack of version 1 that uses a kind of version 2, or a key of version 2 with a value other
-  than its default, cannot be read. It gives `blocked` with `DATA.RULES.MISSING`. A pack of
+- A pack of version 1 cannot use a kind of version 2. It also cannot give a key of version 2 a
+  value other than its default. Such a pack gives `blocked` with `DATA.RULES.MISSING`. A pack of
   version 1 keeps its outcomes and its reason codes.
 - `pattern` matches the string at a JSON Pointer as a whole. The pattern is in a closed subset of
-  regular expressions without nested quantifiers and without backreferences. A value longer than
-  `max_length` characters breaks the rule.
+  regular expressions without nested quantifiers and without backreferences. It has at most three
+  variable choices: quantifiers other than `{m}`, and `|` outside a character class. A value
+  longer than `max_length` characters breaks the rule.
 - `forbidden` breaks if the field at a pointer is present, also with the value `null`.
 - `equals` compares the string at a pointer with a constant or with the string at a second pointer.
 - `each` applies one rule of another kind to each element of the array at a pointer.

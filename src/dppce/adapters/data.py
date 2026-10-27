@@ -85,7 +85,8 @@ _V2_KEYS: Final = frozenset({"path", "pattern", "max_length", "value", "other", 
 # The accepted subset of a pattern (reference-system.md, section 5.1). Python's re backtracks, so
 # a quantifier applies to one character, class, or escape only, never to a group. That refuses
 # nested quantifiers and quantified alternations, the constructs with exponential time.
-# ponytail: with k variable quantifiers the worst case is O(n^k); k <= 3 and n <= 512 bound it.
+# Each "|" is a choice like a variable quantifier, so both share one budget of three.
+# ponytail: with k such choices the worst case is O(n^k); k <= 3 and n <= 512 bound it.
 MAX_PATTERN: Final = 256
 MAX_SUBJECT: Final = 512
 _MAX_VARIABLE: Final = 3
@@ -144,7 +145,9 @@ def check_pattern(pattern: str) -> str:  # noqa: PLR0912, PLR0915 - one branch p
                 fixed = top == int(low) and not (comma and not high)
             variable += 0 if fixed else 1
             if variable > _MAX_VARIABLE:
-                raise ValueError(f"a pattern has at most {_MAX_VARIABLE} variable quantifiers")
+                raise ValueError(
+                    f"a pattern has at most {_MAX_VARIABLE} variable quantifiers and '|' together"
+                )
             repeatable = False  # so a lazy "?" or a possessive "+" is refused
             i = quantifier.end() if quantifier else i + 1
             continue
@@ -163,6 +166,12 @@ def check_pattern(pattern: str) -> str:  # noqa: PLR0912, PLR0915 - one branch p
                 raise ValueError("a pattern closes a group that is not open")
             repeatable = False  # a group never takes a quantifier
         elif char in "|^$":
+            # A chain of unquantified alternations backtracks like a chain of "?", so "|" counts too.
+            variable += char == "|"
+            if variable > _MAX_VARIABLE:
+                raise ValueError(
+                    f"a pattern has at most {_MAX_VARIABLE} variable quantifiers and '|' together"
+                )
             repeatable = False
         elif char == "[":
             i = _class_end(pattern, i)
