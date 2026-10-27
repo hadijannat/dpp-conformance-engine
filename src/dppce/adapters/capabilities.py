@@ -374,13 +374,16 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
     (
         "access.oauth2",
         "access",
-        _I,
-        "Obtain an access token with the OAuth 2.0 client credentials grant. The engine sends only a "
-        "bearer token that the operator supplies as a secret reference.",
+        _E,
+        "Obtain the bearer token of a role with the OAuth 2.0 client credentials grant, once per role and "
+        "run. The client id and the client secret are secret references that the operator confirms. Only "
+        "the client credentials grant with HTTP Basic client authentication is implemented. The token "
+        "exchange is not a record, and the engine does not renew a token.",
         None,
-        "A client credentials exchange exists and runs against a local fixture token endpoint. The "
-        "signed authorization names the token endpoint. The IXIT cannot choose it, and no secret reaches "
-        "a record, a report, or a log.",
+        "For supported: a test against a second, independent token endpoint implementation; a recorded "
+        "token exchange that a replay serves without sending the client secret; token expiry and renewal "
+        "within a run; and a distinct transport error for a refused token, so that the report does not "
+        "show it as a policy refusal.",
     ),
     (
         "evidence.rfc3161",

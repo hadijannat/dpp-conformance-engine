@@ -1306,6 +1306,8 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
   Every redirect hop and every retry of that fetch share it.
 - The transport asks for an unencoded body. A check does not assess an encoded body.
 - Methods other than `GET`, `HEAD`, and `OPTIONS` need a valid authorization with the matching scope.
+  The token request of an OAuth 2.0 role is the one exception. It needs the scope `credential`
+  (section 9.3). That scope permits no request of a check.
 - Limits: timeout, maximum body size (the body is truncated and flagged), maximum redirects,
   maximum request count, and minimum interval. Each limit that triggers is recorded.
 - Secrets are removed from request headers before a record is created. If the tested system
@@ -1390,6 +1392,8 @@ does not let those files decide what the test host trusts or discloses:
 - The IXIT declares a secret reference for a role. The operator must repeat exactly that
   reference with `--role-secret ROLE=REFERENCE`. An IXIT alone can never select a secret, for
   example one that belongs to a different system that the same laboratory tests.
+- The client id of an OAuth 2.0 role is a reference too. The operator repeats it with
+  `--role-client-id ROLE=REFERENCE`, because the engine sends the client id to the token endpoint.
 - A role credential is sent only to an origin that a validated authorization names. Origins
   are compared in one normal form. In that form an explicit default port, such as `:80` for
   `http`, equals no port. An explicit port 0 is never the default port. `--allow-private-host`,
@@ -1503,6 +1507,59 @@ one in `api.contract` and `access.policy`.
   record, only the decision digest comparison applies.
 - In version 2, a changed bound file gives a different decision digest. A version 1 body has no
   `bound_files`, so its digest comparison does not detect a changed bound file.
+
+### 9.3 Credential schemes and token acquisition
+
+An IXIT identity names how the engine presents a role (OD-13). `scheme` has three values:
+
+| Scheme | Fields | What a request of the role carries |
+| --- | --- | --- |
+| `bearer`, the default | `secret_ref` | `Authorization: Bearer <secret>` |
+| `header` | `secret_ref`, `header_name` | `<header_name>: <secret>` |
+| `oauth2_client_credentials` | `secret_ref`, `token_endpoint`, `client_id_ref` | `Authorization: Bearer <issued access token>` |
+
+- A scheme takes only its own fields. Any other field of the table is an input error.
+- An identity of the `bearer` scheme keeps the form that it had before OD-13. The sanitized IXIT
+  hash and the decision digest of an earlier recording therefore do not change.
+- `header_name` is a field-name token of 64 characters or less. It must not be `Host`, `Cookie`,
+  `Content-Length`, a hop-by-hop header, or a header that the transport sets. It must not be a
+  header whose value a record keeps (section 10). The transport refuses such a name too.
+- The rules of sections 9 and 9.1 apply to each scheme. A secret goes only to its origin, and
+  the anonymous role carries none.
+
+The scheme `oauth2_client_credentials` follows RFC 6749, section 4.4:
+
+- `secret_ref` is the client secret. `client_id_ref` is the client id. The operator confirms
+  both references (section 9.1). The IXIT never holds a secret.
+- `token_endpoint` is a key of `IXIT.endpoints`. The origin override of the test rig applies to
+  it as to the other endpoints.
+- Before the first request of the role, the engine sends one `POST` to the token endpoint. The
+  body is `grant_type=client_credentials`. The client authenticates with HTTP Basic.
+- The request goes through the transport policy, with its own total time limit. It counts
+  against the request budget.
+- It needs a valid authorization that names the origin of the token endpoint and the role, and
+  that grants the scope `credential`. The method list of the authorization does not apply to it.
+- The client secret goes only to the origin of the token endpoint, only over `https` or to a
+  loopback address. The engine follows no redirect of the token request.
+- The answer must be a 200 answer within the body limit. The strict JSON parser reads it. It
+  must hold a string `access_token` in the bearer token form of RFC 6750 and a `token_type` of
+  `Bearer` in any case. The token needs 12 characters or more.
+- The engine registers the issued token as a secret. Each later record is scrubbed of it in each
+  form of section 9. The client secret is a secret from the start of the run. The request headers
+  of a record never hold either of them.
+- The engine asks once per role and run. It does not read `expires_in` and does not renew a token.
+- The token exchange is not a record. Its request holds the client secret, and its answer holds
+  the token. No check judges it. A replay therefore needs no token endpoint and sends no secret.
+- If no usable token is issued, the requests of the role are not sent. A refusal, an answer that
+  is not a usable token, or a policy denial gives `authorization_denied`. A transport failure of
+  the token request gives its own transport error. The checks report `unreachable`, which is
+  `inconclusive` and never a pass.
+- A token that the resource refuses is an answer of the resource. The check judges it as usual.
+  The engine does not ask for a new token. So a token endpoint cannot turn the refusal of a role
+  into no answer.
+
+Security note: a system under test can refuse a token to avoid a verdict for the role, as it
+can with a 5xx answer. The step is then `inconclusive`. It is never a pass.
 
 ## 10. Recording
 

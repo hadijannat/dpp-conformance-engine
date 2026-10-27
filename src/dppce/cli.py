@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final, get_args
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -88,6 +88,7 @@ from dppce.infrastructure.transport import (
     ANONYMOUS,
     MIN_SECRET_LENGTH,
     ClientIdentity,
+    OAuthClient,
     PolicyTransport,
     TransportConfig,
     origin_of,
@@ -104,6 +105,7 @@ from dppce.models import (
     IssuerStatement,
     Profile,
     RunInputsRecord,
+    Scope,
     StatusReference,
     TestPack,
     TrustBundle,
@@ -487,20 +489,58 @@ def _confined(base: Path, value: str, what: str) -> Path | None:
     return path
 
 
-def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str, tuple[str, str]]:
-    """Resolve the role secrets that the operator confirmed for this run.
+@dataclass(frozen=True)
+class _RoleSecrets:
+    """The resolved secrets of the roles: static credentials, their header names, and OAuth clients."""
 
-    The IXIT declares a reference. The operator must repeat exactly that reference with
-    ``--role-secret ROLE=REFERENCE``. An IXIT alone can therefore never select a secret, for
-    example one that belongs to a different system that the same laboratory tests.
-    """
+    credentials: dict[str, tuple[str, str]]
+    headers: dict[str, str]
+    oauth: dict[str, OAuthClient]
+
+
+def _confirmed_references(values: list[str]) -> dict[str, str]:
     confirmed: dict[str, str] = {}
-    for item in args.role_secret:
+    for item in values:
         role, separator, reference = item.partition("=")
         if not separator or not role or not reference:
             raise UsageError(f"'{item}' is not ROLE=REFERENCE")
         confirmed[role] = reference
+    return confirmed
+
+
+def _token_url(ixit: IXIT, role: str, key: str) -> str:
+    """The token endpoint that the IXIT names, with the origin override of the test rig.
+
+    The override follows dppce.adapters.common.effective_url. The transport policy and the
+    authorization still decide whether the engine sends the request.
+    """
+    url = ixit.endpoints.get(key)
+    if url is None:
+        raise UsageError(f"the token endpoint '{key}' of role '{role}' is not a key of the IXIT endpoints")
+    public, override = ixit.endpoints.get("public_origin"), ixit.endpoints.get("origin_override")
+    try:
+        same = bool(public and override) and origin_of(url) == origin_of(public or "")
+    except ValueError as exc:
+        raise UsageError(f"the token endpoint '{key}' of role '{role}' is not a URL") from exc
+    if not same or override is None:
+        return url
+    parts = urlsplit(url)
+    return override.rstrip("/") + urlunsplit(("", "", parts.path, parts.query, ""))
+
+
+def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> _RoleSecrets:
+    """Resolve the role secrets that the operator confirmed for this run.
+
+    The IXIT declares a reference. The operator must repeat exactly that reference with
+    ``--role-secret ROLE=REFERENCE``, and the client id reference of an OAuth role with
+    ``--role-client-id ROLE=REFERENCE``. An IXIT alone can therefore never select a secret, for
+    example one that belongs to a different system that the same laboratory tests.
+    """
+    confirmed = _confirmed_references(args.role_secret)
+    client_ids = _confirmed_references(args.role_client_id)
     credentials: dict[str, tuple[str, str]] = {}
+    headers: dict[str, str] = {}
+    oauth: dict[str, OAuthClient] = {}
     for identity in ixit.identities:
         if identity.secret_ref is None:
             continue
@@ -519,8 +559,49 @@ def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> dict[str,
                 f"the secret of role '{identity.role}' is shorter than {MIN_SECRET_LENGTH} characters; "
                 "a short secret cannot be kept out of the recording reliably"
             )
-        credentials[identity.role] = (origin, secret)
-    return credentials
+        if identity.scheme != "oauth2_client_credentials":
+            credentials[identity.role] = (origin, secret)
+            if identity.header_name is not None:
+                headers[identity.role] = identity.header_name
+            continue
+        # The client id goes to the token endpoint, so the operator confirms its reference too.
+        if identity.client_id_ref is None or client_ids.get(identity.role) != identity.client_id_ref:
+            raise UsageError(
+                f"the IXIT names a client id for role '{identity.role}'; confirm it with "
+                f"--role-client-id {identity.role}=<the same reference>"
+            )
+        client_id = resolve_secret(identity.client_id_ref, secrets_dir=args.secrets)
+        if not client_id:
+            raise UsageError(f"the client id of role '{identity.role}' is empty")
+        url = _token_url(ixit, identity.role, identity.token_endpoint or "")
+        oauth[identity.role] = OAuthClient(origin, url, client_id, secret)
+    return _RoleSecrets(credentials, headers, oauth)
+
+
+def _check_role_origins(
+    roles: _RoleSecrets, grant: Authorization | None, authorized: set[str], target: str
+) -> None:
+    """Each role secret needs an authorization for its origin, a client secret one for its token endpoint.
+
+    The token request also needs the scope credential. The transport checks both again.
+    """
+    if (roles.credentials or roles.oauth) and target not in authorized:
+        raise UsageError(
+            f"the IXIT names role secrets, but no valid authorization names the origin {target}; "
+            "a role credential is sent only to an origin that the owner authorized"
+        )
+    for role, client in sorted(roles.oauth.items()):
+        token_origin = origin_of(client.token_url)
+        if grant is None or Scope.CREDENTIAL not in grant.scopes:
+            raise UsageError(
+                f"role '{role}' gets its token from {token_origin}; the token request needs a valid "
+                "authorization with the scope 'credential'"
+            )
+        if token_origin not in authorized:
+            raise UsageError(
+                f"role '{role}' gets its token from {token_origin}, which no valid authorization names; "
+                "the client secret is sent only to an origin that the owner authorized"
+            )
 
 
 def _confirmed_origins(values: list[str], flag: str) -> frozenset[str]:
@@ -691,12 +772,8 @@ def cmd_run(args: argparse.Namespace) -> int:
     for endpoint in inputs.authorization.endpoints if inputs.authorization else ():
         with contextlib.suppress(ValueError):
             authorized.add(origin_of(endpoint))
-    credentials = _credentials(args, ixit, target)
-    if credentials and target not in authorized:
-        raise UsageError(
-            f"the IXIT names role secrets, but no valid authorization names the origin {target}; "
-            "a role credential is sent only to an origin that the owner authorized"
-        )
+    roles = _credentials(args, ixit, target)
+    _check_role_origins(roles, inputs.authorization, authorized, target)
     ca_file, ca_digest, client_identity = _tls_options(args, authorized)
     # Operator facts of this run only. A replay takes them from the manifest of the run.
     inputs = replace(
@@ -731,7 +808,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         TransportConfig(
             policy=ixit.network,
             engine_version=__version__,
-            credentials=credentials,
+            credentials=roles.credentials,
+            credential_headers=roles.headers,
+            oauth_clients=roles.oauth,
             authorization=inputs.authorization,
             remote_read_origins=remote,
             private_origins=private,
@@ -1537,6 +1616,14 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
         default=[],
         metavar="ROLE=REFERENCE",
         help="confirm the secret reference that the IXIT declares for one role; repeat for each role",
+    )
+    run.add_argument(
+        "--role-client-id",
+        action="append",
+        default=[],
+        metavar="ROLE=REFERENCE",
+        help="confirm the client id reference that the IXIT declares for one OAuth 2.0 client "
+        "credentials role; repeat for each such role",
     )
     run.add_argument(
         "--allow-private-host",

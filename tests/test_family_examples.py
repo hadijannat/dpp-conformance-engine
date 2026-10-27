@@ -26,7 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES = ROOT / "profiles" / "family" / "examples"
 GUIDE = ROOT / "docs" / "how-to" / "test-a-real-system.md"
 ICS_FILES = sorted(EXAMPLES.glob("*.ics.yaml"))
-DEFERRED = ("dataspace.protocol", "dataspace.catalog", "access.oauth2")
+# access.oauth2 left this list in P2-28: it is experimental now, with a loopback token endpoint.
+DEFERRED = ("dataspace.protocol", "dataspace.catalog")
 
 
 def _plan(ics: Path, ixit: Path, profile: str) -> dict[str, Any]:
