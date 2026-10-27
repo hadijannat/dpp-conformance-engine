@@ -30,7 +30,7 @@ from dppce.infrastructure.redaction import (
 )
 from tests.support import make_record
 from tests.test_data_document_source import ALLOWED, failed, passed, verdict
-from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, Linked, contexts
+from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts
 
 CTX = f'rel="{JSONLD_CONTEXT}"'
 EVIL = "https://evil.test/ctx"
@@ -207,3 +207,39 @@ def test_paging_on_two_lines_and_several_lines_keep_a_pass(tmp_path: Path) -> No
         ("Link", '<https://x.test/p?page=2>; rel="next"'),
         ("Link", '<https://x.test/p?page=1>; rel="prev"'),
     )
+
+
+# -- a parameter named target ------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        f'<{ALLOWED[0]}>; {CTX}; target="{EVIL}"',
+        f'<{ALLOWED[0]}>; target="{EVIL}"; {CTX}',
+        f"<{ALLOWED[0]}>; {CTX}; target={EVIL}",
+        f"<{ALLOWED[0]}>; rel={JSONLD_CONTEXT};target={EVIL}",
+    ],
+)
+def test_a_parameter_named_target_that_replaces_the_target_fails(tmp_path: Path, value: str) -> None:
+    # jsonld.js and pyld assign each parameter to the link, so "target" replaces the target.
+    assert _processor_links(value, _JS_SPACE) == [(EVIL, True)]
+    assert not parse_link(value).complete
+    assert recorded(value)[0][1].endswith(f", {REMOVED}")
+    assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == failed("DATA.CONTEXT.LINK_MALFORMED")
+    assert verdict(contexts(tmp_path, Linked(PLAIN, recorded(value)))) == failed(
+        "DATA.CONTEXT.LINK_MALFORMED"
+    )
+
+
+@pytest.mark.parametrize("name", ["target ", "Target", "TARGET", "targets", "xtarget"])
+def test_only_the_exact_name_target_replaces_the_target(tmp_path: Path, name: str) -> None:
+    value = f'<{ALLOWED[0]}>; {CTX}; {name}="{EVIL}"'
+    assert _processor_links(value, _JS_SPACE) == [(ALLOWED[0], True)]
+    assert parse_link(value).complete
+    assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == passed("DATA.CONTEXT.OK")
+
+
+def test_a_target_parameter_never_reaches_the_record() -> None:
+    kept = recorded(f'<{ALLOWED[0]}>; {CTX}; target="https://{SECRET}.test/ctx"')
+    assert SECRET not in repr(kept)

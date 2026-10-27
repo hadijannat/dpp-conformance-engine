@@ -262,12 +262,10 @@ def _agrees(links: list[Link] | tuple[Link, ...], value: str) -> bool:
 def _processor_links(value: str, space: str) -> list[tuple[str, bool]]:
     """Each target that the processor model reads in ``value``, and whether its rel names the context."""
     out: list[tuple[str, bool]] = []
-    for target, parameters in _processor_read(value, space):
-        rel = ""
-        for name, text in parameters:
-            if name == "rel":
-                rel = text
-        out.append((target, JSONLD_CONTEXT in rel.lower().split()))
+    for first, parameters in _processor_read(value, space):
+        # Each parameter is assigned to the link, so the last one named exactly "target" replaces it.
+        named = {"target": first, "rel": ""} | dict(parameters)
+        out.append((named["target"], JSONLD_CONTEXT in named["rel"].lower().split()))
     return out
 
 
