@@ -458,6 +458,25 @@ options:
   --json      write one JSON document to standard output
 ```
 
+### `dppce init`
+
+```text
+usage: dppce init [-h] [--json] --family {web,gs1-resolver,aas,credentials} [--carrier CARRIER]
+                  [--out OUT] [--force]
+
+Draft an ICS and an IXIT for a family profile from the shipped examples.
+
+options:
+  -h, --help            show this help message and exit
+  --json                write one JSON document to standard output
+  --family {web,gs1-resolver,aas,credentials}
+                        family profile to draft for
+  --carrier CARRIER     one carrier identifier; parsed offline to fill the scheme, the
+                        granularity, and the origin
+  --out OUT             directory for the drafts; default: here
+  --force               replace drafts that exist
+```
+
 ### `dppce purge`
 
 ```text

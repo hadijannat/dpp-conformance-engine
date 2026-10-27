@@ -29,7 +29,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from pydantic import ValidationError
 
-from dppce import __version__
+from dppce import __version__, scaffold
 from dppce.adapters.access import ACCESS_CHECK, policy_roles
 from dppce.adapters.capabilities import manifest as capability_manifest
 from dppce.applicability import ApplicabilityError
@@ -1356,6 +1356,39 @@ def cmd_purge(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_init(args: argparse.Namespace) -> int:
+    """Draft an ICS and an IXIT. They are untrusted input: init confirms, trusts, and signs nothing."""
+    try:
+        drafted = scaffold.draft(args.family, args.carrier, data_root())
+    except ValueError as exc:
+        raise UsageError(str(exc)) from exc
+    out: Path = args.out
+    files = [(out / f"{args.family}.ics.yaml", drafted.ics), (out / f"{args.family}.ixit.yaml", drafted.ixit)]
+    existing = [str(path) for path, _ in files if path.exists() or path.is_symlink()]
+    if existing and not args.force:
+        raise UsageError(f"{', '.join(existing)} exists; init overwrites a file only with --force")
+    out.mkdir(parents=True, exist_ok=True)
+    for path, text in files:
+        if args.force:
+            path.unlink(missing_ok=True)  # then write_new_file creates it with mode 0600 again
+        write_new_file(path, text.encode("utf-8"), 0o600)
+    steps = scaffold.next_steps(args.family, files[0][0], files[1][0])
+    lines = [
+        f"wrote {files[0][0]} and {files[1][0]}: drafts, mode 0600. Check each 'review:' comment.",
+        *(f"derived from the carrier: {name} = {value}" for name, value in drafted.derived.items()),
+        "Next commands. Replace each <PLACEHOLDER>. A person decides each step marked 'decide'.",
+    ]
+    for number, (command, decision) in enumerate(steps, 1):
+        lines += [f"{number}. {command}", *([f"   decide: {decision}"] if decision else [])]
+    document = {
+        "files": [str(path) for path, _ in files],
+        "derived": drafted.derived,
+        "next_steps": [{"command": command, "decision": decision} for command, decision in steps],
+    }
+    _emit(args, document, "\n".join(lines))
+    return EXIT_OK
+
+
 def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration of the command line
     parser = argparse.ArgumentParser(
         prog="dppce", description="Conformance test engine for Digital Product Passports."
@@ -1655,6 +1688,17 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     coverage.add_argument("--envelope", type=Path, required=True)
 
     add("capabilities", cmd_capabilities, "Show the capability manifest of this installation.")
+
+    init = add("init", cmd_init, "Draft an ICS and an IXIT for a family profile from the shipped examples.")
+    init.add_argument(
+        "--family", required=True, choices=scaffold.FAMILIES, help="family profile to draft for"
+    )
+    init.add_argument(
+        "--carrier",
+        help="one carrier identifier; parsed offline to fill the scheme, the granularity, and the origin",
+    )
+    init.add_argument("--out", type=Path, default=Path(), help="directory for the drafts; default: here")
+    init.add_argument("--force", action="store_true", help="replace drafts that exist")
 
     purge = add("purge", cmd_purge, "Delete recordings whose retention period has ended.")
     purge.add_argument("--runs", type=Path, required=True, help="directory that holds run directories")
