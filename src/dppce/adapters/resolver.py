@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 from typing import Any, Final
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 
 from pydantic import Field, field_validator
 
@@ -32,7 +32,7 @@ from dppce.adapters.common import (
 )
 from dppce.adapters.identifier import gtin_check_digit_ok
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import parse_link
+from dppce.infrastructure.redaction import REMOVED, parse_link
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -164,7 +164,8 @@ def _advertised(answers: list[Record]) -> str | None:
     """The first http or https target of a Link with the relation linkset in the answers, or None.
 
     The record keeps a Link value only in the form that redaction keeps, so this reads that form.
-    A relative target is resolved against the final URL of its answer.
+    A relative target is resolved against the final URL of its answer. A target that redaction
+    changed is skipped: the record no longer holds the URL that the system advertised.
     """
     for record in answers:
         base = record.redirects[-1] if record.redirects else record.url
@@ -175,6 +176,8 @@ def _advertised(answers: list[Record]) -> str | None:
                 try:
                     url = urljoin(base, target)
                 except ValueError:
+                    continue
+                if REMOVED in unquote(url):
                     continue
                 if "linkset" in relations and is_http_url(url):
                     return url

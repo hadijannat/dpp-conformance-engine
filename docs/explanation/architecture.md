@@ -777,6 +777,7 @@ target against the final URL of its answer. It fetches that target once with
 `Accept: application/linkset+json` and judges the answer by rules 1 to 5. The transport policy
 applies to that request as to every other request. The check reads only the recorded form of the
 header (section 10). A `Link` value with another parameter, such as `type`, is therefore not read.
+A target that redaction changed is not fetched.
 No usable `Link` value, no answer, or a body that cannot be read leaves the pass unchanged. The
 check sends the extra request only after both answers pass. So a broken `Link` value cannot turn
 a fail into a missing answer.

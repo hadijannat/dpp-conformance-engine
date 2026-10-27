@@ -178,6 +178,9 @@ def test_an_advertised_linkset_is_judged_by_the_same_rules(
         "<http://[::1>; rel=linkset",
         f'<{ADVERTISED}>; rel="linkset"; type="application/linkset+json"',
         f'<{ADVERTISED}>; rel="next"',
+        # Redaction changed these targets, so the record no longer holds the advertised URL.
+        f'<{ADVERTISED}?X-Amz-Signature=abc123>; rel="linkset"',
+        f'<{ADVERTISED}?productCode=1>; rel="linkset"',
     ],
 )
 def test_an_unusable_link_value_is_judged_as_today(link: str, tmp_path: Path, loopback: Any) -> None:
@@ -185,6 +188,7 @@ def test_an_unusable_link_value_is_judged_as_today(link: str, tmp_path: Path, lo
     outcome, api, _ = _advertising_run(tmp_path, loopback, advertised, link=link)
     assert _outcome(outcome) == (ExecutionStatus.COMPLETED, True, "RESOLVER.LINKSET.OK")
     assert api.hits(ADVERTISED) == 0
+    assert not [s for s in api.server.seen if s["path"].startswith(ADVERTISED)]
     assert len(outcome.observations) == 2
 
 
