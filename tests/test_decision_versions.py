@@ -1,4 +1,6 @@
-"""Decision body versions: a new run writes dppce.decision/2, and a dppce.decision/1 body still verifies.
+"""Decision body versions: a new run writes dppce.decision/3, and a dppce.decision/1 body still verifies.
+
+tests/test_run_provenance.py pins a dppce.decision/2 body and tests the provenance fields of version 3.
 
 The fixture ``rc1-envelope-decision-v1.json`` is ``tests.support.make_envelope()`` as the code at
 tag v0.1.0rc1 serialized it, when the default issuer was 'unspecified'. ``RC1_DIGEST`` is the
@@ -39,7 +41,7 @@ def _signed_document(signer: LocalSigner) -> dict[str, Any]:
     return document
 
 
-def test_a_new_decision_body_is_version_2_and_carries_bound_files() -> None:
+def test_a_new_decision_body_is_version_3_and_carries_bound_files() -> None:
     template = make_envelope(("pass",)).decision
     decision = build_decision(
         manifest=make_manifest(bound_files={"rules.json": "unavailable"}),
@@ -52,8 +54,9 @@ def test_a_new_decision_body_is_version_2_and_carries_bound_files() -> None:
         coverage=template.coverage,
         record_commitments=template.record_commitments,
     )
-    assert decision.schema_version == "dppce.decision/2"
-    assert template.schema_version == "dppce.decision/2"
+    # Changed by P2-21 (OD-09): a new run writes dppce.decision/3, which also holds bound_files.
+    assert decision.schema_version == "dppce.decision/3"
+    assert template.schema_version == "dppce.decision/3"
     assert b'"bound_files":{"rules.json":"unavailable"}' in canonical_bytes(decision)
     assert b'"bound_files":{}' in canonical_bytes(template), "an empty mapping is still written"
 
@@ -117,7 +120,9 @@ def test_a_version_2_body_without_bound_files_is_a_structure_error(
     signer: LocalSigner, trust: TrustBundle
 ) -> None:
     document = _signed_document(signer)
-    assert document["decision"]["schema_version"] == "dppce.decision/2"
+    assert document["decision"]["schema_version"] == "dppce.decision/3"
+    # A default version 3 body differs from a version 2 body only in this literal.
+    document["decision"]["schema_version"] = "dppce.decision/2"
     del document["decision"]["manifest"]["bound_files"]
     outcomes = _outcomes(json.dumps(document).encode(), trust)
     assert outcomes["structure"] == "fail"
@@ -125,11 +130,24 @@ def test_a_version_2_body_without_bound_files_is_a_structure_error(
         DecisionBody.model_validate(document["decision"])
 
 
-def test_the_published_schema_accepts_both_versions_and_no_other(signer: LocalSigner) -> None:
-    """The pairing of version and bound_files is a model rule. The schema states the versions."""
+def test_a_version_3_body_without_bound_files_is_a_structure_error(
+    signer: LocalSigner, trust: TrustBundle
+) -> None:
+    document = _signed_document(signer)
+    del document["decision"]["manifest"]["bound_files"]
+    assert _outcomes(json.dumps(document).encode(), trust)["structure"] == "fail"
+    with pytest.raises(ValidationError, match="bound_files"):
+        DecisionBody.model_validate(document["decision"])
+
+
+def test_the_published_schema_accepts_the_three_versions_and_no_other(signer: LocalSigner) -> None:
+    """The pairing of version and manifest fields is a model rule. The schema states the versions."""
     validator = jsonschema.Draft202012Validator(schemas.load("envelope"))
-    version_2 = _signed_document(signer)
-    assert list(validator.iter_errors(version_2)) == []
+    version_3 = _signed_document(signer)
+    assert list(validator.iter_errors(version_3)) == []
     assert list(validator.iter_errors(json.loads(RC1_ENVELOPE.read_bytes()))) == []
-    version_2["decision"]["schema_version"] = "dppce.decision/3"
-    assert not validator.is_valid(version_2)
+    version_3["decision"]["schema_version"] = "dppce.decision/2"
+    assert list(validator.iter_errors(version_3)) == []
+    # Changed by P2-21 (OD-09): version 3 is now published, so version 4 is the unknown one.
+    version_3["decision"]["schema_version"] = "dppce.decision/4"
+    assert not validator.is_valid(version_3)
