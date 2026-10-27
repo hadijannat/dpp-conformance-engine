@@ -578,6 +578,13 @@ sut_faults:
     test_purpose: TP-GS1-CONFORMANCE-002
     profiles: [family/gs1-resolver]
     expected: {verdict: fail, reason_code: RESOLVER.CONFORMANCE.REDIRECT_STATUS}
+  - id: F-83
+    class: restricted_field_leakage
+    fault: oauth_token_wrong_role
+    description: The OAuth 2.0 token endpoint issues the token of the authority role to the client of the legitimate_interest role. The fetch channel then serves a field that the policy withholds from that role.
+    test_purpose: TP-OAUTH-ACCESS-001
+    profiles: [family/oauth]
+    expected: {verdict: fail, reason_code: ACCESS.LEAK.FETCH}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
@@ -726,6 +733,13 @@ boundary_cases:
     test_purpose: TP-ID-002
     expected: {verdict: inconclusive, reason_code: TRANSPORT.RATE_LIMITED}
     rationale: A rate-limited answer is no answer. It does not prove a breach, and it is never a pass.
+  - id: B-21
+    fault: oauth_token_refused
+    description: The OAuth 2.0 token endpoint answers 401 to the client credentials request of the legitimate_interest role.
+    test_purpose: TP-OAUTH-ACCESS-001
+    profiles: [family/oauth]
+    expected: {verdict: inconclusive, reason_code: TRANSPORT.DENIED}
+    rationale: Without a token, the engine sends no request for the role. It has no answer to judge, and it never gives a pass.
 
 # Faults in the evidence. `dppce verify` must report the named dimension as `fail`.
 evidence_faults:
