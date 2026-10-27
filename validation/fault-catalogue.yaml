@@ -578,6 +578,20 @@ sut_faults:
     test_purpose: TP-GS1-CONFORMANCE-002
     profiles: [family/gs1-resolver]
     expected: {verdict: fail, reason_code: RESOLVER.CONFORMANCE.REDIRECT_STATUS}
+  - id: F-79
+    class: schema_fault
+    fault: id_mismatch
+    description: The passport id ends in a serial that breaks the serial pattern of a pattern rule in the pinned TEST-ONLY rule pack of version 2.
+    test_purpose: TP-WEB-RULES-001
+    profiles: [family/web]
+    expected: {verdict: fail, reason_code: DATA.PATTERN.MISMATCH}
+  - id: F-80
+    class: restricted_field_leakage
+    fault: leak_usage_log_anonymous
+    description: The anonymous passport holds the restricted usage log, which a forbidden rule in the pinned TEST-ONLY rule pack of version 2 forbids.
+    test_purpose: TP-WEB-RULES-001
+    profiles: [family/web]
+    expected: {verdict: fail, reason_code: DATA.FIELD.FORBIDDEN}
 
 # Cases that must NOT be reported as a failure of the system under test.
 boundary_cases:
