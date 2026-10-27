@@ -350,8 +350,8 @@ Initial registry:
 | `identifier.equivalence` | `identifier.equivalence` | Compares the carrier with a declared identifier in GS1 canonical form. It does not change the exact-text rule of `identifier.consistency`. Experimental. |
 | `api.contract` | `api.contract` | Response matches the pinned OpenAPI contract. |
 | `data.jsonschema` | `data.jsonschema` | Document matches the pinned JSON Schema. With `source`, the document can be an IXIT sample, a verified credential payload, or embedded JSON-LD. |
-| `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. `source` applies as for `data.jsonschema`. |
-| `data.rules` | `data.rules` | Rule pack: completeness, units, ranges, relationships, freshness. `source` applies as for `data.jsonschema`. |
+| `data.context` | `data.context` | Every `@context` entry is in the pinned allowlist. A context of a `Link` header and a reference of a pinned context count too. `source` applies as for `data.jsonschema`. |
+| `data.rules` | `data.rules` | Rule pack: completeness, units, ranges, relationships, freshness. Version 2 adds pattern, forbidden, equals, and each. `source` applies as for `data.jsonschema`. |
 | `access.restricted_fields` | `access.policy` | A role gets each field that the declared policy gives it, and no field that the policy withholds from it. |
 | `integrity.jws` | `integrity.jws` | Signature validity, issuer trust, and certificate validity, as separate findings. |
 | `integrity.jose` | `integrity.jose` | Verifies a JWS credential or token under a named profile with its own algorithm allowlist. Signature, issuer trust, and validity are separate findings. The report signing profile is unchanged. Experimental. |
@@ -704,6 +704,41 @@ names a file under the data root, in place of the profile schema or the profile 
 path is relative and has no `.` or `..` segment. A file that a link takes out of the data root
 gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run binds each such file
 (section 9.2).
+
+`data.rules` reads rule packs of version 1 and version 2 (OD-11). Version 2 is experimental. The
+[reference system page](../reference/reference-system.md), section 5.1, gives the format.
+
+- A pack of version 1 cannot use a kind of version 2. It also cannot give a key of version 2 a
+  value other than its default. Such a pack gives `blocked` with `DATA.RULES.MISSING`. A pack of
+  version 1 keeps its outcomes and its reason codes.
+- `pattern` matches the string at a JSON Pointer as a whole. The pattern is in a closed subset of
+  regular expressions without nested quantifiers and without backreferences. It has at most three
+  variable choices: quantifiers other than `{m}`, and `|` outside a character class. A value
+  longer than `max_length` characters breaks the rule.
+- `forbidden` breaks if the field at a pointer is present, also with the value `null`.
+- `equals` compares the string at a pointer with a constant or with the string at a second pointer.
+- `each` applies one rule of another kind to each element of the array at a pointer.
+- An absent field breaks only `required_fields` and `forbidden`. A present value of the wrong type
+  breaks the rule. A reshaped document therefore gives a fail, not `blocked`.
+- A failed `each` rule gives the reason code of its rule. The codes of version 2 come after the
+  codes of version 1: `DATA.FIELD.FORBIDDEN`, `DATA.PATTERN.MISMATCH`, `DATA.EQUALITY.VIOLATED`.
+
+`data.context` reads two more context sources. Both are experimental. No context is fetched.
+
+- The `Link` header of the fetched document, when `source` is absent, `item`, or `model`. A link
+  with the JSON-LD context relation names a context. The check ignores the header for
+  `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
+- The record keeps a `Link` value only in the form that redaction keeps (section 10). A removed
+  value, or a context target that redaction changed, gives `blocked` with
+  `DATA.CONTEXT.LINK_UNREADABLE`. `DATA.CONTEXT.NOT_ALLOWED` comes first. A document without a
+  top-level context and with an unreadable `Link` value gives `blocked`, not
+  `DATA.CONTEXT.MISSING`, because the value can name the context.
+- `context_files` maps an allowed context URL to a pinned copy under the data root. The check
+  reads each `@context` reference and each `@import` value of a pinned context. It follows a
+  reference only into another pinned context.
+- A reference outside the allowlist gives `DATA.CONTEXT.NOT_ALLOWED`. A pinned copy that is not a
+  valid context gives `blocked` with `DATA.CONTEXT.FILE_INVALID`. The run binds each pinned copy
+  (section 9.2).
 
 The check takes the first row that applies. The rows of the schema or the rule packs come after
 row 1 and before row 2.

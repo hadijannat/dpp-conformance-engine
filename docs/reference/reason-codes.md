@@ -95,6 +95,8 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `CARRIER.SAMPLE.TOO_LARGE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
 | `CARRIER.SAMPLE.UNREADABLE` | CARRIER |  | `dppce.adapters.common.decode_qr` | inconclusive | Supply the carrier sample as an image file that the engine can read. |
 | `DATA.COMPLETENESS.MISSING` | DATA |  | `dppce.adapters.data` | not fixed here | Add the fields that the rule requires to the passport data. |
+| `DATA.CONTEXT.FILE_INVALID` | DATA |  | `dppce.adapters.data._pinned_contexts` | inconclusive | Pin a context copy that is a JSON object with string @import values. |
+| `DATA.CONTEXT.LINK_UNREADABLE` | DATA | `data.context` | `dppce.adapters.data.context_check` | inconclusive | Engine limit: the record does not keep this Link header, so a context that it names cannot be judged. |
 | `DATA.CONTEXT.MISSING` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Add the JSON-LD context that the rule requires to the document. |
 | `DATA.CONTEXT.NOT_ALLOWED` | DATA | `data.context` | `dppce.adapters.data.context_check` | fail; inconclusive under a non-default verdict rule | Use only the JSON-LD contexts on the allowlist of the test purpose. |
 | `DATA.CONTEXT.NO_ALLOWLIST` | DATA | `data.context` | `dppce.adapters.data.context_check` | inconclusive | Declare the allowlist of contexts in the test purpose. |
@@ -102,9 +104,12 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `DATA.CREDENTIAL.UNVERIFIED` | DATA |  | `dppce.adapters.data._credential` | inconclusive | Serve a credential that verifies. Its payload was not judged. |
 | `DATA.EMBEDDED.MISSING` | DATA |  | `dppce.adapters.data._embedded` | fail; inconclusive under a non-default verdict rule | Embed the passport data in the page in a JSON-LD script element. |
 | `DATA.EMBEDDED.TOO_LARGE` | DATA |  | `dppce.adapters.data._embedded` | inconclusive | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `DATA.EQUALITY.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Make the strings that the rule compares the same text. |
+| `DATA.FIELD.FORBIDDEN` | DATA |  | `dppce.adapters.data` | not fixed here | Remove the field that the rule forbids from the passport data. |
 | `DATA.FRESHNESS.STALE` | DATA |  | `dppce.adapters.data` | not fixed here | Update the passport data, so that its update time is within the allowed age. |
 | `DATA.NO_TARGET` | DATA |  | `dppce.adapters.data._answer`, `dppce.adapters.data._documents` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
 | `DATA.PARAMS.INVALID` | DATA |  | `dppce.adapters.data._params` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
+| `DATA.PATTERN.MISMATCH` | DATA |  | `dppce.adapters.data` | not fixed here | Give the field a string value that matches the pattern of the rule. |
 | `DATA.RANGE.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Correct the value of the field that the message names, so that it is in range. |
 | `DATA.RELATIONSHIP.VIOLATED` | DATA |  | `dppce.adapters.data` | not fixed here | Correct the related fields that the message names, so that they agree. |
 | `DATA.RESPONSE.NOT_CONCLUSIVE` | DATA |  | `dppce.adapters.data._answer` | inconclusive | No answer: the system gave no usable answer to a probe. Make the endpoint answer, then run again. |

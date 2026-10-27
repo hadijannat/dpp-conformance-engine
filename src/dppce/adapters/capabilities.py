@@ -168,7 +168,9 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         "data",
         _S,
         "Check JSON-LD context references against a pinned allowlist. No context is fetched. "
-        "The parameter source (experimental) applies as for data.jsonschema.",
+        "The parameter source (experimental) applies as for data.jsonschema. Experimental: a context "
+        "of a Link header with the JSON-LD context relation counts, and the parameter context_files "
+        "names pinned copies whose @import and @context references count too.",
         None,
         "",
     ),
@@ -178,7 +180,8 @@ _ENTRIES: tuple[tuple[str, str, CapabilityState, str, str | None, str], ...] = (
         _S,
         "Versioned rule packs: completeness, units, ranges, relationships, freshness. The parameter "
         "rule_pack (experimental) names a rule pack file under the data root. The parameter source "
-        "(experimental) applies as for data.jsonschema.",
+        "(experimental) applies as for data.jsonschema. Rule packs of version 2 (experimental) add "
+        "the kinds pattern, forbidden, equals, and each.",
         None,
         "",
     ),

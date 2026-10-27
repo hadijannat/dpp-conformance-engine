@@ -20,6 +20,7 @@ from decimal import Decimal
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Final, Literal, Self
+from urllib.parse import unquote, urljoin
 
 from jsonschema import SchemaError
 from jsonschema.protocols import Validator
@@ -34,6 +35,7 @@ from dppce.adapters.common import (
     fetch_once,
     item_url,
     json_object,
+    media_type,
     not_200,
     resource_url,
     schema_errors,
@@ -42,6 +44,7 @@ from dppce.adapters.common import (
     validator,
 )
 from dppce.adapters.jose import JoseParams, _Finding, _judge, finding_of
+from dppce.adapters.pointer import parse_pointer, resolve_pointer
 from dppce.applicability import ApplicabilityError, evaluate, facts_from
 from dppce.catalogue import CatalogueError, load_data, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
@@ -49,6 +52,7 @@ from dppce.evidence.jose_profiles import JoseError
 from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
+from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
 
@@ -61,15 +65,137 @@ MAX_PAGE_BYTES: Final = 2 * 1024 * 1024
 # One path segment of a parameter file: no empty, "." or ".." segment, no backslash.
 _SEGMENT: Final = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*")
 # The parameter of each check that names a file under the data root (architecture section 9.2).
-FILE_PARAMS: Final = {"data.jsonschema": "schema", "data.rules": "rule_pack"}
-# When more than one rule fails, the first kind in this order names the reason code.
+FILE_PARAMS: Final = {"data.jsonschema": "schema", "data.rules": "rule_pack", "data.context": "context_files"}
+# When more than one rule fails, the first kind in this order names the reason code. The kinds of
+# version 2 come after the kinds of version 1, so a pack of version 1 keeps its reason codes.
 _PRECEDENCE: tuple[tuple[str, str], ...] = (
     ("required_fields", "DATA.COMPLETENESS.MISSING"),
     ("unit", "DATA.UNIT.INVALID"),
     ("range", "DATA.RANGE.VIOLATED"),
     ("relationship", "DATA.RELATIONSHIP.VIOLATED"),
     ("freshness", "DATA.FRESHNESS.STALE"),
+    ("forbidden", "DATA.FIELD.FORBIDDEN"),
+    ("pattern", "DATA.PATTERN.MISMATCH"),
+    ("equals", "DATA.EQUALITY.VIOLATED"),
 )
+V1: Final = "dppce.rulepack/1"
+V2: Final = "dppce.rulepack/2"
+_V2_KINDS: Final = frozenset({"pattern", "forbidden", "equals", "each"})
+_V2_KEYS: Final = frozenset({"path", "pattern", "max_length", "value", "other", "rule"})
+# The accepted subset of a pattern (reference-system.md, section 5.1). Python's re backtracks, so
+# a quantifier applies to one character, class, or escape only, never to a group. That refuses
+# nested quantifiers and quantified alternations, the constructs with exponential time.
+# Each "|" is a choice like a variable quantifier, so both share one budget of three.
+# ponytail: with k such choices the worst case is O(n^k); k <= 3 and n <= 512 bound it.
+MAX_PATTERN: Final = 256
+MAX_SUBJECT: Final = 512
+_MAX_VARIABLE: Final = 3
+_MAX_REPEAT: Final = 1000
+_CLASS_ESCAPES: Final = frozenset("dDwWsS")
+_REPEAT: Final = re.compile(r"\{([0-9]{1,4})(?:(,)([0-9]{0,4}))?\}")
+
+
+def _escape(pattern: str, i: int) -> int:
+    """The index after the escape at ``i``. Only a class escape or an escaped symbol is accepted."""
+    if i + 1 >= len(pattern):
+        raise ValueError("a pattern ends with a backslash")
+    char = pattern[i + 1]
+    if char.isalnum() and char not in _CLASS_ESCAPES:
+        # A digit is a backreference, and a letter is an anchor, a code, or a named reference.
+        raise ValueError(f"the escape \\{char} is not in the accepted subset")
+    return i + 2
+
+
+def _class_end(pattern: str, i: int) -> int:
+    """The index after the character class that starts at ``i``."""
+    j = i + 1
+    if j < len(pattern) and pattern[j] == "^":
+        j += 1
+    if j < len(pattern) and pattern[j] == "]":
+        j += 1  # a "]" right after "[" or "[^" is a literal
+    while j < len(pattern):
+        char = pattern[j]
+        if char == "]":
+            return j + 1
+        if char == "[":
+            raise ValueError("a nested set in a character class is not in the accepted subset")
+        j = _escape(pattern, j) if char == "\\" else j + 1
+    raise ValueError("a character class is not closed")
+
+
+def check_pattern(pattern: str) -> str:  # noqa: PLR0912, PLR0915 - one branch per token of the accepted subset
+    """Return the pattern if it is in the accepted subset, or raise ValueError."""
+    if not 1 <= len(pattern) <= MAX_PATTERN:
+        raise ValueError(f"a pattern has 1 to {MAX_PATTERN} characters")
+    depth = variable = 0
+    repeatable = False  # whether the item before can take a quantifier
+    i = 0
+    while i < len(pattern):
+        char = pattern[i]
+        quantifier = _REPEAT.match(pattern, i) if char == "{" else None
+        if char in "*+?" or quantifier:
+            if not repeatable:
+                raise ValueError("a quantifier applies to one character, class, or escape only")
+            fixed = False  # "*", "+", and "?" are variable
+            if quantifier:
+                low, comma, high = quantifier.groups()
+                top = int(high) if high else _MAX_REPEAT if comma else int(low)
+                if int(low) > top or top > _MAX_REPEAT:
+                    raise ValueError(f"a counted repeat has bounds of at most {_MAX_REPEAT}, in order")
+                fixed = top == int(low) and not (comma and not high)
+            variable += 0 if fixed else 1
+            if variable > _MAX_VARIABLE:
+                raise ValueError(
+                    f"a pattern has at most {_MAX_VARIABLE} variable quantifiers and '|' together"
+                )
+            repeatable = False  # so a lazy "?" or a possessive "+" is refused
+            i = quantifier.end() if quantifier else i + 1
+            continue
+        if char == "{":
+            raise ValueError("a literal { is written as \\{")
+        if char == "(":
+            if pattern.startswith("(?", i) and not pattern.startswith("(?:", i):
+                raise ValueError("a group is (...) or (?:...); lookaround, flags, and names are refused")
+            depth += 1
+            i += 3 if pattern.startswith("(?:", i) else 1
+            repeatable = False
+            continue
+        if char == ")":
+            depth -= 1
+            if depth < 0:
+                raise ValueError("a pattern closes a group that is not open")
+            repeatable = False  # a group never takes a quantifier
+        elif char in "|^$":
+            # A chain of unquantified alternations backtracks like a chain of "?", so "|" counts too.
+            variable += char == "|"
+            if variable > _MAX_VARIABLE:
+                raise ValueError(
+                    f"a pattern has at most {_MAX_VARIABLE} variable quantifiers and '|' together"
+                )
+            repeatable = False
+        elif char == "[":
+            i = _class_end(pattern, i)
+            repeatable = True
+            continue
+        elif char == "\\":
+            i = _escape(pattern, i)
+            repeatable = True
+            continue
+        else:
+            repeatable = True
+        i += 1
+    if depth:
+        raise ValueError("a pattern leaves a group open")
+    try:
+        re.compile(pattern, re.ASCII)
+    except re.error as exc:
+        raise ValueError(f"not a regular expression: {exc}") from exc
+    return pattern
+
+
+def _pointer(value: str) -> str:
+    parse_pointer(value)  # raises ValueError for a malformed pointer
+    return value
 
 
 class Basis(Model):
@@ -87,12 +213,19 @@ class Basis(Model):
         return self
 
 
-class Rule(Model):
-    id: str
-    kind: Literal["required_fields", "unit", "range", "relationship", "freshness"]
-    document: DocumentKind
-    basis: Basis
-    when: Expr | None = None
+def _subset(value: str) -> str:
+    return value and check_pattern(value)
+
+
+class _Judgment(Model):
+    """The judgment of one rule. ``each`` applies one to every element of an array.
+
+    The kinds of version 1 read dotted ``field`` paths. The kinds of version 2 read the JSON
+    Pointer ``path``. Inside ``each``, both are relative to the element, and the path ``""`` is
+    the element itself.
+    """
+
+    kind: str
     fields: tuple[str, ...] = ()
     field: str = ""
     allowed: tuple[str, ...] = ()
@@ -102,6 +235,19 @@ class Rule(Model):
     op: Literal["lt", "le", "eq", "ge", "gt"] = "le"
     right: str = ""
     max_age_days: int | None = Field(default=None, ge=0)
+    path: str = ""
+    pattern: str = ""
+    max_length: int = Field(default=256, ge=1, le=MAX_SUBJECT)
+    value: str | None = None
+    other: str | None = None
+
+    _path = field_validator("path")(_pointer)
+    _pattern = field_validator("pattern")(_subset)
+
+    @field_validator("other")
+    @classmethod
+    def _other(cls, value: str | None) -> str | None:
+        return None if value is None else _pointer(value)
 
     @model_validator(mode="after")
     def _judges_something(self) -> Self:
@@ -112,17 +258,70 @@ class Rule(Model):
             "range": bool(self.field) and (self.min is not None or self.max is not None),
             "relationship": bool(self.left and self.right),
             "freshness": bool(self.field) and self.max_age_days is not None,
+            "pattern": bool(self.pattern),
+            # The root is never absent, so a forbidden root would always fail.
+            "forbidden": bool(self.path),
+            "equals": (self.value is None) != (self.other is None),
+            "each": True,  # Rule checks its own fields
         }
         if not needed[self.kind]:
             raise ValueError(f"a {self.kind} rule needs the fields of its kind")
         return self
 
 
+class ElementRule(_Judgment):
+    """The rule of an ``each`` rule. It cannot be an ``each`` rule itself, so the work is bounded."""
+
+    kind: Literal[
+        "required_fields", "unit", "range", "relationship", "freshness", "pattern", "forbidden", "equals"
+    ]
+
+
+class Rule(_Judgment):
+    id: str
+    kind: Literal[
+        "required_fields",
+        "unit",
+        "range",
+        "relationship",
+        "freshness",
+        "pattern",
+        "forbidden",
+        "equals",
+        "each",
+    ]
+    document: DocumentKind
+    basis: Basis
+    when: Expr | None = None
+    rule: ElementRule | None = None
+
+    @model_validator(mode="after")
+    def _each_judges_something(self) -> Self:
+        if (self.kind == "each") != (self.rule is not None):
+            raise ValueError("an each rule, and only an each rule, has a rule")
+        # The root of a document is an object, so a rule on it would break for every document.
+        # Only the rule of an each rule names its element with the root pointer.
+        if self.kind in ("pattern", "equals", "each") and not self.path:
+            raise ValueError(f"a {self.kind} rule names a field by a pointer other than the root")
+        return self
+
+
 class RulePack(Model):
-    schema_version: Literal["dppce.rulepack/1"]
+    schema_version: Literal["dppce.rulepack/1", "dppce.rulepack/2"]
     rulepack_id: str
     version: str
     rules: tuple[Rule, ...]
+
+    @model_validator(mode="after")
+    def _version_1_is_unchanged(self) -> Self:
+        # An engine of version 1 refuses these packs, so a pack of version 1 must not use them. A
+        # key of version 2 at its default value changes nothing, as in a dumped rule of version 1.
+        if self.schema_version == V1 and any(
+            r.kind in _V2_KINDS or any(getattr(r, k) != Rule.model_fields[k].default for k in _V2_KEYS)
+            for r in self.rules
+        ):
+            raise ValueError(f"a kind or a key of version 2 needs schema_version {V2}")
+        return self
 
 
 def _relative_file(value: str | None) -> str | None:
@@ -137,8 +336,9 @@ def _relative_file(value: str | None) -> str | None:
 def param_files(check: str, params: Mapping[str, Any]) -> tuple[str, ...]:
     """The files under the data root that the parameters of a test purpose name (section 9.2)."""
     value = params.get(FILE_PARAMS.get(check, ""))
+    values = list(value.values()) if isinstance(value, Mapping) else [value]
     try:
-        return (value,) if isinstance(value, str) and _relative_file(value) else ()
+        return tuple(v for v in values if isinstance(v, str) and _relative_file(v))
     except ValueError:
         return ()  # the planner refuses these parameters, and no check reads the file
 
@@ -218,6 +418,28 @@ class ContextParams(DocumentParams):
     allowed_contexts: tuple[str, ...] = Field(
         min_length=1, description="Exact context URLs that are allowed. No context is fetched."
     )
+    context_files: dict[str, str] = Field(
+        default_factory=dict,
+        max_length=32,
+        description=(
+            "Experimental. A pinned copy of an allowed context: the context URL and a JSON file under "
+            "the data root. The check reads the @import and @context references of each pinned "
+            "context. It follows a reference only into another pinned context. The run binds each file."
+        ),
+    )
+
+    @field_validator("context_files")
+    @classmethod
+    def _files(cls, value: dict[str, str]) -> dict[str, str]:
+        for path in value.values():
+            _relative_file(path)
+        return value
+
+    @model_validator(mode="after")
+    def _files_are_allowed(self) -> Self:
+        if not set(self.context_files) <= set(self.allowed_contexts):
+            raise ValueError("each key of context_files is an allowed context")
+        return self
 
 
 @dataclass(frozen=True)
@@ -485,27 +707,109 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
     return completed(True, "DATA.SCHEMA.OK", f"{what} the pinned schema.", [observation])
 
 
-def _contexts(document: dict[str, Any], allowed: list[Any]) -> tuple[int, set[str]]:
-    """(top-level context entries, context references outside the allowlist) of one document."""
-    declared = document.get("@context")
-    entries = declared if isinstance(declared, list) else [declared] if declared is not None else []
-    # A JSON-LD processor also reads a scoped @context in any nested node, so each one counts.
-    # A work list, not recursion: a deeply nested document must not stop the check.
+def _references(node: Any) -> tuple[list[Any], list[Any]]:
+    """(every @context entry, every @import value) in a JSON value.
+
+    A JSON-LD processor also reads a scoped @context in any nested node, so each one counts.
+    A work list, not recursion: a deeply nested document must not stop the check.
+    """
     every: list[Any] = []
-    pending: list[Any] = [document]
+    imports: list[Any] = []
+    pending: list[Any] = [node]
     while pending:
         node = pending.pop()
         if isinstance(node, dict):
             value = node.get("@context")
             if value is not None:
                 every.extend(value if isinstance(value, list) else [value])
+            if "@import" in node:
+                imports.append(node["@import"])
             pending.extend(node.values())
         elif isinstance(node, list):
             pending.extend(node)
+    return every, imports
+
+
+def _contexts(document: dict[str, Any], allowed: list[Any]) -> tuple[int, set[str]]:
+    """(top-level context entries, context references outside the allowlist) of one document."""
+    declared = document.get("@context")
+    entries = declared if isinstance(declared, list) else [declared] if declared is not None else []
     # An inline context object is not a pinned reference, so it is never in the allowlist.
     return len(entries), {
-        str(e) if isinstance(e, str) else "<inline context>" for e in every if e not in allowed
+        str(e) if isinstance(e, str) else "<inline context>"
+        for e in _references(document)[0]
+        if e not in allowed
     }
+
+
+def _pinned_contexts(ctx: CheckContext, params: ContextParams) -> dict[str, list[str]] | CheckOutcome:
+    """The context references of each pinned context, by context URL. Read before any request."""
+    pinned: dict[str, list[str]] = {}
+    for url, path in params.context_files.items():
+        try:
+            document = load_data(_pinned_path(ctx, path, parameter=True))
+        except (CatalogueError, CanonicalizationError):
+            document = None
+        every, imports = _references(document)
+        # An @import value is one URL (JSON-LD 1.1), so any other value makes the pinned copy invalid.
+        if not isinstance(document, dict) or not all(isinstance(i, str) for i in imports):
+            return blocked(
+                "DATA.CONTEXT.FILE_INVALID", f"The pinned context file of {url} is not a valid context."
+            )
+        # An inline object is a part of the pinned context itself, not a reference.
+        pinned[url] = [r for r in every if isinstance(r, str)] + imports
+    return pinned
+
+
+def _link_contexts(record: Record) -> tuple[list[str], bool]:
+    """The targets of the Link values with the JSON-LD context relation, and whether one is unreadable.
+
+    JSON-LD 1.1, section 6.1: a processor ignores this header for application/ld+json. The record
+    holds a Link value in the form that redaction keeps. A value that redaction removed, or a
+    target that it changed, no longer shows what the system sent, so it is unreadable.
+    """
+    if record.kind != "http" or media_type(record) == "application/ld+json":
+        return [], False
+    base = record.redirects[-1] if record.redirects else record.url
+    found: list[str] = []
+    unreadable = False
+    for name, value in record.headers:
+        if name.lower() != "link":
+            continue
+        links = parse_link(value)
+        if links is None or value == REMOVED:  # "<removed>" itself reads as a link without a relation
+            unreadable = True
+            continue
+        for target, relations in links:
+            if JSONLD_CONTEXT not in relations:
+                continue
+            try:
+                url = urljoin(base, target)
+            except ValueError:
+                url = REMOVED
+            if REMOVED in unquote(url):
+                unreadable = True
+            else:
+                found.append(url)
+    return found, unreadable
+
+
+def _imported(start: list[str], pinned: dict[str, list[str]], allowed: list[Any]) -> set[str]:
+    """The references outside the allowlist that the pinned contexts reachable from ``start`` make."""
+    foreign: set[str] = set()
+    seen: set[str] = set()
+    pending = [url for url in start if url in pinned]
+    while pending:
+        url = pending.pop()
+        if url in seen:
+            continue
+        seen.add(url)
+        for reference in pinned[url]:
+            if reference not in allowed:
+                foreign.add(reference)
+            elif reference in pinned:
+                pending.append(reference)  # an allowed context without a pinned copy is judged by its URL
+    return foreign
 
 
 @register("data.context", capability="data.context", params=ContextParams)
@@ -516,18 +820,30 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     params = _params(ctx, ContextParams)
     if isinstance(params, CheckOutcome):
         return params
+    pinned = _pinned_contexts(ctx, params)
+    if isinstance(pinned, CheckOutcome):
+        return pinned
     got = _documents(ctx, params)
     if isinstance(got, CheckOutcome):
         return got
     counted = [_contexts(document, allowed) for document in got.documents]
-    foreign = sorted(set().union(*(found for _, found in counted)))
+    # A Link header applies to the one fetched document. It never applies to a sample, a
+    # credential payload, or an HTML page.
+    fetched = params.source in (None, "item", "model")
+    linked, unreadable = _link_contexts(got.record) if fetched else ([], False)
+    if linked:
+        entries, found = counted[0]
+        counted[0] = (entries + len(linked), found | {url for url in linked if url not in allowed})
+    start = [r for document in got.documents for r in _references(document)[0] if isinstance(r, str)] + linked
+    foreign = sorted(set().union(*(found for _, found in counted), _imported(start, pinned, allowed)))
     summary: dict[str, JsonValue] = {
         "document": params.document,
         "contexts": sum(entries for entries, _ in counted),
         "not_allowed": list[JsonValue](foreign),
     }
     observation = got.observation(ctx, summary)
-    if missing := sum(1 for entries, _ in counted if not entries):
+    # An unreadable Link value can hold the context, so a document without one is not judged.
+    if (missing := sum(1 for entries, _ in counted if not entries)) and not unreadable:
         message = (
             "The document names no context." if len(counted) == 1 else f"{missing} documents name no context."
         )
@@ -535,6 +851,17 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     if foreign:
         message = f"{len(foreign)} context references are not in the pinned allowlist. No context is fetched."
         return completed(False, "DATA.CONTEXT.NOT_ALLOWED", message, [observation])
+    if unreadable:
+        message = (
+            "A Link header of the answer is not in a form that the record keeps, so a context that it "
+            "names cannot be judged."
+        )
+        return CheckOutcome(
+            status=ExecutionStatus.BLOCKED,
+            reason_code="DATA.CONTEXT.LINK_UNREADABLE",
+            message=message,
+            observations=(observation,),
+        )
     return completed(
         True, "DATA.CONTEXT.OK", "Every context reference is in the pinned allowlist.", [observation]
     )
@@ -555,8 +882,44 @@ def _is_number(value: Any) -> bool:
     return type(value) is int or (type(value) is Decimal and value.is_finite())
 
 
-def rule_holds(rule: Rule, document: dict[str, Any], now: datetime) -> bool:
-    """True if the document obeys the rule. Only ``required_fields`` judges an absent field."""
+def _string_at(document: Any, path: str) -> Any:
+    """The value at a pointer: ``MISSING``, a string, or None for a present value of another type."""
+    value = resolve_pointer(document, parse_pointer(path))
+    return value if value is MISSING or isinstance(value, str) else None
+
+
+def rule_holds(rule: _Judgment, document: Any, now: datetime) -> bool:  # noqa: PLR0912 - one branch per rule kind
+    """True if the document obeys the rule. ``required_fields`` and ``forbidden`` judge absence.
+
+    A present value of the wrong type breaks the rule, so a reshaped document fails and is
+    never blocked.
+    """
+    if rule.kind == "each":
+        items = resolve_pointer(document, parse_pointer(rule.path))
+        if items is MISSING:
+            return True
+        inner = rule.rule if isinstance(rule, Rule) else None
+        return isinstance(items, list) and inner is not None and all(rule_holds(inner, e, now) for e in items)
+    if rule.kind == "forbidden":
+        return resolve_pointer(document, parse_pointer(rule.path)) is MISSING
+    if rule.kind == "pattern":
+        value = _string_at(document, rule.path)
+        if value is MISSING:
+            return True
+        # A bounded subject bounds the work. A longer value breaks the rule: it is not an engine limit.
+        return (
+            value is not None
+            and len(value) <= rule.max_length
+            and bool(re.fullmatch(rule.pattern, value, re.ASCII))
+        )
+    if rule.kind == "equals":
+        left = _string_at(document, rule.path)
+        right = rule.value if rule.other is None else _string_at(document, rule.other)
+        if left is MISSING or right is MISSING:
+            return True
+        return left is not None and left == right
+    if not isinstance(document, Mapping):
+        return False  # an element of each that is not an object, where a dotted field needs one
     if rule.kind == "required_fields":
         return all(dig(document, name) not in (MISSING, None) for name in rule.fields)
     if rule.kind == "relationship":
@@ -648,7 +1011,7 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
         return completed(
             True, "DATA.RULES.OK", f"The document obeys the {applied} rules that apply.", [observation]
         )
-    kinds = {r.kind for r in failed}
+    kinds = {r.rule.kind if r.rule else r.kind for r in failed}  # each gives the code of its rule
     code = next(code for name, code in _PRECEDENCE if name in kinds)
     return completed(
         False,

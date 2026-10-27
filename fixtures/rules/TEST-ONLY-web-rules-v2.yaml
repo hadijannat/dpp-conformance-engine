@@ -1,0 +1,32 @@
+# Audience: contributors and assessors.
+# Purpose: a TEST-ONLY example rule pack of version 2 for the test purpose TP-WEB-RULES-001.
+# This file is project-authored and synthetic. It makes no normative statement. The rules fit
+# the synthetic passport of the reference system (fixtures/reference/items/ev.json).
+# Format: docs/reference/reference-system.md, section 5.1.
+schema_version: dppce.rulepack/2
+rulepack_id: family/web-illustrative-rules
+version: 0.1.0
+rules:
+  - id: WEB-RULE-001
+    kind: pattern
+    document: item
+    path: /id
+    pattern: 'https://id\.example\.test/01/[0-9]{14}/21/EV[0-9]{4}'
+    basis: {class: illustrative, note: "The synthetic serial form of the reference system."}
+  - id: WEB-RULE-002
+    kind: forbidden
+    document: item
+    path: /restricted/usage_log
+    basis: {class: illustrative, note: "The anonymous passport holds no usage log."}
+  - id: WEB-RULE-003
+    kind: equals
+    document: item
+    path: /remaining_capacity/unit
+    other: /rated_capacity/unit
+    basis: {class: illustrative}
+  - id: WEB-RULE-004
+    kind: each
+    document: item
+    path: /@context
+    rule: {kind: pattern, path: "", pattern: 'https://dppce\.example\.test/contexts/[a-z0-9/]+'}
+    basis: {class: illustrative}

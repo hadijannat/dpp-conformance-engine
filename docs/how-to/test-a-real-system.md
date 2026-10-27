@@ -105,6 +105,8 @@ A run on it shows that the engine works. It says nothing about your system.
   - `TP-WEB-VERSIONS-001`: the version history (`features.version_history`).
   - `TP-WEB-IDENTIFIER-001`: the syntax of an `https-url` identifier.
   - `TP-WEB-NEGOTIATION-001`: content negotiation.
+  - `TP-WEB-RULES-001`: the TEST-ONLY rule pack of version 2. Its rules fit the reference
+    passport only, so replace it with a pack for your system.
 
 Operator decisions:
 

@@ -368,8 +368,77 @@ applies to the document, the check gives `blocked` with `DATA.RULES.NONE_APPLIED
 
 Reason codes, in this order of precedence when more than one rule fails:
 `DATA.COMPLETENESS.MISSING`, `DATA.UNIT.INVALID`, `DATA.RANGE.VIOLATED`,
-`DATA.RELATIONSHIP.VIOLATED`, `DATA.FRESHNESS.STALE`. A pass gives `DATA.RULES.OK`.
+`DATA.RELATIONSHIP.VIOLATED`, `DATA.FRESHNESS.STALE`, `DATA.FIELD.FORBIDDEN`,
+`DATA.PATTERN.MISMATCH`, `DATA.EQUALITY.VIOLATED`. A pass gives `DATA.RULES.OK`.
 The observation summary lists every failed rule id.
+
+#### Version 2 (`dppce.rulepack/2`)
+
+Version 2 is experimental (OD-11). It keeps the five kinds of version 1, with dotted `field`
+paths. It adds four kinds that read a JSON Pointer (RFC 6901) in `path`. A pack of version 1
+cannot use a kind of version 2. It also cannot give a key of version 2 a value other than its
+default. The engine cannot read such a pack. A rule of a new kind other than `forbidden` needs a `path` other than the root.
+`fixtures/rules/TEST-ONLY-web-rules-v2.yaml` is an example.
+
+```yaml
+schema_version: dppce.rulepack/2
+rulepack_id: example/rules-v2
+version: 0.1.0
+rules:
+  - {id: R-1, kind: pattern, document: item, path: /id, pattern: 'urn:example:[0-9]{4}', basis: {class: illustrative}}
+  - {id: R-2, kind: forbidden, document: item, path: /restricted/usage_log, basis: {class: illustrative}}
+  - {id: R-3, kind: equals, document: item, path: /granularity, value: item, basis: {class: illustrative}}
+  - {id: R-4, kind: equals, document: item, path: /a/unit, other: /b/unit, basis: {class: illustrative}}
+  - id: R-5
+    kind: each
+    document: item
+    path: /cells
+    rule: {kind: pattern, path: /code, pattern: '[A-Z]{2}[0-9]{2}'}
+    basis: {class: illustrative}
+```
+
+| Kind | Fields | The rule breaks when |
+| --- | --- | --- |
+| `pattern` | `path`, `pattern`, optional `max_length` | The value is not a string, has more than `max_length` characters, or does not match the pattern as a whole. |
+| `forbidden` | `path`, not the root | The field is present. A field with the value `null` is present. |
+| `equals` | `path`, and one of `value` or `other` | One value is not a string, or the strings differ. `value` is a string constant. `other` is a second pointer. |
+| `each` | `path`, not the root, and `rule` | The value is not an array, or an element breaks `rule`. |
+
+The rules of a kind of version 2 judge an absent field as follows:
+
+- An absent field never breaks `pattern`, `equals`, or `each`. Only `required_fields` and
+  `forbidden` judge absence.
+- For `equals` with `other`, an absent field on either side is not judged.
+- A present value of the wrong type breaks the rule. A system under test therefore cannot turn a
+  fail into `blocked` with a reshaped document.
+
+The rule of `each` has a `kind` and the fields of that kind. It has no `id`, `document`, `basis`,
+or `when`, and its kind is not `each`. Its paths start at the element. The path `""` is the
+element itself. A failed `each` rule gives the reason code of its rule.
+
+`max_length` is 256 by default and 512 at most. A longer value breaks the rule, so a system
+cannot pad a value to escape the rule. The text comparison of `pattern` and `equals` is exact.
+It does not fold case or normalize Unicode.
+
+A pattern is a regular expression of this closed subset. A pack with any other pattern cannot be
+read.
+
+- The pattern has 1 to 256 characters. It matches the whole value. `^` and `$` are allowed and
+  change nothing.
+- An item is a literal character, `.`, an escaped symbol such as `\.`, a character class
+  `[...]` or `[^...]`, or one of the class escapes `\d`, `\D`, `\w`, `\W`, `\s`, and `\S`.
+- `\d`, `\w`, and `\s` match ASCII characters only. Another escaped letter or digit is refused,
+  for example a backreference `\1`.
+- A group is `(...)` or `(?:...)`. `|` separates alternatives. Lookaround, named groups, inline
+  flags, and atomic groups are refused.
+- A quantifier `*`, `+`, `?`, `{m}`, `{m,}`, or `{m,n}` applies to one item only, never to a
+  group. Nested quantifiers are therefore refused. The bounds are 1000 at most.
+- A lazy or a possessive quantifier is refused. A literal `{` is written `\{`.
+- A pattern has at most three variable choices. A variable choice is a quantifier other than
+  `{m}`, or a `|` outside a character class. A chain of alternatives is therefore refused.
+
+These limits bound the work of the backtracking matcher on each value. With three choices, the
+work grows at most with the cube of the value length.
 
 ### 5.2 Access policy (`profiles/battery/access/*.yaml`)
 
@@ -546,6 +615,24 @@ A profile constant `allowed_contexts` is not expressive enough, so the test purp
 The check reads every `@context` in the document, also in nested nodes and `@graph` members.
 `DATA.CONTEXT.MISSING` depends on the top-level `@context` only.
 Reason codes: `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, `DATA.CONTEXT.OK`.
+
+Two more context sources are experimental:
+
+- The `Link` header of the fetched document. A link with the relation
+  `http://www.w3.org/ns/json-ld#context` counts as a top-level context. A relative target is
+  resolved against the URL of the document. The check ignores the header for
+  `application/ld+json`.
+- The parameter `context_files`. It maps an allowed context URL to a pinned JSON copy under the
+  data root, for example `{"https://example.test/ctx": "contexts/ctx.json"}`. The check reads
+  each `@context` string and each `@import` value in the copy. It follows a reference only into
+  another pinned copy. An allowed context without a copy is judged by its URL only.
+
+Redaction removes a `Link` value with a parameter other than `rel`, for example
+`type="application/ld+json"`. A removed value, or a context target that redaction changed, gives
+`blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. `DATA.CONTEXT.NOT_ALLOWED` comes first. Without a
+top-level context, an unreadable value gives `blocked`, not `DATA.CONTEXT.MISSING`.
+A copy that is not a JSON object, or an `@import`
+value that is not a string, gives `blocked` with `DATA.CONTEXT.FILE_INVALID`.
 
 ## 6. Fault flags
 
@@ -750,7 +837,7 @@ request budget. The transport then sends the request one more time.
 | `identifier.consistency` | `compare_item` (boolean, default `false`) | `IDENTIFIER.CONSISTENT` | `IDENTIFIER.MISMATCH` (fail). Compares the carrier identifier, `samples.identifier` when both exist, and the `id` of the resolved passport. With `compare_item`, the check also compares the resolved passport with the document at the `item` template, as JSON values. Different values give `IDENTIFIER.BINDING.MISMATCH` (fail). An item target that is not a JSON object with status 200 gives `blocked`, `IDENTIFIER.BINDING.NOT_COMPARABLE`. Architecture contract, section 8, gives the order |
 | `api.contract` | `resource` (default `item`), `method` (default `get`), `path` (optional; must equal the template path) | `API.CONTRACT.OK` | see section 5.3 |
 | `data.jsonschema` | `document`: `item` or `model`; optional `schema`, `source`, `sample`, `credential` (see below the table) | `DATA.SCHEMA.OK` | `DATA.SCHEMA.INVALID` (fail). The summary lists JSON paths and keywords, never values. Numbers are exact decimals. A `format` that the engine cannot assert: `blocked`, `DATA.SCHEMA.UNSUPPORTED_FORMAT`, before the fetch. A body nested too deeply to validate: `blocked`, `DATA.RESPONSE.TOO_DEEP`. A schema that is not valid in its dialect, or a local reference that does not resolve: `blocked`, `DATA.SCHEMA.MALFORMED`. A `$schema` other than 2020-12 or draft-07: `blocked`, `DATA.SCHEMA.DIALECT`. A keyword that the dialect ignores: `blocked`, `DATA.SCHEMA.MALFORMED` |
-| `data.context` | `document`, `allowed_contexts`; optional `source`, `sample`, `credential` | `DATA.CONTEXT.OK` | see section 5.4 |
+| `data.context` | `document`, `allowed_contexts`; optional `context_files`, `source`, `sample`, `credential` | `DATA.CONTEXT.OK` | see section 5.4 |
 | `data.rules` | `document` (default `item`); optional `rule_pack`, `source`, `sample`, `credential` | `DATA.RULES.OK` | see section 5.1 |
 | `access.restricted_fields` | `role` (default `anonymous`) | `ACCESS.POLICY.ENFORCED` | see section 5.2 |
 | `integrity.jws` | none | `INTEGRITY.OK` | see section 8.1 |
@@ -770,8 +857,9 @@ The data checks take these optional parameters. Each one is experimental.
 | `credential` | all three | With `credential_payload`: the parameters of `integrity.jose`, for example `accept` and `source` |
 | `schema` | `data.jsonschema` | A schema file under the data root, in place of the profile schema |
 | `rule_pack` | `data.rules` | A rule pack file under the data root, in place of the profile rule packs |
+| `context_files` | `data.context` | A pinned copy under the data root for each of some allowed contexts (section 5.4) |
 
-A run binds each file that `schema` or `rule_pack` names. The outcomes of the sources are in the
+A run binds each file that `schema`, `rule_pack`, or `context_files` names. The outcomes of the sources are in the
 architecture contract, section 8. An unverified credential gives `blocked`,
 `DATA.CREDENTIAL.UNVERIFIED`. A page without a JSON-LD script gives a fail,
 `DATA.EMBEDDED.MISSING`.
