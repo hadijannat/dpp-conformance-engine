@@ -325,6 +325,9 @@ def _sha256(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+# The QR carrier step reads the qr_image sample only with the qr extra, and test_items
+# lists only the sample files that the run read.
+@pytest.mark.qr
 def test_a_run_records_authorization_trust_ca_file_and_test_items(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -373,6 +376,9 @@ def test_a_remote_read_without_an_authorization_is_recorded(
     assert run.replay(capsys)["match"] is True
 
 
+# The QR carrier step reads the qr_image sample only with the qr extra, and test_items
+# lists only the sample files that the run read.
+@pytest.mark.qr
 def test_a_run_without_provenance_inputs_still_names_its_test_items(tmp_path: Path) -> None:
     run = Run(tmp_path)
     m = run.manifest
