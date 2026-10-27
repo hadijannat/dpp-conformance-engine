@@ -739,6 +739,11 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   read a context link after the malformed part. A recorded value that reading did not finish
   therefore gives a fail, `DATA.CONTEXT.LINK_MALFORMED`, as an unparsable document does. The
   message counts the values and does not echo one.
+- Redaction also stops reading where a model of jsonld.js and pyld reads the value differently
+  (section 10). Examples are a parameter named `target`, and two `Link` lines that read
+  differently once joined. Such a value gives `DATA.CONTEXT.LINK_MALFORMED` too. The check reads
+  each recorded line alone. This is an engine limit: another processor can read a value
+  differently.
 - A malformed value is not a context entry. `DATA.CONTEXT.MISSING` and `DATA.CONTEXT.NOT_ALLOWED`
   come first, so a malformed value never turns them into another outcome.
 - A recorded value that is the bare marker `<removed>`, after spaces and tabs are stripped, names no
@@ -1694,12 +1699,44 @@ records/<id>.enc   one encrypted record each
   These fixed values cannot carry a secret. Each other parameter, and each dropped relation, gives
   the link one marker, `<removed>`, after its relations and its type.
 - Reading stops where a link-value does not start with a target in `<` and `>`, or where a link
-  is followed by text other than `,`. jsonld.js and pyld split a value at each `,` outside `<...>`
-  and outside a quoted string that ends at the next `"`. They read the last `rel`. A value is
-  therefore not complete if such a reading gives other targets or other context links. The links before that point are kept, and one marker
+  is followed by text other than `,`. The links before that point are kept, and one marker
   replaces the rest of the value. A target that is not a URI reference becomes the marker
   `%3Cremoved%3E`, and the other links stay. The output of redaction parses to the same links,
   and redaction of the output gives the same text.
+- A value is not complete either if a processor model reads other targets or other context links.
+  The model is the `Link` parser of jsonld.js 8.3.3 and of pyld 3.0.0. They split a value at each
+  `,` outside `<...>` and outside a quoted string that ends at the next `"`. Of each part, they
+  read the first target and then each parameter. A parameter replaces an earlier one of the same
+  name. So the last `rel` counts, and the last parameter named exactly `target` replaces the
+  target. A name with another case or with a space before `=` does not match.
+- This is an engine limit. Another processor, or a later version of these two, can read a value
+  differently. The agreement check does not see such a difference.
+- The two parsers use three regular expressions with `\s`. In Python, these expressions took more
+  than ten seconds on one value of about 2 KiB. The model is a scanner in linear time instead. A
+  test compares it with the three expressions on 20,000 random values in Python syntax. A second
+  test does so in JavaScript syntax. A third test reads values of 64 KiB in many shapes within a
+  bound of five seconds.
+- JavaScript and Python read `\s` differently: Python also matches `\x85`. The model reads each
+  value twice, once with each set of white space. Both readings must agree with the engine.
+- Redaction reads the value as the system sent it. A value with a control character other than
+  HTAB, or with a character above `\xff`, is not complete. Such characters are not valid in an
+  HTTP field value. The Python header parser can leave the line break of an obs-fold in a value.
+  The characters `\x80` to `\xff` are allowed, because a header value arrives as latin-1 text.
+  UTF-8 text such as `Å` arrives as `\xc3\x85`. This gate reads only the live value, not a
+  recorded value. Before P2-26, redaction kept a target with a character such as `\x01`, so an
+  old recording keeps its reading.
+- An HTTP client gives the application one `Link` value: all `Link` lines in wire order, joined
+  with `, `. Two lines can read the same alone and differently once joined. At record time,
+  redaction joins the raw `Link` lines, with the header name compared without case. The model
+  reads the joined value, and the engine reads each line. If the targets in order or their
+  context links differ, the record of the last `Link` line gets the stop marker. A last line
+  without a link records as `<%3Cremoved%3E>, <removed>`. If the reading of a line already
+  stopped, this check is not made, because the record already shows the stop.
+- A check never joins recorded lines. A recorded value holds markers that the model reads as
+  targets. Each recorded line is canonical, so a check reads it alone. So an old recording replays
+  to the same decision digest.
+- `resolver.linkset` reads each recorded line too. After a joined difference, it can take the
+  linkset of another line than a reader of the joined value does.
 - A well-formed value without a link, such as an empty value, becomes the bare marker `<removed>`.
   An old recording holds this form too (section 8). A malformed value without a link becomes
   `<%3Cremoved%3E>, <removed>`, so its record still shows that reading stopped. The bare marker
@@ -1713,6 +1750,11 @@ records/<id>.enc   one encrypted record each
   `%3Cremoved%3E`. Python joins its path to the host of the base URL. The WHATWG URL parser reads
   its first path segment as the host. Only redaction reads this rule, so an old record replays
   unchanged.
+- A target with the scheme `http`, `https`, `ws`, `wss`, `ftp`, or `file` also becomes
+  `%3Cremoved%3E` if `//` does not follow the scheme. Examples are `https:/ctx` and `https:ctx`.
+  Python `urljoin` resolves such a target against the host of the base URL. pyld 3.0.0 keeps it
+  as it is. Before this rule, the record of `https:user:pw@example.test/ctx` held the credential
+  text. Only redaction reads this rule, so an old record replays unchanged.
 - A credential-like query value is different. Redaction replaces it with a marker in place, and
   that marker shows in the recorded target. So a check sees that redaction changed the target.
 

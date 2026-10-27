@@ -653,17 +653,28 @@ parameter, and each relation outside its closed list, with one marker.
   are kept, so a context link before a malformed part still names its target.
 - A JSON-LD processor can read a context link after the malformed part. So a value that reading
   did not finish gives a fail, `DATA.CONTEXT.LINK_MALFORMED`.
-- Reading does not finish either if a processor that splits at commas, as jsonld.js does, reads
-  other targets or other context links. A quoted string without a closing quote, a backslash
-  before a quote, and a later `rel` are examples.
+- Reading does not finish either if a model of the `Link` parsers of jsonld.js 8.3.3 and pyld
+  3.0.0 reads other targets or other context links. A quoted string without a closing quote, a
+  backslash before a quote, and a later `rel` are examples. A parameter named exactly `target`
+  is one too: these parsers read it as the target.
+- The model reads each value with the white space of JavaScript and of Python. Python also
+  reads `\x85` as white space. Both readings must agree with the engine.
+- A value with a control character other than HTAB, or with a character above `\xff`, does not
+  finish either. UTF-8 text in a title, such as `\xc3\x85`, is allowed.
+- Redaction also reads all `Link` lines of an answer joined with `, `, as an HTTP client gives
+  them to a processor. If the model reads the joined lines differently, the record of the last
+  line shows that reading did not finish. The check reads each recorded line alone.
+- Another processor, or a later version, can read a value differently. The check does not see
+  such a difference.
 - A malformed value is not a context, so a document without a top-level context still gives
   `DATA.CONTEXT.MISSING`. `DATA.CONTEXT.NOT_ALLOWED` also comes before `DATA.CONTEXT.LINK_MALFORMED`.
 - A recorded value that is only the marker `<removed>` names no context and is not malformed. An
   old recording and an empty value have this form. An old recording can also hold the target
   `<<removed>>`. A value with that target is not malformed either.
 - A target that is not a URI reference is recorded as a marker. A target with userinfo, a
-  fragment, or an empty authority, such as `https:///ctx`, is recorded as a marker too. As a context target, the marker gives
-  `DATA.CONTEXT.NOT_ALLOWED`.
+  fragment, or an empty authority, such as `https:///ctx`, is recorded as a marker too. So is a
+  target with a scheme such as `https` that `//` does not follow, such as `https:/ctx`. As a
+  context target, the marker gives `DATA.CONTEXT.NOT_ALLOWED`.
 - A target that redaction changed, for example one with a `token` query parameter, is compared in
   its redacted form. It gives `DATA.CONTEXT.NOT_ALLOWED`.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
