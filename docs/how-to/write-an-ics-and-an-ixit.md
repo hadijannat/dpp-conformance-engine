@@ -66,7 +66,8 @@ Copy `fixtures/reference/ev.ixit.yaml` and change it. The schema is `ixit`.
    A sample path must stay inside the directory of the IXIT file.
    Do not start a sample name with `manual/`. The engine reserves that namespace, and such a name is an input error.
 3. Give a URL template in `resources` for each resource that the system serves: `item`,
-   `model`, `signed`, `versions`, and `registry_record`. Each template names an endpoint and a path.
+   `model`, `signed`, `versions`, `registry_record`, `description`, `shells`, `submodels`,
+   `view`, and `credential`. Each template names an endpoint and a path.
 4. If a template uses a part of the passport identifier, declare the split in `id_parts`.
    Give a fixed separator and a name for each part.
 5. List the role identities. Use only a role that the profile declares in `roles`.
