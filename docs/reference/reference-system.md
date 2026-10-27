@@ -376,7 +376,8 @@ The observation summary lists every failed rule id.
 
 Version 2 is experimental (OD-11). It keeps the five kinds of version 1, with dotted `field`
 paths. It adds four kinds that read a JSON Pointer (RFC 6901) in `path`. A pack of version 1
-that uses a kind or a key of version 2 cannot be read.
+that uses a kind of version 2, or a key of version 2 with a value other than its default,
+cannot be read. A rule of a new kind other than `forbidden` needs a `path` other than the root.
 `testpacks/data/rules/TEST-ONLY-web-rules-v2.yaml` is an example.
 
 ```yaml
@@ -626,7 +627,9 @@ Two more context sources are experimental:
 
 Redaction removes a `Link` value with a parameter other than `rel`, for example
 `type="application/ld+json"`. A removed value, or a context target that redaction changed, gives
-`blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. A copy that is not a JSON object, or an `@import`
+`blocked` with `DATA.CONTEXT.LINK_UNREADABLE`. `DATA.CONTEXT.NOT_ALLOWED` comes first. Without a
+top-level context, an unreadable value gives `blocked`, not `DATA.CONTEXT.MISSING`.
+A copy that is not a JSON object, or an `@import`
 value that is not a string, gives `blocked` with `DATA.CONTEXT.FILE_INVALID`.
 
 ## 6. Fault flags

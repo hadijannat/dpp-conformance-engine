@@ -708,8 +708,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
 `data.rules` reads rule packs of version 1 and version 2 (OD-11). Version 2 is experimental. The
 [reference system page](../reference/reference-system.md), section 5.1, gives the format.
 
-- A pack of version 1 that uses a kind or a key of version 2 cannot be read. It gives `blocked`
-  with `DATA.RULES.MISSING`. A pack of version 1 keeps its outcomes and its reason codes.
+- A pack of version 1 that uses a kind of version 2, or a key of version 2 with a value other
+  than its default, cannot be read. It gives `blocked` with `DATA.RULES.MISSING`. A pack of
+  version 1 keeps its outcomes and its reason codes.
 - `pattern` matches the string at a JSON Pointer as a whole. The pattern is in a closed subset of
   regular expressions without nested quantifiers and without backreferences. A value longer than
   `max_length` characters breaks the rule.
@@ -728,7 +729,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
 - The record keeps a `Link` value only in the form that redaction keeps (section 10). A removed
   value, or a context target that redaction changed, gives `blocked` with
-  `DATA.CONTEXT.LINK_UNREADABLE`. A fail of the document comes first.
+  `DATA.CONTEXT.LINK_UNREADABLE`. `DATA.CONTEXT.NOT_ALLOWED` comes first. A document without a
+  top-level context and with an unreadable `Link` value gives `blocked`, not
+  `DATA.CONTEXT.MISSING`, because the value can name the context.
 - `context_files` maps an allowed context URL to a pinned copy under the data root. The check
   reads each `@context` reference and each `@import` value of a pinned context. It follows a
   reference only into another pinned context.

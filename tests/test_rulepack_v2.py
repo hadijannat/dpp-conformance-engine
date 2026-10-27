@@ -180,6 +180,23 @@ def test_a_pattern_of_the_accepted_subset_loads(pattern: str) -> None:
     Rule.model_validate(rule("pattern", path="/n", pattern=pattern))
 
 
+@pytest.mark.parametrize(
+    "spec",
+    [rule("pattern", pattern="a*"), rule("pattern", path="", pattern="a*"), rule("equals", value="x")],
+    ids=["pattern-no-path", "pattern-root", "equals-no-path"],
+)
+def test_a_rule_on_the_root_of_the_document_is_refused(spec: dict[str, Any]) -> None:
+    """The root is an object, so the rule would break for every document."""
+    with pytest.raises(ValidationError):
+        Rule.model_validate(spec)
+
+
+def test_a_fixed_count_is_not_a_variable_quantifier() -> None:
+    Rule.model_validate(rule("pattern", path="/n", pattern="a{2}b{3,3}c{1000}d*e+f?"))  # three variable
+    with pytest.raises(ValidationError):
+        Rule.model_validate(rule("pattern", path="/n", pattern="a{2}b{3,}d*e+f?"))  # four variable
+
+
 def test_max_length_has_an_engine_limit() -> None:
     with pytest.raises(ValidationError):
         Rule.model_validate(rule("pattern", path="/n", pattern="a*", max_length=513))

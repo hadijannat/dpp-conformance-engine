@@ -135,13 +135,14 @@ def check_pattern(pattern: str) -> str:  # noqa: PLR0912, PLR0915 - one branch p
         if char in "*+?" or quantifier:
             if not repeatable:
                 raise ValueError("a quantifier applies to one character, class, or escape only")
+            fixed = False  # "*", "+", and "?" are variable
             if quantifier:
                 low, comma, high = quantifier.groups()
                 top = int(high) if high else _MAX_REPEAT if comma else int(low)
                 if int(low) > top or top > _MAX_REPEAT:
                     raise ValueError(f"a counted repeat has bounds of at most {_MAX_REPEAT}, in order")
-                fixed = not comma or (high and int(high) == int(low))
-            variable += 0 if quantifier and fixed else 1
+                fixed = top == int(low) and not (comma and not high)
+            variable += 0 if fixed else 1
             if variable > _MAX_VARIABLE:
                 raise ValueError(f"a pattern has at most {_MAX_VARIABLE} variable quantifiers")
             repeatable = False  # so a lazy "?" or a possessive "+" is refused
@@ -289,8 +290,10 @@ class Rule(_Judgment):
     def _each_judges_something(self) -> Self:
         if (self.kind == "each") != (self.rule is not None):
             raise ValueError("an each rule, and only an each rule, has a rule")
-        if self.kind == "each" and not self.path:
-            raise ValueError("an each rule names an array by a pointer other than the root")
+        # The root of a document is an object, so a rule on it would break for every document.
+        # Only the rule of an each rule names its element with the root pointer.
+        if self.kind in ("pattern", "equals", "each") and not self.path:
+            raise ValueError(f"a {self.kind} rule names a field by a pointer other than the root")
         return self
 
 
