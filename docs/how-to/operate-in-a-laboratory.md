@@ -124,6 +124,46 @@ dppce replay --run RUN_DIR --keys KEYS_DIR --times 5 --json
 6. Other exit codes follow the overall outcome, as for `dppce run`.
 7. Keep the output. The engine does not store a replay result.
 
+### Compare repeated runs
+
+A replay gives the same decision digest for one recording. It does not show that a new run gives
+the same result. To show repeatability, run the same plan two times against the same system.
+Then compare the two envelopes.
+
+1. Run the same plan again. Give the second run a new `--out` directory.
+2. Sign each envelope.
+3. Compare the two signed envelopes. Give your trust bundle and the evaluation time.
+
+```bash
+dppce compare RUN_1/envelope.json RUN_2/envelope.json --trust TRUST.json --at TIME --format json
+```
+
+4. Read the exit code. `0` means that every step verdict is equal.
+5. Exit code `1` means that one or more step verdicts differ.
+6. Exit code `4` means that the verification of an envelope failed. Then the command compares nothing.
+7. Exit code `2` means bad input, for example a file that is not a valid envelope.
+8. Keep the output. The engine does not store a comparison result.
+
+Without `--trust`, the command does not verify the envelopes. The output then states
+`verification: not run`. Without `--format json`, the output is plain text.
+
+The output has these parts:
+
+| Part | Content |
+| --- | --- |
+| `plan_inputs` | Each manifest value that differs: engine version, mode, profile, catalogue, packs, test packs, ICS, IXIT, trust policy version, and bound files. |
+| `steps` | Each step whose verdict, execution status, or reason code differs. |
+| `observation_fields` | The name of each observation summary field that differs. The output never shows the value. |
+
+- Different plan inputs do not change the exit code. Read `same_plan_inputs` before you use a
+  comparison as a repeatability result.
+- The decision digests of two live runs always differ. Each run uses new salts for its record
+  commitments.
+- A version 1 decision body records no bound files. A comparison with such a body does not compare
+  them.
+- Two live runs at different times can see different data. A difference alone does not show a
+  defect of the engine.
+
 ## 5. Verify
 
 1. Verify the signed report against your trust bundle. This is the file that `sign` wrote.
@@ -209,6 +249,7 @@ After a purge, a replay is not possible. The signed report still verifies.
 | --- | --- | --- |
 | Verdict and claim level | The outcome of each step under the rules of the selected mode. | A legal decision, product safety, or the truth of the data. |
 | Replay | The same recording gives the same decision digest. | A new measurement of the system. |
+| Comparison | Two runs give the same step verdicts, or the steps that differ. | The cause of a difference, or the values that the system returned. |
 | Verification | The report is intact. A key in your trust bundle signed it as the issuer. The key was valid at the key validity time. | Anything new about the tested system. |
 | Status | The status list that you supplied does not withdraw the report. | The status in a list that you did not supply. |
 | Reviewer signature | A key with the purpose `review` signed the report. | Which person reviewed it, or what that person checked. |

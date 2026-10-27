@@ -3,6 +3,7 @@
 Exit codes (docs/explanation/architecture.md, section 12):
 0 completed (run, replay: overall pass); 1 the system under test failed; 2 usage or input error;
 3 execution error; 4 evidence verification failed or replay digest mismatch; 5 inconclusive.
+For compare: 0 every step verdict is equal; 1 a step verdict differs.
 Every command accepts ``--json`` and then writes one JSON document to standard output.
 """
 
@@ -44,6 +45,9 @@ from dppce.catalogue import (
     load_testpacks,
 )
 from dppce.catalogue.lint import lint, trace
+from dppce.compare import CompareError
+from dppce.compare import as_text as compare_text
+from dppce.compare import compare as compare_envelopes
 from dppce.evidence import disclosure
 from dppce.evidence import status as status_lists
 from dppce.evidence.canonical import CanonicalizationError, canonical_bytes, is_exact, parse_strict
@@ -1168,6 +1172,42 @@ def cmd_verify(args: argparse.Namespace) -> int:
     return EXIT_OK if report.complete else EXIT_VERIFY
 
 
+def cmd_compare(args: argparse.Namespace) -> int:
+    """Compare two envelopes of repeated runs. Exit 1 means that a step verdict differs."""
+    if args.trust is not None and args.at is None:
+        # Verification needs an explicit evaluation time. "Now" is never assumed.
+        raise UsageError("a comparison with --trust needs an explicit time: --at")
+    trust = _trust(args.trust)
+    # A list, not a mapping: an envelope compared with itself is read twice.
+    raws = [(path, path.read_bytes()) for path in (args.a, args.b)]
+    if trust is not None:
+        # Verify first: a changed body must give the verification failure, not an input error.
+        for path, raw in raws:
+            report = verify_json(raw, trust, _time(args.at))
+            if not report.complete:
+                failed = [d.name for d in report.dimensions if d.outcome in ("fail", "missing")]
+                print(f"error: verification of {path} is not complete: {', '.join(failed)}", file=sys.stderr)
+                return EXIT_VERIFY
+    a, b = (_checked_envelope(path, raw) for path, raw in raws)
+    try:
+        document = compare_envelopes(a, b)
+    except CompareError as exc:
+        raise UsageError(str(exc)) from exc
+    for side, path, envelope in (("a", args.a, a), ("b", args.b, b)):
+        document[side] = {
+            "path": str(path),
+            "schema_version": envelope.decision.schema_version,
+            "decision_digest": decision_digest(envelope.decision),
+        }
+    document |= {"verified": trust is not None, "verified_at": args.at if trust is not None else None}
+    if args.json or args.format == "json":
+        print(json.dumps(document, indent=2, sort_keys=True))
+    else:
+        print(compare_text(document))
+    # Code 1 here means that the runs differ in a step verdict (architecture section 12).
+    return EXIT_OK if document["verdicts_equal"] else EXIT_SUT_FAIL
+
+
 def cmd_timestamp_imprint(args: argparse.Namespace) -> int:
     """Print the SHA-256 imprint of each signature. The operator makes the request with it."""
     envelope = EvidenceEnvelope.model_validate(parse_strict(args.envelope.read_bytes()))
@@ -1567,6 +1607,19 @@ def _parser() -> argparse.ArgumentParser:  # noqa: PLR0915 - a flat declaration 
     verify.add_argument("--status-list", type=Path, help=_STATUS_LIST_HELP)
     verify.add_argument("--opening", type=Path, help="record opening to check against the report")
     verify.add_argument("--proof", type=Path, help="inclusion proof to check against the report")
+
+    summary = "Compare two envelopes of repeated runs: plan inputs, and each step that differs."
+    compare = add("compare", cmd_compare, summary)
+    compare.add_argument("a", type=Path, metavar="A", help="envelope of the first run")
+    compare.add_argument("b", type=Path, metavar="B", help="envelope of the second run")
+    compare.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="output format; --json is the same as --format json",
+    )
+    compare.add_argument("--trust", type=Path, help="verify both envelopes first against this trust bundle")
+    compare.add_argument("--at", help="evaluation time of the verification; needed with --trust")
 
     authorize = add("authorize", cmd_authorize, "Sign a test authorization with the key of the system owner.")
     authorize.add_argument(
