@@ -715,7 +715,9 @@ row 1 and before row 2.
 4. A credential that does not verify under `credential`: `blocked`,
    `DATA.CREDENTIAL.UNVERIFIED`. The message and the summary name the code of `integrity.jose`.
    An unverified payload is never judged. `integrity.jose` reports the signature itself.
-5. A page above 2 MiB: `blocked`, `DATA.EMBEDDED.TOO_LARGE`.
+5. A page above 2 MiB: `blocked`, `DATA.EMBEDDED.TOO_LARGE`. A fetched page above the body limit
+   of the transport policy gives `blocked`, `TRANSPORT.BODY_TRUNCATED`, first. The default body
+   limit is 1 MiB, so `DATA.EMBEDDED.TOO_LARGE` applies to a fetched page only under a higher limit.
 6. A sample, a payload, or a script that is not one JSON object gives a fail,
    `DATA.RESPONSE.NOT_JSON`. So does a page that is not UTF-8 text.
 7. A page without such a script: fail, `DATA.EMBEDDED.MISSING`.

@@ -85,6 +85,24 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The IXIT resource names `description`, `shells`, `submodels`, `view`, and `credential`.
   `api.contract` can judge the AAS description and shell list operations. The IXIT version stays
   `dppce.ixit/1`.
+- `data.jsonschema`, `data.context`, and `data.rules` take the optional parameter `source`. It is
+  `item`, `model`, `credential_payload`, `embedded_jsonld`, or the name of an IXIT sample. A
+  credential payload is judged only after the credential verifies. Each embedded JSON-LD script
+  of an HTML page is judged.
+- `data.jsonschema` takes the parameter `schema`, and `data.rules` takes `rule_pack`. Each names a
+  file under the data root. Each file that a test purpose of a selected test pack names is a
+  bound file of the run.
+- Reason codes `DATA.PARAMS.INVALID`, `DATA.SAMPLE.MISSING`, `DATA.CREDENTIAL.UNVERIFIED`,
+  `DATA.EMBEDDED.MISSING`, and `DATA.EMBEDDED.TOO_LARGE`.
+- Records and record openings keep `redirect_statuses`, the status of each redirect hop. The
+  field is left out when it is empty, so an old recording keeps its commitments.
+- `Request.follow_redirects`. With `false`, the transport returns the first answer and follows no
+  redirect.
+- `resolver.conformance` takes the parameter `expected_redirect_statuses`. The first hop of the
+  default request must have one of these statuses. The default accepts 301, 302, 303, 307, and 308.
+- Reason codes `RESOLVER.CONFORMANCE.REDIRECT_STATUS` and
+  `RESOLVER.CONFORMANCE.HOP_STATUS_NOT_RECORDED`.
+- The fault catalogue version 0.13.0 adds `F-77`, `F-78`, `B-09`, and `E-17`.
 
 ### Changed
 

@@ -20,7 +20,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from pydantic import ValidationError
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
-from dppce.adapters.data import DocumentParams, RulesParams, SchemaParams
+from dppce.adapters.data import MAX_PAGE_BYTES, DocumentParams, RulesParams, SchemaParams
 from dppce.models import CheckOutcome, ExecutionStatus, TrustBundle
 from dppce.orchestrator.run import bound_files  # noqa: TID251 - the bound files of a run
 from tests.core import builders as b
@@ -401,6 +401,27 @@ def test_every_script_is_judged_however_many_the_page_holds(
     assert many.observations[0].summary["documents"] == 17
     assert verdict(outcome(*[GOOD] * 16, BAD)) == failed(bad)
     assert verdict(outcome(*[GOOD] * 16, "{bad")) == failed("DATA.RESPONSE.NOT_JSON")
+
+
+class Truncated(Canned):
+    """Answers like a transport whose body limit cut the page."""
+
+    def fetch(self, request: Any) -> Any:
+        return replace(super().fetch(request), truncated=True)
+
+
+def test_a_page_above_the_body_limit_is_blocked_before_the_page_limit(tmp_path: Path) -> None:
+    """The default body limit (1 MiB) is below the page limit, so a fetched page stops there first."""
+    outcome = check(
+        tmp_path, "data.jsonschema", Truncated(page(GOOD)), profile_schema=ID_SCHEMA, source="embedded_jsonld"
+    )
+    assert verdict(outcome) == blocked("TRANSPORT.BODY_TRUNCATED")
+    # A policy with a body limit above 2 MiB lets the whole page through to the page limit.
+    large = page(GOOD) + b" " * MAX_PAGE_BYTES
+    outcome = check(
+        tmp_path, "data.jsonschema", Canned(large), profile_schema=ID_SCHEMA, source="embedded_jsonld"
+    )
+    assert verdict(outcome) == blocked("DATA.EMBEDDED.TOO_LARGE")
 
 
 class HtmlAcquirer(Canned):
