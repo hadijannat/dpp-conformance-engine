@@ -3,7 +3,7 @@ SPDX-PackageName = "dpp-conformance-engine"
 SPDX-PackageSupplier = "Hadi Jannatabadi"
 
 [[annotations]]
-path = ["src/**", "tests/**", "scripts/**", "validation/**", "catalogue/**", "profiles/**", "testpacks/**", "fixtures/**", "styles/**", ".github/**", "pyproject.toml", "uv.lock", "justfile", "Dockerfile", "compose.yaml", ".dockerignore", ".gitignore", ".gitattributes", ".gitleaks.toml", ".pre-commit-config.yaml", ".python-version", ".vale.ini", "mkdocs.yml", "REUSE.toml", "CITATION.cff", "state/**"]
+path = ["src/**", "tests/**", "scripts/**", "validation/**", "catalogue/**", "profiles/**", "testpacks/**", "fixtures/**", "styles/**", ".github/**", "pyproject.toml", "uv.lock", "justfile", "Dockerfile", "compose.yaml", ".dockerignore", ".gitignore", ".gitattributes", ".gitleaks.toml", ".gitleaksignore", ".pre-commit-config.yaml", ".python-version", ".vale.ini", "mkdocs.yml", "REUSE.toml", "CITATION.cff", "state/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Hadi Jannatabadi"
 SPDX-License-Identifier = "Apache-2.0"

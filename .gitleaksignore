@@ -1,0 +1,6 @@
+# Findings of the secret scan that are not secrets. One fingerprint per line.
+#
+# square-access-token in a public TLS certificate: the rule matches a base64 run inside the
+# PEM certificate of facebook.com in a vendored x509-limbo path-validation vector (Apache-2.0).
+# The file holds public certificate chains of public websites and no key or token.
+b93ba2ca84de0db3561c645da2f66d1791dbf717:tests/vectors/x509-limbo/online/facebook.com.limbo.json:square-access-token:14
