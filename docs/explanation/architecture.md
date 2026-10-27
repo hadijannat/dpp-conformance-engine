@@ -1348,7 +1348,11 @@ The IXIT gives the URL of each fetched passport resource. No adapter holds a URL
 passport resource.
 
 - `IXIT.resources` maps a resource name to an endpoint name and a URL template. The names are
-  `item`, `model`, `signed`, `versions`, and `registry_record`.
+  `item`, `model`, `signed`, `versions`, `registry_record`, `description`, `shells`, `submodels`,
+  `view`, and `credential`. The last five are additive, and `dppce.ixit/1` stays.
+- `api.contract` judges any of these resources. The contract marks the operation with
+  `x-dppce-resource`. An AAS description or shell list is one such operation.
+- An unknown resource name is refused when the IXIT loads.
 - A URL template starts with one `/`. It holds URL path and query characters and named
   placeholders, for example `/passports/{gtin}/{serial}/data`. It has no fragment.
 - A URL template is not evaluated. The engine only replaces each named placeholder with a

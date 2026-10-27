@@ -668,8 +668,8 @@ IXIT conventions for the reference rig:
 - `samples.qr_image`: path of a QR image. `samples.identifier`: the public identifier as text.
 - `samples.passport_id`: the `{id}` placeholder value, for example `09506000134352-EV0001`.
 - `samples.aas_file`: path of an Asset Administration Shell JSON file (optional).
-- `resources`: one URL template for each fetched resource: `item`, `model`, `signed`,
-  `versions`, and `registry_record`. Each names an endpoint and a URL template.
+- `resources`: one URL template for each fetched resource. The reference fixtures declare `item`,
+  `model`, `signed`, `versions`, and `registry_record`. Each names an endpoint and a URL template.
 - `id_parts`: splits `passport_id` at a fixed separator into named parts. The reference
   fixtures use separator `-` and the names `gtin` and `serial`.
 - `item_target`: `template` (the default) or `resolved`. With `resolved`, `api.contract`, the
