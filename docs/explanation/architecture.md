@@ -362,7 +362,7 @@ Initial registry:
 | `aas.api_profile` | `aas.api_profile` | Sends positive GET probes to an AAS server through the engine transport under a read profile of the AAS API 3.0. It sends no write, negative, or fuzz request. Experimental. |
 | `manual.review` | `manual.review` | Verify the signed result of a manual step. The engine does not perform the review. |
 | `identifier.negotiation` | `identifier.negotiation` | Sends five fixed `GET` requests to the carrier URL that differ only in the `Accept` header. Checks status, media type, weights, `Vary`, and the body shape. Experimental. |
-| `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
+| `resolver.linkset` | `resolver.linkset` | Fetches the linkset of the carrier identifier, and a linkset that a `Link` header of its answers advertises. Checks its RFC 9264 structure, its anchor, and the declared relations. It does not fetch link targets. |
 | `resolver.well_known` | `resolver.well_known` | Checks the GS1 resolver description file at the carrier origin. A redirected file that would pass gives `blocked`. |
 | `resolver.conformance` | `resolver.conformance` | Probes the final-status behavior of a GS1 resolver. It does not judge the status of a redirect hop. |
 | `identity.did` | `identity.did` | Resolves a did:web DID, or reads an offline copy of its DID document. Checks the `id`, the verification methods, and the assertion methods. Resolution is not trust. Experimental. |
@@ -769,6 +769,17 @@ It judges each answer by the first rule that applies:
 
 Otherwise the check passes with `RESOLVER.LINKSET.OK`. It does not fetch a link target, and it does
 not judge the other target attributes.
+
+An answer can also advertise its linkset in a `Link` header with the relation `linkset` (RFC 9264,
+section 6). After both answers pass, the check reads the recorded `Link` headers of the two
+answers. It takes the first `http` or `https` target with that relation and resolves a relative
+target against the final URL of its answer. It fetches that target once with
+`Accept: application/linkset+json` and judges the answer by rules 1 to 5. The transport policy
+applies to that request as to every other request. The check reads only the recorded form of the
+header (section 10). A `Link` value with another parameter, such as `type`, is therefore not read.
+No usable `Link` value, no answer, or a body that cannot be read leaves the pass unchanged. The
+check sends the extra request only after both answers pass. So a broken `Link` value cannot turn
+a fail into a missing answer.
 
 `resolver.well_known` fetches `/.well-known/gs1resolver` at the origin of the carrier URL. The
 rules judge the final answer, also after a redirect. A status other than 200 gives

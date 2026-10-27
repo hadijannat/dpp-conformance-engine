@@ -126,6 +126,7 @@ test_purposes:
       - https://dppce.example.test/rel/passport
   expected_evidence:
   - The two linkset exchanges, by Accept header and by linkType query.
+  - The exchange of a linkset that a Link header of these answers advertises, if one does.
   permitted_modes: *modes
 - id: TP-GS1-WELLKNOWN-001
   title: Check the resolver description file at the origin of the carrier identifier
