@@ -149,6 +149,10 @@ def test_a_missing_sample_is_blocked_and_a_sample_that_is_not_json_fails(tmp_pat
         {"source": "item", "sample": "view_html"},
         {"sample": "view_html"},
         {"source": "credential_payload", "credential": {"profile": "vc-jose", "key_source": "x5c"}},
+        # A test purpose must not judge the signed manual result of another test purpose.
+        {"source": "embedded_jsonld", "sample": "manual/TP-X"},
+        {"source": "credential_payload", "credential": {"source": "sample", "sample": "manual/TP-X"}},
+        {"source": "credential_payload", "credential": {"key_source": "did", "did_sample": "manual/TP-X"}},
     ],
 )
 def test_the_source_parameters_are_closed(params: dict[str, Any]) -> None:
@@ -373,20 +377,50 @@ def test_a_page_that_is_not_utf_8_fails(tmp_path: Path) -> None:
     assert verdict(outcome) == failed("DATA.RESPONSE.NOT_JSON")
 
 
-def test_too_many_scripts_are_blocked_only_when_none_of_the_judged_ones_fails(tmp_path: Path) -> None:
-    many = check(
-        tmp_path,
-        "data.jsonschema",
-        Canned(page(*[GOOD] * 17)),
-        profile_schema=ID_SCHEMA,
-        source="embedded_jsonld",
-    )
-    assert verdict(many) == blocked("DATA.EMBEDDED.TOO_LARGE")
-    mixed = page(*[GOOD] * 3, BAD, *[GOOD] * 13)
-    outcome = check(
-        tmp_path, "data.jsonschema", Canned(mixed), profile_schema=ID_SCHEMA, source="embedded_jsonld"
-    )
-    assert verdict(outcome) == failed("DATA.SCHEMA.INVALID")
+@pytest.mark.parametrize(
+    ("name", "ok", "bad"),
+    [
+        ("data.jsonschema", "DATA.SCHEMA.OK", "DATA.SCHEMA.INVALID"),
+        ("data.context", "DATA.CONTEXT.OK", "DATA.CONTEXT.NOT_ALLOWED"),
+        ("data.rules", "DATA.RULES.OK", "DATA.COMPLETENESS.MISSING"),
+    ],
+)
+def test_every_script_is_judged_however_many_the_page_holds(
+    tmp_path: Path, name: str, ok: str, bad: str
+) -> None:
+    """A count limit would let a page hide a failing script behind passing ones (finding of P2-24)."""
+
+    extra: dict[str, Any] = {"allowed_contexts": ALLOWED} if name == "data.context" else {}
+
+    def outcome(*scripts: str) -> CheckOutcome:
+        acquirer = Canned(page(*scripts))
+        return check(tmp_path, name, acquirer, profile_schema=ID_SCHEMA, source="embedded_jsonld", **extra)
+
+    many = outcome(*[GOOD] * 17)
+    assert verdict(many) == passed(ok)
+    assert many.observations[0].summary["documents"] == 17
+    assert verdict(outcome(*[GOOD] * 16, BAD)) == failed(bad)
+    assert verdict(outcome(*[GOOD] * 16, "{bad")) == failed("DATA.RESPONSE.NOT_JSON")
+
+
+class HtmlAcquirer(Canned):
+    """Records the Accept header of each request."""
+
+    def __init__(self, body: bytes) -> None:
+        super().__init__(body)
+        self.accepts: list[str | None] = []
+
+    def fetch(self, request: Any) -> Any:
+        self.accepts.append(request.headers.get("Accept"))
+        return super().fetch(request)
+
+
+def test_an_embedded_page_is_asked_for_as_html(tmp_path: Path) -> None:
+    """A resolver with content negotiation answers */* with JSON, so the engine asks for HTML."""
+    acquirer = HtmlAcquirer(page(GOOD))
+    outcome = check(tmp_path, "data.jsonschema", acquirer, profile_schema=ID_SCHEMA, source="embedded_jsonld")
+    assert verdict(outcome) == passed("DATA.SCHEMA.OK")
+    assert acquirer.accepts == ["text/html"]
 
 
 def test_an_embedded_sample_page_is_read_from_the_ixit(tmp_path: Path) -> None:

@@ -55,9 +55,8 @@ from dppce.testdefs.registry import CheckContext, register
 DocumentKind = Literal["item", "model"]
 CREDENTIAL: Final = "credential_payload"
 EMBEDDED: Final = "embedded_jsonld"
-# Engine limits of the source embedded_jsonld. A page above the limit, or the scripts after the
-# limit, are not judged; the check gives blocked only if no judged document fails.
-MAX_SCRIPTS: Final = 16
+# Engine limit of the source embedded_jsonld: a larger page is not judged. Every script of a page
+# within the limit is judged, so a script count limit would let a page hide a failing script.
 MAX_PAGE_BYTES: Final = 2 * 1024 * 1024
 # One path segment of a parameter file: no empty, "." or ".." segment, no backslash.
 _SEGMENT: Final = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*")
@@ -166,7 +165,7 @@ class DocumentParams(Model):
         max_length=64,
         description=(
             "For embedded_jsonld: the IXIT sample that holds the HTML page. Default: the page at the "
-            "resource that document names."
+            "resource that document names, fetched with Accept: text/html. A name never starts with manual/."
         ),
     )
     credential: JoseParams | None = Field(
@@ -179,7 +178,10 @@ class DocumentParams(Model):
 
     @model_validator(mode="after")
     def _source_fields(self) -> Self:
-        if self.source is not None and self.source.startswith(SAMPLE_PREFIX):
+        # The manual results of other test purposes are in the same artifact namespace.
+        jose = self.credential
+        names = (self.source, self.sample, jose and jose.sample, jose and jose.did_sample)
+        if any(name and name.startswith(SAMPLE_PREFIX) for name in names):
             raise ValueError(f"a sample name never starts with {SAMPLE_PREFIX}")
         if self.credential is not None and self.source != CREDENTIAL:
             raise ValueError(f"credential needs the source {CREDENTIAL}")
@@ -225,23 +227,10 @@ class _Documents:
     documents: list[dict[str, Any]]
     record: Record
     summary: dict[str, JsonValue] = field(default_factory=dict)
-    truncated: bool = False
 
     def observation(self, ctx: CheckContext, summary: dict[str, JsonValue]) -> Any:
         kind: Literal["artifact", "exchange"] = "artifact" if self.record.kind == "artifact" else "exchange"
         return ctx.observation(0, kind=kind, records=[self.record], summary=summary | self.summary)
-
-    def limit(self, observation: Any) -> CheckOutcome | None:
-        """The engine limit of a source, after every judged document passed."""
-        if not self.truncated:
-            return None
-        message = f"The page has more than {MAX_SCRIPTS} JSON-LD scripts. The first {MAX_SCRIPTS} pass."
-        return CheckOutcome(
-            status=ExecutionStatus.BLOCKED,
-            reason_code="DATA.EMBEDDED.TOO_LARGE",
-            message=message,
-            observations=(observation,),
-        )
 
 
 def _params[P: DocumentParams](ctx: CheckContext, model: type[P]) -> P | CheckOutcome:
@@ -312,7 +301,7 @@ def _credential(ctx: CheckContext, jose: JoseParams, decimals: bool) -> _Documen
 
 
 class _JsonLdScripts(HTMLParser):
-    """The text of each <script type="application/ld+json">, up to one more than the limit.
+    """The text of each <script type="application/ld+json"> of a page.
 
     The parser never renders or executes the page. Script text is raw: HTML does not decode
     character references in a script.
@@ -346,7 +335,8 @@ class _JsonLdScripts(HTMLParser):
 
 def _embedded(ctx: CheckContext, params: DocumentParams, decimals: bool) -> _Documents | CheckOutcome:
     """Each JSON-LD document of an HTML page. A script that is not one JSON object is a fail."""
-    acquired = _sample(ctx, params.sample) if params.sample else _answer(ctx, params.document)
+    # A resolver with content negotiation can answer */* with JSON, so the engine asks for the page.
+    acquired = _sample(ctx, params.sample) if params.sample else _answer(ctx, params.document, "text/html")
     if isinstance(acquired, CheckOutcome):
         return acquired
     record = acquired
@@ -357,7 +347,7 @@ def _embedded(ctx: CheckContext, params: DocumentParams, decimals: bool) -> _Doc
     except UnicodeDecodeError:
         # JSON text between systems is UTF-8 (RFC 8259, section 8.1), so the scripts are not JSON.
         return _not_json(ctx, record, "The page is not UTF-8 text, so its scripts are not JSON.", EMBEDDED)
-    # ponytail: html.parser reads the whole page; the transport body limit bounds its work.
+    # ponytail: html.parser reads the whole page; MAX_PAGE_BYTES bounds its work and every script.
     parser = _JsonLdScripts()
     parser.feed(text)
     parser.close()
@@ -368,7 +358,7 @@ def _embedded(ctx: CheckContext, params: DocumentParams, decimals: bool) -> _Doc
         message = 'The page holds no <script type="application/ld+json"> element.'
         return completed(False, "DATA.EMBEDDED.MISSING", message, [observation])
     documents: list[dict[str, Any]] = []
-    for script in parser.found[:MAX_SCRIPTS]:
+    for script in parser.found:
         try:
             document = parse_strict(script, decimals=decimals)
         except CanonicalizationError:
@@ -378,7 +368,7 @@ def _embedded(ctx: CheckContext, params: DocumentParams, decimals: bool) -> _Doc
             return _not_json(ctx, record, message, EMBEDDED)
         documents.append(document)
     summary = {"source": EMBEDDED, "documents": len(documents)}
-    return _Documents(documents, record, summary, truncated=len(parser.found) > MAX_SCRIPTS)
+    return _Documents(documents, record, summary)
 
 
 def _documents(
@@ -491,8 +481,6 @@ def jsonschema_check(ctx: CheckContext) -> CheckOutcome:
         return blocked(
             "DATA.RESPONSE.TOO_DEEP", "The document is nested too deeply to validate. It is not judged."
         )
-    if (limit := got.limit(observation)) is not None:
-        return limit
     what = f"The {kind}-level document matches" if len(judged) == 1 else f"All {len(judged)} documents match"
     return completed(True, "DATA.SCHEMA.OK", f"{what} the pinned schema.", [observation])
 
@@ -547,8 +535,6 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     if foreign:
         message = f"{len(foreign)} context references are not in the pinned allowlist. No context is fetched."
         return completed(False, "DATA.CONTEXT.NOT_ALLOWED", message, [observation])
-    if (limit := got.limit(observation)) is not None:
-        return limit
     return completed(
         True, "DATA.CONTEXT.OK", "Every context reference is in the pinned allowlist.", [observation]
     )
@@ -659,8 +645,6 @@ def rules_check(ctx: CheckContext) -> CheckOutcome:
             f"No rule of the pinned rule packs applies to the {kind}-level document.",
         )
     if not failed:
-        if (limit := got.limit(observation)) is not None:
-            return limit
         return completed(
             True, "DATA.RULES.OK", f"The document obeys the {applied} rules that apply.", [observation]
         )

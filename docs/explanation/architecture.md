@@ -692,9 +692,12 @@ still selects the profile schema and the rules of the document kind.
   `signed`, or in an IXIT sample. The parameter `credential` holds the parameters of
   `integrity.jose`, with the profile `vc-jose` and the key source `trust_kid` as defaults.
 - `embedded_jsonld` reads each `<script type="application/ld+json">` element of an HTML page. The
-  page is at the resource that `document` names, or in the IXIT sample that `sample` names.
-- Any other value names an IXIT sample. The check reads the sample and sends no request. A name
-  that starts with `manual/` is refused.
+  page is at the resource that `document` names, or in the IXIT sample that `sample` names. The
+  check asks for the resource with `Accept: text/html`.
+- Any other value names an IXIT sample. The check reads the sample and sends no request.
+
+A sample name that starts with `manual/` is refused. This applies to `source`, `sample`, and the
+sample names in `credential`.
 
 `data.jsonschema` takes the optional parameter `schema`, and `data.rules` takes `rule_pack`. Each
 names a file under the data root, in place of the profile schema or the profile rule packs. The
@@ -717,8 +720,6 @@ row 1 and before row 2.
    `DATA.RESPONSE.NOT_JSON`. So does a page that is not UTF-8 text.
 7. A page without such a script: fail, `DATA.EMBEDDED.MISSING`.
 8. The check judges each embedded document. Any document that breaks the rule gives a fail.
-9. The check judges the first 16 scripts. With more scripts and no fail, it gives `blocked`,
-   `DATA.EMBEDDED.TOO_LARGE`.
 
 A system under test therefore cannot turn a fail into `blocked` with a second script or with a
 document that does not parse. The engine reads the page with the `html.parser` module of the

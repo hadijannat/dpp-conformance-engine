@@ -101,7 +101,7 @@ The last column comes from `dppce.report.hints`, the table that the HTML report 
 | `DATA.CONTEXT.OK` | DATA | `data.context` | `dppce.adapters.data.context_check` | pass | None: the step passed. |
 | `DATA.CREDENTIAL.UNVERIFIED` | DATA |  | `dppce.adapters.data._credential` | inconclusive | Serve a credential that verifies. Its payload was not judged. |
 | `DATA.EMBEDDED.MISSING` | DATA |  | `dppce.adapters.data._embedded` | fail; inconclusive under a non-default verdict rule | Embed the passport data in the page in a JSON-LD script element. |
-| `DATA.EMBEDDED.TOO_LARGE` | DATA |  | `dppce.adapters.data._Documents.limit`, `dppce.adapters.data._embedded` | inconclusive | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
+| `DATA.EMBEDDED.TOO_LARGE` | DATA |  | `dppce.adapters.data._embedded` | inconclusive | Engine limit: the input is larger than the limit of the engine. Supply a smaller sample. |
 | `DATA.FRESHNESS.STALE` | DATA |  | `dppce.adapters.data` | not fixed here | Update the passport data, so that its update time is within the allowed age. |
 | `DATA.NO_TARGET` | DATA |  | `dppce.adapters.data._answer`, `dppce.adapters.data._documents` | inconclusive | Declare the URL template of the resource in the IXIT, and confirm its origin as the operator. |
 | `DATA.PARAMS.INVALID` | DATA |  | `dppce.adapters.data._params` | inconclusive | Correct the parameters of the check in the test purpose. The check did not run with them. |
