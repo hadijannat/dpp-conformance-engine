@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 55,
+    "cycle": 59,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-26: waves 1 to 5 of program P2 are on main (latest 5a6a6c8), and wave 6 (P2-31, P2-34, P2-18, P2-17, and the integrator commits) is on the integration branch worktree-wf_b915a32b-110-7, based on main 5a6a6c8, and is not yet on main.",
+    "state_at_end": "2026-10-27: waves 1 to 6 of program P2 are on main (latest e7d5f45), and wave 7 (P2-20, P2-36, P2-35, P2-32, and the integrator commits) is on the integration branch worktree-wf_0173d194-d70-13 and is not yet on main.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -678,7 +678,31 @@
       "cycle": 55,
       "kind": "implement-and-check",
       "milestone": "M8",
-      "summary": "P2-17 (b93ba2c tests first, then 7b39330, fc22fa4, and the review fix ddbdfa8): 14 unchanged x509-limbo valid chains (C2SP/x509-limbo at 1080e56, Apache-2.0) run through trust_path, scripts/import_schema.py bundles a schema set, and scripts/check_oracle_pins.py checks catalogue/oracle-pins.yaml offline; the package gate figures did not reach the integrator, and after the wave 6 merges uv run just check passed with 4273 tests and 1 skip."
+      "summary": "P2-17 (b93ba2c tests first, then 7b39330, fc22fa4, and the review fix ddbdfa8): 14 unchanged x509-limbo valid chains (C2SP/x509-limbo at 1080e56, Apache-2.0) run through trust_path, scripts/import_schema.py bundles a schema set, and scripts/check_oracle_pins.py checks catalogue/oracle-pins.yaml offline; the package gate figures did not reach the integrator, and after the wave 6 merges uv run just check passed with 4273 tests and 1 skip. Wave 6 landed on main as e7d5f45, with a CI fix: the core-without-extras timeout rose from 10 to 25 minutes."
+    },
+    {
+      "cycle": 56,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-20 (603a77a tests first, then 1bd7de5 and the review fix 272eaf0): test-a-real-system.md gets a section per family and a dataspace data-plane procedure, write-an-ics-and-an-ixit.md explains the ICS for a family profile, and the capabilities dataspace.protocol, dataspace.catalog, and access.oauth2 are named as interface_only, so such a system shows unsupported against a named capability; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
+    },
+    {
+      "cycle": 57,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-36 (b2f9a3b, then the review fix 9c15653): dppce report --format junit and --format sarif render a report for CI, with a step that did not complete or is not applicable as skipped or a SARIF warning, never a pass, and a non-pass overall verdict as its own case or result with the rule DECISION.OVERALL.<VERDICT>; the package run of uv run just check did not finish, and after the wave 7 merges it passed with 4320 tests and 1 skip."
+    },
+    {
+      "cycle": 58,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-35 (b5e9c83 tests first, then 9359125, 6f93610, 73e4765, and the review fix b8d94c6): dppce init drafts an ICS and an IXIT for a family profile from the shipped examples, with a review comment above each key and the next commands, and writes no trust bundle, confirmation, secret, or authorization (ADR 0011), and a new tutorial walks from init to a first run; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
+    },
+    {
+      "cycle": 59,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "P2-32 (6d8f8f9 failing tests first, then a44b84e, 87b115e, c4f4ad8, and the review fix 2dd73bb): dppce compare compares two envelopes of repeated runs, states whether the plan inputs are equal, lists each step that differs by name and summary field without its value, and exits 1 when a step verdict differs; the package gate figures did not reach the integrator, and after the wave 7 merges uv run just check passed with 4320 tests and 1 skip."
     }
   ],
   "blockers": [
