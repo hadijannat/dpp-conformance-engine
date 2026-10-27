@@ -1586,9 +1586,11 @@ A body that writes an absent value is not in the canonical form and fails the st
 | `test_items` | The tested items, sorted by sample name. See below. |
 
 A test item has `sample`, `kind`, and `value`. The kind `declared_identifier` holds the text of
-the IXIT sample `identifier` or `passport_id`. The kind `sample_file` holds `sha256:<hex>` of
-the bytes of a sample file that the run read. A manual result is not a test item. A test item
-never holds a value that the system under test returned.
+the IXIT sample `identifier` or `passport_id`. A declared identifier is recorded after URL
+redaction (section 10), so it holds no userinfo, no fragment, and no credential-like query
+value. The kind `sample_file` holds `sha256:<hex>` of the bytes of a sample file that the run
+read. A manual result is not a test item. A test item never holds a value that the system under
+test returned.
 
 A replay computes the authorization fields, the trust fields, and the test items again from
 `inputs.json` and the recording. The record of run inputs does not hold the CA file or the

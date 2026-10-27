@@ -20,17 +20,19 @@ from cryptography.hazmat.primitives import serialization
 from pydantic import ValidationError
 from validation.evidence_cases import TAMPER
 
-from dppce import cli, schemas
+from dppce import cli, models, schemas
 from dppce.compare import compare
 from dppce.evidence.canonical import canonical_bytes, digest
 from dppce.evidence.envelope import build_decision, decision_digest, in_layout_of, sign_envelope
 from dppce.evidence.jws import LocalSigner
+from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.models import DecisionBody, EvidenceEnvelope, RunManifest, TestItem, TrustBundle
+from dppce.orchestrator import run as orchestrator  # noqa: TID251 - the run core builds the test items
 from dppce.report.html import render
 from dppce.report.junit import render_junit
 from dppce.report.sarif import render_sarif
 from dppce.verifier import verify_json
-from tests.support import AT, ISSUER, make_envelope, make_manifest
+from tests.support import AT, ISSUER, make_artifact, make_envelope, make_manifest
 from tests.test_replay_inputs import ICS, IXIT, PACK, TESTPACK, write_pair
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -290,13 +292,14 @@ def test_compare_reports_provenance_as_a_plan_input_difference() -> None:
 class Run:
     """One reviewed run on a copied data root. It reads a declared identifier and a QR image only."""
 
-    def __init__(self, tmp_path: Path, *extra: str) -> None:
+    def __init__(self, tmp_path: Path, *extra: str, samples: dict[str, str] | None = None) -> None:
         self.root = tmp_path / "root"
         for name in ("catalogue", "profiles", "testpacks"):
             shutil.copytree(ROOT / name, self.root / name)
         pack, testpack = write_pair(tmp_path / "imports")
         shutil.copy(QR, tmp_path / "ev.png")
-        ixit = IXIT | {"samples": {**IXIT["samples"], "qr_image": "ev.png", "passport_id": "EV-0001"}}
+        declared = {**IXIT["samples"], "qr_image": "ev.png", "passport_id": "EV-0001"} | (samples or {})
+        ixit = IXIT | {"samples": declared}
         (tmp_path / "ixit.json").write_text(json.dumps(ixit), encoding="utf-8")
         self.dir, self.keys = tmp_path / "run", tmp_path / "keys"
         self.code = cli.main(
@@ -377,3 +380,63 @@ def test_a_run_without_provenance_inputs_still_names_its_test_items(tmp_path: Pa
     assert [i.sample for i in m.test_items] == ["identifier", "passport_id", "qr_image"]
     document = json.loads((run.dir / "envelope.json").read_bytes())
     assert "authorization_digest" not in document["decision"]["manifest"]
+
+
+def test_a_validated_authorization_is_not_a_remote_read_without_one(tmp_path: Path) -> None:
+    run = Run(
+        tmp_path,
+        "--trust", str(TRUST_FILE), "--authorization", str(TOKEN),
+        "--allow-remote-host", "https://id.example.test",
+    )  # fmt: skip
+    assert run.manifest.authorization_digest is not None
+    assert run.manifest.remote_read_without_authorization is False
+
+
+# -- test items carry no secret and no operator statement -------------------------------------------
+
+CREDENTIAL_ID = (
+    "https://op:TEST-ONLY-pw@id.example.test/01/09506000134352/21/EV0001?access_token=TEST-ONLY-secret"
+)
+REDACTED_ID = "https://id.example.test/01/09506000134352/21/EV0001?access_token=%3Cremoved%3E"
+
+
+def test_tested_items_redact_an_identifier_and_skip_manual_results_and_failed_reads() -> None:
+    ixit = models.IXIT.model_validate(
+        IXIT | {"samples": {"identifier": CREDENTIAL_ID, "passport_id": "EV-0001"}}
+    )
+    records = (
+        make_artifact("qr_image", b"TEST-ONLY-png", index=1),
+        make_artifact(SAMPLE_PREFIX + "T-MAN", b"TEST-ONLY-jws", index=2),
+        make_artifact("label_image", error="artifact_unavailable", index=3),
+    )
+    assert orchestrator.tested_items(ixit, records) == (
+        TestItem(sample="identifier", kind="declared_identifier", value=REDACTED_ID),
+        TestItem(sample="passport_id", kind="declared_identifier", value="EV-0001"),
+        TestItem(
+            sample="qr_image",
+            kind="sample_file",
+            value="sha256:" + hashlib.sha256(b"TEST-ONLY-png").hexdigest(),
+        ),
+    )
+
+
+def test_a_credential_in_an_identifier_reaches_no_report(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    run = Run(tmp_path / "a", samples={"identifier": CREDENTIAL_ID})
+    plain = Run(tmp_path / "b")
+    assert (
+        TestItem(sample="identifier", kind="declared_identifier", value=REDACTED_ID)
+        in run.manifest.test_items
+    )
+    capsys.readouterr()
+    cli.main(["compare", str(plain.dir / "envelope.json"), str(run.dir / "envelope.json")])
+    printed = capsys.readouterr().out
+    assert "identifier" in printed, "compare reports the changed test item"
+    for text in (
+        (run.dir / "envelope.json").read_text(encoding="utf-8"),
+        (run.dir / "report.html").read_text(encoding="utf-8"),
+        printed,
+    ):
+        assert "TEST-ONLY-secret" not in text
+        assert "TEST-ONLY-pw" not in text

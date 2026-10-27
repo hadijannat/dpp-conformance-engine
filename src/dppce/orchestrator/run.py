@@ -29,6 +29,7 @@ from dppce.evidence.manual import MANUAL_CHECK, SAMPLE_PREFIX
 from dppce.evidence.recording import record_commitments
 from dppce.infrastructure.clock import utc_stamp
 from dppce.infrastructure.interfaces import Acquirer, Record
+from dppce.infrastructure.redaction import redact_url
 from dppce.models import (
     ICS,
     IXIT,
@@ -289,10 +290,11 @@ def tested_items(ixit: IXIT, records: Sequence[Record]) -> tuple[TestItem, ...]:
     """The tested items: the identifiers that the IXIT declares, and each sample file that was read.
 
     A file is named by the sha256 of the bytes that the run read, so a replay gives the same items.
-    A manual result is an operator statement, not a test item.
+    A manual result is an operator statement, not a test item. An identifier passes the URL
+    redaction of the transport: the signed report is the most widely shared artifact.
     """
     items = {
-        TestItem(sample=name, kind="declared_identifier", value=ixit.samples[name])
+        TestItem(sample=name, kind="declared_identifier", value=redact_url(ixit.samples[name]))
         for name in _DECLARED
         if ixit.samples.get(name)
     }
