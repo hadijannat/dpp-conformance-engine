@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from typing import Any, Final
 
-from dppce.models import DecisionBody, EvidenceEnvelope, TestResult
+from dppce.models import PROVENANCE_FIELDS, DecisionBody, EvidenceEnvelope, RunManifest, TestResult
 
 _V1_INPUTS: Final = (
     "engine_version",
@@ -31,6 +31,8 @@ _V1_INPUTS: Final = (
 PLAN_INPUTS: Final[dict[str, tuple[str, ...]]] = {
     "dppce.decision/1": _V1_INPUTS,
     "dppce.decision/2": (*_V1_INPUTS, "bound_files"),
+    # The provenance of the run: what was authorized, trusted, and tested. Never a verdict.
+    "dppce.decision/3": (*_V1_INPUTS, "bound_files", *PROVENANCE_FIELDS),
 }
 _STEP_FIELDS: Final = ("verdict", "execution_status", "reason_code")
 
@@ -59,9 +61,12 @@ def _plan_inputs(a: DecisionBody, b: DecisionBody) -> list[dict[str, Any]]:
     )
     # A field that only one version records is not compared, as in a replay (in_layout_of).
     shared = [f for f in PLAN_INPUTS[a.schema_version] if f in PLAN_INPUTS[b.schema_version]]
+    # The dump leaves out an absent value. The field default stands for it, so false and () show.
     ma, mb = a.manifest.model_dump(mode="json"), b.manifest.model_dump(mode="json")
     for field in shared:
-        va, vb = ma[field], mb[field]
+        absent = RunManifest.model_fields[field].default
+        absent = list(absent) if isinstance(absent, tuple) else absent
+        va, vb = ma.get(field, absent), mb.get(field, absent)
         if isinstance(va, dict) and isinstance(vb, dict):
             found += [
                 _diff(f"{field}[{key}]", va.get(key), vb.get(key))

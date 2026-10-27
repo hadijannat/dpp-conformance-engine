@@ -22,7 +22,7 @@ from validation.rig import FIXTURES, ROOT, AlternateLayout, ReferenceRig, RunRes
 
 from dppce import cli
 from dppce.evidence.envelope import decision_digest
-from dppce.models import EvidenceEnvelope, ExecutionStatus, Modality, Tri, Verdict
+from dppce.models import PROVENANCE_FIELDS, EvidenceEnvelope, ExecutionStatus, Modality, Tri, Verdict
 
 pytestmark = pytest.mark.qr  # the reference rig reads QR images
 
@@ -234,6 +234,9 @@ def test_a_version_1_run_replays_with_its_own_digest(tmp_path: Path) -> None:
     document = json.loads(path.read_bytes())
     document["decision"]["schema_version"] = "dppce.decision/1"
     del document["decision"]["manifest"]["bound_files"]
+    # Nor the provenance fields of dppce.decision/3 (P2-21).
+    for name in PROVENANCE_FIELDS:
+        document["decision"]["manifest"].pop(name, None)
     path.write_text(json.dumps(document), encoding="utf-8")
     expected = decision_digest(EvidenceEnvelope.model_validate(document).decision)
     code, summary = rig.replay(run, times=2)

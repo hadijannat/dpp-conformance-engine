@@ -20,7 +20,7 @@ import stat
 import sys
 import tempfile
 from collections.abc import Callable, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final, get_args
@@ -346,6 +346,9 @@ def _build_inputs(
         authorization=authorization,
         issuer=issuer,
         manual_results=manual_results,
+        authorization_digest="sha256:" + hashlib.sha256(authorization_token.encode()).hexdigest()
+        if authorization_token is not None
+        else None,
     )
     if manual_results:
         _refuse_unused_manual_results(inputs)
@@ -573,17 +576,22 @@ def _loads_without_password(data: bytes) -> bool:
     return True
 
 
-def _tls_options(args: argparse.Namespace, authorized: set[str]) -> tuple[Path | None, ClientIdentity | None]:
+def _tls_options(
+    args: argparse.Namespace, authorized: set[str]
+) -> tuple[Path | None, str | None, ClientIdentity | None]:
     """Check the TLS files of the operator and log their SHA-256. The ICS and the IXIT name none of them.
 
-    The CA file adds trust anchors to the default store. The client certificate goes only to the
-    origins in ``authorized``: the origins of the validated authorization.
+    The CA file adds trust anchors to the default store. Its ``sha256:<hex>`` goes into the run
+    manifest. The client certificate goes only to the origins in ``authorized``: the origins of the
+    validated authorization.
     """
+    ca_digest = None
     if args.ca_file is not None:
         pem, _ = _certificates(args.ca_file, "--ca-file", "TLS.CA_FILE.INVALID")
-        print(f"tls: --ca-file {args.ca_file} sha256 {hashlib.sha256(pem).hexdigest()}", file=sys.stderr)
+        ca_digest = "sha256:" + hashlib.sha256(pem).hexdigest()
+        print(f"tls: --ca-file {args.ca_file} sha256 {ca_digest.removeprefix('sha256:')}", file=sys.stderr)
     if args.client_cert is None and args.client_key is None and args.client_key_passphrase_ref is None:
-        return args.ca_file, None
+        return args.ca_file, ca_digest, None
     if args.client_cert is None or args.client_key is None:
         raise UsageError(
             "TLS.CLIENT_CERT.INCOMPLETE: give --client-cert and --client-key together; "
@@ -631,7 +639,7 @@ def _tls_options(args: argparse.Namespace, authorized: set[str]) -> tuple[Path |
         + ", ".join(sorted(authorized)),
         file=sys.stderr,
     )
-    return args.ca_file, ClientIdentity(args.client_cert, args.client_key, passphrase)
+    return args.ca_file, ca_digest, ClientIdentity(args.client_cert, args.client_key, passphrase)
 
 
 def cmd_plan(args: argparse.Namespace) -> int:
@@ -689,7 +697,13 @@ def cmd_run(args: argparse.Namespace) -> int:
             f"the IXIT names role secrets, but no valid authorization names the origin {target}; "
             "a role credential is sent only to an origin that the owner authorized"
         )
-    ca_file, client_identity = _tls_options(args, authorized)
+    ca_file, ca_digest, client_identity = _tls_options(args, authorized)
+    # Operator facts of this run only. A replay takes them from the manifest of the run.
+    inputs = replace(
+        inputs,
+        ca_file_digest=ca_digest,
+        remote_read_without_authorization=inputs.authorization is None and bool(remote),
+    )
     samples = {
         name: path
         for name, value in ixit.samples.items()
@@ -740,7 +754,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         else args.retention_days,
     )
     bound = decision.manifest.bound_files
-    if bound is None:  # a new run writes dppce.decision/2, which always holds bound_files
+    if bound is None:  # a new run writes dppce.decision/3, which always holds bound_files
         raise RuntimeError("the decision body of a new run has no bound_files")
     record = RunInputsRecord(
         schema_version="dppce.runinputs/3",
@@ -824,6 +838,12 @@ def cmd_replay(args: argparse.Namespace) -> int:
         authorization_token=record.authorization_token,
         issuer=record.issuer,
         manual_results=frozenset(record.manual_results),
+    )
+    # inputs.json does not hold these operator facts of the run. They decide no verdict.
+    inputs = replace(
+        inputs,
+        ca_file_digest=original.decision.manifest.ca_file_digest,
+        remote_read_without_authorization=original.decision.manifest.remote_read_without_authorization,
     )
     expected = decision_digest(original.decision)
     digests: list[str] = []

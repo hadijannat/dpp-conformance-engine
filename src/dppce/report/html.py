@@ -105,6 +105,36 @@ def _summary(envelope: EvidenceEnvelope) -> str:
     )
 
 
+def _provenance(envelope: EvidenceEnvelope) -> list[tuple[str, str]]:
+    """Authorization, trust, and test items of the run. A body before version 3 records none of them."""
+    manifest = envelope.decision.manifest
+    if envelope.decision.schema_version != "dppce.decision/3":
+        return [("Authorization, trust anchors, and test items", "not recorded in this decision version")]
+
+    def code(value: str | None) -> str:
+        return "none" if value is None else f"<code>{_e(value)}</code>"
+
+    def codes(values: Iterable[str]) -> str:
+        return "<br>".join(f"<code>{_e(v)}</code>" for v in values) or "none"
+
+    items = [
+        f"{_e(i.sample)} ({_e(i.kind.replace('_', ' '))}): <code>{_e(i.value)}</code>"
+        for i in manifest.test_items
+    ]
+    return [
+        ("Test items (declared by the operator)", "<br>".join(items) or "none"),
+        ("Authorization identifier", code(manifest.authorization_id)),
+        ("Authorization digest", code(manifest.authorization_digest)),
+        (
+            "Remote read-only access without an authorization (confirmed by the operator)",
+            "yes" if manifest.remote_read_without_authorization else "no",
+        ),
+        ("Trust bundle digest", code(manifest.passport_trust_hash)),
+        ("Passport trust anchor fingerprints (SHA-256)", codes(manifest.trust_anchor_fingerprints)),
+        ("Operator CA file digest", code(manifest.ca_file_digest)),
+    ]
+
+
 def _scope(envelope: EvidenceEnvelope) -> str:
     manifest = envelope.decision.manifest
     issuer = manifest.issuer
@@ -129,6 +159,7 @@ def _scope(envelope: EvidenceEnvelope) -> str:
         ("Engine version", _e(manifest.engine_version)),
         ("Container image digest", _e(manifest.image_digest or "not recorded")),
         ("Authorization reference", _e(manifest.authorization_ref or "none")),
+        *_provenance(envelope),
         ("Trust policy version", _e(manifest.trust_policy_version)),
         (
             "Requirement packs",
