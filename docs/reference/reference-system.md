@@ -653,17 +653,22 @@ parameter, and each relation outside its closed list, with one marker.
   are kept, so a context link before a malformed part still names its target.
 - A JSON-LD processor can read a context link after the malformed part. So a value that reading
   did not finish gives a fail, `DATA.CONTEXT.LINK_MALFORMED`.
+- Reading does not finish either if a processor that splits at commas, as jsonld.js does, reads
+  other targets or other context links. A quoted string without a closing quote, a backslash
+  before a quote, and a later `rel` are examples.
 - A malformed value is not a context, so a document without a top-level context still gives
   `DATA.CONTEXT.MISSING`. `DATA.CONTEXT.NOT_ALLOWED` also comes before `DATA.CONTEXT.LINK_MALFORMED`.
 - A recorded value that is only the marker `<removed>` names no context and is not malformed. An
-  old recording and an empty value have this form.
-- A target that is not a URI reference is recorded as a marker. A target with userinfo or a
-  fragment is recorded as a marker too. As a context target, the marker gives
+  old recording and an empty value have this form. An old recording can also hold the target
+  `<<removed>>`. A value with that target is not malformed either.
+- A target that is not a URI reference is recorded as a marker. A target with userinfo, a
+  fragment, or an empty authority, such as `https:///ctx`, is recorded as a marker too. As a context target, the marker gives
   `DATA.CONTEXT.NOT_ALLOWED`.
 - A target that redaction changed, for example one with a `token` query parameter, is compared in
   its redacted form. It gives `DATA.CONTEXT.NOT_ALLOWED`.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
-  form of an allowed URL. `DATA.CONTEXT.MISSING` and `DATA.CONTEXT.NOT_ALLOWED` come first.
+  form of an allowed URL. `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, and
+  `DATA.CONTEXT.LINK_MALFORMED` come first.
 
 The check judges the target of each context link. The JSON-LD 1.1 API, section 9.4.1, rejects
 more than one context link.

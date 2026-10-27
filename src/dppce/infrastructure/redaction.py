@@ -42,6 +42,14 @@ _PARAMETER: Final = re.compile(
     r'(?:=[ \t]*(?:"(?P<quoted>(?:[^"\\]|\\.)*)"?|(?P<token>[^;,]*)))?'
 )
 _QUOTED_PAIR: Final = re.compile(r"\\(.)")
+# jsonld.js 8.3.3 (lib/util.js, parseLinkHeader) and pyld split a Link value at each "," outside
+# "<...>" and outside a quoted string that ends at the next '"'. Of each part they read the first
+# target and the last parameter named exactly "rel", without unescaping.
+_PROCESSOR_PART: Final = re.compile(r'(?:<[^>]*>|"[^"]*"|[^,])+')
+_PROCESSOR_LINK: Final = re.compile(r"\s*<([^>]*)>\s*(?:;\s*(.*))?")
+_PROCESSOR_PARAMETER: Final = re.compile(r'(.*?)=(?:"([^"]*)"|([^"]*?))\s*(?:;\s*|\Z)')
+# A scheme, if any, and then "//": the start of an authority.
+_AUTHORITY_START: Final = re.compile(r"(?:[A-Za-z][A-Za-z0-9+.-]*:)?//")
 # A target that is not a URI reference is recorded as this marker, so its free text never reaches a record.
 _TARGET_REMOVED: Final = "%3Cremoved%3E"
 # RFC 3986, section 2: unreserved and reserved characters, and "%" only before two hex digits.
@@ -166,19 +174,21 @@ def redact_link(value: str) -> str:
 def _link_target(target: str) -> str:
     """The recorded form of a Link target.
 
-    A target that is not a URI reference, or that has userinfo or a fragment, becomes the marker.
-    Redaction would remove userinfo or a fragment without a trace, and URL parsers disagree on the
-    host of a target with "\\" before "@". A credential-like query value is redacted in place,
-    because its marker shows in the recorded target.
+    A target that is not a URI reference, or that has userinfo, a fragment, or an empty authority,
+    becomes the marker. Redaction would remove userinfo or a fragment without a trace. URL parsers
+    disagree on the host of a target with "\\" before "@" or with an empty authority. A
+    credential-like query value is redacted in place, because its marker shows in the recorded target.
     """
     if _URI_REFERENCE.fullmatch(target) is None or "#" in target:
         return _TARGET_REMOVED
     try:
-        userinfo = "@" in urlsplit(target).netloc
+        netloc = urlsplit(target).netloc
     except ValueError:
         return _TARGET_REMOVED
+    # Python joins the path of an empty authority to the base host. WHATWG reads its first segment as host.
+    empty_authority = not netloc and _AUTHORITY_START.match(target) is not None
     redacted = redact_url(target)
-    return _TARGET_REMOVED if userinfo or redacted == REMOVED else redacted
+    return _TARGET_REMOVED if "@" in netloc or empty_authority or redacted == REMOVED else redacted
 
 
 def parse_link(value: str) -> LinkValue:
@@ -188,7 +198,8 @@ def parse_link(value: str) -> LinkValue:
     is followed by something other than "," or the end. The links before that point are kept. A
     value that ends with the marker REMOVED as its own link-value, also before spaces or tabs,
     stopped in redaction, so it is not complete. Section 3.3: only the first rel counts, and a
-    later one is another parameter.
+    later one is another parameter. A value is not complete either if a processor that splits on
+    commas, as jsonld.js does, reads other targets or other context links.
     """
     links: list[Link] = []
     at = _skip(_SEPARATORS, value, 0)
@@ -216,7 +227,23 @@ def parse_link(value: str) -> LinkValue:
         if at < len(value) and value[at] != ",":
             return LinkValue(tuple(links), complete=False)
         at = _skip(_SEPARATORS, value, at)
-    return LinkValue(tuple(links), complete=True)
+    # A processor that splits on commas must read the same targets and the same context links.
+    read = [(x.target, JSONLD_CONTEXT in x.relations) for x in links]
+    return LinkValue(tuple(links), complete=read == _processor_links(value))
+
+
+def _processor_links(value: str) -> list[tuple[str, bool]]:
+    """Each target that jsonld.js reads in ``value``, and whether its rel names the JSON-LD context."""
+    out: list[tuple[str, bool]] = []
+    for part in _PROCESSOR_PART.findall(value):
+        if (link := _PROCESSOR_LINK.search(part)) is None:
+            continue
+        rel = ""
+        for parameter in _PROCESSOR_PARAMETER.finditer(link[2] or ""):
+            if parameter[1] == "rel":
+                rel = parameter[3] if parameter[2] is None else parameter[2]
+        out.append((link[1], JSONLD_CONTEXT in rel.lower().split()))
+    return out
 
 
 def _skip(pattern: re.Pattern[str], value: str, at: int) -> int:

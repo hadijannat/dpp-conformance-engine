@@ -794,7 +794,9 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int, 
         if value.strip(" \t") == REMOVED:
             continue
         parsed = parse_link(value)
-        malformed += not parsed.complete
+        # Before P2-26, redaction recorded a target that urlsplit refuses as "<<removed>>", and reading
+        # stops there. New redaction never writes "<" in a target, so only an old recording holds it.
+        malformed += not parsed.complete and f"<{REMOVED}>" not in value
         for link in parsed.links:
             if JSONLD_CONTEXT not in link.relations:
                 continue

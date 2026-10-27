@@ -38,6 +38,36 @@ UNSHOWABLE = (
     "https://example.test/c\u00e9tx",
     "https://example.test/ctx%zz",
     "https://example.test/ctx%2",
+    # An empty authority: Python joins the path to the host of the answer, and WHATWG reads "example.test".
+    "https:///example.test/ctx",
+    "///example.test/ctx",
+)
+EVIL = "https://evil.test/ctx"
+# jsonld.js and pyld split a value at each comma outside "<...>" and outside a quoted string that
+# ends at the next quote, and the last rel counts. Each value hides its context link from appendix
+# B reading, but not from them. So reading stops, and the record shows it.
+DIFFERENTIAL = (
+    (
+        f'<https://ok.test/x>; title="abc, <{EVIL}>; rel={JSONLD_CONTEXT}',  # no closing quote
+        f"<https://ok.test/x>; {REMOVED}, {REMOVED}",
+    ),
+    (
+        f'<https://ok.test/x>; title="\\", <{EVIL}>; rel={JSONLD_CONTEXT}; a=\\""',  # a quoted-pair
+        f"<https://ok.test/x>; {REMOVED}, {REMOVED}",
+    ),
+    (f'<{EVIL}>; rel="next"; {CTX}', f'<{EVIL}>; rel="next"; {REMOVED}, {REMOVED}'),
+    (f'<{EVIL}>; rel="next";{CTX}', f'<{EVIL}>; rel="next"; {REMOVED}, {REMOVED}'),
+    (
+        f'<{EVIL}>; rel="next"; t="\\"; rel={JSONLD_CONTEXT}; x=\\""',
+        f'<{EVIL}>; rel="next"; {REMOVED}, {REMOVED}',
+    ),
+)
+# Before P2-26, redaction recorded a target that urlsplit refuses as "<<removed>>".
+LEGACY = (
+    '<<removed>>; rel="next"',
+    "<<removed>>",
+    '<https://a.test/x>, <<removed>>; rel="next"',
+    f"<<removed>>; {CTX}",
 )
 
 # -- parse_link --------------------------------------------------------------------------------------
@@ -210,6 +240,10 @@ def test_an_unknown_relation_is_dropped_by_word_and_its_link_gets_the_marker(val
         f"<https://{SECRET}\\@x.test/c>; {CTX}",
         f"<https://{SECRET}\n@x.test/c>; {CTX}",
         f"<https://x.test/{SECRET} c>; {CTX}",
+        f'<https://x.test/a>; title="{SECRET}, <{EVIL}>; rel={JSONLD_CONTEXT}',
+        f'<https://x.test/a>; title="\\", <https://{SECRET}.test/>; rel={JSONLD_CONTEXT}; a=\\""',
+        f"<https:///{SECRET}/c>; {CTX}",
+        f"<<{SECRET}>>; {CTX}",
     ],
 )
 def test_a_secret_never_reaches_the_record(value: str) -> None:
@@ -234,6 +268,9 @@ def test_a_secret_never_reaches_the_record(value: str) -> None:
         f" {REMOVED} ",
         "<x",
         f"<https://a.example/x> junk, <{JSONLD_CONTEXT}>; {CTX}",
+        *(value for value, _ in DIFFERENTIAL),
+        *LEGACY,
+        '</x>; rel="related"; title="say \\"hi\\""',
     ],
 )
 def test_redaction_is_idempotent_and_its_output_parses(value: str) -> None:
@@ -254,6 +291,7 @@ def recorded(*values: str) -> tuple[tuple[str, str], ...]:
 COMMON = (
     "<https://x.test/s.css>; rel=preload; as=style",
     '<https://x.test/a>; rel="linkset preload"',
+    '</x>; rel="related"; title="say \\"hi\\""',
 )
 
 
@@ -346,9 +384,6 @@ def test_an_empty_link_value_keeps_a_pass(tmp_path: Path, value: str) -> None:
     assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == passed("DATA.CONTEXT.OK")
 
 
-EVIL = "https://evil.test/ctx"
-
-
 @pytest.mark.parametrize(
     "value",
     [
@@ -372,9 +407,13 @@ def test_a_reshaped_context_link_to_a_foreign_target_still_fails(tmp_path: Path,
     assert outcome.observations[0].summary["not_allowed"] == [EVIL]
 
 
-def test_a_second_rel_keeps_an_allowed_context_link(tmp_path: Path) -> None:
+def test_a_later_rel_that_drops_an_allowed_context_link_fails(tmp_path: Path) -> None:
+    # Appendix B reads the first rel, and jsonld.js the last, so it reads no context link here.
     value = f'<{ALLOWED[0]}>; {CTX}; rel="next"'
-    assert verdict(contexts(tmp_path, Linked(PLAIN, recorded(value)))) == passed("DATA.CONTEXT.OK")
+    assert recorded(value) == (("Link", f"<{ALLOWED[0]}>; {CTX}; {REMOVED}, {REMOVED}"),)
+    assert verdict(contexts(tmp_path, Linked(PLAIN, recorded(value)))) == failed(
+        "DATA.CONTEXT.LINK_MALFORMED"
+    )
 
 
 def test_a_context_link_whose_target_is_not_a_uri_reference_is_not_allowed(tmp_path: Path) -> None:
@@ -423,6 +462,42 @@ def test_an_unchanged_target_is_never_blocked_by_a_changed_allowed_url(tmp_path:
 def test_a_value_that_redaction_removed_names_no_context(tmp_path: Path) -> None:
     assert verdict(contexts(tmp_path, Linked(PLAIN, (("Link", REMOVED),)))) == failed("DATA.CONTEXT.MISSING")
     assert verdict(contexts(tmp_path, Linked(BODY, (("Link", REMOVED),)))) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize(("value", "kept"), DIFFERENTIAL)
+def test_a_value_that_a_comma_splitting_processor_reads_differently_fails(
+    tmp_path: Path, value: str, kept: str
+) -> None:
+    assert recorded(value) == (("Link", kept),)
+    assert not parse_link(value).complete
+    body = contexts(tmp_path, Linked(BODY, recorded(value)))
+    assert verdict(body) == failed("DATA.CONTEXT.LINK_MALFORMED")
+    assert verdict(contexts(tmp_path, Linked(PLAIN, recorded(value)))) == failed("DATA.CONTEXT.MISSING")
+
+
+@pytest.mark.parametrize("target", ["https:///ctx", "///ctx"])
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_context_target_with_an_empty_authority_is_not_allowed(
+    tmp_path: Path, target: str, body: bytes
+) -> None:
+    # Python joins the target to the host of the answer, and the WHATWG URL parser reads "ctx" as the host.
+    allowed = [ALLOWED[0], "https://id.example.test/ctx"]
+    assert recorded(f"<{target}>; {CTX}") == (("Link", f"<%3Cremoved%3E>; {CTX}"),)
+    outcome = contexts(tmp_path, Linked(body, recorded(f"<{target}>; {CTX}")), allowed_contexts=allowed)
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+
+
+@pytest.mark.parametrize("value", LEGACY)
+def test_the_target_marker_of_an_old_recording_is_not_malformed(tmp_path: Path, value: str) -> None:
+    # An old recording replays to the same decision digest. New redaction never writes "<" in a target.
+    assert verdict(contexts(tmp_path, Linked(BODY, (("Link", value),)))) == passed("DATA.CONTEXT.OK")
+    assert verdict(contexts(tmp_path, Linked(PLAIN, (("Link", value),)))) == failed("DATA.CONTEXT.MISSING")
+
+
+def test_a_system_that_sends_the_old_target_marker_fails(tmp_path: Path) -> None:
+    assert recorded(f"<<removed>>; {CTX}") == (("Link", PLACEHOLDER),)
+    outcome = contexts(tmp_path, Linked(BODY, recorded(f"<<removed>>; {CTX}")))
+    assert verdict(outcome) == failed("DATA.CONTEXT.LINK_MALFORMED")
 
 
 # -- resolver.linkset reads a kept type parameter --------------------------------------------------------

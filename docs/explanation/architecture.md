@@ -746,6 +746,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   that redaction did not keep, and an empty value records so too. So an old recording replays to
   the same decision digest. Redaction records a new malformed value without a link in another form
   (section 10).
+- A recording from before P2-26 also holds the target `<<removed>>` for a target that `urlsplit`
+  refuses. Reading stops there, but a value with that target is not malformed. New redaction never
+  writes `<` in a target, so only an old recording holds it.
 - A context target that redaction changed is compared in its redacted form. That form is not on
   the allowlist, so it gives `DATA.CONTEXT.NOT_ALLOWED`. A target that is not a URI reference is
   recorded as a marker, so it gives `DATA.CONTEXT.NOT_ALLOWED` too. It gives `blocked` with
@@ -1691,7 +1694,9 @@ records/<id>.enc   one encrypted record each
   These fixed values cannot carry a secret. Each other parameter, and each dropped relation, gives
   the link one marker, `<removed>`, after its relations and its type.
 - Reading stops where a link-value does not start with a target in `<` and `>`, or where a link
-  is followed by text other than `,`. The links before that point are kept, and one marker
+  is followed by text other than `,`. jsonld.js and pyld split a value at each `,` outside `<...>`
+  and outside a quoted string that ends at the next `"`. They read the last `rel`. A value is
+  therefore not complete if such a reading gives other targets or other context links. The links before that point are kept, and one marker
   replaces the rest of the value. A target that is not a URI reference becomes the marker
   `%3Cremoved%3E`, and the other links stay. The output of redaction parses to the same links,
   and redaction of the output gives the same text.
@@ -1704,6 +1709,10 @@ records/<id>.enc   one encrypted record each
   target. URL parsers disagree on the host of a target with a backslash before `@`.
 - A target with userinfo or with a `#` also becomes `%3Cremoved%3E`. Redaction would remove these
   parts without a trace, so the record would show a different URL than the system sent.
+- A target with an empty authority, such as `https:///ctx` or `///ctx`, also becomes
+  `%3Cremoved%3E`. Python joins its path to the host of the base URL. The WHATWG URL parser reads
+  its first path segment as the host. Only redaction reads this rule, so an old record replays
+  unchanged.
 - A credential-like query value is different. Redaction replaces it with a marker in place, and
   that marker shows in the recorded target. So a check sees that redaction changed the target.
 
