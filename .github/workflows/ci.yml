@@ -135,7 +135,8 @@ jobs:
           tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
       # Every commit reachable from HEAD. On a pull request, HEAD is the merge commit.
       - name: Secret scan of the git history
-        run: '"$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --redact --no-banner --exit-code 1 .'
+        # --verbose names the rule, file, line, and commit of a finding; --redact hides the value.
+        run: '"$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --redact --verbose --no-banner --exit-code 1 .'
       - name: reuse 6.2.0 lint
         run: uvx --exclude-newer 2026-10-18T00:00:00Z --from reuse==6.2.0 reuse lint
 
