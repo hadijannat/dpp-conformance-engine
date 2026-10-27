@@ -43,12 +43,15 @@ _PARAMETER: Final = re.compile(
     r'(?:=[ \t]*(?:"(?P<quoted>(?:[^"\\]|\\.)*)"?|(?P<token>[^;,]*)))?'
 )
 _QUOTED_PAIR: Final = re.compile(r"\\(.)")
-# jsonld.js 8.3.3 (lib/util.js, parseLinkHeader) and pyld 3.0.0 split a Link value at each "," outside
-# "<...>" and outside a quoted string that ends at the next '"'. Of each part they read the first
-# target and its parameters, without unescaping. A later parameter replaces one of the same name.
-# They use three regular expressions with "\s". A scanner in linear time gives the same results:
-# tests/test_link_processor.py compares the two. "\s" is white space after the gate below: of
-# JavaScript for jsonld.js, and of Python, which adds "\x85", for pyld.
+# The processor model is the Link parser of jsonld.js 8.3.3 (lib/util.js, parseLinkHeader). It splits
+# a Link value at each "," outside "<...>" and outside a quoted string that ends at the next '"'. Of
+# each part it reads the first target and its parameters, without unescaping. A later parameter
+# replaces one of the same name. It uses three regular expressions with "\s". A scanner in linear
+# time gives the same results: tests/test_link_processor.py compares the two. pyld 3.0.0
+# (parse_link_header) uses the same expressions with Python "\s", which adds "\x85". It reads with
+# re.findall, so an unquoted value reads as "", and a link without parameters raises an error. The
+# model reads an unquoted target as "" for pyld. It keeps the jsonld.js reading of an unquoted rel,
+# so it reads each context link that pyld reads, and more. "\s" is white space after the gate below.
 _JS_SPACE: Final = " \t\xa0"
 _PY_SPACE: Final = " \t\xa0\x85"
 # A control character other than HTAB, or a character above "\xff", is not valid in an HTTP field
@@ -263,26 +266,34 @@ def parse_link(value: str) -> LinkValue:
 def _agrees(links: list[Link] | tuple[Link, ...], value: str) -> bool:
     """True if both processor models read the targets of ``links`` in order, with the same context links."""
     read = [(x.target, JSONLD_CONTEXT in x.relations) for x in links]
-    return read == _processor_links(value, _JS_SPACE) == _processor_links(value, _PY_SPACE)
+    return read == _processor_links(value, _JS_SPACE) == _processor_links(value, _PY_SPACE, pyld=True)
 
 
-def _processor_links(value: str, space: str) -> list[tuple[str, bool]]:
-    """Each target that the processor model reads in ``value``, and whether its rel names the context."""
+def _processor_links(value: str, space: str, *, pyld: bool = False) -> list[tuple[str, bool]]:
+    """Each target that the processor model reads in ``value``, and whether its rel names the context.
+
+    With ``pyld``, an unquoted target parameter reads as "": pyld reads parameters with re.findall,
+    which gives "" for the quoted group of an unquoted value. A rel keeps the jsonld.js reading. pyld
+    reads an unquoted rel as "" and finds no context there, so the model reads more contexts than pyld.
+    """
     out: list[tuple[str, bool]] = []
     for first, parameters in _processor_read(value, space):
+        named = {"target": first, "rel": ""}
         # Each parameter is assigned to the link, so the last one named exactly "target" replaces it.
-        named = {"target": first, "rel": ""} | dict(parameters)
+        for name, text, quoted in parameters:
+            named[name] = "" if pyld and name == "target" and not quoted else text
         out.append((named["target"], JSONLD_CONTEXT in named["rel"].lower().split()))
     return out
 
 
-def _processor_read(value: str, space: str) -> list[tuple[str, list[tuple[str, str]]]]:
+def _processor_read(value: str, space: str) -> list[tuple[str, list[tuple[str, str, bool]]]]:
     """Each target and its parameters, as the regular expressions of jsonld.js and pyld read them.
 
     ``space`` is the set of characters that "\\s" matches. The results equal findall of the part
     expression, search of the link expression on each part, and finditer of the parameter expression.
+    A parameter is its name, its value, and whether the value is quoted.
     """
-    out: list[tuple[str, list[tuple[str, str]]]] = []
+    out: list[tuple[str, list[tuple[str, str, bool]]]] = []
     for part in _processor_parts(value):
         # "\s*<([^>]*)>": the first "<" of the part, if a ">" follows it.
         opening = part.find("<")
@@ -316,13 +327,13 @@ def _processor_parts(value: str) -> list[str]:
     return parts
 
 
-def _processor_parameters(text: str, space: str) -> list[tuple[str, str]]:
+def _processor_parameters(text: str, space: str) -> list[tuple[str, str, bool]]:
     """The name and value of each match of '(.*?)=(?:"([^"]*)"|([^"]*?))\\s*(?:;\\s*|\\Z)' in ``text``.
 
     A match at a position does not depend on where its name starts. So if no "=" after the start of
     a name gives a match, no later start does, and the matches end.
     """
-    out: list[tuple[str, str]] = []
+    out: list[tuple[str, str, bool]] = []
     quote, semicolon = _finder(text, '"'), _finder(text, ";")
     start, equals = 0, text.find("=")
     while equals >= 0:
@@ -330,25 +341,28 @@ def _processor_parameters(text: str, space: str) -> list[tuple[str, str]]:
         if found is None:
             equals = text.find("=", equals + 1)
             continue
-        value, end = found
-        out.append((text[start:equals], value))
+        value, end, quoted = found
+        out.append((text[start:equals], value, quoted))
         start, equals = end, text.find("=", end)
     return out
 
 
 def _processor_value(
     text: str, equals: int, space: str, quote: Callable[[int], int], semicolon: Callable[[int], int]
-) -> tuple[str, int] | None:
-    """The value after the "=" at ``equals``, and the end of the match, or None if no match ends there."""
+) -> tuple[str, int, bool] | None:
+    """The value after the "=" at ``equals``, the end of the match, and whether the value is quoted.
+
+    None if no match ends there.
+    """
     size = len(text)
     if text.startswith('"', equals + 1):
         # '"([^"]*)"': the quoted value must be followed by white space, and then ";" or the end.
         closing = quote(equals + 2)
         after = _skip_space(text, closing + 1, space) if closing < size else size + 1
         if after == size:
-            return text[equals + 2 : closing], size
+            return text[equals + 2 : closing], size, True
         if text.startswith(";", after):
-            return text[equals + 2 : closing], _skip_space(text, after + 1, space)
+            return text[equals + 2 : closing], _skip_space(text, after + 1, space), True
         return None  # the unquoted form cannot start with '"'
     # '([^"]*?)': the shortest value without '"' that white space and then ";" or the end follow.
     stop = semicolon(equals + 1)
@@ -357,7 +371,7 @@ def _processor_value(
     value_end = stop
     while value_end > equals + 1 and text[value_end - 1] in space:
         value_end -= 1
-    return text[equals + 1 : value_end], (_skip_space(text, stop + 1, space) if stop < size else size)
+    return text[equals + 1 : value_end], (_skip_space(text, stop + 1, space) if stop < size else size), False
 
 
 def _finder(text: str, char: str) -> Callable[[int], int]:

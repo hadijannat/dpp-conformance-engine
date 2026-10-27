@@ -54,14 +54,19 @@ JS = (javascript(PART), javascript(LINK), javascript(PARAMETER))
 PY = (PART, LINK, PARAMETER)
 
 
-def reference(value: str, regexes: tuple[re.Pattern[str], ...]) -> list[tuple[str, list[tuple[str, str]]]]:
+def reference(
+    value: str, regexes: tuple[re.Pattern[str], ...]
+) -> list[tuple[str, list[tuple[str, str, bool]]]]:
     """Each target and its parameters as the three regular expressions read them."""
     part, link, parameter = regexes
-    out: list[tuple[str, list[tuple[str, str]]]] = []
+    out: list[tuple[str, list[tuple[str, str, bool]]]] = []
     for text in part.findall(value):
         if (found := link.search(text)) is None:
             continue
-        pairs = [(m[1], m[3] if m[2] is None else m[2]) for m in parameter.finditer(found[2] or "")]
+        pairs = [
+            (m[1], m[3] if m[2] is None else m[2], m[2] is not None)
+            for m in parameter.finditer(found[2] or "")
+        ]
         out.append((found[1], pairs))
     return out
 
@@ -233,6 +238,33 @@ def test_a_parameter_named_target_that_replaces_the_target_fails(tmp_path: Path,
     )
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        f"<{ALLOWED[0]}>; {CTX}; target={ALLOWED[0]}",
+        f"<{ALLOWED[0]}>; target={ALLOWED[0]}; {CTX}",
+        f'<{ALLOWED[0]}>; {CTX}; target="{ALLOWED[0]}"; target={ALLOWED[0]}',
+    ],
+)
+def test_an_unquoted_target_parameter_that_pyld_reads_as_empty_fails(tmp_path: Path, value: str) -> None:
+    # pyld 3.0.0 reads parameters with re.findall, which gives "" for the quoted group of an unquoted
+    # value. So the target is "", and pyld loads the URL of the answer itself as the context.
+    assert _processor_links(value, _JS_SPACE) == [(ALLOWED[0], True)]
+    assert _processor_links(value, _PY_SPACE, pyld=True) == [("", True)]
+    assert not parse_link(value).complete
+    for body in (BODY, PLAIN):
+        outcome = contexts(tmp_path, Linked(body, recorded(value)))
+        assert verdict(outcome) == failed("DATA.CONTEXT.LINK_MALFORMED")
+
+
+def test_pyld_reads_an_unquoted_rel_as_empty_but_the_model_keeps_the_context(tmp_path: Path) -> None:
+    # pyld then finds no context link. The engine judges the context that jsonld.js reads: the safe side.
+    value = f"<{ALLOWED[0]}>; rel={JSONLD_CONTEXT}"
+    assert _processor_links(value, _PY_SPACE, pyld=True) == [(ALLOWED[0], True)]
+    assert parse_link(value).complete
+    assert verdict(contexts(tmp_path, Linked(BODY, recorded(value)))) == passed("DATA.CONTEXT.OK")
+
+
 @pytest.mark.parametrize("name", ["target ", "Target", "TARGET", "targets", "xtarget"])
 def test_only_the_exact_name_target_replaces_the_target(tmp_path: Path, name: str) -> None:
     value = f'<{ALLOWED[0]}>; {CTX}; {name}="{EVIL}"'
@@ -303,7 +335,9 @@ def test_resolver_linkset_reads_each_recorded_line_after_a_joined_disagreement()
     assert not parse_link(record.headers[-1][1]).complete
     assert _advertised([record]) == "https://id.example.test/linksets/EV0001"
     joined = _processor_read(", ".join(lines), _JS_SPACE)
-    assert [(target, dict(pairs).get("rel")) for target, pairs in joined] == [("/other", "linkset")]
+    assert [(target, {n: v for n, v, _ in pairs}.get("rel")) for target, pairs in joined] == [
+        ("/other", "linkset")
+    ]
 
 
 # -- a special scheme without "//" ------------------------------------------------------------------------
