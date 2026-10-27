@@ -231,6 +231,12 @@ def test_an_advertised_linkset_is_judged_by_the_same_rules(
         # Redaction changed these targets, so the record no longer holds the advertised URL.
         f'<{ADVERTISED}?X-Amz-Signature=abc123>; rel="linkset"',
         f'<{ADVERTISED}?productCode=1>; rel="linkset"',
+        # The record cannot show these targets as sent, so each becomes the marker.
+        f'<{ADVERTISED}#x>; rel="linkset"',
+        f'<{ADVERTISED}#>; rel="linkset"',
+        f'<{ADVERTISED}\t>; rel="linkset"',
+        f'<{ADVERTISED}\\>; rel="linkset"',
+        f'<//user@127.0.0.1{ADVERTISED}>; rel="linkset"',
     ],
 )
 def test_an_unusable_link_value_is_judged_as_today(link: str, tmp_path: Path, loopback: Any) -> None:

@@ -44,6 +44,8 @@ _PARAMETER: Final = re.compile(
 _QUOTED_PAIR: Final = re.compile(r"\\(.)")
 # A target that is not a URI reference is recorded as this marker, so its free text never reaches a record.
 _TARGET_REMOVED: Final = "%3Cremoved%3E"
+# RFC 3986, section 2: unreserved and reserved characters, and "%" only before two hex digits.
+_URI_REFERENCE: Final = re.compile(r"(?:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=]|%[0-9A-Fa-f]{2})*")
 # Fixed media types cannot carry a secret, so a type parameter with one of them is kept.
 _KEPT_TYPES: Final = frozenset({"application/linkset+json", "application/ld+json", "application/json"})
 # The link types of the GS1 Web Vocabulary: each sub-property of gs1:linkType in v1.16/gs1Voc.jsonld
@@ -144,10 +146,9 @@ def redact_link(value: str) -> str:
     parsed = parse_link(value)
     out: list[str] = []
     for link in parsed.links:
-        target = redact_url(link.target)
         kept = tuple(r for r in link.relations if r in _RELATIONS)
         out.append(
-            f"<{_TARGET_REMOVED if target == REMOVED else target}>"
+            f"<{_link_target(link.target)}>"
             + (f'; rel="{" ".join(kept)}"' if kept else "")
             + (f'; type="{link.media_type}"' if link.media_type else "")
             + (f"; {REMOVED}" if link.other or len(kept) < len(link.relations) else "")
@@ -155,6 +156,24 @@ def redact_link(value: str) -> str:
     if not parsed.complete or not out:
         out.append(REMOVED)
     return ", ".join(out)
+
+
+def _link_target(target: str) -> str:
+    """The recorded form of a Link target.
+
+    A target that is not a URI reference, or that has userinfo or a fragment, becomes the marker.
+    Redaction would remove userinfo or a fragment without a trace, and URL parsers disagree on the
+    host of a target with "\\" before "@". A credential-like query value is redacted in place,
+    because its marker shows in the recorded target.
+    """
+    if _URI_REFERENCE.fullmatch(target) is None or "#" in target:
+        return _TARGET_REMOVED
+    try:
+        userinfo = "@" in urlsplit(target).netloc
+    except ValueError:
+        return _TARGET_REMOVED
+    redacted = redact_url(target)
+    return _TARGET_REMOVED if userinfo or redacted == REMOVED else redacted
 
 
 def parse_link(value: str) -> LinkValue:

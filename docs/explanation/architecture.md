@@ -1686,6 +1686,13 @@ records/<id>.enc   one encrypted record each
   replaces the rest of the value. A value without a link becomes the marker. A target that is not
   a URI reference becomes the marker `%3Cremoved%3E`, and the other links stay. The output of
   redaction parses to the same links, and redaction of the output gives the same text.
+- A URI reference here holds only the characters of RFC 3986, section 2, and a `%` only before two
+  hex digits. So a backslash, a control character, a space, or a non-ASCII character removes the
+  target. URL parsers disagree on the host of a target with a backslash before `@`.
+- A target with userinfo or with a `#` also becomes `%3Cremoved%3E`. Redaction would remove these
+  parts without a trace, so the record would show a different URL than the system sent.
+- A credential-like query value is different. Redaction replaces it with a marker in place, and
+  that marker shows in the recorded target. So a check sees that redaction changed the target.
 
 Replay serves records by sequence. A replayed request that differs from the recorded one in
 method, URL, or role gives `recording_mismatch`, which is an execution error.

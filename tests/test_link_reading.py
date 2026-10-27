@@ -21,6 +21,20 @@ from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts
 
 CTX = f'rel="{JSONLD_CONTEXT}"'
 SECRET = "S3CRET"
+# Targets that the record cannot show as the system sent them. URL parsers disagree on the host of
+# the first two: Python reads example.test, and the WHATWG URL parser reads evil.test.
+UNSHOWABLE = (
+    "https://evil.test\\@example.test/ctx",
+    "https://evil.test\n@example.test/ctx",
+    "https://user:pw@example.test/ctx",
+    "https://example.test/ctx#v1",
+    "https://example.test/ctx#",
+    "https://example.test/c\ttx",
+    "https://example.test/c tx",
+    "https://example.test/c\u00e9tx",
+    "https://example.test/ctx%zz",
+    "https://example.test/ctx%2",
+)
 
 # -- parse_link --------------------------------------------------------------------------------------
 
@@ -110,6 +124,21 @@ def test_a_lenient_link_value_is_read_as_appendix_b_reads_it(value: str, kept: s
 # -- redact_link ---------------------------------------------------------------------------------------
 
 
+@pytest.mark.parametrize("target", UNSHOWABLE)
+def test_a_target_that_the_record_cannot_show_becomes_the_marker(target: str) -> None:
+    # Redaction would remove userinfo or a fragment without a trace, so the whole target goes.
+    recorded = dict(redact_response_headers((("Link", f"<{target}>; {CTX}, <https://x.test/b>"),)))["Link"]
+    assert recorded == f"<%3Cremoved%3E>; {CTX}, <https://x.test/b>"
+
+
+@pytest.mark.parametrize(
+    "target",
+    ["https://example.test/a@b", "https://example.test/c?a=b@c", "/ctx", "https://example.test/%7Ectx"],
+)
+def test_an_at_sign_outside_the_authority_and_a_percent_encoding_are_kept(target: str) -> None:
+    assert redact_link(f"<{target}>; {CTX}") == f"<{target}>; {CTX}"
+
+
 @pytest.mark.parametrize(
     ("value", "kept"),
     [
@@ -153,6 +182,11 @@ def test_an_unknown_relation_is_dropped_by_word_and_its_link_gets_the_marker(val
         f'<https://x.test/a>; rel="next", {SECRET}',
         f"<https://x.test/a>; {CTX}, <http://[::1/{SECRET}>; rel=next",
         f'<https://x.test/a>; rel="{SECRET.lower()}:{SECRET}"',
+        f"<https://user:{SECRET}@x.test/c>; {CTX}",
+        f"<https://x.test/c#{SECRET}>; {CTX}",
+        f"<https://{SECRET}\\@x.test/c>; {CTX}",
+        f"<https://{SECRET}\n@x.test/c>; {CTX}",
+        f"<https://x.test/{SECRET} c>; {CTX}",
     ],
 )
 def test_a_secret_never_reaches_the_record(value: str) -> None:
@@ -172,6 +206,7 @@ def test_a_secret_never_reaches_the_record(value: str) -> None:
         f"<https://x.test/a>; {REMOVED}",
         f'<https://x.test/a>; rel="next", {SECRET}',
         "<http://[::1>; REL=Next; rel=prev, <https://x.test/b>; rel=HTTP://WWW.W3.ORG/NS/JSON-LD#CONTEXT",
+        *(f"<{target}>; {CTX}" for target in UNSHOWABLE),
     ],
 )
 def test_redaction_is_idempotent_and_its_output_parses(value: str) -> None:
@@ -272,6 +307,16 @@ def test_a_context_link_whose_target_is_not_a_uri_reference_is_not_allowed(tmp_p
     outcome = contexts(tmp_path, Linked(BODY, recorded(f"<http://[{SECRET}>; {CTX}")))
     assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
     assert SECRET not in repr(outcome)
+
+
+@pytest.mark.parametrize("target", UNSHOWABLE[:2])
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_context_target_that_url_parsers_read_differently_is_not_allowed(
+    tmp_path: Path, target: str, body: bytes
+) -> None:
+    outcome = contexts(tmp_path, Linked(body, recorded(f"<{target}>; {CTX}")))
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert "example.test/ctx" not in repr(outcome.observations[0].summary["not_allowed"])
 
 
 def test_a_context_target_that_redaction_changed_is_not_on_the_allowlist(tmp_path: Path) -> None:

@@ -623,6 +623,7 @@ After the fetch:
 
 A profile constant `allowed_contexts` is not expressive enough, so the test purpose passes
 `params.allowed_contexts`: a list of exact context URLs. No context is fetched.
+The allowlist holds ASCII URIs, so give an IRI in its percent-encoded form.
 The check reads every `@context` in the document, also in nested nodes and `@graph` members.
 `DATA.CONTEXT.MISSING` depends on the top-level `@context` only.
 Reason codes: `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, `DATA.CONTEXT.OK`.
@@ -651,7 +652,8 @@ parameter, and each relation outside its closed list, with one marker.
   are kept, so a context link before a malformed part still names its target.
 - The rest of the value names no context, so a document without a top-level context still gives
   `DATA.CONTEXT.MISSING`.
-- A target that is not a URI reference is recorded as a marker. As a context target, it gives
+- A target that is not a URI reference is recorded as a marker. A target with userinfo or a
+  fragment is recorded as a marker too. As a context target, the marker gives
   `DATA.CONTEXT.NOT_ALLOWED`.
 - A target that redaction changed, for example one with a `token` query parameter, is compared in
   its redacted form. It gives `DATA.CONTEXT.NOT_ALLOWED`.
