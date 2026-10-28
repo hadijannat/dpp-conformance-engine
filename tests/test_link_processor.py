@@ -809,6 +809,11 @@ def test_a_relative_context_target_after_a_plain_redirect_keeps_its_pass(
         ("https://h.example/dpp/1", "x/", False),
         ("https://h.example/dpp/1", "?q", False),
         ("https://h.example/dpp/1", "%5c/doc", False),
+        # urljoin drops an empty query, fragment, or parameter. That changes no path: see redirect_mark.
+        ("https://h.example/dpp/1", "/x/y/z?", False),
+        ("https://h.example/dpp/1", "/x/y/z#", False),
+        ("https://h.example/dpp/1", "/x/y/z;", False),
+        ("https://h.example/dpp/1", "x//y/z;", True),
     ],
 )
 def test_the_locations_that_the_readers_resolve_apart(base: str, location: str, apart: bool) -> None:
@@ -985,7 +990,7 @@ _LONG_BASES = (
     "https://h.example" + "/" * 60000 + "doc",
     "https://h.example" + "/." * 30000 + "/doc",
     "https://h.example/" + "\\" * 60000 + "/doc",
-    "https://h.example" + "/a" * 30000 + "/doc" + UNKNOWN,
+    "https://h.example" + "/." * 30000 + "/doc" + UNKNOWN,
 )
 _LONG_IDS = ("empty-segments", "dot-segments", "backslashes", "marked")
 
