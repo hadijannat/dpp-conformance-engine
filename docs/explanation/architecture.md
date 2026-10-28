@@ -803,18 +803,20 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   redirect target, so the fail stands. A target with an absolute path or an authority keeps its
   result.
 - The transport marks a redirect target with the suffix `#<removed>` after a `Location` that a
-  consumer can read as another URL (section 10). Such a record does not hold the base path that
+  consumer can read as another path (section 10). Such a record does not hold the base path that
   a consumer reads.
-- So on a marked base, a relative path, a query, or an empty target counts unresolved: the
-  base, a `/`, and the target. It gives `DATA.CONTEXT.NOT_ALLOWED`. The `Location` is the value
-  of the system, so the fail stands.
-- On a marked base, a target with an absolute path or an authority keeps its result. The WHATWG
-  URL parser can read a `Location` such as `/\h.example/doc` with another host. This check then
-  resolves an absolute path against the fetched origin.
+- So on a base with this suffix, a relative path, a query, or an empty target counts unresolved:
+  the base, a `/`, and the target. It gives `DATA.CONTEXT.NOT_ALLOWED`. The `Location` is the
+  value of the system, so the fail stands.
+- After a `Location` with an empty `;` parameter, the suffix is `#?<removed>`. On such a base,
+  only a query or an empty target counts unresolved.
+- On a marked base, a target with an absolute path or an authority keeps its result. The
+  transport does not follow a `Location` that the WHATWG URL parser reads with another host, such
+  as `/\h.example/doc` (section 10). So a consumer reads the fetched origin.
 - `resolver.linkset` resolves a relative target in the same way. It does not fetch a target that
   the two readers resolve to different URLs. It does not fetch a relative path target on a base
-  path that holds the marker. On a marked base, it does not fetch a relative path, a query, or an
-  empty target.
+  path that holds the marker. On a marked base, it does not fetch a target that counts unresolved
+  there.
 - The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
   error code is `multiple context link headers`, section 9.6.2. The check judges the target of
   each context link.
@@ -1843,18 +1845,34 @@ records/<id>.enc   one encrypted record each
 - The transport resolves each `Location` with `urljoin`, which can remove the form that makes a
   base odd. The WHATWG URL parser of Node.js 22 reads `\` as `/` and `%2e` as `.`. It keeps the
   empty segments of a relative path.
-- requests 2.34.2 also reads `%2e` as `.`. `urljoin` also drops an empty `;` parameter, an empty
-  query, and an empty fragment, and it reads `..;x` as `..`. On the base path of a relative
-  `Location`, `urljoin` removes empty segments.
-- So the record marks a redirect target with the suffix `#<removed>` after such a `Location`.
-  Each later hop of that fetch joins the fetched path, so it is marked too.
-- `redact_url` removes every other fragment, so no other record holds the suffix. A plain
+- requests 2.34.2 also reads `%2e` as `.`. `urljoin` also reads `..;x` as `..`. On the base path
+  of a relative `Location`, `urljoin` removes empty segments.
+- So the record marks a redirect target with the suffix `#<removed>` after such a `Location`. A
+  later hop with a relative path, a query, or no path joins the fetched path, so it is marked too.
+- A later hop with an absolute path or an authority does not read the earlier path. Its suffix
+  depends only on its own `Location`.
+- `urljoin` also drops an empty `;` parameter, an empty query, and an empty fragment. Node.js 22
+  keeps the `;`, so it resolves a query or an empty target against another last segment.
+- So the record marks a redirect target with the suffix `#?<removed>` after an empty `;`
+  parameter. A later hop with a query or no path keeps this suffix.
+- Node.js 22 resolves each target against a base with an empty query or fragment as `urljoin`
+  does against the base without it. So these forms get no suffix.
+- In an `http` or `https` `Location`, the WHATWG URL parser of Node.js 22 reads `\` as `/`. It
+  reads the first segment after an empty authority as the host, as in `http:///h2.example/doc`.
+- There `urljoin` keeps the host of the base, so a consumer never reads the answer that the
+  transport would fetch. So the transport does not follow such a `Location`.
+- The request ends with `redirect_out_of_scope`, as for a hop to a host outside the scope. RFC
+  9110, section 4.2.1, says that a recipient rejects an `http` URL with an empty host.
+- `redact_url` removes every other fragment, so no other record holds a suffix. A plain
   `Location` is recorded as before. An old record holds no suffix, so it replays unchanged.
-- The suffix is not a change of the fetched URL. `item_url` and `identifier.negotiation` read the
-  target without it. `data.context` and `resolver.linkset` do not resolve a target that reads the
-  base path on such a base (section 8).
+- A suffix is not a change of the fetched URL. `item_url`, `identifier.negotiation`, and
+  `access.restricted_fields` read the target without it. `data.context` and `resolver.linkset` do
+  not resolve a target that reads the unknown part of such a base (section 8).
 - A fuzzer followed chains of one to three hops with `urljoin`, Node.js 22, and requests with
-  pyld 3.0.0. On each unmarked base, every consumer context URL was among the engine readings.
+  pyld 3.0.0. Its `Location` values also held empty authorities, a `\` before the first segment,
+  and empty `;`, `?`, and `#` parts.
+- No followed chain left the host for Node.js 22. Where the engine resolved a context target to
+  one URL that an allowlist can hold, each consumer read that URL.
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
   marker `<removed>` holds `>`. In a `Link` value, the marker could close a target that a reader
   of the sent value reads as open.
