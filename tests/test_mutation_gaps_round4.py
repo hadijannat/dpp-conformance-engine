@@ -56,6 +56,7 @@ from dppce.evidence.manual import (
     verify_manual_result,
 )
 from dppce.evidence.recording import (
+    _INDEX_AAD,
     REDIRECT_STATUSES,
     RecordingError,
     _aad,
@@ -103,6 +104,7 @@ from dppce.models import (
     EvidenceEnvelope,
     ManualResult,
     NetworkPolicy,
+    RecordCommitment,
     StatusList,
     StatusReference,
     TrustAnchor,
@@ -1694,7 +1696,7 @@ def test_a_damaged_recording_says_where_and_what(tmp_path: Path) -> None:
     dppce.evidence.recording.x_read_recording__mutmut_11
     dppce.evidence.recording.x__verified_index_from__mutmut_3, 8, 13, 20, 21
     dppce.evidence.recording.x__open__mutmut_1, 2, 3
-    dppce.evidence.recording.x__records_from__mutmut_15, 24, 25, 33
+    dppce.evidence.recording.x__records_from__mutmut_7, 15, 24, 25, 33
     """
     absent = tmp_path / "absent"
     assert _failure(read_index, absent) == f"{absent}: the recording index is missing or not valid"
@@ -1724,6 +1726,17 @@ def test_a_damaged_recording_says_where_and_what(tmp_path: Path) -> None:
     _recording(garbage)
     _reseal(garbage, "r0001", b"{")
     assert _failure(read_recording, garbage, _Keys()) == "r0001: a record is malformed"
+
+    named = tmp_path / "named"
+    _recording(named)
+    index = read_index(named).model_copy(
+        update={"records": (RecordCommitment(record_id="r1/../x", commitment="0" * 64),)}
+    )
+    (named / "recording.json").write_bytes(canonical_bytes(index) + b"\n")
+    (named / "recording.sealed").write_bytes(
+        bytes(12) + AESGCM(bytes(range(32))).encrypt(bytes(12), canonical_bytes(index), _INDEX_AAD)
+    )
+    assert _failure(read_recording, named, _Keys()) == "record identifier 'r1/../x' is not valid"
 
     other = tmp_path / "other"
     _recording(other)
