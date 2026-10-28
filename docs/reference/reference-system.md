@@ -627,15 +627,21 @@ The allowlist holds ASCII URIs, so give an IRI in its percent-encoded form.
 The check reads every `@context` in the document, also in nested nodes and `@graph` members.
 `DATA.CONTEXT.MISSING` depends on the top-level `@context` only.
 Reason codes: `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, `DATA.CONTEXT.LINK_MALFORMED`,
-`DATA.CONTEXT.OK`.
+`DATA.CONTEXT.LINK_UNREADABLE`, `DATA.CONTEXT.OK`.
 
 Two more context sources are experimental:
 
 - The `Link` header of the fetched document. A link with the relation
   `http://www.w3.org/ns/json-ld#context` counts as a top-level context. A relative target is
   resolved against the URL of the document. The check ignores the header for
-  `application/ld+json`, also with parameters. pyld 3.0.0 reads it if the `Content-Type` value
-  has parameters.
+  `application/ld+json`, also with parameters.
+- pyld 3.0.0 reads the header unless the whole `Content-Type` value is `application/ld+json`.
+  Examples are a parameter, another case, and two `Content-Type` lines. If pyld can then read a
+  context outside the allowlist, or a malformed value, the check gives `blocked` with
+  `DATA.CONTEXT.LINK_UNREADABLE`.
+- pyld 3.0.0 loads the target of a link with `rel="alternate"` and `type="application/ld+json"`
+  if the whole `Content-Type` value is not a JSON type. The check does not judge that document,
+  so such a link gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE`.
 - The parameter `context_files`. It maps an allowed context URL to a pinned JSON copy under the
   data root, for example `{"https://example.test/ctx": "contexts/ctx.json"}`. The check reads
   each `@context` string and each `@import` value in the copy. It follows a reference only into
@@ -685,6 +691,11 @@ parameter, and each relation outside its closed list, with one marker.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
   form of an allowed URL. `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, and
   `DATA.CONTEXT.LINK_MALFORMED` come first.
+- A relative target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` if the path of the final
+  URL has an empty or dot segment, such as `/x//y`, and the target resolves to an allowed URL. URL
+  parsers resolve such a target differently. A URL outside the allowlist still gives a fail.
+- A `Link` value that echoes a credential of the engine is recorded as
+  `<%3Cremoved%3E>, <removed>`. Reading of that record does not finish.
 
 The check judges the target of each context link. The JSON-LD 1.1 API, section 9.4.1, rejects
 more than one context link.

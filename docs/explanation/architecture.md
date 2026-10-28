@@ -732,9 +732,20 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   with the JSON-LD context relation names its target as a context, whatever its other parameters
   are. The JSON-LD 1.1 API, section 9.4.1, reads only the relation and the target of such a link.
   The check ignores the header for `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
-  It compares the media type without parameters. pyld 3.0.0 compares the whole `Content-Type`
-  value with `application/ld+json`. So pyld reads the header for `application/ld+json; charset=utf-8`,
-  and the check does not. This is an engine limit.
+  It compares the media type without parameters.
+- pyld 3.0.0 ignores the header only if the whole `Content-Type` value is `application/ld+json`.
+  requests joins two `Content-Type` lines with `, ` and keeps their case. So pyld reads the header
+  for `application/ld+json; charset=utf-8`, for `Application/LD+JSON`, and for two lines.
+- For such a value, the header names no context and no fail. If pyld can read a context outside
+  the allowlist there, or if the value is malformed, the check gives `blocked` with
+  `DATA.CONTEXT.LINK_UNREADABLE`. This is an engine limit. So does an allowed context there whose
+  pinned copy imports a context outside the allowlist.
+- pyld 3.0.0 also loads another document: the target of a link with the relation `alternate` and
+  the type `application/ld+json`. It does so if the whole `Content-Type` value does not match
+  `^application/(\w*\+)?json$`. It reads a missing value as `application/octet-stream`.
+- The check does not judge that document, so such a link gives `blocked` with
+  `DATA.CONTEXT.LINK_UNREADABLE`. pyld reads the last `rel`, and the record keeps only the
+  first. So a link with that type and a removed parameter gives `blocked` too.
 - The record keeps a `Link` value only in the form that redaction keeps (section 10). A link
   without the context relation is ignored. Redaction keeps each link that RFC 8288, appendix B,
   reads before a malformed part. A context link before such a part still names its target.
@@ -763,6 +774,12 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted form of an allowed URL. Then the
   engine cannot compare the two exactly. `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, and
   `DATA.CONTEXT.LINK_MALFORMED` come first.
+- The check resolves a relative context target with Python `urljoin`. `urljoin` removes empty
+  segments of the base path, and it does not read `%2e` as `.`. The WHATWG URL parser and pyld
+  3.0.0 keep such segments. A redirect can give such a base.
+- So a relative target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` if the base path has an
+  empty or dot segment and `urljoin` gives an allowed URL. A URL outside the allowlist stays a
+  fail, so this limit never hides one. `resolver.linkset` does not fetch such a target.
 - The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
   error code is `multiple context link headers`, section 9.6.2. The check judges the target of
   each context link.
@@ -1774,9 +1791,15 @@ records/<id>.enc   one encrypted record each
   relative target keeps only a leading run of `.` and `..` segments.
 - A fuzzer found these forms. It compared `urljoin` with the `URL` class of Node.js 22 and with
   the resolver of pyld 3.0.0. Only redaction reads this rule, so an old record replays unchanged.
-- This is an engine limit: for a relative target, `urljoin` also removes empty segments of the base
-  path. A redirect can give such a base. Redaction does not see the base, so this rule cannot
-  remove such a target.
+- For a relative target, `urljoin` also removes empty segments of the base path. A redirect can
+  give such a base. Redaction does not see the base, so this rule cannot remove such a target.
+  `data.context` gives `blocked` for it instead, and `resolver.linkset` skips it (section 8).
+- The transport removes an echoed credential of the engine before redaction (section 9). Its
+  marker `<removed>` holds `>`. In a `Link` value, the marker could close a target that a reader
+  of the sent value reads as open.
+- So a `Link` value that holds a form of a credential is recorded as `<%3Cremoved%3E>, <removed>`
+  as a whole. Reading of that record stops, so `data.context` gives a fail. Only the live
+  transport writes this form, so an old record replays unchanged.
 - A credential-like query value is different. Redaction replaces it with a marker in place, and
   that marker shows in the recorded target. So a check sees that redaction changed the target.
 
