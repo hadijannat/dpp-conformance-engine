@@ -71,6 +71,7 @@ LINK_STOPPED: Final = f"<{_TARGET_REMOVED}>, {REMOVED}"
 _URI_REFERENCE: Final = re.compile(r"(?:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=]|%[0-9A-Fa-f]{2})*")
 # Fixed media types cannot carry a secret, so a type parameter with one of them is kept.
 _KEPT_TYPES: Final = frozenset({"application/linkset+json", "application/ld+json", "application/json"})
+_JSONLD_TYPE: Final = "application/ld+json"
 # The link types of the GS1 Web Vocabulary: each sub-property of gs1:linkType in v1.16/gs1Voc.jsonld
 # of github.com/gs1/WebVoc at commit f8f407bf717233c871dca2f62f4e45b0940e8cad (Apache-2.0, read on
 # 2026-10-27, SHA-256 5b417c158cca7e55766dc5e35a1fa480273f036720b6c7382d61ea6939a7ee66). The file marks
@@ -178,7 +179,8 @@ def _live(value: str) -> LinkValue:
     must keep its reading.
     """
     parsed = parse_link(value)
-    return parsed if _NOT_IN_FIELD.search(value) is None else LinkValue(parsed.links, complete=False)
+    readable = _NOT_IN_FIELD.search(value) is None and _types_agree(parsed.links, value)
+    return parsed if readable else LinkValue(parsed.links, complete=False)
 
 
 def _recorded(parsed: LinkValue) -> str:
@@ -315,6 +317,25 @@ def _agrees(links: list[Link] | tuple[Link, ...], value: str) -> bool:
     """True if both processor models read the targets of ``links`` in order, with the same context links."""
     read = [(x.target, JSONLD_CONTEXT in x.relations) for x in links]
     return read == _processor_links(value, _JS_SPACE) == _processor_links(value, _PY_SPACE, pyld=True)
+
+
+def _types_agree(links: list[Link] | tuple[Link, ...], value: str) -> bool:
+    """True unless the processor model reads the type application/ld+json for a link of ``links``
+    that the engine reads with another type.
+
+    pyld 3.0.0 loads the target of an alternate link with that type, and the model reads the last
+    parameter named exactly "type", as pyld does. The engine keeps the first kept type. Only redaction
+    reads this rule, on a value whose targets agree with the model.
+    """
+    for space, pyld in ((_JS_SPACE, False), (_PY_SPACE, True)):
+        for link, (_, parameters) in zip(links, _processor_read(value, space), strict=False):
+            read = ""
+            for name, text, quoted in parameters:
+                if name == "type":
+                    read = text if quoted or not pyld else ""
+            if read == _JSONLD_TYPE and link.media_type != _JSONLD_TYPE:
+                return False
+    return True
 
 
 def _processor_links(value: str, space: str, *, pyld: bool = False) -> list[tuple[str, bool]]:
@@ -480,7 +501,8 @@ def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple
     # A line whose reading stopped is already not complete, so its record shows the stop.
     if len(lines) > 1 and all(parsed.complete for _, _, parsed in lines):
         links = [link for _, _, parsed in lines for link in parsed.links]
-        if not _agrees(links, ", ".join(value for _, value, _ in lines)):
+        joined = ", ".join(value for _, value, _ in lines)
+        if not (_agrees(links, joined) and _types_agree(links, joined)):
             index = lines[-1][0]
             name, kept = out[index]
             out[index] = (name, LINK_STOPPED if kept == REMOVED else f"{kept}, {REMOVED}")

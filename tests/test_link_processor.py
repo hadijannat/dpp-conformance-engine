@@ -618,3 +618,55 @@ def test_an_alternate_link_recorded_by_the_transport_is_blocked(tmp_path: Path, 
     others = tuple((k, v) for k, v in record.headers if k.lower() != "content-type")
     acquirer = Linked(record.body, others, media=record.header("content-type") or "")
     assert verdict(contexts(tmp_path, acquirer)) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+
+
+# -- a later type parameter that a processor reads -------------------------------------------------------
+
+# jsonld.js and pyld assign each parameter to the link, so the last parameter named exactly "type"
+# counts. The record keeps the first kept type. So a later type="application/ld+json" stops reading.
+LATER_TYPES = (
+    '<https://evil.test/doc>; rel="alternate"; type="application/json"; type="application/ld+json"',
+    '<https://evil.test/doc>; rel="alternate"; TYPE="application/json"; type="application/ld+json"',
+    '<https://evil.test/doc>; rel="alternate"; Type="application/json"; type="application/ld+json"',
+    '<https://evil.test/doc>; rel="alternate"; type="application/linkset+json"; type="application/ld+json"',
+    '<https://evil.test/doc>; rel="alternate"; type=application/json; type="application/ld+json"',
+    '<https://evil.test/doc>; rel="next"; type="application/json"; rel="alternate"; '
+    'type="application/ld+json"',
+)
+
+
+@pytest.mark.parametrize("media", ["application/json; charset=utf-8", "text/html"])
+@pytest.mark.parametrize("line", LATER_TYPES)
+def test_a_later_type_that_a_processor_reads_as_json_ld_fails(tmp_path: Path, media: str, line: str) -> None:
+    lines = recorded(line)
+    assert lines[0][1].endswith(f", {REMOVED}")
+    assert redact_link(lines[0][1]) == lines[0][1]
+    assert verdict(contexts(tmp_path, Linked(BODY, lines, media=media))) == failed(
+        "DATA.CONTEXT.LINK_MALFORMED"
+    )
+    assert verdict(contexts(tmp_path, Linked(PLAIN, lines, media=media))) == failed("DATA.CONTEXT.MISSING")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        '<https://x.test/a>; rel="alternate"; type="application/json"; title="x"',
+        '<https://x.test/a>; rel="alternate"; type="application/json"; type="application/json"',
+    ],
+)
+def test_a_type_that_no_processor_reads_as_json_ld_keeps_its_pass(tmp_path: Path, line: str) -> None:
+    lines = recorded(line)
+    assert parse_link(lines[0][1]).complete
+    outcome = contexts(tmp_path, Linked(BODY, lines, media="application/json; charset=utf-8"))
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+def test_a_later_type_recorded_by_the_transport_fails(tmp_path: Path, loopback: Any) -> None:
+    headers = {"Content-Type": "application/json; charset=utf-8", "Link": LATER_TYPES[0]}
+    server = loopback(lambda r: reply(r, body=BODY, headers=headers))
+    record = transport().fetch(Request("GET", f"{server.origin}/dpp/1"))
+    kept = '<https://evil.test/doc>; rel="alternate"; type="application/json"'
+    assert record.header("link") == f"{kept}; {REMOVED}, {REMOVED}"
+    others = tuple((k, v) for k, v in record.headers if k.lower() != "content-type")
+    acquirer = Linked(record.body, others, media=record.header("content-type") or "")
+    assert verdict(contexts(tmp_path, acquirer)) == failed("DATA.CONTEXT.LINK_MALFORMED")
