@@ -698,6 +698,9 @@ parameter, and each relation outside its closed list, with one marker.
   with empty segments kept. Each URL that these two readers give must be on the allowlist.
 - The WHATWG URL parser reads each `\` of that path as `/`. pyld reads `\` as a character of a
   segment. No reader decodes `%5c`.
+- The transport replaces an echoed credential of the engine in a redirect target with
+  `<removed>`. On such a base path, a relative path target counts unresolved. It gives
+  `DATA.CONTEXT.NOT_ALLOWED`.
 - A `Link` value that echoes a credential of the engine is recorded as
   `<%3Cremoved%3E>, <removed>`. Reading of that record does not finish.
 

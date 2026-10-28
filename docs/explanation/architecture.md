@@ -794,8 +794,17 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   Its base paths also held `\`, `%5c`, and characters that the WHATWG URL parser percent-encodes.
 - A reading keeps such a character as `urljoin` does. The fuzzer compared the WHATWG reading after
   the `URL` class wrote it, so percent-encoding alone was not a difference.
+- The transport replaces an echoed credential of the engine in a recorded redirect target with
+  `<removed>` (section 9). A credential can hold `/`, so the record then does not hold the fetched
+  base path.
+- So on a base path that holds the marker, a relative path target counts unresolved: the base, a
+  `/`, and the target. That URL is never on the allowlist, so it gives `DATA.CONTEXT.NOT_ALLOWED`.
+- The check cannot tell if the credential held `/`. The system put the credential into its own
+  redirect target, so the fail stands. A target with an absolute path or an authority keeps its
+  result.
 - `resolver.linkset` resolves a relative target in the same way. It does not fetch a target that
-  the two readers resolve to different URLs.
+  the two readers resolve to different URLs. It does not fetch a relative path target on a base
+  path that holds the marker.
 - The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
   error code is `multiple context link headers`, section 9.6.2. The check judges the target of
   each context link.
@@ -1817,6 +1826,9 @@ records/<id>.enc   one encrypted record each
   give such a base. It can also give a base path with `\`, which the WHATWG URL parser reads as
   `/`. Redaction does not see the base, so this rule cannot remove such a target.
   `data.context` and `resolver.linkset` resolve it as the WHATWG URL parser and pyld do instead
+  (section 8).
+- The transport also removes an echoed credential from a recorded redirect target. A credential
+  with `/` changes the base path, so neither check resolves a relative path target on that base
   (section 8).
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
   marker `<removed>` holds `>`. In a `Link` value, the marker could close a target that a reader
