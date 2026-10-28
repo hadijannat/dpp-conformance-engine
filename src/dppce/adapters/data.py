@@ -17,6 +17,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from decimal import Decimal
+from functools import cache, partial
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Final, Literal, NamedTuple, Self
@@ -53,13 +54,13 @@ from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
 from dppce.infrastructure.redaction import (
-    BASE_UNKNOWN,
     JSONLD_CONTEXT,
     REMOVED,
     hides_base_path,
     parse_link,
     redact_url,
     resolutions,
+    unmarked,
 )
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
@@ -826,7 +827,7 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
     relative target counts with each URL that WHATWG URL and pyld resolve it to. On a base path that
     holds the marker of an echoed credential, a relative path target counts unresolved. On a base
     after a Location that the readers read apart, a relative path, a query, or an empty target counts
-    unresolved. An alternate
+    unresolved. After an empty ";" parameter, a query or an empty target does. An alternate
     JSON-LD document that pyld loads is not judged.
     """
     # pyld 3.0.0 (documentloader/requests.py) ignores the header only if the whole value is the
@@ -837,6 +838,8 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
     base = record.redirects[-1] if record.redirects else record.url
     changed = {redact_url(a) for a in allowed if isinstance(a, str)}
     found: list[str] = []
+    # The reading of each target, once: a system under test can repeat a target many times.
+    read = cache(partial(_target_reading, base))
     limited = malformed = 0
     # pyld follows a link with the relation alternate and that type, as the document to read.
     not_json = _PYLD_JSON.match(content_type or "application/octet-stream") is None
@@ -859,21 +862,19 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
             )
             if JSONLD_CONTEXT not in link.relations:
                 continue
-            try:
-                urls = resolutions(base, link.target)
-                hidden = hides_base_path(base, link.target)
-            except ValueError:
-                continue  # a target that cannot be resolved names no context
+            if (reading := read(link.target)) is None:
+                continue
+            urls, hidden = reading
             if hidden:
                 # The system put an engine credential into its own redirect target, or sent a Location
                 # that the readers read apart, so the record does not hold the base path that a consumer
                 # reads. The target counts unresolved after the base. That URL holds the marker, so it is
                 # never allowed.
-                stem = base if base.endswith(BASE_UNKNOWN) else base.partition("?")[0]
+                stem = base if unmarked(base) != base else base.partition("?")[0]
                 found.append(f"{stem}/{link.target}")
                 continue
             for url in urls:
-                if url not in allowed and REMOVED in unquote(url) and url in changed:
+                if url not in allowed and url in changed and REMOVED in unquote(url):
                     limited += 1
                 else:
                     found.append(url)
@@ -886,6 +887,14 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
         return _LinkContexts([], 0, 0, pyld + other)
     limits = ((_CHANGED,) if limited else ()) + other
     return _LinkContexts(found, limited, malformed, limits)
+
+
+def _target_reading(base: str, target: str) -> tuple[tuple[str, ...], bool] | None:
+    """The URLs that ``target`` resolves to on ``base``, and whether it counts unresolved there."""
+    try:
+        return resolutions(base, target), hides_base_path(base, target)
+    except ValueError:
+        return None  # a target that cannot be resolved names no context
 
 
 def _content_type(record: Record) -> str:

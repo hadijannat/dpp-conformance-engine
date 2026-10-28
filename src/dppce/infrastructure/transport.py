@@ -29,15 +29,15 @@ from dppce.evidence.recording import REDIRECT_STATUSES, new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Clock, Record, Request, TransportError
 from dppce.infrastructure.redaction import (
-    BASE_UNKNOWN,
     LINK_STOPPED,
     REMOVED,
     SAFE_REQUEST_HEADERS,
     is_public_address,
-    reads_apart,
+    moves_host,
     redact_request_headers,
     redact_response_headers,
     redact_url,
+    redirect_mark,
 )
 from dppce.models import Authorization, NetworkPolicy, Scope
 
@@ -646,8 +646,8 @@ class PolicyTransport:
         statuses: list[int] = []
         attempts = 0
         waited = False
-        # The URL of the current hop as urljoin gave it, and whether a consumer can read another one.
-        current, apart = request.url, False
+        # The URL of the current hop as urljoin gave it.
+        current = request.url
 
         def done(
             error: TransportError | None,
@@ -726,14 +726,17 @@ class PolicyTransport:
             if len(redirects) >= self._config.policy.max_redirects:
                 return done("too_many_redirects", status, headers)
             try:
+                if moves_host(location):
+                    # A consumer goes to another host, so it never reads the answer that urljoin leads to.
+                    return done("redirect_out_of_scope", status, headers)
                 next_url = urljoin(f"{target.origin}{target.path}", location)
-                # A consumer that reads this Location apart joins each later Location to another base.
-                apart = apart or reads_apart(current, location)
+                # A consumer that reads this Location apart can join a later Location to another base.
+                mark = redirect_mark(redirects[-1] if redirects else "", current, location)
             except ValueError:
                 # The system sent a Location that is not a URL. The engine does not follow it.
                 return done("redirect_out_of_scope", status, headers)
             current = next_url
-            redirects.append(redact_url(next_url) + (BASE_UNKNOWN if apart else ""))
+            redirects.append(redact_url(next_url) + mark)
             statuses.append(status)
             try:
                 target = self._target(next_url, method, request.role)

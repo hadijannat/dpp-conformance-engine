@@ -10,6 +10,8 @@ from __future__ import annotations
 import ipaddress
 import re
 from collections.abc import Callable
+from functools import lru_cache
+from itertools import accumulate
 from typing import Final, NamedTuple
 from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlparse, urlsplit, urlunparse, urlunsplit
 
@@ -70,6 +72,9 @@ LINK_STOPPED: Final = f"<{_TARGET_REMOVED}>, {REMOVED}"
 # The suffix of a recorded redirect target after a Location that the URL readers read apart: the record
 # does not hold the base path that a consumer reads. redact_url removes every other fragment.
 BASE_UNKNOWN: Final = f"#{REMOVED}"
+# The suffix after a Location with an empty ";" parameter that urljoin drops: the record does
+# not hold the query and the last segment that a consumer reads.
+QUERY_UNKNOWN: Final = f"#?{REMOVED}"
 # RFC 3986, section 2: unreserved and reserved characters, and "%" only before two hex digits.
 _URI_REFERENCE: Final = re.compile(r"(?:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=]|%[0-9A-Fa-f]{2})*")
 # Fixed media types cannot carry a secret, so a type parameter with one of them is kept.
@@ -269,21 +274,77 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
     "/", removes the dot segments, and reads "%2e" as ".". A reading keeps a character that WHATWG
     percent-encodes, as urljoin does. Raises ValueError as urljoin does.
     """
-    joined = urljoin(base, target)
-    parts, relative = urlsplit(base), urlsplit(target)
-    if not _odd_path(parts.path) or relative.scheme or relative.netloc or target.startswith("/"):
-        return (joined,)
-    readings: list[str] = []
-    whatwg = _without_dots((parts.path or "/").replace("\\", "/"), dotted=True)
-    for dotted in (False, True):
-        path = whatwg if dotted else parts.path or "/"
-        query = relative.query
+    relative = urlsplit(target)
+    readings = None
+    if not (relative.scheme or relative.netloc or target.startswith("/")):
+        readings = _odd_base(base)
+    if readings is None:
+        return (urljoin(base, target),)
+    scheme, netloc, base_query, directories = readings
+    out: list[str] = []
+    for dotted, directory in zip((False, True), directories, strict=True):
+        path, query = directory.path, relative.query
         if relative.path:
-            path = _without_dots(path[: path.rfind("/") + 1] + relative.path, dotted=dotted)
+            path = directory.merge(relative.path, dotted=dotted)
         elif not query:
-            query = parts.query
-        readings.append(urlunsplit((parts.scheme, parts.netloc, path, query, relative.fragment)))
-    return tuple(dict.fromkeys(readings))
+            query = base_query
+        out.append(urlunsplit((scheme, netloc, path, query, relative.fragment)))
+    return tuple(dict.fromkeys(out))
+
+
+class _Directory:
+    """A base path and its directory without dot segments, merged with a relative path in time that
+    does not grow with the base path. A system under test can send a long base path and many links.
+    """
+
+    def __init__(self, path: str, *, dotted: bool) -> None:
+        self.path = path
+        kept: list[str] = []
+        # Each segment of the directory comes before the segments of a relative path, so none is final.
+        for segment in path[: path.rfind("/") + 1].split("/")[1:-1]:
+            dot = _dot(segment, dotted=dotted)
+            if dot == ".." and kept:
+                kept.pop()
+            if dot is None:
+                kept.append(segment)
+        self._joined = "/" + "/".join(kept)
+        # The length of "/" and the first k kept segments, joined with "/", for k from 1.
+        self._ends = [0, *accumulate(len(s) + 1 for s in kept)]
+
+    def merge(self, relative: str, *, dotted: bool) -> str:
+        """``_without_dots`` of the directory followed by ``relative``, which is not empty."""
+        kept, extra = len(self._ends) - 1, list[str]()
+        segments = relative.split("/")
+        for index, segment in enumerate(segments):
+            dot = _dot(segment, dotted=dotted)
+            if dot == "..":
+                if extra:
+                    extra.pop()
+                elif kept:
+                    kept -= 1
+            if dot is None:
+                extra.append(segment)
+            elif index == len(segments) - 1:
+                extra.append("")  # a final dot segment leaves a directory
+        tail = "/".join(extra)
+        if not kept:
+            return "/" + tail
+        head = self._joined[: self._ends[kept]]
+        return f"{head}/{tail}" if extra else head
+
+
+@lru_cache(maxsize=8)
+def _odd_base(base: str) -> tuple[str, str, str, tuple[_Directory, _Directory]] | None:
+    """The parts of ``base`` and the pyld and WHATWG readings of its path, or None for a plain base.
+
+    The readers of one record call this for each link, so the result is computed once per base.
+    """
+    parts = urlsplit(base)
+    if not _odd_path(parts.path):
+        return None
+    whatwg = _without_dots((parts.path or "/").replace("\\", "/"), dotted=True)
+    directories = (_Directory(parts.path or "/", dotted=False), _Directory(whatwg, dotted=True))
+    return parts.scheme, parts.netloc, parts.query, directories
 
 
 def hides_base_path(base: str, target: str) -> bool:
@@ -293,27 +354,46 @@ def hides_base_path(base: str, target: str) -> bool:
     The transport replaces an echoed engine credential in a recorded redirect target with the marker.
     A credential can hold "/", so a relative path target on a path with the marker reads an unknown
     path. Redaction of a query parameter does not change the path. On a base that ends with
-    BASE_UNKNOWN, a relative path, a query, and an empty target read an unknown path. Raises
-    ValueError as urlsplit does.
+    BASE_UNKNOWN, a relative path, a query, and an empty target read an unknown path. On a base that
+    ends with QUERY_UNKNOWN, a query and an empty target do. Raises ValueError as urlsplit does.
     """
+    if mark := _mark(base):
+        return _reads_unknown(mark, target)
     relative = urlsplit(target)
     local = not (relative.scheme or relative.netloc or target.startswith("/"))
-    if base.endswith(BASE_UNKNOWN):
-        return local
-    return local and bool(relative.path) and REMOVED in unquote(base.partition("?")[0])
+    return local and bool(relative.path) and REMOVED in _unquoted_path(base)
+
+
+@lru_cache(maxsize=8)
+def _unquoted_path(url: str) -> str:
+    return unquote(url.partition("?")[0])
+
+
+def moves_host(location: str) -> bool:
+    """True if WHATWG URL can read the redirect ``location`` with another host than Python urljoin.
+
+    In an http or https URL, WHATWG URL reads "\\" as "/". It reads the first segment after an empty
+    authority as the host, and urljoin keeps the host of the base. RFC 9110, section 4.2.1, says that
+    a recipient rejects an http URL with an empty host. Both remove a tab and a line break. Raises
+    ValueError as urlsplit does.
+    """
+    netloc = urlsplit(location).netloc
+    whatwg = location.replace("\\", "/")
+    return urlsplit(whatwg).netloc != netloc or (not netloc and _AUTHORITY_START.match(whatwg) is not None)
 
 
 def reads_apart(base: str, location: str) -> bool:
-    """True if Python urljoin can resolve the redirect ``location`` against ``base`` to another URL
+    """True if Python urljoin can resolve the redirect ``location`` against ``base`` to another path
     than WHATWG URL or requests does.
 
     WHATWG URL reads "\\" as "/" and keeps the empty segments of a relative path. WHATWG URL and
     requests read "%2e" as ".". urljoin does neither, it removes the empty segments of the base path
-    for a relative path, it reads "..;x" as "..", and it drops an empty ";" parameter, "?" query, or
-    "#" fragment. Raises ValueError as urlsplit does.
+    for a relative path, and it reads "..;x" as "..". It also drops an empty ";" parameter, "?" query,
+    or "#" fragment, but that changes no path: see redirect_mark. Raises ValueError as urlsplit does.
     """
-    parsed = urlparse(location)
-    if urlunparse(parsed) != parsed.scheme + location[len(parsed.scheme) :]:
+    trimmed = _without_empty_ends(location)[0]
+    parsed = urlparse(trimmed)
+    if urlunparse(parsed) != parsed.scheme + trimmed[len(parsed.scheme) :]:
         return True
     path = urlsplit(location).path
     segments = path.split("/")
@@ -323,9 +403,58 @@ def reads_apart(base: str, location: str) -> bool:
     return relative and ("" in segments[:-1] or _odd_path(urlsplit(base).path))
 
 
+def redirect_mark(previous: str, base: str, location: str) -> str:
+    """The suffix of the recorded redirect target after ``location``, which urljoin joined to ``base``.
+
+    The suffix is BASE_UNKNOWN after a Location that the readers read apart. It is QUERY_UNKNOWN after
+    one with an empty ";" parameter, which urljoin drops and WHATWG URL keeps. A
+    Location keeps the suffix of the previous recorded target ``previous`` if it reads the part of
+    that base that the record does not hold. Raises ValueError as urlsplit does.
+    """
+    own = BASE_UNKNOWN if reads_apart(base, location) else ""
+    if not own and _without_empty_ends(location)[1]:
+        own = QUERY_UNKNOWN
+    before = _mark(previous)
+    kept = before if before and _reads_unknown(before, location) else ""
+    return BASE_UNKNOWN if BASE_UNKNOWN in (own, kept) else own or kept
+
+
 def unmarked(url: str) -> str:
-    """``url`` without the suffix BASE_UNKNOWN: the URL that the transport fetched."""
-    return url.removesuffix(BASE_UNKNOWN)
+    """``url`` without the suffix BASE_UNKNOWN or QUERY_UNKNOWN: the URL that the transport fetched."""
+    return url.removesuffix(BASE_UNKNOWN).removesuffix(QUERY_UNKNOWN)
+
+
+def _mark(url: str) -> str:
+    """The suffix of ``url`` that the transport added, or ""."""
+    return next((m for m in (BASE_UNKNOWN, QUERY_UNKNOWN) if url.endswith(m)), "")
+
+
+def _reads_unknown(mark: str, target: str) -> bool:
+    """True if ``target`` reads the part of a base with the suffix ``mark`` that the record does not hold."""
+    relative = urlsplit(target)
+    if relative.scheme or relative.netloc or target.startswith("/"):
+        return False
+    return mark == BASE_UNKNOWN or not relative.path
+
+
+def _without_empty_ends(location: str) -> tuple[str, bool]:
+    """``location`` without an empty "#" fragment, "?" query, and ";" parameter, which urljoin drops,
+    and whether it had the parameter.
+
+    A target resolves to no fragment of its base. Node.js 22 new URL() resolves each target against a
+    base with an empty query as urljoin does without it. So only the parameter changes a resolution.
+    urlparse reads a parameter after the first ";" of the last path segment.
+    """
+    head, _, fragment = location.partition("#")
+    head, _, query = head.partition("?")
+    path = urlsplit(head).path
+    params = path.endswith(";") and path.find(";", path.rfind("/") + 1) == len(path) - 1
+    trimmed = (
+        (head[:-1] if params else head)
+        + (f"?{query}" if query else "")
+        + (f"#{fragment}" if fragment else "")
+    )
+    return trimmed, params
 
 
 def _odd_path(path: str) -> bool:

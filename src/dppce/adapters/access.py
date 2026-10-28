@@ -32,7 +32,7 @@ from dppce.adapters.common import (
 from dppce.catalogue import CatalogueError, load_model
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import REMOVED
+from dppce.infrastructure.redaction import REMOVED, unmarked
 from dppce.models import PATH_TEMPLATE_PATTERN, UNKNOWN, CheckOutcome, Model, Profile
 from dppce.testdefs.registry import CheckContext, register
 
@@ -190,8 +190,11 @@ _URL_HEADERS = ("location", "content-location", "link")
 
 
 def _url_texts(record: Record) -> list[str]:
-    """Redirect targets and the URL values of the answer: a value can also leave through them."""
-    return [*record.redirects, *(v for k, v in record.headers if k.lower() in _URL_HEADERS)]
+    """Redirect targets and the URL values of the answer: a value can also leave through them.
+
+    The suffix that the transport adds to a redirect target removed nothing, so it is not read.
+    """
+    return [*map(unmarked, record.redirects), *(v for k, v in record.headers if k.lower() in _URL_HEADERS)]
 
 
 def _look(

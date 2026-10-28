@@ -847,6 +847,171 @@ def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_base_that_the_co
     assert _advertised([absolute]) == "https://id.example.test/linksets/EV0001"
 
 
+# The suffix after a Location whose empty ";" parameter urljoin drops: only a query or an empty target
+# reads the part of the base that the record does not hold.
+QUERY_UNKNOWN = f"#?{REMOVED}"
+
+
+def _follow(loopback: Any, locations: list[str], link: str) -> tuple[Any, Record]:
+    """The transport record of a chain of 302 answers with ``locations``, then a 200 answer with ``link``."""
+
+    def answer(request: Any) -> None:
+        hop = len(server.seen) - 1
+        if hop < len(locations):
+            reply(request, 302, b"", {"Location": locations[hop]})
+        else:
+            reply(request, headers={"Link": link})
+
+    server = loopback(answer)
+    return server, transport().fetch(Request("GET", f"{server.origin}/dpp/1", role="anonymous"))
+
+
+@pytest.mark.parametrize(
+    "locations",
+    [
+        # Node.js 22 new URL() reads the next segment as the host: http://h2.example/x/doc. urljoin keeps
+        # the engine host, and RFC 9110, section 4.2.1, says that a recipient rejects an empty http host.
+        ["http:///h2.example/x/doc"],
+        ["HTTP:///h2.example/x/doc"],
+        ["////h2.example/x/doc"],
+        ["/dpp/2", "http:///h2.example/x/doc"],
+        # WHATWG URL reads "\" as "/": http://h2.example/doc.
+        ["/\\h2.example/doc"],
+        ["\\\\h2.example/doc"],
+        ["http:/\\h2.example/doc"],
+    ],
+)
+def test_a_location_that_a_consumer_reads_with_another_host_is_not_followed(
+    loopback: Any, locations: list[str]
+) -> None:
+    server, record = _follow(loopback, locations, f"</contexts/battery/v1>; {CTX}")
+    assert record.error == "redirect_out_of_scope"
+    assert record.status == 302
+    assert len(server.seen) == len(locations), "the engine fetches no answer of another URL"
+    assert len(record.redirects) == len(locations) - 1
+
+
+@pytest.mark.parametrize(
+    "locations",
+    [
+        # urljoin drops an empty query or fragment. Node.js 22 and requests read the same base.
+        ["/x/y/z?"],
+        ["/x/y/z#"],
+        ["/x/y/z;"],
+        # A later hop with an absolute path does not read the path of an earlier hop.
+        ["/a?", "/x/y/z"],
+        ["/a\\b/../c", "/x/y/z"],
+        ["x//y/doc", "/x/y/z"],
+    ],
+)
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_context_target_after_a_location_that_every_reader_reads_alike_keeps_its_pass(
+    tmp_path: Path, loopback: Any, locations: list[str], body: bytes
+) -> None:
+    server, record = _follow(loopback, locations, f"<../../contexts/battery/v1>; {CTX}")
+    assert record.status == 200
+    assert record.redirects[-1] in (f"{server.origin}/x/y/z", f"{server.origin}/x/y/z{QUERY_UNKNOWN}")
+    links = tuple((k, v) for k, v in record.headers if k.lower() == "link")
+    allowed = [ALLOWED[0], f"{server.origin}/contexts/battery/v1"]
+    outcome = contexts(tmp_path, Redirected(body, links, record.redirects[-1]), allowed_contexts=allowed)
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize(
+    ("locations", "suffix"),
+    [
+        # Node.js 22 reads the base /x/y/z; and then a query target as /x/y/z;?v1. urljoin gives /x/y/z?v1.
+        (["/x/y/z;"], QUERY_UNKNOWN),
+        (["/x/y/z;?a=1"], QUERY_UNKNOWN),
+        # A query hop reads the query of the earlier hop.
+        (["/x/y/z;", "?a=1"], QUERY_UNKNOWN),
+        # A relative hop reads the path of the earlier hop, which the record does not hold.
+        (["/a\\b/x", "y/z"], UNKNOWN),
+        (["/x/y/z;", "/a\\b/x", "?a=1"], UNKNOWN),
+    ],
+)
+def test_a_query_target_after_a_dropped_empty_parameter_counts_unresolved(
+    tmp_path: Path, loopback: Any, locations: list[str], suffix: str
+) -> None:
+    server, record = _follow(loopback, locations, f"<?v1>; {CTX}")
+    assert record.status == 200
+    assert record.redirects[-1].endswith(suffix)
+    assert all(hop.count("#") <= 1 for hop in record.redirects)
+    links = tuple((k, v) for k, v in record.headers if k.lower() == "link")
+    base = record.redirects[-1].partition("#")[0]
+    allowed = [ALLOWED[0], urljoin(base, "?v1"), urljoin(base, "")]
+    for target in ("?v1", ""):
+        lines = tuple((k, v.replace("<?v1>", f"<{target}>")) for k, v in links)
+        outcome = contexts(tmp_path, Redirected(PLAIN, lines, record.redirects[-1]), allowed_contexts=allowed)
+        assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    # A relative path or an absolute path target does not read the query.
+    if suffix == QUERY_UNKNOWN:
+        allowed += [f"{server.origin}/x/y/v1", f"{server.origin}/contexts/battery/v1"]
+        for target in ("v1", "/contexts/battery/v1"):
+            lines = tuple((k, v.replace("<?v1>", f"<{target}>")) for k, v in links)
+            outcome = contexts(
+                tmp_path, Redirected(PLAIN, lines, record.redirects[-1]), allowed_contexts=allowed
+            )
+            assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+def test_resolver_linkset_reads_a_relative_target_after_a_dropped_empty_parameter() -> None:
+    final = f"https://id.example.test/x/doc{QUERY_UNKNOWN}"
+    record = replace(
+        make_record(1), headers=recorded('<../linksets/EV0001>; rel="linkset"'), redirects=(final,)
+    )
+    assert _advertised([record]) == "https://id.example.test/linksets/EV0001"
+    assert _advertised([replace(record, headers=recorded('<?linkset>; rel="linkset"'))]) is None
+
+
+@pytest.mark.parametrize("suffix", [UNKNOWN, QUERY_UNKNOWN])
+def test_the_access_check_reads_a_marked_redirect_as_the_url_that_the_engine_fetched(
+    tmp_path: Path, suffix: str
+) -> None:
+    from tests.test_review_round2 import _POLICY, _context, _Redirected, restricted_fields  # noqa: PLC0415
+
+    # The suffix removed nothing from the URL, so a canary cannot hide there.
+    acquirer = _Redirected(b"<p>clean</p>", redirects=(f"http://sut.example/dpp/x{suffix}",))
+    outcome = restricted_fields(_context(tmp_path, _POLICY, acquirer))
+    assert (outcome.passed, outcome.reason_code) == (True, "ACCESS.POLICY.ENFORCED")
+    leaked = _Redirected(b"<p>clean</p>", redirects=(f"http://sut.example/dpp/CANARY-test{suffix}",))
+    outcome = restricted_fields(_context(tmp_path, _POLICY, leaked))
+    assert (outcome.passed, outcome.reason_code) == (False, "ACCESS.LEAK.FETCH")
+
+
+# One Link line of about 64 KiB with distinct relative context targets, on a base path of about 60 KiB.
+_MANY = ", ".join(f'<a{i}>; rel="{JSONLD_CONTEXT}"' for i in range(1200))
+_LONG_BASES = (
+    "https://h.example" + "/" * 60000 + "doc",
+    "https://h.example" + "/." * 30000 + "/doc",
+    "https://h.example/" + "\\" * 60000 + "/doc",
+    "https://h.example" + "/a" * 30000 + "/doc" + UNKNOWN,
+)
+_LONG_IDS = ("empty-segments", "dot-segments", "backslashes", "marked")
+
+
+@pytest.mark.parametrize("base", _LONG_BASES, ids=_LONG_IDS)
+def test_the_context_links_of_one_answer_on_a_long_odd_base_cost_little(base: str) -> None:
+    from dppce.adapters.data import _link_contexts  # noqa: PLC0415 - a private reader of one record
+
+    lines = redact_response_headers((("Link", _MANY), ("Content-Type", "application/json")))
+    record = replace(make_record(1, b"{}", "https://h.example/dpp/1"), headers=lines, redirects=(base,))
+    start = time.perf_counter()
+    found = _link_contexts(record, ["https://h.example/ctx"], {}).found
+    # The bound is wide, so a slow machine passes. Before the fix, one line took from 8 s to 19 s.
+    assert time.perf_counter() - start < 3
+    assert len(found) >= 1200
+
+
+@pytest.mark.parametrize("base", _LONG_BASES, ids=_LONG_IDS)
+def test_the_linkset_links_of_one_answer_on_a_long_odd_base_cost_little(base: str) -> None:
+    many = ", ".join(f'<a{i}>; rel="next"' for i in range(1200)) + ', <a>; rel="linkset"'
+    record = replace(make_record(1), headers=redact_response_headers((("Link", many),)), redirects=(base,))
+    start = time.perf_counter()
+    _advertised([record])
+    assert time.perf_counter() - start < 3
+
+
 # -- an application/ld+json answer whose Content-Type value pyld reads as another type -----------------
 
 FOREIGN = f"<{EVIL}>; {CTX}"
