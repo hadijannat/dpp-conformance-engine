@@ -29,6 +29,7 @@ from dppce.evidence.recording import REDIRECT_STATUSES, new_salt
 from dppce.infrastructure.clock import parse_stamp, utc_stamp
 from dppce.infrastructure.interfaces import Clock, Record, Request, TransportError
 from dppce.infrastructure.redaction import (
+    LINK_STOPPED,
     REMOVED,
     SAFE_REQUEST_HEADERS,
     is_public_address,
@@ -604,12 +605,18 @@ class PolicyTransport:
         and from the body. Where the body limit cut the body, a cut head of a form is removed
         too. A complete body keeps its tail: it is evidence. Other encodings, such as base64 or a
         mix of forms, are not recognized. An issued token is removed only with its scheme word.
+        A Link value with a form becomes the stopped form as a whole: the marker holds ">", so in
+        place it can close a target that a consumer of the sent value reads as still open.
         """
         for forms, replacement in self._scrubs:
             removed = replacement.encode("ascii")
             for form in forms:
                 headers = tuple(
-                    (k.replace(form, replacement), v.replace(form, replacement)) for k, v in headers
+                    (
+                        k.replace(form, replacement),
+                        LINK_STOPPED if form in v and k.lower() == "link" else v.replace(form, replacement),
+                    )
+                    for k, v in headers
                 )
                 redirects = [target.replace(form, replacement) for target in redirects]
                 body = body.replace(form.encode("utf-8"), removed)

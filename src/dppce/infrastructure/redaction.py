@@ -65,6 +65,8 @@ _AUTHORITY_START: Final = re.compile(r"(?:[A-Za-z][A-Za-z0-9+.-]*:)?//")
 _SPECIAL_SCHEMES: Final = frozenset({"http", "https", "ws", "wss", "ftp", "file"})
 # A target that is not a URI reference is recorded as this marker, so its free text never reaches a record.
 _TARGET_REMOVED: Final = "%3Cremoved%3E"
+# The recorded form of a Link value that reading stopped in before its first link.
+LINK_STOPPED: Final = f"<{_TARGET_REMOVED}>, {REMOVED}"
 # RFC 3986, section 2: unreserved and reserved characters, and "%" only before two hex digits.
 _URI_REFERENCE: Final = re.compile(r"(?:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=]|%[0-9A-Fa-f]{2})*")
 # Fixed media types cannot carry a secret, so a type parameter with one of them is kept.
@@ -464,7 +466,7 @@ def redact_response_headers(headers: tuple[tuple[str, str], ...]) -> tuple[tuple
         if not _agrees(links, ", ".join(value for _, value, _ in lines)):
             index = lines[-1][0]
             name, kept = out[index]
-            out[index] = (name, f"{f'<{_TARGET_REMOVED}>' if kept == REMOVED else kept}, {REMOVED}")
+            out[index] = (name, LINK_STOPPED if kept == REMOVED else f"{kept}, {REMOVED}")
     return tuple(out)
 
 

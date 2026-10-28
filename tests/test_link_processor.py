@@ -13,12 +13,14 @@ import re
 import time
 from dataclasses import replace
 from pathlib import Path
+from typing import Any
 from urllib.parse import urljoin
 
 import pytest
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce.adapters.resolver import _advertised
+from dppce.infrastructure.interfaces import Request
 from dppce.infrastructure.redaction import (
     _JS_SPACE,
     _PY_SPACE,
@@ -29,8 +31,9 @@ from dppce.infrastructure.redaction import (
     redact_link,
     redact_response_headers,
 )
-from tests.support import make_record
+from tests.support import make_record, reply
 from tests.test_data_document_source import ALLOWED, failed, passed, verdict
+from tests.test_review_findings import transport
 from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts
 
 CTX = f'rel="{JSONLD_CONTEXT}"'
@@ -431,3 +434,30 @@ def test_a_target_with_an_authority_or_another_scheme_is_kept(target: str) -> No
 def test_resolver_linkset_does_not_fetch_a_special_scheme_target_without_an_authority(target: str) -> None:
     lines = recorded(f'<{target}>; rel="linkset"')
     assert _advertised([replace(make_record(1, url="https://id.example.test/01/1"), headers=lines)]) is None
+
+
+# -- an echoed credential in a Link line ---------------------------------------------------------------
+
+TOKEN = "TEST-ONLY-S3CRET-token"
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        # The token takes the place of the ">" of a target. Scrubbed in place, the marker would close it.
+        f"<{EVIL}{TOKEN}, <{ALLOWED[0]}>; {CTX}",
+        f'<{ALLOWED[0]}>; {CTX}; title="{TOKEN}"',
+    ],
+)
+@pytest.mark.parametrize(("body", "code"), [(BODY, "LINK_MALFORMED"), (PLAIN, "MISSING")])
+def test_a_link_line_that_echoes_a_credential_records_as_the_placeholder(
+    tmp_path: Path, loopback: Any, line: str, body: bytes, code: str
+) -> None:
+    server = loopback(lambda r: reply(r, headers={"Link": line}))
+    engine = transport(credentials={"authority": (server.origin, TOKEN)})
+    record = engine.fetch(Request("GET", f"{server.origin}/dpp/1", role="anonymous"))
+    assert "Authorization" not in server.seen[-1], "an anonymous request carries no credential"
+    assert [v for k, v in record.headers if k.lower() == "link"] == [PLACEHOLDER]
+    assert TOKEN not in repr(record)
+    headers = tuple((k, v) for k, v in record.headers if k.lower() != "content-type")
+    assert verdict(contexts(tmp_path, Linked(body, headers))) == failed(f"DATA.CONTEXT.{code}")
