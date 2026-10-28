@@ -8,6 +8,7 @@ sections 8 and 10. No test contacts a host.
 
 from __future__ import annotations
 
+import json
 import random
 import re
 import time
@@ -34,7 +35,7 @@ from dppce.infrastructure.redaction import (
 from tests.support import make_record, reply
 from tests.test_data_document_source import ALLOWED, blocked, failed, passed, verdict
 from tests.test_review_findings import transport
-from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts
+from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts, pin
 
 CTX = f'rel="{JSONLD_CONTEXT}"'
 EVIL = "https://evil.test/ctx"
@@ -519,3 +520,56 @@ def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_base_with_an_emp
     plain = replace(odd, redirects=("https://id.example.test/dpp/x/y",))
     assert _advertised([odd]) is None
     assert _advertised([plain]) == "https://id.example.test/dpp/linksets/EV0001"
+
+
+# -- an application/ld+json answer whose Content-Type value pyld reads as another type -----------------
+
+FOREIGN = f"<{EVIL}>; {CTX}"
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        (("Content-Type", "application/ld+json; charset=utf-8"),),
+        (("Content-Type", "Application/LD+JSON"),),
+        (("Content-Type", 'application/ld+json;profile="x"'),),
+        (("Content-Type", "application/ld+json"), ("Content-Type", "text/html")),
+    ],
+)
+def test_pyld_reads_the_link_of_an_ld_json_answer_with_another_content_type_value(
+    tmp_path: Path, headers: tuple[tuple[str, str], ...]
+) -> None:
+    # pyld 3.0.0 compares the whole value, with the lines joined, with "application/ld+json".
+    acquirer = Linked(BODY, (*headers[1:], *recorded(FOREIGN)), media=headers[0][1])
+    assert verdict(contexts(tmp_path, acquirer)) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+    # pyld can read a context after the part where the engine stopped.
+    stopped = recorded(f'<{ALLOWED[0]}>; {CTX}; title="a\x01b"')
+    assert not parse_link(stopped[0][1]).complete
+    malformed = Linked(BODY, (*headers[1:], *stopped), media=headers[0][1])
+    assert verdict(contexts(tmp_path, malformed)) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+    # An allowed context link whose pinned copy imports a context outside the allowlist.
+    other = "https://example.test/b"
+    files = {ALLOWED[0]: pin(tmp_path, "a.json", {"@context": {"@import": "https://other.test/ctx"}})}
+    body = json.dumps({"@context": other}).encode()
+    imported = Linked(body, (*headers[1:], *recorded(f"<{ALLOWED[0]}>; {CTX}")), media=headers[0][1])
+    outcome = contexts(tmp_path, imported, allowed_contexts=[ALLOWED[0], other], context_files=files)
+    assert verdict(outcome) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+
+
+def test_an_ld_json_answer_keeps_an_allowed_link_and_its_fails(tmp_path: Path) -> None:
+    media = "application/ld+json; charset=utf-8"
+    allowed = Linked(BODY, recorded(f"<{ALLOWED[0]}>; {CTX}"), media=media)
+    assert verdict(contexts(tmp_path, allowed)) == passed("DATA.CONTEXT.OK")
+    # The header does not count as a context for an application/ld+json answer, so it hides no fail.
+    assert verdict(contexts(tmp_path, Linked(PLAIN, recorded(FOREIGN), media=media))) == failed(
+        "DATA.CONTEXT.MISSING"
+    )
+    foreign = b'{"@context": "https://other.test/ctx"}'
+    assert verdict(contexts(tmp_path, Linked(foreign, recorded(FOREIGN), media=media))) == failed(
+        "DATA.CONTEXT.NOT_ALLOWED"
+    )
+
+
+def test_an_exact_ld_json_answer_ignores_the_link_header(tmp_path: Path) -> None:
+    acquirer = Linked(BODY, recorded(FOREIGN), media="application/ld+json")
+    assert verdict(contexts(tmp_path, acquirer)) == passed("DATA.CONTEXT.OK")

@@ -776,6 +776,11 @@ _UNCERTAIN_BASE: Final = (
     "A context link of the answer has a relative target, and the URL of the answer has an empty or "
     "dot segment in its path. URL parsers can resolve such a target to different URLs."
 )
+_PYLD_READS: Final = (
+    "The answer has the media type application/ld+json, so a JSON-LD processor ignores its Link "
+    "header. The Content-Type value is not exactly that type, so pyld 3.0.0 reads the header. "
+    "There it can read a context outside the pinned allowlist."
+)
 
 
 class _LinkContexts(NamedTuple):
@@ -794,20 +799,24 @@ class _LinkContexts(NamedTuple):
 _NO_LINKS: Final = _LinkContexts([], 0, 0, ())
 
 
-def _link_contexts(record: Record, allowed: list[Any]) -> _LinkContexts:
+def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[str]]) -> _LinkContexts:
     """The targets of the links with the JSON-LD context relation, the limits of their reading,
     and how many Link values are malformed.
 
     JSON-LD 1.1 API, section 9.4.1: a processor reads the href of such a link and ignores the
-    header for application/ld+json. The record holds the form that redaction keeps. A link with
-    the relation names its target, whatever its other parameters are. Redaction keeps the links
-    that RFC 8288, appendix B, reads before a malformed part. A JSON-LD processor can read a context
+    header for application/ld+json. There a value that pyld can read as another context is a
+    limit, unless the Content-Type value is exactly that type. The record holds the form that
+    redaction keeps. A link with the relation names its target, whatever its other parameters
+    are. Redaction keeps the links that RFC 8288, appendix B, reads before a malformed part. A
+    JSON-LD processor can read a context
     link after that part, so a malformed value counts. A target that redaction changed holds the
     marker and is compared in that form. It cannot be compared only if it equals the redacted form
     of an allowed URL that redaction changes too. A relative target that urljoin resolves to an
     allowed URL is not compared if another URL parser can resolve it to another URL.
     """
-    if record.kind != "http" or media_type(record) == "application/ld+json":
+    # pyld 3.0.0 (documentloader/requests.py) ignores the header only if the whole value is the
+    # type. requests joins the lines with ", " and keeps their case.
+    if record.kind != "http" or _content_type(record) == "application/ld+json":
         return _NO_LINKS
     base = record.redirects[-1] if record.redirects else record.url
     changed = {redact_url(a) for a in allowed if isinstance(a, str)}
@@ -837,8 +846,18 @@ def _link_contexts(record: Record, allowed: list[Any]) -> _LinkContexts:
                 uncertain += 1  # a URL outside the allowlist is a fail, so a limit never hides one
             else:
                 found.append(url)
+    if media_type(record) == "application/ld+json":
+        # JSON-LD 1.1, section 6.1: a processor ignores the header here, so it names no context and
+        # no fail. pyld reads it, so a value that pyld can read as another context is a limit.
+        unread = malformed or limited or uncertain or any(url not in allowed for url in found)
+        return _LinkContexts([], 0, 0, (_PYLD_READS,) if unread or _imported(found, pinned, allowed) else ())
     limits = ((_CHANGED,) if limited else ()) + ((_UNCERTAIN_BASE,) if uncertain else ())
     return _LinkContexts(found, limited + uncertain, malformed, limits)
+
+
+def _content_type(record: Record) -> str:
+    """The Content-Type value as requests gives it: each line in record order, joined with ", "."""
+    return ", ".join(v for k, v in record.headers if k.lower() == "content-type")
 
 
 def _imported(start: list[str], pinned: dict[str, list[str]], allowed: list[Any]) -> set[str]:
@@ -877,7 +896,9 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     # A Link header applies to the one fetched document. It never applies to a sample, a
     # credential payload, or an HTML page.
     fetched = params.source in (None, "item", "model")
-    linked, unjudged, malformed, limits = _link_contexts(got.record, allowed) if fetched else _NO_LINKS
+    linked, unjudged, malformed, limits = (
+        _link_contexts(got.record, allowed, pinned) if fetched else _NO_LINKS
+    )
     if linked or unjudged:
         entries, found = counted[0]
         counted[0] = (entries + len(linked) + unjudged, found | {url for url in linked if url not in allowed})
