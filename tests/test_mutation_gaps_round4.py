@@ -287,7 +287,6 @@ def test_the_two_readings_of_a_relative_path_on_a_base_with_a_dot_segment() -> N
     dppce.infrastructure.redaction.x_resolutions__mutmut_24, 25, 30
     dppce.infrastructure.redaction.xǁ_Directoryǁ__init____mutmut_13, 20
     dppce.infrastructure.redaction.xǁ_Directoryǁmerge__mutmut_10
-    dppce.infrastructure.redaction.x__without_dots__mutmut_9
     """
     assert resolutions("http://h/c/a;/../;?x=1#<removed>", "%2E#") == ("http://h/c/%2E", "http://h/c/")
     assert resolutions("http://h/x/%2e%2e/y", "z") == ("http://h/x/%2e%2e/z", "http://h/z")
@@ -296,6 +295,7 @@ def test_the_two_readings_of_a_relative_path_on_a_base_with_a_dot_segment() -> N
 def test_a_target_with_only_a_fragment_keeps_the_query_of_the_base() -> None:
     """Kills:
     dppce.infrastructure.redaction.x_resolutions__mutmut_34
+    dppce.infrastructure.redaction.x__without_dots__mutmut_9
     """
     assert resolutions("http://h/..;x/%2E/\\/%2e?x=1", "#f") == (
         "http://h/..;x/%2E/\\/%2e?x=1#f",
@@ -536,7 +536,7 @@ def test_the_token_request_names_the_engine_and_asks_for_json_without_encoding(
 ) -> None:
     """Kills:
     dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_39, 40, 41, 42, 44, 45, 46, 47, 48
-    dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_49, 50, 51, 52, 53, 54, 55, 56
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_49, 50, 51, 53, 54, 55, 56
     """
     system = tokens()
     engine = _transport(
@@ -914,7 +914,7 @@ def test_the_signer_row_states_valid_until_supersedes_and_the_status_entry(
     """Each lifecycle statement of a signature is added to its row, in this order, and only if it is stated.
 
     Kills:
-    dppce.verifier.verify.x__lifecycle__mutmut_2, 3, 4, 7, 10
+    dppce.verifier.verify.x__lifecycle__mutmut_2, 3, 7, 10
     """
     plain = sign_envelope(make_envelope(), signer, issuer=ISSUER, signed_at=SIGNED_AT)
     rich = sign_envelope(
@@ -1679,7 +1679,7 @@ def test_the_first_and_the_last_instant_are_inside_the_validity_of_a_key_and_a_r
 
 def test_a_key_with_a_stamp_that_is_no_time_is_not_valid() -> None:
     """Kills:
-    dppce.evidence.manual.x__trusted_key__mutmut_27, 28
+    dppce.evidence.manual.x__trusted_key__mutmut_28
     """
     broken = UNIT_TRUST.keys[0].model_copy(update={"not_before": "yesterday"})
     trust = UNIT_TRUST.model_copy(update={"keys": (broken,)})
@@ -1691,7 +1691,7 @@ def test_a_key_with_a_stamp_that_is_no_time_is_not_valid() -> None:
 
 def test_the_purpose_that_a_result_claims_is_read_without_verifying_it() -> None:
     """Kills:
-    dppce.evidence.manual.x_claimed_test_purpose__mutmut_3, 4, 5, 18, 19, 20, 23, 24, 25, 26, 27
+    dppce.evidence.manual.x_claimed_test_purpose__mutmut_18, 19, 20, 23, 24, 25, 26, 27
     dppce.evidence.manual.x_claimed_test_purpose__mutmut_30, 35, 36, 37, 38, 39, 40, 41, 42, 43
     """
     assert claimed_test_purpose(_token().decode("ascii")) == "T-MAN"
@@ -1878,7 +1878,7 @@ def test_the_last_step_of_a_purge_refuses_a_name_that_was_replaced(tmp_path: Pat
     """The directory that was checked and emptied is the one that is removed, not a link in its place.
 
     Kills:
-    dppce.evidence.recording.x__delete_recording__mutmut_26, 29, 30
+    dppce.evidence.recording.x__delete_recording__mutmut_29, 30
     """
     root = tmp_path / "runs"
     _recording(root / "old")
@@ -1991,6 +1991,7 @@ def test_each_header_rule_refuses_with_its_code_and_its_message(
 
 
 def test_a_vc_jose_typ_may_leave_out_the_media_type_prefix_and_the_case() -> None:
+    """RFC 7515, section 4.1.9: the type is compared without case, and "application/" may be left out."""
     for typ in ("vc+jwt", "VC+JWT", "application/vc+jwt"):
         jose.check_header(_signature_with({"alg": "ES256", "typ": typ}, {"alg", "typ"}), "vc-jose")
 
