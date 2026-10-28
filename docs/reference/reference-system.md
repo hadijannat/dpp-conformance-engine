@@ -693,9 +693,11 @@ parameter, and each relation outside its closed list, with one marker.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
   form of an allowed URL. `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, and
   `DATA.CONTEXT.LINK_MALFORMED` come first.
-- The path of the final URL can have an empty or dot segment, such as `/x//y`. Then a relative
-  target is resolved as the WHATWG URL parser and pyld 3.0.0 resolve it, with empty segments kept.
-  Each URL that these two readers give must be on the allowlist.
+- The path of the final URL can have an empty or dot segment, such as `/x//y`, or a `\`, such as
+  `/a\b/c`. Then a relative target is resolved as the WHATWG URL parser and pyld 3.0.0 resolve it,
+  with empty segments kept. Each URL that these two readers give must be on the allowlist.
+- The WHATWG URL parser reads each `\` of that path as `/`. pyld reads `\` as a character of a
+  segment. No reader decodes `%5c`.
 - A `Link` value that echoes a credential of the engine is recorded as
   `<%3Cremoved%3E>, <removed>`. Reading of that record does not finish.
 

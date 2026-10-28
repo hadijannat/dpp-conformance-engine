@@ -781,12 +781,19 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   For a target that redaction keeps, the WHATWG URL parser and pyld 3.0.0 then give the same URL.
 - `urljoin` removes empty segments of the base path, and it does not read `%2e` as `.`. The WHATWG
   URL parser and pyld 3.0.0 keep empty segments. A redirect can give such a base.
-- So if the base path has an empty or dot segment, the check resolves a relative path as these two
-  readers do. It merges the paths as RFC 3986, section 5.2, states, and keeps empty segments.
-- pyld reads the base as it is. The WHATWG URL parser first removes the dot segments of the base,
-  and it reads `%2e` as `.`. The target counts with each URL that the two readers give.
+- In the path of an `http` or `https` URL, the WHATWG URL parser reads `\` as `/`. `urljoin` and
+  pyld 3.0.0 read it as a character of a segment. No reader decodes `%5c`.
+- So if the base path has an empty or dot segment or a `\`, the check resolves a relative path as
+  these two readers do. It merges the paths as RFC 3986, section 5.2, states, and keeps empty
+  segments.
+- pyld reads the base as it is. The WHATWG URL parser first reads each `\` of the base path as
+  `/`. Then it removes the dot segments of the base, and it reads `%2e` as `.`. The target counts
+  with each URL that the two readers give.
 - A URL outside the allowlist gives `DATA.CONTEXT.NOT_ALLOWED`. If each URL is allowed, the link
   is allowed. A fuzzer compared this resolution with pyld 3.0.0 and the `URL` class of Node.js 22.
+  Its base paths also held `\`, `%5c`, and characters that the WHATWG URL parser percent-encodes.
+- A reading keeps such a character as `urljoin` does. The fuzzer compared the WHATWG reading after
+  the `URL` class wrote it, so percent-encoding alone was not a difference.
 - `resolver.linkset` resolves a relative target in the same way. It does not fetch a target that
   the two readers resolve to different URLs.
 - The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
@@ -1407,8 +1414,10 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
   maximum request count, and minimum interval. Each limit that triggers is recorded.
 - Secrets are removed from request headers before a record is created. If the tested system
   echoes a credential of the engine, its common forms are replaced with `<removed>` in header
-  names and values, redirect targets, and the body. The forms are: plain, percent-encoded with or
-  without `/` kept, in upper-case or lower-case hex, and with `/` written as `\/`. Where the body
+  names and values, redirect targets, and the body. A `Link` value that holds a form is replaced as
+  a whole with `<%3Cremoved%3E>, <removed>` instead (section 10). The forms are: plain,
+  percent-encoded with or without `/` kept, in upper-case or lower-case hex, and with `/` written
+  as `\/`. Where the body
   limit cut the body, a cut head of a form at its end is removed too. A complete body keeps its
   end. Other encodings, such as base64 or a mix of forms, are not recognized. A credential needs
   12 characters or more, so that its removal cannot change unrelated text of the evidence.
@@ -1805,7 +1814,8 @@ records/<id>.enc   one encrypted record each
 - A fuzzer found these forms. It compared `urljoin` with the `URL` class of Node.js 22 and with
   the resolver of pyld 3.0.0. Only redaction reads this rule, so an old record replays unchanged.
 - For a relative target, `urljoin` also removes empty segments of the base path. A redirect can
-  give such a base. Redaction does not see the base, so this rule cannot remove such a target.
+  give such a base. It can also give a base path with `\`, which the WHATWG URL parser reads as
+  `/`. Redaction does not see the base, so this rule cannot remove such a target.
   `data.context` and `resolver.linkset` resolve it as the WHATWG URL parser and pyld do instead
   (section 8).
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
