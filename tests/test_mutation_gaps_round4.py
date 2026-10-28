@@ -186,7 +186,7 @@ def test_the_kept_or_removed_form_of_a_link_target_with_dot_segments(target: str
     """The decision of ``_changed_by_urljoin`` for each target, seen through ``redact_link``.
 
     Kills:
-    dppce.infrastructure.redaction.x__changed_by_urljoin__mutmut_45, 50, 54, 55, 58, 72
+    dppce.infrastructure.redaction.x__changed_by_urljoin__mutmut_40, 45, 50, 54, 55, 58, 72
     """
     expected = f"<{target}>" if kept else f"<{REMOVED_TARGET}>"
     assert redact_link(f"<{target}>") == expected
@@ -891,7 +891,7 @@ def test_every_signature_gets_a_row_whatever_the_one_before_it_was(
     each give a row, and the search goes on to the next signature.
 
     Kills:
-    dppce.verifier.verify.x__signers__mutmut_25, 30, 39
+    dppce.verifier.verify.x__signers__mutmut_25, 30, 39, 75, 76
     """
     stranger = LocalSigner.generate("TEST-ONLY-unknown-key")
     elsewhere = sign_envelope(make_envelope(("fail",)), signer, issuer=ISSUER, signed_at=SIGNED_AT)
@@ -1620,6 +1620,7 @@ def test_each_refusal_of_a_manual_result_gives_its_message(
     dppce.evidence.manual.x_verify_manual_result__mutmut_78, 83, 84, 85, 88, 93, 94, 95
     dppce.evidence.manual.x_verify_manual_result__mutmut_98, 103, 104, 105, 108, 113, 114, 115
     dppce.evidence.manual.x_verify_manual_result__mutmut_119, 124, 125, 126, 129, 134, 135
+    dppce.evidence.manual.x_verify_manual_result__mutmut_136, 143, 148, 149, 150
     """
     refused = run_check(body(), error=error, trust=trust)
     assert (refused.reason_code, refused.message) == (code, message)
@@ -1665,7 +1666,7 @@ def test_the_first_and_the_last_instant_are_inside_the_validity_of_a_key_and_a_r
 
     Kills:
     dppce.evidence.manual.x__trusted_key__mutmut_24, 25
-    dppce.evidence.manual.x_verify_manual_result__mutmut_127
+    dppce.evidence.manual.x_verify_manual_result__mutmut_127, 139, 140
     """
     token = _token().decode("ascii")
     performed = datetime(2026, 10, 13, 8, 0, tzinfo=UTC)  # the performed_at of the result
@@ -2408,7 +2409,7 @@ def test_the_details_of_a_signed_report_that_states_nothing_more(
 def test_the_details_of_a_report_whose_structure_or_body_is_wrong(trust: TrustBundle) -> None:
     """Kills:
     dppce.verifier.verify.x_verify__mutmut_37, 38, 39
-    dppce.verifier.verify.x__ordering__mutmut_18
+    dppce.verifier.verify.x__ordering__mutmut_2, 3, 4, 5, 18
     dppce.verifier.verify.x_body_dimensions__mutmut_9, 10, 11, 12, 13, 53, 54, 55, 69, 70, 71
     """
     # A number that pydantic reads from 6.0 is not in the exact canonical form.
