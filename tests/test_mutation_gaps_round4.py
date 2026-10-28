@@ -536,7 +536,7 @@ def test_the_token_request_names_the_engine_and_asks_for_json_without_encoding(
 ) -> None:
     """Kills:
     dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_39, 40, 41, 42, 44, 45, 46, 47, 48
-    dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_49, 50, 51, 53, 54, 55, 56
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_49, 50, 51, 52, 53, 54, 55, 56
     """
     system = tokens()
     engine = _transport(
@@ -551,6 +551,16 @@ def test_the_token_request_names_the_engine_and_asks_for_json_without_encoding(
         "application/json",
         "identity",
     )
+    # A renamed header would add a name on the wire, so the set of names is pinned too.
+    assert set(sent) == {
+        "Accept",
+        "Accept-Encoding",
+        "Authorization",
+        "Content-Length",
+        "Content-Type",
+        "Host",
+        "User-Agent",
+    }
 
 
 def test_the_token_request_is_bound_by_the_total_time_of_the_request(
@@ -631,7 +641,7 @@ def test_a_token_endpoint_that_does_not_resolve_is_a_dns_error(tokens: Any) -> N
 
 def test_a_token_endpoint_outside_the_authorization_is_denied_not_a_dns_error(tokens: Any) -> None:
     """Kills:
-    dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_20, 23, 26, 27
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_request_token__mutmut_20, 26, 27
     """
     system, elsewhere = tokens(), tokens()
     engine = _with_names(
@@ -1777,7 +1787,6 @@ def test_a_record_form_refuses_a_non_canonical_base64_text_and_a_wrong_hop_list(
 
 def test_a_damaged_recording_says_where_and_what(tmp_path: Path) -> None:
     """Kills:
-    dppce.evidence.recording.x__index_from__mutmut_1
     dppce.evidence.recording.x_read_index__mutmut_2
     dppce.evidence.recording.x_read_recording__mutmut_11
     dppce.evidence.recording.x__verified_index_from__mutmut_3, 8, 13, 20, 21
