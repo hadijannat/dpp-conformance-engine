@@ -732,6 +732,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   with the JSON-LD context relation names its target as a context, whatever its other parameters
   are. The JSON-LD 1.1 API, section 9.4.1, reads only the relation and the target of such a link.
   The check ignores the header for `application/ld+json`, as JSON-LD 1.1, section 6.1, states.
+  It compares the media type without parameters. pyld 3.0.0 compares the whole `Content-Type`
+  value with `application/ld+json`. So pyld reads the header for `application/ld+json; charset=utf-8`,
+  and the check does not. This is an engine limit.
 - The record keeps a `Link` value only in the form that redaction keeps (section 10). A link
   without the context relation is ignored. Redaction keeps each link that RFC 8288, appendix B,
   reads before a malformed part. A context link before such a part still names its target.
@@ -1704,13 +1707,20 @@ records/<id>.enc   one encrypted record each
   `%3Cremoved%3E`, and the other links stay. The output of redaction parses to the same links,
   and redaction of the output gives the same text.
 - A value is not complete either if a processor model reads other targets or other context links.
-  The model is the `Link` parser of jsonld.js 8.3.3 and of pyld 3.0.0. They split a value at each
-  `,` outside `<...>` and outside a quoted string that ends at the next `"`. Of each part, they
-  read the first target and then each parameter. A parameter replaces an earlier one of the same
-  name. So the last `rel` counts, and the last parameter named exactly `target` replaces the
-  target. A name with another case or with a space before `=` does not match.
-- This is an engine limit. Another processor, or a later version of these two, can read a value
-  differently. The agreement check does not see such a difference.
+  The model is the `Link` parser of jsonld.js 8.3.3. It splits a value at each `,` outside
+  `<...>` and outside a quoted string that ends at the next `"`. Of each part, it reads the first
+  target and then each parameter. A parameter replaces an earlier one of the same name. So the
+  last `rel` counts, and the last parameter named exactly `target` replaces the target. A name
+  with another case or with a space before `=` does not match.
+- pyld 3.0.0 uses the same three regular expressions with `re.findall`, so it reads each unquoted
+  parameter value as empty. With an empty target, pyld loads the URL of the answer as the context.
+  So for pyld, the model reads an unquoted `target` as empty, and such a value is not complete.
+- pyld also reads an unquoted `rel` as empty, so it finds no context link there. The model keeps
+  the jsonld.js reading of `rel`, so it reads each context link that pyld reads, and more. pyld
+  raises an error on a link without parameters.
+- This is an engine limit. The agreement check models the `Link` parsers of jsonld.js 8.3.3 and
+  pyld 3.0.0. Another processor, or a later version of these two, can read a value differently.
+  The agreement check does not see such a difference.
 - The two parsers use three regular expressions with `\s`. In Python, these expressions took more
   than ten seconds on one value of about 2 KiB. The model is a scanner in linear time instead. A
   test compares it with the three expressions on 20,000 random values in Python syntax. A second
@@ -1755,6 +1765,18 @@ records/<id>.enc   one encrypted record each
   Python `urljoin` resolves such a target against the host of the base URL. pyld 3.0.0 keeps it
   as it is. Before this rule, the record of `https:user:pw@example.test/ctx` held the credential
   text. Only redaction reads this rule, so an old record replays unchanged.
+- A target that Python `urljoin` can resolve to another URL than the WHATWG URL parser or pyld
+  also becomes `%3Cremoved%3E`. `urljoin` drops an empty `;` parameter and an empty `?` query.
+  It removes empty segments of a relative path that does not start with `/`. pyld 3.0.0 drops the
+  first `.` of a relative path such as `.well-known/ctx`.
+- The readers also differ on some dot segments: `%2e`, a final `..;x`, a dot segment after another
+  segment, a dot segment in a URL with a scheme, and a final dot segment before a query. So a
+  relative target keeps only a leading run of `.` and `..` segments.
+- A fuzzer found these forms. It compared `urljoin` with the `URL` class of Node.js 22 and with
+  the resolver of pyld 3.0.0. Only redaction reads this rule, so an old record replays unchanged.
+- This is an engine limit: for a relative target, `urljoin` also removes empty segments of the base
+  path. A redirect can give such a base. Redaction does not see the base, so this rule cannot
+  remove such a target.
 - A credential-like query value is different. Redaction replaces it with a marker in place, and
   that marker shows in the recorded target. So a check sees that redaction changed the target.
 

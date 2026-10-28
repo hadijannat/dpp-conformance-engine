@@ -634,7 +634,8 @@ Two more context sources are experimental:
 - The `Link` header of the fetched document. A link with the relation
   `http://www.w3.org/ns/json-ld#context` counts as a top-level context. A relative target is
   resolved against the URL of the document. The check ignores the header for
-  `application/ld+json`.
+  `application/ld+json`, also with parameters. pyld 3.0.0 reads it if the `Content-Type` value
+  has parameters.
 - The parameter `context_files`. It maps an allowed context URL to a pinned JSON copy under the
   data root, for example `{"https://example.test/ctx": "contexts/ctx.json"}`. The check reads
   each `@context` string and each `@import` value in the copy. It follows a reference only into
@@ -656,7 +657,8 @@ parameter, and each relation outside its closed list, with one marker.
 - Reading does not finish either if a model of the `Link` parsers of jsonld.js 8.3.3 and pyld
   3.0.0 reads other targets or other context links. A quoted string without a closing quote, a
   backslash before a quote, and a later `rel` are examples. A parameter named exactly `target`
-  is one too: these parsers read it as the target.
+  is one too: jsonld.js reads it as the target. pyld reads an unquoted value as empty, so an
+  unquoted `target` gives an empty target, and pyld loads the URL of the answer as the context.
 - The model reads each value with the white space of JavaScript and of Python. Python also
   reads `\x85` as white space. Both readings must agree with the engine.
 - A value with a control character other than HTAB, or with a character above `\xff`, does not
@@ -673,8 +675,11 @@ parameter, and each relation outside its closed list, with one marker.
   `<<removed>>`. A value with that target is not malformed either.
 - A target that is not a URI reference is recorded as a marker. A target with userinfo, a
   fragment, or an empty authority, such as `https:///ctx`, is recorded as a marker too. So is a
-  target with a scheme such as `https` that `//` does not follow, such as `https:/ctx`. As a
-  context target, the marker gives `DATA.CONTEXT.NOT_ALLOWED`.
+  target with a scheme such as `https` that `//` does not follow, such as `https:/ctx`. So is a
+  target that Python `urljoin` resolves to another URL than the WHATWG URL parser or pyld does.
+  Examples are `ctx;`, `ctx?`, `a//ctx`, `.well-known/ctx`, and `a/../ctx`. A relative target
+  keeps only a leading run of `.` and `..` segments. As a context target, the marker gives
+  `DATA.CONTEXT.NOT_ALLOWED`.
 - A target that redaction changed, for example one with a `token` query parameter, is compared in
   its redacted form. It gives `DATA.CONTEXT.NOT_ALLOWED`.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
