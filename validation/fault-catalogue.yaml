@@ -149,9 +149,9 @@
 # commit for joined Link lines. It also comes before the commit for a special-scheme target and the
 # commit that adds the flags context_link_target_param and context_link_split_lines, which are the
 # seeds. A documentation commit follows. The rig needed no change.
-# Version 0.14.0 also adds the fault F-88. A recheck round found its shape after the code fix
-# 21087f5 (stop Link reading where a later type reads as JSON-LD) had landed. So the code fix comes
-# before the entry commit f070708, and the entry is not pre-registered. The entry commit comes
+# Version 0.14.0 also adds the fault F-88. A recheck round found its shape. The code fix 21087f5
+# (stop Link reading where a later type reads as JSON-LD) came first, before the entry commit
+# f070708, so the entry is not pre-registered. The entry commit comes
 # before the commit 1208211 that adds the flag context_link_alternate_later_type, which is the seed.
 # The rig needed no change. F-89 is not used: on the rig, the base URL is the loopback origin, so
 # urljoin cannot resolve a relative target to the allowed context.
