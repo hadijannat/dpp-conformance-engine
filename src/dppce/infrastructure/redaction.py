@@ -11,7 +11,7 @@ import ipaddress
 import re
 from collections.abc import Callable
 from typing import Final, NamedTuple
-from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlsplit, urlunparse, urlunsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlparse, urlsplit, urlunparse, urlunsplit
 
 REMOVED: Final = "<removed>"
 
@@ -283,6 +283,18 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
             query = parts.query
         readings.append(urlunsplit((parts.scheme, parts.netloc, path, query, relative.fragment)))
     return tuple(dict.fromkeys(readings))
+
+
+def hides_base_path(base: str, target: str) -> bool:
+    """True if a relative path ``target`` reads the path of ``base`` and that path holds the marker.
+
+    The transport replaces an echoed engine credential in a recorded redirect target with the marker.
+    A credential can hold "/", so the record then does not hold the fetched path. Redaction of a query
+    parameter does not change the path. Raises ValueError as urlsplit does.
+    """
+    relative = urlsplit(target)
+    reads_path = bool(relative.path) and not (relative.scheme or relative.netloc or target.startswith("/"))
+    return reads_path and REMOVED in unquote(base.partition("?")[0])
 
 
 def _dot(segment: str, *, dotted: bool) -> str | None:

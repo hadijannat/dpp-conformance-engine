@@ -647,6 +647,75 @@ def test_resolver_linkset_does_not_fetch_a_target_that_the_readers_resolve_apart
     assert _advertised([alike]) == "https://id.example.test/linksets/EV0001"
 
 
+# -- a relative target against a redirect path that held an echoed credential -----------------------------
+
+
+@pytest.mark.parametrize(
+    "secret",
+    [
+        # The scrub replaces "ab/cd/S3CRET" with one marker segment, so urljoin of the record gives the
+        # allowed context. Every reader of the fetched URL gives .../x/TEST-ONLY-ab/contexts/battery/v1.
+        "TEST-ONLY-ab/cd/S3CRET",
+        # Without "/" the record keeps the segments. The engine cannot tell the two apart, and the
+        # system put the engine credential into its own redirect target, so this fails too.
+        "TEST-ONLY-abcdS3CRET",
+    ],
+)
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_context_target_on_a_redirect_path_with_an_echoed_credential_fails(
+    tmp_path: Path, loopback: Any, secret: str, body: bytes
+) -> None:
+    def answer(request: Any) -> None:
+        if request.path == "/dpp/1":
+            reply(request, 302, b"", {"Location": f"/x/{secret}/doc"})
+        else:
+            reply(request, headers={"Link": f"<../../contexts/battery/v1>; {CTX}"})
+
+    server = loopback(answer)
+    engine = transport(credentials={"authority": (server.origin, secret)})
+    record = engine.fetch(Request("GET", f"{server.origin}/dpp/1", role="authority"))
+    assert server.seen[-1]["path"] == f"/x/{secret}/doc"
+    assert secret not in repr(record)
+    assert record.redirects == (f"{server.origin}/x/{REMOVED}/doc",)
+    links = tuple((k, v) for k, v in record.headers if k.lower() == "link")
+    acquirer = Redirected(body, links, record.redirects[-1])
+    allowed = [ALLOWED[0], f"{server.origin}/contexts/battery/v1"]
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=allowed)
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert outcome.observations[0].summary["not_allowed"] == [
+        f"{server.origin}/x/{REMOVED}/doc/../../contexts/battery/v1"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("final", "target"),
+    [
+        # A target with an absolute path or an authority does not read the base path.
+        (f"https://dppce.example.test/x/{REMOVED}/doc", "/contexts/battery/v1"),
+        (f"https://dppce.example.test/x/{REMOVED}/doc", BATTERY),
+        # Redaction of a credential-like query parameter does not change the base path.
+        ("https://dppce.example.test/x/y/doc?session=%3Cremoved%3E", "../../contexts/battery/v1"),
+    ],
+)
+def test_a_context_target_that_does_not_read_a_scrubbed_base_path_keeps_its_pass(
+    tmp_path: Path, final: str, target: str
+) -> None:
+    acquirer = Redirected(PLAIN, recorded(f"<{target}>; {CTX}"), final)
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_redirect_path_with_an_echoed_credential() -> (
+    None
+):
+    lines = recorded('<../../linksets/EV0001>; rel="linkset"')
+    final = f"https://id.example.test/x/Bearer {REMOVED}/doc"
+    scrubbed = replace(make_record(1), headers=lines, redirects=(final,))
+    assert _advertised([scrubbed]) is None
+    absolute = replace(scrubbed, headers=recorded('</linksets/EV0001>; rel="linkset"'))
+    assert _advertised([absolute]) == "https://id.example.test/linksets/EV0001"
+
+
 # -- an application/ld+json answer whose Content-Type value pyld reads as another type -----------------
 
 FOREIGN = f"<{EVIL}>; {CTX}"

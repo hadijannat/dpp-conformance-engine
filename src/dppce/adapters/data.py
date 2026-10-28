@@ -52,7 +52,14 @@ from dppce.evidence.jose_profiles import JoseError
 from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link, redact_url, resolutions
+from dppce.infrastructure.redaction import (
+    JSONLD_CONTEXT,
+    REMOVED,
+    hides_base_path,
+    parse_link,
+    redact_url,
+    resolutions,
+)
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
 
@@ -815,7 +822,8 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
     JSON-LD processor can read a context link after that part, so a malformed value counts. A
     target that redaction changed holds the marker and is compared in that form. It cannot be
     compared only if it equals the redacted form of an allowed URL that redaction changes too. A
-    relative target counts with each URL that WHATWG URL and pyld resolve it to. An alternate
+    relative target counts with each URL that WHATWG URL and pyld resolve it to. On a base path that
+    holds the marker of an echoed credential, a relative path target counts unresolved. An alternate
     JSON-LD document that pyld loads is not judged.
     """
     # pyld 3.0.0 (documentloader/requests.py) ignores the header only if the whole value is the
@@ -850,8 +858,14 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
                 continue
             try:
                 urls = resolutions(base, link.target)
+                hidden = hides_base_path(base, link.target)
             except ValueError:
                 continue  # a target that cannot be resolved names no context
+            if hidden:
+                # The system put an engine credential into its own redirect target, so the fetched base
+                # path is not known. The target counts unresolved after the base, which is never allowed.
+                found.append(f"{base.partition('?')[0]}/{link.target}")
+                continue
             for url in urls:
                 if url not in allowed and REMOVED in unquote(url) and url in changed:
                     limited += 1

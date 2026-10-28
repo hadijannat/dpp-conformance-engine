@@ -33,7 +33,7 @@ from dppce.adapters.common import (
 from dppce.adapters.identifier import gtin_check_digit_ok
 from dppce.evidence.recording import REDIRECT_STATUSES
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import REMOVED, parse_link, resolutions
+from dppce.infrastructure.redaction import REMOVED, hides_base_path, parse_link, resolutions
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -169,6 +169,7 @@ def _advertised(answers: list[Record]) -> str | None:
     relative target is resolved against the final URL of its answer. A target that redaction
     changed is skipped: the record no longer holds the URL that the system advertised. A relative
     target is resolved as WHATWG URL and pyld resolve it, and skipped if the two give different URLs.
+    A relative path target is skipped if the base path holds the marker of an echoed credential.
     """
     for record in answers:
         base = record.redirects[-1] if record.redirects else record.url
@@ -180,6 +181,8 @@ def _advertised(answers: list[Record]) -> str | None:
                     continue
                 try:
                     urls = resolutions(base, link.target)
+                    if hides_base_path(base, link.target):
+                        continue  # the record does not hold the fetched base path
                 except ValueError:
                     continue
                 if len(urls) > 1:  # the readers resolve it to different URLs
