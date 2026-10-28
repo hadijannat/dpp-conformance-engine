@@ -573,3 +573,48 @@ def test_an_ld_json_answer_keeps_an_allowed_link_and_its_fails(tmp_path: Path) -
 def test_an_exact_ld_json_answer_ignores_the_link_header(tmp_path: Path) -> None:
     acquirer = Linked(BODY, recorded(FOREIGN), media="application/ld+json")
     assert verdict(contexts(tmp_path, acquirer)) == passed("DATA.CONTEXT.OK")
+
+
+# -- an alternate JSON-LD document of an answer without a JSON media type --------------------------------
+
+ALTERNATE = '<https://evil.test/doc>; rel="alternate"; type="application/ld+json"'
+LATER_ALTERNATE = '<https://evil.test/doc>; rel="next"; rel="alternate"; type="application/ld+json"'
+
+
+@pytest.mark.parametrize(
+    "media", ["text/html", "text/plain", "application/octet-stream", "", "application/json; charset=utf-8"]
+)
+@pytest.mark.parametrize("line", [ALTERNATE, LATER_ALTERNATE])
+def test_an_alternate_json_ld_document_of_an_answer_that_pyld_reads_as_not_json_is_blocked(
+    tmp_path: Path, media: str, line: str
+) -> None:
+    # pyld 3.0.0 loads the alternate document if the whole Content-Type value is not a JSON type.
+    outcome = contexts(tmp_path, Linked(BODY, recorded(line), media=media))
+    assert verdict(outcome) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+
+
+@pytest.mark.parametrize("media", ["application/json", "application/problem+json", "application/ld+json"])
+def test_an_alternate_link_of_a_json_answer_keeps_its_pass(tmp_path: Path, media: str) -> None:
+    assert verdict(contexts(tmp_path, Linked(BODY, recorded(ALTERNATE), media=media))) == passed(
+        "DATA.CONTEXT.OK"
+    )
+
+
+def test_the_alternate_limit_never_hides_a_fail(tmp_path: Path) -> None:
+    lines = recorded(ALTERNATE)
+    assert verdict(contexts(tmp_path, Linked(PLAIN, lines, media="text/html"))) == failed(
+        "DATA.CONTEXT.MISSING"
+    )
+    foreign = b'{"@context": "https://other.test/ctx"}'
+    assert verdict(contexts(tmp_path, Linked(foreign, lines, media="text/html"))) == failed(
+        "DATA.CONTEXT.NOT_ALLOWED"
+    )
+
+
+def test_an_alternate_link_recorded_by_the_transport_is_blocked(tmp_path: Path, loopback: Any) -> None:
+    server = loopback(lambda r: reply(r, body=BODY, headers={"Content-Type": "text/html", "Link": ALTERNATE}))
+    record = transport().fetch(Request("GET", f"{server.origin}/dpp/1"))
+    assert record.header("link") == ALTERNATE
+    others = tuple((k, v) for k, v in record.headers if k.lower() != "content-type")
+    acquirer = Linked(record.body, others, media=record.header("content-type") or "")
+    assert verdict(contexts(tmp_path, acquirer)) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
