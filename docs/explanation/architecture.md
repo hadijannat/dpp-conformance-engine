@@ -1406,10 +1406,12 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
   An out-of-scope hop ends the request with `redirect_out_of_scope`. So does a `Location` that
   is not a URL. So does a `Location` that the WHATWG URL parser reads with another host than
-  `urljoin` does (section 10). A URL that cannot be parsed is never raised: it is `policy_denied`.
+  `urljoin` does, or one with a control character or a space (section 10). A URL that cannot be
+  parsed is never raised: it is `policy_denied`.
 - The transport follows only the statuses 301, 302, 303, 307, and 308, with a `Location`, for
   `GET`, `HEAD`, and `OPTIONS`. The record keeps each redirect target and, in parallel, the status
-  of the answer that named it. A refused hop keeps its target and its status too.
+  of the answer that named it. A refused hop keeps its target and its status too. A
+  `Location` that is not a URL gives no target and no status.
 - A request with `follow_redirects` false follows no hop. The record then holds the first answer,
   a redirect included, with no redirect target and no hop status.
 - A URL with a control character or a space is `policy_denied`. The URL parser would drop or
@@ -1849,7 +1851,10 @@ records/<id>.enc   one encrypted record each
 - requests 2.34.2 also reads `%2e` as `.`. `urljoin` also reads `..;x` as `..`. On the base path
   of a relative `Location`, `urljoin` removes empty segments.
 - So the record marks a redirect target with the suffix `#<removed>` after such a `Location`. A
-  later hop with a relative path, a query, or no path joins the fetched path, so it is marked too.
+  later hop keeps the suffix if `urljoin` reads it with a relative path, a query, or no path. Such
+  a hop joins the fetched path.
+- `urljoin` reads a `Location` with the scheme of the base and no `//` after the scheme as such a
+  reference. An example is `http:w` on an `http` base.
 - A later hop with an absolute path or an authority does not read the earlier path. Its suffix
   depends only on its own `Location`.
 - `urljoin` also drops an empty `;` parameter, an empty query, and an empty fragment. Node.js 22
@@ -1862,6 +1867,10 @@ records/<id>.enc   one encrypted record each
   reads the first segment after an empty authority as the host, as in `http:///h2.example/doc`.
 - There `urljoin` keeps the host of the base, so a consumer never reads the answer that the
   transport would fetch. So the transport does not follow such a `Location`.
+- `urlsplit` removes a tab and strips leading control characters, which can hide an empty
+  authority. So the transport also refuses a `Location` with a control character or a space.
+- The record keeps such a refused hop with its status. Its target is the `urljoin` result with the
+  suffix `#<removed>`.
 - The request ends with `redirect_out_of_scope`, as for a hop to a host outside the scope. RFC
   9110, section 4.2.1, says that a recipient rejects an `http` URL with an empty host.
 - `redact_url` removes every other fragment, so no other record holds a suffix. A plain
@@ -1871,9 +1880,12 @@ records/<id>.enc   one encrypted record each
   not resolve a target that reads the unknown part of such a base (section 8).
 - A fuzzer followed chains of one to three hops with `urljoin`, Node.js 22, and requests with
   pyld 3.0.0. Its `Location` values also held empty authorities, a `\` before the first segment,
-  and empty `;`, `?`, and `#` parts.
-- No followed chain left the host for Node.js 22. Where the engine resolved a context target to
-  one URL that an allowlist can hold, each consumer read that URL.
+  tabs, leading control characters, references with the scheme of the base, and empty `;`, `?`,
+  and `#` parts.
+- It ran 20000 chains for each of six seeds with two grammars. One grammar had no tabs, control
+  characters, or references with the scheme of the base.
+- In these runs, no followed chain left the host for Node.js 22. Where the engine resolved a
+  context target to one URL that an allowlist can hold, each consumer read that URL.
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
   marker `<removed>` holds `>`. In a `Link` value, the marker could close a target that a reader
   of the sent value reads as open.

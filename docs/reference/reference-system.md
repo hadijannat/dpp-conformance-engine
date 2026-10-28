@@ -703,14 +703,15 @@ parameter, and each relation outside its closed list, with one marker.
   `DATA.CONTEXT.NOT_ALLOWED`.
 - A redirect `Location` with a `\`, a `%2e` dot segment, or an empty segment in a relative path
   can read apart. Then the transport records the target with the suffix `#<removed>`. A later hop
-  with a relative path, a query, or no path keeps the suffix.
+  keeps the suffix if `urljoin` reads it with a relative path, a query, or no path, as `http:w` on
+  an `http` base.
 - On such a base, a relative path, a query, or an empty target counts unresolved. It gives
   `DATA.CONTEXT.NOT_ALLOWED`.
 - After a `Location` with an empty `;` parameter, such as `/x/y/z;`, the suffix is `#?<removed>`.
   On such a base, only a query or an empty target counts unresolved.
 - The transport does not follow a `Location` that the WHATWG URL parser reads with another host,
-  such as `http:///h2.example/doc` or `/\h2.example/doc`. The fetch ends with
-  `redirect_out_of_scope`.
+  such as `http:///h2.example/doc` or `/\h2.example/doc`, or a `Location` with a control
+  character or a space. The fetch ends with `redirect_out_of_scope`.
 - A `Link` value that echoes a credential of the engine is recorded as
   `<%3Cremoved%3E>, <removed>`. Reading of that record does not finish.
 
