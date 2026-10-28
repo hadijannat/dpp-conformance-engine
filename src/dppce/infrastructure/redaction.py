@@ -260,20 +260,22 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
     """The URLs that the WHATWG URL parser and pyld 3.0.0 resolve the kept ``target`` to, each once.
 
     For a target that redaction keeps, both agree with Python urljoin unless the target is a relative
-    path and the base path has an empty or dot segment. urljoin removes empty segments of the base
-    path, and it does not read "%2e" as ".". There the RFC 3986 merge, which keeps empty segments,
-    gives each reading: pyld reads the base as it is, and WHATWG first removes its dot segments and
-    reads "%2e" as ".". Raises ValueError as urljoin does.
+    path and the base path has an empty or dot segment or a "\\". urljoin removes empty segments of
+    the base path, and it does not read "%2e" as ".". There the RFC 3986 merge, which keeps empty
+    segments, gives each reading: pyld reads the base as it is, and WHATWG first reads each "\\" as
+    "/", removes the dot segments, and reads "%2e" as ".". A reading keeps a character that WHATWG
+    percent-encodes, as urljoin does. Raises ValueError as urljoin does.
     """
     joined = urljoin(base, target)
     parts, relative = urlsplit(base), urlsplit(target)
     segments = parts.path.split("/")[1:]
-    odd = "" in segments[:-1] or any(_dot(s, dotted=True) for s in segments)
+    odd = "" in segments[:-1] or any(_dot(s, dotted=True) for s in segments) or "\\" in parts.path
     if not odd or relative.scheme or relative.netloc or target.startswith("/"):
         return (joined,)
     readings: list[str] = []
+    whatwg = _without_dots((parts.path or "/").replace("\\", "/"), dotted=True)
     for dotted in (False, True):
-        path = _without_dots(parts.path or "/", dotted=True) if dotted else parts.path or "/"
+        path = whatwg if dotted else parts.path or "/"
         query = relative.query
         if relative.path:
             path = _without_dots(path[: path.rfind("/") + 1] + relative.path, dotted=dotted)

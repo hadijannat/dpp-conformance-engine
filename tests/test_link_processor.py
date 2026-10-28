@@ -544,6 +544,20 @@ def test_a_relative_target_on_a_base_with_a_percent_encoded_dot_segment_fails_if
         ("https://h.test/x/.%2e/y/z", "a", ("https://h.test/x/.%2e/y/a", "https://h.test/y/a")),
         ("https://h.test/a/..", "a", ("https://h.test/a/a", "https://h.test/a")),
         ("https://h.test/a/b//", "..", ("https://h.test/a/b/",)),
+        # The WHATWG URL parser reads "\" in the path of an https URL as "/". pyld keeps it.
+        (
+            "https://h.example/a\\b/c/doc",
+            "../../contexts/battery/v1",
+            ("https://h.example/contexts/battery/v1", "https://h.example/a/contexts/battery/v1"),
+        ),
+        (
+            "https://h.example/contexts\\x/doc",
+            "v1",
+            ("https://h.example/contexts\\x/v1", "https://h.example/contexts/x/v1"),
+        ),
+        ("https://h.example/x\\..\\contexts/doc", "../battery/v1", ("https://h.example/battery/v1",)),
+        # No reader decodes "%5c", so this base is plain.
+        ("https://h.example/a%5cb/c/doc", "../../ctx", ("https://h.example/ctx",)),
     ],
 )
 def test_the_consumer_readings_of_a_relative_target_on_an_odd_base(
@@ -579,6 +593,43 @@ def test_resolver_linkset_fetches_a_relative_target_on_a_base_with_an_empty_segm
     # The readers resolve it to two URLs, so it is not fetched.
     dotted = replace(odd, redirects=("https://id.example.test/dpp/%2e%2e/x/y",))
     assert _advertised([dotted]) is None
+
+
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_context_target_on_a_base_with_a_backslash_is_judged_as_the_consumers_resolve_it(
+    tmp_path: Path, body: bytes
+) -> None:
+    # urljoin and pyld 3.0.0 give BATTERY. Node.js 22 new URL() reads "\" as "/": .../a/contexts/battery/v1.
+    final = "https://dppce.example.test/a\\b/c/doc"
+    acquirer = Redirected(body, recorded(f"<../../contexts/battery/v1>; {CTX}"), final)
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert outcome.observations[0].summary["not_allowed"] == [
+        "https://dppce.example.test/a/contexts/battery/v1"
+    ]
+    both = [ALLOWED[0], BATTERY, "https://dppce.example.test/a/contexts/battery/v1"]
+    assert verdict(contexts(tmp_path, acquirer, allowed_contexts=both)) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_target_that_both_readers_resolve_to_an_allowed_context_on_a_backslash_base_passes(
+    tmp_path: Path, body: bytes
+) -> None:
+    # pyld 3.0.0 keeps "x\..\y" as one segment. WHATWG URL reads it as "x/../y". Both give BATTERY.
+    final = "https://dppce.example.test/contexts/x\\..\\y/doc"
+    acquirer = Redirected(body, recorded(f"<../battery/v1>; {CTX}"), final)
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+def test_resolver_linkset_does_not_fetch_a_target_that_the_readers_resolve_apart_on_a_backslash_base() -> (
+    None
+):
+    lines = recorded('<../../linksets/EV0001>; rel="linkset"')
+    apart = replace(make_record(1), headers=lines, redirects=("https://id.example.test/a\\b/c/1",))
+    assert _advertised([apart]) is None
+    alike = replace(apart, redirects=("https://id.example.test/a\\..\\b/c/1",))
+    assert _advertised([alike]) == "https://id.example.test/linksets/EV0001"
 
 
 # -- an application/ld+json answer whose Content-Type value pyld reads as another type -----------------
@@ -691,6 +742,8 @@ LATER_TYPES = (
     '<https://evil.test/doc>; rel="alternate"; type=application/json; type="application/ld+json"',
     '<https://evil.test/doc>; rel="next"; type="application/json"; rel="alternate"; '
     'type="application/ld+json"',
+    '<https://evil.test/doc>; rel="next"; rel="alternate"; type="application/json"; '
+    'type="application/ld+json"',
 )
 
 
@@ -711,6 +764,7 @@ def test_a_later_type_that_a_processor_reads_as_json_ld_fails(tmp_path: Path, me
     [
         '<https://x.test/a>; rel="alternate"; type="application/json"; title="x"',
         '<https://x.test/a>; rel="alternate"; type="application/json"; type="application/json"',
+        '<https://r.example/x>; rel="gs1:pip"; type="text/html"; hreflang="en"; title="Product"',
     ],
 )
 def test_a_type_that_no_processor_reads_as_json_ld_keeps_its_pass(tmp_path: Path, line: str) -> None:
@@ -718,6 +772,27 @@ def test_a_type_that_no_processor_reads_as_json_ld_keeps_its_pass(tmp_path: Path
     assert parse_link(lines[0][1]).complete
     outcome = contexts(tmp_path, Linked(BODY, lines, media="application/json; charset=utf-8"))
     assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize(
+    ("line", "kept"),
+    [
+        (ALTERNATE, ALTERNATE),
+        (
+            '<https://evil.test/doc>; rel="alternate foo"; type="application/ld+json"',
+            f'<https://evil.test/doc>; rel="alternate"; type="application/ld+json"; {REMOVED}',
+        ),
+        (
+            '<https://r.example/x>; rel="gs1:pip"; type="text/html"; hreflang="en"; title="Product"',
+            f'<https://r.example/x>; rel="gs1:pip"; {REMOVED}',
+        ),
+    ],
+)
+def test_a_link_with_at_most_one_json_ld_type_records_complete(line: str, kept: str) -> None:
+    # Only a later type that differs from the kept one stops reading.
+    assert recorded(line) == (("Link", kept),)
+    assert parse_link(kept).complete
+    assert redact_link(kept) == kept
 
 
 def test_a_later_type_recorded_by_the_transport_fails(tmp_path: Path, loopback: Any) -> None:
