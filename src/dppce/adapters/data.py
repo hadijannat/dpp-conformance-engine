@@ -20,7 +20,7 @@ from decimal import Decimal
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Final, Literal, NamedTuple, Self
-from urllib.parse import unquote, urljoin
+from urllib.parse import unquote
 
 from jsonschema import SchemaError
 from jsonschema.protocols import Validator
@@ -52,7 +52,7 @@ from dppce.evidence.jose_profiles import JoseError
 from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link, redact_url, uncertain_join
+from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link, redact_url, resolutions
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
 
@@ -772,10 +772,6 @@ _CHANGED: Final = (
     "A context link of the answer has a target that redaction changed. It equals the redacted "
     "form of an allowed context, so the two cannot be compared exactly."
 )
-_UNCERTAIN_BASE: Final = (
-    "A context link of the answer has a relative target, and the URL of the answer has an empty or "
-    "dot segment in its path. URL parsers can resolve such a target to different URLs."
-)
 _PYLD_READS: Final = (
     "The answer has the media type application/ld+json, so a JSON-LD processor ignores its Link "
     "header. The Content-Type value is not exactly that type, so pyld 3.0.0 reads the header. "
@@ -819,8 +815,8 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
     JSON-LD processor can read a context link after that part, so a malformed value counts. A
     target that redaction changed holds the marker and is compared in that form. It cannot be
     compared only if it equals the redacted form of an allowed URL that redaction changes too. A
-    relative target that urljoin resolves to an allowed URL is not compared if another URL parser
-    can resolve it to another URL. An alternate JSON-LD document that pyld loads is not judged.
+    relative target counts with each URL that WHATWG URL and pyld resolve it to. An alternate
+    JSON-LD document that pyld loads is not judged.
     """
     # pyld 3.0.0 (documentloader/requests.py) ignores the header only if the whole value is the
     # type. requests joins the lines with ", " and keeps their case.
@@ -830,7 +826,7 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
     base = record.redirects[-1] if record.redirects else record.url
     changed = {redact_url(a) for a in allowed if isinstance(a, str)}
     found: list[str] = []
-    limited = uncertain = malformed = 0
+    limited = malformed = 0
     # pyld follows a link with the relation alternate and that type, as the document to read.
     not_json = _PYLD_JSON.match(content_type or "application/octet-stream") is None
     alternate = False
@@ -853,24 +849,23 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
             if JSONLD_CONTEXT not in link.relations:
                 continue
             try:
-                url = urljoin(base, link.target)
+                urls = resolutions(base, link.target)
             except ValueError:
                 continue  # a target that cannot be resolved names no context
-            if url not in allowed and REMOVED in unquote(url) and url in changed:
-                limited += 1
-            elif url in allowed and uncertain_join(base, link.target):
-                uncertain += 1  # a URL outside the allowlist is a fail, so a limit never hides one
-            else:
-                found.append(url)
+            for url in urls:
+                if url not in allowed and REMOVED in unquote(url) and url in changed:
+                    limited += 1
+                else:
+                    found.append(url)
     other = (_ALTERNATE,) if alternate else ()
     if media_type(record) == _JSONLD:
         # JSON-LD 1.1, section 6.1: a processor ignores the header here, so it names no context and
         # no fail. pyld reads it, so a value that pyld can read as another context is a limit.
-        unread = malformed or limited or uncertain or any(url not in allowed for url in found)
+        unread = malformed or limited or any(url not in allowed for url in found)
         pyld = (_PYLD_READS,) if unread or _imported(found, pinned, allowed) else ()
         return _LinkContexts([], 0, 0, pyld + other)
-    limits = ((_CHANGED,) if limited else ()) + ((_UNCERTAIN_BASE,) if uncertain else ()) + other
-    return _LinkContexts(found, limited + uncertain, malformed, limits)
+    limits = ((_CHANGED,) if limited else ()) + other
+    return _LinkContexts(found, limited, malformed, limits)
 
 
 def _content_type(record: Record) -> str:

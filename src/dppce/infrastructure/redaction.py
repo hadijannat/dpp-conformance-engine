@@ -11,7 +11,7 @@ import ipaddress
 import re
 from collections.abc import Callable
 from typing import Final, NamedTuple
-from urllib.parse import parse_qsl, urlencode, urlparse, urlsplit, urlunparse, urlunsplit
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlsplit, urlunparse, urlunsplit
 
 REMOVED: Final = "<removed>"
 
@@ -256,21 +256,52 @@ def _changed_by_urljoin(target: str, scheme: str, netloc: str) -> bool:
     return "" in segments[1:-1] or pyld_strip
 
 
-def uncertain_join(base: str, target: str) -> bool:
-    """True if WHATWG URL or pyld 3.0.0 can resolve the relative path ``target`` against ``base``
-    to another URL than Python urljoin does.
+def resolutions(base: str, target: str) -> tuple[str, ...]:
+    """The URLs that the WHATWG URL parser and pyld 3.0.0 resolve the kept ``target`` to, each once.
 
-    urljoin removes empty segments of the base path, and it does not read "%2e" as ".". Redaction
-    does not see the base, so a check asks here. A base with such a segment is never plain.
+    For a target that redaction keeps, both agree with Python urljoin unless the target is a relative
+    path and the base path has an empty or dot segment. urljoin removes empty segments of the base
+    path, and it does not read "%2e" as ".". There the RFC 3986 merge, which keeps empty segments,
+    gives each reading: pyld reads the base as it is, and WHATWG first removes its dot segments and
+    reads "%2e" as ".". Raises ValueError as urljoin does.
     """
-    try:
-        if urlsplit(target).scheme or target.startswith("/"):
-            return False
-        segments = urlsplit(base).path.split("/")[1:]
-    except ValueError:
-        return True
-    # ponytail: each empty or dot segment counts, also where readers agree. An RFC 3986 merge can narrow it.
-    return "" in segments[:-1] or any(s.lower().replace("%2e", ".") in (".", "..") for s in segments)
+    joined = urljoin(base, target)
+    parts, relative = urlsplit(base), urlsplit(target)
+    segments = parts.path.split("/")[1:]
+    odd = "" in segments[:-1] or any(_dot(s, dotted=True) for s in segments)
+    if not odd or relative.scheme or relative.netloc or target.startswith("/"):
+        return (joined,)
+    readings: list[str] = []
+    for dotted in (False, True):
+        path = _without_dots(parts.path or "/", dotted=True) if dotted else parts.path or "/"
+        query = relative.query
+        if relative.path:
+            path = _without_dots(path[: path.rfind("/") + 1] + relative.path, dotted=dotted)
+        elif not query:
+            query = parts.query
+        readings.append(urlunsplit((parts.scheme, parts.netloc, path, query, relative.fragment)))
+    return tuple(dict.fromkeys(readings))
+
+
+def _dot(segment: str, *, dotted: bool) -> str | None:
+    """ "." or ".." if ``segment`` is a dot segment, with "%2e" read as "." if ``dotted``."""
+    name = segment.lower().replace("%2e", ".") if dotted else segment
+    return name if name in (".", "..") else None
+
+
+def _without_dots(path: str, *, dotted: bool) -> str:
+    """RFC 3986, section 5.2.4: ``path`` without its dot segments. Empty segments stay."""
+    out: list[str] = []
+    segments = path.split("/")[1:]
+    for index, segment in enumerate(segments):
+        dot = _dot(segment, dotted=dotted)
+        if dot == ".." and out:
+            out.pop()
+        if dot is None:
+            out.append(segment)
+        elif index == len(segments) - 1:
+            out.append("")  # a final dot segment leaves a directory
+    return "/" + "/".join(out)
 
 
 def parse_link(value: str) -> LinkValue:

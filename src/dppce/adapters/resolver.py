@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 from typing import Any, Final, Literal
-from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 from pydantic import Field, ValidationError, field_validator
 
@@ -33,7 +33,7 @@ from dppce.adapters.common import (
 from dppce.adapters.identifier import gtin_check_digit_ok
 from dppce.evidence.recording import REDIRECT_STATUSES
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import REMOVED, parse_link, uncertain_join
+from dppce.infrastructure.redaction import REMOVED, parse_link, resolutions
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -167,8 +167,8 @@ def _advertised(answers: list[Record]) -> str | None:
     The record keeps a Link value only in the form that redaction keeps, so this reads that form.
     A kept type parameter is read. A link with the marker of another parameter is skipped. A
     relative target is resolved against the final URL of its answer. A target that redaction
-    changed is skipped: the record no longer holds the URL that the system advertised. So is a
-    relative target that another URL parser can resolve against that URL to another URL.
+    changed is skipped: the record no longer holds the URL that the system advertised. A relative
+    target is resolved as WHATWG URL and pyld resolve it, and skipped if the two give different URLs.
     """
     for record in answers:
         base = record.redirects[-1] if record.redirects else record.url
@@ -176,12 +176,15 @@ def _advertised(answers: list[Record]) -> str | None:
             if name.lower() != "link":
                 continue
             for link in parse_link(value).links:
-                if link.other or uncertain_join(base, link.target):  # an anchor can change what it means
+                if link.other:  # an anchor can change what it means
                     continue
                 try:
-                    url = urljoin(base, link.target)
+                    urls = resolutions(base, link.target)
                 except ValueError:
                     continue
+                if len(urls) > 1:  # the readers resolve it to different URLs
+                    continue
+                url = urls[0]
                 if REMOVED in unquote(url):
                     continue
                 if "linkset" in link.relations and is_http_url(url):

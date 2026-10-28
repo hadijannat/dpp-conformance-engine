@@ -31,6 +31,7 @@ from dppce.infrastructure.redaction import (
     parse_link,
     redact_link,
     redact_response_headers,
+    resolutions,
 )
 from tests.support import make_record, reply
 from tests.test_data_document_source import ALLOWED, blocked, failed, passed, verdict
@@ -483,7 +484,7 @@ class Redirected(Linked):
 
 
 @pytest.mark.parametrize("body", [BODY, PLAIN])
-def test_a_relative_context_target_on_a_base_with_an_empty_segment_is_blocked(
+def test_a_relative_context_target_on_a_base_with_an_empty_segment_is_judged_as_the_consumers_resolve_it(
     tmp_path: Path, body: bytes
 ) -> None:
     # urljoin gives BATTERY. WHATWG URL and pyld 3.0.0 keep the empty segment: .../x/contexts/battery/v1.
@@ -491,10 +492,13 @@ def test_a_relative_context_target_on_a_base_with_an_empty_segment_is_blocked(
         body, recorded(f"<../../contexts/battery/v1>; {CTX}"), "https://dppce.example.test/x//y/z"
     )
     outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
-    assert verdict(outcome) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert outcome.observations[0].summary["not_allowed"] == [
+        "https://dppce.example.test/x/contexts/battery/v1"
+    ]
 
 
-def test_the_base_path_limit_never_hides_a_fail(tmp_path: Path) -> None:
+def test_a_relative_target_that_the_consumers_resolve_outside_the_allowlist_fails(tmp_path: Path) -> None:
     acquirer = Redirected(
         BODY, recorded(f"<../contexts/battery/v1>; {CTX}"), "https://dppce.example.test/x//y/z"
     )
@@ -502,24 +506,79 @@ def test_the_base_path_limit_never_hides_a_fail(tmp_path: Path) -> None:
     assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
 
 
-@pytest.mark.parametrize("target", ["../../contexts/battery/v1", "/contexts/battery/v1", BATTERY])
-def test_a_context_target_on_a_plain_base_or_without_a_relative_path_keeps_its_pass(
-    tmp_path: Path, target: str
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_target_that_only_urljoin_resolves_outside_the_allowlist_passes(
+    tmp_path: Path, body: bytes
 ) -> None:
-    final = (
-        "https://dppce.example.test/x/y/z" if target.startswith("..") else "https://dppce.example.test/x//y/z"
+    # urljoin gives .../battery/v1. WHATWG URL and pyld 3.0.0 keep the empty segment and give BATTERY.
+    acquirer = Redirected(
+        body, recorded(f"<../battery/v1>; {CTX}"), "https://dppce.example.test/contexts//v0"
     )
-    acquirer = Redirected(PLAIN, recorded(f"<{target}>; {CTX}"), final)
     outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
     assert verdict(outcome) == passed("DATA.CONTEXT.OK")
 
 
-def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_base_with_an_empty_segment() -> None:
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_target_on_a_base_with_a_percent_encoded_dot_segment_fails_if_one_reading_is_foreign(
+    tmp_path: Path, body: bytes
+) -> None:
+    # WHATWG URL reads "%2e%2e" as "..": BATTERY. pyld 3.0.0 keeps it: .../x/%2e%2e/contexts/battery/v1.
+    final = "https://dppce.example.test/x/%2e%2e/contexts/v0"
+    acquirer = Redirected(body, recorded(f"<battery/v1>; {CTX}"), final)
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert outcome.observations[0].summary["not_allowed"] == [
+        "https://dppce.example.test/x/%2e%2e/contexts/battery/v1"
+    ]
+    both = [ALLOWED[0], BATTERY, "https://dppce.example.test/x/%2e%2e/contexts/battery/v1"]
+    assert verdict(contexts(tmp_path, acquirer, allowed_contexts=both)) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize(
+    ("base", "target", "readings"),
+    [
+        ("https://h.test/x//y/z", "../../a", ("https://h.test/x/a",)),
+        ("https://h.test/x//y/z", "", ("https://h.test/x//y/z",)),
+        ("https://h.test/x//y/z?q", "?r", ("https://h.test/x//y/z?r",)),
+        ("https://h.test/x/%2E%2e/y/z", "a", ("https://h.test/x/%2E%2e/y/a", "https://h.test/y/a")),
+        ("https://h.test/x/.%2e/y/z", "a", ("https://h.test/x/.%2e/y/a", "https://h.test/y/a")),
+        ("https://h.test/a/..", "a", ("https://h.test/a/a", "https://h.test/a")),
+        ("https://h.test/a/b//", "..", ("https://h.test/a/b/",)),
+    ],
+)
+def test_the_consumer_readings_of_a_relative_target_on_an_odd_base(
+    base: str, target: str, readings: tuple[str, ...]
+) -> None:
+    # Each expected value is what pyld 3.0.0 (iri_resolver.resolve) and Node.js 22 new URL() printed.
+    assert resolutions(base, target) == readings
+
+
+def test_on_a_plain_base_the_consumer_reading_is_urljoin() -> None:
+    rng = random.Random(7)  # noqa: S311 - fixed test samples, not a secret
+    segments = ["a", "b", "x.y", "a;p", "..a"]
+    targets = ["", "/", "ctx", ".", "..", "./", "../", "?q", "a", "x/", "../../c", "/c/d", "//h.test/c"]
+    checked = 0
+    for _ in range(5000):
+        base = "https://id.test/" + "/".join(rng.choice(segments) for _ in range(rng.randint(0, 4)))
+        target = "".join(rng.choice(targets) for _ in range(rng.randint(1, 3)))
+        if redact_link(f"<{target}>") != f"<{target}>":
+            continue
+        assert resolutions(base, target) == (urljoin(base, target),), (base, target)
+        checked += 1
+    assert checked > 1000
+
+
+def test_resolver_linkset_fetches_a_relative_target_on_a_base_with_an_empty_segment_as_the_consumers_do() -> (
+    None
+):
     lines = recorded('<../linksets/EV0001>; rel="linkset"')
     odd = replace(make_record(1), headers=lines, redirects=("https://id.example.test/dpp//x/y",))
     plain = replace(odd, redirects=("https://id.example.test/dpp/x/y",))
-    assert _advertised([odd]) is None
+    assert _advertised([odd]) == "https://id.example.test/dpp//linksets/EV0001"
     assert _advertised([plain]) == "https://id.example.test/dpp/linksets/EV0001"
+    # The readers resolve it to two URLs, so it is not fetched.
+    dotted = replace(odd, redirects=("https://id.example.test/dpp/%2e%2e/x/y",))
+    assert _advertised([dotted]) is None
 
 
 # -- an application/ld+json answer whose Content-Type value pyld reads as another type -----------------
