@@ -20,6 +20,7 @@ import re
 import shutil
 import socket
 import ssl
+import threading
 import zlib
 from collections.abc import Callable, Iterator
 from dataclasses import replace
@@ -396,9 +397,9 @@ def _answers(*replies: tuple[int, dict[str, str]]) -> Callable[[http.server.Base
     return handle
 
 
-def _waiting(waits: list[float]) -> PolicyTransport:
-    config = TransportConfig(policy=NetworkPolicy(**LOCAL), engine_version="1")
-    return PolicyTransport(config, FrozenClock(NOW), sleep=waits.append, monotonic=lambda: 0.0)
+def _waiting(waits: list[float], *, now: float = 0.0, **policy: Any) -> PolicyTransport:
+    config = TransportConfig(policy=NetworkPolicy(**(LOCAL | policy)), engine_version="1")
+    return PolicyTransport(config, FrozenClock(NOW), sleep=waits.append, monotonic=lambda: now)
 
 
 @pytest.mark.parametrize(
@@ -406,6 +407,7 @@ def _waiting(waits: list[float]) -> PolicyTransport:
     [
         ("0", [0]),  # zero seconds is a valid delay: one retry at once
         ("0003", [3]),  # leading zeros do not make the number longer than the cap
+        ("5", [5]),  # the cap itself is allowed
         ("50", []),  # trailing zeros count: 50 is above the cap of 5
         ("10", []),
     ],
@@ -414,12 +416,95 @@ def test_a_retry_after_is_read_as_a_decimal_number(value: str, waited: list[int]
     """Leading zeros are stripped, trailing zeros are not, and 0 is a number.
 
     Kills:
-    dppce.infrastructure.transport.xǁPolicyTransportǁ_retry_delay__mutmut_17, 18, 20
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_retry_delay__mutmut_17, 18, 20, 29
     """
     server = loopback(_answers((429, {"Retry-After": value}), (200, {})))
     waits: list[float] = []
     record = _waiting(waits).fetch(Request("GET", f"{server.origin}/x"))
     assert (waits, record.attempts, record.status) == (waited, 2 if waited else 1, 200 if waited else 429)
+
+
+@pytest.mark.parametrize("now", [0.0, 10.0])
+def test_a_retry_after_that_equals_the_time_left_is_not_waited_for(now: float, loopback: Any) -> None:
+    """The delay must be shorter than the time left. The time left is the deadline less the clock.
+
+    Kills:
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_retry_delay__mutmut_30, 31
+    """
+    server = loopback(_answers((429, {"Retry-After": "2"}), (200, {})))
+    waits: list[float] = []
+    record = _waiting(waits, now=now, total_timeout_ms=2000).fetch(Request("GET", f"{server.origin}/x"))
+    assert (record.status, record.attempts, waits) == (429, 1, [])
+
+
+def test_the_wait_between_requests_is_not_slept_when_it_is_zero(loopback: Any) -> None:
+    """A request exactly one interval after the last one needs no wait.
+
+    Kills:
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_send__mutmut_9
+    """
+    server = loopback(reply)
+    now = [100.0]
+    waits: list[float] = []
+    config = TransportConfig(policy=NetworkPolicy(**(LOCAL | {"min_interval_ms": 500})), engine_version="1")
+    subject = PolicyTransport(config, FrozenClock(NOW), sleep=waits.append, monotonic=lambda: now[0])
+    subject.fetch(Request("GET", f"{server.origin}/ok"))
+    now[0] = 100.5
+    subject.fetch(Request("GET", f"{server.origin}/ok"))
+    assert waits == []
+
+
+class _FakeTimer:
+    """Stands in for threading.Timer. The deadline passes at once, on a socket that cannot be shut down."""
+
+    instances: ClassVar[list[_FakeTimer]] = []
+
+    def __init__(self, interval: float, function: Callable[..., None], args: tuple[Any, ...] = ()) -> None:
+        self.function = function
+        self.daemon: bool | None = None
+        _FakeTimer.instances.append(self)
+
+    def start(self) -> None:
+        class Closed:
+            def shutdown(self, how: int) -> None:
+                raise OSError("the socket is closed")
+
+        self.function(Closed())
+
+    def cancel(self) -> None:
+        return
+
+
+def test_a_deadline_on_a_closed_socket_is_a_timeout_and_the_timer_is_a_daemon(
+    loopback: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The timer shuts the socket down and ignores an error of the shutdown. It does not hold the process.
+
+    Kills:
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_send__mutmut_54, 66, 67
+    """
+    server = loopback(reply)
+    _FakeTimer.instances = []
+    monkeypatch.setattr(threading, "Timer", _FakeTimer)
+    record = _waiting([]).fetch(Request("GET", f"{server.origin}/x"))
+    assert record.error == "timeout"
+    assert [timer.daemon for timer in _FakeTimer.instances] == [True]
+
+
+def test_a_role_with_a_credential_for_another_origin_and_no_client_gets_no_secret() -> None:
+    """The secret is for the origin of its credential. A role without a client has no other source.
+
+    Kills:
+    dppce.infrastructure.transport.xǁPolicyTransportǁ_secret_of__mutmut_12
+    """
+    settings = TransportConfig(
+        policy=NetworkPolicy(**LOCAL),
+        engine_version="1",
+        credentials={"auditor": ("http://127.0.0.1:1", "TEST-ONLY-secret-0123456789")},
+    )
+    subject = PolicyTransport(settings, FrozenClock(NOW))
+    assert subject._secret_of("auditor", "http://127.0.0.1:1") == "TEST-ONLY-secret-0123456789"
+    assert subject._secret_of("auditor", "http://127.0.0.1:2") is None
 
 
 # -- transport: the token request of an OAuth 2.0 role -------------------------------------------
