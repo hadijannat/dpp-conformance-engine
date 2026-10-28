@@ -80,6 +80,11 @@ from dppce.evidence.status import (
     read_status_list,
 )
 from dppce.evidence.x509path import MAX_CHAIN, path_gap, trust_path
+from dppce.infrastructure.authorization import (
+    AuthorizationError,
+    issue_authorization,
+    validate_authorization,
+)
 from dppce.infrastructure.clock import FrozenClock
 from dppce.infrastructure.interfaces import Request
 from dppce.infrastructure.redaction import (
@@ -93,7 +98,7 @@ from dppce.infrastructure.redaction import (
     redirect_mark,
     resolutions,
 )
-from dppce.infrastructure.transport import PolicyTransport, TransportConfig, _pending_alert
+from dppce.infrastructure.transport import PolicyTransport, TransportConfig, _forms, _pending_alert
 from dppce.models import (
     EvidenceEnvelope,
     ManualResult,
@@ -137,6 +142,8 @@ from tests.test_manual_results import _key as _manual_key
 from tests.test_mutation_gaps_round2 import as_document
 from tests.test_report_status import ISSUED_AT, LIST_ID, STATUS_SIGNER
 from tests.test_report_status import _key as _status_key
+from tests.test_timestamps import FAULTS, Tsa, check, dim, with_tokens
+from tests.tsa_support import tsa_ca, tsa_cert
 
 REMOVED_TARGET = "%3Cremoved%3E"
 REMOVED = "<removed>"
@@ -475,6 +482,20 @@ def test_the_token_request_is_bound_by_the_total_time_of_the_request(
     )
     engine.fetch(Request("GET", f"{system.origin}/data", role="auditor"))
     assert create_connection_calls[0][1] == 0.5
+
+
+def test_a_form_of_a_credential_that_is_part_of_a_longer_form_comes_after_it() -> None:
+    """The plain form of a token that starts with "/" is part of its JSON-escaped form ("\\\\/...").
+    Replacing the short one first would leave a backslash. Longer forms come first.
+
+    Kills:
+    dppce.infrastructure.transport.x__forms__mutmut_31, 34, 35
+    """
+    forms = _forms("/TEST-ONLY-slash-token-0123456789")
+    assert forms.index("\\/TEST-ONLY-slash-token-0123456789") < forms.index(
+        "/TEST-ONLY-slash-token-0123456789"
+    )
+    assert not any(a in b for i, a in enumerate(forms) for b in forms[i + 1 :])
 
 
 class _Names:
@@ -1183,6 +1204,163 @@ def test_a_status_list_file_is_read_at_its_limit_and_refused_with_the_reason(tru
     spaced = json.dumps(json.loads(canonical_bytes(valid)), indent=1).encode()
     loose = sign_compact(spaced, STATUS_SIGNER, typ=STATUS_LIST_TYP).encode("ascii")
     assert read(loose) == ("STATUSLIST.FILE.MALFORMED", "the payload is not in its canonical form")
+
+
+# -- evidence: timestamps -------------------------------------------------------------------------
+
+AUTHORITY = "the TSA certificate has no path to a timestamp anchor"
+ONLY_PURPOSE = "the TSA certificate does not have time stamping as its only critical purpose"
+NOT_DER = "the token is not a DER TimeStampToken"
+TOKEN_DETAILS = {
+    "wrong imprint": (
+        "TIMESTAMP.IMPRINT.MISMATCH: token 0: the imprint is not that of a signature that verifies"
+    ),
+    "no timestamp anchor": f"TIMESTAMP.TSA.UNTRUSTED: token 0: {AUTHORITY}",
+    "the CA only in the passport anchors": f"TIMESTAMP.TSA.UNTRUSTED: token 0: {AUTHORITY}",
+    "EKU serverAuth": f"TIMESTAMP.TSA.EKU: token 0: {ONLY_PURPOSE}",
+    "no EKU": f"TIMESTAMP.TSA.EKU: token 0: {ONLY_PURPOSE}",
+    "non-critical EKU": f"TIMESTAMP.TSA.EKU: token 0: {ONLY_PURPOSE}",
+    "two purposes": f"TIMESTAMP.TSA.EKU: token 0: {ONLY_PURPOSE}",
+    "no digital signature usage": (
+        "TIMESTAMP.TSA.KEY_USAGE: token 0: the key usage of the TSA certificate does not permit signing"
+    ),
+    "flipped signature byte": (
+        "TIMESTAMP.CMS.SIGNATURE_INVALID: token 0: the signature of the token does not verify"
+    ),
+    "TSTInfo changed after signing": (
+        "TIMESTAMP.CMS.SIGNATURE_INVALID: token 0: the content type or the message digest does not verify"
+    ),
+    "genTime after the evaluation time": (
+        "TIMESTAMP.TIME.FUTURE: token 0: genTime 2026-10-15T00:00:00Z is after the evaluation time"
+    ),
+    "genTime half a second after the evaluation time": (
+        "TIMESTAMP.TIME.FUTURE: token 0: genTime 2026-10-14T00:00:00.500000Z is after the evaluation time"
+    ),
+    "sha512 imprint": "TIMESTAMP.IMPRINT.ALGORITHM: token 0: the imprint does not use SHA-256",
+    "not base64": "TIMESTAMP.TOKEN.MALFORMED: token 0: the token is not standard base64",
+    "random DER": f"TIMESTAMP.TOKEN.MALFORMED: token 0: {NOT_DER} (ValueError)",
+    "a certificate that does not load": f"TIMESTAMP.TOKEN.MALFORMED: token 0: {NOT_DER} (ValueError)",
+    "a signer certificate with an invalid X.509 version": (
+        f"TIMESTAMP.TOKEN.MALFORMED: token 0: {NOT_DER} (InvalidVersion)"
+    ),
+    "a TSA certificate with a repeated extension": f"TIMESTAMP.TSA.EKU: token 0: {ONLY_PURPOSE}",
+    "six certificates": "TIMESTAMP.TOKEN.TOO_LARGE: token 0: the token holds more than 5 certificates",
+    "a critical TSTInfo extension": (
+        "TIMESTAMP.TOKEN.UNSUPPORTED_EXTENSION: token 0: the TSTInfo has a critical extension"
+    ),
+    "no ESS attribute": (
+        "TIMESTAMP.CMS.SIGNING_CERT: token 0: the signing certificate attribute does not identify "
+        "the TSA certificate"
+    ),
+    "the signer certificate is absent": (
+        "TIMESTAMP.TSA.UNKNOWN: token 0: no certificate matches the signer of the token"
+    ),
+    "expired at genTime": (
+        "TIMESTAMP.TSA.EXPIRED: token 0: a certificate of the TSA path is not valid at 2026-10-13T12:06:00Z"
+    ),
+    "genTime 0.9 s after not_after": (
+        "TIMESTAMP.TSA.EXPIRED: token 0: a certificate of the TSA path is not valid at "
+        "2026-10-13T12:06:00.900000Z"
+    ),
+    "revoked under its issuer": (
+        "TIMESTAMP.TSA.REVOKED: token 0: a certificate of the TSA path is revoked at 2026-10-13T12:06:00Z"
+    ),
+    "Ed25519 key": "TIMESTAMP.CMS.UNSUPPORTED: token 0: the CMS signer is outside the timestamp profile",
+    "Ed25519 key declared as ECDSA": (
+        "TIMESTAMP.CMS.UNSUPPORTED: token 0: the TSA key is outside the timestamp profile"
+    ),
+    "a combined signature OID that names another hash": (
+        "TIMESTAMP.CMS.UNSUPPORTED: token 0: the CMS signer is outside the timestamp profile"
+    ),
+    "17 tokens": "TIMESTAMP.EVIDENCE.TOO_MANY: the envelope holds 17 tokens; the limit is 16.",
+    "a token of MAX_TOKEN_BYTES + 1 bytes": (
+        "TIMESTAMP.TOKEN.TOO_LARGE: token 0: the token is larger than 65536 bytes"
+    ),
+    "text of MAX_TOKEN_TEXT + 1 characters": (
+        "TIMESTAMP.TOKEN.TOO_LARGE: token 0: the token is longer than 87384 characters"
+    ),
+}
+
+
+@pytest.fixture(scope="module")
+def tsa() -> Tsa:
+    authority = tsa_ca()
+    return Tsa(authority, tsa_cert(authority))
+
+
+@pytest.mark.parametrize("name", list(FAULTS))
+def test_each_fault_of_a_timestamp_token_gives_its_detail(
+    name: str, signed: EvidenceEnvelope, trust: TrustBundle, tsa: Tsa
+) -> None:
+    """The detail is what the reader of the verification report sees.
+
+    Kills:
+    dppce.evidence.timestamp.xǁTimestampErrorǁ__init____mutmut_1
+    dppce.evidence.timestamp.x__malformed__mutmut_2
+    dppce.evidence.timestamp.x_parse_token__mutmut_86, 117, 118
+    dppce.evidence.timestamp.x__check_cms__mutmut_27, 32, 33, 34, 59, 64, 65, 66, 75, 80, 81, 100, 105, 106
+    dppce.evidence.timestamp.x__check_tsa__mutmut_16, 21, 22, 23, 34, 39, 40, 41
+    dppce.evidence.timestamp.x_verify_token__mutmut_3, 14, 15, 16, 19, 27, 32, 33, 34, 45, 50, 51, 52
+    dppce.evidence.timestamp.x_verify_token__mutmut_74, 79, 80, 92, 97, 98, 99, 102, 107, 108, 123, 128
+    dppce.evidence.timestamp.x_verify_token__mutmut_129, 130, 142, 153, 166
+    """
+    build, _ = FAULTS[name]
+    tokens, bundle, at = build(signed, trust, tsa)
+    report = check(with_tokens(signed, *tokens), bundle.model_copy(update={"require_timestamp": True}), at)
+    assert dim(report, "timestamp") == ("fail", TOKEN_DETAILS[name])
+
+
+# -- authorization -------------------------------------------------------------------------------
+
+
+def test_each_refusal_of_an_authorization_gives_its_code_and_its_message(
+    signer: LocalSigner, trust: TrustBundle
+) -> None:
+    """The CLI shows the message to the operator, who decides what to correct.
+
+    Kills:
+    dppce.infrastructure.authorization.x_validate_authorization__mutmut_8, 13, 25, 41, 68, 73
+    dppce.infrastructure.authorization.x_validate_authorization__mutmut_84, 89, 90, 91, 94, 99, 100, 101
+    dppce.infrastructure.authorization.x_validate_authorization__mutmut_108, 113, 114, 115
+    """
+    at = datetime(2026, 10, 14, tzinfo=UTC)
+    origin = "http://127.0.0.1:1"
+    token = issue_authorization(_authorization(origin), signer)
+
+    def refused(text: str, **changes: Any) -> tuple[str, str]:
+        arguments: dict[str, Any] = {"trust": trust, "at": at, "sut_identifier": "urn:example:sut"}
+        with pytest.raises(AuthorizationError) as caught:
+            validate_authorization(text, **(arguments | changes))
+        return caught.value.code, str(caught.value)
+
+    assert validate_authorization(token, trust, at, "urn:example:sut").sut_identifier == "urn:example:sut"
+    assert refused("x") == ("AUTHZ.MALFORMED", "a compact JWS is three base64url parts")
+    stranger = LocalSigner.generate("TEST-ONLY-unknown-key")
+    assert refused(issue_authorization(_authorization(origin), stranger)) == (
+        "AUTHZ.ISSUER.UNTRUSTED",
+        "Key 'TEST-ONLY-unknown-key' is not trusted to authorize tests.",
+    )
+    assert refused(token, at=datetime(2028, 1, 1, tzinfo=UTC)) == (
+        "AUTHZ.ISSUER.KEY_NOT_VALID",
+        f"Key '{KID}' is revoked or outside its validity.",
+    )
+    head, body, _ = token.split(".")
+    assert refused(f"{head}.{body}.{_b64(bytes(64))}") == (
+        "AUTHZ.SIGNATURE.INVALID",
+        "the signature does not verify",
+    )
+    assert refused(issue_authorization(_authorization(origin, issuer="urn:example:other"), signer)) == (
+        "AUTHZ.ISSUER.MISMATCH",
+        "The authorization names a different issuer than the key.",
+    )
+    assert refused(token, sut_identifier="urn:example:other-sut") == (
+        "AUTHZ.SUT.MISMATCH",
+        "The authorization is for a different system under test.",
+    )
+    assert refused(token, at=datetime(2026, 11, 15, tzinfo=UTC)) == (
+        "AUTHZ.EXPIRED",
+        "The authorization is not valid at the evaluation time.",
+    )
 
 
 # -- evidence: certificate paths, the Merkle tree, and strict JSON ---------------------------------
