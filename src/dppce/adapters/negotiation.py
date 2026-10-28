@@ -27,6 +27,7 @@ from dppce.adapters.common import (
 )
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record
+from dppce.infrastructure.redaction import unmarked
 from dppce.models import CheckOutcome, Model
 from dppce.testdefs.registry import CheckContext, register
 
@@ -115,7 +116,7 @@ def _vary_missing(answers: dict[str, Record], unsupported_answer: str) -> bool:
     served: dict[str, list[Record]] = {}
     for n, r in answers.items():
         if n != "unsupported" or unsupported_answer == "default" or r.status == 406:
-            *hops, final = (r.url, *r.redirects)
+            *hops, final = (r.url, *map(unmarked, r.redirects))
             for hop in hops:
                 kinds.setdefault(hop, set()).add("redirect")
             kinds.setdefault(final, set()).add(f"{r.status} {media_type(r) if r.status == 200 else ''}")

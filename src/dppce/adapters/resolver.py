@@ -169,7 +169,8 @@ def _advertised(answers: list[Record]) -> str | None:
     relative target is resolved against the final URL of its answer. A target that redaction
     changed is skipped: the record no longer holds the URL that the system advertised. A relative
     target is resolved as WHATWG URL and pyld resolve it, and skipped if the two give different URLs.
-    A relative path target is skipped if the base path holds the marker of an echoed credential.
+    A relative path target is skipped if the base path holds the marker of an echoed credential. A
+    relative path, a query, or an empty target is skipped after a Location that the readers read apart.
     """
     for record in answers:
         base = record.redirects[-1] if record.redirects else record.url

@@ -53,6 +53,7 @@ from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
 from dppce.infrastructure.redaction import (
+    BASE_UNKNOWN,
     JSONLD_CONTEXT,
     REMOVED,
     hides_base_path,
@@ -823,7 +824,9 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
     target that redaction changed holds the marker and is compared in that form. It cannot be
     compared only if it equals the redacted form of an allowed URL that redaction changes too. A
     relative target counts with each URL that WHATWG URL and pyld resolve it to. On a base path that
-    holds the marker of an echoed credential, a relative path target counts unresolved. An alternate
+    holds the marker of an echoed credential, a relative path target counts unresolved. On a base
+    after a Location that the readers read apart, a relative path, a query, or an empty target counts
+    unresolved. An alternate
     JSON-LD document that pyld loads is not judged.
     """
     # pyld 3.0.0 (documentloader/requests.py) ignores the header only if the whole value is the
@@ -862,9 +865,12 @@ def _link_contexts(record: Record, allowed: list[Any], pinned: dict[str, list[st
             except ValueError:
                 continue  # a target that cannot be resolved names no context
             if hidden:
-                # The system put an engine credential into its own redirect target, so the fetched base
-                # path is not known. The target counts unresolved after the base, which is never allowed.
-                found.append(f"{base.partition('?')[0]}/{link.target}")
+                # The system put an engine credential into its own redirect target, or sent a Location
+                # that the readers read apart, so the record does not hold the base path that a consumer
+                # reads. The target counts unresolved after the base. That URL holds the marker, so it is
+                # never allowed.
+                stem = base if base.endswith(BASE_UNKNOWN) else base.partition("?")[0]
+                found.append(f"{stem}/{link.target}")
                 continue
             for url in urls:
                 if url not in allowed and REMOVED in unquote(url) and url in changed:

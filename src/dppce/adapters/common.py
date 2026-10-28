@@ -22,7 +22,7 @@ from referencing.exceptions import Unresolvable
 
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.infrastructure.interfaces import Record, Request
-from dppce.infrastructure.redaction import REMOVED, redact_url
+from dppce.infrastructure.redaction import REMOVED, redact_url, unmarked
 from dppce.infrastructure.transport import origin_of
 from dppce.models import (
     PATH_TEMPLATE_PATTERN,
@@ -335,7 +335,8 @@ def item_url(ctx: CheckContext, area: str) -> str | CheckOutcome:
         # The linkset names where the passport is. The engine does not follow it (OD-04).
         message = "The IXIT asks for the resolved item target, and the resolver answers with a linkset."
         return blocked(f"{area}.NO_TARGET", message)
-    final = record.redirects[-1] if record.redirects else record.url
+    # The suffix of a Location that the readers read apart is not a change of the fetched URL.
+    final = unmarked(record.redirects[-1]) if record.redirects else record.url
     # Redaction writes the marker percent-encoded in a query and plain elsewhere.
     if REMOVED in unquote(final):
         message = "Redaction changed the resolved URL. The engine does not fetch a changed URL."

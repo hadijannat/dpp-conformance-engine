@@ -193,6 +193,22 @@ def test_a_url_with_the_plain_removed_marker_is_not_fetched(tmp_path: Path) -> N
     assert len(acquirer.records()) == 1
 
 
+class _ReadApart(Canned):
+    """A resolver record whose redirect Location the consumers read as another URL than urljoin."""
+
+    def fetch(self, request: Request) -> Record:
+        record = replace(super().fetch(request), redirects=("http://127.0.0.1/dpp/item#<removed>",))
+        self._records[-1] = record
+        return record
+
+
+def test_a_redirect_that_the_consumers_read_apart_keeps_the_fetched_item_url(tmp_path: Path) -> None:
+    # The suffix tells the Link checks that the base is not known. The item URL stays the fetched URL,
+    # so the system cannot turn the item checks into blocked with such a Location.
+    ctx = resolved_context(tmp_path, "data.jsonschema", "http://127.0.0.1", acquirer=_ReadApart())
+    assert item_url(ctx, "DATA") == "http://127.0.0.1/dpp/item"
+
+
 def test_a_resolver_that_answers_200_directly_needs_one_request(tmp_path: Path, loopback: Any) -> None:
     api = Origin(loopback, {RESOLVER_PATH: served(), ITEM_PATH: served(b'{"other": true}')})
     outcome = run(resolved_context(tmp_path, "data.jsonschema", api.origin))

@@ -350,6 +350,23 @@ def test_answers_that_end_at_one_url_and_differ_need_vary(tmp_path: Path, loopba
     _failed(outcome, "NEGOTIATION.VARY.MISSING")
 
 
+def test_answers_that_end_at_one_url_after_a_location_that_the_readers_read_apart_need_vary(
+    tmp_path: Path, loopback: Any
+) -> None:
+    # urljoin reads both Locations as /p. The record marks the first, and the mark is not another URL.
+    def handle(request: http.server.BaseHTTPRequestHandler) -> None:
+        html = request.headers.get("Accept", "") == "text/html"
+        if request.path == RESOLVER_PATH:
+            reply(request, 307, b"", {"Location": "/a\\b/../p" if html else "/p", "Vary": "Accept"})
+        elif html:
+            reply(request, 200, HTML, {"Content-Type": "text/html"})
+        else:
+            reply(request, 200, PASSPORT)
+
+    outcome = run(resolved_context(tmp_path, "identifier.negotiation", loopback(handle).origin))
+    _failed(outcome, "NEGOTIATION.VARY.MISSING")
+
+
 def test_a_url_that_redirects_one_request_and_serves_another_needs_vary(
     tmp_path: Path, loopback: Any
 ) -> None:

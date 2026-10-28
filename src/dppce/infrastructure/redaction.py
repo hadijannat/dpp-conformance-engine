@@ -67,6 +67,9 @@ _SPECIAL_SCHEMES: Final = frozenset({"http", "https", "ws", "wss", "ftp", "file"
 _TARGET_REMOVED: Final = "%3Cremoved%3E"
 # The recorded form of a Link value that reading stopped in before its first link.
 LINK_STOPPED: Final = f"<{_TARGET_REMOVED}>, {REMOVED}"
+# The suffix of a recorded redirect target after a Location that the URL readers read apart: the record
+# does not hold the base path that a consumer reads. redact_url removes every other fragment.
+BASE_UNKNOWN: Final = f"#{REMOVED}"
 # RFC 3986, section 2: unreserved and reserved characters, and "%" only before two hex digits.
 _URI_REFERENCE: Final = re.compile(r"(?:[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=]|%[0-9A-Fa-f]{2})*")
 # Fixed media types cannot carry a secret, so a type parameter with one of them is kept.
@@ -268,9 +271,7 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
     """
     joined = urljoin(base, target)
     parts, relative = urlsplit(base), urlsplit(target)
-    segments = parts.path.split("/")[1:]
-    odd = "" in segments[:-1] or any(_dot(s, dotted=True) for s in segments) or "\\" in parts.path
-    if not odd or relative.scheme or relative.netloc or target.startswith("/"):
+    if not _odd_path(parts.path) or relative.scheme or relative.netloc or target.startswith("/"):
         return (joined,)
     readings: list[str] = []
     whatwg = _without_dots((parts.path or "/").replace("\\", "/"), dotted=True)
@@ -286,15 +287,51 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
 
 
 def hides_base_path(base: str, target: str) -> bool:
-    """True if a relative path ``target`` reads the path of ``base`` and that path holds the marker.
+    """True if ``target`` reads the path of ``base`` and the record does not hold the path that a
+    consumer reads.
 
     The transport replaces an echoed engine credential in a recorded redirect target with the marker.
-    A credential can hold "/", so the record then does not hold the fetched path. Redaction of a query
-    parameter does not change the path. Raises ValueError as urlsplit does.
+    A credential can hold "/", so a relative path target on a path with the marker reads an unknown
+    path. Redaction of a query parameter does not change the path. On a base that ends with
+    BASE_UNKNOWN, a relative path, a query, and an empty target read an unknown path. Raises
+    ValueError as urlsplit does.
     """
     relative = urlsplit(target)
-    reads_path = bool(relative.path) and not (relative.scheme or relative.netloc or target.startswith("/"))
-    return reads_path and REMOVED in unquote(base.partition("?")[0])
+    local = not (relative.scheme or relative.netloc or target.startswith("/"))
+    if base.endswith(BASE_UNKNOWN):
+        return local
+    return local and bool(relative.path) and REMOVED in unquote(base.partition("?")[0])
+
+
+def reads_apart(base: str, location: str) -> bool:
+    """True if Python urljoin can resolve the redirect ``location`` against ``base`` to another URL
+    than WHATWG URL or requests does.
+
+    WHATWG URL reads "\\" as "/" and keeps the empty segments of a relative path. WHATWG URL and
+    requests read "%2e" as ".". urljoin does neither, it removes the empty segments of the base path
+    for a relative path, it reads "..;x" as "..", and it drops an empty ";" parameter, "?" query, or
+    "#" fragment. Raises ValueError as urlsplit does.
+    """
+    parsed = urlparse(location)
+    if urlunparse(parsed) != parsed.scheme + location[len(parsed.scheme) :]:
+        return True
+    path = urlsplit(location).path
+    segments = path.split("/")
+    if "\\" in location or any(_dot(s.split(";")[0], dotted=True) and s not in (".", "..") for s in segments):
+        return True
+    relative = bool(path) and not path.startswith("/") and not urlsplit(location).netloc
+    return relative and ("" in segments[:-1] or _odd_path(urlsplit(base).path))
+
+
+def unmarked(url: str) -> str:
+    """``url`` without the suffix BASE_UNKNOWN: the URL that the transport fetched."""
+    return url.removesuffix(BASE_UNKNOWN)
+
+
+def _odd_path(path: str) -> bool:
+    """True if ``path`` has an empty segment before its last, a dot segment, or a "\\"."""
+    segments = path.split("/")[1:]
+    return "" in segments[:-1] or any(_dot(s, dotted=True) for s in segments) or "\\" in path
 
 
 def _dot(segment: str, *, dotted: bool) -> str | None:

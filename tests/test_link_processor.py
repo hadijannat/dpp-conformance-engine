@@ -716,6 +716,137 @@ def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_redirect_path_wi
     assert _advertised([absolute]) == "https://id.example.test/linksets/EV0001"
 
 
+# -- a redirect Location that urljoin reads as another URL than the consumers do --------------------------
+
+# The transport records such a hop, and each later hop, with this suffix. A fragment is never recorded
+# otherwise, because redact_url removes it.
+UNKNOWN = f"#{REMOVED}"
+
+
+# Each case: the Locations, the context target, the recorded hops, and the context that WHATWG URL loads.
+@pytest.mark.parametrize(
+    "case",
+    [
+        # urljoin removes "a\b/..". Node.js 22 new URL() reads "\" as "/": base /a/doc.
+        (["/a\\b/../doc"], "contexts/battery/v1", ["/doc"], "/a/contexts/battery/v1"),
+        # urljoin removes the empty segment of a relative path. WHATWG URL keeps it: base /dpp/x//y/doc.
+        (["x//y/doc"], "../../../contexts/battery/v1", ["/dpp/x/y/doc"], "/dpp/contexts/battery/v1"),
+        # The next hop joins the quoted path /a%5Cb/c/x. WHATWG URL joins /a/b/c/x: base /a/doc.
+        (["/a\\b/c/x", "../../doc"], "contexts/battery/v1", ["/a\\b/c/x", "/doc"], "/a/contexts/battery/v1"),
+        # urljoin keeps "%2e%2e" as a segment. WHATWG URL and requests read it as "..": base /doc.
+        (
+            ["/contexts/%2e%2e/y/z", "../../doc"],
+            "battery/v1",
+            ["/contexts/%2e%2e/y/z", "/contexts/doc"],
+            "/battery/v1",
+        ),
+        # The ".." of urljoin removes "%2e%2e". WHATWG URL and requests read both as "..": base /doc.
+        (["/contexts/x/%2e%2e/../doc"], "../battery/v1", ["/contexts/x/doc"], "/battery/v1"),
+    ],
+)
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_context_target_after_a_location_that_the_consumers_read_apart_fails(
+    tmp_path: Path, loopback: Any, case: tuple[list[str], str, list[str], str], body: bytes
+) -> None:
+    locations, target, recorded_hops, consumer = case
+
+    def answer(request: Any) -> None:
+        hop = len(server.seen) - 1
+        if hop < len(locations):
+            reply(request, 302, b"", {"Location": locations[hop]})
+        else:
+            reply(request, headers={"Link": f"<{target}>; {CTX}"})
+
+    server = loopback(answer)
+    record = transport().fetch(Request("GET", f"{server.origin}/dpp/1", role="anonymous"))
+    assert record.status == 200
+    assert record.redirects == tuple(f"{server.origin}{hop}{UNKNOWN}" for hop in recorded_hops)
+    links = tuple((k, v) for k, v in record.headers if k.lower() == "link")
+    # The allowlist holds the urljoin reading of the record and not the URL that the consumer loads.
+    allowed = [ALLOWED[0], urljoin(f"{server.origin}{recorded_hops[-1]}", target)]
+    assert f"{server.origin}{consumer}" not in allowed
+    outcome = contexts(tmp_path, Redirected(body, links, record.redirects[-1]), allowed_contexts=allowed)
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    assert outcome.observations[0].summary["not_allowed"] == [f"{record.redirects[-1]}/{target}"]
+
+
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_context_target_after_a_plain_redirect_keeps_its_pass(
+    tmp_path: Path, loopback: Any, body: bytes
+) -> None:
+    def answer(request: Any) -> None:
+        if request.path == "/dpp/1":
+            reply(request, 302, b"", {"Location": "/x/y/z"})
+        else:
+            reply(request, headers={"Link": f"<../../contexts/battery/v1>; {CTX}"})
+
+    server = loopback(answer)
+    record = transport().fetch(Request("GET", f"{server.origin}/dpp/1", role="anonymous"))
+    assert record.redirects == (f"{server.origin}/x/y/z",)
+    links = tuple((k, v) for k, v in record.headers if k.lower() == "link")
+    allowed = [ALLOWED[0], f"{server.origin}/contexts/battery/v1"]
+    outcome = contexts(tmp_path, Redirected(body, links, record.redirects[-1]), allowed_contexts=allowed)
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+@pytest.mark.parametrize(
+    ("base", "location", "apart"),
+    [
+        ("https://h.example/dpp/1", "/a\\b/../doc", True),
+        ("https://h.example/dpp/1", "x//y/doc", True),
+        ("https://h.example/dpp/1", "/contexts/x/%2e%2e/../doc", True),
+        ("https://h.example/dpp/1", "/contexts/%2E./y", True),
+        ("https://h.example/dpp/1", "..;x/doc", True),
+        # urljoin removes the empty segment of the base path for a relative path. WHATWG URL keeps it.
+        ("https://h.example/dpp//1", "doc", True),
+        ("https://h.example/a\\b/1", "../doc", True),
+        # A Location that every reader reads alike is plain.
+        ("https://h.example/dpp//1", "/doc", False),
+        ("https://h.example/dpp/1", "/x/y/z", False),
+        ("https://h.example/dpp/1", "../x/doc", False),
+        ("https://h.example/dpp/1", "/a//b", False),
+        ("https://h.example/dpp/1", "https://h.example/a//b", False),
+        ("https://h.example/dpp/1", "x/", False),
+        ("https://h.example/dpp/1", "?q", False),
+        ("https://h.example/dpp/1", "%5c/doc", False),
+    ],
+)
+def test_the_locations_that_the_readers_resolve_apart(base: str, location: str, apart: bool) -> None:
+    from dppce.infrastructure.redaction import reads_apart  # noqa: PLC0415 - red until the code lands
+
+    assert reads_apart(base, location) is apart
+
+
+@pytest.mark.parametrize(
+    ("target", "result"),
+    [
+        # A query or an empty target also reads the base path, which the record does not hold.
+        ("?v1", failed("DATA.CONTEXT.NOT_ALLOWED")),
+        ("", failed("DATA.CONTEXT.NOT_ALLOWED")),
+        # An absolute path does not read the base path.
+        ("/contexts/battery/v1", passed("DATA.CONTEXT.OK")),
+        (BATTERY, passed("DATA.CONTEXT.OK")),
+    ],
+)
+def test_a_context_target_on_a_base_that_the_consumers_read_apart(
+    tmp_path: Path, target: str, result: Any
+) -> None:
+    final = f"https://dppce.example.test/doc?v=1{UNKNOWN}"
+    acquirer = Redirected(PLAIN, recorded(f"<{target}>; {CTX}"), final)
+    allowed = [ALLOWED[0], BATTERY, "https://dppce.example.test/doc?v1", "https://dppce.example.test/doc?v=1"]
+    assert verdict(contexts(tmp_path, acquirer, allowed_contexts=allowed)) == result
+
+
+def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_base_that_the_consumers_read_apart() -> None:
+    final = f"https://id.example.test/contexts/x/doc{UNKNOWN}"
+    lines = recorded('<../linksets/EV0001>; rel="linkset"')
+    apart = replace(make_record(1), headers=lines, redirects=(final,))
+    assert _advertised([apart]) is None
+    assert _advertised([replace(apart, headers=recorded('<?linkset>; rel="linkset"'))]) is None
+    absolute = replace(apart, headers=recorded('</linksets/EV0001>; rel="linkset"'))
+    assert _advertised([absolute]) == "https://id.example.test/linksets/EV0001"
+
+
 # -- an application/ld+json answer whose Content-Type value pyld reads as another type -----------------
 
 FOREIGN = f"<{EVIL}>; {CTX}"
