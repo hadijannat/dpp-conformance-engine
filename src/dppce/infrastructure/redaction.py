@@ -415,7 +415,12 @@ def redirect_mark(previous: str, base: str, location: str) -> str:
     if not own and _without_empty_ends(location)[1]:
         own = QUERY_UNKNOWN
     before = _mark(previous)
-    kept = before if before and _reads_unknown(before, location) else ""
+    # urljoin and WHATWG URL read a Location with the scheme of the base and no "//" after it, such as
+    # "http:w", as the relative reference after the scheme.
+    scheme, _, rest = location.partition(":")
+    same = urlsplit(location).scheme == scheme.lower() == urlsplit(base).scheme
+    reference = rest if same and not rest.startswith("//") else location
+    kept = before if before and _reads_unknown(before, reference) else ""
     return BASE_UNKNOWN if BASE_UNKNOWN in (own, kept) else own or kept
 
 
