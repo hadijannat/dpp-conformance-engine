@@ -363,8 +363,65 @@ def test_a_special_scheme_target_without_an_authority_is_not_allowed(
     assert "user:pw" not in repr(outcome)
 
 
+# -- a target that Python urljoin changes ----------------------------------------------------------------
+
+# urljoin drops an empty ";" parameter and an empty "?" query, and removes empty segments of a relative
+# path. pyld 3.0.0 drops the first "." of a relative path such as ".well-known". WHATWG URL and pyld
+# keep the others, so the engine would judge a URL that a processor does not load. The readers also
+# differ on dot segments, so only a leading run of "." and ".." segments is kept.
+NORMALIZED = (
+    "https://example.test/ctx;",
+    "https://example.test/ctx?",
+    "https://example.test/ctx;?",
+    "/contexts/battery/v1;",
+    "contexts//battery/v1",
+    ".well-known/ctx",
+    # Found by a fuzzer that compares urljoin with WHATWG URL and pyld: dot segments read differently.
+    "contexts/..;x",
+    "%2e%2e/contexts/battery/v1",
+    "a/../contexts/battery/v1",
+    "contexts/.?v=1",
+    "/..//contexts/battery/v1",
+    "https://example.test/a/../ctx",
+)
+
+
+@pytest.mark.parametrize("target", NORMALIZED)
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_target_that_urljoin_changes_is_not_allowed(tmp_path: Path, target: str, body: bytes) -> None:
+    assert recorded(f"<{target}>; {CTX}") == (("Link", f"<%3Cremoved%3E>; {CTX}"),)
+    first = contexts(tmp_path, Linked(body, recorded(f"<{target}>; {CTX}")))
+    assert verdict(first) == failed("DATA.CONTEXT.NOT_ALLOWED")
+    resolved = urljoin(first.observations[0].summary["not_allowed"][0], target)
+    outcome = contexts(
+        tmp_path, Linked(body, recorded(f"<{target}>; {CTX}")), allowed_contexts=[ALLOWED[0], resolved]
+    )
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+
+
+@pytest.mark.parametrize("target", ["/linksets/EV0001;", "/linksets/EV0001?", "linksets//EV0001"])
+def test_resolver_linkset_does_not_fetch_a_target_that_urljoin_changes(target: str) -> None:
+    lines = recorded(f'<{target}>; rel="linkset"')
+    assert _advertised([replace(make_record(1, url="https://id.example.test/01/1"), headers=lines)]) is None
+
+
 @pytest.mark.parametrize(
-    "target", ["https://example.test/ctx", "HTTPS://example.test/ctx", "urn:x:ctx", "/ctx", "ctx"]
+    "target",
+    [
+        "https://example.test/ctx",
+        "HTTPS://example.test/ctx",
+        "urn:x:ctx",
+        "/ctx",
+        "ctx",
+        "../ctx",
+        "./ctx",
+        ".a",
+        "..a/ctx",
+        "/a//ctx",
+        "https://example.test/a//ctx",
+        "?page=2",
+        "/ctx;v=1",
+    ],
 )
 def test_a_target_with_an_authority_or_another_scheme_is_kept(target: str) -> None:
     assert recorded(f"<{target}>; {CTX}") == (("Link", f"<{target}>; {CTX}"),)

@@ -11,7 +11,7 @@ import ipaddress
 import re
 from collections.abc import Callable
 from typing import Final, NamedTuple
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlencode, urlparse, urlsplit, urlunparse, urlunsplit
 
 REMOVED: Final = "<removed>"
 
@@ -202,7 +202,8 @@ def _link_target(target: str) -> str:
     """The recorded form of a Link target.
 
     A target that is not a URI reference, or that has userinfo, a fragment, or an empty authority,
-    becomes the marker. So does a target with a scheme such as https that "//" does not follow.
+    becomes the marker. So does a target with a scheme such as https that "//" does not follow, and a
+    target that Python urljoin can resolve to another URL than WHATWG URL or pyld does.
     Redaction would remove userinfo or a fragment without a trace. URL parsers disagree on the host
     of a target with "\\" before "@", with an empty authority, or with such a scheme. A credential-like
     query value is redacted in place, because its marker shows in the recorded target.
@@ -217,10 +218,38 @@ def _link_target(target: str) -> str:
     # Python joins "https:/ctx" or "https:ctx" to the base host. pyld keeps a value with ":" as it is.
     if parts.scheme in _SPECIAL_SCHEMES and not target[len(parts.scheme) + 1 :].startswith("//"):
         return _TARGET_REMOVED
+    if _changed_by_urljoin(target, parts.scheme, netloc):
+        return _TARGET_REMOVED
     # Python joins the path of an empty authority to the base host. WHATWG reads its first segment as host.
     empty_authority = not netloc and _AUTHORITY_START.match(target) is not None
     redacted = redact_url(target)
     return _TARGET_REMOVED if "@" in netloc or empty_authority or redacted == REMOVED else redacted
+
+
+def _changed_by_urljoin(target: str, scheme: str, netloc: str) -> bool:
+    """True if Python urljoin can resolve ``target`` to a URL that WHATWG URL or pyld 3.0.0 does not.
+
+    urljoin drops an empty ";" parameter and an empty "?" query, and reads "..;x" at the end as "..".
+    It does not read "%2e" as ".". It removes empty segments of a relative path that does not start
+    with "/". The readers also differ on a dot segment after another segment, on a dot segment in a
+    URL with a scheme, and on a dot segment at the end before a query. pyld drops the first "." of a
+    relative path that starts with ".", not "..", not "./", and has more than two characters. So only
+    a leading run of "." and ".." segments is kept, in a relative target. A scheme in upper case is
+    not a change: every reader writes it in lower case.
+    """
+    if urlunparse(urlparse(target)) != scheme + target[len(scheme) :]:
+        return True
+    segments = urlsplit(target).path.split("/")
+    dots = [s.split(";")[0].lower().replace("%2e", ".") in (".", "..") for s in segments]
+    if any(dot and s not in (".", "..") for dot, s in zip(dots, segments, strict=True)):
+        return True
+    leading = next((i for i, dot in enumerate(dots) if not dot), len(dots))
+    if any(dots[leading:]) or (any(dots) and (scheme or netloc)) or (dots[-1] and "?" in target):
+        return True
+    if scheme or netloc or target.startswith("/"):
+        return False
+    pyld_strip = target.startswith(".") and not target.startswith(("..", "./")) and len(target) > 2
+    return "" in segments[1:-1] or pyld_strip
 
 
 def parse_link(value: str) -> LinkValue:
