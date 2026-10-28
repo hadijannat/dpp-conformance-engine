@@ -148,6 +148,9 @@ ADVERSARIAL = (
 )
 
 
+# Coverage tracing multiplies the time of a per-character scanner by three to five. The bound measures
+# the engine, so the two timing tests run without the tracer.
+@pytest.mark.no_cover
 def test_the_link_path_is_linear_on_adversarial_values() -> None:
     start = time.perf_counter()
     for value in ADVERSARIAL:
@@ -159,6 +162,7 @@ def test_the_link_path_is_linear_on_adversarial_values() -> None:
     assert time.perf_counter() - start < 5
 
 
+@pytest.mark.no_cover
 def test_the_link_checks_are_linear_on_adversarial_records(tmp_path: Path) -> None:
     start = time.perf_counter()
     lines = tuple(("Link", value) for value in ADVERSARIAL)
