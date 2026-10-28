@@ -746,6 +746,9 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
 - The check does not judge that document, so such a link gives `blocked` with
   `DATA.CONTEXT.LINK_UNREADABLE`. pyld reads the last `rel`, and the record keeps only the
   first. So a link with that type and a removed parameter gives `blocked` too.
+- pyld also reads the last `type`, and the record keeps the first kept `type`. So redaction stops
+  reading a value where a later `type` reads as `application/ld+json` (section 10). Such a value
+  gives `DATA.CONTEXT.LINK_MALFORMED`.
 - The record keeps a `Link` value only in the form that redaction keeps (section 10). A link
   without the context relation is ignored. Redaction keeps each link that RFC 8288, appendix B,
   reads before a malformed part. A context link before such a part still names its target.
@@ -774,12 +777,18 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
   `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted form of an allowed URL. Then the
   engine cannot compare the two exactly. `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, and
   `DATA.CONTEXT.LINK_MALFORMED` come first.
-- The check resolves a relative context target with Python `urljoin`. `urljoin` removes empty
-  segments of the base path, and it does not read `%2e` as `.`. The WHATWG URL parser and pyld
-  3.0.0 keep such segments. A redirect can give such a base.
-- So a relative target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` if the base path has an
-  empty or dot segment and `urljoin` gives an allowed URL. A URL outside the allowlist stays a
-  fail, so this limit never hides one. `resolver.linkset` does not fetch such a target.
+- The check resolves a relative context target with Python `urljoin` if the base path is plain.
+  For a target that redaction keeps, the WHATWG URL parser and pyld 3.0.0 then give the same URL.
+- `urljoin` removes empty segments of the base path, and it does not read `%2e` as `.`. The WHATWG
+  URL parser and pyld 3.0.0 keep empty segments. A redirect can give such a base.
+- So if the base path has an empty or dot segment, the check resolves a relative path as these two
+  readers do. It merges the paths as RFC 3986, section 5.2, states, and keeps empty segments.
+- pyld reads the base as it is. The WHATWG URL parser first removes the dot segments of the base,
+  and it reads `%2e` as `.`. The target counts with each URL that the two readers give.
+- A URL outside the allowlist gives `DATA.CONTEXT.NOT_ALLOWED`. If each URL is allowed, the link
+  is allowed. A fuzzer compared this resolution with pyld 3.0.0 and the `URL` class of Node.js 22.
+- `resolver.linkset` resolves a relative target in the same way. It does not fetch a target that
+  the two readers resolve to different URLs.
 - The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
   error code is `multiple context link headers`, section 9.6.2. The check judges the target of
   each context link.
@@ -1729,6 +1738,10 @@ records/<id>.enc   one encrypted record each
   target and then each parameter. A parameter replaces an earlier one of the same name. So the
   last `rel` counts, and the last parameter named exactly `target` replaces the target. A name
   with another case or with a space before `=` does not match.
+- The record keeps the first kept `type` of a link. If the model reads the last parameter named
+  exactly `type` as `application/ld+json` and the record keeps another type, the value is not
+  complete. pyld loads the target of an alternate link with that type (section 8). Only
+  redaction reads this rule, at record time, also on joined `Link` lines.
 - pyld 3.0.0 uses the same three regular expressions with `re.findall`, so it reads each unquoted
   parameter value as empty. With an empty target, pyld loads the URL of the answer as the context.
   So for pyld, the model reads an unquoted `target` as empty, and such a value is not complete.
@@ -1793,7 +1806,8 @@ records/<id>.enc   one encrypted record each
   the resolver of pyld 3.0.0. Only redaction reads this rule, so an old record replays unchanged.
 - For a relative target, `urljoin` also removes empty segments of the base path. A redirect can
   give such a base. Redaction does not see the base, so this rule cannot remove such a target.
-  `data.context` gives `blocked` for it instead, and `resolver.linkset` skips it (section 8).
+  `data.context` and `resolver.linkset` resolve it as the WHATWG URL parser and pyld do instead
+  (section 8).
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
   marker `<removed>` holds `>`. In a `Link` value, the marker could close a target that a reader
   of the sent value reads as open.

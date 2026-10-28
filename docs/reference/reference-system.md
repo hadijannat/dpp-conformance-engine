@@ -642,6 +642,8 @@ Two more context sources are experimental:
 - pyld 3.0.0 loads the target of a link with `rel="alternate"` and `type="application/ld+json"`
   if the whole `Content-Type` value is not a JSON type. The check does not judge that document,
   so such a link gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE`.
+- pyld reads the last `type` of a link. A later `type="application/ld+json"` after another kept
+  type therefore gives `DATA.CONTEXT.LINK_MALFORMED`.
 - The parameter `context_files`. It maps an allowed context URL to a pinned JSON copy under the
   data root, for example `{"https://example.test/ctx": "contexts/ctx.json"}`. The check reads
   each `@context` string and each `@import` value in the copy. It follows a reference only into
@@ -691,9 +693,9 @@ parameter, and each relation outside its closed list, with one marker.
 - Such a target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` only if it equals the redacted
   form of an allowed URL. `DATA.CONTEXT.MISSING`, `DATA.CONTEXT.NOT_ALLOWED`, and
   `DATA.CONTEXT.LINK_MALFORMED` come first.
-- A relative target gives `blocked` with `DATA.CONTEXT.LINK_UNREADABLE` if the path of the final
-  URL has an empty or dot segment, such as `/x//y`, and the target resolves to an allowed URL. URL
-  parsers resolve such a target differently. A URL outside the allowlist still gives a fail.
+- The path of the final URL can have an empty or dot segment, such as `/x//y`. Then a relative
+  target is resolved as the WHATWG URL parser and pyld 3.0.0 resolve it, with empty segments kept.
+  Each URL that these two readers give must be on the allowlist.
 - A `Link` value that echoes a credential of the engine is recorded as
   `<%3Cremoved%3E>, <removed>`. Reading of that record does not finish.
 
