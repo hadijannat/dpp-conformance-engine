@@ -518,6 +518,18 @@ def test_a_relative_target_that_only_urljoin_resolves_outside_the_allowlist_pass
     assert verdict(outcome) == passed("DATA.CONTEXT.OK")
 
 
+@pytest.mark.parametrize("target", ["../../contexts/battery/v1", "/contexts/battery/v1", BATTERY])
+def test_a_context_target_on_a_plain_base_or_without_a_relative_path_keeps_its_pass(
+    tmp_path: Path, target: str
+) -> None:
+    final = (
+        "https://dppce.example.test/x/y/z" if target.startswith("..") else "https://dppce.example.test/x//y/z"
+    )
+    acquirer = Redirected(PLAIN, recorded(f"<{target}>; {CTX}"), final)
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
 @pytest.mark.parametrize("body", [BODY, PLAIN])
 def test_a_relative_target_on_a_base_with_a_percent_encoded_dot_segment_fails_if_one_reading_is_foreign(
     tmp_path: Path, body: bytes
@@ -544,6 +556,9 @@ def test_a_relative_target_on_a_base_with_a_percent_encoded_dot_segment_fails_if
         ("https://h.test/x/.%2e/y/z", "a", ("https://h.test/x/.%2e/y/a", "https://h.test/y/a")),
         ("https://h.test/a/..", "a", ("https://h.test/a/a", "https://h.test/a")),
         ("https://h.test/a/b//", "..", ("https://h.test/a/b/",)),
+        # A target with an authority or an absolute path does not read the base path.
+        ("https://h.test/x//y/z", "/c", ("https://h.test/c",)),
+        ("https://h.test/x//y/z", "https://h.test/c", ("https://h.test/c",)),
         # The WHATWG URL parser reads "\" in the path of an https URL as "/". pyld keeps it.
         (
             "https://h.example/a\\b/c/doc",
