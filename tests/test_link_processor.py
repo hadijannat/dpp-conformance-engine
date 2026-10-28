@@ -20,7 +20,7 @@ import pytest
 
 import dppce.adapters  # noqa: F401 - importing the package registers every check
 from dppce.adapters.resolver import _advertised
-from dppce.infrastructure.interfaces import Request
+from dppce.infrastructure.interfaces import Record, Request
 from dppce.infrastructure.redaction import (
     _JS_SPACE,
     _PY_SPACE,
@@ -32,7 +32,7 @@ from dppce.infrastructure.redaction import (
     redact_response_headers,
 )
 from tests.support import make_record, reply
-from tests.test_data_document_source import ALLOWED, failed, passed, verdict
+from tests.test_data_document_source import ALLOWED, blocked, failed, passed, verdict
 from tests.test_review_findings import transport
 from tests.test_rulepack_v2 import BODY, JSONLD_CONTEXT, PLAIN, Linked, contexts
 
@@ -461,3 +461,61 @@ def test_a_link_line_that_echoes_a_credential_records_as_the_placeholder(
     assert TOKEN not in repr(record)
     headers = tuple((k, v) for k, v in record.headers if k.lower() != "content-type")
     assert verdict(contexts(tmp_path, Linked(body, headers))) == failed(f"DATA.CONTEXT.{code}")
+
+
+# -- a relative target against a base path with an empty or dot segment ----------------------------------
+
+BATTERY = "https://dppce.example.test/contexts/battery/v1"
+
+
+class Redirected(Linked):
+    """Linked whose answer came after a redirect to ``final``."""
+
+    def __init__(self, body: bytes, headers: tuple[tuple[str, str], ...], final: str) -> None:
+        super().__init__(body, headers)
+        self._final = final
+
+    def fetch(self, request: Request) -> Record:
+        record = replace(super().fetch(request), redirects=(self._final,))
+        self._records[-1] = record
+        return record
+
+
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_relative_context_target_on_a_base_with_an_empty_segment_is_blocked(
+    tmp_path: Path, body: bytes
+) -> None:
+    # urljoin gives BATTERY. WHATWG URL and pyld 3.0.0 keep the empty segment: .../x/contexts/battery/v1.
+    acquirer = Redirected(
+        body, recorded(f"<../../contexts/battery/v1>; {CTX}"), "https://dppce.example.test/x//y/z"
+    )
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == blocked("DATA.CONTEXT.LINK_UNREADABLE")
+
+
+def test_the_base_path_limit_never_hides_a_fail(tmp_path: Path) -> None:
+    acquirer = Redirected(
+        BODY, recorded(f"<../contexts/battery/v1>; {CTX}"), "https://dppce.example.test/x//y/z"
+    )
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+
+
+@pytest.mark.parametrize("target", ["../../contexts/battery/v1", "/contexts/battery/v1", BATTERY])
+def test_a_context_target_on_a_plain_base_or_without_a_relative_path_keeps_its_pass(
+    tmp_path: Path, target: str
+) -> None:
+    final = (
+        "https://dppce.example.test/x/y/z" if target.startswith("..") else "https://dppce.example.test/x//y/z"
+    )
+    acquirer = Redirected(PLAIN, recorded(f"<{target}>; {CTX}"), final)
+    outcome = contexts(tmp_path, acquirer, allowed_contexts=[ALLOWED[0], BATTERY])
+    assert verdict(outcome) == passed("DATA.CONTEXT.OK")
+
+
+def test_resolver_linkset_does_not_fetch_a_relative_target_on_a_base_with_an_empty_segment() -> None:
+    lines = recorded('<../linksets/EV0001>; rel="linkset"')
+    odd = replace(make_record(1), headers=lines, redirects=("https://id.example.test/dpp//x/y",))
+    plain = replace(odd, redirects=("https://id.example.test/dpp/x/y",))
+    assert _advertised([odd]) is None
+    assert _advertised([plain]) == "https://id.example.test/dpp/linksets/EV0001"

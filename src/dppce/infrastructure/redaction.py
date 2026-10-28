@@ -254,6 +254,23 @@ def _changed_by_urljoin(target: str, scheme: str, netloc: str) -> bool:
     return "" in segments[1:-1] or pyld_strip
 
 
+def uncertain_join(base: str, target: str) -> bool:
+    """True if WHATWG URL or pyld 3.0.0 can resolve the relative path ``target`` against ``base``
+    to another URL than Python urljoin does.
+
+    urljoin removes empty segments of the base path, and it does not read "%2e" as ".". Redaction
+    does not see the base, so a check asks here. A base with such a segment is never plain.
+    """
+    try:
+        if urlsplit(target).scheme or target.startswith("/"):
+            return False
+        segments = urlsplit(base).path.split("/")[1:]
+    except ValueError:
+        return True
+    # ponytail: each empty or dot segment counts, also where readers agree. An RFC 3986 merge can narrow it.
+    return "" in segments[:-1] or any(s.lower().replace("%2e", ".") in (".", "..") for s in segments)
+
+
 def parse_link(value: str) -> LinkValue:
     """Read a ``Link`` value as RFC 8288, appendix B, reads it.
 

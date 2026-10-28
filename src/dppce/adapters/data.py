@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Final, Literal, Self
+from typing import Any, Final, Literal, NamedTuple, Self
 from urllib.parse import unquote, urljoin
 
 from jsonschema import SchemaError
@@ -52,7 +52,7 @@ from dppce.evidence.jose_profiles import JoseError
 from dppce.evidence.manual import SAMPLE_PREFIX
 from dppce.infrastructure.clock import parse_stamp
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link, redact_url
+from dppce.infrastructure.redaction import JSONLD_CONTEXT, REMOVED, parse_link, redact_url, uncertain_join
 from dppce.models import CheckOutcome, ExecutionStatus, Expr, JsonValue, Model, Tri
 from dppce.testdefs.registry import CheckContext, register
 
@@ -768,8 +768,34 @@ def _pinned_contexts(ctx: CheckContext, params: ContextParams) -> dict[str, list
     return pinned
 
 
-def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int, int]:
-    """The targets of the links with the JSON-LD context relation, how many cannot be compared,
+_CHANGED: Final = (
+    "A context link of the answer has a target that redaction changed. It equals the redacted "
+    "form of an allowed context, so the two cannot be compared exactly."
+)
+_UNCERTAIN_BASE: Final = (
+    "A context link of the answer has a relative target, and the URL of the answer has an empty or "
+    "dot segment in its path. URL parsers can resolve such a target to different URLs."
+)
+
+
+class _LinkContexts(NamedTuple):
+    """The context links of the Link values of an answer.
+
+    ``found`` holds the resolved targets. ``unjudged`` counts the context links that name a context
+    but cannot be compared. ``limits`` holds one message for each kind of engine limit.
+    """
+
+    found: list[str]
+    unjudged: int
+    malformed: int
+    limits: tuple[str, ...]
+
+
+_NO_LINKS: Final = _LinkContexts([], 0, 0, ())
+
+
+def _link_contexts(record: Record, allowed: list[Any]) -> _LinkContexts:
+    """The targets of the links with the JSON-LD context relation, the limits of their reading,
     and how many Link values are malformed.
 
     JSON-LD 1.1 API, section 9.4.1: a processor reads the href of such a link and ignores the
@@ -778,14 +804,15 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int, 
     that RFC 8288, appendix B, reads before a malformed part. A JSON-LD processor can read a context
     link after that part, so a malformed value counts. A target that redaction changed holds the
     marker and is compared in that form. It cannot be compared only if it equals the redacted form
-    of an allowed URL that redaction changes too.
+    of an allowed URL that redaction changes too. A relative target that urljoin resolves to an
+    allowed URL is not compared if another URL parser can resolve it to another URL.
     """
     if record.kind != "http" or media_type(record) == "application/ld+json":
-        return [], 0, 0
+        return _NO_LINKS
     base = record.redirects[-1] if record.redirects else record.url
     changed = {redact_url(a) for a in allowed if isinstance(a, str)}
     found: list[str] = []
-    limited = malformed = 0
+    limited = uncertain = malformed = 0
     for name, value in record.headers:
         if name.lower() != "link":
             continue
@@ -806,9 +833,12 @@ def _link_contexts(record: Record, allowed: list[Any]) -> tuple[list[str], int, 
                 continue  # a target that cannot be resolved names no context
             if url not in allowed and REMOVED in unquote(url) and url in changed:
                 limited += 1
+            elif url in allowed and uncertain_join(base, link.target):
+                uncertain += 1  # a URL outside the allowlist is a fail, so a limit never hides one
             else:
                 found.append(url)
-    return found, limited, malformed
+    limits = ((_CHANGED,) if limited else ()) + ((_UNCERTAIN_BASE,) if uncertain else ())
+    return _LinkContexts(found, limited + uncertain, malformed, limits)
 
 
 def _imported(start: list[str], pinned: dict[str, list[str]], allowed: list[Any]) -> set[str]:
@@ -847,10 +877,10 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
     # A Link header applies to the one fetched document. It never applies to a sample, a
     # credential payload, or an HTML page.
     fetched = params.source in (None, "item", "model")
-    linked, limited, malformed = _link_contexts(got.record, allowed) if fetched else ([], 0, 0)
-    if linked or limited:
+    linked, unjudged, malformed, limits = _link_contexts(got.record, allowed) if fetched else _NO_LINKS
+    if linked or unjudged:
         entries, found = counted[0]
-        counted[0] = (entries + len(linked) + limited, found | {url for url in linked if url not in allowed})
+        counted[0] = (entries + len(linked) + unjudged, found | {url for url in linked if url not in allowed})
     start = [r for document in got.documents for r in _references(document)[0] if isinstance(r, str)] + linked
     foreign = sorted(set().union(*(found for _, found in counted), _imported(start, pinned, allowed)))
     summary: dict[str, JsonValue] = {
@@ -878,15 +908,11 @@ def context_check(ctx: CheckContext) -> CheckOutcome:
             f"{what} not well-formed. A JSON-LD processor can read a context link after the malformed part."
         )
         return completed(False, "DATA.CONTEXT.LINK_MALFORMED", message, [observation])
-    if limited:
-        message = (
-            "A context link of the answer has a target that redaction changed. It equals the redacted "
-            "form of an allowed context, so the two cannot be compared exactly."
-        )
+    if limits:
         return CheckOutcome(
             status=ExecutionStatus.BLOCKED,
             reason_code="DATA.CONTEXT.LINK_UNREADABLE",
-            message=message,
+            message=" ".join(limits),
             observations=(observation,),
         )
     return completed(

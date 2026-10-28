@@ -33,7 +33,7 @@ from dppce.adapters.common import (
 from dppce.adapters.identifier import gtin_check_digit_ok
 from dppce.evidence.recording import REDIRECT_STATUSES
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import REMOVED, parse_link
+from dppce.infrastructure.redaction import REMOVED, parse_link, uncertain_join
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -167,7 +167,8 @@ def _advertised(answers: list[Record]) -> str | None:
     The record keeps a Link value only in the form that redaction keeps, so this reads that form.
     A kept type parameter is read. A link with the marker of another parameter is skipped. A
     relative target is resolved against the final URL of its answer. A target that redaction
-    changed is skipped: the record no longer holds the URL that the system advertised.
+    changed is skipped: the record no longer holds the URL that the system advertised. So is a
+    relative target that another URL parser can resolve against that URL to another URL.
     """
     for record in answers:
         base = record.redirects[-1] if record.redirects else record.url
@@ -175,7 +176,7 @@ def _advertised(answers: list[Record]) -> str | None:
             if name.lower() != "link":
                 continue
             for link in parse_link(value).links:
-                if link.other:  # a removed parameter, such as an anchor, can change what the link means
+                if link.other or uncertain_join(base, link.target):  # an anchor can change what it means
                     continue
                 try:
                     url = urljoin(base, link.target)
