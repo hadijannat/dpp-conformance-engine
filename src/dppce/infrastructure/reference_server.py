@@ -49,7 +49,7 @@ CORE_FAULTS: Final = frozenset(
         "resolver_404", "redirect_out_of_scope", "data_wrong_type", "data_missing_required", "data_stale",
         "data_wrong_unit", "data_relationship", "context_invalid", "context_link_malformed",
         "context_link_backslash", "context_link_target_param", "context_link_split_lines",
-        "registry_inconsistent",
+        "context_link_alternate_later_type", "registry_inconsistent",
         "version_undeclared_change", "over_restrict_legitimate_interest",
         "leak_supplier_to_legitimate_interest", "leak_usage_log_anonymous", "deny_all",
         "resolver_5xx", "resolver_html", "resolver_divergent", "registry_extra_field_differs",
@@ -65,7 +65,7 @@ def known_faults() -> frozenset[str]:
 
 FAULTS: Final = known_faults()
 _CONTEXT_RELATION: Final = 'rel="http://www.w3.org/ns/json-ld#context"'
-# The Link header of the passport answer under each context link flag (F-84 to F-87).
+# The Link header of the passport answer under each context link flag (F-84 to F-88).
 _CONTEXT_LINKS: Final = {
     "context_link_malformed": (
         f"<https://dppce.example.test/x> junk, <https://unpinned.example.test/ctx>; {_CONTEXT_RELATION}"
@@ -81,6 +81,11 @@ _CONTEXT_LINKS: Final = {
     ),
     # The first of two Link lines. Joined with the second, the quote ends later.
     "context_link_split_lines": '<https://unpinned.example.test/ctx>; title="x',
+    # jsonld.js and pyld read the last type parameter, so pyld loads the target as a JSON-LD document.
+    "context_link_alternate_later_type": (
+        '<https://unpinned.example.test/doc>; rel="alternate"; type="application/json"; '
+        'type="application/ld+json"'
+    ),
 }
 # The second Link line of context_link_split_lines.
 _SPLIT_SECOND_LINE: Final = (

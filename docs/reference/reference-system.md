@@ -738,6 +738,7 @@ Each flag changes one behavior. `validation/fault-catalogue.yaml` states the exp
 | `context_link_backslash` | `/dpp/{id}` adds `Link: <https://unpinned.example.test\@dppce.example.test/contexts/battery/v1>; rel="http://www.w3.org/ns/json-ld#context"` |
 | `context_link_target_param` | `/dpp/{id}` adds `Link: <https://dppce.example.test/contexts/battery/v1>; rel="http://www.w3.org/ns/json-ld#context"; target="https://unpinned.example.test/ctx"` |
 | `context_link_split_lines` | `/dpp/{id}` adds two Link lines: `<https://unpinned.example.test/ctx>; title="x` and `<https://dppce.example.test/contexts/battery/v1>; t="p, <https://unpinned.example.test/ctx>; rel=http://www.w3.org/ns/json-ld#context, q"` |
+| `context_link_alternate_later_type` | `/dpp/{id}` adds `Link: <https://unpinned.example.test/doc>; rel="alternate"; type="application/json"; type="application/ld+json"` |
 | `registry_inconsistent` | the registry record names operator `urn:example:operator:9999` |
 | `version_undeclared_change` | the last version entry repeats the previous version number with a different digest |
 | `registry_extra_field_differs` | the registry `passport_url` names serial `OTHER0001`, not the passport identifier |
