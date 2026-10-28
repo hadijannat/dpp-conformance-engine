@@ -1405,7 +1405,8 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
   connects to the checked address. This prevents DNS rebinding.
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
   An out-of-scope hop ends the request with `redirect_out_of_scope`. So does a `Location` that
-  is not a URL. A URL that cannot be parsed is never raised: it is `policy_denied`.
+  is not a URL. So does a `Location` that the WHATWG URL parser reads with another host than
+  `urljoin` does (section 10). A URL that cannot be parsed is never raised: it is `policy_denied`.
 - The transport follows only the statuses 301, 302, 303, 307, and 308, with a `Location`, for
   `GET`, `HEAD`, and `OPTIONS`. The record keeps each redirect target and, in parallel, the status
   of the answer that named it. A refused hop keeps its target and its status too.
