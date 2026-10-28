@@ -15,7 +15,7 @@ import time
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin, urlsplit
 
 import pytest
 
@@ -28,11 +28,15 @@ from dppce.infrastructure.redaction import (
     REMOVED,
     _processor_links,
     _processor_read,
+    hides_base_path,
     parse_link,
     redact_link,
     redact_response_headers,
+    redact_url,
+    redirect_mark,
     resolutions,
 )
+from dppce.infrastructure.transport import _URL_SAFE
 from tests.support import make_record, reply
 from tests.test_data_document_source import ALLOWED, blocked, failed, passed, verdict
 from tests.test_review_findings import transport
@@ -884,6 +888,13 @@ def _follow(loopback: Any, locations: list[str], link: str) -> tuple[Any, Record
         ["/\\h2.example/doc"],
         ["\\\\h2.example/doc"],
         ["http:/\\h2.example/doc"],
+        # urlsplit removes a tab and strips leading C0 controls, so the raw Location is checked.
+        ["/\t//h2.example/x"],
+        ["\x01///h2.example/x"],
+        ["h\tttp:///h2.example/x"],
+        # Another scheme: urljoin keeps the Location, which has no host. WHATWG URL reads h2.example.
+        ["https:h2.example/doc"],
+        ["https:/h2.example/doc"],
     ],
 )
 def test_a_location_that_a_consumer_reads_with_another_host_is_not_followed(
@@ -893,7 +904,8 @@ def test_a_location_that_a_consumer_reads_with_another_host_is_not_followed(
     assert record.error == "redirect_out_of_scope"
     assert record.status == 302
     assert len(server.seen) == len(locations), "the engine fetches no answer of another URL"
-    assert len(record.redirects) == len(locations) - 1
+    # A refused hop keeps its target and its status (section 9).
+    assert len(record.redirects) == len(record.redirect_statuses) == len(locations)
 
 
 @pytest.mark.parametrize(
@@ -960,6 +972,37 @@ def test_a_query_target_after_a_dropped_empty_parameter_counts_unresolved(
             assert verdict(outcome) == passed("DATA.CONTEXT.OK")
 
 
+@pytest.mark.parametrize("body", [BODY, PLAIN])
+def test_a_location_with_the_scheme_of_the_base_and_no_authority_keeps_the_suffix(
+    tmp_path: Path, loopback: Any, body: bytes
+) -> None:
+    # urljoin and WHATWG URL read "http:w" on an http base as the relative reference "w". The middle hop
+    # joins the quoted path, so the last hop does not read apart on its own.
+    server, record = _follow(loopback, ["/a\\b/x", "y/z", "http:w"], f"<../../contexts/battery/v1>; {CTX}")
+    assert record.status == 200
+    assert record.redirects[-1].endswith(UNKNOWN)
+    links = tuple((k, v) for k, v in record.headers if k.lower() == "link")
+    allowed = [ALLOWED[0], f"{server.origin}/contexts/battery/v1"]
+    outcome = contexts(tmp_path, Redirected(body, links, record.redirects[-1]), allowed_contexts=allowed)
+    assert verdict(outcome) == failed("DATA.CONTEXT.NOT_ALLOWED")
+
+
+def test_the_suffix_stays_after_a_reference_with_the_scheme_of_the_base() -> None:
+    # The w17 fuzzer, seed 1818: Node.js 22 reads ./x as https://h.example/a/a/x, urljoin as /a/x.
+    current, hops = "https://h.example/dpp/1", []
+    for location in ["/a/a\\b?q#", ";", "https:%2f%2fc?"]:
+        # The join of PolicyTransport.fetch: the quoted path of the current hop, then urljoin.
+        parts = urlsplit(current)
+        path = quote(parts.path or "/", safe=_URL_SAFE)
+        if parts.query:
+            path += "?" + quote(parts.query, safe=_URL_SAFE + "?")
+        joined = urljoin(f"https://h.example{path}", location)
+        hops.append(redact_url(joined) + redirect_mark(hops[-1] if hops else "", current, location))
+        current = joined
+    assert hops[-1].endswith(UNKNOWN)
+    assert hides_base_path(hops[-1], "./x")
+
+
 def test_resolver_linkset_reads_a_relative_target_after_a_dropped_empty_parameter() -> None:
     final = f"https://id.example.test/x/doc{QUERY_UNKNOWN}"
     record = replace(
@@ -973,7 +1016,7 @@ def test_resolver_linkset_reads_a_relative_target_after_a_dropped_empty_paramete
 def test_the_access_check_reads_a_marked_redirect_as_the_url_that_the_engine_fetched(
     tmp_path: Path, suffix: str
 ) -> None:
-    from tests.test_review_round2 import _POLICY, _context, _Redirected, restricted_fields  # noqa: PLC0415
+    from tests.test_review_round2 import _POLICY, _context, _Redirected, restricted_fields  # noqa: PLC0415 - the access helpers live in another test module
 
     # The suffix removed nothing from the URL, so a canary cannot hide there.
     acquirer = _Redirected(b"<p>clean</p>", redirects=(f"http://sut.example/dpp/x{suffix}",))

@@ -32,6 +32,7 @@ from dppce.evidence.recording import (
 )
 from dppce.infrastructure.interfaces import Acquirer, Record, Request
 from dppce.infrastructure.keys import FileDataKeyProvider
+from dppce.infrastructure.redaction import BASE_UNKNOWN
 from dppce.infrastructure.replay import ReplayAcquirer
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, EvidenceEnvelope, ExecutionStatus, OpenedRecord, TrustBundle
@@ -84,6 +85,24 @@ def test_a_refused_hop_keeps_its_status(loopback: Start) -> None:
     record = transport().fetch(Request("GET", f"{server.origin}/a"))
     assert record.error == "redirect_out_of_scope"
     assert (record.redirects, record.redirect_statuses) == ((OUT_OF_SCOPE,), (308,))
+
+
+# Locations that WHATWG URL reads with another host than urljoin. The transport refuses them before the join.
+HOST_MOVES = ("/\\h2.example/doc", "http:///h2.example/doc")
+
+
+@pytest.mark.parametrize("location", [*HOST_MOVES, "/\t//h2.example/doc"])
+def test_a_hop_refused_before_the_join_keeps_its_status_and_a_marked_target(
+    location: str, loopback: Start
+) -> None:
+    server = loopback(_chain({"/a": (302, location)}))
+    record = transport().fetch(Request("GET", f"{server.origin}/a"))
+    assert record.error == "redirect_out_of_scope"
+    assert record.redirect_statuses == (302,)
+    # The suffix says that the record does not hold the URL that a consumer reads.
+    (target,) = record.redirects
+    assert target.startswith(server.origin + "/")
+    assert target.endswith(BASE_UNKNOWN)
 
 
 def test_a_loop_keeps_one_status_per_followed_hop(loopback: Start) -> None:
@@ -291,8 +310,8 @@ def test_a_declared_status_passes(tmp_path: Path, loopback: Any) -> None:
 
 @pytest.mark.parametrize(
     ("target", "status"),
-    [(None, 302), (OUT_OF_SCOPE, 302), (RESOLVER_PATH, 302)],
-    ids=["followed", "out_of_scope", "loop"],
+    [(None, 302), (OUT_OF_SCOPE, 302), (RESOLVER_PATH, 302), *((t, 302) for t in HOST_MOVES)],
+    ids=["followed", "out_of_scope", "loop", "host_move_backslash", "host_move_empty_host"],
 )
 def test_an_undeclared_first_hop_status_fails(
     target: str | None, status: int, tmp_path: Path, loopback: Any
@@ -334,7 +353,11 @@ def test_a_followed_hop_to_a_target_without_an_answer_is_no_answer(
     ), outcome.message
 
 
-@pytest.mark.parametrize("target", [OUT_OF_SCOPE, RESOLVER_PATH], ids=["out_of_scope", "loop"])
+@pytest.mark.parametrize(
+    "target",
+    [OUT_OF_SCOPE, RESOLVER_PATH, *HOST_MOVES],
+    ids=["out_of_scope", "loop", "host_move_backslash", "host_move_empty_host"],
+)
 def test_a_declared_first_hop_is_judged_also_when_the_hop_is_not_followed(
     target: str, tmp_path: Path, loopback: Any
 ) -> None:
