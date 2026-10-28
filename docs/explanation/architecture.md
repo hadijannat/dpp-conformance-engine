@@ -802,9 +802,19 @@ gives `blocked`, with `DATA.SCHEMA.MISSING` or `DATA.RULES.MISSING`. The run bin
 - The check cannot tell if the credential held `/`. The system put the credential into its own
   redirect target, so the fail stands. A target with an absolute path or an authority keeps its
   result.
+- The transport marks a redirect target with the suffix `#<removed>` after a `Location` that a
+  consumer can read as another URL (section 10). Such a record does not hold the base path that
+  a consumer reads.
+- So on a marked base, a relative path, a query, or an empty target counts unresolved: the
+  base, a `/`, and the target. It gives `DATA.CONTEXT.NOT_ALLOWED`. The `Location` is the value
+  of the system, so the fail stands.
+- On a marked base, a target with an absolute path or an authority keeps its result. The WHATWG
+  URL parser can read a `Location` such as `/\h.example/doc` with another host. This check then
+  resolves an absolute path against the fetched origin.
 - `resolver.linkset` resolves a relative target in the same way. It does not fetch a target that
   the two readers resolve to different URLs. It does not fetch a relative path target on a base
-  path that holds the marker.
+  path that holds the marker. On a marked base, it does not fetch a relative path, a query, or an
+  empty target.
 - The JSON-LD 1.1 API, section 9.4.1, rejects a document with more than one context link. Its
   error code is `multiple context link headers`, section 9.6.2. The check judges the target of
   each context link.
@@ -1830,6 +1840,21 @@ records/<id>.enc   one encrypted record each
 - The transport also removes an echoed credential from a recorded redirect target. A credential
   with `/` changes the base path, so neither check resolves a relative path target on that base
   (section 8).
+- The transport resolves each `Location` with `urljoin`, which can remove the form that makes a
+  base odd. The WHATWG URL parser of Node.js 22 reads `\` as `/` and `%2e` as `.`. It keeps the
+  empty segments of a relative path.
+- requests 2.34.2 also reads `%2e` as `.`. `urljoin` also drops an empty `;` parameter, an empty
+  query, and an empty fragment, and it reads `..;x` as `..`. On the base path of a relative
+  `Location`, `urljoin` removes empty segments.
+- So the record marks a redirect target with the suffix `#<removed>` after such a `Location`.
+  Each later hop of that fetch joins the fetched path, so it is marked too.
+- `redact_url` removes every other fragment, so no other record holds the suffix. A plain
+  `Location` is recorded as before. An old record holds no suffix, so it replays unchanged.
+- The suffix is not a change of the fetched URL. `item_url` and `identifier.negotiation` read the
+  target without it. `data.context` and `resolver.linkset` do not resolve a target that reads the
+  base path on such a base (section 8).
+- A fuzzer followed chains of one to three hops with `urljoin`, Node.js 22, and requests with
+  pyld 3.0.0. On each unmarked base, every consumer context URL was among the engine readings.
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
   marker `<removed>` holds `>`. In a `Link` value, the marker could close a target that a reader
   of the sent value reads as open.

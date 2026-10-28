@@ -701,6 +701,11 @@ parameter, and each relation outside its closed list, with one marker.
 - The transport replaces an echoed credential of the engine in a redirect target with
   `<removed>`. On such a base path, a relative path target counts unresolved. It gives
   `DATA.CONTEXT.NOT_ALLOWED`.
+- A redirect `Location` with a `\`, a `%2e` dot segment, or an empty segment in a relative path
+  can read apart. Then the transport records the target and each later hop with the suffix
+  `#<removed>`.
+- On such a base, a relative path, a query, or an empty target counts unresolved. It gives
+  `DATA.CONTEXT.NOT_ALLOWED`.
 - A `Link` value that echoes a credential of the engine is recorded as
   `<%3Cremoved%3E>, <removed>`. Reading of that record does not finish.
 
