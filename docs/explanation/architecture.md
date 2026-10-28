@@ -1882,8 +1882,8 @@ records/<id>.enc   one encrypted record each
   pyld 3.0.0. Its `Location` values also held empty authorities, a `\` before the first segment,
   tabs, leading control characters, references with the scheme of the base, and empty `;`, `?`,
   and `#` parts.
-- It ran 20000 chains for each of six seeds with two grammars. One grammar had no tabs, control
-  characters, or references with the scheme of the base.
+- It ran 20000 chains for each of six seeds with two grammars. One grammar had no tabs or control
+  characters.
 - In these runs, no followed chain left the host for Node.js 22. Where the engine resolved a
   context target to one URL that an allowlist can hold, each consumer read that URL.
 - The transport removes an echoed credential of the engine before redaction (section 9). Its
