@@ -24,7 +24,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.12", "3.13"]
+        # Both legs run every test outside the validation marker. With coverage, the 3.12 leg took 25
+        # to 39 minutes (runs of 3dd4330 to 17eeaba), and the core job, a smaller set without it, took
+        # 10 to 12. So only one leg measures coverage.
+        include:
+          - python: "3.12"
+            coverage: false
+          - python: "3.13"
+            coverage: true
     env:
       UV_PYTHON: ${{ matrix.python }}
     steps:
@@ -49,12 +56,15 @@ jobs:
         run: uv run --no-sync dppce catalogue lint
       # No test may reach a real DPP system or any third-party service.
       - name: Tests with no network except loopback
+        env:
+          COVERAGE_OPTIONS: ${{ matrix.coverage && '--cov --cov-report=xml --cov-report=' || '' }}
         run: |
-          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m 'not validation' --cov --cov-report=xml --cov-report="
+          sudo unshare --net bash -c "ip link set lo up && exec sudo -E -u '$USER' env HOME='$HOME' PATH='$PATH' UV_OFFLINE=1 uv run --no-sync pytest -m 'not validation' $COVERAGE_OPTIONS"
       - name: Coverage gate on the core packages
+        if: matrix.coverage
         run: uv run --no-sync just cov-report
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
+        if: always() && matrix.coverage
         with:
           name: coverage-${{ matrix.python }}
           path: coverage.xml
@@ -79,7 +89,8 @@ jobs:
 
   validate:
     name: Method validation
-    needs: check
+    # Runs beside the fast gates, not after them: it uses none of their output, and waiting for
+    # them added about 14 minutes to each run.
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
