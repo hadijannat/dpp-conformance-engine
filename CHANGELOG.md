@@ -172,6 +172,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- The engine joins URL parts and judges public addresses with its own rules, not with the stdlib of
+  the running Python. So CPython 3.12.3 and later releases give the same records and verdicts.
+  Before, a redirect to a `Location` such as `http:b` got a false unknown-base mark on 3.12.3, and a
+  6to4 address counted as public there.
+- A public address now excludes six special-purpose ranges in `2001::/23` that CPython 3.12.3
+  refuses, the deprecated site-local network `fec0::/10`, and the deprecated 6to4 relay anycast
+  network `192.88.99.0/24`. A system under test at such an address needs an entry in
+  `allow_private_hosts`.
+- The origin override of the test rig keeps a path that starts with `//`. Before, CPython 3.12.12
+  and later requested `////` for it.
 - A secret reference whose value is not valid UTF-8 gives exit code 2 with a fixed message.
   Before, `dppce run` gave exit code 3 with a message that named one byte of the secret and its
   position.
