@@ -537,7 +537,10 @@ class PolicyTransport:
             target = self._target(client.token_url, "POST", role, credential=True)
         except _DeniedError as denied:
             return "dns" if denied.error == "dns" else "authorization_denied"
-        if target.scheme != "https" and not ipaddress.ip_address(target.address).is_loopback:
+        address = ipaddress.ip_address(target.address)
+        # An IPv4-mapped address is its IPv4 address. CPython 3.12.3 calls ::ffff:127.0.0.1 not loopback.
+        mapped = address.ipv4_mapped if isinstance(address, ipaddress.IPv6Address) else None
+        if target.scheme != "https" and not (mapped or address).is_loopback:
             # The client secret would cross a network in clear text.
             return "authorization_denied"
         if not self._budget_left():

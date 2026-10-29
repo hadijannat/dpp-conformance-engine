@@ -119,6 +119,24 @@ _SENSITIVE_PARAMETER: Final = re.compile(
 )
 # IPv6 prefixes that carry an IPv4 address. The embedded address decides where a packet goes.
 _NAT64: Final = (ipaddress.ip_network("64:ff9b::/96"), ipaddress.ip_network("64:ff9b:1::/48"))
+# The networks that the ipaddress module of CPython 3.12.3, 3.12.12, 3.12.13, 3.13.12, or 3.14.4 calls
+# not global, multicast, reserved, loopback, link-local, or unspecified, without nested ones. The
+# versions read the IANA IPv4 and IPv6 Special-Purpose Address Registries differently, so the union
+# is the rule: an address is public only if each of these versions calls it public. Inside
+# 192.0.0.0/24, each one calls 192.0.0.9 and 192.0.0.10 global.
+_NOT_PUBLIC: Final = tuple(
+    ipaddress.ip_network(network)
+    for network in (
+        "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12",
+        "192.0.0.0/24", "192.0.2.0/24", "192.168.0.0/16", "198.18.0.0/15", "198.51.100.0/24",
+        "203.0.113.0/24", "224.0.0.0/4", "240.0.0.0/4",
+        "::/8", "::ffff:0:0/96", "64:ff9b:1::/48", "100::/8", "200::/7", "400::/6", "800::/5",
+        "1000::/4", "2001::/23", "2001:db8::/32", "2002::/16", "3fff::/20", "4000::/3", "6000::/3",
+        "8000::/3", "a000::/3", "c000::/3", "e000::/4", "f000::/5", "f800::/6", "fc00::/7",
+        "fe00::/9", "fe80::/10", "ff00::/8",
+    )
+)  # fmt: skip
+_PUBLIC_IN_NOT_PUBLIC: Final = (ipaddress.ip_network("192.0.0.9/32"), ipaddress.ip_network("192.0.0.10/32"))
 # The schemes of uses_netloc and uses_relative in urllib.parse of CPython 3.12 to 3.14.
 _USES_NETLOC: Final = frozenset(
     {
@@ -814,9 +832,9 @@ def _embedded_ipv4(ip: ipaddress.IPv6Address) -> ipaddress.IPv4Address | None:
 
 
 def _routable(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
-    # ``is_global`` alone is not enough: it is true for multicast addresses such as 224.0.0.1.
-    return ip.is_global and not (
-        ip.is_multicast or ip.is_reserved or ip.is_loopback or ip.is_link_local or ip.is_unspecified
+    # Not the is_global of the running Python: its sets differ between CPython patch releases.
+    return any(ip in network for network in _PUBLIC_IN_NOT_PUBLIC) or not any(
+        ip in network for network in _NOT_PUBLIC
     )
 
 
@@ -824,8 +842,8 @@ def is_public_address(address: str) -> bool:
     """True only if the address, and any IPv4 address embedded in it, is a public unicast address.
 
     A NAT64, 6to4, Teredo, or IPv4-mapped address can look global while it leads to a private
-    IPv4 address. Both layers must be public. In practice a NAT64, 6to4, or Teredo address is
-    always refused, because the prefix itself is not public unicast space. A system that is
+    IPv4 address. Both layers must be public. A NAT64, 6to4, or Teredo address is always refused,
+    because each prefix is in _NOT_PUBLIC. The rule is the same on every Python. A system that is
     reachable only through such a prefix needs an entry in ``allow_private_hosts``.
     """
     ip = ipaddress.ip_address(address)
