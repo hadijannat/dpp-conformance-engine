@@ -8,7 +8,9 @@ sections 8 and 10. No test contacts a host.
 
 from __future__ import annotations
 
+import gc
 import json
+import math
 import random
 import re
 import time
@@ -157,7 +159,8 @@ ADVERSARIAL = adversarial(SIZE)
 
 # A linear path takes about K times as long on values K times as long, and a quadratic one K * K times.
 # An absolute bound depends on the speed of the runner, and this ratio does not. Measured at n = 16 KiB
-# and K = 4, the scanner gives 4.8 at most and the regular expressions of jsonld.js 15 or more.
+# and K = 4, the scanner gave 4.8 at most. The regular expressions of jsonld.js and pyld gave 14.8 and
+# 16.0 on two values, and ran for more than 40 s on nine: then the job timeout stops the test.
 K = 4
 THRESHOLD = 2 * K
 # Below 5 ms at the larger size, a value is too fast to backtrack, and timer noise sets its ratio.
@@ -175,8 +178,28 @@ def scaling_failures[T](
     Each time is the least of ``repeats`` runs. The two sizes alternate, so that a slow interval of the
     runner slows both. The collector is off, because a collection in one run would add to its time.
     """
-    # A stub: the check flags nothing until the helper is written.
-    return []
+    pairs = list(zip(cases(n), cases(K * n), strict=True))
+    failures: list[str] = []
+    collecting = gc.isenabled()
+    gc.disable()
+    try:
+        for index, pair in enumerate(pairs):
+            times = [math.inf, math.inf]
+            for _ in range(repeats):
+                for at, case in enumerate(pair):
+                    start = time.perf_counter()
+                    run(case)
+                    times[at] = min(times[at], time.perf_counter() - start)
+            small, large = times
+            if large >= FLOOR and large > THRESHOLD * small:
+                ratio = large / small if small else math.inf
+                failures.append(
+                    f"case {index}: {small:.4f} s at {n}, {large:.4f} s at {K * n}, ratio {ratio:.1f}"
+                )
+    finally:
+        if collecting:
+            gc.enable()
+    return failures
 
 
 def _linear(value: str) -> None:
@@ -198,28 +221,32 @@ def test_the_scaling_check_flags_a_quadratic_path_and_passes_a_linear_one() -> N
     assert len(flagged) == len(ADVERSARIAL), flagged
 
 
-# Coverage tracing multiplies the time of a per-character scanner by three to five. The bound measures
-# the engine, so the two timing tests run without the tracer.
+def link_path(value: str) -> None:
+    recorded = redact_response_headers((("Link", value), ("Link", value)))
+    parse_link(value)
+    for _, kept in recorded:
+        parse_link(kept)
+
+
+# Coverage tracing multiplies the time of a per-character scanner by three to five. The ratio does not
+# depend on that factor, but the tracer would make the two tests run long.
 @pytest.mark.no_cover
 def test_the_link_path_is_linear_on_adversarial_values() -> None:
-    start = time.perf_counter()
-    for value in ADVERSARIAL:
-        recorded = redact_response_headers((("Link", value), ("Link", value)))
-        parse_link(value)
-        for _, kept in recorded:
-            parse_link(kept)
-    # The scanner takes milliseconds per value. A backtracking expression took seconds on one.
-    assert time.perf_counter() - start < 5
+    failures = scaling_failures(link_path, adversarial)
+    assert failures == [], failures
 
 
 @pytest.mark.no_cover
 def test_the_link_checks_are_linear_on_adversarial_records(tmp_path: Path) -> None:
-    start = time.perf_counter()
-    lines = tuple(("Link", value) for value in ADVERSARIAL)
-    record = replace(make_record(1), headers=redact_response_headers(lines))
-    _advertised([record])
-    contexts(tmp_path, Linked(BODY, redact_response_headers(lines)))
-    assert time.perf_counter() - start < 5
+    def checks(values: tuple[str, ...]) -> None:
+        lines = tuple(("Link", value) for value in values)
+        record = replace(make_record(1), headers=redact_response_headers(lines))
+        _advertised([record])
+        contexts(tmp_path, Linked(BODY, redact_response_headers(lines)))
+
+    # All values as the lines of one record, as before: each line is read, and then the joined lines.
+    failures = scaling_failures(checks, lambda size: [adversarial(size)])
+    assert failures == [], failures
 
 
 # -- the record-time gate ------------------------------------------------------------------------------
