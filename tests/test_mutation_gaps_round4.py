@@ -819,7 +819,7 @@ def test_the_standalone_verifier_reads_an_opening_and_a_proof_and_writes_indente
     assert {d["name"]: d["outcome"] for d in shown["dimensions"]}["proof"] == "pass"
 
 
-class _RecordingPath(type(Path())):  # type: ignore[misc]  # a Path whose open() records each read size
+class _RecordingPath(type(Path())):  # type: ignore[misc]  # type(Path()) is a dynamic base class
     reads: ClassVar[list[int | None]] = []
 
     def open(self, mode: str = "r", *args: Any, **kwargs: Any) -> Any:
