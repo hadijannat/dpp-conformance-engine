@@ -28,7 +28,6 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, ClassVar
 from unittest import mock
-from urllib.parse import urlparse, urlunparse
 
 import pytest
 from cryptography import x509
@@ -151,9 +150,6 @@ from tests.tsa_support import tsa_ca, tsa_cert
 
 REMOVED_TARGET = "%3Cremoved%3E"
 REMOVED = "<removed>"
-# CPython 3.12.3 drops the empty authority of "mailto:////;" in urlunparse and gives "mailto://;";
-# 3.12.12 keeps it. reads_apart compares that round trip, so its answer follows the running Python.
-DROPS_EMPTY_AUTHORITY = urlunparse(urlparse("mailto:////;")) != "mailto:////;"
 
 
 @pytest.fixture
@@ -328,7 +324,7 @@ def test_a_final_dot_segment_of_the_base_leaves_a_directory() -> None:
         ("http://h/x", "b/;", False),
         ("http://h/x", "b;x", False),
         ("http://h/x", "https:/;", True),
-        ("http://h/x", "mailto:////;", DROPS_EMPTY_AUTHORITY),
+        ("http://h/x", "mailto:////;", False),
         ("http://h/x", "mailto:///;", True),
         ("http://h/x", "https:?", True),  # urlunparse writes "https://" for "https:"
         ("http://h/x", "b?x\ty", True),  # urlparse removes a tab, so the query is not as sent
@@ -362,9 +358,7 @@ def test_the_mark_of_a_redirect_target() -> None:
     assert redirect_mark("", "http://h/x", "a;b;") == ""
     assert redirect_mark("", "http://h/x", "b;") == QUERY_UNKNOWN
     # A location that urlparse reads with an empty authority and a ";" drops nothing: no parameter.
-    # Where urlunparse drops that authority, reads_apart is true and the base is unknown.
-    expected = BASE_UNKNOWN if DROPS_EMPTY_AUTHORITY else QUERY_UNKNOWN
-    assert redirect_mark("", "http://h/x", "mailto:////;") == expected
+    assert redirect_mark("", "http://h/x", "mailto:////;") == QUERY_UNKNOWN
 
 
 # -- transport: TLS alert, Retry-After -----------------------------------------------------------
