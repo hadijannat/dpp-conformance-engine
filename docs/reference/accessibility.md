@@ -30,6 +30,8 @@ no manual review by a person has been done.
 
 Diagrams in the documentation are text blocks, Mermaid diagrams, or SVG images in `docs/images/`.
 Each one has a text alternative directly below it. Each SVG image also has a `title` and a `desc`.
+The README also shows raster illustrations from an image-generation tool, in `docs/images/`.
+Each one has an `alt` text. For each illustration except the cover, the README text directly below it states the same information.
 
 ## Verification status
 

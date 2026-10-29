@@ -1,43 +1,83 @@
 # DPP Conformance Engine (DPP-CE)
 
-[![CI](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/ci.yml?query=branch%3Amain)
-[![CodeQL](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/codeql.yml)
-[![Release](https://img.shields.io/github/v/release/hadijannat/dpp-conformance-engine?include_prereleases&sort=semver)](https://github.com/hadijannat/dpp-conformance-engine/releases)
-
-Audience: people new to Digital Product Passports, system owners, developers, laboratories, authorities, and report recipients.
-Purpose: understand the engine, try a local test, and learn how to verify its report.
-Prerequisites: none for the overview. The demo needs Git, Python 3.12 or later, and [uv](https://docs.astral.sh/uv/).
+<a href="docs/images/dppce-overview.webp"><img src="docs/images/dppce-overview.webp" width="880" alt="Conceptual illustration: an electric vehicle battery with a passport card, a lens over layered test plates, evidence documents with pass, inconclusive, and fail symbols, and a report with a key."></a>
 
 **Test a Digital Product Passport system. Find gaps. Share evidence that others can verify.**
 
+[![CI](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/ci.yml?query=branch%3Amain)
+[![CodeQL](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/hadijannat/dpp-conformance-engine/actions/workflows/codeql.yml)
+[![Release](https://img.shields.io/github/v/release/hadijannat/dpp-conformance-engine?include_prereleases&sort=semver)](https://github.com/hadijannat/dpp-conformance-engine/releases)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](pyproject.toml)
+[![Code license: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSES/Apache-2.0.txt)
+[![Docs license: CC-BY-4.0](https://img.shields.io/badge/docs-CC--BY--4.0-blue)](LICENSES/CC-BY-4.0.txt)
+
+<sub>**Audience:** people new to Digital Product Passports, system owners, developers, laboratories, authorities, and report recipients.<br>
+**Purpose:** understand the engine, try a local test, and verify its report.<br>
+**Prerequisites:** none to read. The demo needs Git, Python 3.12 or later, and [uv](https://docs.astral.sh/uv/).</sub>
+
 DPP-CE is an open-source, vendor-neutral command line tool.
-It tests how a Digital Product Passport (DPP) system behaves against versioned requirements, then writes a **conformance test report**.
-A passport gives access to information about a product, batch, or product model, often through a QR code.
+A Digital Product Passport (DPP) is a digital record about a product. A data carrier on the product, such as a QR code, leads to it.
+DPP-CE tests the software system that serves a passport, not the product. It checks that system against versioned requirements and writes a **conformance test report**.
 
-![Conceptual illustration: a battery passport passes through test instruments to evidence documents with pass, fail, and unknown symbols.](docs/images/dppce-overview.png)
+*The cover is an illustration. DPP-CE tests software, not the battery. The real report appears in the [quick start](#4-read-the-report).*
 
-*A passport system, its checks, and the evidence. This is an illustration; the real report appears below.*
-
+> [!WARNING]
 > **Release candidate 0.1.0rc1. Not for production use.**
 > Shipped rules are synthetic examples or unreviewed drafts. Validation uses synthetic systems.
-> Reports are not certificates and make no statement of legal compliance, product safety, or data truth.
+> Reports are not certificates. They make no statement of legal compliance or product safety, and they do not show that passport data are true.
 > See [limitations and readiness](#limitations-and-readiness).
 
-- **Try it:** [run the local demo](#quick-start).
-- **Understand it:** [see what the engine checks](#what-the-engine-checks) and [what a result means](#what-a-result-means).
-- **Check evidence:** [verify a report you received](docs/how-to/verify-a-report.md).
+**Jump to:** [What a DPP is](#what-is-a-digital-product-passport) · [How it works](#how-it-works) · [Quick start](#quick-start) · [What it checks](#what-the-engine-checks) · [Results](#what-a-result-means) · [Evidence](#evidence-that-others-can-verify) · [Your own system](#test-your-own-system) · [Limitations](#limitations-and-readiness) · [All guides](docs/index.md)
 
-[Your own system](#test-your-own-system) · [Profiles](#profiles) · [Stakeholder expectations](#what-people-expect-and-where-dpp-ce-stands) · [All guides](docs/index.md)
+## What is a Digital Product Passport?
+
+<a href="docs/images/dpp-explained.webp"><img src="docs/images/dpp-explained.webp" width="880" alt="Illustration: a label with a QR-style code on an electric vehicle battery pack leads to one passport card. Three views of the same card show none, part, and all of a restricted section."></a>
+
+*Illustration, not test evidence. Each key stands for a reader role. Blurred rows are fields that the role cannot see, and the colors are not verdicts. Select an image to open it at full size.*
+
+A Digital Product Passport gives access to data about a product, a batch, or a product model. It can hold, for example, information about materials, repair, or recycling.
+A data carrier on the product, such as a QR code, leads to it.
+Different readers can see different parts of the same passport. An access policy decides which part each reader role gets, for example the public or an authority.
+
+From 2027-02-18, the EU Batteries Regulation requires a passport for light means of transport batteries, industrial batteries above 2 kWh, and electric vehicle batteries.
+Under the Ecodesign for Sustainable Products Regulation (ESPR), another product group gets a passport duty only through a delegated act.
+**DPP-CE tests the software system that serves a passport. It does not test the product.**
+[Why this exists](#why-this-exists) gives the legal context.
+
+## How it works
+
+<a href="docs/images/three-steps.webp"><img src="docs/images/three-steps.webp" width="880" alt="Illustration in three panels. 1 Describe: two declaration documents. 2 Test: an instrument contacts one system through one gate. It writes an encrypted recording, with its key kept apart, and a report. 3 Verify: a separate desk with its own keys, the signed report, and an offline verifier."></a>
+
+*Illustration, not test evidence. The check mark means that the report is intact and signed by a trusted issuer. It does not mean that the system passed.*
+
+1. **Describe** the system. The owner declares it in an ICS. The IXIT lists the endpoints and inputs for the tester.
+2. **Test** it. The engine sends the planned requests through one policy-enforcing transport. It encrypts its records, keeps the data key apart, and writes a conformance test report.
+3. **Verify** the report. The issuer signs it separately. A recipient checks the signed report offline with its own trust bundle.
+
+[How a run works](#how-a-run-works) gives each step in detail.
+
+## Who it is for
+
+| You are | Start here |
+| --- | --- |
+| New to DPPs | [What a DPP is](#what-is-a-digital-product-passport), the [scope and legal mapping](docs/explanation/scope-and-legal-mapping.md), and the [glossary](docs/reference/glossary.md) |
+| A system owner or a vendor | [Quick start](#quick-start), then [test your own system](#test-your-own-system) |
+| A developer or an integrator | [Command line](docs/reference/cli.md), [CI formats](docs/how-to/verify-a-report.md#use-a-report-in-ci), and [schemas](docs/reference/schemas.md) |
+| A testing laboratory or an assessor | [Operate in a laboratory](docs/how-to/operate-in-a-laboratory.md), [architecture](docs/explanation/architecture.md), and [method validation](docs/how-to/run-the-method-validation.md) |
+| An authority or a report recipient | [If you received a signed report](#if-you-received-a-signed-report), then [verify a report](docs/how-to/verify-a-report.md) |
+| A decision maker | [What a result means](#what-a-result-means), then [readiness](docs/readiness.md) |
+| A researcher or a contributor | [Cite](#cite), [source audit](docs/research/source-audit.md), and [contribute](#contribute) |
 
 ## Quick start
 
 This demo tests a local reference system with synthetic data. The run contacts only this local system.
 The fixture keys and tokens are published test values, named `TEST-ONLY-...`.
+No terminal at hand? Skip to [what the engine checks](#what-the-engine-checks).
 
 ### 1. Install from source
 
 You need Git, Python 3.12 or later, and [uv](https://docs.astral.sh/uv/).
-The demo needs the source checkout, which includes [unreleased changes](CHANGELOG.md#unreleased).
+The demo uses the fixtures in the source checkout. The checkout also includes [unreleased changes](CHANGELOG.md#unreleased).
 For the published release, use the [release installation guide](docs/how-to/install-and-verify-a-release.md).
 
 ```bash
@@ -48,13 +88,11 @@ uv sync --all-extras
 
 ### 2. Start the reference system
 
-Run every command from the repository root. Keep this terminal open:
+Run every command from the repository root. Keep this terminal open, and keep the port 8765. The fixture IXIT names it.
 
 ```bash
 uv run python -m dppce.infrastructure.reference_server --port 8765
 ```
-
-Keep the port 8765. The fixture IXIT names it.
 
 ### 3. Run the battery example
 
@@ -85,18 +123,29 @@ digest sha256:<64 hexadecimal characters>
 run runs/ev-1
 ```
 
-What the options do:
+This `pass` covers the synthetic rules of the demo only. It makes no statement about a law.
+
+<details>
+<summary>What the options do</summary>
 
 - `--mode illustrative` assesses the synthetic rules only. The result makes no statement about a law.
 - `--at` fixes the evaluation time. The freshness rule of the fixture depends on it.
 - `--allow-private-host` and `--role-secret` are confirmations from the operator. Without them, the engine refuses the host and the secrets.
 - `--secrets` names the directory that holds the token files.
 - `legitimate_interest` and `authority` are role names of the synthetic access policy. They do not encode the access rights of the Regulation.
+- The fixture IXIT names a signed `TEST-ONLY` authorization for the local origin. Role credentials need such an authorization.
 - `--issuer-id` must match the issuer of the signing key in the trust bundle.
 
-If you did not start the reference system, or did not install with `--all-extras`, the run gives `inconclusive` and exit code `5`.
+</details>
+
+<details>
+<summary>If the run gives <code>inconclusive</code> and exit code 5</summary>
+
+You did not start the reference system, or you did not install with `--all-extras`.
 Fix the cause, keep the failed run, and choose a new directory such as `--out ./runs/ev-2`.
 Use that directory in subsequent commands. The existing data key can be reused.
+
+</details>
 
 ### 4. Read the report
 
@@ -104,12 +153,13 @@ Open `runs/ev-1/report.html` in a browser. Start with the summary, then read the
 
 [![HTML report from the synthetic demo: overall pass, requirement counts, and a notice that the report is not a certificate.](docs/images/report-summary.png)](docs/images/report-summary.png)
 
-*Select the image to open it at full size.*
-
 The image shows the top of `report.html` from this demo, captured on 2026-10-29. The data are synthetic, and the mode is `illustrative`.
 The summary names the system, the profile, and the mode. It gives the overall outcome and the requirement counts.
 The one `inconclusive` result is a recommended manual step, so it does not change the overall outcome.
-The exclusions are draft and placeholder requirements that `illustrative` mode leaves out. Counts change when the catalogue changes.
+The exclusions list the draft and placeholder requirements, and their test steps, that `illustrative` mode leaves out. Counts change when the catalogue changes.
+
+<details>
+<summary>What the run writes</summary>
 
 | Output | Contents |
 | --- | --- |
@@ -122,6 +172,9 @@ The exclusions are draft and placeholder requirements that `illustrative` mode l
 
 A run never overwrites an earlier run. For another run, choose a directory that does not exist yet.
 Keep the data key to replay a recording.
+
+</details>
+
 The [first-run tutorial](docs/tutorials/first-run.md#8-see-a-failure) shows how to introduce a fault and read the failure.
 
 <details>
@@ -154,9 +207,10 @@ uv run python -m dppce.verifier ./runs/ev-1/envelope.signed.json \
   --trust fixtures/reference/trust/TEST-ONLY-trust-bundle.json --at 2026-10-14T00:00:00Z
 ```
 
-The verifier prints one outcome for each check, called a dimension, and `"complete": true`.
+The verifier prints one outcome for each verification dimension, and `"complete": true`.
+`complete` is `true` only if every mandatory dimension passed.
 The demo signature names no status entry, states no validity period, and has no timestamp.
-The demo trust bundle requires none of them, so `status`, `validity`, and `timestamp` show `not_checked`.
+The demo trust bundle requires no status entry and no timestamp. So `status`, `validity`, and `timestamp` show `not_checked`.
 A real recipient uses its own trust bundle and gets the issuer key through its own channel, never from the report.
 For your own reports, use the time at which you rely on the report.
 [Verify a report](docs/how-to/verify-a-report.md) explains each dimension.
@@ -165,6 +219,26 @@ For your own reports, use the time at which you rely on the report.
 
 ## What the engine checks
 
+<a href="docs/images/dpp-anatomy.webp"><img src="docs/images/dpp-anatomy.webp" width="880" alt="Illustration of a DPP system with seven numbered markers: 01 Data carrier on the battery label, 02 Identifier, 03 Interface, 04 Data, 05 Access, 06 Integrity, and 07 Lifecycle, with a separate mock registry."></a>
+
+*Illustration, not test evidence. The numbers label parts, not steps. The mock registry stands in for a real registry. The list below names the same seven parts.*
+
+The engine observes seven parts of a DPP system:
+
+1. **Data carrier:** a supplied QR image decodes to one symbol. The engine reads an image file. It does not scan the product.
+2. **Identifier:** the identifier has its declared syntax, resolves to the passport, and is the same in each place.
+3. **Interface:** a response matches the API contract that the system owner pins.
+4. **Data:** a document matches a pinned schema, a context allowlist, and a rule pack.
+5. **Access:** each role gets no field that the declared access policy withholds.
+6. **Integrity:** a signature is valid, its issuer is trusted, and its X.509 certificate is valid.
+7. **Lifecycle:** the version history follows the declared update rule. A record in a mock (stand-in) registry agrees with the passport.
+
+The checks test form, rules, and consistency. They do not show that the data are true.
+The [scope page](docs/explanation/scope-and-legal-mapping.md#1-what-the-engine-tests) gives the same list. Checks are deterministic code.
+
+<details>
+<summary>Show the seven areas as a card diagram</summary>
+
 <a href="docs/images/test-areas.svg">
   <picture>
     <source media="(max-width: 600px)" srcset="docs/images/test-areas-mobile.svg">
@@ -172,24 +246,18 @@ For your own reports, use the time at which you rely on the report.
   </picture>
 </a>
 
-Select the diagram to open it at full size. The engine observes seven parts of a DPP system:
+The cards repeat the list above.
 
-- **Data carrier:** a supplied QR image decodes to one symbol.
-- **Identifier:** the identifier has its declared syntax, resolves, and is the same in each place.
-- **Interface:** a response matches the API contract that the system owner pins.
-- **Data:** a document matches a pinned schema, a context allowlist, and a rule pack.
-- **Access:** a role gets no field that the declared access policy withholds.
-- **Integrity:** a signature is valid, its issuer is trusted, and its X.509 certificate is valid.
-- **Lifecycle:** the version history follows the declared update rule, and a mock registry record agrees with the passport.
+</details>
 
-The [scope page](docs/explanation/scope-and-legal-mapping.md#1-what-the-engine-tests) gives the same list. Checks are deterministic code.
+### Key features
 
-Each requirement links its source provision to test purposes and executable checks.
-You can keep encrypted recordings, replay them offline, and compare the steps that changed between two runs.
-Reports come as HTML and JSON. JUnit XML and SARIF exports support continuous integration (CI) tools.
-A recipient can verify a signed report with the standalone verifier and its own trust bundle.
+- **Traceable:** each interpreted requirement links its source provision to test purposes and executable checks. A placeholder links to its source only.
+- **Deterministic:** versioned data and deterministic code select the checks and calculate the verdicts. No language model takes part at run time.
+- **Replayable:** keep encrypted recordings, replay them offline, and compare the steps that changed between two runs.
+- **Ready for CI:** reports come as HTML and JSON. JUnit XML and SARIF exports support continuous integration (CI) tools.
+- **Independently verifiable:** a recipient verifies a signed report with the standalone verifier and its own trust bundle.
 
-No language model takes part at run time. Versioned data and deterministic code select checks and calculate verdicts.
 Checking a passport signature and verifying a signed test report are separate operations.
 
 ## How a run works
@@ -203,6 +271,7 @@ The engine treats both files as untrusted input.
 The **operator** is the person who runs the engine.
 The operator supplies the **trust bundle**, the explicit list of keys and anchors that the operator trusts.
 The operator also confirms each private host and each secret reference.
+The **issuer** is the party that signs the report, for example a testing laboratory.
 
 <a href="docs/images/run-lifecycle.svg">
   <picture>
@@ -211,9 +280,7 @@ The operator also confirms each private host and each secret reference.
   </picture>
 </a>
 
-*Select the diagram to open it at full size.*
-
-The steps below follow the pipeline. Replay, export, and signing each read the run outputs independently.
+The steps below follow the diagram. Replay, export, and signing each read the run outputs independently.
 
 1. **Plan:** select requirements and test steps from the profile, the packs, the ICS, and the IXIT. It sends no request.
 2. **Run:** send the planned requests through one policy-enforcing transport. Only this step contacts the system under test.
@@ -234,24 +301,23 @@ Replay does not test the system again. Verification says nothing new about the s
   </picture>
 </a>
 
-*Select the diagram to open it at full size.*
-
-The table and the text below describe the diagram.
-
 | Verdict | Meaning |
 | --- | --- |
-| `pass` | At least one assessment path passed, and no valid observation failed. |
+| `pass` | At least one assessment path, a defined way to test the requirement, passed. No valid observation failed. |
 | `fail` | A valid observation or a declaration contradicts a selected requirement. |
 | `inconclusive` | The evidence cannot establish an outcome. For example, applicability is unknown or a step did not run. |
 | `not_applicable` | The requirement does not apply to the declared system. |
 | `error` | An execution error prevented an outcome, and no other path passed or failed. |
 
-The overall outcome uses the applicable mandatory requirements only.
-`fail` comes first, then `error`, then `inconclusive`, then `pass`. An empty run cannot pass.
-A requirement with unknown applicability is `inconclusive`. It stays outside the overall outcome, and the report counts it.
-Recommended and optional requirements do not change the overall outcome.
-Absent information never becomes `not_applicable`. An unavailable check never becomes `pass`.
-The [verdict truth table](docs/reference/verdict-truth-table.md) lists every case.
+How the overall outcome works:
+
+- It uses the applicable mandatory requirements only.
+- The worst result wins, in this order: `fail`, `error`, `inconclusive`, `pass`. An empty run cannot pass.
+- A requirement with unknown applicability is `inconclusive`. It stays outside the overall outcome, and the report counts it.
+- Recommended and optional requirements do not change the overall outcome.
+- Absent information never becomes `not_applicable`. An unavailable check never becomes `pass`.
+
+Read the counts as well as the overall outcome. The [verdict truth table](docs/reference/verdict-truth-table.md) lists every case.
 
 ### Execution modes and claim levels
 
@@ -262,11 +328,15 @@ The **claim level** says what you can cite a result as.
 | --- | --- | --- |
 | `illustrative`, the default | Synthetic rules only | `illustrative` |
 | `exploratory` | Draft interpretations, synthetic rules, and placeholders | `diagnostic`; `illustrative` for a synthetic rule; `none` for a placeholder |
-| `reviewed` | Requirements with a human approval record only | `reviewed` |
+| `reviewed` | Normative requirements with a human approval record only | `reviewed` |
 
 A run lists each requirement that its mode leaves out as an exclusion, with a reason code.
+No shipped requirement has the status `approved`. Only a human reviewer can approve an interpretation.
+Without a signed manual result, no verdict from `eu-battery/draft` is `pass` or `fail`, in any mode.
+See [how to import an approved pack](docs/how-to/import-an-approved-pack.md).
 
-### Packs
+<details>
+<summary>Packs: what each one holds</summary>
 
 A **pack** is a versioned set of requirements with a scope statement.
 
@@ -277,34 +347,6 @@ A **pack** is a versioned set of requirements with a scope statement.
 | `family/oauth` | One synthetic rule: each role gets only what the declared access policy allows | `illustrative`; no normative statement |
 | `eu-battery/draft` | Draft interpretations of Regulation (EU) 2023/1542 that a development agent (an AI coding assistant) wrote | `diagnostic` in `exploratory` mode; excluded in `illustrative` and `reviewed` modes |
 | `en-jtc24/placeholders` | Bibliographic placeholders for eight EN standards of CEN/CLC/JTC 24 "Digital Product Passport - Framework and System" | No clause assessed; optional, so the overall outcome does not change |
-
-No shipped requirement has the status `approved`. Only a human reviewer can approve an interpretation.
-Without a signed manual result, no verdict from `eu-battery/draft` is `pass` or `fail`, in any mode.
-See [how to import an approved pack](docs/how-to/import-an-approved-pack.md).
-
-<details>
-<summary>Trace a requirement from its source to a verdict</summary>
-
-<a href="docs/images/traceability.svg">
-  <picture>
-    <source media="(max-width: 600px)" srcset="docs/images/traceability-mobile.svg">
-    <img src="docs/images/traceability.svg" width="880" alt="Traceability: a requirement cites a source record and holds its interpretation and applicability rule. It names test purposes and checks. Step verdicts roll up to the overall outcome.">
-  </picture>
-</a>
-
-*Select the diagram to open it at full size.*
-
-A requirement cites a source record. It holds its interpretation, its applicability rule, and its review status.
-Its assessment paths name test purposes. Each test purpose names one registered check.
-A step verdict goes into the path verdict, the requirement verdict, and the overall outcome.
-Each observation names its encrypted records. The report holds a salted commitment to each record.
-The results tree binds test and requirement results. A separate records tree binds commitments to recorded content.
-
-Print the chain from source to check for each requirement in the catalogue:
-
-```bash
-uv run dppce catalogue trace
-```
 
 </details>
 
@@ -324,37 +366,65 @@ A replay can reproduce a `fail` or `inconclusive` outcome. It then returns the s
 
 </details>
 
-## Profiles
+## Evidence that others can verify
 
-A **profile** selects packs, test packs, and resources for one product type or one passport technology.
+<a href="docs/images/evidence-chain.webp"><img src="docs/images/evidence-chain.webp" width="880" alt="Illustration in two zones. Tester: one gated connection to the system under test, an encrypted recording with its key apart, a replay loop, two hash trees, and a signed report. Recipient: its own keys and an offline verifier. Only the signed report crosses."></a>
 
-| Profile | For | Packs |
-| --- | --- | --- |
-| `battery/ev` | Electric vehicle battery passports; used in the demo | `illustrative/core`, `eu-battery/draft`, `en-jtc24/placeholders` |
-| `battery/lmt` | Light means of transport battery passports | Same as `battery/ev` |
-| `battery/industrial` | Industrial battery passports | Same as `battery/ev` |
-| `family/web` | Web passports with HTML or JSON representations | `family/illustrative` |
-| `family/gs1-resolver` | GS1 Digital Link identifiers and resolver behavior | `family/illustrative` |
-| `family/aas` | Asset Administration Shell (AAS) files and API responses | `family/illustrative` |
-| `family/credentials` | Signed credentials, issuer keys, and status information | `family/illustrative` |
-| `family/oauth` | Passport views behind OAuth 2.0 client credentials | `family/oauth` |
+*Illustration, not test evidence. Left is the tester's side: the capsule is the encrypted recording, and its key stays apart. The two trees bind the report to its records and results. Right is the recipient's side. Only the signed report crosses. The check mark means that the report is intact, not that the system passed.*
 
-The three battery profiles differ only in their product category.
-Profiles combine supported checks, experimental checks, and manual steps.
-Some capabilities are planned but not built (`interface_only`). A step that needs one stays `inconclusive`.
-The [capability manifest](docs/reference/capabilities.md) gives the state and the limits of each capability.
-A profile does not cover a law or a standard. The scope statement of each pack says what the pack covers.
+A recipient can check a conformance test report offline, without help from the tester. The recipient decides which issuers to trust.
 
-Show the capabilities of your installation:
+- Only the run contacts the system under test. It uses one controlled connection, the policy-enforcing transport.
+- The run encrypts each record. The data key stays with the operator, outside the recording.
+- The report does not hold the records. It holds a salted commitment, a kind of fingerprint, to each record.
+- A records tree binds the commitments. A separate results tree binds the test and requirement results.
+- The issuer signs the JSON report in a separate step, with `dppce sign`.
+- The recipient verifies the signed report offline with the standalone verifier. Its own trust bundle supplies the issuer key, never the report.
+- A replay of the recording reproduces the decision digest. Replay needs the recording and the data key.
+
+Verification shows that the report is intact and that a trusted issuer signed it.
+It does not show that the issuer observed what the report says. It says nothing new about the system under test.
+
+### If you received a signed report
+
+1. Get the public key of the issuer through a channel that you trust. Never take the key from the report.
+2. Add the key to your own trust bundle with `dppce trust-bundle add-key`.
+3. Run the standalone verifier with your trust bundle. Set `--at` to the time at which you rely on the report.
+4. Read the exit code. `0` means that every mandatory dimension passed. `4` means that the verification failed or is incomplete.
+5. Read the report itself: the mode, the claim level, the counts, and the exclusions. In `illustrative` mode, only synthetic rules count.
+6. Treat the accreditation status as a statement of the operator. The engine does not verify it.
+
+[Verify a report](docs/how-to/verify-a-report.md) gives the commands and explains each dimension.
+
+<details>
+<summary>Trace a requirement from its source to a verdict</summary>
+
+<a href="docs/images/traceability.svg">
+  <picture>
+    <source media="(max-width: 600px)" srcset="docs/images/traceability-mobile.svg">
+    <img src="docs/images/traceability.svg" width="880" alt="Traceability: a requirement cites a source record and holds its interpretation and applicability rule. It names test purposes and checks. Step verdicts roll up to the overall outcome.">
+  </picture>
+</a>
+
+A requirement cites a source record. It holds its interpretation, its applicability rule, and its review status.
+Its assessment paths name test purposes. Each test purpose names one registered check.
+A step verdict goes into the path verdict, the requirement verdict, and the overall outcome.
+Each observation names its encrypted records. The report holds a salted commitment to each record.
+The results tree binds test and requirement results. A separate records tree binds commitments to recorded content.
+
+Print the chain from source to check for each requirement in the catalogue:
 
 ```bash
-uv run dppce capabilities
+uv run dppce catalogue trace
 ```
+
+</details>
 
 ## Test your own system
 
-Get the permission of the system owner before any test, also for read-only access.
-Read [test a real system](docs/how-to/test-a-real-system.md) before you connect to one.
+> [!IMPORTANT]
+> Get the permission of the system owner before any test, also for read-only access.
+> Read [test a real system](docs/how-to/test-a-real-system.md) before you connect to one.
 
 **Web, GS1 resolver, AAS, and credential passports.** Draft an ICS and an IXIT for a family profile:
 
@@ -377,10 +447,40 @@ The shipped battery profiles pin a synthetic schema. [Test a real system](docs/h
 Role credentials, TLS client authentication, and access probes need a signed authorization that names the origin.
 The operator supplies the trust bundle and confirms each origin and each secret reference.
 
+## Profiles
+
+A **profile** selects packs, test packs, and resources for one product type or one passport technology.
+A profile does not cover a law or a standard. The scope statement of each pack says what the pack covers.
+
+<details>
+<summary>All eight profiles and their packs</summary>
+
+| Profile | For | Packs |
+| --- | --- | --- |
+| `battery/ev` | Electric vehicle battery passports; used in the demo | `illustrative/core`, `eu-battery/draft`, `en-jtc24/placeholders` |
+| `battery/lmt` | Light means of transport battery passports | Same as `battery/ev` |
+| `battery/industrial` | Industrial battery passports | Same as `battery/ev` |
+| `family/web` | Web passports with HTML or JSON representations | `family/illustrative` |
+| `family/gs1-resolver` | GS1 Digital Link identifiers and resolver behavior | `family/illustrative` |
+| `family/aas` | Asset Administration Shell (AAS) files and API responses | `family/illustrative` |
+| `family/credentials` | Signed credentials, issuer keys, and status information | `family/illustrative` |
+| `family/oauth` | Passport views behind OAuth 2.0 client credentials | `family/oauth` |
+
+The three battery profiles differ only in their product category.
+
+</details>
+
+Profiles combine supported checks, experimental checks, and manual steps.
+Some capabilities are planned but not built (`interface_only`). A step that needs one stays `inconclusive`.
+The [capability manifest](docs/reference/capabilities.md) gives the state and the limits of each capability.
+Show the capabilities of your installation:
+
+```bash
+uv run dppce capabilities
+```
+
 ## Why this exists
 
-A Digital Product Passport gives access to data about a product, a batch, or a product model.
-A data carrier on the product, such as a QR code, leads to it.
 Several EU regulations set up a passport, for example:
 
 - [Regulation (EU) 2023/1542](https://eur-lex.europa.eu/eli/reg/2023/1542/oj/eng), Article 77, requires a **battery passport** from 2027-02-18.
@@ -399,28 +499,15 @@ The Commission [announced the registry and the testing environment](https://sing
 A market surveillance authority decides whether a report helps its own checks. A report never replaces them.
 The [scope and legal mapping](docs/explanation/scope-and-legal-mapping.md) explains how the engine relates to each regulation.
 
-## Who it is for
-
-| You are | You want to | Start here |
-| --- | --- | --- |
-| New to DPPs | Learn what a passport is and what the engine tests | [Why this exists](#why-this-exists), then [scope and legal mapping](docs/explanation/scope-and-legal-mapping.md). Look up project terms in the [glossary](docs/reference/glossary.md). |
-| A system owner or a vendor | Find gaps before others test your system | [Quick start](#quick-start), then [test your own system](#test-your-own-system) |
-| A developer or an integrator | Run checks in CI and read machine-readable results | [Command line](docs/reference/cli.md), [CI formats](docs/how-to/verify-a-report.md#use-a-report-in-ci), [schemas](docs/reference/schemas.md) |
-| A testing laboratory | Run, keep, replay, and verify runs under your own procedures | [Operate in a laboratory](docs/how-to/operate-in-a-laboratory.md), [laboratory records](docs/reference/laboratory-records.md) |
-| An assessor | Inspect the method and its evidence | [Architecture](docs/explanation/architecture.md), [method validation](docs/how-to/run-the-method-validation.md), [readiness](docs/readiness.md) |
-| An authority or a report recipient | Check a report that you received | [Verify a report](docs/how-to/verify-a-report.md) |
-| A decision maker | Know what a result means and does not mean | [What a result means](#what-a-result-means), [readiness](docs/readiness.md) |
-| A researcher | Cite or study the method | [Cite](#cite), [source audit](docs/research/source-audit.md) |
-| A contributor | Change code, checks, or documentation | [Contribute](#contribute) |
-
 ## What people expect, and where DPP-CE stands
 
 Manufacturers need useful gap reports. Developers need repeatable checks. Recipients need to inspect the evidence behind a result.
 Consumers, repairers, and recyclers need usable product information throughout a product's life.
 
 The table synthesizes public sources checked on **2026-10-29**.
-Legal duties apply to passport systems. Expectations for test tools are engineering inferences unless a source states them directly.
+Legal duties apply to passports and to the economic operators that are responsible for them. Expectations for test tools are engineering inferences unless a source states them directly.
 This is not a survey of DPP-CE users. No person has reviewed this agent-written synthesis.
+In short, DPP-CE covers selected technical checks. It does not cover legal readiness, usability, or the EU registry.
 
 | Stakeholders and expected outcome | Source | DPP-CE today |
 | --- | --- | --- |
@@ -435,7 +522,8 @@ The [stakeholder research and coverage assessment](docs/research/stakeholder-exp
 It includes the limits of published surveys and the distinction between legal obligations and demand for testing tools.
 The [capability manifest](docs/reference/capabilities.md) states each check's implementation status.
 
-### Related tools
+<details>
+<summary>Related tools</summary>
 
 These projects address different needs. Each description reflects its own page, checked on 2026-10-29.
 Their inclusion implies no endorsement, compatibility, or integration with DPP-CE.
@@ -445,6 +533,8 @@ Their inclusion implies no endorsement, compatibility, or integration with DPP-C
 - [EU DPP registry](https://single-market-economy.ec.europa.eu/news/digital-product-passport-registry-now-live-2026-07-20_en): the Commission's registry, with a testing environment for economic operators.
 - [CIRPASS-2 DPP validator](https://github.com/CIRPASS-2/dpp-validator): payload checks with JSON Schema or SHACL. Its scope is exploratory and non-normative.
 - [UNTP tests](https://github.com/uncefact/tests-untp): test suites and a reference implementation for the UN Transparency Protocol.
+
+</details>
 
 ## Limitations and readiness
 
@@ -471,9 +561,14 @@ Their inclusion implies no endorsement, compatibility, or integration with DPP-C
 | Check the scope and the sources | [Scope and legal mapping](docs/explanation/scope-and-legal-mapping.md), [source audit](docs/research/source-audit.md) |
 | See open work | [Open questions](docs/open-questions.md), [backlog](docs/backlog.md), [task state](TASKS.md) |
 
+<details>
+<summary>Repository layout</summary>
+
 The engine lives in [`src/dppce/`](src/dppce/).
 [`catalogue/`](catalogue/), [`profiles/`](profiles/), and [`testpacks/`](testpacks/) hold requirements, configurations, and test purposes.
 [`fixtures/`](fixtures/), [`tests/`](tests/), and [`validation/`](validation/) hold examples and verification material.
+
+</details>
 
 ## Get help
 
@@ -511,7 +606,7 @@ The unreleased source also reports the version `0.1.0rc1`, so cite the version a
 
 Code: [Apache-2.0](LICENSES/Apache-2.0.txt).
 Documentation, this README, and its images: [CC-BY-4.0](LICENSES/CC-BY-4.0.txt).
-See the [image provenance](docs/images/README.md), including the generated cover prompt.
+See the [image provenance](docs/images/README.md), including the prompts of the generated illustrations.
 See [NOTICE](NOTICE) and [REUSE.toml](REUSE.toml) for attribution and file-level assignments.
 Third-party materials keep their own licenses.
 This repository contains no text of any EN, ISO, IEC, or DIN standard.

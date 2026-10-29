@@ -10,6 +10,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Stakeholder research dated 2026-10-29, with primary sources, evidence classes, coverage gaps, and proposed priorities.
 - A conceptual README cover, mobile diagram layouts, editable Draw.io sources, and image provenance.
+- Four README illustrations from an image-generation tool: what a passport is, the three steps of
+  the engine, the seven test areas in one passport system, and the evidence path to a recipient.
+  Development agents checked each one against the repository facts. No person has reviewed them.
+  `docs/images/README.md` records the final prompts. The README cover is now a WebP copy of about 70 KB.
 - README for a broad audience. It explains why the engine exists and who it is for.
   It lists the profiles and their packs, the execution modes and claim levels, and the limitations.
   It adds a path to test your own battery passport system.
@@ -117,7 +121,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- The README starts with a local demo and clearer reader routes. Its expectation table now cites sources.
+- README layout for faster reading. The first screen states what the engine is, its status, and
+  where to go. Reference tables are now in expandable sections. Some sentences are more precise:
+  placeholders have no test, and a trust bundle cannot require a validity period.
+  A new section tells a report recipient how to check a signed report.
+- The README puts a local demo near the top and gives clearer reader routes. Its expectation table now cites sources.
   The diagrams use larger labels and separate result and record-commitment trees. Failed-run guidance preserves the evidence.
 - `dppce sign --out`, `authorize`, `trust-bundle add-key`, and `prove` create each new file with
   mode 0600. Change the mode to share a report, a proof, a token, or a bundle.
