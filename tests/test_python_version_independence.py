@@ -222,6 +222,21 @@ def test_a_translated_or_disputed_address_is_never_public(address: str) -> None:
     assert is_public_address(address) is False
 
 
+# fec0::/10 is the deprecated site-local network (RFC 3879). Each stdlib calls it global, but a site
+# can still route it inside its own network, so a public-address rule must not let it through.
+@pytest.mark.parametrize(
+    "address", ["fec0::", "fec0::1", "feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", "::ffff:10.0.0.1"]
+)
+def test_a_site_local_address_is_never_public(address: str) -> None:
+    assert is_public_address(address) is False
+
+
+@pytest.mark.parametrize("address", ["febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff", "ff00::"])
+def test_the_networks_next_to_site_local_stay_refused(address: str) -> None:
+    # fe80::/10 (link-local) ends just before fec0::, and ff00::/8 (multicast) starts just after it.
+    assert is_public_address(address) is False
+
+
 @pytest.mark.parametrize(
     "address",
     ["8.8.8.8", "93.184.216.34", "192.0.0.9", "192.0.0.10", "::ffff:8.8.8.8", "2606:4700:4700::1111"],
