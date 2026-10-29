@@ -819,18 +819,18 @@ def test_the_standalone_verifier_reads_an_opening_and_a_proof_and_writes_indente
     assert {d["name"]: d["outcome"] for d in shown["dimensions"]}["proof"] == "pass"
 
 
-class _RecordingPath(type(Path())):  # type: ignore[misc] - a Path whose open() records each read size
+class _RecordingPath(type(Path())):  # type: ignore[misc]  # a Path whose open() records each read size
     reads: ClassVar[list[int | None]] = []
 
-    def open(self, mode: str = "r", *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
+    def open(self, mode: str = "r", *args: Any, **kwargs: Any) -> Any:
         handle = super().open(mode, *args, **kwargs)
         real = handle.read
 
         def read(size: int | None = -1) -> bytes:
             _RecordingPath.reads.append(size)
-            return real(size)  # type: ignore[no-any-return]
+            return real(size)  # type: ignore[no-any-return]  # handle is Any, so its read() is untyped
 
-        handle.read = read  # type: ignore[method-assign]
+        handle.read = read
         return handle
 
 
