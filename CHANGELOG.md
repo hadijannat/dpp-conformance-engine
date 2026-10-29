@@ -8,6 +8,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- README for a broad audience. It explains why the engine exists and who it is for.
+  It lists the profiles and their packs, the execution modes and claim levels, and the limitations.
+  It adds a path to test your own battery passport system.
+  A table compares what stakeholders expect of a DPP conformance engine with this version.
+  A list names related tools.
+- Four diagrams in `docs/images/`: tested areas, run, verdicts, and traceability. Development agents
+  drew them from a specification that agents checked against the architecture contract. No person
+  has reviewed them. A screenshot shows the top of the HTML report of the demo.
+  Each image has a text alternative directly below it.
 - Each registered check declares a closed parameter model. The capability reference lists the
   parameters of each check.
 - Lint codes `CAT019` to `CAT022`. `CAT019`: the parameters of a test purpose do not fit its check.

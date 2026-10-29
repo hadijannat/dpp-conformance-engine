@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 500" role="img" aria-labelledby="title desc">
+  <rect x="0.5" y="0.5" width="879" height="499" rx="12" fill="#ffffff" stroke="#767676" stroke-width="1" />
+  <title id="title">From a source to a verdict</title>
+  <desc id="desc">Traceability: a requirement cites a source record, holds its interpretation and applicability rule, and names test purposes and checks. Step verdicts roll up to the overall outcome, and observations link to encrypted records.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#767676" />
+    </marker>
+  </defs>
+  <g font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif">
+    <text x="24" y="38" font-size="18" fill="#1a1a1a" font-weight="600">
+      <tspan x="24" dy="0">From a source to a verdict</tspan>
+    </text>
+    <text x="24" y="64" font-size="12" fill="#1a1a1a" font-weight="600">
+      <tspan x="24" dy="0">Catalogue and test packs (versioned data)</tspan>
+    </text>
+    <path d="M 136 140 H 156" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="cited in the requirement's source: id, citation, version" />
+    <text x="146" y="79" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="146" dy="0">cited in the requirement's</tspan>
+      <tspan x="146" dy="14">source: id, citation, version</tspan>
+    </text>
+    <path d="M 392 140 H 412" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="alternatives" />
+    <text x="402" y="79" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="402" dy="0">one or more</tspan>
+      <tspan x="402" dy="14">alternatives</tspan>
+    </text>
+    <path d="M 544 140 H 564" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="names purposes" />
+    <text x="554" y="88" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="554" dy="0">names test purposes</tspan>
+    </text>
+    <path d="M 684 140 H 704" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="one check" />
+    <text x="694" y="88" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="694" dy="0">one check</tspan>
+    </text>
+    <path d="M 624 190 C 624 224 490 233 392 223" fill="none" stroke="#767676" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="lists requirements" />
+    <text x="516" y="241" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="516" dy="0">lists requirements</tspan>
+    </text>
+    <path d="M 790 190 V 284" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="outcome plus verdict_rules" />
+    <text x="698" y="213" font-size="12" fill="#4a4a4a">
+      <tspan x="698" dy="0">outcome +</tspan>
+      <tspan x="698" dy="15">verdict_rules</tspan>
+    </text>
+    <path d="M 790 258 H 28 V 390 H 48" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="what the check saw" />
+    <circle cx="790" cy="258" r="2.2" fill="#0b4f9e" />
+    <text x="594" y="273" font-size="12" fill="#4a4a4a">
+      <tspan x="594" dy="0">what the check saw</tspan>
+    </text>
+    <path d="M 650 306 H 622" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="all steps required" />
+    <text x="636.0" y="341" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="636.0" dy="0">all steps required</tspan>
+    </text>
+    <path d="M 440 306 H 412" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="paths are alternatives" />
+    <text x="426.0" y="341" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="426.0" dy="0">paths are alternatives</tspan>
+    </text>
+    <path d="M 230 306 H 202" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="applicable mandatory only" />
+    <text x="216.0" y="341" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="216.0" dy="0">applicable mandatory only</tspan>
+    </text>
+    <path d="M 320 328 V 354 H 790 V 368" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="results tree: requirement and step verdicts" />
+    <path d="M 790 328 V 354" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-label="results tree: step verdict" />
+    <text x="506" y="344" font-size="12" fill="#4a4a4a">
+      <tspan x="506" dy="0">results tree</tspan>
+    </text>
+    <path d="M 214 390 H 242" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="record_ids" />
+    <text x="228" y="366" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace" text-anchor="middle">
+      <tspan x="228" dy="0">record_ids</tspan>
+    </text>
+    <path d="M 410 390 H 438" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="committed, not disclosed" />
+    <text x="424" y="366" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="424" dy="0">committed, not disclosed</tspan>
+    </text>
+    <path d="M 638 390 H 666" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="records tree" />
+    <text x="652" y="366" font-size="12" fill="#4a4a4a" text-anchor="middle">
+      <tspan x="652" dy="0">records tree</tspan>
+    </text>
+    <rect x="24" y="100" width="112" height="90" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="34" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="34" dy="0">Source record</tspan>
+    </text>
+    <text x="34" y="140" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="34" dy="0">SourceRecord</tspan>
+    </text>
+    <text x="34" y="159" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="34" dy="0">catalogue/</tspan>
+      <tspan x="34" dy="15">sources.yaml</tspan>
+    </text>
+    <rect x="156" y="100" width="236" height="146" rx="6" fill="#f3f3f3" stroke="#767676" />
+    <text x="168" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="168" dy="0">Requirement</tspan>
+    </text>
+    <text x="168" y="136" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="168" dy="0">Requirement</tspan>
+    </text>
+    <text x="168" y="151" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="168" dy="0">catalogue/packs/*.yaml</tspan>
+    </text>
+    <path d="M 168 159 H 380" fill="none" stroke="#767676" />
+    <text x="168" y="176" font-size="12" fill="#1a1a1a" font-weight="600">
+      <tspan x="168" dy="0">Interpretation</tspan>
+    </text>
+    <text x="266" y="176" font-size="12" fill="#4a4a4a">draft-needs-review</text>
+    <text x="168" y="195" font-size="12" fill="#1a1a1a" font-weight="600">
+      <tspan x="168" dy="0">Applicability rule</tspan>
+    </text>
+    <text x="280" y="195" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="280" dy="0">applicability</tspan>
+    </text>
+    <text x="168" y="210" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="168" dy="0">true / false / unknown</tspan>
+    </text>
+    <text x="168" y="229" font-size="12" fill="#1a1a1a" font-weight="600">
+      <tspan x="168" dy="0">Review status</tspan>
+    </text>
+    <text x="266" y="229" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="266" dy="0">review_status</tspan>
+    </text>
+    <text x="168" y="242" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="168" dy="0">approval: human only</tspan>
+    </text>
+    <rect x="412" y="100" width="132" height="90" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="422" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="422" dy="0">Assessment path</tspan>
+    </text>
+    <text x="422" y="140" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="422" dy="0">AssessmentPath</tspan>
+    </text>
+    <text x="422" y="160" font-size="12" fill="#4a4a4a">
+      <tspan x="422" dy="0">all steps</tspan>
+      <tspan x="422" dy="15">required</tspan>
+    </text>
+    <rect x="564" y="100" width="120" height="90" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="574" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="574" dy="0">Test purpose</tspan>
+    </text>
+    <text x="574" y="140" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="574" dy="0">TestPurpose</tspan>
+    </text>
+    <text x="574" y="159" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="574" dy="0">testpacks/</tspan>
+      <tspan x="574" dy="15">*.yaml</tspan>
+    </text>
+    <rect x="704" y="100" width="128" height="90" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="714" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="714" dy="0">Registered</tspan>
+      <tspan x="714" dy="16">check</tspan>
+    </text>
+    <text x="714" y="156" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="714" dy="0">stimulus.check</tspan>
+    </text>
+    <text x="714" y="176" font-size="12" fill="#4a4a4a">
+      <tspan x="714" dy="0">allowlisted</tspan>
+    </text>
+    <text x="48" y="276" font-size="12" fill="#1a1a1a" font-weight="600">
+      <tspan x="48" dy="0">Results in the report</tspan>
+    </text>
+    <rect x="48" y="284" width="154" height="44" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="58" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="58" dy="0">Overall outcome</tspan>
+    </text>
+    <text x="58" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="58" dy="0">overall</tspan>
+    </text>
+    <rect x="230" y="284" width="182" height="44" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="240" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="240" dy="0">Requirement verdict</tspan>
+    </text>
+    <text x="240" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="240" dy="0">RequirementResult</tspan>
+    </text>
+    <rect x="440" y="284" width="182" height="44" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="450" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="450" dy="0">Path verdict</tspan>
+    </text>
+    <text x="450" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="450" dy="0">PathResult</tspan>
+    </text>
+    <rect x="650" y="284" width="182" height="44" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="660" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="660" dy="0">Step verdict</tspan>
+    </text>
+    <text x="660" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="660" dy="0">TestResult</tspan>
+    </text>
+    <text x="48" y="363" font-size="12" fill="#4a4a4a" font-weight="600">Evidence</text>
+    <rect x="48" y="368" width="166" height="50" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="58" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="58" dy="0">Observation</tspan>
+    </text>
+    <text x="58" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="58" dy="0">Observation</tspan>
+      <tspan x="58" dy="13">minimized summary</tspan>
+    </text>
+    <rect x="242" y="368" width="168" height="50" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="252" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="252" dy="0">Encrypted record</tspan>
+    </text>
+    <text x="252" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="252" dy="0">records/&lt;id&gt;.enc</tspan>
+    </text>
+    <rect x="438" y="368" width="200" height="50" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="448" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="448" dy="0">Record commitment</tspan>
+    </text>
+    <text x="448" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="448" dy="0">RecordCommitment</tspan>
+      <tspan x="448" dy="13">salted HMAC</tspan>
+    </text>
+    <rect x="666" y="368" width="166" height="50" rx="6" fill="#ffffff" stroke="#767676" />
+    <text x="676" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
+      <tspan x="676" dy="0">Merkle roots</tspan>
+    </text>
+    <text x="676" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
+      <tspan x="676" dy="0">results_root</tspan>
+      <tspan x="676" dy="13">records_root</tspan>
+    </text>
+    <rect x="24" y="430" width="832" height="46" rx="6" fill="#f3f3f3" stroke="#767676" />
+    <text x="36" y="450" font-size="12" fill="#1a1a1a" font-weight="600">Synthetic example row printed by dppce catalogue trace</text>
+    <text x="36" y="465" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">dppce-illustrative - -&gt; ILL-ID-001 [draft-needs-review] -&gt; TP-ID-001 -&gt; identifier.parse</text>
+  </g>
+</svg>

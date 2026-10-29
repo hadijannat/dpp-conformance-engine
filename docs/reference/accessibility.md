@@ -28,8 +28,8 @@ no manual review by a person has been done.
 
 ## Diagrams
 
-Diagrams in the documentation are text blocks or Mermaid diagrams. Each one has a text
-alternative directly below it.
+Diagrams in the documentation are text blocks, Mermaid diagrams, or SVG images in `docs/images/`.
+Each one has a text alternative directly below it. Each SVG image also has a `title` and a `desc`.
 
 ## Verification status
 

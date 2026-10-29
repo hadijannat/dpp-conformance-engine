@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 400" role="img" aria-labelledby="title desc">
+  <rect x="0.5" y="0.5" width="879" height="399" rx="12" fill="#ffffff" stroke="#767676" stroke-width="1" />
+  <title id="title">Five verdicts and how they combine</title>
+  <desc id="desc">Five verdicts with symbols: pass, fail, inconclusive, not applicable, and error. The overall outcome uses applicable mandatory requirements only: fail, then error, then inconclusive, then pass.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#767676" />
+    </marker>
+  </defs>
+  <g font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif">
+    <text x="24" y="38" font-size="18" fill="#1a1a1a" font-weight="600">Five verdicts and how they combine</text>
+    <text x="24" y="55" font-size="12" fill="#4a4a4a" font-weight="600">Five verdicts</text>
+    <rect x="24" y="64" width="160" height="82" rx="6" fill="#f3f3f3" stroke="#767676" stroke-width="1" />
+    <text x="34" y="86.0" font-size="14" fill="#1a1a1a" font-weight="600">✓ pass</text>
+    <text x="34" y="106.0" font-size="12" fill="#4a4a4a">
+      <tspan x="34" dy="0">every required step</tspan>
+      <tspan x="34" dy="14">of a path passed</tspan>
+    </text>
+    <rect x="192" y="64" width="160" height="82" rx="6" fill="#f3f3f3" stroke="#767676" stroke-width="1" />
+    <text x="202" y="86.0" font-size="14" fill="#1a1a1a" font-weight="600">✗ fail</text>
+    <text x="202" y="106.0" font-size="12" fill="#4a4a4a">
+      <tspan x="202" dy="0">valid failing</tspan>
+      <tspan x="202" dy="14">observation, or declared</tspan>
+      <tspan x="202" dy="14">not implemented</tspan>
+    </text>
+    <rect x="360" y="64" width="160" height="82" rx="6" fill="#f3f3f3" stroke="#767676" stroke-width="1" />
+    <text x="370" y="86.0" font-size="14" fill="#1a1a1a" font-weight="600">? inconclusive</text>
+    <text x="370" y="106.0" font-size="12" fill="#4a4a4a">
+      <tspan x="370" dy="0">evidence missing,</tspan>
+      <tspan x="370" dy="14">unknown, or not run</tspan>
+    </text>
+    <rect x="528" y="64" width="160" height="82" rx="6" fill="#f3f3f3" stroke="#767676" stroke-width="1" />
+    <text x="538" y="86.0" font-size="14" fill="#1a1a1a" font-weight="600">- not applicable</text>
+    <text x="538" y="106.0" font-size="12" fill="#4a4a4a">
+      <tspan x="538" dy="0">applicability</tspan>
+      <tspan x="538" dy="14">established as false</tspan>
+    </text>
+    <rect x="696" y="64" width="160" height="82" rx="6" fill="#f3f3f3" stroke="#767676" stroke-width="1" />
+    <text x="706" y="86.0" font-size="14" fill="#1a1a1a" font-weight="600">! error</text>
+    <text x="706" y="106.0" font-size="12" fill="#4a4a4a">
+      <tspan x="706" dy="0">execution error</tspan>
+      <tspan x="706" dy="14">prevented an outcome</tspan>
+    </text>
+    <text x="24" y="166" font-size="12" fill="#4a4a4a" font-weight="600">How results combine</text>
+    <path d="M 192 210 H 220" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="combines into" />
+    <text x="206.0" y="174" font-size="12" fill="#4a4a4a" text-anchor="middle">into</text>
+    <path d="M 388 210 H 416" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="combines into" />
+    <text x="402.0" y="174" font-size="12" fill="#4a4a4a" text-anchor="middle">into</text>
+    <path d="M 584 210 H 612" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="combines into" />
+    <text x="598.0" y="174" font-size="12" fill="#4a4a4a" text-anchor="middle">into</text>
+    <rect x="24" y="178" width="168" height="64" rx="6" fill="#ffffff" stroke="#767676" stroke-width="1" />
+    <text x="34" y="200.0" font-size="14" fill="#1a1a1a" font-weight="600">Step verdicts</text>
+    <text x="34" y="217.0" font-size="12" fill="#4a4a4a">
+      <tspan x="34" dy="0">only a completed check</tspan>
+      <tspan x="34" dy="13">passes or fails</tspan>
+    </text>
+    <rect x="220" y="178" width="168" height="64" rx="6" fill="#ffffff" stroke="#767676" stroke-width="1" />
+    <text x="230" y="200.0" font-size="14" fill="#1a1a1a" font-weight="600">Path verdict</text>
+    <text x="230" y="217.0" font-size="12" fill="#4a4a4a">every step is required</text>
+    <rect x="416" y="178" width="168" height="64" rx="6" fill="#ffffff" stroke="#767676" stroke-width="1" />
+    <text x="426" y="200.0" font-size="14" fill="#1a1a1a" font-weight="600">Requirement verdict</text>
+    <text x="426" y="217.0" font-size="12" fill="#4a4a4a">
+      <tspan x="426" dy="0">paths are alternatives;</tspan>
+      <tspan x="426" dy="13">any fail fails</tspan>
+    </text>
+    <rect x="612" y="178" width="244" height="64" rx="6" fill="#ffffff" stroke="#767676" stroke-width="1" />
+    <text x="622" y="200.0" font-size="14" fill="#1a1a1a" font-weight="600">Overall outcome</text>
+    <text x="622" y="217.0" font-size="12" fill="#4a4a4a">
+      <tspan x="622" dy="0">applicable mandatory</tspan>
+      <tspan x="622" dy="13">requirements only</tspan>
+    </text>
+    <path d="M 620 250 L 620 373" fill="none" stroke="#767676" stroke-width="1" />
+    <text x="632" y="260" font-size="12" fill="#1a1a1a">
+      <tspan x="632" dy="0">1. No applicable mandatory</tspan>
+      <tspan x="648" dy="16">requirement → ? inconclusive</tspan>
+      <tspan x="648" dy="16">(an empty run cannot pass)</tspan>
+    </text>
+    <text x="632" y="308" font-size="12" fill="#1a1a1a">2. Any ✗ fail → ✗ fail</text>
+    <text x="632" y="324" font-size="12" fill="#1a1a1a">3. Else any ! error → ! error</text>
+    <text x="632" y="340" font-size="12" fill="#1a1a1a">
+      <tspan x="632" dy="0">4. Else any ? inconclusive</tspan>
+      <tspan x="648" dy="16">→ ? inconclusive</tspan>
+    </text>
+    <text x="632" y="372" font-size="12" fill="#1a1a1a">5. Else → ✓ pass</text>
+    <text x="24" y="373" font-size="12" fill="#4a4a4a">Recommended and optional requirements are reported but do not change the overall outcome.</text>
+  </g>
+</svg>
