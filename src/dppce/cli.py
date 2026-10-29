@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final, get_args
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlsplit
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -525,7 +525,8 @@ def _token_url(ixit: IXIT, role: str, key: str) -> str:
     if not same or override is None:
         return url
     parts = urlsplit(url)
-    return override.rstrip("/") + urlunsplit(("", "", parts.path, parts.query, ""))
+    # Not urlunsplit: without an authority it writes the path "//t" as "////t", another path.
+    return override.rstrip("/") + parts.path + (f"?{parts.query}" if parts.query else "")
 
 
 def _credentials(args: argparse.Namespace, ixit: IXIT, origin: str) -> _RoleSecrets:

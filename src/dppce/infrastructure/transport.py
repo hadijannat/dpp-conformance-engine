@@ -22,7 +22,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final, Protocol
-from urllib.parse import quote, urljoin, urlsplit
+from urllib.parse import quote, urlsplit
 
 from dppce.evidence.canonical import CanonicalizationError, parse_strict
 from dppce.evidence.recording import REDIRECT_STATUSES, new_salt
@@ -39,6 +39,7 @@ from dppce.infrastructure.redaction import (
     redact_response_headers,
     redact_url,
     redirect_mark,
+    url_join,
 )
 from dppce.models import Authorization, NetworkPolicy, Scope
 
@@ -731,7 +732,7 @@ class PolicyTransport:
                 # from moves_host. A consumer can then go to another host, so it never reads the answer
                 # that urljoin leads to. The rule of _target, on the raw Location.
                 moved = any(c <= " " or c == "\x7f" for c in location) or moves_host(location)
-                next_url = urljoin(f"{target.origin}{target.path}", location)
+                next_url = url_join(f"{target.origin}{target.path}", location)
                 # A consumer that reads this Location apart can join a later Location to another base.
                 mark = (
                     BASE_UNKNOWN

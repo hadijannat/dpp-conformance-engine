@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 from typing import Any, Final, Literal
-from urllib.parse import unquote, urlsplit, urlunsplit
+from urllib.parse import unquote, urlsplit
 
 from pydantic import Field, ValidationError, field_validator
 
@@ -33,7 +33,7 @@ from dppce.adapters.common import (
 from dppce.adapters.identifier import gtin_check_digit_ok
 from dppce.evidence.recording import REDIRECT_STATUSES
 from dppce.infrastructure.interfaces import Record
-from dppce.infrastructure.redaction import REMOVED, hides_base_path, parse_link, resolutions
+from dppce.infrastructure.redaction import REMOVED, hides_base_path, parse_link, resolutions, url_unsplit
 from dppce.infrastructure.transport import origin_of
 from dppce.models import CheckOutcome, ExecutionStatus, Model, Observation
 from dppce.testdefs.registry import CheckContext, NoParams, register
@@ -90,7 +90,7 @@ def _carrier(ctx: CheckContext) -> tuple[str, tuple[str, ...]] | CheckOutcome:
 def _with_link_type(url: str) -> str:
     parts = urlsplit(url)
     query = f"{parts.query}&linkType=linkset" if parts.query else "linkType=linkset"
-    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
+    return url_unsplit((parts.scheme, parts.netloc, parts.path, query, ""))
 
 
 def _summary(record: Record, request: str) -> dict[str, Any]:
@@ -331,7 +331,7 @@ def _invalid_variant(carrier: str) -> str | None:
         return None
     gtin = match[1][:-1] + str((int(match[1][-1]) + 1) % 10)
     path = parts.path[: match.start(1)] + gtin + parts.path[match.end(1) :]
-    return urlunsplit((parts.scheme, parts.netloc, path, parts.query, ""))
+    return url_unsplit((parts.scheme, parts.netloc, path, parts.query, ""))
 
 
 RedirectStatus = Literal[301, 302, 303, 307, 308]

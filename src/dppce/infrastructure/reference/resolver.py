@@ -26,8 +26,9 @@ one of these flags stays the same.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
-from urllib.parse import parse_qs, urljoin
+from urllib.parse import parse_qs
 
+from dppce.infrastructure.redaction import url_join
 from dppce.infrastructure.reference.base import PUBLIC_ORIGIN, RESOLVER_PATH, Reply, Request, json_reply
 
 if TYPE_CHECKING:
@@ -186,5 +187,5 @@ def respond(system: ReferenceSystem, request: Request) -> Reply | None:
         extra = {"Link": f'<{request.path}?{ADVERTISED_QUERY}>; rel="linkset"'}
         if request.query == ADVERTISED_QUERY:
             faults = faults | {"resolver_linkset_anchor_mismatch"}
-    body = linkset(anchor, urljoin(anchor, headers["Location"]), faults)
+    body = linkset(anchor, url_join(anchor, headers["Location"]), faults)
     return 200, LINKSET, body, {"Vary": "Accept", **extra}

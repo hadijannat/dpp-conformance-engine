@@ -11,7 +11,7 @@ import warnings
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from decimal import Decimal
 from typing import Any, Final
-from urllib.parse import quote, unquote, urlsplit, urlunsplit
+from urllib.parse import quote, unquote, urlsplit
 
 import jsonschema
 import referencing.jsonschema
@@ -88,9 +88,13 @@ def effective_url(ctx: CheckContext, url: str) -> tuple[str, tuple[str, ...]]:
         return url, ()
     if not same:
         return url, ()
-    return override.rstrip("/") + urlunsplit(("", "", parts.path, parts.query, parts.fragment)), (
-        "origin_override",
+    # Not urlunsplit: without an authority it writes the path "//t" as "////t", another path.
+    tail = (
+        parts.path
+        + (f"?{parts.query}" if parts.query else "")
+        + (f"#{parts.fragment}" if parts.fragment else "")
     )
+    return override.rstrip("/") + tail, ("origin_override",)
 
 
 def _accept_of(record: Record) -> str:

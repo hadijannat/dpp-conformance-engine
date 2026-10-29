@@ -13,7 +13,7 @@ from collections.abc import Callable
 from functools import lru_cache
 from itertools import accumulate
 from typing import Final, NamedTuple
-from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlparse, urlsplit, urlunparse, urlunsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlsplit
 
 REMOVED: Final = "<removed>"
 
@@ -119,6 +119,81 @@ _SENSITIVE_PARAMETER: Final = re.compile(
 )
 # IPv6 prefixes that carry an IPv4 address. The embedded address decides where a packet goes.
 _NAT64: Final = (ipaddress.ip_network("64:ff9b::/96"), ipaddress.ip_network("64:ff9b:1::/48"))
+# The schemes of uses_netloc and uses_relative in urllib.parse of CPython 3.12 to 3.14.
+_USES_NETLOC: Final = frozenset(
+    {
+        "", "ftp", "http", "gopher", "nntp", "telnet", "imap", "wais", "file", "mms", "https", "shttp",
+        "snews", "prospero", "rtsp", "rtsps", "rtspu", "rsync", "svn", "svn+ssh", "sftp", "nfs", "git",
+        "git+ssh", "ws", "wss", "itms-services",
+    }
+)  # fmt: skip
+_USES_RELATIVE: Final = frozenset(
+    {
+        "", "ftp", "http", "gopher", "nntp", "imap", "wais", "file", "https", "shttp", "mms",
+        "prospero", "rtsp", "rtsps", "rtspu", "sftp", "svn", "svn+ssh", "ws", "wss",
+    }
+)  # fmt: skip
+
+
+def url_unsplit(parts: tuple[str, str, str, str, str]) -> str:
+    """urlunsplit as CPython 3.12.12 and 3.13 write it, on every Python.
+
+    CPython 3.12.3 writes an empty authority for ("http", "", "b") and drops one for
+    ("mailto", "", "//;"), so a record would depend on the Python that wrote it.
+    """
+    scheme, netloc, path, query, fragment = parts
+    if netloc:
+        path = f"//{netloc}{path if not path or path.startswith('/') else '/' + path}"
+    elif path.startswith("//") or (scheme and scheme in _USES_NETLOC and (not path or path.startswith("/"))):
+        path = "//" + path
+    url = f"{scheme}:{path}" if scheme else path
+    return url + (f"?{query}" if query else "") + (f"#{fragment}" if fragment else "")
+
+
+def url_unparse(parts: tuple[str, str, str, str, str, str]) -> str:
+    """urlunparse as CPython 3.12.12 and 3.13 write it: the parameter joins the path first."""
+    scheme, netloc, path, params, query, fragment = parts
+    return url_unsplit((scheme, netloc, f"{path};{params}" if params else path, query, fragment))
+
+
+def url_join(base: str, url: str) -> str:
+    """urljoin as CPython 3.12.12 and 3.13 resolve, on every Python.
+
+    The readers of redirect_mark and reads_apart are written against it: it drops an empty ";"
+    parameter, "?" query, and "#" fragment, and reads "..;x" as "..". CPython 3.14 keeps them, and
+    3.12.3 writes an empty authority. urlparse gives the same parts on each version, except that
+    3.12.3 accepts more bracketed hosts.
+    """
+    if not base or not url:
+        return url or base
+    bscheme, bnetloc, bpath, bparams, bquery, _ = urlparse(base)
+    scheme, netloc, path, params, query, fragment = urlparse(url, bscheme)
+    if scheme != bscheme or scheme not in _USES_RELATIVE:
+        return url
+    if scheme in _USES_NETLOC:
+        if netloc:
+            return url_unparse((scheme, netloc, path, params, query, fragment))
+        netloc = bnetloc
+    if not path and not params:
+        return url_unparse((scheme, netloc, bpath, bparams, query or bquery, fragment))
+    directory = bpath.split("/")
+    # The last segment of the base is a directory only if it is empty.
+    directory = directory[:-1] if directory[-1] else directory
+    if path.startswith("/"):
+        segments = path.split("/")
+    else:
+        segments = directory + path.split("/")
+        segments[1:-1] = [s for s in segments[1:-1] if s]
+    resolved: list[str] = []
+    for segment in segments:
+        if segment == "..":
+            if resolved:
+                resolved.pop()
+        elif segment != ".":
+            resolved.append(segment)
+    if segments[-1] in (".", ".."):
+        resolved.append("")
+    return url_unparse((scheme, netloc, "/".join(resolved) or "/", params, query, fragment))
 
 
 def redact_url(url: str) -> str:
@@ -143,7 +218,7 @@ def redact_url(url: str) -> str:
         if sensitive
         else parts.query
     )
-    return urlunsplit((parts.scheme, netloc, parts.path, query, ""))
+    return url_unsplit((parts.scheme, netloc, parts.path, query, ""))
 
 
 class Link(NamedTuple):
@@ -249,7 +324,7 @@ def _changed_by_urljoin(target: str, scheme: str, netloc: str) -> bool:
     a leading run of "." and ".." segments is kept, in a relative target. A scheme in upper case is
     not a change: every reader writes it in lower case.
     """
-    if urlunparse(urlparse(target)) != scheme + target[len(scheme) :]:
+    if url_unparse(urlparse(target)) != scheme + target[len(scheme) :]:
         return True
     segments = urlsplit(target).path.split("/")
     dots = [s.split(";")[0].lower().replace("%2e", ".") in (".", "..") for s in segments]
@@ -279,7 +354,7 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
     if not (relative.scheme or relative.netloc or target.startswith("/")):
         readings = _odd_base(base)
     if readings is None:
-        return (urljoin(base, target),)
+        return (url_join(base, target),)
     scheme, netloc, base_query, directories = readings
     out: list[str] = []
     for dotted, directory in zip((False, True), directories, strict=True):
@@ -288,7 +363,7 @@ def resolutions(base: str, target: str) -> tuple[str, ...]:
             path = directory.merge(relative.path, dotted=dotted)
         elif not query:
             query = base_query
-        out.append(urlunsplit((scheme, netloc, path, query, relative.fragment)))
+        out.append(url_unsplit((scheme, netloc, path, query, relative.fragment)))
     return tuple(dict.fromkeys(out))
 
 
@@ -393,7 +468,7 @@ def reads_apart(base: str, location: str) -> bool:
     """
     trimmed = _without_empty_ends(location)[0]
     parsed = urlparse(trimmed)
-    if urlunparse(parsed) != parsed.scheme + trimmed[len(parsed.scheme) :]:
+    if url_unparse(parsed) != parsed.scheme + trimmed[len(parsed.scheme) :]:
         return True
     path = urlsplit(location).path
     segments = path.split("/")
