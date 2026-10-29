@@ -12,6 +12,7 @@ import json
 import random
 import re
 import time
+from collections.abc import Callable, Sequence
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -118,34 +119,83 @@ def test_the_two_space_models_differ_and_each_is_checked() -> None:
     assert not parse_link(value).complete
 
 
-# Values of 64 KiB in each shape that made a backtracking expression slow, and their mixes.
+# Values of 64 KiB in each shape that made a backtracking expression slow, and their mixes. Each shape is
+# a function of its size, so that a test can compare the time at two sizes.
 SIZE = 64 * 1024
-ADVERSARIAL = (
-    "<https://a.test/>, " + " " * SIZE + "x",
-    "<x>; " + "a=" * (SIZE // 2) + '"',
-    "<x>; " + "=" * SIZE,
-    "<" * SIZE,
-    "<x>; t=" + "<" * SIZE,
-    '"' * SIZE,
-    "<x>; " + '="' * (SIZE // 2),
-    "<x>; a=" + '"' * SIZE,
-    "<x>" + ";" * SIZE,
-    "<x>; a=" + ";" * SIZE,
-    "," * SIZE,
-    "<x>," * (SIZE // 4),
-    '<x>; a="b"' + " " * SIZE + "c",
-    "<x>; " + 'a="b" ' * (SIZE // 6),
-    "<x>; " + "a=b \xa0\x85" * (SIZE // 6),
-    "<x>; a=" + "\xa0" * SIZE + "b",
-    "<" + "a" * SIZE + ">",
-    "<" + "%" * SIZE + ">",
-    "<https://" + "@" * SIZE + ">",
-    "<" + ":" * SIZE + ">",
-    "<https://x.test/?" + "token=a&" * (SIZE // 8) + ">",
-    "<x>; title=" + '\\"' * (SIZE // 2),
-    '<x>; title="' + "\\" * SIZE,
-    f"{REMOVED}," * (SIZE // 10),
-)
+
+
+def adversarial(size: int) -> tuple[str, ...]:
+    return (
+        "<https://a.test/>, " + " " * size + "x",
+        "<x>; " + "a=" * (size // 2) + '"',
+        "<x>; " + "=" * size,
+        "<" * size,
+        "<x>; t=" + "<" * size,
+        '"' * size,
+        "<x>; " + '="' * (size // 2),
+        "<x>; a=" + '"' * size,
+        "<x>" + ";" * size,
+        "<x>; a=" + ";" * size,
+        "," * size,
+        "<x>," * (size // 4),
+        '<x>; a="b"' + " " * size + "c",
+        "<x>; " + 'a="b" ' * (size // 6),
+        "<x>; " + "a=b \xa0\x85" * (size // 6),
+        "<x>; a=" + "\xa0" * size + "b",
+        "<" + "a" * size + ">",
+        "<" + "%" * size + ">",
+        "<https://" + "@" * size + ">",
+        "<" + ":" * size + ">",
+        "<https://x.test/?" + "token=a&" * (size // 8) + ">",
+        "<x>; title=" + '\\"' * (size // 2),
+        '<x>; title="' + "\\" * size,
+        f"{REMOVED}," * (size // 10),
+    )
+
+
+ADVERSARIAL = adversarial(SIZE)
+
+# A linear path takes about K times as long on values K times as long, and a quadratic one K * K times.
+# An absolute bound depends on the speed of the runner, and this ratio does not. Measured at n = 16 KiB
+# and K = 4, the scanner gives 4.8 at most and the regular expressions of jsonld.js 15 or more.
+K = 4
+THRESHOLD = 2 * K
+# Below 5 ms at the larger size, a value is too fast to backtrack, and timer noise sets its ratio.
+FLOOR = 0.005
+
+
+def scaling_failures[T](
+    run: Callable[[T], object],
+    cases: Callable[[int], Sequence[T]],
+    n: int = SIZE // K,
+    repeats: int = 3,
+) -> list[str]:
+    """Each case whose time at K * n exceeds THRESHOLD times its time at n, with the two times.
+
+    Each time is the least of ``repeats`` runs. The two sizes alternate, so that a slow interval of the
+    runner slows both. The collector is off, because a collection in one run would add to its time.
+    """
+    # A stub: the check flags nothing until the helper is written.
+    return []
+
+
+def _linear(value: str) -> None:
+    # Four passes keep the time above FLOOR, so that the ratio decides, not the floor.
+    for _ in range(4):
+        for at in range(len(value)):
+            value.startswith("<", at)
+
+
+def _quadratic(value: str) -> None:
+    # A step of 16 keeps the time short. The work still grows with the square of the length.
+    for at in range(0, len(value), 16):
+        value.count("x", at)
+
+
+def test_the_scaling_check_flags_a_quadratic_path_and_passes_a_linear_one() -> None:
+    assert scaling_failures(_linear, adversarial) == []
+    flagged = scaling_failures(_quadratic, adversarial)
+    assert len(flagged) == len(ADVERSARIAL), flagged
 
 
 # Coverage tracing multiplies the time of a per-character scanner by three to five. The bound measures
