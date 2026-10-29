@@ -4,11 +4,11 @@
   "legal_as_of": "2026-10-13",
   "session": {
     "started_utc": "2026-10-13T20:02:58Z",
-    "cycle": 68,
+    "cycle": 69,
     "max_cycles": 80,
     "cycle_rule": "One cycle is one research pass or one implement-and-check iteration. Tool and model discovery probes are logged in cycle_log but are not counted.",
     "note": "The session was interrupted by an expired credential and by a usage limit. It was resumed each time. The cycle count continues. Cycles 24 to 33 are a reconstruction: no cycle log was kept during that work. An agent wrote them in 4a39cac, after the work, from the git history of main and of ci/scans-and-release-gates, with one cycle per work package.",
-    "state_at_end": "2026-10-29: waves 1 to 10 of program P2 are on main (latest 5824386, followed on main by the test timing fix cd20215 and the DCO sign-off commit 981b60c), and P2-19 of wave 11 is on main (merge 4b8907a). P2-27 of wave 11 is on the integration branch worktree-wf_e94bb4bf-67e-7, is not on main, and waits for a decision of the owner.",
+    "state_at_end": "2026-10-29: waves 1 to 10 of program P2 are on main (latest 5824386, followed on main by the test timing fix cd20215 and the DCO sign-off commit 981b60c), and P2-19 of wave 11 is on main (merge 4b8907a). The version-independent URL and address rules of cycle 69 are on main (0cba012). P2-27 of wave 11 is on the integration branch worktree-wf_e94bb4bf-67e-7, is not on main, and waits for a decision of the owner.",
     "max_cycles_note": "Raised from 20 to 80 on 2026-10-18 by the owner, for the T1 program of docs/research/gap-assessment-2026-10-15.md, section 6. The owner chose \"Raise cycles to 80, keep 3 writers\". max_parallel_tasks stays 3 for tasks that write files."
   },
   "limits": {
@@ -757,6 +757,12 @@
       "kind": "implement-and-check",
       "milestone": "M8",
       "summary": "P2-19 (d1ff9a1 to a9ee280) added tests/test_mutation_gaps_round4.py, which kills transport, redaction, verifier, evidence, authorization, timestamp, and credential form survivors without a change under src/, and validation/records/mutation-2026-10-28.md, whose baseline at 5824386 with four deselected tests printed 7925 mutants, 6839 killed, 1060 survived, and 26 timeouts, and which leaves 75 survivors and the 26 timeouts not classified. On 2026-10-29 the owner chose to land P2-19 alone on main (merge 4b8907a), because P2-27 missed its round 3 landing bar and stays on the integration branch."
+    },
+    {
+      "cycle": 69,
+      "kind": "implement-and-check",
+      "milestone": "M8",
+      "summary": "After CI on 4b692f2 failed on the CPython 3.12.3 of ubuntu-24.04, 3dd4330 fixed two round 4 tests, and the branch pyver-indep (1294286 tests first, then f0ac398 to 0cba012) made the engine join URL parts with the rules of CPython 3.12.12 and 3.13 instead of the stdlib of the running Python, and judge a public address with a fixed table: an address is public only if each of CPython 3.12.3, 3.12.12, 3.12.13, 3.13.12, and 3.14.4 calls it public, and fec0::/10 and 192.88.99.0/24 are refused; a redirect to http:b no longer gets an unknown-base mark on 3.12.3, and the origin override keeps a path that starts with //. A urlsplit bracket check that only CPython 3.12.3 lacks (CVE-2024-11168) stays a documented difference."
     }
   ],
   "blockers": [
