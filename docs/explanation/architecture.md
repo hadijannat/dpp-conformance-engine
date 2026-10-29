@@ -1403,8 +1403,9 @@ Every adapter uses one transport. Defaults: read-only methods, bounded, rate-lim
   other non-public addresses also need an entry in `allow_private_hosts`.
 - The engine joins URL parts and judges public addresses with its own rules, not with the stdlib
   of the running Python. In this document, `urljoin` means the rules of `urljoin` in CPython 3.12.12
-  and 3.13. An address is public only if the stdlib of each of CPython 3.12.3 to 3.14.4 calls it
-  public.
+  and 3.13. An address is public only if the stdlib of each of CPython 3.12.3, 3.12.12, 3.12.13,
+  3.13.12, and 3.14.4 calls it public. The engine also refuses `fec0::/10`, the deprecated site-local
+  network, which each of them calls public.
 - The transport resolves the host once, checks every resolved address against the policy, and
   connects to the checked address. This prevents DNS rebinding.
 - Redirects are followed by the transport, never by the HTTP library. Each hop is checked.
