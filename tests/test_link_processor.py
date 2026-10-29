@@ -159,12 +159,16 @@ ADVERSARIAL = adversarial(SIZE)
 
 # A linear path takes about K times as long on values K times as long, and a quadratic one K * K times.
 # An absolute bound depends on the speed of the runner, and this ratio does not. Measured at n = 16 KiB
-# and K = 4, the scanner gave 4.8 at most. The regular expressions of jsonld.js and pyld gave 14.8 and
-# 16.0 on two values, and ran for more than 40 s on nine: then the job timeout stops the test.
+# and K = 4, the scanner gave 4.9 at most. The regular expressions of the reader before 9f75f3a gave
+# 14.8 and 16.0 on two values, and ran for more than 40 s on nine: then the job timeout stops the test.
 K = 4
 THRESHOLD = 2 * K
 # Below 5 ms at the larger size, a value is too fast to backtrack, and timer noise sets its ratio.
 FLOOR = 0.005
+
+
+def _flagged(small: float, large: float) -> bool:
+    return large >= FLOOR and large > THRESHOLD * small
 
 
 def scaling_failures[T](
@@ -177,6 +181,8 @@ def scaling_failures[T](
 
     Each time is the least of ``repeats`` runs. The two sizes alternate, so that a slow interval of the
     runner slows both. The collector is off, because a collection in one run would add to its time.
+    A flagged case runs ``repeats`` more times and fails only if the least times still flag it. One
+    preempted run can push a short case past THRESHOLD, and a backtracking case is flagged each time.
     """
     pairs = list(zip(cases(n), cases(K * n), strict=True))
     failures: list[str] = []
@@ -185,13 +191,16 @@ def scaling_failures[T](
     try:
         for index, pair in enumerate(pairs):
             times = [math.inf, math.inf]
-            for _ in range(repeats):
-                for at, case in enumerate(pair):
-                    start = time.perf_counter()
-                    run(case)
-                    times[at] = min(times[at], time.perf_counter() - start)
+            for _ in range(2):
+                for _ in range(repeats):
+                    for at, case in enumerate(pair):
+                        start = time.perf_counter()
+                        run(case)
+                        times[at] = min(times[at], time.perf_counter() - start)
+                if not _flagged(*times):
+                    break
             small, large = times
-            if large >= FLOOR and large > THRESHOLD * small:
+            if _flagged(small, large):
                 ratio = large / small if small else math.inf
                 failures.append(
                     f"case {index}: {small:.4f} s at {n}, {large:.4f} s at {K * n}, ratio {ratio:.1f}"
