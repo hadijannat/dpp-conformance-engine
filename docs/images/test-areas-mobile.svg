@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="1264" viewBox="0 0 400 1264" role="img" aria-labelledby="title desc">
+<title id="title">What the engine checks</title>
+<desc id="desc">Seven independent test areas: data carrier, identifier, interface, data, access, integrity, and lifecycle. Checks depend on the selected profile and catalogue. Registry checks use a mock. Passport signatures are distinct from report signatures.</desc>
+<defs><marker id="arrow-67e8db" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#67e8db"/></marker><marker id="arrow-93c5fd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#93c5fd"/></marker><marker id="arrow-86efc0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#86efc0"/></marker><marker id="arrow-fda4af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#fda4af"/></marker><marker id="arrow-fcd884" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#fcd884"/></marker><marker id="arrow-c4b5fd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#c4b5fd"/></marker><marker id="arrow-bdcfe1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#bdcfe1"/></marker></defs>
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="400" height="1264" rx="24" fill="#0d1d32" stroke="#0d1d32" stroke-width="1.5"/>
+<text x="32" y="37" font-size="13" fill="#67e8db" font-weight="600" text-anchor="start">DPP-CE / TEST SCOPE</text>
+<text x="32" y="80" font-size="26" fill="#f4f8ff" font-weight="700" text-anchor="start">What gets tested</text>
+<text x="32" y="110" font-size="17" fill="#bdcfe1" font-weight="400" text-anchor="start">Seven areas of selected checks.</text>
+<rect x="32" y="140" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="174" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Data carrier</text>
+<text x="345" y="171" font-size="14" fill="#67e8db" font-weight="700" text-anchor="end">01</text>
+<text x="48" y="211" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">A supplied QR image</text>
+<text x="48" y="236" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">decodes to one symbol.</text>
+<rect x="32" y="286" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="320" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Identifier</text>
+<text x="345" y="317" font-size="14" fill="#93c5fd" font-weight="700" text-anchor="end">02</text>
+<text x="48" y="357" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Syntax, resolution,</text>
+<text x="48" y="382" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">and consistent identity.</text>
+<rect x="32" y="432" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="466" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Interface</text>
+<text x="345" y="463" font-size="14" fill="#c4b5fd" font-weight="700" text-anchor="end">03</text>
+<text x="48" y="503" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Responses match a</text>
+<text x="48" y="528" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">pinned API contract.</text>
+<rect x="32" y="578" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="612" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Data</text>
+<text x="345" y="609" font-size="14" fill="#93c5fd" font-weight="700" text-anchor="end">04</text>
+<text x="48" y="649" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Pinned schemas, contexts,</text>
+<text x="48" y="674" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">and rule packs.</text>
+<rect x="32" y="724" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="758" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Access</text>
+<text x="345" y="755" font-size="14" fill="#67e8db" font-weight="700" text-anchor="end">05</text>
+<text x="48" y="795" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Roles receive only the fields</text>
+<text x="48" y="820" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">their declared policy allows.</text>
+<rect x="32" y="870" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="904" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Integrity</text>
+<text x="345" y="901" font-size="14" fill="#c4b5fd" font-weight="700" text-anchor="end">06</text>
+<text x="48" y="941" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Passport signatures, issuers,</text>
+<text x="48" y="966" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">and X.509 certificate paths.</text>
+<rect x="32" y="1016" width="336" height="126" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<text x="48" y="1050" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Lifecycle</text>
+<text x="345" y="1047" font-size="14" fill="#fcd884" font-weight="700" text-anchor="end">07</text>
+<text x="48" y="1087" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Version history and update rules;</text>
+<text x="48" y="1112" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">agreement with a mock registry.</text>
+<text x="32" y="1194" font-size="17" fill="#bdcfe1" font-weight="400" text-anchor="start">Selected catalogue only.</text>
+<text x="32" y="1218" font-size="17" fill="#bdcfe1" font-weight="400" text-anchor="start">Unavailable checks cannot pass.</text>
+<text x="32" y="1242" font-size="17" fill="#bdcfe1" font-weight="400" text-anchor="start">Registry integration is mock-only.</text>
+</g>
+</svg>

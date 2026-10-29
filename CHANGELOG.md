@@ -8,6 +8,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Stakeholder research dated 2026-10-29, with primary sources, evidence classes, coverage gaps, and proposed priorities.
+- A conceptual README cover, mobile diagram layouts, editable Draw.io sources, and image provenance.
 - README for a broad audience. It explains why the engine exists and who it is for.
   It lists the profiles and their packs, the execution modes and claim levels, and the limitations.
   It adds a path to test your own battery passport system.
@@ -115,6 +117,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- The README starts with a local demo and clearer reader routes. Its expectation table now cites sources.
+  The diagrams use larger labels and separate result and record-commitment trees. Failed-run guidance preserves the evidence.
 - `dppce sign --out`, `authorize`, `trust-bundle add-key`, and `prove` create each new file with
   mode 0600. Change the mode to share a report, a proof, a token, or a bundle.
 - `dppce sign` needs `--out NEW_FILE` or `--in-place`. It no longer writes over the input by

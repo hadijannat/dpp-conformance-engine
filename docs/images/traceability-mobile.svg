@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="1964" viewBox="0 0 400 1964" role="img" aria-labelledby="title desc">
+<title id="title">From source to inspectable evidence</title>
+<desc id="desc">A source record is cited by a requirement containing interpretation, applicability, and review status. Assessment paths name test purposes and registered checks. All steps in a path are required. Checks produce observations and test results. Test results combine into path, requirement, and overall verdicts; paths are alternatives and a valid failure cannot be hidden by a passing alternative. Observations refer to records by identifier. Captured record content is stored encrypted and also receives a salted commitment. Test and requirement result objects form results_root. Record commitments form the separate records_root. Both roots bind into the report decision. Human approval is separate from execution.</desc>
+<defs><marker id="arrow-67e8db" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#67e8db"/></marker><marker id="arrow-93c5fd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#93c5fd"/></marker><marker id="arrow-86efc0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#86efc0"/></marker><marker id="arrow-fda4af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#fda4af"/></marker><marker id="arrow-fcd884" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#fcd884"/></marker><marker id="arrow-c4b5fd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#c4b5fd"/></marker><marker id="arrow-bdcfe1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#bdcfe1"/></marker></defs>
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="400" height="1964" rx="24" fill="#0d1d32" stroke="#0d1d32" stroke-width="1.5"/>
+<text x="32" y="37" font-size="14" fill="#67e8db" font-weight="600" text-anchor="start">04 / DPP-CE EXPLAINED</text>
+<text x="32" y="78" font-size="26" fill="#f4f8ff" font-weight="700" text-anchor="start">From source to evidence</text>
+<text x="32" y="108" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Why a check runs, what it found,</text>
+<text x="32" y="132" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">and what the report binds.</text>
+<rect x="32" y="170" width="336" height="96" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="186" width="4" height="64" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="54" y="205" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Source record</text>
+<text x="54" y="236" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Citation, version, provenance</text>
+<rect x="32" y="308" width="336" height="144" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="324" width="4" height="112" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="54" y="343" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Requirement</text>
+<text x="54" y="374" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Interpretation + scope</text>
+<text x="54" y="399" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Applicability + review status</text>
+<text x="54" y="424" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Only a human can approve it.</text>
+<rect x="32" y="494" width="336" height="144" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="510" width="4" height="112" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="54" y="529" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Paths and checks</text>
+<text x="54" y="560" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Assessment path → test purpose</text>
+<text x="54" y="585" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">→ registered check</text>
+<text x="54" y="610" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Every step of a path is required.</text>
+<path d="M 200 266 L 200 308" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<path d="M 200 452 L 200 494" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<rect x="32" y="690" width="336" height="170" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="706" width="4" height="138" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="725" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Result roll-up</text>
+<text x="54" y="756" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Step → path → requirement</text>
+<text x="54" y="781" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">→ overall outcome</text>
+<text x="54" y="806" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Paths are alternatives.</text>
+<text x="54" y="831" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">A valid fail cannot be hidden.</text>
+<path d="M 200 638 L 200 690" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<rect x="32" y="902" width="336" height="118" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="918" width="4" height="86" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="937" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">results_root</text>
+<text x="54" y="968" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">A Merkle tree over test and</text>
+<text x="54" y="993" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">requirement result objects.</text>
+<path d="M 200 860 L 200 902" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<text x="32" y="1072" font-size="14" fill="#67e8db" font-weight="600" text-anchor="start">PARALLEL EVIDENCE</text>
+<rect x="32" y="1100" width="336" height="116" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="1116" width="4" height="84" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="1135" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Observation</text>
+<text x="54" y="1166" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Minimized summary</text>
+<text x="54" y="1191" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">References records by identifier</text>
+<path d="M 32 566 L 16 566 L 16 1158 L 32 1158" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<rect x="32" y="1258" width="336" height="94" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="1274" width="4" height="62" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="54" y="1293" font-size="22" fill="#f4f8ff" font-weight="700" text-anchor="start">Captured record content</text>
+<text x="54" y="1324" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">The content before encryption</text>
+<path d="M 200 1216 L 200 1258" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<rect x="32" y="1394" width="336" height="94" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="1410" width="4" height="62" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="54" y="1429" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Encrypted record</text>
+<text x="54" y="1460" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Stored in the recording</text>
+<rect x="32" y="1530" width="336" height="116" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="1546" width="4" height="84" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="1565" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Salted commitment</text>
+<text x="54" y="1596" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">A commitment to record content</text>
+<text x="54" y="1621" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Computed before encryption</text>
+<path d="M 200 1352 L 200 1394" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<path d="M 368 1305 L 384 1305 L 384 1588 L 368 1588" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<rect x="32" y="1688" width="336" height="118" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="1704" width="4" height="86" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="1723" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">records_root</text>
+<text x="54" y="1754" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">A separate Merkle tree over</text>
+<text x="54" y="1779" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">the record commitments.</text>
+<path d="M 200 1646 L 200 1688" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<text x="32" y="1858" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Two separate roots bind into</text>
+<text x="32" y="1884" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">the report decision. Neither</text>
+<text x="32" y="1910" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">root establishes data truth.</text>
+</g>
+</svg>

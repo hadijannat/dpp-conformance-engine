@@ -25,6 +25,8 @@ Read the [readiness page](readiness.md) before you rely on a result.
 
 ## How the documentation is organized
 
+The [stakeholder research](research/stakeholder-expectations-2026-10-29.md) compares published needs with the engine's coverage and gaps.
+
 The documentation follows the Diataxis structure.
 
 - **Tutorials** teach by one complete example.

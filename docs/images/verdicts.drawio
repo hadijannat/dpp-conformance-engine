@@ -1,0 +1,346 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="desktop" name="Desktop">
+    <mxGraphModel adaptiveColors="none" background="#0d1d32" page="1" pageWidth="880" pageHeight="824" dx="880" dy="824" grid="1" gridSize="8">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n1" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#0d1d32;strokeColor=#0d1d32;strokeWidth=1.5;html=1;">
+          <mxGeometry x="0" y="0" width="880" height="824" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="DPP-CE / VERDICTS" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="23" width="147.56" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="Understand the result" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=30;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="50" width="390.6" height="42.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Five verdicts. One bounded overall outcome." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="92" width="479.88" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="140" width="470" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#86efc0;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="164" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="✓" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=27;fontFamily=Helvetica;fontColor=#86efc0;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48.0" y="166" width="32" height="37.8" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" value="pass" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=22;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="146" width="54.56" height="30.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="A path passed;" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="176" width="156.24" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="no valid observation failed." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="201" width="312.48" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="240" width="470" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#fda4af;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="264" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" value="×" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=27;fontFamily=Helvetica;fontColor=#fda4af;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48.0" y="266" width="32" height="37.8" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" value="fail" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=22;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="246" width="54.56" height="30.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" value="A valid observation or declaration" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="276" width="379.44" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n16" value="contradicts the requirement." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="301" width="312.48" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n17" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="340" width="470" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="n18" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#fcd884;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="364" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n19" value="?" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=27;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48.0" y="366" width="32" height="37.8" as="geometry" />
+        </mxCell>
+        <mxCell id="n20" value="inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=22;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="346" width="163.68" height="30.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n21" value="Evidence is missing or insufficient," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="376" width="401.76" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n22" value="or applicability is unknown." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="401" width="312.48" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n23" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="440" width="470" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="n24" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#93c5fd;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="464" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n25" value="–" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=27;fontFamily=Helvetica;fontColor=#93c5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48.0" y="466" width="32" height="37.8" as="geometry" />
+        </mxCell>
+        <mxCell id="n26" value="not_applicable" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=22;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="446" width="190.96" height="30.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n27" value="Applicability is established as false." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="476" width="424.08" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n28" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="540" width="470" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="n29" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#c4b5fd;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="564" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n30" value="!" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=27;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48.0" y="566" width="32" height="37.8" as="geometry" />
+        </mxCell>
+        <mxCell id="n31" value="error" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=22;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="546" width="68.2" height="30.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n32" value="Execution prevented an outcome;" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="576" width="345.96" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n33" value="no other path passed or failed." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="100" y="601" width="345.96" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n34" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="526" y="140" width="322" height="492" as="geometry" />
+        </mxCell>
+        <mxCell id="n35" value="Overall outcome" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="154" width="223.2" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n36" value="Applicable mandatory" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="193" width="223.2" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n37" value="requirements only." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="218" width="200.88" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n38" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#0d1d32;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="546" y="258" width="282" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="n39" value="No applicable mandatory" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="560" y="267" width="256.68" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n40" value="requirements? Inconclusive." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="560" y="292" width="301.32" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n41" value="1" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#fda4af;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="352" width="32" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n42" value="Any fail → fail" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="580" y="350" width="186.0" height="28.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n43" value="2" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="399" width="32" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n44" value="Else error → error" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="580" y="397" width="223.2" height="28.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n45" value="3" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="446" width="32" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n46" value="Else any inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="580" y="446" width="234.35999999999999" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n47" value="→ inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="580" y="468" width="147.56" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n48" value="4" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#86efc0;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="493" width="32" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n49" value="Else → pass" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="580" y="491" width="136.4" height="28.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n50" value="Unknown applicability is" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="570" width="252.96" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n51" value="counted separately." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="550" y="594" width="200.26" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n52" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="656" width="816" height="136" as="geometry" />
+        </mxCell>
+        <mxCell id="n53" value="At requirement level" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="670" width="260.4" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n54" value="A valid fail wins. Otherwise, a passing alternative can satisfy the requirement," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="704" width="856" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n55" value="even when another path has an error. Reviewed mode also requires approval." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="729" width="825.84" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n56" value="Recommended and optional requirements do not change the overall outcome." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="754" width="803.52" height="25.2" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="mobile" name="Mobile">
+    <mxGraphModel adaptiveColors="none" background="#0d1d32" page="1" pageWidth="400" pageHeight="1472" dx="400" dy="1472" grid="1" gridSize="8">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n1" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#0d1d32;strokeColor=#0d1d32;strokeWidth=1.5;html=1;">
+          <mxGeometry x="0" y="0" width="400" height="1472" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="DPP-CE / VERDICTS" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=13;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="24" width="137.02" height="18.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="Read the result" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=26;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="54" width="241.8" height="36.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Five verdicts, with explicit limits." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="93" width="376" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="140" width="336" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#86efc0;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="157" width="32" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="✓" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#86efc0;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="44.0" y="158" width="32" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" value="pass" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="87" y="160" width="52.08" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="A path passed; no valid" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="201" width="242.42" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="observation failed." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="225" width="200.26" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="276" width="336" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#fda4af;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="293" width="32" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" value="×" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#fda4af;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="44.0" y="294" width="32" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" value="fail" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="87" y="296" width="52.08" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" value="A valid observation or declaration" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="337" width="358.36" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n16" value="contradicts the requirement." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="361" width="295.12" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n17" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="412" width="336" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n18" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#fcd884;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="429" width="32" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="n19" value="?" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="44.0" y="430" width="32" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n20" value="inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="87" y="432" width="156.24" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n21" value="Evidence is missing or insufficient," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="473" width="376" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n22" value="or applicability is unknown." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="497" width="295.12" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n23" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="548" width="336" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n24" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#93c5fd;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="565" width="32" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="n25" value="–" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#93c5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="44.0" y="566" width="32" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n26" value="not_applicable" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="87" y="568" width="182.28" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n27" value="Applicability is established" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="609" width="295.12" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n28" value="as false." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="633" width="94.86" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n29" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="684" width="336" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n30" value="" vertex="1" parent="1" style="ellipse;fillColor=#152d49;strokeColor=#c4b5fd;strokeWidth=1.5;html=1;">
+          <mxGeometry x="44" y="701" width="32" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="n31" value="!" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="44.0" y="702" width="32" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n32" value="error" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="87" y="704" width="65.1" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n33" value="Execution prevented an outcome;" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="745" width="326.74" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n34" value="no other path passed or failed." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="769" width="326.74" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n35" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="832" width="336" height="346" as="geometry" />
+        </mxCell>
+        <mxCell id="n36" value="Overall outcome" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="847" width="213.9" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n37" value="Applicable mandatory" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="882" width="223.2" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n38" value="requirements only." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="907" width="200.88" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n39" value="Empty scope → inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="951" width="290.16" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n40" value="1   Any fail → fail" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;fontColor=#fda4af;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="992" width="235.6" height="28.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n41" value="2   Else error → error" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1032" width="272.8" height="28.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n42" value="3   Else any inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1074" width="279.0" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n43" value="→ inconclusive" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="76" y="1095" width="147.56" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n44" value="4   Else → pass" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=20;fontFamily=Helvetica;fontColor=#86efc0;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1112" width="186.0" height="28.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n45" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="1200" width="336" height="192" as="geometry" />
+        </mxCell>
+        <mxCell id="n46" value="At requirement level" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=21;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1215" width="260.4" height="29.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n47" value="A valid fail wins. Otherwise," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1253" width="305.66" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n48" value="a passing alternative can satisfy" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1277" width="347.82" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n49" value="the requirement despite another" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1301" width="326.74" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n50" value="path's error. Reviewed mode" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1325" width="284.58" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n51" value="also requires approval." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1349" width="242.42" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n52" value="Unknown applicability is" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="1407" width="252.96" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n53" value="inconclusive and counted separately." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="1431" width="376" height="23.799999999999997" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

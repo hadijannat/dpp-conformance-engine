@@ -1,222 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 500" role="img" aria-labelledby="title desc">
-  <rect x="0.5" y="0.5" width="879" height="499" rx="12" fill="#ffffff" stroke="#767676" stroke-width="1" />
-  <title id="title">From a source to a verdict</title>
-  <desc id="desc">Traceability: a requirement cites a source record, holds its interpretation and applicability rule, and names test purposes and checks. Step verdicts roll up to the overall outcome, and observations link to encrypted records.</desc>
-  <defs>
-    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse" markerUnits="strokeWidth">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#767676" />
-    </marker>
-  </defs>
-  <g font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif">
-    <text x="24" y="38" font-size="18" fill="#1a1a1a" font-weight="600">
-      <tspan x="24" dy="0">From a source to a verdict</tspan>
-    </text>
-    <text x="24" y="64" font-size="12" fill="#1a1a1a" font-weight="600">
-      <tspan x="24" dy="0">Catalogue and test packs (versioned data)</tspan>
-    </text>
-    <path d="M 136 140 H 156" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="cited in the requirement's source: id, citation, version" />
-    <text x="146" y="79" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="146" dy="0">cited in the requirement's</tspan>
-      <tspan x="146" dy="14">source: id, citation, version</tspan>
-    </text>
-    <path d="M 392 140 H 412" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="alternatives" />
-    <text x="402" y="79" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="402" dy="0">one or more</tspan>
-      <tspan x="402" dy="14">alternatives</tspan>
-    </text>
-    <path d="M 544 140 H 564" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="names purposes" />
-    <text x="554" y="88" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="554" dy="0">names test purposes</tspan>
-    </text>
-    <path d="M 684 140 H 704" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="one check" />
-    <text x="694" y="88" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="694" dy="0">one check</tspan>
-    </text>
-    <path d="M 624 190 C 624 224 490 233 392 223" fill="none" stroke="#767676" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="lists requirements" />
-    <text x="516" y="241" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="516" dy="0">lists requirements</tspan>
-    </text>
-    <path d="M 790 190 V 284" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="outcome plus verdict_rules" />
-    <text x="698" y="213" font-size="12" fill="#4a4a4a">
-      <tspan x="698" dy="0">outcome +</tspan>
-      <tspan x="698" dy="15">verdict_rules</tspan>
-    </text>
-    <path d="M 790 258 H 28 V 390 H 48" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="what the check saw" />
-    <circle cx="790" cy="258" r="2.2" fill="#0b4f9e" />
-    <text x="594" y="273" font-size="12" fill="#4a4a4a">
-      <tspan x="594" dy="0">what the check saw</tspan>
-    </text>
-    <path d="M 650 306 H 622" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="all steps required" />
-    <text x="636.0" y="341" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="636.0" dy="0">all steps required</tspan>
-    </text>
-    <path d="M 440 306 H 412" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="paths are alternatives" />
-    <text x="426.0" y="341" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="426.0" dy="0">paths are alternatives</tspan>
-    </text>
-    <path d="M 230 306 H 202" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="applicable mandatory only" />
-    <text x="216.0" y="341" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="216.0" dy="0">applicable mandatory only</tspan>
-    </text>
-    <path d="M 320 328 V 354 H 790 V 368" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="results tree: requirement and step verdicts" />
-    <path d="M 790 328 V 354" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-label="results tree: step verdict" />
-    <text x="506" y="344" font-size="12" fill="#4a4a4a">
-      <tspan x="506" dy="0">results tree</tspan>
-    </text>
-    <path d="M 214 390 H 242" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="record_ids" />
-    <text x="228" y="366" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace" text-anchor="middle">
-      <tspan x="228" dy="0">record_ids</tspan>
-    </text>
-    <path d="M 410 390 H 438" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="committed, not disclosed" />
-    <text x="424" y="366" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="424" dy="0">committed, not disclosed</tspan>
-    </text>
-    <path d="M 638 390 H 666" fill="none" stroke="#0b4f9e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" aria-label="records tree" />
-    <text x="652" y="366" font-size="12" fill="#4a4a4a" text-anchor="middle">
-      <tspan x="652" dy="0">records tree</tspan>
-    </text>
-    <rect x="24" y="100" width="112" height="90" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="34" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="34" dy="0">Source record</tspan>
-    </text>
-    <text x="34" y="140" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="34" dy="0">SourceRecord</tspan>
-    </text>
-    <text x="34" y="159" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="34" dy="0">catalogue/</tspan>
-      <tspan x="34" dy="15">sources.yaml</tspan>
-    </text>
-    <rect x="156" y="100" width="236" height="146" rx="6" fill="#f3f3f3" stroke="#767676" />
-    <text x="168" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="168" dy="0">Requirement</tspan>
-    </text>
-    <text x="168" y="136" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="168" dy="0">Requirement</tspan>
-    </text>
-    <text x="168" y="151" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="168" dy="0">catalogue/packs/*.yaml</tspan>
-    </text>
-    <path d="M 168 159 H 380" fill="none" stroke="#767676" />
-    <text x="168" y="176" font-size="12" fill="#1a1a1a" font-weight="600">
-      <tspan x="168" dy="0">Interpretation</tspan>
-    </text>
-    <text x="266" y="176" font-size="12" fill="#4a4a4a">draft-needs-review</text>
-    <text x="168" y="195" font-size="12" fill="#1a1a1a" font-weight="600">
-      <tspan x="168" dy="0">Applicability rule</tspan>
-    </text>
-    <text x="280" y="195" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="280" dy="0">applicability</tspan>
-    </text>
-    <text x="168" y="210" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="168" dy="0">true / false / unknown</tspan>
-    </text>
-    <text x="168" y="229" font-size="12" fill="#1a1a1a" font-weight="600">
-      <tspan x="168" dy="0">Review status</tspan>
-    </text>
-    <text x="266" y="229" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="266" dy="0">review_status</tspan>
-    </text>
-    <text x="168" y="242" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="168" dy="0">approval: human only</tspan>
-    </text>
-    <rect x="412" y="100" width="132" height="90" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="422" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="422" dy="0">Assessment path</tspan>
-    </text>
-    <text x="422" y="140" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="422" dy="0">AssessmentPath</tspan>
-    </text>
-    <text x="422" y="160" font-size="12" fill="#4a4a4a">
-      <tspan x="422" dy="0">all steps</tspan>
-      <tspan x="422" dy="15">required</tspan>
-    </text>
-    <rect x="564" y="100" width="120" height="90" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="574" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="574" dy="0">Test purpose</tspan>
-    </text>
-    <text x="574" y="140" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="574" dy="0">TestPurpose</tspan>
-    </text>
-    <text x="574" y="159" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="574" dy="0">testpacks/</tspan>
-      <tspan x="574" dy="15">*.yaml</tspan>
-    </text>
-    <rect x="704" y="100" width="128" height="90" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="714" y="120" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="714" dy="0">Registered</tspan>
-      <tspan x="714" dy="16">check</tspan>
-    </text>
-    <text x="714" y="156" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="714" dy="0">stimulus.check</tspan>
-    </text>
-    <text x="714" y="176" font-size="12" fill="#4a4a4a">
-      <tspan x="714" dy="0">allowlisted</tspan>
-    </text>
-    <text x="48" y="276" font-size="12" fill="#1a1a1a" font-weight="600">
-      <tspan x="48" dy="0">Results in the report</tspan>
-    </text>
-    <rect x="48" y="284" width="154" height="44" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="58" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="58" dy="0">Overall outcome</tspan>
-    </text>
-    <text x="58" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="58" dy="0">overall</tspan>
-    </text>
-    <rect x="230" y="284" width="182" height="44" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="240" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="240" dy="0">Requirement verdict</tspan>
-    </text>
-    <text x="240" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="240" dy="0">RequirementResult</tspan>
-    </text>
-    <rect x="440" y="284" width="182" height="44" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="450" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="450" dy="0">Path verdict</tspan>
-    </text>
-    <text x="450" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="450" dy="0">PathResult</tspan>
-    </text>
-    <rect x="650" y="284" width="182" height="44" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="660" y="304" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="660" dy="0">Step verdict</tspan>
-    </text>
-    <text x="660" y="319" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="660" dy="0">TestResult</tspan>
-    </text>
-    <text x="48" y="363" font-size="12" fill="#4a4a4a" font-weight="600">Evidence</text>
-    <rect x="48" y="368" width="166" height="50" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="58" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="58" dy="0">Observation</tspan>
-    </text>
-    <text x="58" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="58" dy="0">Observation</tspan>
-      <tspan x="58" dy="13">minimized summary</tspan>
-    </text>
-    <rect x="242" y="368" width="168" height="50" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="252" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="252" dy="0">Encrypted record</tspan>
-    </text>
-    <text x="252" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="252" dy="0">records/&lt;id&gt;.enc</tspan>
-    </text>
-    <rect x="438" y="368" width="200" height="50" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="448" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="448" dy="0">Record commitment</tspan>
-    </text>
-    <text x="448" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="448" dy="0">RecordCommitment</tspan>
-      <tspan x="448" dy="13">salted HMAC</tspan>
-    </text>
-    <rect x="666" y="368" width="166" height="50" rx="6" fill="#ffffff" stroke="#767676" />
-    <text x="676" y="386" font-size="14" fill="#1a1a1a" font-weight="600">
-      <tspan x="676" dy="0">Merkle roots</tspan>
-    </text>
-    <text x="676" y="401" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">
-      <tspan x="676" dy="0">results_root</tspan>
-      <tspan x="676" dy="13">records_root</tspan>
-    </text>
-    <rect x="24" y="430" width="832" height="46" rx="6" fill="#f3f3f3" stroke="#767676" />
-    <text x="36" y="450" font-size="12" fill="#1a1a1a" font-weight="600">Synthetic example row printed by dppce catalogue trace</text>
-    <text x="36" y="465" font-size="12" fill="#4a4a4a" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace">dppce-illustrative - -&gt; ILL-ID-001 [draft-needs-review] -&gt; TP-ID-001 -&gt; identifier.parse</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="1024" viewBox="0 0 880 1024" role="img" aria-labelledby="title desc">
+<title id="title">From source to inspectable evidence</title>
+<desc id="desc">A source record is cited by a requirement containing interpretation, applicability, and review status. Assessment paths name test purposes and registered checks. All steps in a path are required. Checks produce observations and test results. Test results combine into path, requirement, and overall verdicts; paths are alternatives and a valid failure cannot be hidden by a passing alternative. Observations refer to records by identifier. Captured record content is stored encrypted and also receives a salted commitment. Test and requirement result objects form results_root. Record commitments form the separate records_root. Both roots bind into the report decision. Human approval is separate from execution.</desc>
+<defs><marker id="arrow-67e8db" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#67e8db"/></marker><marker id="arrow-93c5fd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#93c5fd"/></marker><marker id="arrow-86efc0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#86efc0"/></marker><marker id="arrow-fda4af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#fda4af"/></marker><marker id="arrow-fcd884" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#fcd884"/></marker><marker id="arrow-c4b5fd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#c4b5fd"/></marker><marker id="arrow-bdcfe1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#bdcfe1"/></marker></defs>
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="880" height="1024" rx="24" fill="#0d1d32" stroke="#0d1d32" stroke-width="1.5"/>
+<text x="32" y="37" font-size="14" fill="#67e8db" font-weight="600" text-anchor="start">04 / DPP-CE EXPLAINED</text>
+<text x="32" y="80" font-size="30" fill="#f4f8ff" font-weight="700" text-anchor="start">From source to inspectable evidence</text>
+<text x="32" y="110" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Follow the reason for a check, its outcome, and what the report binds.</text>
+<rect x="32" y="150" width="232" height="142" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="166" width="4" height="110" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="54" y="185" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Source record</text>
+<text x="54" y="216" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Citation + version</text>
+<text x="54" y="241" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Recorded provenance</text>
+<rect x="296" y="150" width="260" height="142" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="297" y="166" width="4" height="110" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="318" y="185" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Requirement</text>
+<text x="318" y="216" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Interpretation + scope</text>
+<text x="318" y="241" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Applicability + review</text>
+<text x="318" y="266" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Human approval only</text>
+<rect x="588" y="150" width="260" height="142" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="589" y="166" width="4" height="110" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="610" y="185" font-size="23" fill="#f4f8ff" font-weight="700" text-anchor="start">Paths and checks</text>
+<text x="610" y="216" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Path → test purpose</text>
+<text x="610" y="241" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">→ registered check</text>
+<text x="610" y="266" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Every path step required</text>
+<path d="M 264 221 L 296 221" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<path d="M 556 221 L 588 221" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<text x="32" y="340" font-size="14" fill="#67e8db" font-weight="600" text-anchor="start">CHECK OUTPUTS</text>
+<rect x="32" y="370" width="396" height="216" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="386" width="4" height="184" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="405" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Result roll-up</text>
+<text x="54" y="436" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Step → path → requirement</text>
+<text x="54" y="461" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">→ overall outcome</text>
+<text x="54" y="486" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Paths are alternatives.</text>
+<text x="54" y="511" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">A valid fail cannot be hidden.</text>
+<rect x="452" y="370" width="396" height="112" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="453" y="386" width="4" height="80" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="474" y="405" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Observation</text>
+<text x="474" y="436" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Minimized summary</text>
+<text x="474" y="461" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">References records by identifier</text>
+<path d="M 718 292 L 718 320 L 230 320 L 230 370" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<path d="M 718 320 L 650 320 L 650 370" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<rect x="452" y="530" width="396" height="94" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="453" y="546" width="4" height="62" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="474" y="565" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">Captured record content</text>
+<text x="474" y="596" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">The content before encryption</text>
+<path d="M 650 482 L 650 530" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<text x="474" y="513" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">record reference</text>
+<rect x="452" y="686" width="178" height="118" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="453" y="702" width="4" height="86" rx="2" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="474" y="721" font-size="22" fill="#f4f8ff" font-weight="700" text-anchor="start">Encrypted</text>
+<text x="474" y="748" font-size="22" fill="#f4f8ff" font-weight="700" text-anchor="start">record</text>
+<text x="474" y="782" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Stored locally</text>
+<rect x="670" y="686" width="178" height="118" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="671" y="702" width="4" height="86" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="692" y="721" font-size="22" fill="#f4f8ff" font-weight="700" text-anchor="start">Salted</text>
+<text x="692" y="748" font-size="20" fill="#f4f8ff" font-weight="700" text-anchor="start">commitment</text>
+<text x="692" y="782" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Record content</text>
+<path d="M 650 624 L 650 652 L 541 652 L 541 686" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-93c5fd)"/>
+<path d="M 650 652 L 759 652 L 759 686" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<text x="32" y="656" font-size="14" fill="#67e8db" font-weight="600" text-anchor="start">RESULTS TREE</text>
+<text x="32" y="700" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Test and requirement result objects</text>
+<text x="32" y="727" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">bind into their own Merkle tree.</text>
+<rect x="32" y="862" width="396" height="100" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="33" y="878" width="4" height="68" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="54" y="897" font-size="24" fill="#f4f8ff" font-weight="700" text-anchor="start">results_root</text>
+<text x="54" y="928" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Test + requirement result objects</text>
+<rect x="670" y="862" width="178" height="100" rx="16" fill="#152d49" stroke="#416180" stroke-width="1.5"/>
+<rect x="671" y="878" width="4" height="68" rx="2" fill="#67e8db" stroke="#67e8db" stroke-width="1.5"/>
+<text x="692" y="897" font-size="20" fill="#f4f8ff" font-weight="700" text-anchor="start">records_root</text>
+<text x="692" y="928" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Record</text>
+<text x="692" y="953" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">commitments</text>
+<path d="M 414 586 L 414 842 L 230 842 L 230 862" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<path d="M 759 804 L 759 862" fill="none" stroke="#67e8db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-67e8db)"/>
+<text x="32" y="989" font-size="18" fill="#bdcfe1" font-weight="400" text-anchor="start">Two separate roots bind into the report decision. A root does not establish data truth.</text>
+</g>
 </svg>

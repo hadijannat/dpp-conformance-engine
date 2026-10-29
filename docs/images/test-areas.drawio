@@ -1,0 +1,268 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="desktop" name="Desktop">
+    <mxGraphModel adaptiveColors="none" background="#0d1d32" page="1" pageWidth="880" pageHeight="708" dx="880" dy="708" grid="1" gridSize="8">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n1" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#0d1d32;strokeColor=#0d1d32;strokeWidth=1.5;html=1;">
+          <mxGeometry x="0" y="0" width="880" height="708" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="DPP-CE / TEST SCOPE" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="23" width="164.92" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="What the engine checks" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=30;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="50" width="409.2" height="42.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Seven areas. Coverage follows your selected profile." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="92" width="580.32" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="140" width="264" height="146" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="01" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="154" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="Data carrier" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="181" width="178.56" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" value="A supplied QR image" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="218" width="212.04" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="decodes to one symbol." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="243" width="245.52" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="308" y="140" width="264" height="146" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" value="02" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#93c5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="328" y="154" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" value="Identifier" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="328" y="181" width="148.8" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" value="Syntax, resolution," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="328" y="218" width="212.04" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" value="and consistent identity." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="328" y="243" width="267.84" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="584" y="140" width="264" height="146" as="geometry" />
+        </mxCell>
+        <mxCell id="n16" value="03" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="604" y="154" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n17" value="Interface" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="604" y="181" width="133.92" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n18" value="Responses match a" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="604" y="218" width="189.72" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n19" value="pinned API contract." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="604" y="243" width="223.2" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n20" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="306" width="404" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n21" value="04" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#93c5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="320" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n22" value="Data" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="347" width="59.519999999999996" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n23" value="Pinned schemas, contexts," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="384" width="279.0" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n24" value="and rule packs." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="409" width="167.4" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n25" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="452" y="306" width="396" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n26" value="05" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="320" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n27" value="Access" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="347" width="89.28" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n28" value="Roles receive only the fields" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="384" width="323.64" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n29" value="their declared policy allows." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="409" width="323.64" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n30" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="466" width="404" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n31" value="06" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="480" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n32" value="Integrity" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="507" width="133.92" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n33" value="Passport signatures, issuers," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="544" width="323.64" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n34" value="and X.509 certificate paths." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="52" y="569" width="312.48" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n35" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="452" y="466" width="396" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n36" value="07" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=15;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="480" width="32" height="21.0" as="geometry" />
+        </mxCell>
+        <mxCell id="n37" value="Lifecycle" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=24;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="507" width="133.92" height="33.599999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="n38" value="Version history and update rules;" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="544" width="368.28" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n39" value="agreement with a mock registry." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="472" y="569" width="345.96" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n40" value="Checks cover the selected catalogue only." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="632" width="457.56" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n41" value="Unavailable checks cannot pass. Registry integration is mock-only." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="659" width="736.56" height="25.2" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="mobile" name="Mobile">
+    <mxGraphModel adaptiveColors="none" background="#0d1d32" page="1" pageWidth="400" pageHeight="1264" dx="400" dy="1264" grid="1" gridSize="8">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n1" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#0d1d32;strokeColor=#0d1d32;strokeWidth=1.5;html=1;">
+          <mxGeometry x="0" y="0" width="400" height="1264" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="DPP-CE / TEST SCOPE" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=13;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="24" width="153.14" height="18.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="What gets tested" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=26;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="54" width="257.92" height="36.4" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Seven areas of selected checks." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="93" width="326.74" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="140" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="Data carrier" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="151" width="171.12" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="01" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="157" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" value="A supplied QR image" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="193" width="212.04" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="decodes to one symbol." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="218" width="245.52" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="286" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" value="Identifier" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="297" width="142.6" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" value="02" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#93c5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="303" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" value="Syntax, resolution," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="339" width="212.04" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" value="and consistent identity." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="364" width="267.84" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="432" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n16" value="Interface" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="443" width="128.34" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n17" value="03" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="449" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n18" value="Responses match a" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="485" width="189.72" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n19" value="pinned API contract." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="510" width="223.2" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n20" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="578" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n21" value="Data" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="589" width="57.04" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n22" value="04" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#93c5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="595" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n23" value="Pinned schemas, contexts," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="631" width="279.0" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n24" value="and rule packs." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="656" width="167.4" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n25" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="724" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n26" value="Access" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="735" width="85.56" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n27" value="05" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#67e8db;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="741" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n28" value="Roles receive only the fields" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="777" width="323.64" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n29" value="their declared policy allows." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="802" width="323.64" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n30" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="870" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n31" value="Integrity" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="881" width="128.34" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n32" value="06" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#c4b5fd;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="887" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n33" value="Passport signatures, issuers," vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="923" width="323.64" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n34" value="and X.509 certificate paths." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="948" width="312.48" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n35" value="" vertex="1" parent="1" style="rounded=1;arcSize=12;fillColor=#152d49;strokeColor=#416180;strokeWidth=1.5;html=1;">
+          <mxGeometry x="32" y="1016" width="336" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="n36" value="Lifecycle" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=23;fontFamily=Helvetica;fontColor=#f4f8ff;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1027" width="128.34" height="32.199999999999996" as="geometry" />
+        </mxCell>
+        <mxCell id="n37" value="07" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=14;fontFamily=Helvetica;fontColor=#fcd884;fontStyle=1;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="313" y="1033" width="32" height="19.599999999999998" as="geometry" />
+        </mxCell>
+        <mxCell id="n38" value="Version history and update rules;" vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1069" width="368.28" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n39" value="agreement with a mock registry." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=18;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="48" y="1094" width="345.96" height="25.2" as="geometry" />
+        </mxCell>
+        <mxCell id="n40" value="Selected catalogue only." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="1177" width="252.96" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n41" value="Unavailable checks cannot pass." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="1201" width="326.74" height="23.799999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="n42" value="Registry integration is mock-only." vertex="1" parent="1" style="text;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;fontSize=17;fontFamily=Helvetica;fontColor=#bdcfe1;fontStyle=0;spacing=0;whiteSpace=wrap;html=1;">
+          <mxGeometry x="32" y="1225" width="358.36" height="23.799999999999997" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
