@@ -225,10 +225,26 @@ def test_a_translated_or_disputed_address_is_never_public(address: str) -> None:
 # fec0::/10 is the deprecated site-local network (RFC 3879). Each stdlib calls it global, but a site
 # can still route it inside its own network, so a public-address rule must not let it through.
 @pytest.mark.parametrize(
-    "address", ["fec0::", "fec0::1", "feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", "::ffff:10.0.0.1"]
+    "address", ["fec0::", "fec0::1", "fef0::1", "feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"]
 )
 def test_a_site_local_address_is_never_public(address: str) -> None:
     assert is_public_address(address) is False
+
+
+# 192.88.99.0/24 is the deprecated 6to4 relay anycast network (RFC 7526), and the IANA IPv4
+# Special-Purpose Address Registry flags 192.88.99.2, the 6a44 relay, as not globally reachable.
+# Each stdlib calls the network global, but an anycast relay is the nearest one, often the
+# operator's own, so a public-address rule must not let it through.
+@pytest.mark.parametrize(
+    "address", ["192.88.99.0", "192.88.99.1", "192.88.99.2", "192.88.99.255", "::ffff:192.88.99.1"]
+)
+def test_a_relay_anycast_address_is_never_public(address: str) -> None:
+    assert is_public_address(address) is False
+
+
+@pytest.mark.parametrize("address", ["192.88.98.255", "192.88.100.0"])
+def test_the_addresses_next_to_the_relay_network_stay_public(address: str) -> None:
+    assert is_public_address(address) is True
 
 
 @pytest.mark.parametrize("address", ["febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff", "ff00::"])
