@@ -123,14 +123,15 @@ _NAT64: Final = (ipaddress.ip_network("64:ff9b::/96"), ipaddress.ip_network("64:
 # not global, multicast, reserved, loopback, link-local, or unspecified, without nested ones. The
 # versions read the IANA IPv4 and IPv6 Special-Purpose Address Registries differently, so the union
 # is the rule: an address is public only if each of these versions calls it public. Inside
-# 192.0.0.0/24, each one calls 192.0.0.9 and 192.0.0.10 global. The table also holds fec0::/10, the
-# deprecated site-local network (RFC 3879): each version calls it global, but a site can route it.
+# 192.0.0.0/24, each one calls 192.0.0.9 and 192.0.0.10 global. Each version also calls two
+# deprecated networks global that the table holds: fec0::/10, site-local (RFC 3879), which a site
+# can route, and 192.88.99.0/24, 6to4 relay anycast (RFC 7526), which goes to the nearest relay.
 _NOT_PUBLIC: Final = tuple(
     ipaddress.ip_network(network)
     for network in (
         "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12",
-        "192.0.0.0/24", "192.0.2.0/24", "192.168.0.0/16", "198.18.0.0/15", "198.51.100.0/24",
-        "203.0.113.0/24", "224.0.0.0/4", "240.0.0.0/4",
+        "192.0.0.0/24", "192.0.2.0/24", "192.88.99.0/24", "192.168.0.0/16", "198.18.0.0/15",
+        "198.51.100.0/24", "203.0.113.0/24", "224.0.0.0/4", "240.0.0.0/4",
         "::/8", "100::/8", "200::/7", "400::/6", "800::/5",
         "1000::/4", "2001::/23", "2001:db8::/32", "2002::/16", "3fff::/20", "4000::/3", "6000::/3",
         "8000::/3", "a000::/3", "c000::/3", "e000::/4", "f000::/5", "f800::/6", "fc00::/7",
